@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AgeGroup {
   id: string;
@@ -143,7 +144,17 @@ const getProblemImage = (ageId: string | null, problemId: string): string => {
   return `/problem-${agePrefix}-${problemSuffix}.png`;
 };
 
-function ElectronParticle({ delay, startX, startY }: { delay: number; startX: number; startY: number }) {
+// Lightweight particle for mobile
+function ElectronParticle({ delay, startX, startY, isMobile }: { delay: number; startX: number; startY: number; isMobile: boolean }) {
+  if (isMobile) {
+    // Static glowing dot on mobile - no animation
+    return (
+      <div
+        className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/50"
+        style={{ left: `${startX}%`, top: `${startY}%` }}
+      />
+    );
+  }
   return (
     <motion.div
       className="absolute w-2 h-2 rounded-full bg-cyan-400"
@@ -168,7 +179,9 @@ function ElectronParticle({ delay, startX, startY }: { delay: number; startX: nu
   );
 }
 
-function ElectronLine({ startX, startY, endX, endY, delay }: { startX: number; startY: number; endX: number; endY: number; delay: number }) {
+// Lightweight line for mobile
+function ElectronLine({ startX, startY, endX, endY, delay, isMobile }: { startX: number; startY: number; endX: number; endY: number; delay: number; isMobile: boolean }) {
+  if (isMobile) return null; // No lines on mobile
   return (
     <motion.div
       className="absolute h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
@@ -198,6 +211,7 @@ interface SelectionScreenProps {
 }
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
+  const isMobile = useIsMobile();
   const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("age");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
@@ -207,16 +221,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const scanTimerRef = useRef<NodeJS.Timeout | null>(null);
   const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const [electrons] = useState(() => 
-    Array.from({ length: 15 }, (_, i) => ({
+  
+  // Reduce particles on mobile for performance
+  const electrons = useMemo(() => 
+    Array.from({ length: isMobile ? 5 : 15 }, (_, i) => ({
       id: i,
       startX: Math.random() * 100,
       startY: Math.random() * 100,
       delay: Math.random() * 3,
     }))
-  );
-  const [lines] = useState(() => 
-    Array.from({ length: 8 }, (_, i) => ({
+  , [isMobile]);
+  
+  // No lines on mobile
+  const lines = useMemo(() => 
+    isMobile ? [] : Array.from({ length: 8 }, (_, i) => ({
       id: i,
       startX: Math.random() * 80 + 10,
       startY: Math.random() * 80 + 10,
@@ -224,7 +242,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       endY: Math.random() * 80 + 10,
       delay: Math.random() * 5,
     }))
-  );
+  , [isMobile]);
 
   const handleAgeSelect = (ageId: string) => {
     setSelectedAge(ageId);
@@ -374,41 +392,48 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       data-testid="selection-screen"
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {step === "age" && (
+        {step === "age" && !isMobile && (
           <motion.img 
             src="/circuit-pattern.png" 
             alt=""
             className="absolute right-0 bottom-0 w-72 md:w-[400px] opacity-40"
             initial={{ opacity: 0, x: 50 }}
-            animate={{ 
-              opacity: [0.3, 0.5, 0.3],
-              x: 0,
-            }}
+            animate={{ opacity: [0.3, 0.5, 0.3], x: 0 }}
             transition={{
               opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" },
               x: { duration: 0.8 }
             }}
-            style={{
-              filter: "drop-shadow(0 0 20px hsl(187 85% 53% / 0.5))",
-            }}
+            style={{ filter: "drop-shadow(0 0 20px hsl(187 85% 53% / 0.5))" }}
+          />
+        )}
+        {step === "age" && isMobile && (
+          <img 
+            src="/circuit-pattern.png" 
+            alt=""
+            className="absolute right-0 bottom-0 w-48 opacity-20"
+            loading="lazy"
           />
         )}
         
-        {step === "problems" && (
+        {step === "problems" && !isMobile && (
           <motion.img 
             src="/x-background.png" 
             alt=""
             className="absolute left-0 top-20 w-48 md:w-72 opacity-15"
             initial={{ opacity: 0, rotate: -10 }}
-            animate={{ 
-              opacity: 0.15,
-              rotate: [0, 5, -5, 0],
-              scale: [1, 1.05, 1],
-            }}
+            animate={{ opacity: 0.15, rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
             transition={{
               rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 8, repeat: Infinity, ease: "easeInOut" },
             }}
+          />
+        )}
+        {step === "problems" && isMobile && (
+          <img 
+            src="/x-background.png" 
+            alt=""
+            className="absolute left-0 top-20 w-32 opacity-10"
+            loading="lazy"
           />
         )}
         
@@ -418,10 +443,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             delay={electron.delay}
             startX={electron.startX}
             startY={electron.startY}
+            isMobile={isMobile}
           />
         ))}
         
-        {lines.map((line) => (
+        {!isMobile && lines.map((line) => (
           <ElectronLine
             key={line.id}
             startX={line.startX}
@@ -429,6 +455,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             endX={line.endX}
             endY={line.endY}
             delay={line.delay}
+            isMobile={isMobile}
           />
         ))}
       </div>
@@ -456,66 +483,34 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <motion.div
-                    className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
-                    style={{ background: "linear-gradient(135deg, hsl(280 70% 50%), hsl(187 85% 53%))" }}
-                    animate={{
-                      opacity: [0.2, 0.4, 0.2],
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                      style={{ background: "linear-gradient(135deg, hsl(280 70% 50%), hsl(187 85% 53%))" }}
+                      animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
                   
                   <div className="relative">
-                    <motion.p 
-                      className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2">
                       Descubre tu camino
-                    </motion.p>
+                    </p>
                     
                     <h1 className="text-3xl md:text-5xl font-black leading-tight">
                       <span className="text-muted-foreground">Que esta </span>
-                      <motion.span 
-                        className="relative inline-block"
-                        animate={{ 
-                          textShadow: [
-                            "0 0 20px hsl(280 70% 50% / 0.8)",
-                            "0 0 40px hsl(280 70% 50% / 1)",
-                            "0 0 20px hsl(280 70% 50% / 0.8)",
-                          ]
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
+                      <span className="relative inline-block">
                         <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
                           frenando
                         </span>
-                        <motion.span 
-                          className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ delay: 0.5, duration: 0.8 }}
-                        />
-                      </motion.span>
+                        <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400" />
+                      </span>
                     </h1>
                     
                     <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
-                      <motion.span 
-                        className="relative inline-block"
-                        animate={{ 
-                          textShadow: [
-                            "0 0 20px hsl(187 85% 53% / 0.8)",
-                            "0 0 40px hsl(187 85% 53% / 1)",
-                            "0 0 20px hsl(187 85% 53% / 0.8)",
-                          ]
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-                      >
-                        <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                          tu potencial
-                        </span>
-                      </motion.span>
+                      <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                        tu potencial
+                      </span>
                       <span className="text-muted-foreground"> hoy?</span>
                     </h2>
                   </div>
@@ -697,51 +692,31 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <motion.div
-                    className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
-                    style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
-                    animate={{
-                      opacity: [0.2, 0.4, 0.2],
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
+                      animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
                   
                   <div className="relative">
-                    <motion.p 
-                      className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-2"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-2">
                       Identifica tu reto
-                    </motion.p>
+                    </p>
                     
                     <h1 className="text-3xl md:text-5xl font-black leading-tight">
                       <span className="text-muted-foreground">Cual es tu mayor</span>
                     </h1>
                     
                     <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
-                      <motion.span 
-                        className="relative inline-block"
-                        animate={{ 
-                          textShadow: [
-                            "0 0 20px hsl(280 70% 50% / 0.8)",
-                            "0 0 40px hsl(280 70% 50% / 1)",
-                            "0 0 20px hsl(280 70% 50% / 0.8)",
-                          ]
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
+                      <span className="relative inline-block">
                         <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
                           desafio?
                         </span>
-                        <motion.span 
-                          className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ delay: 0.5, duration: 0.8 }}
-                        />
-                      </motion.span>
+                        <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500" />
+                      </span>
                     </h2>
                   </div>
                 </motion.div>
@@ -1214,47 +1189,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <motion.div
-                    className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
-                    style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
-                    animate={{
-                      opacity: [0.2, 0.5, 0.2],
-                      scale: [1, 1.15, 1],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
+                      animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.15, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
                   
                   <div className="relative">
-                    <motion.p 
-                      className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2">
                       Elige tu camino
-                    </motion.p>
+                    </p>
                     
                     <h1 className="text-3xl md:text-5xl font-black leading-tight">
-                      <motion.span 
-                        className="relative inline-block"
-                        animate={{ 
-                          textShadow: [
-                            "0 0 20px hsl(187 85% 53% / 0.6)",
-                            "0 0 40px hsl(280 70% 50% / 0.8)",
-                            "0 0 20px hsl(187 85% 53% / 0.6)",
-                          ]
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <span className="relative inline-block">
                         <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                           Desafía tu Mente
                         </span>
-                        <motion.span 
-                          className="absolute -bottom-2 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ delay: 0.5, duration: 0.8 }}
-                        />
-                      </motion.span>
+                        <span className="absolute -bottom-2 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500" />
+                      </span>
                     </h1>
                   </div>
                 </motion.div>
@@ -1292,33 +1247,22 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       background: "radial-gradient(circle at 50% 50%, hsl(280 70% 60% / 0.4) 0%, transparent 70%)",
                     }}
                   />
-                  <motion.div
-                    className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
-                    style={{ background: "linear-gradient(135deg, hsl(280 70% 60%), hsl(200 80% 50%))" }}
-                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
+                      style={{ background: "linear-gradient(135deg, hsl(280 70% 60%), hsl(200 80% 50%))" }}
+                    />
+                  )}
                   
                   <div className="relative p-5 flex items-center gap-4">
-                    <motion.div 
-                      className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative"
-                      animate={{ 
-                        y: [0, -6, 0],
-                        rotateZ: [0, 2, 0, -2, 0],
-                      }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <motion.div
-                        className="absolute inset-0 rounded-full opacity-50 blur-2xl"
-                        style={{ background: "radial-gradient(circle, hsl(280 70% 60%), transparent)" }}
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      />
+                    <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative">
                       <img 
                         src="/brain-head.png" 
                         alt="Tests cognitivos"
-                        className="w-full h-full object-contain drop-shadow-2xl relative z-10"
+                        className="w-full h-full object-contain relative z-10"
                         loading="lazy"
                       />
-                    </motion.div>
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <h2 className="text-xl md:text-2xl font-black text-white mb-2 drop-shadow-lg">
@@ -1356,33 +1300,22 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       background: "radial-gradient(circle at 50% 50%, hsl(187 85% 53% / 0.4) 0%, transparent 70%)",
                     }}
                   />
-                  <motion.div
-                    className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
-                    style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(220 80% 60%))" }}
-                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
+                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(220 80% 60%))" }}
+                    />
+                  )}
                   
                   <div className="relative p-5 flex items-center gap-4">
-                    <motion.div 
-                      className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative"
-                      animate={{ 
-                        y: [0, -6, 0],
-                        rotateZ: [0, -2, 0, 2, 0],
-                      }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    >
-                      <motion.div
-                        className="absolute inset-0 rounded-full opacity-50 blur-2xl"
-                        style={{ background: "radial-gradient(circle, hsl(187 85% 53%), transparent)" }}
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                      />
+                    <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative">
                       <img 
                         src="/brain-cube.png" 
                         alt="Entrenamiento"
-                        className="w-full h-full object-contain drop-shadow-2xl relative z-10"
+                        className="w-full h-full object-contain relative z-10"
                         loading="lazy"
                       />
-                    </motion.div>
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <h2 className="text-xl md:text-2xl font-black text-white mb-2 drop-shadow-lg">
