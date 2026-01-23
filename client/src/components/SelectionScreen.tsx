@@ -18,6 +18,8 @@ interface Problem {
   title: string;
   description: string;
   gradient: string;
+  image: string;
+  icon: string;
 }
 
 const ageGroups: AgeGroup[] = [
@@ -71,33 +73,43 @@ const ageGroups: AgeGroup[] = [
 const problems: Problem[] = [
   { 
     id: "atencion", 
-    title: "Tareas eternas y falta de atencion", 
-    description: "Es inteligente pero se distrae facilmente. Las tardes de estudio son una batalla de frustracion.",
-    gradient: "from-cyan-500/20 to-cyan-600/30"
+    title: "Falta de atencion", 
+    description: "Es inteligente pero se distrae facilmente. Las tardes de estudio son una batalla.",
+    gradient: "from-cyan-500/30 to-cyan-600/40",
+    image: "/age-ninos.png",
+    icon: "Focus"
   },
   { 
     id: "desmotivacion", 
-    title: "Desmotivacion academica", 
-    description: "Estudia sin tecnica. Lee pero no retiene. Siente que el colegio es lento y aburrido.",
-    gradient: "from-purple-500/20 to-purple-600/30"
+    title: "Desmotivacion", 
+    description: "Estudia sin tecnica. Lee pero no retiene. El colegio es lento y aburrido.",
+    gradient: "from-purple-500/30 to-purple-600/40",
+    image: "/age-adolescentes.png",
+    icon: "TrendingDown"
   },
   { 
     id: "sobrecarga", 
-    title: "Sobrecarga y ansiedad", 
-    description: "Lecturas interminables para la tesis y bloqueos mentales durante los examenes por estres.",
-    gradient: "from-cyan-500/20 to-purple-500/20"
+    title: "Sobrecarga mental", 
+    description: "Lecturas interminables y bloqueos mentales durante examenes por estres.",
+    gradient: "from-cyan-500/30 to-purple-500/30",
+    image: "/age-universitarios.png",
+    icon: "Brain"
   },
   { 
     id: "fatiga", 
-    title: "Fatiga mental y estancamiento", 
-    description: "Niebla mental (Brain Fog). Te cuesta mantener el enfoque profundo y expresar tus ideas.",
-    gradient: "from-purple-600/20 to-cyan-500/20"
+    title: "Fatiga mental", 
+    description: "Niebla mental (Brain Fog). Te cuesta mantener el enfoque y expresar ideas.",
+    gradient: "from-purple-600/30 to-cyan-500/30",
+    image: "/age-profesionales.png",
+    icon: "Battery"
   },
   { 
     id: "prevencion", 
-    title: "Prevencion y agilidad", 
-    description: "Pequenos olvidos frecuentes. Buscas mantener tu mente lucida y activa para no perder independencia.",
-    gradient: "from-cyan-400/20 to-purple-400/20"
+    title: "Olvidos frecuentes", 
+    description: "Buscas mantener tu mente lucida y activa para no perder independencia.",
+    gradient: "from-cyan-400/30 to-purple-400/30",
+    image: "/age-adulto-mayor.png",
+    icon: "Lightbulb"
   },
 ];
 
@@ -229,20 +241,43 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       data-testid="selection-screen"
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.img 
-          src="/x-background.png" 
-          alt=""
-          className="absolute right-0 bottom-0 w-64 md:w-96 opacity-10"
-          animate={{
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        {step === "age" && (
+          <motion.img 
+            src="/circuit-pattern.png" 
+            alt=""
+            className="absolute right-0 bottom-0 w-72 md:w-[400px] opacity-40"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ 
+              opacity: [0.3, 0.5, 0.3],
+              x: 0,
+            }}
+            transition={{
+              opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+              x: { duration: 0.8 }
+            }}
+            style={{
+              filter: "drop-shadow(0 0 20px hsl(187 85% 53% / 0.5))",
+            }}
+          />
+        )}
+        
+        {step === "problems" && (
+          <motion.img 
+            src="/x-background.png" 
+            alt=""
+            className="absolute left-0 top-20 w-48 md:w-72 opacity-15"
+            initial={{ opacity: 0, rotate: -10 }}
+            animate={{ 
+              opacity: 0.15,
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+            }}
+          />
+        )}
         
         {electrons.map((electron) => (
           <ElectronParticle
@@ -558,12 +593,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-3"
+                className="grid grid-cols-2 gap-3 md:gap-4"
                 role="group"
                 aria-label="Selecciona tus desafios"
               >
-                {problems.map((problem) => {
+                {problems.map((problem, index) => {
                   const isSelected = selectedProblems.includes(problem.id);
+                  const isLast = index === problems.length - 1;
                   
                   return (
                     <motion.button
@@ -573,38 +609,57 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       aria-checked={isSelected}
                       variants={itemVariants}
                       onClick={() => handleProblemToggle(problem.id)}
-                      className={`w-full p-4 rounded-xl border-2 text-left bg-gradient-to-r ${problem.gradient} ${
+                      className={`relative rounded-2xl border-2 overflow-hidden text-left aspect-square ${
+                        isLast ? "col-span-2 aspect-auto h-32" : ""
+                      } ${
                         isSelected
-                          ? "border-purple-400 shadow-lg"
-                          : "border-border/30"
+                          ? "border-purple-400"
+                          : "border-border/20"
                       }`}
                       style={isSelected ? {
-                        boxShadow: "0 0 20px hsl(280 70% 50% / 0.4)",
+                        boxShadow: "0 0 25px hsl(280 70% 50% / 0.5)",
                       } : {}}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
                       data-testid={`button-problem-${problem.id}`}
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-1 min-w-0">
-                          <span className={`font-bold text-sm block ${isSelected ? "text-purple-300" : "text-foreground"}`}>
-                            {problem.title}
-                          </span>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {problem.description}
-                          </p>
-                        </div>
-
-                        <motion.div
-                          className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
-                            isSelected ? "border-purple-400 bg-purple-500" : "border-muted-foreground/30"
-                          }`}
-                          animate={isSelected ? { scale: [1, 1.2, 1] } : {}}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {isSelected && <Check className="w-4 h-4 text-white" />}
-                        </motion.div>
+                      <img 
+                        src={problem.image} 
+                        alt=""
+                        className={`absolute inset-0 w-full h-full object-cover ${isSelected ? "opacity-80" : "opacity-60"}`}
+                      />
+                      
+                      <div className={`absolute inset-0 bg-gradient-to-t ${problem.gradient} via-black/60 to-transparent`} />
+                      
+                      <div className="absolute inset-0 flex flex-col justify-end p-3">
+                        <span className={`font-bold text-sm md:text-base text-white drop-shadow-lg ${isLast ? "text-center" : ""}`}>
+                          {problem.title}
+                        </span>
+                        <p className={`text-[10px] md:text-xs text-white/80 mt-1 line-clamp-2 drop-shadow ${isLast ? "text-center" : ""}`}>
+                          {problem.description}
+                        </p>
                       </div>
+                      
+                      <motion.div
+                        className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          isSelected 
+                            ? "border-purple-400 bg-purple-500" 
+                            : "border-white/50 bg-black/30"
+                        }`}
+                        animate={isSelected ? { scale: [1, 1.3, 1] } : {}}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {isSelected && <Check className="w-4 h-4 text-white" />}
+                      </motion.div>
+                      
+                      {isSelected && (
+                        <motion.div 
+                          className="absolute inset-0 border-4 border-purple-400 rounded-2xl pointer-events-none"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      )}
                     </motion.button>
                   );
                 })}
