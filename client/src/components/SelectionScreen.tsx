@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -203,6 +203,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
   const [expandedProblem, setExpandedProblem] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const scanTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [electrons] = useState(() => 
     Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -246,46 +250,97 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     }
   };
 
-  const handleFingerprintScan = () => {
+  // Cleanup function for scan resources
+  const cleanupScan = useCallback((isSuccess: boolean) => {
+    // Stop vibration
+    if (vibrationIntervalRef.current) {
+      clearInterval(vibrationIntervalRef.current);
+      vibrationIntervalRef.current = null;
+    }
+    if ('vibrate' in navigator) {
+      navigator.vibrate(isSuccess ? [80, 40, 80] : 0);
+    }
+    
+    // Stop and close audio
+    try {
+      if (audioContextRef.current) {
+        const osc = (audioContextRef.current as any).oscillator;
+        if (osc) {
+          try { osc.stop(); } catch (e) {}
+        }
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+    } catch (e) {}
+    
+    // Clear timer
+    if (scanTimerRef.current) {
+      clearInterval(scanTimerRef.current);
+      scanTimerRef.current = null;
+    }
+  }, []);
+
+  // Start scanning when finger touches
+  const handleScanStart = useCallback(() => {
     if (isScanning) return;
     setIsScanning(true);
+    setScanProgress(0);
     
-    // Play scan sound using Web Audio API
+    // Start continuous vibration
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+      vibrationIntervalRef.current = setInterval(() => {
+        navigator.vibrate(30);
+      }, 100);
+    }
+    
+    // Start continuous scan sound
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
       
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(audioContextRef.current.destination);
       
-      // Create a futuristic scan sound
-      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(2400, audioContext.currentTime + 0.1);
-      oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
-      oscillator.frequency.exponentialRampToValueAtTime(1600, audioContext.currentTime + 0.5);
+      oscillator.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+      oscillator.frequency.linearRampToValueAtTime(1200, audioContextRef.current.currentTime + 1);
       
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
       
       oscillator.type = 'sine';
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.6);
-    } catch (e) {
-      // Audio not supported, continue silently
-    }
+      oscillator.start();
+      
+      (audioContextRef.current as any).oscillator = oscillator;
+    } catch (e) {}
     
-    // Trigger haptic feedback (Android)
-    if ('vibrate' in navigator) {
-      navigator.vibrate([50, 30, 50, 30, 80]);
-    }
+    // Progress timer - complete after 1 second
+    let progress = 0;
+    scanTimerRef.current = setInterval(() => {
+      progress += 10;
+      setScanProgress(progress);
+      
+      if (progress >= 100) {
+        // Cleanup first
+        cleanupScan(true);
+        // Transition to options
+        setTimeout(() => {
+          setStep("options");
+          setIsScanning(false);
+          setScanProgress(0);
+        }, 150);
+      }
+    }, 100);
+  }, [isScanning, cleanupScan]);
+
+  const handleScanEnd = useCallback(() => {
+    if (!isScanning) return;
     
-    // Transition to options after scan animation
-    setTimeout(() => {
-      setStep("options");
-      setIsScanning(false);
-    }, 800);
-  };
+    // Cancel if not complete
+    cleanupScan(false);
+    setIsScanning(false);
+    setScanProgress(0);
+  }, [isScanning, cleanupScan]);
 
   const handleOptionSelect = (option: "tests" | "training") => {
     onComplete({ 
@@ -566,6 +621,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                   src={group.image} 
                                   alt={group.label}
                                   className="w-full h-full object-cover"
+                                  loading="lazy"
                                 />
                               </div>
                               <div className="flex-1 min-w-0">
@@ -797,6 +853,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                     src={getProblemImage(selectedAge, problem.id)} 
                                     alt={problem.title}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -858,28 +915,25 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 className="relative"
                 initial={{ y: 20 }}
                 animate={{ y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.1 }}
               >
-                <motion.p 
-                  className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 text-center mb-4"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  Verificación de identidad
-                </motion.p>
-                
-                <h1 className="text-2xl md:text-3xl font-black text-center mb-8">
+                <h1 className="text-3xl md:text-4xl font-black text-center">
                   <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                    Confirma tu perfil
+                    Continuemos
                   </span>
                 </h1>
               </motion.div>
 
               <motion.button
-                onClick={handleFingerprintScan}
-                className="relative w-48 h-48 md:w-56 md:h-56 rounded-full flex items-center justify-center cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onTouchStart={handleScanStart}
+                onTouchEnd={handleScanEnd}
+                onTouchCancel={handleScanEnd}
+                onMouseDown={handleScanStart}
+                onMouseUp={handleScanEnd}
+                onMouseLeave={handleScanEnd}
+                className="relative w-48 h-48 md:w-56 md:h-56 rounded-full flex items-center justify-center cursor-pointer touch-none select-none"
+                whileHover={{ scale: 1.02 }}
+                animate={isScanning ? { scale: 0.95 } : { scale: 1 }}
                 data-testid="button-fingerprint"
               >
                 {/* Outer glow ring */}
@@ -1089,24 +1143,40 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </motion.button>
 
               <motion.div
-                className="text-center space-y-2"
+                className="text-center space-y-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.3 }}
               >
+                {/* Progress bar */}
+                {isScanning && (
+                  <div className="w-48 h-2 rounded-full bg-black/40 overflow-hidden mx-auto">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ 
+                        background: "linear-gradient(90deg, hsl(187 85% 53%), hsl(280 70% 60%))",
+                        boxShadow: "0 0 10px hsl(187 85% 53%)",
+                      }}
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${scanProgress}%` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  </div>
+                )}
+                
                 <motion.p
-                  className="text-lg md:text-xl font-bold"
+                  className="text-xl md:text-2xl font-bold"
                   style={{
-                    color: isScanning ? "hsl(187 85% 53%)" : "hsl(187 85% 53% / 0.8)",
-                    textShadow: isScanning ? "0 0 20px hsl(187 85% 53%)" : "none",
+                    color: isScanning ? "hsl(187 85% 53%)" : "hsl(187 85% 53% / 0.9)",
+                    textShadow: isScanning ? "0 0 30px hsl(187 85% 53%)" : "0 0 10px hsl(187 85% 53% / 0.5)",
                   }}
-                  animate={!isScanning ? { opacity: [0.7, 1, 0.7] } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  animate={!isScanning ? { opacity: [0.8, 1, 0.8] } : {}}
+                  transition={{ duration: 1, repeat: Infinity }}
                 >
                   {isScanning ? "Escaneando..." : "Presiona aquí"}
                 </motion.p>
                 <p className="text-sm text-muted-foreground">
-                  {isScanning ? "Verificando identidad" : "Coloca tu dedo para continuar"}
+                  {isScanning ? "Mantén presionado" : "Mantén tu dedo para continuar"}
                 </p>
               </motion.div>
             </motion.div>
@@ -1246,6 +1316,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         src="/brain-head.png" 
                         alt="Tests cognitivos"
                         className="w-full h-full object-contain drop-shadow-2xl relative z-10"
+                        loading="lazy"
                       />
                     </motion.div>
                     
@@ -1309,6 +1380,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         src="/brain-cube.png" 
                         alt="Entrenamiento"
                         className="w-full h-full object-contain drop-shadow-2xl relative z-10"
+                        loading="lazy"
                       />
                     </motion.div>
                     
