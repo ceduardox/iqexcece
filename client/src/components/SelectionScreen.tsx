@@ -293,13 +293,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     
     // Stop and close audio
     try {
-      if (audioContextRef.current) {
-        const osc = (audioContextRef.current as any).oscillator;
-        if (osc) {
-          try { osc.stop(); } catch (e) {}
-        }
-        audioContextRef.current.close();
-        audioContextRef.current = null;
+      if ((audioContextRef as any).current?.audio) {
+        const audio = (audioContextRef as any).current.audio;
+        audio.pause();
+        audio.currentTime = 0;
+        (audioContextRef as any).current = null;
       }
     } catch (e) {}
     
@@ -324,24 +322,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       }, 100);
     }
     
-    // Start continuous scan sound
+    // Start scan sound from mp3
     try {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContextRef.current.createOscillator();
-      const gainNode = audioContextRef.current.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-      
-      oscillator.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
-      oscillator.frequency.linearRampToValueAtTime(1200, audioContextRef.current.currentTime + 1);
-      
-      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
-      
-      oscillator.type = 'sine';
-      oscillator.start();
-      
-      (audioContextRef.current as any).oscillator = oscillator;
+      const audio = new Audio('/fingerprint-sound.mp3');
+      audio.loop = true;
+      audio.volume = 0.5;
+      audio.play();
+      (audioContextRef as any).current = { audio };
     } catch (e) {}
     
     // Progress timer - complete after 1 second
@@ -963,157 +950,34 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   }}
                 />
                 
-                {/* Fingerprint SVG */}
-                <motion.svg
-                  viewBox="0 0 100 100"
-                  className="w-28 h-28 md:w-32 md:h-32 relative z-10"
-                  style={{
-                    filter: isScanning 
-                      ? "drop-shadow(0 0 20px hsl(187 85% 53%)) drop-shadow(0 0 40px hsl(187 85% 53%))"
-                      : "drop-shadow(0 0 10px hsl(187 85% 53% / 0.5))",
-                  }}
+                {/* Fingerprint Image */}
+                <motion.div
+                  className="relative w-32 h-32 md:w-40 md:h-40 z-10"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  {/* Fingerprint lines */}
-                  <motion.path
-                    d="M50 15 C30 15 20 30 20 50 C20 70 30 85 50 85"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.1 }}
+                  <img 
+                    src="/fingerprint-custom.png" 
+                    alt="Huella digital"
+                    className="w-full h-full object-contain"
+                    style={{
+                      filter: isScanning 
+                        ? "drop-shadow(0 0 25px hsl(187 85% 53%)) drop-shadow(0 0 50px hsl(280 70% 60%))"
+                        : "drop-shadow(0 0 15px hsl(187 85% 53% / 0.6))",
+                    }}
                   />
-                  <motion.path
-                    d="M50 20 C35 20 27 32 27 50 C27 68 35 80 50 80"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.2 }}
-                  />
-                  <motion.path
-                    d="M50 25 C38 25 33 35 33 50 C33 65 38 75 50 75"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.3 }}
-                  />
-                  <motion.path
-                    d="M50 30 C42 30 38 38 38 50 C38 62 42 70 50 70"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.4 }}
-                  />
-                  <motion.path
-                    d="M50 35 C45 35 43 42 43 50 C43 58 45 65 50 65"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                  />
-                  <motion.path
-                    d="M50 40 C47 40 46 45 46 50 C46 55 47 60 50 60"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.6 }}
-                  />
-                  {/* Right side curves */}
-                  <motion.path
-                    d="M50 15 C70 15 80 30 80 50 C80 70 70 85 50 85"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.15 }}
-                  />
-                  <motion.path
-                    d="M50 20 C65 20 73 32 73 50 C73 68 65 80 50 80"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.25 }}
-                  />
-                  <motion.path
-                    d="M50 25 C62 25 67 35 67 50 C67 65 62 75 50 75"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.35 }}
-                  />
-                  <motion.path
-                    d="M50 30 C58 30 62 38 62 50 C62 62 58 70 50 70"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.45 }}
-                  />
-                  <motion.path
-                    d="M50 35 C55 35 57 42 57 50 C57 58 55 65 50 65"
-                    fill="none"
-                    stroke="hsl(187 85% 53%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.55 }}
-                  />
-                  <motion.path
-                    d="M50 40 C53 40 54 45 54 50 C54 55 53 60 50 60"
-                    fill="none"
-                    stroke="hsl(280 70% 60%)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.65 }}
-                  />
-                  
-                  {/* Scanning line */}
+                  {/* Scanning line overlay */}
                   {isScanning && (
-                    <motion.line
-                      x1="15"
-                      y1="50"
-                      x2="85"
-                      y2="50"
-                      stroke="hsl(187 85% 53%)"
-                      strokeWidth="3"
-                      initial={{ y1: 10, y2: 10 }}
-                      animate={{ y1: [10, 90, 10], y2: [10, 90, 10] }}
+                    <motion.div
+                      className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+                      style={{ boxShadow: "0 0 20px hsl(187 85% 53%)" }}
+                      initial={{ top: "10%" }}
+                      animate={{ top: ["10%", "90%", "10%"] }}
                       transition={{ duration: 0.6, ease: "easeInOut" }}
-                      style={{
-                        filter: "drop-shadow(0 0 10px hsl(187 85% 53%))",
-                      }}
                     />
                   )}
-                </motion.svg>
+                </motion.div>
                 
                 {/* Scan effect overlay */}
                 {isScanning && (
