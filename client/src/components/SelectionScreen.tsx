@@ -402,7 +402,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-4"
+                className="space-y-3"
                 role="radiogroup"
                 aria-label="Selecciona tu grupo de edad"
               >
@@ -410,91 +410,123 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   const isSelected = selectedAge === group.id;
                   
                   return (
-                    <motion.button
+                    <motion.div
                       key={group.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={isSelected}
                       variants={itemVariants}
-                      onClick={() => handleAgeSelect(group.id)}
-                      className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left ${
-                        isSelected
-                          ? `${group.borderColor} shadow-lg`
-                          : "border-border/30"
-                      }`}
-                      style={isSelected ? {
-                        boxShadow: "0 0 30px hsl(187 85% 53% / 0.3), 0 0 60px hsl(280 70% 50% / 0.2)",
-                      } : {}}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      data-testid={`button-age-${group.id}`}
+                      layout
+                      className="w-full"
                     >
-                      <div className={`bg-gradient-to-r ${group.gradient}`}>
-                        <div className="flex gap-4 p-4">
-                          <motion.div 
-                            className="relative w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg"
-                            whileHover={{ scale: 1.03 }}
-                            style={{
-                              boxShadow: isSelected ? "0 0 20px hsl(187 85% 53% / 0.4)" : "0 4px 15px rgba(0,0,0,0.3)"
-                            }}
-                          >
-                            <img 
-                              src={group.image} 
-                              alt={group.label}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                          </motion.div>
-                          
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <div className="flex items-center gap-2 flex-wrap mb-2">
-                              <span className={`font-bold text-base md:text-lg ${isSelected ? "text-cyan-400" : "text-foreground"}`}>
-                                {group.label}
-                              </span>
-                              <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
-                                {group.ageRange}
-                              </span>
-                            </div>
-                            <p className="text-sm md:text-base text-muted-foreground">
-                              {group.description}
-                            </p>
-                            
+                      <motion.button
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => handleAgeSelect(group.id)}
+                        className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left ${
+                          isSelected
+                            ? `${group.borderColor}`
+                            : "border-border/30"
+                        }`}
+                        style={isSelected ? {
+                          boxShadow: "0 0 30px hsl(187 85% 53% / 0.3), 0 0 60px hsl(280 70% 50% / 0.2)",
+                        } : {}}
+                        whileTap={{ scale: 0.98 }}
+                        data-testid={`button-age-${group.id}`}
+                      >
+                        <AnimatePresence mode="wait">
+                          {isSelected ? (
                             <motion.div
-                              className={`mt-3 w-7 h-7 rounded-full border-2 flex items-center justify-center ${
-                                isSelected ? "border-cyan-400 bg-cyan-400" : "border-muted-foreground/30"
-                              }`}
-                              animate={isSelected ? { scale: [1, 1.2, 1] } : {}}
+                              key="expanded"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.3 }}
+                              className={`bg-gradient-to-br ${group.gradient}`}
                             >
-                              {isSelected && <Check className="w-4 h-4 text-background" />}
+                              <div className="relative">
+                                <motion.img 
+                                  src={group.image} 
+                                  alt={group.label}
+                                  className="w-full h-48 md:h-64 object-cover"
+                                  initial={{ scale: 1.1 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ duration: 0.5 }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                                
+                                <div className="absolute bottom-0 left-0 right-0 p-4">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <motion.div
+                                      className="w-8 h-8 rounded-full border-2 border-cyan-400 bg-cyan-400 flex items-center justify-center"
+                                      animate={{ scale: [1, 1.2, 1] }}
+                                      transition={{ duration: 0.5 }}
+                                    >
+                                      <Check className="w-5 h-5 text-background" />
+                                    </motion.div>
+                                    <div>
+                                      <h3 className="text-xl md:text-2xl font-black text-white drop-shadow-lg">
+                                        {group.label}
+                                      </h3>
+                                      <span className="text-sm text-cyan-300">{group.ageRange}</span>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm md:text-base text-white/90 mb-4">
+                                    {group.description}
+                                  </p>
+                                </div>
+                              </div>
                             </motion.div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.button>
+                          ) : (
+                            <motion.div
+                              key="collapsed"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className={`flex items-center gap-3 p-3 bg-gradient-to-r ${group.gradient}`}
+                            >
+                              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={group.image} 
+                                  alt={group.label}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="font-bold text-sm md:text-base text-foreground">
+                                  {group.label}
+                                </span>
+                                <span className="text-xs text-muted-foreground ml-2">
+                                  {group.ageRange}
+                                </span>
+                              </div>
+                              <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30 flex-shrink-0" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                      
+                      <AnimatePresence>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                            className="mt-3"
+                          >
+                            <Button
+                              onClick={handleContinue}
+                              size="lg"
+                              className="w-full text-lg font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
+                              data-testid="button-continue-age"
+                            >
+                              CONTINUAR
+                            </Button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                   );
                 })}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="pt-4"
-              >
-                <Button
-                  onClick={handleContinue}
-                  disabled={!selectedAge}
-                  size="lg"
-                  className="w-full text-lg font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
-                  data-testid="button-continue-age"
-                >
-                  <motion.span
-                    animate={{ opacity: selectedAge ? 1 : 0.7 }}
-                  >
-                    CONTINUAR
-                  </motion.span>
-                </Button>
               </motion.div>
             </motion.div>
           )}
@@ -593,7 +625,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-2 gap-3 md:gap-4"
+                className="grid grid-cols-2 gap-4"
                 role="group"
                 aria-label="Selecciona tus desafios"
               >
@@ -609,8 +641,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       aria-checked={isSelected}
                       variants={itemVariants}
                       onClick={() => handleProblemToggle(problem.id)}
-                      className={`relative rounded-2xl border-2 overflow-hidden text-left aspect-square ${
-                        isLast ? "col-span-2 aspect-auto h-32" : ""
+                      className={`relative rounded-2xl border-2 overflow-hidden text-left ${
+                        isLast ? "col-span-2 h-44 md:h-52" : "h-40 md:h-48"
                       } ${
                         isSelected
                           ? "border-purple-400"
@@ -619,32 +651,32 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       style={isSelected ? {
                         boxShadow: "0 0 25px hsl(280 70% 50% / 0.5)",
                       } : {}}
-                      whileHover={{ scale: 1.03 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                       data-testid={`button-problem-${problem.id}`}
                     >
                       <img 
                         src={problem.image} 
                         alt=""
-                        className={`absolute inset-0 w-full h-full object-cover ${isSelected ? "opacity-80" : "opacity-60"}`}
+                        className={`absolute inset-0 w-full h-full object-cover ${isSelected ? "opacity-90" : "opacity-70"}`}
                       />
                       
-                      <div className={`absolute inset-0 bg-gradient-to-t ${problem.gradient} via-black/60 to-transparent`} />
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20`} />
                       
-                      <div className="absolute inset-0 flex flex-col justify-end p-3">
-                        <span className={`font-bold text-sm md:text-base text-white drop-shadow-lg ${isLast ? "text-center" : ""}`}>
+                      <div className={`absolute inset-0 flex flex-col justify-end p-4 ${isLast ? "items-center text-center" : ""}`}>
+                        <span className={`font-black text-lg md:text-xl text-white drop-shadow-lg`}>
                           {problem.title}
                         </span>
-                        <p className={`text-[10px] md:text-xs text-white/80 mt-1 line-clamp-2 drop-shadow ${isLast ? "text-center" : ""}`}>
+                        <p className={`text-xs md:text-sm text-white/90 mt-2 ${isLast ? "max-w-md" : "line-clamp-2"}`}>
                           {problem.description}
                         </p>
                       </div>
                       
                       <motion.div
-                        className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        className={`absolute top-3 right-3 w-7 h-7 rounded-full border-2 flex items-center justify-center ${
                           isSelected 
                             ? "border-purple-400 bg-purple-500" 
-                            : "border-white/50 bg-black/30"
+                            : "border-white/60 bg-black/40"
                         }`}
                         animate={isSelected ? { scale: [1, 1.3, 1] } : {}}
                         transition={{ duration: 0.3 }}
