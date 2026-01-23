@@ -25,26 +25,26 @@ interface Problem {
 const ageGroups: AgeGroup[] = [
   { 
     id: "ninos", 
-    label: "NINOS", 
-    ageRange: "6-12 anos", 
+    label: "NIÑOS", 
+    ageRange: "6-12 años", 
     image: "/age-ninos.png",
-    description: "Tareas eternas y falta de atencion",
+    description: "Tareas eternas y falta de atención",
     gradient: "from-cyan-500/20 to-cyan-600/30",
     borderColor: "border-cyan-400"
   },
   { 
     id: "adolescentes", 
     label: "ADOLESCENTES", 
-    ageRange: "13-17 anos", 
+    ageRange: "13-17 años", 
     image: "/age-adolescentes.png",
-    description: "Desmotivacion academica",
+    description: "Desmotivación académica",
     gradient: "from-purple-500/20 to-purple-600/30",
     borderColor: "border-purple-400"
   },
   { 
     id: "universitarios", 
     label: "UNIVERSITARIOS", 
-    ageRange: "18-25 anos", 
+    ageRange: "18-25 años", 
     image: "/age-universitarios.png",
     description: "Sobrecarga y ansiedad",
     gradient: "from-cyan-500/20 to-purple-500/20",
@@ -53,7 +53,7 @@ const ageGroups: AgeGroup[] = [
   { 
     id: "profesionales", 
     label: "PROFESIONALES", 
-    ageRange: "26-50 anos", 
+    ageRange: "26-50 años", 
     image: "/age-profesionales.png",
     description: "Fatiga mental y estancamiento",
     gradient: "from-purple-600/20 to-cyan-500/20",
@@ -62,9 +62,9 @@ const ageGroups: AgeGroup[] = [
   { 
     id: "adulto-mayor", 
     label: "ADULTO MAYOR", 
-    ageRange: "50+ anos", 
+    ageRange: "50+ años", 
     image: "/age-adulto-mayor.png",
-    description: "Prevencion y agilidad",
+    description: "Prevención y agilidad",
     gradient: "from-cyan-400/20 to-cyan-600/30",
     borderColor: "border-cyan-500"
   },
@@ -171,9 +171,10 @@ interface SelectionScreenProps {
 }
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
-  const [step, setStep] = useState<"age" | "problems">("age");
+  const [step, setStep] = useState<"age" | "problems" | "options">("age");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
+  const [expandedProblem, setExpandedProblem] = useState<string | null>(null);
   const [electrons] = useState(() => 
     Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -198,24 +199,32 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   };
 
   const handleProblemToggle = (problemId: string) => {
-    setSelectedProblems(prev => 
-      prev.includes(problemId)
-        ? prev.filter(id => id !== problemId)
-        : [...prev, problemId]
-    );
+    if (expandedProblem === problemId) {
+      setSelectedProblems(prev => 
+        prev.includes(problemId)
+          ? prev.filter(id => id !== problemId)
+          : [...prev, problemId]
+      );
+    } else {
+      setExpandedProblem(problemId);
+    }
   };
 
   const handleContinue = () => {
     if (step === "age" && selectedAge) {
       setStep("problems");
     } else if (step === "problems" && selectedProblems.length > 0) {
-      onComplete({ 
-        ageGroup: selectedAge!, 
-        ageLabel: getAgeLabel(selectedAge!),
-        problems: selectedProblems,
-        problemTitles: selectedProblems.map(getProblemTitle)
-      });
+      setStep("options");
     }
+  };
+
+  const handleOptionSelect = (option: "tests" | "training") => {
+    onComplete({ 
+      ageGroup: selectedAge!, 
+      ageLabel: getAgeLabel(selectedAge!),
+      problems: selectedProblems,
+      problemTitles: selectedProblems.map(getProblemTitle)
+    });
   };
 
   const containerVariants = {
@@ -446,7 +455,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                 <motion.img 
                                   src={group.image} 
                                   alt={group.label}
-                                  className="w-full h-48 md:h-64 object-cover"
+                                  className="w-full h-56 md:h-72 object-cover"
                                   initial={{ scale: 1.1 }}
                                   animate={{ scale: 1 }}
                                   transition={{ duration: 0.5 }}
@@ -483,7 +492,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               exit={{ opacity: 0 }}
                               className={`flex items-center gap-3 p-3 bg-gradient-to-r ${group.gradient}`}
                             >
-                              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
                                 <img 
                                   src={group.image} 
                                   alt={group.label}
@@ -625,74 +634,124 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-2 gap-4"
+                className="space-y-3"
                 role="group"
-                aria-label="Selecciona tus desafios"
+                aria-label="Selecciona tus desafíos"
               >
-                {problems.map((problem, index) => {
+                {problems.map((problem) => {
                   const isSelected = selectedProblems.includes(problem.id);
-                  const isLast = index === problems.length - 1;
+                  const isExpanded = expandedProblem === problem.id;
                   
                   return (
-                    <motion.button
+                    <motion.div
                       key={problem.id}
-                      type="button"
-                      role="checkbox"
-                      aria-checked={isSelected}
                       variants={itemVariants}
-                      onClick={() => handleProblemToggle(problem.id)}
-                      className={`relative rounded-2xl border-2 overflow-hidden text-left ${
-                        isLast ? "col-span-2 h-44 md:h-52" : "h-40 md:h-48"
-                      } ${
-                        isSelected
-                          ? "border-purple-400"
-                          : "border-border/20"
-                      }`}
-                      style={isSelected ? {
-                        boxShadow: "0 0 25px hsl(280 70% 50% / 0.5)",
-                      } : {}}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      data-testid={`button-problem-${problem.id}`}
+                      layout
+                      className="w-full"
                     >
-                      <img 
-                        src={problem.image} 
-                        alt=""
-                        className={`absolute inset-0 w-full h-full object-cover ${isSelected ? "opacity-90" : "opacity-70"}`}
-                      />
-                      
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20`} />
-                      
-                      <div className={`absolute inset-0 flex flex-col justify-end p-4 ${isLast ? "items-center text-center" : ""}`}>
-                        <span className={`font-black text-lg md:text-xl text-white drop-shadow-lg`}>
-                          {problem.title}
-                        </span>
-                        <p className={`text-xs md:text-sm text-white/90 mt-2 ${isLast ? "max-w-md" : "line-clamp-2"}`}>
-                          {problem.description}
-                        </p>
-                      </div>
-                      
-                      <motion.div
-                        className={`absolute top-3 right-3 w-7 h-7 rounded-full border-2 flex items-center justify-center ${
-                          isSelected 
-                            ? "border-purple-400 bg-purple-500" 
-                            : "border-white/60 bg-black/40"
+                      <motion.button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        onClick={() => handleProblemToggle(problem.id)}
+                        className={`w-full rounded-2xl border-2 overflow-hidden text-left transition-all duration-300 ${
+                          isSelected
+                            ? "border-purple-400"
+                            : "border-border/30"
                         }`}
-                        animate={isSelected ? { scale: [1, 1.3, 1] } : {}}
-                        transition={{ duration: 0.3 }}
+                        style={isSelected ? {
+                          boxShadow: "0 0 25px hsl(280 70% 50% / 0.4)",
+                        } : {}}
+                        whileTap={{ scale: 0.98 }}
+                        data-testid={`button-problem-${problem.id}`}
                       >
-                        {isSelected && <Check className="w-4 h-4 text-white" />}
-                      </motion.div>
-                      
-                      {isSelected && (
-                        <motion.div 
-                          className="absolute inset-0 border-4 border-purple-400 rounded-2xl pointer-events-none"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
-                    </motion.button>
+                        <AnimatePresence mode="wait">
+                          {isExpanded ? (
+                            <motion.div
+                              key="expanded"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="relative">
+                                <motion.img 
+                                  src={problem.image} 
+                                  alt={problem.title}
+                                  className="w-full h-52 md:h-64 object-cover"
+                                  initial={{ scale: 1.1 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ duration: 0.5 }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                                
+                                <div className="absolute bottom-0 left-0 right-0 p-5">
+                                  <div className="flex items-start gap-3 mb-3">
+                                    <motion.div
+                                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                        isSelected 
+                                          ? "border-purple-400 bg-purple-500" 
+                                          : "border-white/60 bg-black/40"
+                                      }`}
+                                      animate={isSelected ? { scale: [1, 1.2, 1] } : {}}
+                                      transition={{ duration: 0.5 }}
+                                    >
+                                      {isSelected && <Check className="w-5 h-5 text-white" />}
+                                    </motion.div>
+                                    <div className="flex-1">
+                                      <h3 className="text-xl md:text-2xl font-black text-white drop-shadow-lg">
+                                        {problem.title}
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm md:text-base text-white/95 leading-relaxed">
+                                    {problem.description}
+                                  </p>
+                                  <p className="text-xs text-purple-300 mt-3">
+                                    Toca para {isSelected ? "deseleccionar" : "seleccionar"}
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="collapsed"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="relative"
+                            >
+                              <div className="flex items-center gap-4 p-3">
+                                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+                                  <img 
+                                    src={problem.image} 
+                                    alt={problem.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className={`font-bold text-base md:text-lg ${isSelected ? "text-purple-400" : "text-foreground"}`}>
+                                    {problem.title}
+                                  </span>
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                    {problem.description}
+                                  </p>
+                                </div>
+                                <motion.div
+                                  className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                    isSelected 
+                                      ? "border-purple-400 bg-purple-500" 
+                                      : "border-muted-foreground/30"
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-4 h-4 text-white" />}
+                                </motion.div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                    </motion.div>
                   );
                 })}
               </motion.div>
@@ -708,10 +767,134 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   disabled={selectedProblems.length === 0}
                   size="lg"
                   className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0"
-                  data-testid="button-complete"
+                  data-testid="button-continue-problems"
                 >
-                  COMENZAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
+                  CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
                 </Button>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {step === "options" && (
+            <motion.div
+              key="options-selection"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-6"
+            >
+              <Button
+                onClick={() => setStep("problems")}
+                variant="ghost"
+                size="sm"
+                data-testid="button-back-options"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver
+              </Button>
+
+              <motion.div 
+                className="text-center space-y-3 py-4"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <motion.h1
+                  className="text-3xl md:text-4xl font-black"
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Desafía tu Mente
+                  </span>
+                </motion.h1>
+                <motion.p
+                  className="text-sm md:text-base text-muted-foreground max-w-md mx-auto"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  Explora tu potencial y mejora tu percepción visual con nuestros ejercicios interactivos
+                </motion.p>
+              </motion.div>
+
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-5"
+              >
+                <motion.button
+                  variants={itemVariants}
+                  onClick={() => handleOptionSelect("tests")}
+                  className="w-full rounded-3xl overflow-hidden border-2 border-transparent text-left"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(280 70% 60%) 0%, hsl(200 80% 50%) 100%)",
+                    boxShadow: "0 10px 40px hsl(280 70% 50% / 0.3)",
+                  }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  data-testid="button-option-tests"
+                >
+                  <div className="relative p-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div 
+                        className="w-32 h-32 md:w-40 md:h-40 mb-4"
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <img 
+                          src="/age-ninos.png" 
+                          alt="Tests cognitivos"
+                          className="w-full h-full object-contain drop-shadow-2xl"
+                        />
+                      </motion.div>
+                      <h2 className="text-2xl md:text-3xl font-black text-white mb-2 drop-shadow-lg">
+                        Tests cognitivos interactivos
+                      </h2>
+                      <p className="text-sm md:text-base text-white/90">
+                        Descubre tu potencial explorando tu mente con nuestros tests
+                      </p>
+                    </div>
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  variants={itemVariants}
+                  onClick={() => handleOptionSelect("training")}
+                  className="w-full rounded-3xl overflow-hidden border-2 border-transparent text-left"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(187 85% 53%) 0%, hsl(200 80% 60%) 100%)",
+                    boxShadow: "0 10px 40px hsl(187 85% 53% / 0.3)",
+                  }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  data-testid="button-option-training"
+                >
+                  <div className="relative p-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div 
+                        className="w-32 h-32 md:w-40 md:h-40 mb-4"
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                      >
+                        <img 
+                          src="/age-profesionales.png" 
+                          alt="Entrenamiento"
+                          className="w-full h-full object-contain drop-shadow-2xl"
+                        />
+                      </motion.div>
+                      <h2 className="text-2xl md:text-3xl font-black text-white mb-2 drop-shadow-lg">
+                        Entrenamiento
+                      </h2>
+                      <p className="text-sm md:text-base text-white/90">
+                        Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas
+                      </p>
+                    </div>
+                  </div>
+                </motion.button>
               </motion.div>
             </motion.div>
           )}
