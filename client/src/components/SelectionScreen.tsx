@@ -277,35 +277,81 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className="space-y-6"
             >
               <motion.div 
-                className="text-center space-y-2"
+                className="text-center space-y-3 py-2"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
                 <motion.div
-                  className="inline-block"
-                  animate={{
-                    textShadow: [
-                      "0 0 10px hsl(280 70% 50% / 0.5)",
-                      "0 0 20px hsl(280 70% 50% / 0.8)",
-                      "0 0 10px hsl(280 70% 50% / 0.5)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  className="relative inline-block"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <h1 className="text-2xl md:text-4xl font-bold">
-                    <span className="text-muted-foreground">Que esta </span>
-                    <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
-                      frenando
-                    </span>
-                  </h1>
+                  <motion.div
+                    className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                    style={{ background: "linear-gradient(135deg, hsl(280 70% 50%), hsl(187 85% 53%))" }}
+                    animate={{
+                      opacity: [0.2, 0.4, 0.2],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  
+                  <div className="relative">
+                    <motion.p 
+                      className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2"
+                      animate={{ opacity: [0.6, 1, 0.6] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      Descubre tu camino
+                    </motion.p>
+                    
+                    <h1 className="text-3xl md:text-5xl font-black leading-tight">
+                      <span className="text-muted-foreground">Que esta </span>
+                      <motion.span 
+                        className="relative inline-block"
+                        animate={{ 
+                          textShadow: [
+                            "0 0 20px hsl(280 70% 50% / 0.8)",
+                            "0 0 40px hsl(280 70% 50% / 1)",
+                            "0 0 20px hsl(280 70% 50% / 0.8)",
+                          ]
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
+                          frenando
+                        </span>
+                        <motion.span 
+                          className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ delay: 0.5, duration: 0.8 }}
+                        />
+                      </motion.span>
+                    </h1>
+                    
+                    <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
+                      <motion.span 
+                        className="relative inline-block"
+                        animate={{ 
+                          textShadow: [
+                            "0 0 20px hsl(187 85% 53% / 0.8)",
+                            "0 0 40px hsl(187 85% 53% / 1)",
+                            "0 0 20px hsl(187 85% 53% / 0.8)",
+                          ]
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                      >
+                        <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                          tu potencial
+                        </span>
+                      </motion.span>
+                      <span className="text-muted-foreground"> hoy?</span>
+                    </h2>
+                  </div>
                 </motion.div>
-                <h2 className="text-2xl md:text-4xl font-bold">
-                  <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                    tu potencial
-                  </span>
-                  <span className="text-muted-foreground"> hoy?</span>
-                </h2>
               </motion.div>
 
               <motion.p
@@ -438,27 +484,65 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </Button>
 
               <motion.div 
-                className="text-center space-y-2"
+                className="text-center space-y-3 py-2"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h1 className="text-2xl md:text-4xl font-bold text-foreground">
-                  Cual es tu mayor
-                </h1>
-                <motion.h2 
-                  className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent"
-                  animate={{
-                    textShadow: [
-                      "0 0 10px hsl(280 70% 50% / 0.3)",
-                      "0 0 20px hsl(280 70% 50% / 0.5)",
-                      "0 0 10px hsl(280 70% 50% / 0.3)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                <motion.div
+                  className="relative inline-block"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  desafio?
-                </motion.h2>
+                  <motion.div
+                    className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                    style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
+                    animate={{
+                      opacity: [0.2, 0.4, 0.2],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  
+                  <div className="relative">
+                    <motion.p 
+                      className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-2"
+                      animate={{ opacity: [0.6, 1, 0.6] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      Identifica tu reto
+                    </motion.p>
+                    
+                    <h1 className="text-3xl md:text-5xl font-black leading-tight">
+                      <span className="text-muted-foreground">Cual es tu mayor</span>
+                    </h1>
+                    
+                    <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
+                      <motion.span 
+                        className="relative inline-block"
+                        animate={{ 
+                          textShadow: [
+                            "0 0 20px hsl(280 70% 50% / 0.8)",
+                            "0 0 40px hsl(280 70% 50% / 1)",
+                            "0 0 20px hsl(280 70% 50% / 0.8)",
+                          ]
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                          desafio?
+                        </span>
+                        <motion.span 
+                          className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ delay: 0.5, duration: 0.8 }}
+                        />
+                      </motion.span>
+                    </h2>
+                  </div>
+                </motion.div>
               </motion.div>
 
               <motion.p
