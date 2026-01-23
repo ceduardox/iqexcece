@@ -1036,176 +1036,182 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           {step === "options" && (
             <motion.div
               key="options-selection"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.4 }}
-              className="relative min-h-[85vh] -mx-4 md:-mx-8 -mt-4"
+              className="space-y-6"
             >
-              {/* Background with X and girl image */}
-              <div className="absolute inset-0 overflow-hidden">
-                {/* Girl with headphones behind X */}
-                <div className="absolute right-0 top-0 bottom-0 w-3/4">
-                  <img 
-                    src="/girl-headphones.jpg" 
-                    alt=""
-                    className="w-full h-full object-cover object-center"
-                    style={{ 
-                      clipPath: "polygon(30% 0, 100% 0, 100% 100%, 30% 100%, 50% 50%)",
-                    }}
-                  />
-                  {/* X overlay shape */}
-                  <div 
-                    className="absolute inset-0"
-                    style={{
-                      background: "linear-gradient(135deg, transparent 45%, hsl(0 0% 95%) 45%, hsl(0 0% 95%) 55%, transparent 55%), linear-gradient(-135deg, transparent 45%, hsl(0 0% 95%) 45%, hsl(0 0% 95%) 55%, transparent 55%)",
-                    }}
-                  />
-                </div>
-                {/* Left gradient fade */}
-                <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-gradient-to-r from-background via-background to-transparent z-10" />
-              </div>
+              <motion.button
+                onClick={() => setStep("fingerprint")}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors"
+                whileHover={{ x: -4 }}
+                whileTap={{ scale: 0.95 }}
+                data-testid="button-back-options"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Volver
+              </motion.button>
 
-              {/* Content */}
-              <div className="relative z-20 px-4 md:px-8 py-4">
-                <motion.button
-                  onClick={() => setStep("fingerprint")}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors mb-6"
-                  whileHover={{ x: -4 }}
-                  whileTap={{ scale: 0.95 }}
-                  data-testid="button-back-options"
+              <motion.div 
+                className="text-center space-y-4 py-2"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <motion.div
+                  className="relative inline-block"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  Volver
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
+                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
+                      animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.15, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
+                  
+                  <div className="relative">
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2">
+                      Elige tu camino
+                    </p>
+                    
+                    <h1 className="text-3xl md:text-5xl font-black leading-tight">
+                      <span className="relative inline-block">
+                        <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                          Desafía tu Mente
+                        </span>
+                        <span className="absolute -bottom-2 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500" />
+                      </span>
+                    </h1>
+                  </div>
+                </motion.div>
+                
+                <motion.p
+                  className="text-sm md:text-base text-muted-foreground max-w-sm mx-auto"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Explora tu potencial y mejora tu percepción visual
+                </motion.p>
+              </motion.div>
+
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-4"
+              >
+                <motion.button
+                  variants={itemVariants}
+                  onClick={() => handleOptionSelect("tests")}
+                  className="w-full rounded-3xl overflow-hidden text-left relative group"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(280 70% 45%) 0%, hsl(260 60% 35%) 50%, hsl(200 70% 40%) 100%)",
+                  }}
+                  whileHover={{ scale: 1.03, y: -6 }}
+                  whileTap={{ scale: 0.97 }}
+                  data-testid="button-option-tests"
+                >
+                  <motion.div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: "radial-gradient(circle at 50% 50%, hsl(280 70% 60% / 0.4) 0%, transparent 70%)",
+                    }}
+                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
+                      style={{ background: "linear-gradient(135deg, hsl(280 70% 60%), hsl(200 80% 50%))" }}
+                    />
+                  )}
+                  
+                  <div className="relative p-5 flex items-center gap-4">
+                    <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative">
+                      <img 
+                        src="/brain-head.png" 
+                        alt="Tests cognitivos"
+                        className="w-full h-full object-contain relative z-10"
+                        loading="lazy"
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl md:text-2xl font-black text-white mb-2 drop-shadow-lg">
+                        Tests cognitivos interactivos
+                      </h2>
+                      <p className="text-sm text-white/80 leading-relaxed">
+                        Descubre tu potencial explorando tu mente con nuestros tests
+                      </p>
+                      <motion.div
+                        className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-medium"
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        Comenzar
+                        <ArrowLeft className="w-3 h-3 rotate-180" />
+                      </motion.div>
+                    </div>
+                  </div>
                 </motion.button>
 
-                {/* Title */}
-                <motion.div 
-                  className="mb-8"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                <motion.button
+                  variants={itemVariants}
+                  onClick={() => handleOptionSelect("training")}
+                  className="w-full rounded-3xl overflow-hidden text-left relative group"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(187 70% 40%) 0%, hsl(200 60% 35%) 50%, hsl(220 70% 45%) 100%)",
+                  }}
+                  whileHover={{ scale: 1.03, y: -6 }}
+                  whileTap={{ scale: 0.97 }}
+                  data-testid="button-option-training"
                 >
-                  <h1 className="text-3xl md:text-4xl font-black leading-tight">
-                    <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
-                      Entrena tu Mente
-                    </span>
-                  </h1>
-                  <h2 className="text-3xl md:text-4xl font-black text-foreground">
-                    Ahora Mismo
-                  </h2>
-                </motion.div>
-
-                {/* Training cards */}
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-4 max-w-xs"
-                >
-                  {/* Card 1 - Taquistoscopía Piramidal */}
-                  <motion.button
-                    variants={itemVariants}
-                    onClick={() => handleOptionSelect("tests")}
-                    className="w-full rounded-2xl overflow-hidden text-left relative group"
+                  <motion.div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{
-                      background: "linear-gradient(135deg, hsl(220 60% 15%) 0%, hsl(240 50% 20%) 100%)",
-                      border: "1px solid hsl(220 50% 30%)",
+                      background: "radial-gradient(circle at 50% 50%, hsl(187 85% 53% / 0.4) 0%, transparent 70%)",
                     }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    data-testid="button-option-tests"
-                  >
-                    <div className="p-4 flex items-center gap-3">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center">
-                          <span className="text-white text-lg font-bold">7</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-bold text-sm mb-0.5">Taquistoscopía Piramidal</h3>
-                        <p className="text-white/60 text-xs">Entrena tu retentiva</p>
-                      </div>
+                  />
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
+                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(220 80% 60%))" }}
+                    />
+                  )}
+                  
+                  <div className="relative p-5 flex items-center gap-4">
+                    <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 relative">
+                      <img 
+                        src="/brain-cube.png" 
+                        alt="Entrenamiento"
+                        className="w-full h-full object-contain relative z-10"
+                        loading="lazy"
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl md:text-2xl font-black text-white mb-2 drop-shadow-lg">
+                        Entrenamiento
+                      </h2>
+                      <p className="text-sm text-white/80 leading-relaxed">
+                        Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas
+                      </p>
                       <motion.div
-                        className="px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-medium"
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
                       >
-                        START
+                        Comenzar
+                        <ArrowLeft className="w-3 h-3 rotate-180" />
                       </motion.div>
                     </div>
-                  </motion.button>
-
-                  {/* Card 2 - Atención Selectiva */}
-                  <motion.button
-                    variants={itemVariants}
-                    onClick={() => handleOptionSelect("training")}
-                    className="w-full rounded-2xl overflow-hidden text-left relative group"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(220 60% 15%) 0%, hsl(240 50% 20%) 100%)",
-                      border: "1px solid hsl(220 50% 30%)",
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    data-testid="button-option-training"
-                  >
-                    <div className="p-4 flex items-center gap-3">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center flex-shrink-0 border border-cyan-400/30">
-                        <div className="grid grid-cols-2 gap-1">
-                          <div className="w-3 h-3 rounded-full bg-cyan-400" />
-                          <div className="w-3 h-3 rounded-full bg-purple-400" />
-                          <div className="w-3 h-3 rounded-full bg-purple-400" />
-                          <div className="w-3 h-3 rounded-full bg-cyan-400" />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-bold text-sm mb-0.5">Atención Selectiva</h3>
-                        <p className="text-white/60 text-xs">Sudercool mental</p>
-                      </div>
-                      <motion.div
-                        className="px-3 py-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-xs font-bold"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                      >
-                        START
-                      </motion.div>
-                    </div>
-                  </motion.button>
-
-                  {/* Card 3 - Focus Visual */}
-                  <motion.button
-                    variants={itemVariants}
-                    onClick={() => handleOptionSelect("training")}
-                    className="w-full rounded-2xl overflow-hidden text-left relative group"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(220 60% 15%) 0%, hsl(240 50% 20%) 100%)",
-                      border: "1px solid hsl(220 50% 30%)",
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    data-testid="button-option-focus"
-                  >
-                    <div className="p-4 flex items-center gap-3">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                        <div className="w-8 h-8 rounded-full border-2 border-cyan-400 flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-bold text-sm mb-0.5">Focus Visual</h3>
-                        <p className="text-white/60 text-xs">Mejora tu concentración</p>
-                      </div>
-                      <motion.div
-                        className="px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
-                      >
-                        START
-                      </motion.div>
-                    </div>
-                  </motion.button>
-                </motion.div>
-              </div>
+                  </div>
+                </motion.button>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
