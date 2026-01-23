@@ -136,12 +136,22 @@ const problemImageSuffix: Record<string, string> = {
   "prevencion": "olvidos"
 };
 
-// Get specific image for age + problem combination
+// Get specific image for age + problem combination (WebP for performance)
 const getProblemImage = (ageId: string | null, problemId: string): string => {
   if (!ageId) return `/age-ninos.png`;
   const agePrefix = ageImagePrefix[ageId] || "ninos";
   const problemSuffix = problemImageSuffix[problemId] || "atencion";
-  return `/problem-${agePrefix}-${problemSuffix}.png`;
+  return `/problem-${agePrefix}-${problemSuffix}.webp`;
+};
+
+// Preload images for selected age group
+const preloadImagesForAge = (ageId: string) => {
+  const agePrefix = ageImagePrefix[ageId] || "ninos";
+  const suffixes = ["atencion", "desmotivacion", "sobrecarga", "fatiga", "olvidos"];
+  suffixes.forEach(suffix => {
+    const img = new Image();
+    img.src = `/problem-${agePrefix}-${suffix}.webp`;
+  });
 };
 
 // Lightweight particle for mobile
@@ -246,6 +256,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   const handleAgeSelect = (ageId: string) => {
     setSelectedAge(ageId);
+    // Preload problem images for this age group immediately
+    preloadImagesForAge(ageId);
   };
 
   const handleProblemToggle = (problemId: string) => {
@@ -776,14 +788,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               transition={{ duration: 0.3 }}
                             >
                               <div className="relative">
-                                <motion.img 
-                                  src={getProblemImage(selectedAge, problem.id)} 
-                                  alt={problem.title}
-                                  className="w-full h-48 md:h-56 object-cover"
-                                  initial={{ scale: 1.1 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ duration: 0.5 }}
-                                />
+                                <div className="w-full h-48 md:h-56 bg-gradient-to-br from-purple-900/50 to-cyan-900/50">
+                                  <img 
+                                    src={getProblemImage(selectedAge, problem.id)} 
+                                    alt={problem.title}
+                                    className="w-full h-full object-cover"
+                                    loading="eager"
+                                  />
+                                </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                                 
                                 <div className="absolute bottom-0 left-0 right-0 p-5">
