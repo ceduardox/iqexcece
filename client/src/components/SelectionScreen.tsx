@@ -117,6 +117,32 @@ const getAgeLabel = (id: string) => ageGroups.find(g => g.id === id)?.label || i
 const getAgeImage = (id: string) => ageGroups.find(g => g.id === id)?.image || "/age-ninos.png";
 const getProblemTitle = (id: string) => problems.find(p => p.id === id)?.title || id;
 
+// Map age IDs to image prefixes
+const ageImagePrefix: Record<string, string> = {
+  "ninos": "ninos",
+  "adolescentes": "adolescentes", 
+  "universitarios": "universitarios",
+  "profesionales": "profesionales",
+  "adulto-mayor": "adulto"
+};
+
+// Map problem IDs to image suffixes
+const problemImageSuffix: Record<string, string> = {
+  "atencion": "atencion",
+  "desmotivacion": "desmotivacion",
+  "sobrecarga": "sobrecarga",
+  "fatiga": "fatiga",
+  "prevencion": "olvidos"
+};
+
+// Get specific image for age + problem combination
+const getProblemImage = (ageId: string | null, problemId: string): string => {
+  if (!ageId) return `/age-ninos.png`;
+  const agePrefix = ageImagePrefix[ageId] || "ninos";
+  const problemSuffix = problemImageSuffix[problemId] || "atencion";
+  return `/problem-${agePrefix}-${problemSuffix}.png`;
+};
+
 function ElectronParticle({ delay, startX, startY }: { delay: number; startX: number; startY: number }) {
   return (
     <motion.div
@@ -172,10 +198,11 @@ interface SelectionScreenProps {
 }
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
-  const [step, setStep] = useState<"age" | "problems" | "options">("age");
+  const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("age");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
   const [expandedProblem, setExpandedProblem] = useState<string | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
   const [electrons] = useState(() => 
     Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -215,8 +242,49 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (step === "age" && selectedAge) {
       setStep("problems");
     } else if (step === "problems" && selectedProblems.length > 0) {
-      setStep("options");
+      setStep("fingerprint");
     }
+  };
+
+  const handleFingerprintScan = () => {
+    if (isScanning) return;
+    setIsScanning(true);
+    
+    // Play scan sound using Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Create a futuristic scan sound
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(2400, audioContext.currentTime + 0.1);
+      oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+      oscillator.frequency.exponentialRampToValueAtTime(1600, audioContext.currentTime + 0.5);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+      
+      oscillator.type = 'sine';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.6);
+    } catch (e) {
+      // Audio not supported, continue silently
+    }
+    
+    // Trigger haptic feedback (Android)
+    if ('vibrate' in navigator) {
+      navigator.vibrate([50, 30, 50, 30, 80]);
+    }
+    
+    // Transition to options after scan animation
+    setTimeout(() => {
+      setStep("options");
+      setIsScanning(false);
+    }, 800);
   };
 
   const handleOptionSelect = (option: "tests" | "training") => {
@@ -678,7 +746,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                             >
                               <div className="relative">
                                 <motion.img 
-                                  src={selectedAge ? getAgeImage(selectedAge) : problem.image} 
+                                  src={getProblemImage(selectedAge, problem.id)} 
                                   alt={problem.title}
                                   className="w-full h-48 md:h-56 object-cover"
                                   initial={{ scale: 1.1 }}
@@ -726,7 +794,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               <div className="flex items-center gap-4 p-3">
                                 <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
                                   <img 
-                                    src={selectedAge ? getAgeImage(selectedAge) : problem.image} 
+                                    src={getProblemImage(selectedAge, problem.id)} 
                                     alt={problem.title}
                                     className="w-full h-full object-cover"
                                   />
@@ -777,6 +845,273 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </motion.div>
           )}
 
+          {step === "fingerprint" && (
+            <motion.div
+              key="fingerprint-scanner"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center justify-center min-h-[70vh] space-y-8"
+            >
+              <motion.div
+                className="relative"
+                initial={{ y: 20 }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <motion.p 
+                  className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 text-center mb-4"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  Verificación de identidad
+                </motion.p>
+                
+                <h1 className="text-2xl md:text-3xl font-black text-center mb-8">
+                  <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Confirma tu perfil
+                  </span>
+                </h1>
+              </motion.div>
+
+              <motion.button
+                onClick={handleFingerprintScan}
+                className="relative w-48 h-48 md:w-56 md:h-56 rounded-full flex items-center justify-center cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                data-testid="button-fingerprint"
+              >
+                {/* Outer glow ring */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "radial-gradient(circle, transparent 40%, hsl(187 85% 53% / 0.1) 70%, transparent 100%)",
+                  }}
+                  animate={isScanning ? {
+                    scale: [1, 1.3, 1],
+                    opacity: [0.5, 1, 0.5],
+                  } : {
+                    scale: [1, 1.1, 1],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{ duration: isScanning ? 0.3 : 2, repeat: Infinity }}
+                />
+                
+                {/* Neon border ring */}
+                <motion.div
+                  className="absolute inset-2 rounded-full border-2"
+                  style={{
+                    borderColor: "hsl(187 85% 53%)",
+                    boxShadow: isScanning 
+                      ? "0 0 30px hsl(187 85% 53%), 0 0 60px hsl(187 85% 53% / 0.5), inset 0 0 30px hsl(187 85% 53% / 0.3)"
+                      : "0 0 15px hsl(187 85% 53% / 0.5), 0 0 30px hsl(187 85% 53% / 0.3)",
+                  }}
+                  animate={isScanning ? {
+                    scale: [1, 1.05, 1],
+                    borderColor: ["hsl(187 85% 53%)", "hsl(280 70% 60%)", "hsl(187 85% 53%)"],
+                  } : {}}
+                  transition={{ duration: 0.4, repeat: Infinity }}
+                />
+                
+                {/* Inner background */}
+                <div 
+                  className="absolute inset-4 rounded-full"
+                  style={{
+                    background: "radial-gradient(circle, hsl(220 30% 8%) 0%, hsl(220 40% 5%) 100%)",
+                  }}
+                />
+                
+                {/* Fingerprint SVG */}
+                <motion.svg
+                  viewBox="0 0 100 100"
+                  className="w-28 h-28 md:w-32 md:h-32 relative z-10"
+                  style={{
+                    filter: isScanning 
+                      ? "drop-shadow(0 0 20px hsl(187 85% 53%)) drop-shadow(0 0 40px hsl(187 85% 53%))"
+                      : "drop-shadow(0 0 10px hsl(187 85% 53% / 0.5))",
+                  }}
+                >
+                  {/* Fingerprint lines */}
+                  <motion.path
+                    d="M50 15 C30 15 20 30 20 50 C20 70 30 85 50 85"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.1 }}
+                  />
+                  <motion.path
+                    d="M50 20 C35 20 27 32 27 50 C27 68 35 80 50 80"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.2 }}
+                  />
+                  <motion.path
+                    d="M50 25 C38 25 33 35 33 50 C33 65 38 75 50 75"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                  />
+                  <motion.path
+                    d="M50 30 C42 30 38 38 38 50 C38 62 42 70 50 70"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.4 }}
+                  />
+                  <motion.path
+                    d="M50 35 C45 35 43 42 43 50 C43 58 45 65 50 65"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  />
+                  <motion.path
+                    d="M50 40 C47 40 46 45 46 50 C46 55 47 60 50 60"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.6 }}
+                  />
+                  {/* Right side curves */}
+                  <motion.path
+                    d="M50 15 C70 15 80 30 80 50 C80 70 70 85 50 85"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.15 }}
+                  />
+                  <motion.path
+                    d="M50 20 C65 20 73 32 73 50 C73 68 65 80 50 80"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.25 }}
+                  />
+                  <motion.path
+                    d="M50 25 C62 25 67 35 67 50 C67 65 62 75 50 75"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.35 }}
+                  />
+                  <motion.path
+                    d="M50 30 C58 30 62 38 62 50 C62 62 58 70 50 70"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.45 }}
+                  />
+                  <motion.path
+                    d="M50 35 C55 35 57 42 57 50 C57 58 55 65 50 65"
+                    fill="none"
+                    stroke="hsl(187 85% 53%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.55 }}
+                  />
+                  <motion.path
+                    d="M50 40 C53 40 54 45 54 50 C54 55 53 60 50 60"
+                    fill="none"
+                    stroke="hsl(280 70% 60%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.65 }}
+                  />
+                  
+                  {/* Scanning line */}
+                  {isScanning && (
+                    <motion.line
+                      x1="15"
+                      y1="50"
+                      x2="85"
+                      y2="50"
+                      stroke="hsl(187 85% 53%)"
+                      strokeWidth="3"
+                      initial={{ y1: 10, y2: 10 }}
+                      animate={{ y1: [10, 90, 10], y2: [10, 90, 10] }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                      style={{
+                        filter: "drop-shadow(0 0 10px hsl(187 85% 53%))",
+                      }}
+                    />
+                  )}
+                </motion.svg>
+                
+                {/* Scan effect overlay */}
+                {isScanning && (
+                  <motion.div
+                    className="absolute inset-4 rounded-full"
+                    style={{
+                      background: "linear-gradient(180deg, transparent 0%, hsl(187 85% 53% / 0.3) 50%, transparent 100%)",
+                    }}
+                    initial={{ y: "-100%" }}
+                    animate={{ y: ["−100%", "100%", "−100%"] }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  />
+                )}
+              </motion.button>
+
+              <motion.div
+                className="text-center space-y-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.p
+                  className="text-lg md:text-xl font-bold"
+                  style={{
+                    color: isScanning ? "hsl(187 85% 53%)" : "hsl(187 85% 53% / 0.8)",
+                    textShadow: isScanning ? "0 0 20px hsl(187 85% 53%)" : "none",
+                  }}
+                  animate={!isScanning ? { opacity: [0.7, 1, 0.7] } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  {isScanning ? "Escaneando..." : "Presiona aquí"}
+                </motion.p>
+                <p className="text-sm text-muted-foreground">
+                  {isScanning ? "Verificando identidad" : "Coloca tu dedo para continuar"}
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+
           {step === "options" && (
             <motion.div
               key="options-selection"
@@ -787,7 +1122,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className="space-y-6"
             >
               <motion.button
-                onClick={() => setStep("problems")}
+                onClick={() => setStep("fingerprint")}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors"
                 whileHover={{ x: -4 }}
                 whileTap={{ scale: 0.95 }}
