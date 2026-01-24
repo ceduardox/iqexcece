@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
@@ -8,6 +8,24 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({ onComplete, duration = 3500 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play open.mp3 sound on mount
+  useEffect(() => {
+    try {
+      const audio = new Audio('/open.mp3');
+      audio.volume = 0.6;
+      audioRef.current = audio;
+      audio.play().catch(() => {});
+    } catch (e) {}
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const startTime = Date.now();

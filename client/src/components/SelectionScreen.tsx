@@ -4,6 +4,23 @@ import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Sound utilities
+const playCardSound = () => {
+  try {
+    const audio = new Audio('/card.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch (e) {}
+};
+
+const playButtonSound = () => {
+  try {
+    const audio = new Audio('/iphone.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch (e) {}
+};
+
 interface AgeGroup {
   id: string;
   label: string;
@@ -255,6 +272,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   , [isMobile]);
 
   const handleAgeSelect = (ageId: string) => {
+    playCardSound();
     setSelectedAge(ageId);
     // Preload problem images for this age group immediately
     preloadImagesForAge(ageId);
@@ -262,17 +280,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   const handleProblemToggle = (problemId: string) => {
     if (expandedProblem === problemId) {
+      playCardSound();
       setSelectedProblems(prev => 
         prev.includes(problemId)
           ? prev.filter(id => id !== problemId)
           : [...prev, problemId]
       );
     } else {
+      playCardSound();
       setExpandedProblem(problemId);
     }
   };
 
   const handleContinue = () => {
+    playButtonSound();
     if (step === "age" && selectedAge) {
       setStep("problems");
     } else if (step === "problems" && selectedProblems.length > 0) {
@@ -360,12 +381,25 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   }, [isScanning, cleanupScan]);
 
   const handleOptionSelect = (option: "tests" | "training") => {
+    playButtonSound();
     onComplete({ 
       ageGroup: selectedAge!, 
       ageLabel: getAgeLabel(selectedAge!),
       problems: selectedProblems,
       problemTitles: selectedProblems.map(getProblemTitle)
     });
+  };
+
+  const handleBack = () => {
+    playButtonSound();
+    if (step === "problems") {
+      setStep("age");
+      setExpandedProblem(null);
+    } else if (step === "fingerprint") {
+      setStep("problems");
+    } else if (step === "options") {
+      setStep("fingerprint");
+    }
   };
 
   const containerVariants = {
@@ -669,7 +703,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className="space-y-6"
             >
               <motion.button
-                onClick={() => setStep("age")}
+                onClick={handleBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 transition-colors"
                 whileHover={{ x: -4 }}
                 whileTap={{ scale: 0.95 }}
@@ -1043,7 +1077,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className="space-y-6"
             >
               <motion.button
-                onClick={() => setStep("fingerprint")}
+                onClick={handleBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors"
                 whileHover={{ x: -4 }}
                 whileTap={{ scale: 0.95 }}
