@@ -470,30 +470,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               transition={{ duration: 0.4 }}
               className="relative min-h-[85vh] flex flex-col"
             >
-              {/* X-shaped girl image - positioned more to the left */}
+              {/* X-shaped girl image - full height, positioned to the left */}
               <motion.div 
-                className="absolute -right-8 top-0 bottom-0 w-3/5 md:w-1/2 pointer-events-none overflow-hidden"
-                initial={{ opacity: 0, x: 100 }}
+                className="absolute top-0 bottom-0 pointer-events-none"
+                initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                style={{ left: "35%" }}
+                style={{ left: "25%", right: "-20%" }}
               >
                 <img 
                   src="/girl-x-image.png" 
                   alt=""
-                  className="h-full w-full object-cover object-center"
+                  className="h-full w-full object-contain object-right"
                   style={{
-                    maskImage: "linear-gradient(to left, black 70%, transparent 100%)",
-                    WebkitMaskImage: "linear-gradient(to left, black 70%, transparent 100%)",
-                  }}
-                />
-                {/* Subtle circuit pattern overlay */}
-                <div 
-                  className="absolute inset-0 opacity-15"
-                  style={{
-                    backgroundImage: "url('/circuit-pattern.png')",
-                    backgroundSize: "cover",
-                    mixBlendMode: "overlay",
+                    maskImage: "linear-gradient(to left, black 80%, transparent 100%)",
+                    WebkitMaskImage: "linear-gradient(to left, black 80%, transparent 100%)",
                   }}
                 />
               </motion.div>
@@ -533,12 +524,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 Selecciona tu grupo de edad
               </motion.p>
 
-              {/* Age cards - square/rectangular style */}
+              {/* Age cards - larger square style */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-3 flex-1 relative z-10 w-3/5 md:w-1/2"
+                className="space-y-3 flex-1 relative z-10 w-2/3 md:w-3/5"
                 role="radiogroup"
                 aria-label="Selecciona tu grupo de edad"
               >
@@ -560,10 +551,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left ${
                           isSelected
                             ? `${group.borderColor}`
-                            : "border-purple-500/40 bg-background/90"
+                            : "border-purple-500/40 bg-background/95"
                         }`}
                         style={isSelected ? {
-                          boxShadow: "0 0 25px hsl(187 85% 53% / 0.4), 0 0 50px hsl(280 70% 50% / 0.25)",
+                          boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)",
                         } : {}}
                         whileTap={{ scale: 0.98 }}
                         data-testid={`button-age-${group.id}`}
@@ -582,33 +573,33 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                 <img 
                                   src={group.image} 
                                   alt={group.label}
-                                  className="w-full h-40 md:h-48 object-cover"
+                                  className="w-full h-52 md:h-64 object-cover"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                                 
-                                <div className="absolute bottom-0 left-0 right-0 p-4">
-                                  <div className="flex items-center gap-3 mb-2">
+                                <div className="absolute bottom-0 left-0 right-0 p-5">
+                                  <div className="flex items-center gap-3 mb-3">
                                     <motion.div
-                                      className="w-7 h-7 rounded-full border-2 border-cyan-400 bg-cyan-400 flex items-center justify-center"
+                                      className="w-8 h-8 rounded-full border-2 border-cyan-400 bg-cyan-400 flex items-center justify-center"
                                       animate={{ scale: [1, 1.2, 1] }}
                                       transition={{ duration: 0.5 }}
                                     >
-                                      <Check className="w-4 h-4 text-background" />
+                                      <Check className="w-5 h-5 text-background" />
                                     </motion.div>
                                     <div>
-                                      <h3 className="text-lg md:text-xl font-black text-white">
+                                      <h3 className="text-xl md:text-2xl font-black text-white">
                                         {group.label}
                                       </h3>
-                                      <span className="text-xs text-cyan-300">{group.ageRange}</span>
+                                      <span className="text-sm text-cyan-300">{group.ageRange}</span>
                                     </div>
                                   </div>
-                                  <p className="text-xs md:text-sm text-white/90 mb-3 line-clamp-2">
+                                  <p className="text-sm md:text-base text-white/90 mb-4">
                                     {group.description}
                                   </p>
                                   <Button
                                     onClick={(e) => { e.stopPropagation(); handleContinue(); }}
-                                    size="sm"
-                                    className="w-full text-sm font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
+                                    size="lg"
+                                    className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
                                     data-testid="button-continue-age"
                                   >
                                     CONTINUAR
@@ -622,25 +613,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="flex items-center gap-3 p-3"
+                              className="p-3"
                             >
-                              <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
-                                <img 
-                                  src={group.image} 
-                                  alt={group.label}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                />
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
+                                  <img 
+                                    src={group.image} 
+                                    alt={group.label}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-bold text-base md:text-lg text-foreground block">
+                                    {group.label}
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {group.ageRange}
+                                  </span>
+                                </div>
+                                <div className="w-7 h-7 rounded-full border-2 border-purple-500/40 flex-shrink-0" />
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <span className="font-bold text-sm md:text-base text-foreground block">
-                                  {group.label}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {group.ageRange}
-                                </span>
-                              </div>
-                              <div className="w-6 h-6 rounded-full border-2 border-purple-500/40 flex-shrink-0" />
                             </motion.div>
                           )}
                         </AnimatePresence>
