@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Brain, HelpCircle, Search, Menu } from "lucide-react";
+import { useLocation } from "wouter";
 import { useUserData, getAgeTestContent } from "@/lib/user-context";
 
 class SoundPlayer {
@@ -124,7 +125,8 @@ function TestCard({
 }
 
 export default function TestsPage() {
-  const { userData } = useUserData();
+  const [, setLocation] = useLocation();
+  const { userData, updateUserData } = useUserData();
   const [showNino, setShowNino] = useState(false);
 
   useEffect(() => {
@@ -139,8 +141,14 @@ export default function TestsPage() {
 
   const handleTestClick = useCallback((testId: string) => {
     playCardSound();
-    console.log("Selected test:", testId, "for age group:", userData.ageGroup);
-  }, [userData.ageGroup]);
+    updateUserData({ selectedTest: testId });
+    
+    if (userData.ageGroup === "ninos") {
+      setLocation("/child-category");
+    } else {
+      console.log("Selected test:", testId, "for age group:", userData.ageGroup);
+    }
+  }, [userData.ageGroup, updateUserData, setLocation]);
 
   const ageContent = getAgeTestContent(userData.ageGroup);
   const ageLabel = userData.ageLabel || "Usuario";

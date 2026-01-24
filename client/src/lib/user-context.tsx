@@ -4,11 +4,14 @@ interface UserData {
   ageGroup: string | null;
   ageLabel: string | null;
   selectedProblems: string[];
+  selectedTest: string | null;
+  childCategory: string | null;
 }
 
 interface UserContextType {
   userData: UserData;
   setUserData: (data: Partial<UserData>) => void;
+  updateUserData: (data: Partial<UserData>) => void;
   clearUserData: () => void;
 }
 
@@ -16,6 +19,8 @@ const defaultUserData: UserData = {
   ageGroup: null,
   ageLabel: null,
   selectedProblems: [],
+  selectedTest: null,
+  childCategory: null,
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -36,13 +41,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem("iq_user_data", JSON.stringify(newData));
   };
 
+  const updateUserData = setUserData;
+
   const clearUserData = () => {
     setUserDataState(defaultUserData);
     sessionStorage.removeItem("iq_user_data");
   };
 
   return (
-    <UserContext.Provider value={{ userData, setUserData, clearUserData }}>
+    <UserContext.Provider value={{ userData, setUserData, updateUserData, clearUserData }}>
       {children}
     </UserContext.Provider>
   );
