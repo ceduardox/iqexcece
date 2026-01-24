@@ -22,9 +22,10 @@ const categories = [
     label: "PRE-ESCOLAR",
     ageRange: "3-5 años",
     description: "Actividades divertidas para los más pequeños",
-    gradient: "from-purple-400 via-violet-400 to-fuchsia-400",
-    borderColor: "border-purple-400",
-    bgColor: "bg-gradient-to-br from-purple-50 to-violet-100",
+    gradient: "from-orange-400 via-amber-400 to-yellow-400",
+    borderColor: "border-orange-400",
+    bgColor: "bg-gradient-to-br from-orange-50 to-amber-100",
+    image: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
   },
   {
     id: "ninos",
@@ -34,15 +35,27 @@ const categories = [
     gradient: "from-violet-500 via-purple-500 to-indigo-500",
     borderColor: "border-violet-500",
     bgColor: "bg-gradient-to-br from-violet-50 to-purple-100",
+    image: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
   },
 ];
+
+interface CategoryType {
+  id: string;
+  label: string;
+  ageRange: string;
+  description: string;
+  gradient: string;
+  borderColor: string;
+  bgColor: string;
+  image: string;
+}
 
 function ChildCategoryCard({
   category,
   index,
   onClick,
 }: {
-  category: typeof categories[0];
+  category: CategoryType;
   index: number;
   onClick: () => void;
 }) {
@@ -70,41 +83,12 @@ function ChildCategoryCard({
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <div className="relative w-full h-full rounded-full bg-white/80 flex items-center justify-center shadow-lg border-4 border-white">
-              {category.id === "preescolar" ? (
-                <svg viewBox="0 0 100 100" className="w-20 h-20">
-                  <circle cx="50" cy="35" r="20" fill="#FFDAB9" stroke="#DDA0DD" strokeWidth="2"/>
-                  <circle cx="43" cy="32" r="3" fill="#333"/>
-                  <circle cx="57" cy="32" r="3" fill="#333"/>
-                  <path d="M 43 42 Q 50 48 57 42" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <rect x="40" y="55" width="20" height="25" rx="3" fill="#9370DB" stroke="#7B68EE" strokeWidth="2"/>
-                  <rect x="35" y="55" width="8" height="15" rx="2" fill="#FFDAB9"/>
-                  <rect x="57" y="55" width="8" height="15" rx="2" fill="#FFDAB9"/>
-                  <rect x="42" y="78" width="7" height="12" rx="2" fill="#9370DB" stroke="#7B68EE" strokeWidth="1"/>
-                  <rect x="51" y="78" width="7" height="12" rx="2" fill="#9370DB" stroke="#7B68EE" strokeWidth="1"/>
-                  <ellipse cx="50" cy="20" rx="18" ry="12" fill="#8B4513"/>
-                  <circle cx="35" cy="22" r="3" fill="#FFD700"/>
-                  <circle cx="65" cy="22" r="3" fill="#FFD700"/>
-                </svg>
-              ) : (
-                <svg viewBox="0 0 100 100" className="w-20 h-20">
-                  <circle cx="50" cy="30" r="18" fill="#FFDAB9" stroke="#DDA0DD" strokeWidth="2"/>
-                  <circle cx="43" cy="28" r="2.5" fill="#333"/>
-                  <circle cx="57" cy="28" r="2.5" fill="#333"/>
-                  <path d="M 44 36 Q 50 40 56 36" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <path d="M 35 18 Q 50 8 65 18" fill="#8B4513" stroke="#654321" strokeWidth="1"/>
-                  <rect x="35" y="12" width="30" height="8" rx="2" fill="#8B4513"/>
-                  <rect x="42" y="48" width="16" height="22" rx="3" fill="#7C3AED" stroke="#6D28D9" strokeWidth="2"/>
-                  <rect x="58" y="50" width="12" height="8" rx="2" fill="#FFDAB9"/>
-                  <rect x="30" y="50" width="12" height="8" rx="2" fill="#FFDAB9"/>
-                  <rect x="44" y="68" width="6" height="14" rx="2" fill="#4F46E5"/>
-                  <rect x="50" y="68" width="6" height="14" rx="2" fill="#4F46E5"/>
-                  <rect x="44" y="80" width="6" height="4" rx="1" fill="#333"/>
-                  <rect x="50" y="80" width="6" height="4" rx="1" fill="#333"/>
-                  <circle cx="70" cy="60" r="8" fill="#A855F7" stroke="#9333EA" strokeWidth="1"/>
-                  <path d="M 67 60 L 73 60 M 70 57 L 70 63" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              )}
+            <div className="relative w-full h-full rounded-full bg-white overflow-hidden shadow-lg border-4 border-white">
+              <img 
+                src={category.image} 
+                alt={category.label}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
           
