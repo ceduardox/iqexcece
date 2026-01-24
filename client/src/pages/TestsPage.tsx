@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Brain, Zap, Target, Cpu, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Brain, HelpCircle, Search, Menu } from "lucide-react";
 import { useLocation } from "wouter";
 
 class SoundPlayer {
@@ -64,187 +64,81 @@ const playButtonSound = () => soundPlayer.play('/iphone.mp3', 0.6);
 interface TestCategory {
   id: string;
   title: string;
-  subtitle: string;
+  description: string;
   icon: typeof Brain;
-  color: string;
-  glowColor: string;
+  gradient: string;
 }
 
 const testCategories: TestCategory[] = [
   {
-    id: "memoria",
-    title: "MEMORIA",
-    subtitle: "Retención y recuperación",
-    icon: Brain,
-    color: "hsl(280 70% 60%)",
-    glowColor: "hsl(280 70% 60% / 0.5)"
-  },
-  {
-    id: "atencion",
-    title: "ATENCIÓN",
-    subtitle: "Concentración y enfoque",
-    icon: Target,
-    color: "hsl(187 85% 53%)",
-    glowColor: "hsl(187 85% 53% / 0.5)"
+    id: "lectura",
+    title: "Lectura",
+    description: "Para medir tu velocidad y comprensión lectora.",
+    icon: BookOpen,
+    gradient: "linear-gradient(135deg, #4DD0E1 0%, #26C6DA 50%, #00ACC1 100%)"
   },
   {
     id: "razonamiento",
-    title: "RAZONAMIENTO",
-    subtitle: "Lógica y análisis",
-    icon: Cpu,
-    color: "hsl(320 70% 55%)",
-    glowColor: "hsl(320 70% 55% / 0.5)"
+    title: "Razonamiento",
+    description: "Para medir tu nivel de razonamiento.",
+    icon: Brain,
+    gradient: "linear-gradient(135deg, #F48FB1 0%, #CE93D8 50%, #7E57C2 100%)"
   },
   {
-    id: "velocidad",
-    title: "VELOCIDAD",
-    subtitle: "Procesamiento rápido",
-    icon: Zap,
-    color: "hsl(45 90% 55%)",
-    glowColor: "hsl(45 90% 55% / 0.5)"
+    id: "cerebral",
+    title: "Cerebral",
+    description: "Conocerás tu hemisferio cerebral predominante.",
+    icon: HelpCircle,
+    gradient: "linear-gradient(135deg, #E1BEE7 0%, #CE93D8 50%, #BA68C8 100%)"
+  },
+  {
+    id: "iq",
+    title: "IQ",
+    description: "Para medir tu nivel intelectual.",
+    icon: Search,
+    gradient: "linear-gradient(135deg, #90CAF9 0%, #7986CB 50%, #5C6BC0 100%)"
   }
 ];
 
-function HexCard({ 
+function TestCard({ 
   category, 
   index, 
-  isSelected, 
-  onSelect, 
-  onStart 
+  onClick 
 }: { 
   category: TestCategory; 
   index: number;
-  isSelected: boolean;
-  onSelect: () => void;
-  onStart: () => void;
+  onClick: () => void;
 }) {
   const Icon = category.icon;
   
   return (
     <motion.div
-      initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
-      className="relative"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
+      onClick={onClick}
+      className="cursor-pointer card-touch"
+      data-testid={`card-test-${category.id}`}
     >
       <motion.div
-        onClick={onSelect}
-        className="relative cursor-pointer card-touch"
+        className="relative overflow-hidden rounded-3xl p-4 flex items-center gap-4"
+        style={{ background: category.gradient }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
-        data-testid={`card-test-${category.id}`}
       >
-        <div 
-          className="relative overflow-hidden rounded-2xl border-2 transition-all duration-200"
-          style={{
-            borderColor: isSelected ? category.color : 'hsl(187 85% 53% / 0.2)',
-            background: isSelected 
-              ? `linear-gradient(135deg, ${category.color}15 0%, transparent 50%, ${category.color}10 100%)`
-              : 'hsl(0 0% 0% / 0.4)',
-            boxShadow: isSelected 
-              ? `0 0 30px ${category.glowColor}, inset 0 0 30px ${category.glowColor}` 
-              : 'none'
-          }}
-        >
-          <div 
-            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
-            style={{ background: category.color }}
-          />
-          
-          <div className="relative p-4 flex items-center gap-4">
-            <motion.div
-              className="w-14 h-14 rounded-xl flex items-center justify-center relative"
-              style={{ 
-                background: `linear-gradient(135deg, ${category.color}30 0%, ${category.color}10 100%)`,
-                border: `1px solid ${category.color}50`
-              }}
-              animate={isSelected ? {
-                boxShadow: [
-                  `0 0 10px ${category.glowColor}`,
-                  `0 0 25px ${category.glowColor}`,
-                  `0 0 10px ${category.glowColor}`
-                ]
-              } : {}}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <Icon 
-                className="w-7 h-7" 
-                style={{ color: category.color }}
-              />
-            </motion.div>
-            
-            <div className="flex-1 min-w-0">
-              <h3 
-                className="text-lg font-bold tracking-wider"
-                style={{ color: category.color }}
-              >
-                {category.title}
-              </h3>
-              <p className="text-xs text-muted-foreground truncate">
-                {category.subtitle}
-              </p>
-            </div>
-            
-            <motion.div
-              animate={{ rotate: isSelected ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-              className="text-muted-foreground"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </motion.div>
+        {/* Icon/Character Area */}
+        <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center relative">
+          <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
+          <div className="relative w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <Icon className="w-10 h-10 text-white drop-shadow-lg" />
           </div>
-
-          <AnimatePresence>
-            {isSelected && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pb-4 pt-2">
-                  <div 
-                    className="h-px w-full mb-4"
-                    style={{ background: `linear-gradient(90deg, transparent, ${category.color}50, transparent)` }}
-                  />
-                  
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {["Nivel 1", "Nivel 2", "Nivel 3"].map((level, i) => (
-                      <div
-                        key={level}
-                        className="text-center py-2 rounded-lg text-xs font-medium"
-                        style={{
-                          background: `${category.color}15`,
-                          border: `1px solid ${category.color}30`,
-                          color: category.color
-                        }}
-                      >
-                        {level}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <motion.button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onStart();
-                    }}
-                    className="w-full py-3 rounded-xl font-bold tracking-wider text-sm btn-instant"
-                    style={{
-                      background: `linear-gradient(135deg, ${category.color} 0%, ${category.color}CC 100%)`,
-                      boxShadow: `0 0 20px ${category.glowColor}`,
-                      color: 'white'
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    data-testid={`button-start-${category.id}`}
-                  >
-                    INICIAR TEST
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        </div>
+        
+        {/* Text Content */}
+        <div className="flex-1 text-white py-2">
+          <p className="text-sm font-medium opacity-90 mb-0.5">Test</p>
+          <h3 className="text-2xl font-black mb-1">{category.title}</h3>
+          <p className="text-sm opacity-90 leading-snug">{category.description}</p>
         </div>
       </motion.div>
     </motion.div>
@@ -253,7 +147,6 @@ function HexCard({
 
 export default function TestsPage() {
   const [, setLocation] = useLocation();
-  const [selectedTest, setSelectedTest] = useState<string | null>(null);
   const [showNino, setShowNino] = useState(false);
 
   useEffect(() => {
@@ -266,14 +159,9 @@ export default function TestsPage() {
     setLocation("/");
   }, [setLocation]);
 
-  const handleTestSelect = useCallback((testId: string) => {
+  const handleTestClick = useCallback((testId: string) => {
     playCardSound();
-    setSelectedTest(testId === selectedTest ? null : testId);
-  }, [selectedTest]);
-
-  const handleStartTest = useCallback((testId: string) => {
-    playButtonSound();
-    console.log("Starting test:", testId);
+    console.log("Selected test:", testId);
   }, []);
 
   return (
@@ -281,10 +169,10 @@ export default function TestsPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-background overflow-hidden relative"
+      className="min-h-screen bg-slate-50 dark:bg-background overflow-hidden relative"
     >
       {/* Background Images with Swipe Effect */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 opacity-30">
         {/* Base image - nino2 (cyan X logo) */}
         <motion.div
           className="absolute inset-0"
@@ -309,80 +197,63 @@ export default function TestsPage() {
           <img
             src="/nino.png"
             alt=""
-            className="w-full h-full object-cover object-center opacity-50"
+            className="w-full h-full object-cover object-center opacity-60"
           />
         </motion.div>
-
-        {/* Gradient overlays for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
-        
-        {/* Subtle radial glow */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse at center, hsl(187 85% 53% / 0.08) 0%, transparent 60%)"
-          }}
-        />
       </div>
 
-      <div className="relative z-10 min-h-screen px-4 py-6 safe-area-inset flex flex-col">
-        <motion.div
+      {/* Content */}
+      <div className="relative z-10 min-h-screen safe-area-inset">
+        {/* Header */}
+        <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex items-center gap-4 mb-4"
+          className="flex items-center justify-between px-4 py-4"
         >
           <button
             onClick={handleBack}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 btn-instant"
+            className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-medium btn-instant"
             data-testid="button-back-tests"
           >
             <ArrowLeft className="w-5 h-5" />
+            <span>Volver</span>
           </button>
           
-          <div>
-            <h1 
-              className="text-xl font-black tracking-[0.15em]"
-              style={{
-                background: "linear-gradient(135deg, hsl(187 85% 53%) 0%, hsl(280 70% 60%) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              TESTS COGNITIVOS
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Evalúa tu potencial mental
-            </p>
-          </div>
-        </motion.div>
+          <button 
+            className="p-2 text-gray-600 dark:text-gray-400"
+            data-testid="button-menu"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </motion.header>
 
-        <div className="flex-1 flex flex-col justify-center -mt-8">
-          <div className="space-y-3 max-w-lg mx-auto w-full">
-            {testCategories.map((category, index) => (
-              <HexCard
-                key={category.id}
-                category={category}
-                index={index}
-                isSelected={selectedTest === category.id}
-                onSelect={() => handleTestSelect(category.id)}
-                onStart={() => handleStartTest(category.id)}
-              />
-            ))}
-          </div>
-        </div>
-
+        {/* Title Section */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="text-center mt-4 pb-4"
+          className="px-6 pt-2 pb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <p className="text-xs text-muted-foreground/50">
-            Powered by IQ<span style={{ color: "hsl(187 85% 53%)" }}>EXPONENCIAL</span>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">
+            Descubre tu potencial
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
+            Explora tu mente con nuestra serie de tests cognitivos interactivos.
           </p>
         </motion.div>
+
+        {/* Test Cards */}
+        <div className="px-4 pb-8 space-y-4">
+          {testCategories.map((category, index) => (
+            <TestCard
+              key={category.id}
+              category={category}
+              index={index}
+              onClick={() => handleTestClick(category.id)}
+            />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
