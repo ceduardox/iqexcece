@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "wouter";
 
 // Web Audio API for instant sound playback (especially on mobile)
 class SoundPlayer {
@@ -294,6 +295,7 @@ interface SelectionScreenProps {
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
+  const [, setLocation] = useLocation();
   const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("age");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
@@ -437,12 +439,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   const handleOptionSelect = (option: "tests" | "training") => {
     playButtonSound();
-    onComplete({ 
-      ageGroup: selectedAge!, 
-      ageLabel: getAgeLabel(selectedAge!),
-      problems: selectedProblems,
-      problemTitles: selectedProblems.map(getProblemTitle)
-    });
+    if (option === "tests") {
+      setLocation("/tests");
+    } else {
+      onComplete({ 
+        ageGroup: selectedAge!, 
+        ageLabel: getAgeLabel(selectedAge!),
+        problems: selectedProblems,
+        problemTitles: selectedProblems.map(getProblemTitle)
+      });
+    }
   };
 
   const handleBack = () => {
