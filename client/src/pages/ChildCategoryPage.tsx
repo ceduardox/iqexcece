@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 
 const playButtonSound = () => {
@@ -21,18 +22,18 @@ const categories = [
     label: "PRE-ESCOLAR",
     ageRange: "3-5 años",
     description: "Actividades divertidas para los más pequeños",
-    gradient: "from-pink-400 via-orange-300 to-yellow-300",
-    borderColor: "border-pink-400",
-    bgColor: "bg-gradient-to-br from-pink-100 to-orange-100",
+    gradient: "from-purple-400 via-violet-400 to-fuchsia-400",
+    borderColor: "border-purple-400",
+    bgColor: "bg-gradient-to-br from-purple-50 to-violet-100",
   },
   {
     id: "ninos",
     label: "NIÑOS",
     ageRange: "6-11 años",
     description: "Retos cognitivos adaptados para niños",
-    gradient: "from-cyan-400 via-blue-400 to-purple-400",
-    borderColor: "border-cyan-400",
-    bgColor: "bg-gradient-to-br from-cyan-100 to-blue-100",
+    gradient: "from-violet-500 via-purple-500 to-indigo-500",
+    borderColor: "border-violet-500",
+    bgColor: "bg-gradient-to-br from-violet-50 to-purple-100",
   },
 ];
 
@@ -72,36 +73,36 @@ function ChildCategoryCard({
             <div className="relative w-full h-full rounded-full bg-white/80 flex items-center justify-center shadow-lg border-4 border-white">
               {category.id === "preescolar" ? (
                 <svg viewBox="0 0 100 100" className="w-20 h-20">
-                  <circle cx="50" cy="35" r="20" fill="#FFB6C1" stroke="#FF69B4" strokeWidth="2"/>
+                  <circle cx="50" cy="35" r="20" fill="#FFDAB9" stroke="#DDA0DD" strokeWidth="2"/>
                   <circle cx="43" cy="32" r="3" fill="#333"/>
                   <circle cx="57" cy="32" r="3" fill="#333"/>
                   <path d="M 43 42 Q 50 48 57 42" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  <rect x="40" y="55" width="20" height="25" rx="3" fill="#87CEEB" stroke="#4169E1" strokeWidth="2"/>
-                  <rect x="35" y="55" width="8" height="15" rx="2" fill="#FFB6C1"/>
-                  <rect x="57" y="55" width="8" height="15" rx="2" fill="#FFB6C1"/>
-                  <rect x="42" y="78" width="7" height="12" rx="2" fill="#87CEEB" stroke="#4169E1" strokeWidth="1"/>
-                  <rect x="51" y="78" width="7" height="12" rx="2" fill="#87CEEB" stroke="#4169E1" strokeWidth="1"/>
-                  <path d="M 35 20 Q 50 5 65 20" stroke="#FFD700" strokeWidth="3" fill="none"/>
-                  <circle cx="35" cy="20" r="4" fill="#FF69B4"/>
-                  <circle cx="65" cy="20" r="4" fill="#FF69B4"/>
+                  <rect x="40" y="55" width="20" height="25" rx="3" fill="#9370DB" stroke="#7B68EE" strokeWidth="2"/>
+                  <rect x="35" y="55" width="8" height="15" rx="2" fill="#FFDAB9"/>
+                  <rect x="57" y="55" width="8" height="15" rx="2" fill="#FFDAB9"/>
+                  <rect x="42" y="78" width="7" height="12" rx="2" fill="#9370DB" stroke="#7B68EE" strokeWidth="1"/>
+                  <rect x="51" y="78" width="7" height="12" rx="2" fill="#9370DB" stroke="#7B68EE" strokeWidth="1"/>
+                  <ellipse cx="50" cy="20" rx="18" ry="12" fill="#8B4513"/>
+                  <circle cx="35" cy="22" r="3" fill="#FFD700"/>
+                  <circle cx="65" cy="22" r="3" fill="#FFD700"/>
                 </svg>
               ) : (
                 <svg viewBox="0 0 100 100" className="w-20 h-20">
-                  <circle cx="50" cy="30" r="18" fill="#FFA07A" stroke="#FF6347" strokeWidth="2"/>
+                  <circle cx="50" cy="30" r="18" fill="#FFDAB9" stroke="#DDA0DD" strokeWidth="2"/>
                   <circle cx="43" cy="28" r="2.5" fill="#333"/>
                   <circle cx="57" cy="28" r="2.5" fill="#333"/>
                   <path d="M 44 36 Q 50 40 56 36" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
                   <path d="M 35 18 Q 50 8 65 18" fill="#8B4513" stroke="#654321" strokeWidth="1"/>
                   <rect x="35" y="12" width="30" height="8" rx="2" fill="#8B4513"/>
-                  <rect x="42" y="48" width="16" height="22" rx="3" fill="#32CD32" stroke="#228B22" strokeWidth="2"/>
-                  <rect x="58" y="50" width="12" height="8" rx="2" fill="#FFA07A"/>
-                  <rect x="30" y="50" width="12" height="8" rx="2" fill="#FFA07A"/>
-                  <rect x="44" y="68" width="6" height="14" rx="2" fill="#4169E1"/>
-                  <rect x="50" y="68" width="6" height="14" rx="2" fill="#4169E1"/>
+                  <rect x="42" y="48" width="16" height="22" rx="3" fill="#7C3AED" stroke="#6D28D9" strokeWidth="2"/>
+                  <rect x="58" y="50" width="12" height="8" rx="2" fill="#FFDAB9"/>
+                  <rect x="30" y="50" width="12" height="8" rx="2" fill="#FFDAB9"/>
+                  <rect x="44" y="68" width="6" height="14" rx="2" fill="#4F46E5"/>
+                  <rect x="50" y="68" width="6" height="14" rx="2" fill="#4F46E5"/>
                   <rect x="44" y="80" width="6" height="4" rx="1" fill="#333"/>
                   <rect x="50" y="80" width="6" height="4" rx="1" fill="#333"/>
-                  <circle cx="70" cy="60" r="8" fill="#FF6347" stroke="#DC143C" strokeWidth="1"/>
-                  <path d="M 70 55 L 70 65 M 65 60 L 75 60" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="70" cy="60" r="8" fill="#A855F7" stroke="#9333EA" strokeWidth="1"/>
+                  <path d="M 67 60 L 73 60 M 70 57 L 70 63" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               )}
             </div>
@@ -168,6 +169,7 @@ function ChildCategoryCard({
 }
 
 export default function ChildCategoryPage() {
+  const [, setLocation] = useLocation();
   const { userData, updateUserData } = useUserData();
 
   const handleBack = useCallback(() => {
@@ -178,9 +180,8 @@ export default function ChildCategoryPage() {
   const handleCategorySelect = useCallback((categoryId: string) => {
     playCardSound();
     updateUserData({ childCategory: categoryId });
-    console.log("Selected child category:", categoryId, "for test:", userData.selectedTest);
-    // TODO: Navigate to test activity page when implemented
-  }, [userData.selectedTest, updateUserData]);
+    setLocation("/reading-selection");
+  }, [updateUserData, setLocation]);
 
   const testName = userData.selectedTest || "cognitivo";
 
