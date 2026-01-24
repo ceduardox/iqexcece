@@ -51,6 +51,7 @@ export const quizResults = pgTable("quiz_results", {
   categoria: text("categoria").default("preescolar"),
   tiempoLectura: integer("tiempo_lectura"),
   tiempoCuestionario: integer("tiempo_cuestionario"),
+  isPwa: boolean("is_pwa").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

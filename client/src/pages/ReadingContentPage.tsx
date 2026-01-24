@@ -197,7 +197,10 @@ export default function ReadingContentPage() {
   });
   const [answers, setAnswers] = useState<number[]>([]);
 
+  const [quizFinished, setQuizFinished] = useState(false);
+
   useEffect(() => {
+    if (quizFinished) return;
     const interval = setInterval(() => {
       if (activeTab === "lectura") {
         setReadingTime(prev => prev + 1);
@@ -206,7 +209,7 @@ export default function ReadingContentPage() {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [activeTab]);
+  }, [activeTab, quizFinished]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -240,6 +243,7 @@ export default function ReadingContentPage() {
         setCurrentQuestion(prev => prev + 1);
         setSelectedAnswer(null);
       } else {
+        setQuizFinished(true);
         setShowForm(true);
       }
     }, 600);
@@ -264,14 +268,18 @@ export default function ReadingContentPage() {
       });
       setCorrectAnswers(correct);
       
+      const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
+        (window.navigator as any).standalone === true;
+      
       await fetch("/api/quiz/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          categoria: "preescolar",
+          categoria: userData.childCategory || "preescolar",
           tiempoLectura: readingTime,
           tiempoCuestionario: questionTime,
+          isPwa,
         }),
       });
       setShowForm(false);

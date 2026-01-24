@@ -37,6 +37,7 @@ interface QuizResult {
   categoria: string | null;
   tiempoLectura: number | null;
   tiempoCuestionario: number | null;
+  isPwa: boolean;
   createdAt: string | null;
 }
 
@@ -50,8 +51,11 @@ export default function GestionPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
+  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos">("preescolar");
+  const [expandedResult, setExpandedResult] = useState<string | null>(null);
   
-  const [editContent, setEditContent] = useState({
+  const defaultPreescolar = {
     title: "Paseando con mi perrito",
     content: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
     imageUrl: "https://img.freepik.com/free-vector/cute-girl-walking-dog-cartoon-vector-icon-illustration_138676-2600.jpg",
@@ -61,8 +65,26 @@ export default function GestionPage() {
       { question: "¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
       { question: "¿Dónde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
     ]
-  });
+  };
+  
+  const defaultNinos = {
+    title: "El jardín mágico",
+    content: "Pedro encontró una puerta secreta en su jardín. Detrás había un mundo de colores brillantes con flores gigantes y mariposas que hablaban. Una mariposa azul le dijo que era el guardián del jardín. Pedro prometió cuidarlo y volver cada día.",
+    imageUrl: "https://img.freepik.com/free-vector/magical-garden-illustration_23-2149508098.jpg",
+    questions: [
+      { question: "¿Qué encontró Pedro?", options: ["Una llave", "Una puerta secreta", "Un tesoro"], correct: 1 },
+      { question: "¿Qué había detrás de la puerta?", options: ["Un mundo de colores", "Una cueva", "Un río"], correct: 0 },
+      { question: "¿De qué color era la mariposa?", options: ["Roja", "Verde", "Azul"], correct: 2 },
+      { question: "¿Qué prometió Pedro?", options: ["Cuidar el jardín", "Contar el secreto", "No volver"], correct: 0 },
+    ]
+  };
+
+  const [editContentPreescolar, setEditContentPreescolar] = useState(defaultPreescolar);
+  const [editContentNinos, setEditContentNinos] = useState(defaultNinos);
   const [saving, setSaving] = useState(false);
+  
+  const currentEditContent = contentCategory === "preescolar" ? editContentPreescolar : editContentNinos;
+  const setCurrentEditContent = contentCategory === "preescolar" ? setEditContentPreescolar : setEditContentNinos;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,11 +155,11 @@ export default function GestionPage() {
           Authorization: `Bearer ${token}` 
         },
         body: JSON.stringify({
-          categoria: "preescolar",
-          title: editContent.title,
-          content: editContent.content,
-          imageUrl: editContent.imageUrl,
-          questions: JSON.stringify(editContent.questions),
+          categoria: contentCategory,
+          title: currentEditContent.title,
+          content: currentEditContent.content,
+          imageUrl: currentEditContent.imageUrl,
+          questions: JSON.stringify(currentEditContent.questions),
         }),
       });
       alert("Contenido guardado correctamente");
@@ -146,6 +168,11 @@ export default function GestionPage() {
     }
     setSaving(false);
   };
+  
+  const filteredResults = quizResults.filter(r => {
+    if (resultFilter === "all") return true;
+    return r.categoria === resultFilter;
+  });
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -301,7 +328,7 @@ export default function GestionPage() {
             className={activeTab === "contenido" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
           >
             <BookOpen className="w-4 h-4 mr-2" />
-            Preescolar
+            Contenido
           </Button>
         </div>
 
@@ -427,13 +454,43 @@ export default function GestionPage() {
         {activeTab === "resultados" && (
           <Card className="bg-black/40 border-green-500/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-white flex items-center gap-2 flex-wrap">
                 <FileText className="w-5 h-5 text-green-400" />
-                Resultados de Tests ({quizResults.length})
+                Resultados de Tests ({filteredResults.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <Button
+                  onClick={() => setResultFilter("preescolar")}
+                  variant={resultFilter === "preescolar" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "preescolar" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+                  data-testid="button-filter-preescolar"
+                >
+                  Pre-escolar
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("ninos")}
+                  variant={resultFilter === "ninos" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+                  data-testid="button-filter-ninos"
+                >
+                  Niños
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("all")}
+                  variant={resultFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "all" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                  data-testid="button-filter-all"
+                >
+                  Todos
+                </Button>
+              </div>
+
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-white/60 border-b border-white/10">
@@ -444,11 +501,12 @@ export default function GestionPage() {
                       <th className="pb-3 px-2">Teléfono</th>
                       <th className="pb-3 px-2">T. Lectura</th>
                       <th className="pb-3 px-2">T. Test</th>
+                      <th className="pb-3 px-2">Tipo</th>
                       <th className="pb-3 px-2">Fecha</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {quizResults.map((r) => (
+                    {filteredResults.map((r) => (
                       <tr key={r.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="py-3 px-2 text-white">{r.nombre}</td>
                         <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
@@ -457,18 +515,61 @@ export default function GestionPage() {
                         <td className="py-3 px-2 text-white/80">{r.telefono || "-"}</td>
                         <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
                         <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
+                        <td className="py-3 px-2">
+                          <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                            {r.isPwa ? "PWA" : "Web"}
+                          </span>
+                        </td>
                         <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>
                       </tr>
                     ))}
-                    {quizResults.length === 0 && (
+                    {filteredResults.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="py-8 text-center text-white/40">
+                        <td colSpan={9} className="py-8 text-center text-white/40">
                           No hay resultados registrados
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="md:hidden space-y-2">
+                {filteredResults.map((r) => (
+                  <div key={r.id} className="bg-white/5 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                      className="w-full p-3 flex items-center justify-between text-left"
+                      data-testid={`button-expand-${r.id}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-medium">{r.nombre}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                          {r.isPwa ? "PWA" : "Web"}
+                        </span>
+                      </div>
+                      <svg className={`w-5 h-5 text-white/60 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {expandedResult === r.id && (
+                      <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
+                        <p className="text-white/60 pt-2">Email: <span className="text-white/80">{r.email || "-"}</span></p>
+                        <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
+                        <p className="text-white/60">Ciudad: <span className="text-white/80">{r.ciudad || "-"}</span></p>
+                        <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
+                        <p className="text-white/60">T. Lectura: <span className="text-cyan-400">{formatTime(r.tiempoLectura)}</span></p>
+                        <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
+                        <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {filteredResults.length === 0 && (
+                  <div className="py-8 text-center text-white/40">
+                    No hay resultados registrados
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -479,15 +580,34 @@ export default function GestionPage() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-orange-400" />
-                Editar Contenido Preescolar
+                Editar Contenido de Lectura
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex gap-2 mb-4">
+                <Button
+                  onClick={() => setContentCategory("preescolar")}
+                  variant={contentCategory === "preescolar" ? "default" : "outline"}
+                  className={contentCategory === "preescolar" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+                  data-testid="button-content-preescolar"
+                >
+                  Pre-escolar
+                </Button>
+                <Button
+                  onClick={() => setContentCategory("ninos")}
+                  variant={contentCategory === "ninos" ? "default" : "outline"}
+                  className={contentCategory === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+                  data-testid="button-content-ninos"
+                >
+                  Niños
+                </Button>
+              </div>
+
               <div>
                 <label className="text-white/60 text-sm mb-1 block">Título de la lectura</label>
                 <Input
-                  value={editContent.title}
-                  onChange={(e) => setEditContent(p => ({ ...p, title: e.target.value }))}
+                  value={currentEditContent.title}
+                  onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, title: e.target.value }))}
                   className="bg-white/10 border-white/20 text-white"
                 />
               </div>
@@ -495,8 +615,8 @@ export default function GestionPage() {
               <div>
                 <label className="text-white/60 text-sm mb-1 block">Texto de la lectura</label>
                 <textarea
-                  value={editContent.content}
-                  onChange={(e) => setEditContent(p => ({ ...p, content: e.target.value }))}
+                  value={currentEditContent.content}
+                  onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, content: e.target.value }))}
                   rows={4}
                   className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white resize-none"
                 />
@@ -505,36 +625,39 @@ export default function GestionPage() {
               <div>
                 <label className="text-white/60 text-sm mb-1 block">URL de imagen</label>
                 <Input
-                  value={editContent.imageUrl}
-                  onChange={(e) => setEditContent(p => ({ ...p, imageUrl: e.target.value }))}
+                  value={currentEditContent.imageUrl}
+                  onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, imageUrl: e.target.value }))}
                   className="bg-white/10 border-white/20 text-white"
                 />
+                {currentEditContent.imageUrl && (
+                  <img src={currentEditContent.imageUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-lg" />
+                )}
               </div>
 
               <div className="border-t border-white/10 pt-4">
                 <h3 className="text-white font-semibold mb-3">Preguntas del cuestionario</h3>
-                {editContent.questions.map((q, qi) => (
+                {currentEditContent.questions.map((q: { question: string; options: string[]; correct: number }, qi: number) => (
                   <div key={qi} className="mb-4 p-3 bg-white/5 rounded-lg">
                     <label className="text-orange-400 text-sm mb-1 block">Pregunta {qi + 1}</label>
                     <Input
                       value={q.question}
                       onChange={(e) => {
-                        const newQ = [...editContent.questions];
+                        const newQ = [...currentEditContent.questions];
                         newQ[qi].question = e.target.value;
-                        setEditContent(p => ({ ...p, questions: newQ }));
+                        setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                       }}
                       className="bg-white/10 border-white/20 text-white mb-2"
                     />
                     <div className="grid grid-cols-3 gap-2">
-                      {q.options.map((opt, oi) => (
+                      {q.options.map((opt: string, oi: number) => (
                         <div key={oi}>
                           <label className="text-white/40 text-xs">Opción {oi + 1}</label>
                           <Input
                             value={opt}
                             onChange={(e) => {
-                              const newQ = [...editContent.questions];
+                              const newQ = [...currentEditContent.questions];
                               newQ[qi].options[oi] = e.target.value;
-                              setEditContent(p => ({ ...p, questions: newQ }));
+                              setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                             }}
                             className="bg-white/10 border-white/20 text-white"
                           />
@@ -549,9 +672,9 @@ export default function GestionPage() {
                         max={2}
                         value={q.correct}
                         onChange={(e) => {
-                          const newQ = [...editContent.questions];
+                          const newQ = [...currentEditContent.questions];
                           newQ[qi].correct = parseInt(e.target.value) || 0;
-                          setEditContent(p => ({ ...p, questions: newQ }));
+                          setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                         }}
                         className="bg-white/10 border-white/20 text-white w-20"
                       />
@@ -566,7 +689,7 @@ export default function GestionPage() {
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-600"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? "Guardando..." : "Guardar Cambios"}
+                {saving ? "Guardando..." : `Guardar ${contentCategory === "preescolar" ? "Pre-escolar" : "Niños"}`}
               </Button>
             </CardContent>
           </Card>
