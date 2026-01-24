@@ -656,7 +656,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         >
                           <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex flex-col">
-                            <div className="w-full h-24 overflow-hidden">
+                            <div className="w-full h-32 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex items-center justify-between p-2">
@@ -693,7 +693,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         >
                           <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex flex-col">
-                            <div className="w-full h-24 overflow-hidden">
+                            <div className="w-full h-32 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex items-center justify-between p-2">
@@ -723,7 +723,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                          className={`w-full h-36 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
                             isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
                           }`}
                           style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
@@ -731,7 +731,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         >
                           <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex h-full">
-                            <div className="w-32 h-full overflow-hidden flex-shrink-0">
+                            <div className="w-36 h-full overflow-hidden flex-shrink-0">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex-1 flex flex-col justify-center p-4">
