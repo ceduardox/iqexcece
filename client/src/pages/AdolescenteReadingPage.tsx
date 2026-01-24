@@ -109,13 +109,13 @@ export default function AdolescenteReadingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex items-center justify-center relative px-4 py-4 safe-area-inset"
+        className="flex items-center gap-3 px-4 py-4 safe-area-inset"
       >
         <Button
           variant="ghost"
           size="icon"
           onClick={handleBack}
-          className="absolute left-4 rounded-full bg-white/20 backdrop-blur-md border-0"
+          className="rounded-full bg-white/20 backdrop-blur-md border-0"
           data-testid="button-back-adolescente-reading"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
