@@ -63,6 +63,7 @@ export default function GestionPage() {
     imageUrl: "https://img.freepik.com/free-vector/cute-girl-walking-dog-cartoon-vector-icon-illustration_138676-2600.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
     questions: [
       { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
       { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
@@ -77,6 +78,7 @@ export default function GestionPage() {
     imageUrl: "https://img.freepik.com/free-vector/magical-garden-illustration_23-2149508098.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
     questions: [
       { question: "¿Qué encontró Pedro?", options: ["Una llave", "Una puerta secreta", "Un tesoro"], correct: 1 },
       { question: "¿Qué había detrás de la puerta?", options: ["Un mundo de colores", "Una cueva", "Un río"], correct: 0 },
@@ -174,6 +176,7 @@ export default function GestionPage() {
           imageUrl: currentEditContent.imageUrl,
           pageMainImage: currentEditContent.pageMainImage,
           pageSmallImage: currentEditContent.pageSmallImage,
+          categoryImage: currentEditContent.categoryImage,
           questions: JSON.stringify(currentEditContent.questions),
         }),
       });
@@ -214,6 +217,47 @@ export default function GestionPage() {
       return () => clearInterval(interval);
     }
   }, [isLoggedIn, token]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const loadContent = async () => {
+        try {
+          const [preescolarRes, ninosRes] = await Promise.all([
+            fetch("/api/reading/preescolar"),
+            fetch("/api/reading/ninos"),
+          ]);
+          const preescolarData = await preescolarRes.json();
+          const ninosData = await ninosRes.json();
+          
+          if (preescolarData.content) {
+            const c = preescolarData.content;
+            setEditContentPreescolar({
+              title: c.title || defaultPreescolar.title,
+              content: c.content || defaultPreescolar.content,
+              imageUrl: c.imageUrl || defaultPreescolar.imageUrl,
+              pageMainImage: c.pageMainImage || defaultPreescolar.pageMainImage,
+              pageSmallImage: c.pageSmallImage || defaultPreescolar.pageSmallImage,
+              categoryImage: c.categoryImage || defaultPreescolar.categoryImage,
+              questions: c.questions ? JSON.parse(c.questions) : defaultPreescolar.questions,
+            });
+          }
+          if (ninosData.content) {
+            const c = ninosData.content;
+            setEditContentNinos({
+              title: c.title || defaultNinos.title,
+              content: c.content || defaultNinos.content,
+              imageUrl: c.imageUrl || defaultNinos.imageUrl,
+              pageMainImage: c.pageMainImage || defaultNinos.pageMainImage,
+              pageSmallImage: c.pageSmallImage || defaultNinos.pageSmallImage,
+              categoryImage: c.categoryImage || defaultNinos.categoryImage,
+              questions: c.questions ? JSON.parse(c.questions) : defaultNinos.questions,
+            });
+          }
+        } catch {}
+      };
+      loadContent();
+    }
+  }, [isLoggedIn]);
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
@@ -792,6 +836,19 @@ export default function GestionPage() {
                     />
                     {currentEditContent.pageSmallImage && (
                       <img src={currentEditContent.pageSmallImage} alt="Small" className="mt-2 w-16 h-16 object-cover rounded-lg" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen de categoría (selección)</label>
+                    <Input
+                      value={currentEditContent.categoryImage || ""}
+                      onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, categoryImage: e.target.value }))}
+                      className="bg-white/10 border-white/20 text-white"
+                      placeholder="Imagen que se muestra en la selección de categoría"
+                      data-testid="input-category-image"
+                    />
+                    {currentEditContent.categoryImage && (
+                      <img src={currentEditContent.categoryImage} alt="Category" className="mt-2 w-20 h-20 object-cover rounded-full" />
                     )}
                   </div>
                 </div>

@@ -149,6 +149,7 @@ export class MemStorage implements IStorage {
       imageUrl: insertContent.imageUrl || null,
       pageMainImage: insertContent.pageMainImage || null,
       pageSmallImage: insertContent.pageSmallImage || null,
+      categoryImage: insertContent.categoryImage || null,
       questions: insertContent.questions,
       updatedAt: new Date(),
     };
@@ -254,6 +255,7 @@ export class DatabaseStorage implements IStorage {
           imageUrl: insertContent.imageUrl || null,
           pageMainImage: insertContent.pageMainImage || null,
           pageSmallImage: insertContent.pageSmallImage || null,
+          categoryImage: insertContent.categoryImage || null,
           questions: insertContent.questions,
           updatedAt: new Date(),
         })
@@ -269,6 +271,7 @@ export class DatabaseStorage implements IStorage {
       imageUrl: insertContent.imageUrl || null,
       pageMainImage: insertContent.pageMainImage || null,
       pageSmallImage: insertContent.pageSmallImage || null,
+      categoryImage: insertContent.categoryImage || null,
       questions: insertContent.questions,
     }).returning();
     return created;

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
@@ -16,7 +16,12 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
-const categories = [
+const defaultCategoryImages: Record<string, string> = {
+  preescolar: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
+  ninos: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
+};
+
+const categoriesBase = [
   {
     id: "preescolar",
     label: "PRE-ESCOLAR",
@@ -25,7 +30,6 @@ const categories = [
     gradient: "from-orange-400 via-amber-400 to-yellow-400",
     borderColor: "border-orange-400",
     bgColor: "bg-gradient-to-br from-orange-50 to-amber-100",
-    image: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
   },
   {
     id: "ninos",
@@ -35,7 +39,6 @@ const categories = [
     gradient: "from-violet-500 via-purple-500 to-indigo-500",
     borderColor: "border-violet-500",
     bgColor: "bg-gradient-to-br from-violet-50 to-purple-100",
-    image: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
   },
 ];
 
@@ -155,6 +158,32 @@ function ChildCategoryCard({
 export default function ChildCategoryPage() {
   const [, setLocation] = useLocation();
   const { userData, updateUserData } = useUserData();
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const [preescolarRes, ninosRes] = await Promise.all([
+          fetch("/api/reading/preescolar"),
+          fetch("/api/reading/ninos"),
+        ]);
+        const preescolarData = await preescolarRes.json();
+        const ninosData = await ninosRes.json();
+        setCategoryImages({
+          preescolar: preescolarData.content?.categoryImage || defaultCategoryImages.preescolar,
+          ninos: ninosData.content?.categoryImage || defaultCategoryImages.ninos,
+        });
+      } catch {
+        setCategoryImages(defaultCategoryImages);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  const categories = categoriesBase.map(cat => ({
+    ...cat,
+    image: categoryImages[cat.id] || defaultCategoryImages[cat.id],
+  }));
 
   const handleBack = useCallback(() => {
     playButtonSound();
