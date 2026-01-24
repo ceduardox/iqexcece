@@ -12,7 +12,7 @@ const playButtonSound = () => {
 const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niño",
-  adolescentes: "Adolescente",
+  adolescentes: "Adolesc.",
 };
 
 interface Question {
@@ -77,7 +77,11 @@ const getShuffledColors = (questionIndex: number) => {
   return shuffled;
 };
 
-function FloatingBubbles({ count = 20, opacity = 0.3 }: { count?: number; opacity?: number }) {
+function FloatingBubbles({ count = 20, opacity = 0.3, isAdolescent = false }: { count?: number; opacity?: number; isAdolescent?: boolean }) {
+  const adolescentColors = ["#FBBF24", "#F472B6", "#22D3EE", "#A78BFA", "#F97316", "#34D399", "#8B5CF6"];
+  const childColors = ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB", "#FFB6C1", "#90EE90", "#FFC0CB"];
+  const colors = isAdolescent ? adolescentColors : childColors;
+  
   return (
     <>
       {[...Array(count)].map((_, i) => (
@@ -85,17 +89,17 @@ function FloatingBubbles({ count = 20, opacity = 0.3 }: { count?: number; opacit
           key={i}
           className="absolute rounded-full pointer-events-none"
           style={{
-            width: 8 + Math.random() * 18,
-            height: 8 + Math.random() * 18,
+            width: isAdolescent ? (6 + Math.random() * 14) : (8 + Math.random() * 18),
+            height: isAdolescent ? (6 + Math.random() * 14) : (8 + Math.random() * 18),
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB", "#FFB6C1", "#90EE90", "#FFC0CB"][Math.floor(Math.random() * 10)],
+            backgroundColor: colors[Math.floor(Math.random() * colors.length)],
             opacity: opacity,
           }}
           animate={{
-            y: [0, -25, 0],
+            y: [0, isAdolescent ? -15 : -25, 0],
             x: [0, Math.random() * 15 - 7.5, 0],
-            scale: [1, 1.3, 1],
+            scale: [1, isAdolescent ? 1.15 : 1.3, 1],
           }}
           transition={{
             duration: 3 + Math.random() * 3,
@@ -104,7 +108,7 @@ function FloatingBubbles({ count = 20, opacity = 0.3 }: { count?: number; opacit
           }}
         />
       ))}
-      {[...Array(6)].map((_, i) => (
+      {!isAdolescent && [...Array(6)].map((_, i) => (
         <motion.div
           key={`star-${i}`}
           className="absolute pointer-events-none"
@@ -132,7 +136,39 @@ function FloatingBubbles({ count = 20, opacity = 0.3 }: { count?: number; opacit
   );
 }
 
-function ChildishCloseButton({ onClick }: { onClick: () => void }) {
+function ChildishCloseButton({ onClick, isAdolescent = false }: { onClick: () => void; isAdolescent?: boolean }) {
+  if (isAdolescent) {
+    return (
+      <motion.button
+        onClick={onClick}
+        className="relative"
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        data-testid="button-close-reading"
+      >
+        <motion.div
+          className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ 
+            background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)",
+            boxShadow: "0 4px 15px rgba(251, 191, 36, 0.4)"
+          }}
+        >
+          <X className="w-5 h-5 text-white" strokeWidth={2.5} />
+        </motion.div>
+        <motion.div
+          className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-pink-400"
+          animate={{ scale: [1, 1.3, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
+        />
+      </motion.button>
+    );
+  }
+  
   return (
     <motion.button
       onClick={onClick}
@@ -217,6 +253,7 @@ export default function ReadingContentPage() {
   const [quizFinished, setQuizFinished] = useState(false);
   
   const categoria = userData.childCategory || "preescolar";
+  const isAdolescent = categoria === "adolescentes";
   const [content, setContent] = useState(defaultReadingContent[categoria] || defaultReadingContent.preescolar);
 
   useEffect(() => {
@@ -359,7 +396,7 @@ export default function ReadingContentPage() {
       style={{ background: "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FloatingBubbles count={25} opacity={0.4} />
+        <FloatingBubbles count={25} opacity={0.4} isAdolescent={isAdolescent} />
       </div>
 
       <motion.header
@@ -376,7 +413,7 @@ export default function ReadingContentPage() {
         >
           Test Lectura
         </motion.h1>
-        <ChildishCloseButton onClick={handleClose} />
+        <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />
       </motion.header>
 
       <motion.div
@@ -436,7 +473,7 @@ export default function ReadingContentPage() {
         style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.2)" }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <FloatingBubbles count={15} opacity={0.15} />
+          <FloatingBubbles count={15} opacity={0.15} isAdolescent={isAdolescent} />
         </div>
 
         {activeTab === "lectura" ? (
@@ -709,7 +746,7 @@ export default function ReadingContentPage() {
           style={{ background: "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" }}
         >
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <FloatingBubbles count={20} opacity={0.3} />
+            <FloatingBubbles count={20} opacity={0.3} isAdolescent={isAdolescent} />
           </div>
 
           <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8">
