@@ -7,6 +7,13 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
 ## Recent Changes (Jan 2026)
 
 - Added admin panel at `/gestion` (login: CITEX / GESTORCITEXBO2014)
+- Admin panel now uses sidebar layout on desktop, tabs on mobile
+- "Remember me" checkbox saves login credentials to localStorage
+- PostgreSQL database storage for persistent data (dev and prod)
+- Page image editing for preescolar/niños selection pages (main + floating image)
+- Mobile-responsive results and sessions with expandable cards
+- Category filter for quiz results (Pre-escolar, Niños, All)
+- PWA detection and tracking (web vs PWA)
 - User session tracking with IP, device, browser, and PWA detection
 - Active users count displayed in admin panel
 - Age-specific content for cognitive tests (5 age groups with unique content)
@@ -36,10 +43,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **ORM**: Drizzle ORM with PostgreSQL dialect
+- **Database**: PostgreSQL (Neon-backed) via `DATABASE_URL`
 - **Schema Location**: `shared/schema.ts` (shared between client and server)
 - **Migrations**: Drizzle Kit with migrations output to `./migrations`
-- **Current Storage**: In-memory storage (`MemStorage` class) as default implementation
-- **Database Ready**: Schema and Drizzle config prepared for PostgreSQL connection via `DATABASE_URL`
+- **Current Storage**: DatabaseStorage class using PostgreSQL for persistent data
+- **Tables**: users, user_sessions, quiz_results, reading_contents
 
 ### Project Structure
 ```

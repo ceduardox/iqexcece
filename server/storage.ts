@@ -1,5 +1,7 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, users, userSessions, quizResults, readingContents } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { eq, desc, and, gt } from "drizzle-orm";
+import { db } from "./db";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -155,4 +157,122 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async createSession(insertSession: InsertUserSession): Promise<UserSession> {
+    const [session] = await db.insert(userSessions).values({
+      sessionId: insertSession.sessionId,
+      ip: insertSession.ip || null,
+      userAgent: insertSession.userAgent || null,
+      device: insertSession.device || null,
+      browser: insertSession.browser || null,
+      isPwa: insertSession.isPwa || false,
+      ageGroup: insertSession.ageGroup || null,
+      selectedProblems: insertSession.selectedProblems || null,
+      isActive: insertSession.isActive ?? true,
+    }).returning();
+    return session;
+  }
+
+  async updateSession(sessionId: string, data: Partial<InsertUserSession>): Promise<void> {
+    await db.update(userSessions)
+      .set({ ...data, lastActivity: new Date() })
+      .where(eq(userSessions.sessionId, sessionId));
+  }
+
+  async getSession(sessionId: string): Promise<UserSession | undefined> {
+    const [session] = await db.select().from(userSessions).where(eq(userSessions.sessionId, sessionId));
+    return session;
+  }
+
+  async getAllSessions(): Promise<UserSession[]> {
+    return db.select().from(userSessions).orderBy(desc(userSessions.createdAt));
+  }
+
+  async getActiveSessions(): Promise<UserSession[]> {
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return db.select().from(userSessions)
+      .where(and(
+        eq(userSessions.isActive, true),
+        gt(userSessions.lastActivity, fiveMinutesAgo)
+      ));
+  }
+
+  async deactivateSession(sessionId: string): Promise<void> {
+    await db.update(userSessions)
+      .set({ isActive: false })
+      .where(eq(userSessions.sessionId, sessionId));
+  }
+
+  async saveQuizResult(insertResult: InsertQuizResult): Promise<QuizResult> {
+    const [result] = await db.insert(quizResults).values({
+      nombre: insertResult.nombre,
+      email: insertResult.email || null,
+      edad: insertResult.edad || null,
+      ciudad: insertResult.ciudad || null,
+      telefono: insertResult.telefono || null,
+      comentario: insertResult.comentario || null,
+      categoria: insertResult.categoria || "preescolar",
+      tiempoLectura: insertResult.tiempoLectura || null,
+      tiempoCuestionario: insertResult.tiempoCuestionario || null,
+      isPwa: insertResult.isPwa || false,
+    }).returning();
+    return result;
+  }
+
+  async getAllQuizResults(): Promise<QuizResult[]> {
+    return db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
+  }
+
+  async getReadingContent(categoria: string): Promise<ReadingContent | undefined> {
+    const [content] = await db.select().from(readingContents).where(eq(readingContents.categoria, categoria));
+    return content;
+  }
+
+  async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
+    const existing = await this.getReadingContent(insertContent.categoria);
+    
+    if (existing) {
+      const [updated] = await db.update(readingContents)
+        .set({
+          title: insertContent.title,
+          content: insertContent.content,
+          imageUrl: insertContent.imageUrl || null,
+          pageMainImage: insertContent.pageMainImage || null,
+          pageSmallImage: insertContent.pageSmallImage || null,
+          questions: insertContent.questions,
+          updatedAt: new Date(),
+        })
+        .where(eq(readingContents.categoria, insertContent.categoria))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db.insert(readingContents).values({
+      categoria: insertContent.categoria,
+      title: insertContent.title,
+      content: insertContent.content,
+      imageUrl: insertContent.imageUrl || null,
+      pageMainImage: insertContent.pageMainImage || null,
+      pageSmallImage: insertContent.pageSmallImage || null,
+      questions: insertContent.questions,
+    }).returning();
+    return created;
+  }
+}
+
+export const storage = new DatabaseStorage();

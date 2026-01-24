@@ -43,8 +43,9 @@ interface QuizResult {
 
 export default function GestionPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");
+  const [password, setPassword] = useState(() => localStorage.getItem("adminPass") || "");
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("adminUser"));
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
@@ -107,6 +108,13 @@ export default function GestionPage() {
         setToken(token);
         setIsLoggedIn(true);
         localStorage.setItem("adminToken", token);
+        if (rememberMe) {
+          localStorage.setItem("adminUser", username);
+          localStorage.setItem("adminPass", password);
+        } else {
+          localStorage.removeItem("adminUser");
+          localStorage.removeItem("adminPass");
+        }
       } else {
         setError("Credenciales incorrectas");
       }
@@ -263,6 +271,16 @@ export default function GestionPage() {
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   data-testid="input-admin-password"
                 />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
+                    data-testid="checkbox-remember-me"
+                  />
+                  <span className="text-white/70 text-sm">Guardar datos de acceso</span>
+                </label>
                 {error && (
                   <p className="text-red-400 text-sm text-center">{error}</p>
                 )}
