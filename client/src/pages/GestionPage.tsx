@@ -74,16 +74,17 @@ export default function GestionPage() {
   
   const defaultNinos = {
     title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
-    content: "El chocolate es uno de los alimentos más populares del mundo. Su historia comenzó hace miles de años en las selvas de América Central y del Sur, donde los antiguos mayas y aztecas cultivaban el cacao. Los aztecas preparaban una bebida amarga llamada 'xocolatl' que consideraban sagrada. Cuando los españoles llegaron a América, llevaron el cacao a Europa donde le añadieron azúcar para hacerlo más dulce. Así nació el chocolate que conocemos hoy. Bolivia es uno de los países productores de cacao de alta calidad, especialmente en la región del Beni.",
+    content: "Hace muchos años, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en América Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podía comprar un tomate con un grano de cacao, o un conejo con 30 granos. Además, solo las personas importantes, como guerreros y nobles, podían tomar esa bebida.\n\nCuando los conquistadores españoles llegaron a América en el siglo XVI, llevaron el cacao a Europa. Allí, las personas comenzaron a mezclarlo con azúcar y leche, creando una bebida caliente más dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en países tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y además de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de ánimo y aportar energía, siempre que se consuma con moderación.",
     imageUrl: "https://img.freepik.com/free-vector/chocolate-bar-pieces-realistic-composition_1284-19023.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
     categoryImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     questions: [
-      { question: "¿Dónde comenzó la historia del chocolate?", options: ["Europa", "América Central y del Sur", "Asia"], correct: 1 },
-      { question: "¿Cómo se llamaba la bebida azteca de cacao?", options: ["Chocolate", "Xocolatl", "Cacahuatl"], correct: 1 },
-      { question: "¿Qué le añadieron los europeos al cacao?", options: ["Sal", "Azúcar", "Leche"], correct: 1 },
-      { question: "¿En qué región de Bolivia se produce cacao de alta calidad?", options: ["La Paz", "Beni", "Potosí"], correct: 1 },
+      { question: "¿Qué civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
+      { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
+      { question: "Pregunta 3 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      { question: "Pregunta 4 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      { question: "Pregunta 5 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
     ]
   };
 
