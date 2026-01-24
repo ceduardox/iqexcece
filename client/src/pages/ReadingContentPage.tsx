@@ -27,8 +27,8 @@ const readingContent: Record<string, { title: string; text: string; questions: Q
     questions: [
       { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
       { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
-      { question: "¿Cómo se llamaba el perrito?", options: ["Balu", "Max", "Toby"], correct: 0 },
-      { question: "¿A dónde iba Mariana a pasear?", options: ["A la escuela", "Al parque", "A la tienda"], correct: 1 },
+      { question: "¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
+      { question: "¿Dónde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
     ],
   },
   ninos: {
