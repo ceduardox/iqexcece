@@ -615,8 +615,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               exit={{ opacity: 0 }}
                               className="p-4"
                             >
-                              <div className="flex items-center gap-4 h-20">
-                                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
+                              <div className="flex items-center gap-3 h-24">
+                                <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
                                   <img 
                                     src={group.image} 
                                     alt={group.label}
@@ -624,15 +624,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                     loading="lazy"
                                   />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <span className="font-bold text-lg md:text-xl text-foreground block">
+                                <div className="flex-1 min-w-0 overflow-hidden">
+                                  <span className="font-bold text-sm sm:text-base md:text-lg text-foreground block truncate">
                                     {group.label}
                                   </span>
-                                  <span className="text-sm text-muted-foreground mt-1 block">
+                                  <span className="text-xs sm:text-sm text-muted-foreground mt-1 block">
                                     {group.ageRange}
                                   </span>
                                 </div>
-                                <div className="w-8 h-8 rounded-full border-2 border-purple-500/40 flex-shrink-0" />
+                                <div className="w-7 h-7 rounded-full border-2 border-purple-500/40 flex-shrink-0 ml-1" />
                               </div>
                             </motion.div>
                           )}
