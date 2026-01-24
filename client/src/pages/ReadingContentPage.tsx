@@ -387,62 +387,71 @@ export default function ReadingContentPage() {
     window.location.href = "/";
   };
 
+  const bgGradient = isAdolescent 
+    ? "linear-gradient(180deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%)"
+    : "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)";
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" }}
+      style={{ background: bgGradient }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FloatingBubbles count={25} opacity={0.4} isAdolescent={isAdolescent} />
+        <FloatingBubbles count={isAdolescent ? 18 : 25} opacity={isAdolescent ? 0.3 : 0.4} isAdolescent={isAdolescent} />
       </div>
 
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 flex items-center justify-between px-5 py-4"
+        className={`relative z-10 flex items-center ${isAdolescent ? 'justify-center' : 'justify-between'} px-5 py-4`}
       >
+        {isAdolescent && (
+          <div className="absolute right-4">
+            <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />
+          </div>
+        )}
         <motion.h1 
-          className="text-2xl font-black text-white drop-shadow-lg"
-          style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.2)" }}
-          animate={{ scale: [1, 1.03, 1] }}
+          className={`font-bold text-white ${isAdolescent ? 'text-xl' : 'text-2xl font-black drop-shadow-lg'}`}
+          style={!isAdolescent ? { textShadow: "2px 2px 4px rgba(0,0,0,0.2)" } : {}}
+          animate={!isAdolescent ? { scale: [1, 1.03, 1] } : {}}
           transition={{ duration: 2, repeat: Infinity }}
         >
           Test Lectura
         </motion.h1>
-        <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />
+        {!isAdolescent && <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />}
       </motion.header>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative z-10 flex mx-4 rounded-full overflow-hidden border-4 border-white/30"
-        style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
+        className={`relative z-10 flex mx-4 rounded-full overflow-hidden ${isAdolescent ? 'border-2 border-white/20' : 'border-4 border-white/30'}`}
+        style={{ boxShadow: isAdolescent ? "0 2px 15px rgba(0,0,0,0.15)" : "0 4px 20px rgba(0,0,0,0.2)" }}
       >
         <motion.button
           onClick={() => setActiveTab("lectura")}
-          className={`flex-1 py-3 text-sm font-black text-center transition-all ${
+          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
             activeTab === "lectura" 
-              ? "bg-purple-600 text-white" 
-              : "bg-purple-400/50 text-white/70"
+              ? (isAdolescent ? "bg-violet-600 text-white" : "bg-purple-600 text-white")
+              : (isAdolescent ? "bg-violet-500/40 text-white/80" : "bg-purple-400/50 text-white/70")
           }`}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.98 }}
           data-testid="tab-lectura"
         >
           LECTURA
         </motion.button>
         <motion.button
           onClick={() => setActiveTab("cuestionario")}
-          className={`flex-1 py-3 text-sm font-black text-center transition-all ${
+          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
             activeTab === "cuestionario" 
-              ? "bg-purple-600 text-white" 
-              : "bg-purple-400/50 text-white/70"
+              ? (isAdolescent ? "bg-violet-600 text-white" : "bg-purple-600 text-white")
+              : (isAdolescent ? "bg-violet-500/40 text-white/80" : "bg-purple-400/50 text-white/70")
           }`}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.98 }}
           data-testid="tab-cuestionario"
         >
           CUESTIONARIO
@@ -453,16 +462,18 @@ export default function ReadingContentPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        className="relative z-10 mx-4 mt-3 grid grid-cols-4 rounded-2xl overflow-hidden border-4 border-white/20"
+        className={`relative z-10 mx-4 mt-3 grid grid-cols-4 rounded-2xl overflow-hidden ${isAdolescent ? 'border-2 border-white/15' : 'border-4 border-white/20'}`}
         style={{ 
-          background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A855F7 100%)",
-          boxShadow: "0 4px 20px rgba(124, 58, 237, 0.4)"
+          background: isAdolescent 
+            ? "linear-gradient(135deg, #6D28D9 0%, #7C3AED 50%, #8B5CF6 100%)"
+            : "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A855F7 100%)",
+          boxShadow: isAdolescent ? "0 2px 15px rgba(109, 40, 217, 0.3)" : "0 4px 20px rgba(124, 58, 237, 0.4)"
         }}
       >
-        <InfoCard label="CATEGORÍA" value={categoryLabel} color="#FF69B4" delay={0} />
-        <InfoCard label="TIEMPO" value={formatTime(readingTime)} color="#00CED1" delay={0.1} />
-        <InfoCard label="TIEMPO" value={formatTime(questionTime)} color="#FFD700" delay={0.2} />
-        <InfoCard label="PREGUNTAS" value={`${activeTab === "cuestionario" ? currentQuestion + 1 : 0} / ${content.questions.length}`} color="#98FB98" delay={0.3} />
+        <InfoCard label="CATEGORÍA" value={categoryLabel} color={isAdolescent ? "#A78BFA" : "#FF69B4"} delay={0} />
+        <InfoCard label="TIEMPO" value={formatTime(readingTime)} color={isAdolescent ? "#22D3EE" : "#00CED1"} delay={0.1} />
+        <InfoCard label="TIEMPO" value={formatTime(questionTime)} color={isAdolescent ? "#FBBF24" : "#FFD700"} delay={0.2} />
+        <InfoCard label="PREGUNTAS" value={`${activeTab === "cuestionario" ? currentQuestion + 1 : 0} / ${content.questions.length}`} color={isAdolescent ? "#34D399" : "#98FB98"} delay={0.3} />
       </motion.div>
 
       <motion.div
@@ -483,7 +494,7 @@ export default function ReadingContentPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="text-purple-500 font-black text-sm tracking-widest"
+                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
               >
                 LECTURA
               </motion.span>
@@ -491,7 +502,7 @@ export default function ReadingContentPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-black text-gray-900 dark:text-white mt-2"
+                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
               >
                 {content.title}
               </motion.h2>
@@ -501,7 +512,7 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.35 }}
-              className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed"
+              className={`text-gray-600 dark:text-gray-300 leading-relaxed ${isAdolescent ? 'text-base' : 'text-lg'}`}
             >
               {content.text}
             </motion.p>
@@ -511,24 +522,29 @@ export default function ReadingContentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               onClick={handleGoToQuestionnaire}
-              className="relative w-full py-5 rounded-2xl font-black text-white text-xl flex items-center justify-center gap-3 mt-8 overflow-hidden"
+              className={`relative w-full rounded-2xl font-bold text-white flex items-center justify-center gap-3 mt-8 overflow-hidden ${isAdolescent ? 'py-4 text-lg' : 'py-5 text-xl font-black'}`}
               style={{ 
-                background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                boxShadow: "0 8px 25px rgba(249, 115, 22, 0.5)"
+                background: isAdolescent 
+                  ? "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)"
+                  : "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
+                boxShadow: isAdolescent 
+                  ? "0 6px 20px rgba(124, 58, 237, 0.4)"
+                  : "0 8px 25px rgba(249, 115, 22, 0.5)"
               }}
-              whileHover={{ scale: 1.03, boxShadow: "0 10px 30px rgba(249, 115, 22, 0.6)" }}
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               data-testid="button-go-questionnaire"
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-100%", "100%"] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+              {!isAdolescent && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
               <span className="relative">Ir a cuestionario</span>
               <motion.span
-                className="relative text-2xl"
-                animate={{ x: [0, 8, 0] }}
+                className="relative text-xl"
+                animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
                 transition={{ duration: 1, repeat: Infinity }}
               >
                 →
@@ -541,14 +557,14 @@ export default function ReadingContentPage() {
               <motion.span 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-purple-500 font-black text-sm tracking-widest"
+                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
               >
                 CUESTIONARIO
               </motion.span>
               <motion.h2 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-black text-gray-900 dark:text-white mt-2"
+                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
               >
                 {content.title}
               </motion.h2>
@@ -558,7 +574,7 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-gray-600 dark:text-gray-300 text-base"
+              className={`text-gray-600 dark:text-gray-300 ${isAdolescent ? 'text-sm' : 'text-base'}`}
             >
               Para que puedas conocer tu resultado del Test, completa los siguientes datos con tu información
             </motion.p>
@@ -572,7 +588,7 @@ export default function ReadingContentPage() {
                 placeholder="Nombre y Apellido"
                 value={formData.nombre}
                 onChange={(e) => handleFormChange("nombre", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="input-nombre"
               />
 
@@ -584,7 +600,7 @@ export default function ReadingContentPage() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={(e) => handleFormChange("email", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="input-email"
               />
 
@@ -596,7 +612,7 @@ export default function ReadingContentPage() {
                 placeholder="Edad"
                 value={formData.edad}
                 onChange={(e) => handleFormChange("edad", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="input-edad"
               />
               <motion.input
@@ -607,7 +623,7 @@ export default function ReadingContentPage() {
                 placeholder="Ciudad"
                 value={formData.ciudad}
                 onChange={(e) => handleFormChange("ciudad", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="input-ciudad"
               />
 
@@ -619,7 +635,7 @@ export default function ReadingContentPage() {
                 placeholder="Teléfono"
                 value={formData.telefono}
                 onChange={(e) => handleFormChange("telefono", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="input-telefono"
               />
 
@@ -631,7 +647,7 @@ export default function ReadingContentPage() {
                 value={formData.comentario}
                 onChange={(e) => handleFormChange("comentario", e.target.value)}
                 rows={3}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors resize-none"
+                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors resize-none ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
                 data-testid="textarea-comentario"
               />
             </div>
@@ -641,24 +657,29 @@ export default function ReadingContentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               onClick={handleSubmitForm}
-              className="relative w-full py-5 rounded-2xl font-black text-white text-xl flex items-center justify-center gap-3 overflow-hidden"
+              className={`relative w-full rounded-2xl font-bold text-white flex items-center justify-center gap-3 overflow-hidden ${isAdolescent ? 'py-4 text-lg' : 'py-5 text-xl font-black'}`}
               style={{ 
-                background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                boxShadow: "0 8px 25px rgba(249, 115, 22, 0.5)"
+                background: isAdolescent 
+                  ? "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)"
+                  : "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
+                boxShadow: isAdolescent 
+                  ? "0 6px 20px rgba(124, 58, 237, 0.4)"
+                  : "0 8px 25px rgba(249, 115, 22, 0.5)"
               }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               data-testid="button-ver-resultado"
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-100%", "100%"] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+              {!isAdolescent && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
               <span className="relative">Ver mi resultado</span>
               <motion.span
-                className="relative text-2xl"
-                animate={{ x: [0, 8, 0] }}
+                className="relative text-xl"
+                animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
                 transition={{ duration: 1, repeat: Infinity }}
               >
                 →
@@ -671,14 +692,14 @@ export default function ReadingContentPage() {
               <motion.span 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-purple-500 font-black text-sm tracking-widest"
+                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
               >
                 CUESTIONARIO
               </motion.span>
               <motion.h2 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-black text-gray-900 dark:text-white mt-2"
+                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
               >
                 {content.title}
               </motion.h2>
@@ -688,12 +709,12 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-gray-800 dark:text-gray-200 text-lg font-semibold"
+              className={`text-gray-800 dark:text-gray-200 font-semibold ${isAdolescent ? 'text-base' : 'text-lg'}`}
             >
               {currentQ.question}
             </motion.p>
 
-            <div className="space-y-4">
+            <div className={isAdolescent ? 'space-y-3' : 'space-y-4'}>
               {currentQ.options.map((option, index) => {
                 const colors = getShuffledColors(currentQuestion);
                 const color = colors[index % colors.length];
@@ -704,15 +725,14 @@ export default function ReadingContentPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + index * 0.1, type: "spring" }}
                     onClick={() => handleSelectAnswer(index)}
-                    className={`relative w-full py-5 px-6 rounded-2xl text-left font-bold text-lg text-white overflow-hidden transition-all ${
+                    className={`relative w-full text-left font-bold text-white overflow-hidden transition-all ${
                       selectedAnswer === index ? "ring-4 ring-white ring-offset-2" : ""
-                    }`}
+                    } ${isAdolescent ? 'py-4 px-5 rounded-xl text-base' : 'py-5 px-6 rounded-2xl text-lg'}`}
                     style={{ 
                       background: `linear-gradient(135deg, ${color.bg} 0%, ${color.bg2} 100%)`,
                       boxShadow: `0 6px 20px ${color.shadow}`
                     }}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={{ scale: 0.98 }}
                     data-testid={`option-${index}`}
                   >
                     <motion.div
