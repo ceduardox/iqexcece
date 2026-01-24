@@ -216,3 +216,22 @@
     inset: -1px;
   }
 }
+
+/* Neon shimmer animation for cards */
+@keyframes shimmer {
+  0%, 100% {
+    background-position: -200% 0;
+  }
+  50% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px hsl(187 85% 53% / 0.3), 0 0 10px hsl(280 70% 50% / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px hsl(187 85% 53% / 0.5), 0 0 20px hsl(280 70% 50% / 0.3);
+  }
+}

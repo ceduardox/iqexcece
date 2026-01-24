@@ -613,26 +613,37 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="p-4"
+                              className="p-3 relative"
                             >
-                              <div className="flex items-center gap-3 h-24">
-                                <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
+                              {/* Neon border effect */}
+                              <div 
+                                className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none"
+                                style={{
+                                  background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)",
+                                  backgroundSize: "200% 100%",
+                                  animation: "shimmer 3s ease-in-out infinite",
+                                }}
+                              />
+                              <div className="flex gap-3 h-28">
+                                <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 border border-cyan-500/30 relative">
                                   <img 
                                     src={group.image} 
                                     alt={group.label}
                                     className="w-full h-full object-cover"
                                     loading="lazy"
                                   />
+                                  {/* Subtle glow on image */}
+                                  <div className="absolute inset-0 border border-cyan-400/20 rounded-xl" />
                                 </div>
-                                <div className="flex-1 min-w-0 overflow-hidden">
-                                  <span className="font-bold text-sm sm:text-base md:text-lg text-foreground block truncate">
+                                <div className="flex-1 flex flex-col justify-center">
+                                  <span className="font-bold text-base sm:text-lg md:text-xl text-foreground block leading-tight">
                                     {group.label}
                                   </span>
-                                  <span className="text-xs sm:text-sm text-muted-foreground mt-1 block">
+                                  <span className="text-xs sm:text-sm text-cyan-400/80 mt-1 block">
                                     {group.ageRange}
                                   </span>
+                                  <div className="w-6 h-6 rounded-full border-2 border-purple-500/40 mt-2" />
                                 </div>
-                                <div className="w-7 h-7 rounded-full border-2 border-purple-500/40 flex-shrink-0 ml-1" />
                               </div>
                             </motion.div>
                           )}
