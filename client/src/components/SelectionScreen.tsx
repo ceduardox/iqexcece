@@ -489,18 +489,18 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 />
               </motion.div>
 
-              {/* Title section - same style as problems page */}
+              {/* Title section - full width for 2-line layout */}
               <motion.div 
-                className="text-left space-y-2 py-4 pr-32 md:pr-48 relative z-10"
+                className="text-left py-4 relative z-10"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-2">
+                <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-3">
                   Descubre tu camino
                 </p>
                 
-                <h1 className="text-3xl md:text-5xl font-black leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight">
                   <span className="text-muted-foreground">Que esta </span>
                   <span className="relative inline-block">
                     <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
@@ -510,7 +510,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   </span>
                 </h1>
                 
-                <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
+                <h2 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mt-1">
                   <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
                     tu potencial
                   </span>
