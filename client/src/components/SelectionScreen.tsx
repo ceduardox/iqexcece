@@ -648,21 +648,23 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                          className={`w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
                             isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
                           }`}
                           style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
                           data-testid={`button-age-${group.id}`}
                         >
                           <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
-                          <div className="flex h-full">
-                            <div className="w-24 h-full overflow-hidden flex-shrink-0">
+                          <div className="flex flex-col">
+                            <div className="w-full h-24 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
-                            <div className="flex-1 flex flex-col justify-center p-3">
-                              <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
-                              <span className="text-xs text-cyan-400/80 mt-1 block">{group.ageRange}</span>
-                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
+                            <div className="flex items-center justify-between p-2">
+                              <div>
+                                <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
+                                <span className="text-xs text-cyan-400/80 block">{group.ageRange}</span>
+                              </div>
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
                                 {isSelected && <Check className="w-4 h-4 text-background" />}
                               </div>
                             </div>
@@ -683,21 +685,23 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                          className={`w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
                             isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
                           }`}
                           style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
                           data-testid={`button-age-${group.id}`}
                         >
                           <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
-                          <div className="flex h-full">
-                            <div className="w-24 h-full overflow-hidden flex-shrink-0">
+                          <div className="flex flex-col">
+                            <div className="w-full h-24 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
-                            <div className="flex-1 flex flex-col justify-center p-3">
-                              <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
-                              <span className="text-xs text-cyan-400/80 mt-1 block">{group.ageRange}</span>
-                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
+                            <div className="flex items-center justify-between p-2">
+                              <div>
+                                <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
+                                <span className="text-xs text-cyan-400/80 block">{group.ageRange}</span>
+                              </div>
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
                                 {isSelected && <Check className="w-4 h-4 text-background" />}
                               </div>
                             </div>
