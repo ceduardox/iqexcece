@@ -174,6 +174,16 @@ export default function ReadingContentPage() {
   const [questionTime, setQuestionTime] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    email: "",
+    edad: "",
+    ciudad: "",
+    telefono: "",
+    soy: "",
+    comentario: "",
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -216,9 +226,20 @@ export default function ReadingContentPage() {
       if (currentQuestion < content.questions.length - 1) {
         setCurrentQuestion(prev => prev + 1);
         setSelectedAnswer(null);
+      } else {
+        setShowForm(true);
       }
     }, 600);
   }, [currentQuestion, content.questions.length]);
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmitForm = () => {
+    playButtonSound();
+    console.log("Form submitted:", formData);
+  };
 
   return (
     <motion.div
@@ -359,6 +380,154 @@ export default function ReadingContentPage() {
                 transition={{ duration: 2, repeat: Infinity }}
               />
               <span className="relative">Ir a cuestionario</span>
+              <motion.span
+                className="relative text-2xl"
+                animate={{ x: [0, 8, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                →
+              </motion.span>
+            </motion.button>
+          </div>
+        ) : showForm ? (
+          <div className="relative z-10 space-y-5 pb-6">
+            <div className="text-center">
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-purple-500 font-black text-sm tracking-widest"
+              >
+                CUESTIONARIO
+              </motion.span>
+              <motion.h2 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-2xl font-black text-gray-900 dark:text-white mt-2"
+              >
+                {content.title}
+              </motion.h2>
+            </div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-gray-600 dark:text-gray-300 text-base"
+            >
+              Para que puedas conocer tu resultado del Test, completa los siguientes datos con tu información
+            </motion.p>
+
+            <div className="space-y-3">
+              <motion.input
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                type="text"
+                placeholder="Nombre y Apellido"
+                value={formData.nombre}
+                onChange={(e) => handleFormChange("nombre", e.target.value)}
+                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                data-testid="input-nombre"
+              />
+
+              <motion.input
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => handleFormChange("email", e.target.value)}
+                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                data-testid="input-email"
+              />
+
+              <div className="flex gap-3">
+                <motion.input
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  type="text"
+                  placeholder="Edad"
+                  value={formData.edad}
+                  onChange={(e) => handleFormChange("edad", e.target.value)}
+                  className="flex-1 py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                  data-testid="input-edad"
+                />
+                <motion.input
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  type="text"
+                  placeholder="Ciudad"
+                  value={formData.ciudad}
+                  onChange={(e) => handleFormChange("ciudad", e.target.value)}
+                  className="flex-1 py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                  data-testid="input-ciudad"
+                />
+              </div>
+
+              <motion.input
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                type="tel"
+                placeholder="Teléfono"
+                value={formData.telefono}
+                onChange={(e) => handleFormChange("telefono", e.target.value)}
+                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                data-testid="input-telefono"
+              />
+
+              <motion.select
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                value={formData.soy}
+                onChange={(e) => handleFormChange("soy", e.target.value)}
+                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-purple-400 focus:outline-none transition-colors appearance-none"
+                data-testid="select-soy"
+              >
+                <option value="">Soy</option>
+                <option value="estudiante">Estudiante</option>
+                <option value="padre">Padre/Madre</option>
+                <option value="profesor">Profesor</option>
+                <option value="otro">Otro</option>
+              </motion.select>
+
+              <motion.textarea
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                placeholder="Comentario"
+                value={formData.comentario}
+                onChange={(e) => handleFormChange("comentario", e.target.value)}
+                rows={3}
+                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors resize-none"
+                data-testid="textarea-comentario"
+              />
+            </div>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              onClick={handleSubmitForm}
+              className="relative w-full py-5 rounded-2xl font-black text-white text-xl flex items-center justify-center gap-3 overflow-hidden"
+              style={{ 
+                background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
+                boxShadow: "0 8px 25px rgba(249, 115, 22, 0.5)"
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              data-testid="button-ver-resultado"
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span className="relative">Ver mi resultado</span>
               <motion.span
                 className="relative text-2xl"
                 animate={{ x: [0, 8, 0] }}
