@@ -26,7 +26,7 @@ const readingContent: Record<string, { title: string; text: string; questions: Q
     text: "Mariana tiene un perrito de color café llamado Balu, lo saca a pasear todos los días al parque que esta frente su casa, un día se le escapo, estaba asustada y lloro llego hasta el kiosco y el señor le devolvió a su perrito.",
     questions: [
       { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
-      { question: "¿De qué color era el perrito?", options: ["Negro", "Blanco", "Café"], correct: 2 },
+      { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
       { question: "¿Cómo se llamaba el perrito?", options: ["Balu", "Max", "Toby"], correct: 0 },
       { question: "¿A dónde iba Mariana a pasear?", options: ["A la escuela", "Al parque", "A la tienda"], correct: 1 },
     ],
@@ -204,14 +204,21 @@ export default function ReadingContentPage() {
     setSelectedAnswer(null);
   }, []);
 
-  const handleSelectAnswer = useCallback((index: number) => {
-    playButtonSound();
-    setSelectedAnswer(index);
-  }, []);
-
   const categoryLabel = categoryLabels[userData.childCategory || "preescolar"] || "Pre escolar";
   const content = readingContent[userData.childCategory || "preescolar"] || readingContent.preescolar;
   const currentQ = content.questions[currentQuestion];
+
+  const handleSelectAnswer = useCallback((index: number) => {
+    playButtonSound();
+    setSelectedAnswer(index);
+    
+    setTimeout(() => {
+      if (currentQuestion < content.questions.length - 1) {
+        setCurrentQuestion(prev => prev + 1);
+        setSelectedAnswer(null);
+      }
+    }, 600);
+  }, [currentQuestion, content.questions.length]);
 
   return (
     <motion.div
