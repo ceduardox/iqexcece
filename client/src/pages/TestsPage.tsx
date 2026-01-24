@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Brain, HelpCircle, Search, Menu } from "lucide-react";
-import { useLocation } from "wouter";
+import { useUserData, getAgeTestContent } from "@/lib/user-context";
 
 class SoundPlayer {
   private audioContext: AudioContext | null = null;
@@ -61,55 +61,35 @@ const soundPlayer = new SoundPlayer();
 const playCardSound = () => soundPlayer.play('/card.mp3', 0.5);
 const playButtonSound = () => soundPlayer.play('/iphone.mp3', 0.6);
 
-interface TestCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: typeof Brain;
-  gradient: string;
-}
+const testIcons = {
+  lectura: BookOpen,
+  razonamiento: Brain,
+  cerebral: HelpCircle,
+  iq: Search,
+};
 
-const testCategories: TestCategory[] = [
-  {
-    id: "lectura",
-    title: "Lectura",
-    description: "Para medir tu velocidad y comprensión lectora.",
-    icon: BookOpen,
-    gradient: "linear-gradient(135deg, #4DD0E1 0%, #26C6DA 50%, #00ACC1 100%)"
-  },
-  {
-    id: "razonamiento",
-    title: "Razonamiento",
-    description: "Para medir tu nivel de razonamiento.",
-    icon: Brain,
-    gradient: "linear-gradient(135deg, #F48FB1 0%, #CE93D8 50%, #7E57C2 100%)"
-  },
-  {
-    id: "cerebral",
-    title: "Cerebral",
-    description: "Conocerás tu hemisferio cerebral predominante.",
-    icon: HelpCircle,
-    gradient: "linear-gradient(135deg, #E1BEE7 0%, #CE93D8 50%, #BA68C8 100%)"
-  },
-  {
-    id: "iq",
-    title: "IQ",
-    description: "Para medir tu nivel intelectual.",
-    icon: Search,
-    gradient: "linear-gradient(135deg, #90CAF9 0%, #7986CB 50%, #5C6BC0 100%)"
-  }
-];
+const testGradients = {
+  lectura: "linear-gradient(135deg, #4DD0E1 0%, #26C6DA 50%, #00ACC1 100%)",
+  razonamiento: "linear-gradient(135deg, #F48FB1 0%, #CE93D8 50%, #7E57C2 100%)",
+  cerebral: "linear-gradient(135deg, #E1BEE7 0%, #CE93D8 50%, #BA68C8 100%)",
+  iq: "linear-gradient(135deg, #90CAF9 0%, #7986CB 50%, #5C6BC0 100%)",
+};
 
 function TestCard({ 
-  category, 
+  testId,
+  title,
+  description,
   index, 
   onClick 
 }: { 
-  category: TestCategory; 
+  testId: string;
+  title: string;
+  description: string;
   index: number;
   onClick: () => void;
 }) {
-  const Icon = category.icon;
+  const Icon = testIcons[testId as keyof typeof testIcons] || Brain;
+  const gradient = testGradients[testId as keyof typeof testGradients] || testGradients.razonamiento;
   
   return (
     <motion.div
@@ -118,15 +98,14 @@ function TestCard({
       transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
       onClick={onClick}
       className="cursor-pointer card-touch"
-      data-testid={`card-test-${category.id}`}
+      data-testid={`card-test-${testId}`}
     >
       <motion.div
         className="relative overflow-hidden rounded-3xl p-4 flex items-center gap-4"
-        style={{ background: category.gradient }}
+        style={{ background: gradient }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
-        {/* Icon/Character Area */}
         <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center relative">
           <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
           <div className="relative w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -134,11 +113,10 @@ function TestCard({
           </div>
         </div>
         
-        {/* Text Content */}
         <div className="flex-1 text-white py-2">
           <p className="text-sm font-medium opacity-90 mb-0.5">Test</p>
-          <h3 className="text-2xl font-black mb-1">{category.title}</h3>
-          <p className="text-sm opacity-90 leading-snug">{category.description}</p>
+          <h3 className="text-2xl font-black mb-1">{title}</h3>
+          <p className="text-sm opacity-90 leading-snug">{description}</p>
         </div>
       </motion.div>
     </motion.div>
@@ -146,7 +124,7 @@ function TestCard({
 }
 
 export default function TestsPage() {
-  const [, setLocation] = useLocation();
+  const { userData } = useUserData();
   const [showNino, setShowNino] = useState(false);
 
   useEffect(() => {
@@ -156,13 +134,23 @@ export default function TestsPage() {
 
   const handleBack = useCallback(() => {
     playButtonSound();
-    setLocation("/");
-  }, [setLocation]);
+    window.history.back();
+  }, []);
 
   const handleTestClick = useCallback((testId: string) => {
     playCardSound();
-    console.log("Selected test:", testId);
-  }, []);
+    console.log("Selected test:", testId, "for age group:", userData.ageGroup);
+  }, [userData.ageGroup]);
+
+  const ageContent = getAgeTestContent(userData.ageGroup);
+  const ageLabel = userData.ageLabel || "Usuario";
+
+  const testCategories = [
+    { id: "lectura", ...ageContent.lectura },
+    { id: "razonamiento", ...ageContent.razonamiento },
+    { id: "cerebral", ...ageContent.cerebral },
+    { id: "iq", ...ageContent.iq },
+  ];
 
   return (
     <motion.div
@@ -171,9 +159,7 @@ export default function TestsPage() {
       exit={{ opacity: 0 }}
       className="min-h-screen bg-slate-50 dark:bg-background overflow-hidden relative"
     >
-      {/* Background Images with Swipe Effect */}
       <div className="fixed inset-0 z-0 opacity-30">
-        {/* Base image - nino2 (cyan X logo) */}
         <motion.div
           className="absolute inset-0"
           initial={{ opacity: 0 }}
@@ -187,7 +173,6 @@ export default function TestsPage() {
           />
         </motion.div>
 
-        {/* Overlay image - nino (person in X) with swipe effect from right to left */}
         <motion.div
           className="absolute inset-0 overflow-hidden"
           initial={{ clipPath: "inset(0 0 0 100%)" }}
@@ -202,9 +187,7 @@ export default function TestsPage() {
         </motion.div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 min-h-screen safe-area-inset">
-        {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -220,6 +203,10 @@ export default function TestsPage() {
             <span>Volver</span>
           </button>
           
+          <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-medium">
+            {ageLabel}
+          </div>
+          
           <button 
             className="p-2 text-gray-600 dark:text-gray-400"
             data-testid="button-menu"
@@ -228,7 +215,6 @@ export default function TestsPage() {
           </button>
         </motion.header>
 
-        {/* Title Section */}
         <motion.div
           className="px-6 pt-2 pb-6"
           initial={{ opacity: 0, y: 20 }}
@@ -243,12 +229,13 @@ export default function TestsPage() {
           </p>
         </motion.div>
 
-        {/* Test Cards */}
         <div className="px-4 pb-8 space-y-4">
           {testCategories.map((category, index) => (
             <TestCard
               key={category.id}
-              category={category}
+              testId={category.id}
+              title={category.title}
+              description={category.description}
               index={index}
               onClick={() => handleTestClick(category.id)}
             />

@@ -4,6 +4,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { SelectionScreen } from "@/components/SelectionScreen";
 import { Sparkles, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSessionTracking } from "@/hooks/use-session";
 
 type AppState = "loading" | "selection" | "complete";
 
@@ -17,6 +18,8 @@ interface UserSelection {
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("loading");
   const [selection, setSelection] = useState<UserSelection | null>(null);
+  
+  const { updateSession } = useSessionTracking(selection?.ageGroup, selection?.problems);
 
   const handleLoadingComplete = useCallback(() => {
     setAppState("selection");
@@ -25,7 +28,8 @@ export default function Home() {
   const handleSelectionComplete = useCallback((userSelection: UserSelection) => {
     setSelection(userSelection);
     setAppState("complete");
-  }, []);
+    updateSession({ ageGroup: userSelection.ageGroup, selectedProblems: userSelection.problems });
+  }, [updateSession]);
 
   const handleRestart = useCallback(() => {
     setAppState("loading");

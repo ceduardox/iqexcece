@@ -2,7 +2,16 @@
 
 ## Overview
 
-IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speaking users. The platform helps users identify their age group and cognitive challenges, then provides personalized mental improvement solutions. The app features an engaging onboarding flow with a loading screen, age/problem selection, and completion confirmation.
+IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speaking users. The platform helps users identify their age group and cognitive challenges, then provides personalized mental improvement solutions. The app features an engaging onboarding flow with a loading screen, age/problem selection, fingerprint scanner, and options for Tests or Training.
+
+## Recent Changes (Jan 2026)
+
+- Added admin panel at `/gestion` (login: CITEX / GESTORCITEXBO2014)
+- User session tracking with IP, device, browser, and PWA detection
+- Active users count displayed in admin panel
+- Age-specific content for cognitive tests (5 age groups with unique content)
+- Session tracking with heartbeat and automatic deactivation
+- UserContext for passing age group data through the flow
 
 ## User Preferences
 

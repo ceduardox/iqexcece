@@ -4,6 +4,7 @@ import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "wouter";
+import { useUserData } from "@/lib/user-context";
 
 // Web Audio API for instant sound playback (especially on mobile)
 class SoundPlayer {
@@ -134,7 +135,7 @@ const ageGroups: AgeGroup[] = [
     borderColor: "border-purple-400"
   },
   { 
-    id: "adulto-mayor", 
+    id: "adulto_mayor", 
     label: "ADULTO MAYOR", 
     ageRange: "50+ años", 
     image: "/age-adulto-mayor.png",
@@ -197,7 +198,7 @@ const ageImagePrefix: Record<string, string> = {
   "adolescentes": "adolescentes", 
   "universitarios": "universitarios",
   "profesionales": "profesionales",
-  "adulto-mayor": "adulto"
+  "adulto_mayor": "adulto"
 };
 
 // Map problem IDs to image suffixes
@@ -296,6 +297,7 @@ interface SelectionScreenProps {
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
+  const { setUserData } = useUserData();
   const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("age");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
@@ -439,6 +441,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   const handleOptionSelect = (option: "tests" | "training") => {
     playButtonSound();
+    setUserData({
+      ageGroup: selectedAge,
+      ageLabel: getAgeLabel(selectedAge!),
+      selectedProblems: selectedProblems
+    });
     if (option === "tests") {
       setLocation("/tests");
     } else {
