@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ThumbsUp, ArrowRight } from "lucide-react";
 import { useUserData } from "@/lib/user-context";
 
 const playButtonSound = () => {
@@ -53,10 +53,10 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 
 Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despenalizado la eutanasia, y en ellos todavía permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. Según los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos países.`,
     questions: [
-      { question: "Pregunta 1 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
-      { question: "Pregunta 2 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
-      { question: "Pregunta 3 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
-      { question: "Pregunta 4 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      { question: "¿Qué es la eutanasia?", options: ["Es aquello que considera lo bueno y lo malo", "Es quitarse la vida para evitar el sufrimiento", "Es todo acto u omisión cuya responsabilidad recae en el medico y/o familiares"], correct: 2 },
+      { question: "¿Dónde surge la propaganda de realizar la eutanasia?", options: ["E.E.U.U.", "Alemania", "Rusia"], correct: 1 },
+      { question: "¿En qué países se ha despenalizado la eutanasia?", options: ["Alemania - Italia", "Bélgica - Holanda", "España - Inglaterra"], correct: 1 },
+      { question: "¿Quién fue juzgado como asesino por practicar la eutanasia en el gobierno nazi?", options: ["Arthun", "Nuberg", "Vemberth"], correct: 0 },
     ],
   },
 };
@@ -543,11 +543,11 @@ export default function ReadingContentPage() {
               )}
               <span className="relative">Ir a cuestionario</span>
               <motion.span
-                className="relative text-xl"
+                className="relative"
                 animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                →
+                <ArrowRight className="w-5 h-5" />
               </motion.span>
             </motion.button>
           </div>
@@ -678,11 +678,11 @@ export default function ReadingContentPage() {
               )}
               <span className="relative">Ver mi resultado</span>
               <motion.span
-                className="relative text-xl"
+                className="relative"
                 animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                →
+                <ArrowRight className="w-5 h-5" />
               </motion.span>
             </motion.button>
           </div>
@@ -763,7 +763,10 @@ export default function ReadingContentPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex flex-col"
-          style={{ background: "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" }}
+          style={{ background: isAdolescent 
+            ? "linear-gradient(160deg, #8B5CF6 0%, #7C3AED 40%, #6D28D9 100%)"
+            : "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" 
+          }}
         >
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <FloatingBubbles count={20} opacity={0.3} isAdolescent={isAdolescent} />
@@ -789,9 +792,9 @@ export default function ReadingContentPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.2 }}
-              className="text-6xl mb-6"
+              className="mb-6"
             >
-              👍
+              <ThumbsUp className="w-16 h-16 text-white" />
             </motion.div>
 
             <motion.div
