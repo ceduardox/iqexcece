@@ -228,29 +228,33 @@ const preloadImagesForAge = (ageId: string) => {
   });
 };
 
-// Lightweight particle for mobile
+// Lightweight particle for mobile - using logo colors
 function ElectronParticle({ delay, startX, startY, isMobile }: { delay: number; startX: number; startY: number; isMobile: boolean }) {
+  const isPurple = Math.random() > 0.5;
+  const color = isPurple ? "#9333EA" : "#14B8A6";
+  
   if (isMobile) {
     // Static glowing dot on mobile - no animation
     return (
       <div
-        className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/50"
-        style={{ left: `${startX}%`, top: `${startY}%` }}
+        className="absolute w-1.5 h-1.5 rounded-full"
+        style={{ left: `${startX}%`, top: `${startY}%`, backgroundColor: color, opacity: 0.3 }}
       />
     );
   }
   return (
     <motion.div
-      className="absolute w-2 h-2 rounded-full bg-cyan-400"
+      className="absolute w-2 h-2 rounded-full"
       style={{ 
         left: `${startX}%`, 
         top: `${startY}%`,
-        boxShadow: "0 0 10px hsl(187 85% 53%), 0 0 20px hsl(187 85% 53% / 0.5)"
+        backgroundColor: color,
+        boxShadow: `0 0 10px ${color}, 0 0 20px ${color}50`
       }}
       animate={{
         x: [0, Math.random() * 100 - 50, Math.random() * 100 - 50, 0],
         y: [0, Math.random() * 100 - 50, Math.random() * 100 - 50, 0],
-        opacity: [0.3, 0.8, 0.5, 0.3],
+        opacity: [0.2, 0.5, 0.3, 0.2],
         scale: [0.5, 1.2, 0.8, 0.5],
       }}
       transition={{
@@ -263,21 +267,25 @@ function ElectronParticle({ delay, startX, startY, isMobile }: { delay: number; 
   );
 }
 
-// Lightweight line for mobile
+// Lightweight line for mobile - using logo colors
 function ElectronLine({ startX, startY, endX, endY, delay, isMobile }: { startX: number; startY: number; endX: number; endY: number; delay: number; isMobile: boolean }) {
   if (isMobile) return null; // No lines on mobile
+  const isPurple = Math.random() > 0.5;
   return (
     <motion.div
-      className="absolute h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+      className="absolute h-0.5"
       style={{
         left: `${startX}%`,
         top: `${startY}%`,
         width: `${Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)}%`,
         transform: `rotate(${Math.atan2(endY - startY, endX - startX) * 180 / Math.PI}deg)`,
         transformOrigin: "left center",
+        background: isPurple 
+          ? "linear-gradient(to right, transparent, #9333EA, transparent)"
+          : "linear-gradient(to right, transparent, #14B8A6, transparent)",
       }}
       animate={{
-        opacity: [0, 0.6, 0],
+        opacity: [0, 0.4, 0],
         scaleX: [0, 1, 0],
       }}
       transition={{
@@ -487,31 +495,53 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background p-4 md:p-8 overflow-y-auto relative"
+      className="min-h-screen p-4 md:p-8 overflow-y-auto relative"
+      style={{
+        background: "linear-gradient(135deg, #FAFBFF 0%, #F0F4FF 50%, #F5FAFF 100%)"
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       data-testid="selection-screen"
     >
+      {/* Decorative X shape in background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[800px] md:h-[800px]"
+          initial={{ opacity: 0, rotate: -15 }}
+          animate={{ opacity: 0.06, rotate: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <path d="M10 10 L45 50 L10 90 L20 90 L50 55 L80 90 L90 90 L55 50 L90 10 L80 10 L50 45 L20 10 Z" 
+              fill="url(#xGradient)" />
+            <defs>
+              <linearGradient id="xGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#9333EA" />
+                <stop offset="100%" stopColor="#14B8A6" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </motion.div>
+        
         {step === "age" && !isMobile && (
           <motion.img 
             src="/circuit-pattern.png" 
             alt=""
-            className="absolute right-0 bottom-0 w-72 md:w-[400px] opacity-40"
+            className="absolute right-0 bottom-0 w-72 md:w-[400px] opacity-20"
             initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: [0.3, 0.5, 0.3], x: 0 }}
+            animate={{ opacity: [0.15, 0.25, 0.15], x: 0 }}
             transition={{
               opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" },
               x: { duration: 0.8 }
             }}
-            style={{ filter: "drop-shadow(0 0 20px hsl(187 85% 53% / 0.5))" }}
+            style={{ filter: "drop-shadow(0 0 20px rgba(147, 51, 234, 0.3))" }}
           />
         )}
         {step === "age" && isMobile && (
           <img 
             src="/circuit-pattern.png" 
             alt=""
-            className="absolute right-0 bottom-0 w-48 opacity-20"
+            className="absolute right-0 bottom-0 w-48 opacity-10"
             loading="lazy"
           />
         )}
@@ -520,9 +550,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           <motion.img 
             src="/x-background.png" 
             alt=""
-            className="absolute left-0 top-20 w-48 md:w-72 opacity-15"
+            className="absolute left-0 top-20 w-48 md:w-72 opacity-10"
             initial={{ opacity: 0, rotate: -10 }}
-            animate={{ opacity: 0.15, rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
+            animate={{ opacity: 0.1, rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
             transition={{
               rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 8, repeat: Infinity, ease: "easeInOut" },
@@ -533,7 +563,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           <img 
             src="/x-background.png" 
             alt=""
-            className="absolute left-0 top-20 w-32 opacity-10"
+            className="absolute left-0 top-20 w-32 opacity-[0.08]"
             loading="lazy"
           />
         )}
@@ -598,30 +628,30 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-3">
+                <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase mb-3" style={{ color: "#9333EA" }}>
                   Descubre tu camino
                 </p>
                 
                 <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight">
-                  <span className="text-muted-foreground">Que esta </span>
+                  <span className="text-slate-700">Que esta </span>
                   <span className="relative inline-block">
-                    <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                    <span style={{ background: "linear-gradient(90deg, #9333EA, #14B8A6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                       frenando
                     </span>
-                    <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full" style={{ background: "linear-gradient(90deg, #9333EA, #14B8A6)" }} />
                   </span>
                 </h1>
                 
                 <h2 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mt-1">
-                  <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                  <span style={{ background: "linear-gradient(90deg, #14B8A6, #9333EA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     tu potencial
                   </span>
-                  <span className="text-muted-foreground"> hoy?</span>
+                  <span className="text-slate-700"> hoy?</span>
                 </h2>
               </motion.div>
 
               <motion.p
-                className="text-left text-muted-foreground text-sm mb-4 relative z-10"
+                className="text-left text-slate-500 text-sm mb-4 relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -648,24 +678,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
-                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
-                          }`}
-                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          className="w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative bg-white/90 backdrop-blur-sm"
+                          style={{
+                            borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.3)",
+                            boxShadow: isSelected 
+                              ? "0 0 30px rgba(20, 184, 166, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)" 
+                              : "0 4px 20px rgba(147, 51, 234, 0.1)"
+                          }}
                           data-testid={`button-age-${group.id}`}
                         >
-                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="absolute inset-0 rounded-2xl opacity-40 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.2), rgba(147, 51, 234, 0.2), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex flex-col">
                             <div className="w-full h-32 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex items-center justify-between p-2">
                               <div>
-                                <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
-                                <span className="text-xs text-cyan-400/80 block">{group.ageRange}</span>
+                                <span className="font-bold text-sm text-slate-800 block leading-tight">{group.label}</span>
+                                <span className="text-xs block" style={{ color: "#14B8A6" }}>{group.ageRange}</span>
                               </div>
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
-                                {isSelected && <Check className="w-4 h-4 text-background" />}
+                              <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.4)", backgroundColor: isSelected ? "#14B8A6" : "transparent" }}>
+                                {isSelected && <Check className="w-4 h-4 text-white" />}
                               </div>
                             </div>
                           </div>
@@ -685,24 +718,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
-                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
-                          }`}
-                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          className="w-full rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative bg-white/90 backdrop-blur-sm"
+                          style={{
+                            borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.3)",
+                            boxShadow: isSelected 
+                              ? "0 0 30px rgba(20, 184, 166, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)" 
+                              : "0 4px 20px rgba(147, 51, 234, 0.1)"
+                          }}
                           data-testid={`button-age-${group.id}`}
                         >
-                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="absolute inset-0 rounded-2xl opacity-40 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.2), rgba(147, 51, 234, 0.2), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex flex-col">
                             <div className="w-full h-32 overflow-hidden">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex items-center justify-between p-2">
                               <div>
-                                <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
-                                <span className="text-xs text-cyan-400/80 block">{group.ageRange}</span>
+                                <span className="font-bold text-sm text-slate-800 block leading-tight">{group.label}</span>
+                                <span className="text-xs block" style={{ color: "#14B8A6" }}>{group.ageRange}</span>
                               </div>
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
-                                {isSelected && <Check className="w-4 h-4 text-background" />}
+                              <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.4)", backgroundColor: isSelected ? "#14B8A6" : "transparent" }}>
+                                {isSelected && <Check className="w-4 h-4 text-white" />}
                               </div>
                             </div>
                           </div>
@@ -723,22 +759,25 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => !isSelected && handleAgeSelect(group.id)}
-                          className={`w-full h-36 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
-                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
-                          }`}
-                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          className="w-full h-36 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative bg-white/90 backdrop-blur-sm"
+                          style={{
+                            borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.3)",
+                            boxShadow: isSelected 
+                              ? "0 0 30px rgba(20, 184, 166, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)" 
+                              : "0 4px 20px rgba(147, 51, 234, 0.1)"
+                          }}
                           data-testid={`button-age-${group.id}`}
                         >
-                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="absolute inset-0 rounded-2xl opacity-40 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.2), rgba(147, 51, 234, 0.2), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
                           <div className="flex h-full">
                             <div className="w-36 h-full overflow-hidden flex-shrink-0">
                               <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex-1 flex flex-col justify-center p-4">
-                              <span className="font-bold text-lg text-foreground block leading-tight">{group.label}</span>
-                              <span className="text-sm text-cyan-400/80 mt-1 block">{group.ageRange}</span>
-                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
-                                {isSelected && <Check className="w-4 h-4 text-background" />}
+                              <span className="font-bold text-lg text-slate-800 block leading-tight">{group.label}</span>
+                              <span className="text-sm mt-1 block" style={{ color: "#14B8A6" }}>{group.ageRange}</span>
+                              <div className="w-5 h-5 rounded-full border-2 mt-2 flex items-center justify-center" style={{ borderColor: isSelected ? "#14B8A6" : "rgba(147, 51, 234, 0.4)", backgroundColor: isSelected ? "#14B8A6" : "transparent" }}>
+                                {isSelected && <Check className="w-4 h-4 text-white" />}
                               </div>
                             </div>
                           </div>
@@ -758,7 +797,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <Button
                       onClick={handleContinue}
                       size="lg"
-                      className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0 btn-instant"
+                      className="w-full text-base font-bold border-0 btn-instant text-white"
+                      style={{ background: "linear-gradient(90deg, #9333EA, #14B8A6)" }}
                       data-testid="button-continue-age"
                     >
                       CONTINUAR
@@ -780,7 +820,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             >
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 btn-instant"
+                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium btn-instant"
+                style={{ borderColor: "#14B8A6", backgroundColor: "rgba(20, 184, 166, 0.1)", color: "#14B8A6" }}
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -801,28 +842,28 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 >
                   {!isMobile && (
                     <motion.div
-                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
-                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
-                      animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
+                      className="absolute -inset-4 rounded-3xl opacity-20 blur-xl"
+                      style={{ background: "linear-gradient(135deg, #14B8A6, #9333EA)" }}
+                      animate={{ opacity: [0.15, 0.25, 0.15], scale: [1, 1.1, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
                   )}
                   
                   <div className="relative">
-                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-purple-400 mb-2">
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase mb-2" style={{ color: "#9333EA" }}>
                       Identifica tu reto
                     </p>
                     
                     <h1 className="text-3xl md:text-5xl font-black leading-tight">
-                      <span className="text-muted-foreground">Cual es tu mayor</span>
+                      <span className="text-slate-700">Cual es tu mayor</span>
                     </h1>
                     
                     <h2 className="text-3xl md:text-5xl font-black leading-tight mt-1">
                       <span className="relative inline-block">
-                        <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                        <span style={{ background: "linear-gradient(90deg, #9333EA, #14B8A6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                           desafio?
                         </span>
-                        <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500" />
+                        <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full" style={{ background: "linear-gradient(90deg, #14B8A6, #9333EA)" }} />
                       </span>
                     </h2>
                   </div>
@@ -830,7 +871,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </motion.div>
 
               <motion.p
-                className="text-center text-muted-foreground text-sm"
+                className="text-center text-slate-500 text-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -862,14 +903,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         role="checkbox"
                         aria-checked={isSelected}
                         onClick={() => handleProblemToggle(problem.id)}
-                        className={`w-full rounded-2xl border-2 overflow-hidden text-left card-touch ${
-                          isSelected
-                            ? "border-purple-400"
-                            : "border-border/30"
-                        }`}
-                        style={isSelected ? {
-                          boxShadow: "0 0 25px hsl(280 70% 50% / 0.4)",
-                        } : {}}
+                        className="w-full rounded-2xl border-2 overflow-hidden text-left card-touch bg-white/90 backdrop-blur-sm"
+                        style={{
+                          borderColor: isSelected ? "#9333EA" : "rgba(147, 51, 234, 0.2)",
+                          boxShadow: isSelected 
+                            ? "0 0 25px rgba(147, 51, 234, 0.3)" 
+                            : "0 4px 20px rgba(147, 51, 234, 0.08)"
+                        }}
                         data-testid={`button-problem-${problem.id}`}
                       >
                         <AnimatePresence mode="wait">
@@ -939,19 +979,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <span className={`font-bold text-base md:text-lg ${isSelected ? "text-purple-400" : "text-foreground"}`}>
+                                  <span className="font-bold text-base md:text-lg" style={{ color: isSelected ? "#9333EA" : "#334155" }}>
                                     {problem.title}
                                   </span>
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                  <p className="text-xs text-slate-500 mt-1 line-clamp-1">
                                     {problem.description}
                                   </p>
                                 </div>
                                 <motion.div
-                                  className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                    isSelected 
-                                      ? "border-purple-400 bg-purple-500" 
-                                      : "border-muted-foreground/30"
-                                  }`}
+                                  className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                  style={{
+                                    borderColor: isSelected ? "#9333EA" : "rgba(147, 51, 234, 0.3)",
+                                    backgroundColor: isSelected ? "#9333EA" : "transparent"
+                                  }}
                                 >
                                   {isSelected && <Check className="w-4 h-4 text-white" />}
                                 </motion.div>
@@ -975,7 +1015,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={handleContinue}
                   disabled={selectedProblems.length === 0}
                   size="lg"
-                  className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0 btn-instant"
+                  className="w-full text-lg font-bold border-0 btn-instant text-white"
+                  style={{ background: "linear-gradient(90deg, #14B8A6, #9333EA)" }}
                   data-testid="button-continue-problems"
                 >
                   CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
@@ -1000,7 +1041,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 transition={{ delay: 0.1 }}
               >
                 <h1 className="text-3xl md:text-4xl font-black text-center">
-                  <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                  <span style={{ background: "linear-gradient(90deg, #14B8A6, #9333EA, #14B8A6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     Continuemos
                   </span>
                 </h1>
@@ -1022,7 +1063,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.div
                   className="absolute inset-0 rounded-full"
                   style={{
-                    background: "radial-gradient(circle, transparent 40%, hsl(187 85% 53% / 0.1) 70%, transparent 100%)",
+                    background: "radial-gradient(circle, transparent 40%, rgba(20, 184, 166, 0.15) 70%, transparent 100%)",
                   }}
                   animate={isScanning ? {
                     scale: [1, 1.3, 1],
@@ -1038,23 +1079,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.div
                   className="absolute inset-2 rounded-full border-2"
                   style={{
-                    borderColor: "hsl(187 85% 53%)",
+                    borderColor: "#14B8A6",
                     boxShadow: isScanning 
-                      ? "0 0 30px hsl(187 85% 53%), 0 0 60px hsl(187 85% 53% / 0.5), inset 0 0 30px hsl(187 85% 53% / 0.3)"
-                      : "0 0 15px hsl(187 85% 53% / 0.5), 0 0 30px hsl(187 85% 53% / 0.3)",
+                      ? "0 0 30px #14B8A6, 0 0 60px rgba(20, 184, 166, 0.5), inset 0 0 30px rgba(20, 184, 166, 0.3)"
+                      : "0 0 15px rgba(20, 184, 166, 0.5), 0 0 30px rgba(20, 184, 166, 0.3)",
                   }}
                   animate={isScanning ? {
                     scale: [1, 1.05, 1],
-                    borderColor: ["hsl(187 85% 53%)", "hsl(280 70% 60%)", "hsl(187 85% 53%)"],
+                    borderColor: ["#14B8A6", "#9333EA", "#14B8A6"],
                   } : {}}
                   transition={{ duration: 0.4, repeat: Infinity }}
                 />
                 
-                {/* Inner background */}
+                {/* Inner background - lighter for white theme */}
                 <div 
                   className="absolute inset-4 rounded-full"
                   style={{
-                    background: "radial-gradient(circle, hsl(220 30% 8%) 0%, hsl(220 40% 5%) 100%)",
+                    background: "linear-gradient(135deg, #F0F4FF 0%, #E8F0FE 100%)",
+                    boxShadow: "inset 0 2px 10px rgba(147, 51, 234, 0.1)"
                   }}
                 />
                 
@@ -1071,15 +1113,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     className="w-full h-full object-contain"
                     style={{
                       filter: isScanning 
-                        ? "drop-shadow(0 0 25px hsl(187 85% 53%)) drop-shadow(0 0 50px hsl(280 70% 60%))"
-                        : "drop-shadow(0 0 15px hsl(187 85% 53% / 0.6))",
+                        ? "drop-shadow(0 0 25px #14B8A6) drop-shadow(0 0 50px #9333EA)"
+                        : "drop-shadow(0 0 15px rgba(20, 184, 166, 0.6))",
                     }}
                   />
                   {/* Scanning line overlay */}
                   {isScanning && (
                     <motion.div
-                      className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
-                      style={{ boxShadow: "0 0 20px hsl(187 85% 53%)" }}
+                      className="absolute left-0 right-0 h-1"
+                      style={{ background: "linear-gradient(to right, transparent, #14B8A6, transparent)", boxShadow: "0 0 20px #14B8A6" }}
                       initial={{ top: "10%" }}
                       animate={{ top: ["10%", "90%", "10%"] }}
                       transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -1092,7 +1134,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   <motion.div
                     className="absolute inset-4 rounded-full"
                     style={{
-                      background: "linear-gradient(180deg, transparent 0%, hsl(187 85% 53% / 0.3) 50%, transparent 100%)",
+                      background: "linear-gradient(180deg, transparent 0%, rgba(20, 184, 166, 0.3) 50%, transparent 100%)",
                     }}
                     initial={{ y: "-100%" }}
                     animate={{ y: ["−100%", "100%", "−100%"] }}
@@ -1109,12 +1151,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               >
                 {/* Progress bar */}
                 {isScanning && (
-                  <div className="w-48 h-2 rounded-full bg-black/40 overflow-hidden mx-auto">
+                  <div className="w-48 h-2 rounded-full bg-slate-200 overflow-hidden mx-auto">
                     <motion.div
                       className="h-full rounded-full"
                       style={{ 
-                        background: "linear-gradient(90deg, hsl(187 85% 53%), hsl(280 70% 60%))",
-                        boxShadow: "0 0 10px hsl(187 85% 53%)",
+                        background: "linear-gradient(90deg, #14B8A6, #9333EA)",
+                        boxShadow: "0 0 10px #14B8A6",
                       }}
                       initial={{ width: "0%" }}
                       animate={{ width: `${scanProgress}%` }}
@@ -1126,15 +1168,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.p
                   className="text-xl md:text-2xl font-bold"
                   style={{
-                    color: isScanning ? "hsl(187 85% 53%)" : "hsl(187 85% 53% / 0.9)",
-                    textShadow: isScanning ? "0 0 30px hsl(187 85% 53%)" : "0 0 10px hsl(187 85% 53% / 0.5)",
+                    color: isScanning ? "#14B8A6" : "#9333EA",
+                    textShadow: isScanning ? "0 0 20px rgba(20, 184, 166, 0.5)" : "none",
                   }}
                   animate={!isScanning ? { opacity: [0.8, 1, 0.8] } : {}}
                   transition={{ duration: 1, repeat: Infinity }}
                 >
                   {isScanning ? "Escaneando..." : "Presiona aquí"}
                 </motion.p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-slate-500">
                   {isScanning ? "Mantén presionado" : "Mantén tu dedo para continuar"}
                 </p>
               </motion.div>
@@ -1152,7 +1194,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             >
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 btn-instant"
+                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium btn-instant"
+                style={{ borderColor: "#9333EA", backgroundColor: "rgba(147, 51, 234, 0.1)", color: "#9333EA" }}
                 data-testid="button-back-options"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -1173,31 +1216,31 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 >
                   {!isMobile && (
                     <motion.div
-                      className="absolute -inset-4 rounded-3xl opacity-30 blur-xl"
-                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(280 70% 50%))" }}
-                      animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.15, 1] }}
+                      className="absolute -inset-4 rounded-3xl opacity-20 blur-xl"
+                      style={{ background: "linear-gradient(135deg, #14B8A6, #9333EA)" }}
+                      animate={{ opacity: [0.15, 0.25, 0.15], scale: [1, 1.15, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
                   )}
                   
                   <div className="relative">
-                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase text-cyan-400 mb-2">
+                    <p className="text-xs md:text-sm font-medium tracking-[0.3em] uppercase mb-2" style={{ color: "#14B8A6" }}>
                       Elige tu camino
                     </p>
                     
                     <h1 className="text-3xl md:text-5xl font-black leading-tight">
                       <span className="relative inline-block">
-                        <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                        <span style={{ background: "linear-gradient(90deg, #14B8A6, #9333EA, #14B8A6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                           Desafía tu Mente
                         </span>
-                        <span className="absolute -bottom-2 left-0 right-0 h-1 rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500" />
+                        <span className="absolute -bottom-2 left-0 right-0 h-1 rounded-full" style={{ background: "linear-gradient(90deg, #9333EA, #14B8A6, #9333EA)" }} />
                       </span>
                     </h1>
                   </div>
                 </motion.div>
                 
                 <motion.p
-                  className="text-sm md:text-base text-muted-foreground max-w-sm mx-auto"
+                  className="text-sm md:text-base text-slate-500 max-w-sm mx-auto"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
@@ -1217,20 +1260,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={() => handleOptionSelect("tests")}
                   className="w-full rounded-3xl overflow-hidden text-left relative group cursor-pointer card-touch"
                   style={{
-                    background: "linear-gradient(135deg, hsl(280 70% 45%) 0%, hsl(260 60% 35%) 50%, hsl(200 70% 40%) 100%)",
+                    background: "linear-gradient(135deg, #9333EA 0%, #7C3AED 50%, #14B8A6 100%)",
                   }}
                   data-testid="button-option-tests"
                 >
                   <motion.div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{
-                      background: "radial-gradient(circle at 50% 50%, hsl(280 70% 60% / 0.4) 0%, transparent 70%)",
+                      background: "radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.4) 0%, transparent 70%)",
                     }}
                   />
                   {!isMobile && (
                     <motion.div
                       className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
-                      style={{ background: "linear-gradient(135deg, hsl(280 70% 60%), hsl(200 80% 50%))" }}
+                      style={{ background: "linear-gradient(135deg, #9333EA, #14B8A6)" }}
                     />
                   )}
                   
@@ -1268,20 +1311,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={() => handleOptionSelect("training")}
                   className="w-full rounded-3xl overflow-hidden text-left relative group cursor-pointer card-touch"
                   style={{
-                    background: "linear-gradient(135deg, hsl(187 70% 40%) 0%, hsl(200 60% 35%) 50%, hsl(220 70% 45%) 100%)",
+                    background: "linear-gradient(135deg, #14B8A6 0%, #0D9488 50%, #9333EA 100%)",
                   }}
                   data-testid="button-option-training"
                 >
                   <motion.div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{
-                      background: "radial-gradient(circle at 50% 50%, hsl(187 85% 53% / 0.4) 0%, transparent 70%)",
+                      background: "radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.4) 0%, transparent 70%)",
                     }}
                   />
                   {!isMobile && (
                     <motion.div
                       className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500"
-                      style={{ background: "linear-gradient(135deg, hsl(187 85% 53%), hsl(220 80% 60%))" }}
+                      style={{ background: "linear-gradient(135deg, #14B8A6, #9333EA)" }}
                     />
                   )}
                   
