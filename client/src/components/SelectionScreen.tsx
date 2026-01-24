@@ -529,7 +529,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-3 flex-1 relative z-10 w-2/3 md:w-3/5"
+                className="space-y-3 flex-1 relative z-10 w-[78%] md:w-[70%]"
                 role="radiogroup"
                 aria-label="Selecciona tu grupo de edad"
               >
