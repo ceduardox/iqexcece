@@ -470,25 +470,26 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               transition={{ duration: 0.4 }}
               className="relative min-h-[85vh] flex flex-col"
             >
-              {/* X-shaped girl image - positioned on right side */}
+              {/* X-shaped girl image - positioned more to the left */}
               <motion.div 
-                className="absolute right-0 top-0 bottom-0 w-1/2 md:w-2/5 pointer-events-none overflow-hidden"
+                className="absolute -right-8 top-0 bottom-0 w-3/5 md:w-1/2 pointer-events-none overflow-hidden"
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
+                style={{ left: "35%" }}
               >
                 <img 
                   src="/girl-x-image.png" 
                   alt=""
-                  className="h-full w-full object-cover object-left"
+                  className="h-full w-full object-cover object-center"
                   style={{
-                    maskImage: "linear-gradient(to left, black 60%, transparent 100%)",
-                    WebkitMaskImage: "linear-gradient(to left, black 60%, transparent 100%)",
+                    maskImage: "linear-gradient(to left, black 70%, transparent 100%)",
+                    WebkitMaskImage: "linear-gradient(to left, black 70%, transparent 100%)",
                   }}
                 />
                 {/* Subtle circuit pattern overlay */}
                 <div 
-                  className="absolute inset-0 opacity-20"
+                  className="absolute inset-0 opacity-15"
                   style={{
                     backgroundImage: "url('/circuit-pattern.png')",
                     backgroundSize: "cover",
@@ -532,16 +533,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 Selecciona tu grupo de edad
               </motion.p>
 
-              {/* Age cards - left side with overlap */}
+              {/* Age cards - square/rectangular style */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-2 flex-1 relative z-10 pr-16 md:pr-24"
+                className="space-y-3 flex-1 relative z-10 w-3/5 md:w-1/2"
                 role="radiogroup"
                 aria-label="Selecciona tu grupo de edad"
               >
-                {ageGroups.map((group, index) => {
+                {ageGroups.map((group) => {
                   const isSelected = selectedAge === group.id;
                   
                   return (
@@ -556,66 +557,90 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         role="radio"
                         aria-checked={isSelected}
                         onClick={() => handleAgeSelect(group.id)}
-                        className={`w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left backdrop-blur-sm ${
+                        className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left ${
                           isSelected
-                            ? `${group.borderColor} bg-gradient-to-r ${group.gradient}`
-                            : "border-purple-500/30 bg-background/80"
+                            ? `${group.borderColor}`
+                            : "border-purple-500/40 bg-background/90"
                         }`}
                         style={isSelected ? {
-                          boxShadow: "0 0 20px hsl(187 85% 53% / 0.3), 0 0 40px hsl(280 70% 50% / 0.2)",
+                          boxShadow: "0 0 25px hsl(187 85% 53% / 0.4), 0 0 50px hsl(280 70% 50% / 0.25)",
                         } : {}}
                         whileTap={{ scale: 0.98 }}
                         data-testid={`button-age-${group.id}`}
                       >
-                        <div className="flex items-center gap-3 p-3">
-                          <div className={`w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 ${
-                            isSelected ? "border-cyan-400" : "border-purple-500/30"
-                          }`}>
-                            <img 
-                              src={group.image} 
-                              alt={group.label}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className={`font-bold text-sm md:text-base block ${
-                              isSelected ? "text-white" : "text-foreground"
-                            }`}>
-                              {group.label}
-                            </span>
-                            <span className={`text-xs ${
-                              isSelected ? "text-cyan-300" : "text-muted-foreground"
-                            }`}>
-                              {group.ageRange}
-                            </span>
-                          </div>
-                          <motion.div 
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              isSelected 
-                                ? "border-cyan-400 bg-cyan-400" 
-                                : "border-purple-500/40"
-                            }`}
-                            animate={isSelected ? { scale: [1, 1.2, 1] } : {}}
-                            transition={{ duration: 0.3 }}
-                          >
-                            {isSelected && <Check className="w-4 h-4 text-background" />}
-                          </motion.div>
-                        </div>
-                        
-                        {/* Expanded description */}
-                        <AnimatePresence>
-                          {isSelected && (
+                        <AnimatePresence mode="wait">
+                          {isSelected ? (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
+                              key="expanded"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.3 }}
-                              className="overflow-hidden"
+                              className={`bg-gradient-to-br ${group.gradient}`}
                             >
-                              <p className="px-3 pb-3 text-sm text-white/90">
-                                {group.description}
-                              </p>
+                              <div className="relative">
+                                <img 
+                                  src={group.image} 
+                                  alt={group.label}
+                                  className="w-full h-40 md:h-48 object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                                
+                                <div className="absolute bottom-0 left-0 right-0 p-4">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <motion.div
+                                      className="w-7 h-7 rounded-full border-2 border-cyan-400 bg-cyan-400 flex items-center justify-center"
+                                      animate={{ scale: [1, 1.2, 1] }}
+                                      transition={{ duration: 0.5 }}
+                                    >
+                                      <Check className="w-4 h-4 text-background" />
+                                    </motion.div>
+                                    <div>
+                                      <h3 className="text-lg md:text-xl font-black text-white">
+                                        {group.label}
+                                      </h3>
+                                      <span className="text-xs text-cyan-300">{group.ageRange}</span>
+                                    </div>
+                                  </div>
+                                  <p className="text-xs md:text-sm text-white/90 mb-3 line-clamp-2">
+                                    {group.description}
+                                  </p>
+                                  <Button
+                                    onClick={(e) => { e.stopPropagation(); handleContinue(); }}
+                                    size="sm"
+                                    className="w-full text-sm font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
+                                    data-testid="button-continue-age"
+                                  >
+                                    CONTINUAR
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="collapsed"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="flex items-center gap-3 p-3"
+                            >
+                              <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 border-purple-500/30">
+                                <img 
+                                  src={group.image} 
+                                  alt={group.label}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="font-bold text-sm md:text-base text-foreground block">
+                                  {group.label}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {group.ageRange}
+                                </span>
+                              </div>
+                              <div className="w-6 h-6 rounded-full border-2 border-purple-500/40 flex-shrink-0" />
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -624,28 +649,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   );
                 })}
               </motion.div>
-
-              {/* Continue button at bottom */}
-              <AnimatePresence>
-                {selectedAge && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ delay: 0.1, duration: 0.3 }}
-                    className="mt-4 relative z-10"
-                  >
-                    <Button
-                      onClick={handleContinue}
-                      size="lg"
-                      className="w-full text-lg font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
-                      data-testid="button-continue-age"
-                    >
-                      CONTINUAR
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </motion.div>
           )}
 
