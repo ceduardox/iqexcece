@@ -145,6 +145,8 @@ export default function TestsPage() {
     
     if (userData.ageGroup === "ninos") {
       setLocation("/child-category");
+    } else if (userData.ageGroup === "adolescentes") {
+      setLocation("/adolescente");
     } else {
       console.log("Selected test:", testId, "for age group:", userData.ageGroup);
     }
