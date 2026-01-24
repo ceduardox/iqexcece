@@ -4,41 +4,77 @@ import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Preloaded audio cache for instant playback
-const audioCache: { card?: HTMLAudioElement; button?: HTMLAudioElement } = {};
+// Web Audio API for instant sound playback (especially on mobile)
+class SoundPlayer {
+  private audioContext: AudioContext | null = null;
+  private buffers: Map<string, AudioBuffer> = new Map();
+  private fallbackAudios: Map<string, HTMLAudioElement> = new Map();
 
-// Preload sounds on first import
-if (typeof window !== 'undefined') {
-  const preloadAudio = (src: string): HTMLAudioElement => {
-    const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.load();
-    return audio;
-  };
-  audioCache.card = preloadAudio('/card.mp3');
-  audioCache.button = preloadAudio('/iphone.mp3');
+  constructor() {
+    if (typeof window !== 'undefined') {
+      // Preload with HTML Audio as fallback
+      ['/card.mp3', '/iphone.mp3'].forEach(src => {
+        const audio = new Audio(src);
+        audio.preload = 'auto';
+        audio.load();
+        this.fallbackAudios.set(src, audio);
+      });
+
+      // Try to initialize Web Audio API
+      this.initWebAudio();
+    }
+  }
+
+  private async initWebAudio() {
+    try {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Load buffers
+      for (const src of ['/card.mp3', '/iphone.mp3']) {
+        const response = await fetch(src);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.buffers.set(src, audioBuffer);
+      }
+    } catch (e) {
+      // Fall back to HTML Audio
+    }
+  }
+
+  play(src: string, volume: number = 0.5) {
+    // Resume audio context if suspended (iOS requirement)
+    if (this.audioContext?.state === 'suspended') {
+      this.audioContext.resume();
+    }
+
+    // Try Web Audio API first (faster)
+    if (this.audioContext && this.buffers.has(src)) {
+      try {
+        const source = this.audioContext.createBufferSource();
+        const gainNode = this.audioContext.createGain();
+        source.buffer = this.buffers.get(src)!;
+        gainNode.gain.value = volume;
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        source.start(0);
+        return;
+      } catch (e) {}
+    }
+
+    // Fallback to HTML Audio
+    const fallback = this.fallbackAudios.get(src);
+    if (fallback) {
+      const clone = fallback.cloneNode() as HTMLAudioElement;
+      clone.volume = volume;
+      clone.play().catch(() => {});
+    }
+  }
 }
 
-// Play sound instantly using cloned preloaded audio
-const playCardSound = () => {
-  try {
-    if (audioCache.card) {
-      const sound = audioCache.card.cloneNode() as HTMLAudioElement;
-      sound.volume = 0.5;
-      sound.play().catch(() => {});
-    }
-  } catch (e) {}
-};
+const soundPlayer = new SoundPlayer();
 
-const playButtonSound = () => {
-  try {
-    if (audioCache.button) {
-      const sound = audioCache.button.cloneNode() as HTMLAudioElement;
-      sound.volume = 0.6;
-      sound.play().catch(() => {});
-    }
-  } catch (e) {}
-};
+const playCardSound = () => soundPlayer.play('/card.mp3', 0.5);
+const playButtonSound = () => soundPlayer.play('/iphone.mp3', 0.6);
 
 interface AgeGroup {
   id: string;
@@ -598,12 +634,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       variants={itemVariants}
                       className="w-full"
                     >
-                      <motion.button
-                        type="button"
+                      <motion.div
                         role="radio"
                         aria-checked={isSelected}
-                        onClick={() => handleAgeSelect(group.id)}
-                        className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left ${
+                        onClick={() => !isSelected && handleAgeSelect(group.id)}
+                        className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left cursor-pointer ${
                           isSelected
                             ? `${group.borderColor}`
                             : "border-purple-500/40 bg-background/95"
@@ -611,7 +646,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         style={isSelected ? {
                           boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)",
                         } : {}}
-                        whileTap={{ scale: 0.98 }}
+                        whileTap={!isSelected ? { scale: 0.98 } : {}}
                         data-testid={`button-age-${group.id}`}
                       >
                         <AnimatePresence mode="wait">
@@ -655,14 +690,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                   <p className="text-sm md:text-base text-white/90 mb-4">
                                     {group.description}
                                   </p>
-                                  <Button
-                                    onClick={(e) => { e.stopPropagation(); handleContinue(); }}
-                                    size="lg"
-                                    className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
-                                    data-testid="button-continue-age"
-                                  >
-                                    CONTINUAR
-                                  </Button>
+                                  <motion.div
+                                      whileTap={{ scale: 0.95, y: 2 }}
+                                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                    >
+                                      <Button
+                                        onClick={(e) => { e.stopPropagation(); handleContinue(); }}
+                                        size="lg"
+                                        className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
+                                        data-testid="button-continue-age"
+                                      >
+                                        CONTINUAR
+                                      </Button>
+                                    </motion.div>
                                 </div>
                               </div>
                             </motion.div>
@@ -708,7 +748,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                             </motion.div>
                           )}
                         </AnimatePresence>
-                      </motion.button>
+                      </motion.div>
                     </motion.div>
                   );
                 })}
@@ -729,7 +769,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 onClick={handleBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 transition-colors"
                 whileHover={{ x: -4 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.92, y: 2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -920,15 +961,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 transition={{ delay: 0.6 }}
                 className="pt-2 pb-6"
               >
-                <Button
-                  onClick={handleContinue}
-                  disabled={selectedProblems.length === 0}
-                  size="lg"
-                  className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0"
-                  data-testid="button-continue-problems"
+                <motion.div
+                  whileTap={{ scale: 0.95, y: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
-                </Button>
+                  <Button
+                    onClick={handleContinue}
+                    disabled={selectedProblems.length === 0}
+                    size="lg"
+                    className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0"
+                    data-testid="button-continue-problems"
+                  >
+                    CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
+                  </Button>
+                </motion.div>
               </motion.div>
             </motion.div>
           )}
@@ -1103,7 +1149,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 onClick={handleBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors"
                 whileHover={{ x: -4 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.92, y: 2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 data-testid="button-back-options"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -1171,7 +1218,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     background: "linear-gradient(135deg, hsl(280 70% 45%) 0%, hsl(260 60% 35%) 50%, hsl(200 70% 40%) 100%)",
                   }}
                   whileHover={{ scale: 1.03, y: -6 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.95, y: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   data-testid="button-option-tests"
                 >
                   <motion.div 
@@ -1224,7 +1272,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     background: "linear-gradient(135deg, hsl(187 70% 40%) 0%, hsl(200 60% 35%) 50%, hsl(220 70% 45%) 100%)",
                   }}
                   whileHover={{ scale: 1.03, y: -6 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.95, y: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   data-testid="button-option-training"
                 >
                   <motion.div 

@@ -1,6 +1,51 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
+// All images to preload
+const imagesToPreload = [
+  // Age group images
+  "/age-ninos.png",
+  "/age-adolescentes.png", 
+  "/age-universitarios.png",
+  "/age-profesionales.png",
+  "/age-adulto-mayor.png",
+  "/girl-x-image.png",
+  "/fingerprint-custom.png",
+  // Problem images for all age groups
+  "/problem-ninos-atencion.webp",
+  "/problem-ninos-desmotivacion.webp",
+  "/problem-ninos-sobrecarga.webp",
+  "/problem-ninos-fatiga.webp",
+  "/problem-ninos-olvidos.webp",
+  "/problem-adolescentes-atencion.webp",
+  "/problem-adolescentes-desmotivacion.webp",
+  "/problem-adolescentes-sobrecarga.webp",
+  "/problem-adolescentes-fatiga.webp",
+  "/problem-adolescentes-olvidos.webp",
+  "/problem-universitarios-atencion.webp",
+  "/problem-universitarios-desmotivacion.webp",
+  "/problem-universitarios-sobrecarga.webp",
+  "/problem-universitarios-fatiga.webp",
+  "/problem-universitarios-olvidos.webp",
+  "/problem-profesionales-atencion.webp",
+  "/problem-profesionales-desmotivacion.webp",
+  "/problem-profesionales-sobrecarga.webp",
+  "/problem-profesionales-fatiga.webp",
+  "/problem-profesionales-olvidos.webp",
+  "/problem-adulto-atencion.webp",
+  "/problem-adulto-desmotivacion.webp",
+  "/problem-adulto-sobrecarga.webp",
+  "/problem-adulto-fatiga.webp",
+  "/problem-adulto-olvidos.webp",
+];
+
+// All sounds to preload
+const soundsToPreload = [
+  "/card.mp3",
+  "/iphone.mp3",
+  "/fingerprint-sound.mp3",
+];
+
 interface LoadingScreenProps {
   onComplete: () => void;
   duration?: number;
@@ -9,6 +54,22 @@ interface LoadingScreenProps {
 export function LoadingScreen({ onComplete, duration = 3500 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Preload all assets on mount
+  useEffect(() => {
+    // Preload images
+    imagesToPreload.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    // Preload sounds using fetch for faster caching
+    soundsToPreload.forEach(src => {
+      fetch(src)
+        .then(res => res.arrayBuffer())
+        .catch(() => {});
+    });
+  }, []);
 
   // Play open.mp3 sound on mount
   useEffect(() => {
