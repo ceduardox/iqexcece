@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Home } from "lucide-react";
+import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 
 const playButtonSound = () => {
@@ -15,22 +16,6 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
-const preescolarReadings = [
-  { id: 1, title: "Paseando con mi perrito" },
-  { id: 2, title: "El globo rojo" },
-  { id: 3, title: "Mi primer día de clases" },
-  { id: 4, title: "Los colores del arcoíris" },
-  { id: 5, title: "El gato dormilón" },
-];
-
-const ninosReadings = [
-  { id: 1, title: "La aventura del explorador" },
-  { id: 2, title: "El misterio del jardín" },
-  { id: 3, title: "Viaje a las estrellas" },
-  { id: 4, title: "El tesoro escondido" },
-  { id: 5, title: "Amigos del bosque" },
-];
-
 const testTitles: Record<string, string> = {
   lectura: "Test Lectura",
   razonamiento: "Test Razonamiento",
@@ -43,46 +28,13 @@ const categoryLabels: Record<string, string> = {
   ninos: "Niños",
 };
 
-function ReadingCard({
-  number,
-  title,
-  index,
-  onClick,
-}: {
-  number: number;
-  title: string;
-  index: number;
-  onClick: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.4 + index * 0.08, duration: 0.3 }}
-      onClick={onClick}
-      className="cursor-pointer"
-      data-testid={`card-reading-${number}`}
-    >
-      <motion.div
-        className="bg-white dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-4 shadow-md hover:shadow-lg transition-shadow"
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.1 }}
-      >
-        <span 
-          className="text-4xl font-extralight w-14 text-center"
-          style={{ color: "#A855F7" }}
-        >
-          {String(number).padStart(2, '0')}
-        </span>
-        <span className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex-1">
-          {title}
-        </span>
-      </motion.div>
-    </motion.div>
-  );
-}
+const categoryReadings: Record<string, { id: number; title: string }> = {
+  preescolar: { id: 1, title: "Paseando con mi perrito" },
+  ninos: { id: 1, title: "La aventura del explorador" },
+};
 
 export default function ReadingSelectionPage() {
+  const [, setLocation] = useLocation();
   const { userData } = useUserData();
 
   const handleBack = useCallback(() => {
@@ -90,14 +42,19 @@ export default function ReadingSelectionPage() {
     window.history.back();
   }, []);
 
-  const handleReadingSelect = useCallback((readingId: number, title: string) => {
+  const handleGoHome = useCallback(() => {
+    playButtonSound();
+    setLocation("/");
+  }, [setLocation]);
+
+  const handleReadingSelect = useCallback((title: string) => {
     playCardSound();
-    console.log("Selected reading:", readingId, title, "category:", userData.childCategory);
+    console.log("Selected reading:", title, "category:", userData.childCategory);
   }, [userData.childCategory]);
 
   const testName = testTitles[userData.selectedTest || "lectura"] || "Test Lectura";
   const categoryLabel = categoryLabels[userData.childCategory || "preescolar"] || "Pre escolar";
-  const readings = userData.childCategory === "ninos" ? ninosReadings : preescolarReadings;
+  const reading = categoryReadings[userData.childCategory || "preescolar"] || categoryReadings.preescolar;
 
   return (
     <motion.div
@@ -105,7 +62,7 @@ export default function ReadingSelectionPage() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col"
-      style={{ background: "linear-gradient(180deg, #7C3AED 0%, #9333EA 40%, #A855F7 100%)" }}
+      style={{ background: "linear-gradient(160deg, #9333EA 0%, #7C3AED 30%, #A855F7 70%, #C084FC 100%)" }}
     >
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -115,105 +72,145 @@ export default function ReadingSelectionPage() {
       >
         <motion.button
           onClick={handleBack}
-          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white"
+          className="text-white flex items-center"
           whileTap={{ scale: 0.9 }}
           data-testid="button-back-reading"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-8 h-8" />
         </motion.button>
-        <h1 className="flex-1 text-center text-xl font-bold text-white pr-10">
+        <h1 className="flex-1 text-center text-xl font-bold text-white pr-8">
           {testName}
         </h1>
       </motion.header>
 
-      <div className="relative flex-shrink-0 h-64 flex items-end justify-center px-6 overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative z-10"
-        >
-          <img 
-            src="https://img.freepik.com/free-vector/happy-children-holding-books_1308-132774.jpg"
-            alt="Niño leyendo"
-            className="w-56 h-56 object-contain drop-shadow-2xl"
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.4, type: "spring" }}
-          className="absolute right-4 bottom-8 z-20"
-        >
-          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl border-2 border-white/30">
+      <div className="relative flex-1 flex flex-col">
+        <div className="relative h-72 flex items-end justify-center overflow-visible">
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
+            className="relative z-10"
+          >
             <img 
-              src="https://img.freepik.com/free-vector/cute-book-reading-cartoon-icon-illustration_138676-2690.jpg"
-              alt="Libro"
-              className="w-full h-full object-cover"
+              src="https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg"
+              alt="Niño feliz"
+              className="w-64 h-64 object-contain drop-shadow-2xl"
+              style={{ filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.3))" }}
             />
-          </div>
-        </motion.div>
+          </motion.div>
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(8)].map((_, i) => (
+          <motion.div
+            initial={{ opacity: 0, x: 30, rotate: -10 }}
+            animate={{ opacity: 1, x: 0, rotate: 0 }}
+            transition={{ delay: 0.5, duration: 0.4, type: "spring" }}
+            className="absolute right-2 bottom-12 z-20"
+          >
+            <motion.div 
+              className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <img 
+                src="https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg"
+                alt="Libro mascota"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+
+          {[...Array(12)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 rounded-full bg-white/30"
+              className="absolute rounded-full"
               style={{
-                left: `${10 + Math.random() * 80}%`,
-                top: `${20 + Math.random() * 60}%`,
+                width: 4 + Math.random() * 8,
+                height: 4 + Math.random() * 8,
+                left: `${5 + Math.random() * 90}%`,
+                top: `${10 + Math.random() * 80}%`,
+                backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500"][Math.floor(Math.random() * 5)],
               }}
               animate={{
-                y: [0, -10, 0],
-                opacity: [0.3, 0.6, 0.3],
+                y: [0, -15, 0],
+                opacity: [0.4, 0.8, 0.4],
+                scale: [1, 1.2, 1],
               }}
               transition={{
-                duration: 2 + Math.random(),
+                duration: 2 + Math.random() * 2,
                 repeat: Infinity,
                 delay: Math.random() * 2,
               }}
             />
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-32 shadow-2xl"
+          style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}
+        >
+          <div className="mb-8">
+            <motion.p 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-purple-500 font-semibold text-base mb-1"
+            >
+              {categoryLabel}
+            </motion.p>
+            <motion.h2 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.45 }}
+              className="text-2xl font-black text-gray-900 dark:text-white"
+            >
+              Elige una lectura
+            </motion.h2>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+            onClick={() => handleReadingSelect(reading.title)}
+            className="cursor-pointer"
+            data-testid="card-reading-01"
+          >
+            <motion.div
+              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-5 border-2 border-gray-100 dark:border-gray-700"
+              whileHover={{ scale: 1.01, backgroundColor: "#F9FAFB" }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+            >
+              <span 
+                className="text-5xl font-thin tracking-tight"
+                style={{ color: "#D1D5DB" }}
+              >
+                01
+              </span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                {reading.title}
+              </span>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="flex-1 bg-gray-50 dark:bg-background rounded-t-[2rem] -mt-4 px-6 pt-8 pb-8"
+        transition={{ delay: 0.6 }}
+        className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 py-4 px-6 safe-area-inset"
       >
-        <div className="mb-6">
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-            className="text-purple-600 dark:text-purple-400 font-semibold text-sm mb-1"
-          >
-            {categoryLabel}
-          </motion.p>
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-2xl font-bold text-gray-900 dark:text-white"
-          >
-            Elige una lectura
-          </motion.h2>
-        </div>
-
-        <div className="space-y-3">
-          {readings.map((reading, index) => (
-            <ReadingCard
-              key={reading.id}
-              number={reading.id}
-              title={reading.title}
-              index={index}
-              onClick={() => handleReadingSelect(reading.id, reading.title)}
-            />
-          ))}
-        </div>
+        <button
+          onClick={handleGoHome}
+          className="flex items-center justify-center gap-2 w-full py-3 text-purple-600 dark:text-purple-400 font-semibold text-lg"
+          data-testid="button-go-home"
+        >
+          <Home className="w-6 h-6" />
+          <span>Ir al Inicio</span>
+        </button>
       </motion.div>
     </motion.div>
   );
