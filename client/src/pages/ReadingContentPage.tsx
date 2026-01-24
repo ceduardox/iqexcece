@@ -43,25 +43,32 @@ const readingContent: Record<string, { title: string; text: string; questions: Q
   },
 };
 
-function FloatingBubbles() {
+const optionColors = [
+  { bg: "from-pink-400 to-rose-500", shadow: "rgba(244, 114, 182, 0.4)" },
+  { bg: "from-cyan-400 to-teal-500", shadow: "rgba(34, 211, 238, 0.4)" },
+  { bg: "from-amber-400 to-orange-500", shadow: "rgba(251, 191, 36, 0.4)" },
+  { bg: "from-violet-400 to-purple-500", shadow: "rgba(167, 139, 250, 0.4)" },
+];
+
+function FloatingBubbles({ count = 20, opacity = 0.3 }: { count?: number; opacity?: number }) {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[...Array(20)].map((_, i) => (
+    <>
+      {[...Array(count)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full"
+          className="absolute rounded-full pointer-events-none"
           style={{
-            width: 8 + Math.random() * 16,
-            height: 8 + Math.random() * 16,
+            width: 8 + Math.random() * 18,
+            height: 8 + Math.random() * 18,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB", "#FFB6C1"][Math.floor(Math.random() * 8)],
+            backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB", "#FFB6C1", "#90EE90", "#FFC0CB"][Math.floor(Math.random() * 10)],
+            opacity: opacity,
           }}
           animate={{
-            y: [0, -30, 0],
-            x: [0, Math.random() * 20 - 10, 0],
-            opacity: [0.3, 0.7, 0.3],
-            scale: [1, 1.2, 1],
+            y: [0, -25, 0],
+            x: [0, Math.random() * 15 - 7.5, 0],
+            scale: [1, 1.3, 1],
           }}
           transition={{
             duration: 3 + Math.random() * 3,
@@ -70,18 +77,18 @@ function FloatingBubbles() {
           }}
         />
       ))}
-      {[...Array(8)].map((_, i) => (
+      {[...Array(6)].map((_, i) => (
         <motion.div
           key={`star-${i}`}
-          className="absolute"
+          className="absolute pointer-events-none"
           style={{
             left: `${10 + Math.random() * 80}%`,
             top: `${10 + Math.random() * 80}%`,
           }}
           animate={{
             rotate: [0, 180, 360],
-            scale: [0.6, 1, 0.6],
-            opacity: [0.2, 0.5, 0.2],
+            scale: [0.5, 1, 0.5],
+            opacity: [0.2, 0.6, 0.2],
           }}
           transition={{
             duration: 4 + Math.random() * 2,
@@ -89,12 +96,12 @@ function FloatingBubbles() {
             delay: Math.random() * 2,
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFD700">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFD700">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
         </motion.div>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -103,27 +110,60 @@ function ChildishCloseButton({ onClick }: { onClick: () => void }) {
     <motion.button
       onClick={onClick}
       className="relative"
-      whileTap={{ scale: 0.85 }}
+      whileTap={{ scale: 0.8 }}
       whileHover={{ scale: 1.1 }}
       data-testid="button-close-reading"
     >
       <motion.div
-        className="w-10 h-10 rounded-full flex items-center justify-center"
+        className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{ 
-          background: "linear-gradient(135deg, #FF69B4 0%, #FF1493 100%)",
-          boxShadow: "0 4px 15px rgba(255, 105, 180, 0.4)"
+          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+          boxShadow: "0 4px 15px rgba(255, 165, 0, 0.5)"
         }}
         animate={{ rotate: [0, 5, -5, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
+        transition={{ duration: 2, repeat: Infinity }}
       >
-        <X className="w-5 h-5 text-white" strokeWidth={3} />
+        <X className="w-6 h-6 text-white" strokeWidth={3} />
       </motion.div>
       <motion.div
-        className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400"
-        animate={{ scale: [1, 1.3, 1] }}
+        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-pink-500"
+        animate={{ scale: [1, 1.4, 1] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       />
+      <motion.div
+        className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full bg-cyan-400"
+        animate={{ scale: [1, 1.3, 1] }}
+        transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
+      />
     </motion.button>
+  );
+}
+
+function InfoCard({ label, value, color, delay }: { label: string; value: string; color: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="relative py-3 px-2 text-center"
+    >
+      <motion.div
+        className="absolute inset-1 rounded-xl opacity-30"
+        style={{ backgroundColor: color }}
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 2, repeat: Infinity, delay: delay * 2 }}
+      />
+      <div className="relative">
+        <div className="text-white/70 text-[9px] font-bold mb-0.5 tracking-wider">{label}</div>
+        <motion.div 
+          className="font-black text-white text-sm"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay }}
+        >
+          {value}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -181,7 +221,9 @@ export default function ReadingContentPage() {
       className="min-h-screen flex flex-col relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" }}
     >
-      <FloatingBubbles />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <FloatingBubbles count={25} opacity={0.4} />
+      </div>
 
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -191,7 +233,8 @@ export default function ReadingContentPage() {
       >
         <motion.h1 
           className="text-2xl font-black text-white drop-shadow-lg"
-          animate={{ scale: [1, 1.02, 1] }}
+          style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.2)" }}
+          animate={{ scale: [1, 1.03, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           Test Lectura
@@ -200,75 +243,73 @@ export default function ReadingContentPage() {
       </motion.header>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative z-10 flex mx-4 rounded-t-2xl overflow-hidden"
+        className="relative z-10 flex mx-4 rounded-full overflow-hidden border-4 border-white/30"
+        style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
       >
-        <button
+        <motion.button
           onClick={() => setActiveTab("lectura")}
-          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
+          className={`flex-1 py-3 text-sm font-black text-center transition-all ${
             activeTab === "lectura" 
-              ? "bg-purple-600 text-white shadow-lg" 
-              : "bg-purple-400/60 text-white/80"
+              ? "bg-purple-600 text-white" 
+              : "bg-purple-400/50 text-white/70"
           }`}
+          whileTap={{ scale: 0.95 }}
           data-testid="tab-lectura"
         >
           LECTURA
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           onClick={() => setActiveTab("cuestionario")}
-          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
+          className={`flex-1 py-3 text-sm font-black text-center transition-all ${
             activeTab === "cuestionario" 
-              ? "bg-purple-600 text-white shadow-lg" 
-              : "bg-purple-400/60 text-white/80"
+              ? "bg-purple-600 text-white" 
+              : "bg-purple-400/50 text-white/70"
           }`}
+          whileTap={{ scale: 0.95 }}
           data-testid="tab-cuestionario"
         >
           CUESTIONARIO
-        </button>
+        </motion.button>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        className="relative z-10 mx-4 grid grid-cols-4 text-white text-xs font-medium rounded-b-2xl overflow-hidden"
-        style={{ background: "linear-gradient(90deg, #7C3AED 0%, #8B5CF6 100%)" }}
+        className="relative z-10 mx-4 mt-3 grid grid-cols-4 rounded-2xl overflow-hidden border-4 border-white/20"
+        style={{ 
+          background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A855F7 100%)",
+          boxShadow: "0 4px 20px rgba(124, 58, 237, 0.4)"
+        }}
       >
-        <div className="py-3 px-1 text-center">
-          <div className="text-white/60 text-[9px] mb-0.5">CATEGORÍA</div>
-          <div className="font-bold text-[11px]">{categoryLabel}</div>
-        </div>
-        <div className="py-3 px-1 text-center">
-          <div className="text-white/60 text-[9px] mb-0.5">TIEMPO</div>
-          <div className="font-bold">{formatTime(readingTime)}</div>
-        </div>
-        <div className="py-3 px-1 text-center">
-          <div className="text-white/60 text-[9px] mb-0.5">TIEMPO</div>
-          <div className="font-bold">{formatTime(questionTime)}</div>
-        </div>
-        <div className="py-3 px-1 text-center">
-          <div className="text-white/60 text-[9px] mb-0.5">PREGUNTAS</div>
-          <div className="font-bold">{activeTab === "cuestionario" ? currentQuestion + 1 : 0} / {content.questions.length}</div>
-        </div>
+        <InfoCard label="CATEGORÍA" value={categoryLabel} color="#FF69B4" delay={0} />
+        <InfoCard label="TIEMPO" value={formatTime(readingTime)} color="#00CED1" delay={0.1} />
+        <InfoCard label="TIEMPO" value={formatTime(questionTime)} color="#FFD700" delay={0.2} />
+        <InfoCard label="PREGUNTAS" value={`${activeTab === "cuestionario" ? currentQuestion + 1 : 0} / ${content.questions.length}`} color="#98FB98" delay={0.3} />
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="relative z-10 flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] mx-0 mt-4 px-6 py-8 shadow-2xl"
+        className="relative z-10 flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] mx-0 mt-4 px-6 py-8 overflow-hidden"
         style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.2)" }}
       >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <FloatingBubbles count={15} opacity={0.15} />
+        </div>
+
         {activeTab === "lectura" ? (
-          <div className="space-y-6">
+          <div className="relative z-10 space-y-6">
             <div className="text-center">
               <motion.span 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="text-purple-500 font-bold text-sm tracking-wide"
+                className="text-purple-500 font-black text-sm tracking-widest"
               >
                 LECTURA
               </motion.span>
@@ -286,7 +327,7 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.35 }}
-              className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed"
+              className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed"
             >
               {content.text}
             </motion.p>
@@ -296,18 +337,24 @@ export default function ReadingContentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               onClick={handleGoToQuestionnaire}
-              className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-2 mt-8"
+              className="relative w-full py-5 rounded-2xl font-black text-white text-xl flex items-center justify-center gap-3 mt-8 overflow-hidden"
               style={{ 
                 background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                boxShadow: "0 6px 20px rgba(249, 115, 22, 0.4)"
+                boxShadow: "0 8px 25px rgba(249, 115, 22, 0.5)"
               }}
-              whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(249, 115, 22, 0.5)" }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, boxShadow: "0 10px 30px rgba(249, 115, 22, 0.6)" }}
+              whileTap={{ scale: 0.97 }}
               data-testid="button-go-questionnaire"
             >
-              Ir a cuestionario
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span className="relative">Ir a cuestionario</span>
               <motion.span
-                animate={{ x: [0, 5, 0] }}
+                className="relative text-2xl"
+                animate={{ x: [0, 8, 0] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
                 →
@@ -315,12 +362,12 @@ export default function ReadingContentPage() {
             </motion.button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="relative z-10 space-y-6">
             <div className="text-center">
               <motion.span 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-purple-500 font-bold text-sm tracking-wide"
+                className="text-purple-500 font-black text-sm tracking-widest"
               >
                 CUESTIONARIO
               </motion.span>
@@ -337,28 +384,45 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-gray-800 dark:text-gray-200 text-lg font-medium"
+              className="text-gray-800 dark:text-gray-200 text-lg font-semibold"
             >
               {currentQ.question}
             </motion.p>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {currentQ.options.map((option, index) => (
                 <motion.button
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 + index * 0.08 }}
+                  transition={{ delay: 0.15 + index * 0.1, type: "spring" }}
                   onClick={() => handleSelectAnswer(index)}
-                  className={`w-full py-4 px-5 rounded-2xl text-left font-semibold text-lg transition-all border-2 ${
-                    selectedAnswer === index
-                      ? "bg-purple-100 dark:bg-purple-900/40 border-purple-400 text-purple-700 dark:text-purple-300"
-                      : "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                  className={`relative w-full py-5 px-6 rounded-2xl text-left font-bold text-lg text-white overflow-hidden transition-all ${
+                    selectedAnswer === index ? "ring-4 ring-white ring-offset-2" : ""
                   }`}
-                  whileTap={{ scale: 0.98 }}
+                  style={{ 
+                    background: `linear-gradient(135deg, ${optionColors[index].bg.split(" ")[0].replace("from-", "")} 0%, ${optionColors[index].bg.split(" ")[1].replace("to-", "")} 100%)`.replace("pink-400", "#f472b6").replace("rose-500", "#f43f5e").replace("cyan-400", "#22d3ee").replace("teal-500", "#14b8a6").replace("amber-400", "#fbbf24").replace("orange-500", "#f97316"),
+                    boxShadow: `0 6px 20px ${optionColors[index].shadow}`
+                  }}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
                   data-testid={`option-${index}`}
                 >
-                  {option}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: ["-100%", "100%"] }}
+                    transition={{ duration: 2.5, repeat: Infinity, delay: index * 0.3 }}
+                  />
+                  <span className="relative drop-shadow-md">{option}</span>
+                  {selectedAnswer === index && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center"
+                    >
+                      <span className="text-green-500 text-xl">✓</span>
+                    </motion.div>
+                  )}
                 </motion.button>
               ))}
             </div>
