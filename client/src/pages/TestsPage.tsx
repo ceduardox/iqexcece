@@ -105,96 +105,6 @@ const testCategories: TestCategory[] = [
   }
 ];
 
-function AnimatedX() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      <svg
-        viewBox="0 0 200 200"
-        className="w-[90vw] h-[90vw] max-w-[500px] max-h-[500px]"
-        style={{ filter: "drop-shadow(0 0 30px hsl(187 85% 53% / 0.4))" }}
-      >
-        <defs>
-          <linearGradient id="xGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(187 85% 53%)" />
-            <stop offset="50%" stopColor="hsl(280 70% 60%)" />
-            <stop offset="100%" stopColor="hsl(187 85% 53%)" />
-          </linearGradient>
-          <linearGradient id="xGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="hsl(280 70% 60%)" />
-            <stop offset="50%" stopColor="hsl(187 85% 53%)" />
-            <stop offset="100%" stopColor="hsl(280 70% 60%)" />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
-        <motion.line
-          x1="30" y1="30" x2="170" y2="170"
-          stroke="url(#xGradient1)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          filter="url(#glow)"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-        />
-        
-        <motion.line
-          x1="170" y1="30" x2="30" y2="170"
-          stroke="url(#xGradient2)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          filter="url(#glow)"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-        />
-
-        <motion.circle
-          cx="100" cy="100" r="85"
-          fill="none"
-          stroke="url(#xGradient1)"
-          strokeWidth="2"
-          strokeDasharray="8 12"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ 
-            opacity: [0.3, 0.6, 0.3],
-            scale: 1,
-            rotate: 360
-          }}
-          transition={{ 
-            opacity: { duration: 3, repeat: Infinity },
-            scale: { duration: 0.5, delay: 0.6 },
-            rotate: { duration: 30, repeat: Infinity, ease: "linear" }
-          }}
-        />
-
-        <motion.circle
-          cx="100" cy="100" r="70"
-          fill="none"
-          stroke="url(#xGradient2)"
-          strokeWidth="1"
-          strokeDasharray="4 8"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: [0.2, 0.4, 0.2],
-            rotate: -360
-          }}
-          transition={{ 
-            opacity: { duration: 4, repeat: Infinity },
-            rotate: { duration: 40, repeat: Infinity, ease: "linear" }
-          }}
-        />
-      </svg>
-    </div>
-  );
-}
-
 function HexCard({ 
   category, 
   index, 
@@ -344,6 +254,12 @@ function HexCard({
 export default function TestsPage() {
   const [, setLocation] = useLocation();
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
+  const [showNino, setShowNino] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowNino(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleBack = useCallback(() => {
     playButtonSound();
@@ -367,16 +283,48 @@ export default function TestsPage() {
       exit={{ opacity: 0 }}
       className="min-h-screen bg-background overflow-hidden relative"
     >
+      {/* Background Images with Swipe Effect */}
       <div className="fixed inset-0 z-0">
+        {/* Base image - nino2 (cyan X logo) */}
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ duration: 0.3 }}
+        >
+          <img
+            src="/nino2.png"
+            alt=""
+            className="w-full h-full object-cover object-center"
+          />
+        </motion.div>
+
+        {/* Overlay image - nino (person in X) with swipe effect from right to left */}
+        <motion.div
+          className="absolute inset-0 overflow-hidden"
+          initial={{ clipPath: "inset(0 0 0 100%)" }}
+          animate={{ clipPath: showNino ? "inset(0 0 0 0%)" : "inset(0 0 0 100%)" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <img
+            src="/nino.png"
+            alt=""
+            className="w-full h-full object-cover object-center opacity-50"
+          />
+        </motion.div>
+
+        {/* Gradient overlays for readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
+        
+        {/* Subtle radial glow */}
         <div 
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at center, hsl(187 85% 53% / 0.05) 0%, transparent 60%)"
+            background: "radial-gradient(ellipse at center, hsl(187 85% 53% / 0.08) 0%, transparent 60%)"
           }}
         />
       </div>
-
-      <AnimatedX />
 
       <div className="relative z-10 min-h-screen px-4 py-6 safe-area-inset flex flex-col">
         <motion.div
