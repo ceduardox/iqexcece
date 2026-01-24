@@ -18,7 +18,7 @@ const playCardSound = () => {
 
 const defaultCategoryImages: Record<string, string> = {
   preescolar: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
-  ninos: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
+  ninos: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
 };
 
 const categoriesBase = [

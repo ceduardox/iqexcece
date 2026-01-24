@@ -73,17 +73,17 @@ export default function GestionPage() {
   };
   
   const defaultNinos = {
-    title: "El jardín mágico",
-    content: "Pedro encontró una puerta secreta en su jardín. Detrás había un mundo de colores brillantes con flores gigantes y mariposas que hablaban. Una mariposa azul le dijo que era el guardián del jardín. Pedro prometió cuidarlo y volver cada día.",
-    imageUrl: "https://img.freepik.com/free-vector/magical-garden-illustration_23-2149508098.jpg",
-    pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
-    pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
-    categoryImage: "https://img.freepik.com/free-vector/group-happy-kids-having-fun_1308-78957.jpg",
+    title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
+    content: "El chocolate es uno de los alimentos más populares del mundo. Su historia comenzó hace miles de años en las selvas de América Central y del Sur, donde los antiguos mayas y aztecas cultivaban el cacao. Los aztecas preparaban una bebida amarga llamada 'xocolatl' que consideraban sagrada. Cuando los españoles llegaron a América, llevaron el cacao a Europa donde le añadieron azúcar para hacerlo más dulce. Así nació el chocolate que conocemos hoy. Bolivia es uno de los países productores de cacao de alta calidad, especialmente en la región del Beni.",
+    imageUrl: "https://img.freepik.com/free-vector/chocolate-bar-pieces-realistic-composition_1284-19023.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     questions: [
-      { question: "¿Qué encontró Pedro?", options: ["Una llave", "Una puerta secreta", "Un tesoro"], correct: 1 },
-      { question: "¿Qué había detrás de la puerta?", options: ["Un mundo de colores", "Una cueva", "Un río"], correct: 0 },
-      { question: "¿De qué color era la mariposa?", options: ["Roja", "Verde", "Azul"], correct: 2 },
-      { question: "¿Qué prometió Pedro?", options: ["Cuidar el jardín", "Contar el secreto", "No volver"], correct: 0 },
+      { question: "¿Dónde comenzó la historia del chocolate?", options: ["Europa", "América Central y del Sur", "Asia"], correct: 1 },
+      { question: "¿Cómo se llamaba la bebida azteca de cacao?", options: ["Chocolate", "Xocolatl", "Cacahuatl"], correct: 1 },
+      { question: "¿Qué le añadieron los europeos al cacao?", options: ["Sal", "Azúcar", "Leche"], correct: 1 },
+      { question: "¿En qué región de Bolivia se produce cacao de alta calidad?", options: ["La Paz", "Beni", "Potosí"], correct: 1 },
     ]
   };
 

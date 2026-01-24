@@ -30,12 +30,12 @@ const testTitles: Record<string, string> = {
 
 const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
-  ninos: "Niños",
+  ninos: "Niño",
 };
 
 const categoryReadings: Record<string, { id: number; title: string }> = {
   preescolar: { id: 1, title: "Paseando con mi perrito" },
-  ninos: { id: 1, title: "La aventura del explorador" },
+  ninos: { id: 1, title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria" },
 };
 
 function ChildishBackButton({ onClick }: { onClick: () => void }) {
@@ -80,8 +80,8 @@ const defaultImages = {
     smallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
   },
   ninos: {
-    mainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
-    smallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
+    mainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
+    smallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
   },
 };
 
