@@ -127,5 +127,47 @@ export async function registerRoutes(
     res.json({ activeCount: activeSessions.length });
   });
 
+  // Save quiz result
+  app.post("/api/quiz/submit", async (req, res) => {
+    try {
+      const result = await storage.saveQuizResult(req.body);
+      res.json({ success: true, result });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save result" });
+    }
+  });
+
+  // Get all quiz results (admin)
+  app.get("/api/admin/quiz-results", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const results = await storage.getAllQuizResults();
+    res.json({ results });
+  });
+
+  // Get reading content
+  app.get("/api/reading/:categoria", async (req, res) => {
+    const content = await storage.getReadingContent(req.params.categoria);
+    res.json({ content });
+  });
+
+  // Save reading content (admin)
+  app.post("/api/admin/reading", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const content = await storage.saveReadingContent(req.body);
+      res.json({ success: true, content });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save content" });
+    }
+  });
+
   return httpServer;
 }

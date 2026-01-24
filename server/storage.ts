@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -12,15 +12,27 @@ export interface IStorage {
   getAllSessions(): Promise<UserSession[]>;
   getActiveSessions(): Promise<UserSession[]>;
   deactivateSession(sessionId: string): Promise<void>;
+  
+  // Quiz results
+  saveQuizResult(result: InsertQuizResult): Promise<QuizResult>;
+  getAllQuizResults(): Promise<QuizResult[]>;
+  
+  // Reading content
+  getReadingContent(categoria: string): Promise<ReadingContent | undefined>;
+  saveReadingContent(content: InsertReadingContent): Promise<ReadingContent>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private sessions: Map<string, UserSession>;
+  private quizResults: Map<string, QuizResult>;
+  private readingContents: Map<string, ReadingContent>;
 
   constructor() {
     this.users = new Map();
     this.sessions = new Map();
+    this.quizResults = new Map();
+    this.readingContents = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -93,6 +105,50 @@ export class MemStorage implements IStorage {
     if (session) {
       this.sessions.set(sessionId, { ...session, isActive: false });
     }
+  }
+
+  async saveQuizResult(insertResult: InsertQuizResult): Promise<QuizResult> {
+    const id = randomUUID();
+    const result: QuizResult = {
+      id,
+      nombre: insertResult.nombre,
+      email: insertResult.email || null,
+      edad: insertResult.edad || null,
+      ciudad: insertResult.ciudad || null,
+      telefono: insertResult.telefono || null,
+      comentario: insertResult.comentario || null,
+      categoria: insertResult.categoria || "preescolar",
+      tiempoLectura: insertResult.tiempoLectura || null,
+      tiempoCuestionario: insertResult.tiempoCuestionario || null,
+      createdAt: new Date(),
+    };
+    this.quizResults.set(id, result);
+    return result;
+  }
+
+  async getAllQuizResults(): Promise<QuizResult[]> {
+    return Array.from(this.quizResults.values()).sort(
+      (a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+    );
+  }
+
+  async getReadingContent(categoria: string): Promise<ReadingContent | undefined> {
+    return this.readingContents.get(categoria);
+  }
+
+  async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
+    const existing = this.readingContents.get(insertContent.categoria);
+    const content: ReadingContent = {
+      id: existing?.id || randomUUID(),
+      categoria: insertContent.categoria,
+      title: insertContent.title,
+      content: insertContent.content,
+      imageUrl: insertContent.imageUrl || null,
+      questions: insertContent.questions,
+      updatedAt: new Date(),
+    };
+    this.readingContents.set(insertContent.categoria, content);
+    return content;
   }
 }
 

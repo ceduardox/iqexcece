@@ -175,13 +175,13 @@ export default function ReadingContentPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
     edad: "",
     ciudad: "",
     telefono: "",
-    soy: "",
     comentario: "",
   });
 
@@ -236,9 +236,26 @@ export default function ReadingContentPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = async () => {
     playButtonSound();
-    console.log("Form submitted:", formData);
+    setSubmitting(true);
+    try {
+      await fetch("/api/quiz/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          categoria: "preescolar",
+          tiempoLectura: readingTime,
+          tiempoCuestionario: questionTime,
+        }),
+      });
+      alert("¡Gracias por completar el test!");
+      window.history.back();
+    } catch (e) {
+      console.error(e);
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -478,22 +495,6 @@ export default function ReadingContentPage() {
                 className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
                 data-testid="input-telefono"
               />
-
-              <motion.select
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                value={formData.soy}
-                onChange={(e) => handleFormChange("soy", e.target.value)}
-                className="w-full py-4 px-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-purple-400 focus:outline-none transition-colors appearance-none"
-                data-testid="select-soy"
-              >
-                <option value="">Soy</option>
-                <option value="estudiante">Estudiante</option>
-                <option value="padre">Padre/Madre</option>
-                <option value="profesor">Profesor</option>
-                <option value="otro">Otro</option>
-              </motion.select>
 
               <motion.textarea
                 initial={{ opacity: 0, y: 10 }}
