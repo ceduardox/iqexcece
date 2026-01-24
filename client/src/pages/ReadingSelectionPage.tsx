@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Home } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 
@@ -33,6 +32,42 @@ const categoryReadings: Record<string, { id: number; title: string }> = {
   ninos: { id: 1, title: "La aventura del explorador" },
 };
 
+function ChildishBackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className="relative flex items-center justify-center"
+      whileTap={{ scale: 0.85 }}
+      whileHover={{ scale: 1.05 }}
+      data-testid="button-back-reading"
+    >
+      <motion.div
+        className="w-12 h-12 rounded-full flex items-center justify-center"
+        style={{ 
+          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+          boxShadow: "0 4px 15px rgba(255, 165, 0, 0.4)"
+        }}
+        animate={{ rotate: [0, -5, 5, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </motion.div>
+      <motion.div
+        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-pink-400"
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full bg-cyan-400"
+        animate={{ scale: [1, 1.3, 1] }}
+        transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
+      />
+    </motion.button>
+  );
+}
+
 export default function ReadingSelectionPage() {
   const [, setLocation] = useLocation();
   const { userData } = useUserData();
@@ -42,15 +77,10 @@ export default function ReadingSelectionPage() {
     window.history.back();
   }, []);
 
-  const handleGoHome = useCallback(() => {
-    playButtonSound();
-    setLocation("/");
-  }, [setLocation]);
-
-  const handleReadingSelect = useCallback((title: string) => {
+  const handleReadingSelect = useCallback(() => {
     playCardSound();
-    console.log("Selected reading:", title, "category:", userData.childCategory);
-  }, [userData.childCategory]);
+    setLocation("/lectura-contenido");
+  }, [setLocation]);
 
   const testName = testTitles[userData.selectedTest || "lectura"] || "Test Lectura";
   const categoryLabel = categoryLabels[userData.childCategory || "preescolar"] || "Pre escolar";
@@ -70,15 +100,8 @@ export default function ReadingSelectionPage() {
         transition={{ duration: 0.3 }}
         className="flex items-center px-4 py-4 safe-area-inset"
       >
-        <motion.button
-          onClick={handleBack}
-          className="text-white flex items-center"
-          whileTap={{ scale: 0.9 }}
-          data-testid="button-back-reading"
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </motion.button>
-        <h1 className="flex-1 text-center text-xl font-bold text-white pr-8">
+        <ChildishBackButton onClick={handleBack} />
+        <h1 className="flex-1 text-center text-xl font-bold text-white pr-12">
           {testName}
         </h1>
       </motion.header>
@@ -118,21 +141,21 @@ export default function ReadingSelectionPage() {
             </motion.div>
           </motion.div>
 
-          {[...Array(12)].map((_, i) => (
+          {[...Array(15)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute rounded-full"
               style={{
-                width: 4 + Math.random() * 8,
-                height: 4 + Math.random() * 8,
+                width: 6 + Math.random() * 12,
+                height: 6 + Math.random() * 12,
                 left: `${5 + Math.random() * 90}%`,
                 top: `${10 + Math.random() * 80}%`,
-                backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500"][Math.floor(Math.random() * 5)],
+                backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB"][Math.floor(Math.random() * 7)],
               }}
               animate={{
-                y: [0, -15, 0],
-                opacity: [0.4, 0.8, 0.4],
-                scale: [1, 1.2, 1],
+                y: [0, -20, 0],
+                opacity: [0.5, 0.9, 0.5],
+                scale: [1, 1.3, 1],
               }}
               transition={{
                 duration: 2 + Math.random() * 2,
@@ -141,13 +164,38 @@ export default function ReadingSelectionPage() {
               }}
             />
           ))}
+
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={`star-${i}`}
+              className="absolute"
+              style={{
+                left: `${10 + Math.random() * 80}%`,
+                top: `${15 + Math.random() * 60}%`,
+              }}
+              animate={{
+                rotate: [0, 180, 360],
+                scale: [0.8, 1.2, 0.8],
+                opacity: [0.4, 0.8, 0.4],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD700">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </motion.div>
+          ))}
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-32 shadow-2xl"
+          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-12 shadow-2xl"
           style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}
         >
           <div className="mb-8">
@@ -173,13 +221,13 @@ export default function ReadingSelectionPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.3 }}
-            onClick={() => handleReadingSelect(reading.title)}
+            onClick={handleReadingSelect}
             className="cursor-pointer"
             data-testid="card-reading-01"
           >
             <motion.div
               className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-5 border-2 border-gray-100 dark:border-gray-700"
-              whileHover={{ scale: 1.01, backgroundColor: "#F9FAFB" }}
+              whileHover={{ scale: 1.02, backgroundColor: "#F3F4F6" }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.15 }}
             >
@@ -196,22 +244,6 @@ export default function ReadingSelectionPage() {
           </motion.div>
         </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 py-4 px-6 safe-area-inset"
-      >
-        <button
-          onClick={handleGoHome}
-          className="flex items-center justify-center gap-2 w-full py-3 text-purple-600 dark:text-purple-400 font-semibold text-lg"
-          data-testid="button-go-home"
-        >
-          <Home className="w-6 h-6" />
-          <span>Ir al Inicio</span>
-        </button>
-      </motion.div>
     </motion.div>
   );
 }
