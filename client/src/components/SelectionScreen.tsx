@@ -629,136 +629,138 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 Selecciona tu grupo de edad
               </motion.p>
 
-              {/* Age cards - larger square style */}
+              {/* Age cards - grid layout matching design */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-3 flex-1 relative z-10 w-[78%] md:w-[70%]"
+                className="flex-1 relative z-10 w-full px-4 space-y-2"
                 role="radiogroup"
                 aria-label="Selecciona tu grupo de edad"
               >
-                {ageGroups.map((group) => {
-                  const isSelected = selectedAge === group.id;
-                  
-                  return (
-                    <motion.div
-                      key={group.id}
-                      variants={itemVariants}
-                      className="w-full"
-                    >
-                      <motion.div
-                        role="radio"
-                        aria-checked={isSelected}
-                        onClick={() => !isSelected && handleAgeSelect(group.id)}
-                        className={`w-full rounded-2xl border-2 overflow-hidden text-left cursor-pointer card-touch ${
-                          isSelected
-                            ? `${group.borderColor}`
-                            : "border-purple-500/40 bg-background/95"
-                        }`}
-                        style={isSelected ? {
-                          boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)",
-                        } : {}}
-                        data-testid={`button-age-${group.id}`}
-                      >
-                        <AnimatePresence mode="wait">
-                          {isSelected ? (
-                            <motion.div
-                              key="expanded"
-                              initial={{ opacity: 0, scaleY: 0.9 }}
-                              animate={{ opacity: 1, scaleY: 1 }}
-                              exit={{ opacity: 0, scaleY: 0.9 }}
-                              transition={{ 
-                                duration: 0.12, 
-                                ease: "easeOut"
-                              }}
-                              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
-                              className={`bg-gradient-to-br ${group.gradient}`}
-                            >
-                              <div className="relative">
-                                <img 
-                                  src={group.image} 
-                                  alt={group.label}
-                                  className="w-full h-52 md:h-64 object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                                
-                                <div className="absolute bottom-0 left-0 right-0 p-5">
-                                  <div className="flex items-center gap-3 mb-3">
-                                    <motion.div
-                                      className="w-8 h-8 rounded-full border-2 border-cyan-400 bg-cyan-400 flex items-center justify-center"
-                                      animate={{ scale: [1, 1.2, 1] }}
-                                      transition={{ duration: 0.5 }}
-                                    >
-                                      <Check className="w-5 h-5 text-background" />
-                                    </motion.div>
-                                    <div>
-                                      <h3 className="text-xl md:text-2xl font-black text-white">
-                                        {group.label}
-                                      </h3>
-                                      <span className="text-sm text-cyan-300">{group.ageRange}</span>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm md:text-base text-white/90 mb-4">
-                                    {group.description}
-                                  </p>
-                                  <Button
-                                    onClick={(e) => { e.stopPropagation(); handleContinue(); }}
-                                    size="lg"
-                                    className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0 btn-instant"
-                                    data-testid="button-continue-age"
-                                  >
-                                    CONTINUAR
-                                  </Button>
-                                </div>
+                {/* Row 1: NIÑOS | ADOLESCENTES */}
+                <div className="grid grid-cols-2 gap-2">
+                  {[ageGroups[0], ageGroups[1]].map((group) => {
+                    const isSelected = selectedAge === group.id;
+                    return (
+                      <motion.div key={group.id} variants={itemVariants}>
+                        <motion.div
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => !isSelected && handleAgeSelect(group.id)}
+                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
+                          }`}
+                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          data-testid={`button-age-${group.id}`}
+                        >
+                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="flex h-full">
+                            <div className="w-24 h-full overflow-hidden flex-shrink-0">
+                              <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center p-3">
+                              <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
+                              <span className="text-xs text-cyan-400/80 mt-1 block">{group.ageRange}</span>
+                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
+                                {isSelected && <Check className="w-4 h-4 text-background" />}
                               </div>
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              key="collapsed"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.08 }}
-                              className="p-3 relative"
-                            >
-                              {/* Neon border effect */}
-                              <div 
-                                className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none"
-                                style={{
-                                  background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)",
-                                  backgroundSize: "200% 100%",
-                                  animation: "shimmer 3s ease-in-out infinite",
-                                }}
-                              />
-                              <div className="flex gap-3 h-28">
-                                <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 border border-cyan-500/30 relative">
-                                  <img 
-                                    src={group.image} 
-                                    alt={group.label}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                  {/* Subtle glow on image */}
-                                  <div className="absolute inset-0 border border-cyan-400/20 rounded-xl" />
-                                </div>
-                                <div className="flex-1 flex flex-col justify-center">
-                                  <span className="font-bold text-base sm:text-lg md:text-xl text-foreground block leading-tight">
-                                    {group.label}
-                                  </span>
-                                  <span className="text-xs sm:text-sm text-cyan-400/80 mt-1 block">
-                                    {group.ageRange}
-                                  </span>
-                                  <div className="w-6 h-6 rounded-full border-2 border-purple-500/40 mt-2" />
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                            </div>
+                          </div>
+                        </motion.div>
                       </motion.div>
-                    </motion.div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* Row 2: UNIVERSITARIOS | PROFESIONALES */}
+                <div className="grid grid-cols-2 gap-2">
+                  {[ageGroups[2], ageGroups[3]].map((group) => {
+                    const isSelected = selectedAge === group.id;
+                    return (
+                      <motion.div key={group.id} variants={itemVariants}>
+                        <motion.div
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => !isSelected && handleAgeSelect(group.id)}
+                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
+                          }`}
+                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          data-testid={`button-age-${group.id}`}
+                        >
+                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="flex h-full">
+                            <div className="w-24 h-full overflow-hidden flex-shrink-0">
+                              <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center p-3">
+                              <span className="font-bold text-sm text-foreground block leading-tight">{group.label}</span>
+                              <span className="text-xs text-cyan-400/80 mt-1 block">{group.ageRange}</span>
+                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
+                                {isSelected && <Check className="w-4 h-4 text-background" />}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Row 3: ADULTO MAYOR (full width) */}
+                <div className="w-full">
+                  {(() => {
+                    const group = ageGroups[4];
+                    const isSelected = selectedAge === group.id;
+                    return (
+                      <motion.div key={group.id} variants={itemVariants}>
+                        <motion.div
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => !isSelected && handleAgeSelect(group.id)}
+                          className={`w-full h-28 rounded-2xl border-2 overflow-hidden cursor-pointer card-touch relative ${
+                            isSelected ? group.borderColor : "border-purple-500/40 bg-background/95"
+                          }`}
+                          style={isSelected ? { boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)" } : {}}
+                          data-testid={`button-age-${group.id}`}
+                        >
+                          <div className="absolute inset-0 rounded-2xl opacity-60 pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, hsl(187 85% 53% / 0.3), hsl(280 70% 50% / 0.3), transparent)", backgroundSize: "200% 100%", animation: "shimmer 3s ease-in-out infinite" }} />
+                          <div className="flex h-full">
+                            <div className="w-32 h-full overflow-hidden flex-shrink-0">
+                              <img src={group.image} alt={group.label} className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center p-4">
+                              <span className="font-bold text-lg text-foreground block leading-tight">{group.label}</span>
+                              <span className="text-sm text-cyan-400/80 mt-1 block">{group.ageRange}</span>
+                              <div className={`w-5 h-5 rounded-full border-2 mt-2 ${isSelected ? 'border-cyan-400 bg-cyan-400' : 'border-purple-500/40'}`}>
+                                {isSelected && <Check className="w-4 h-4 text-background" />}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    );
+                  })()}
+                </div>
+
+                {/* Continue button when selected */}
+                {selectedAge && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="pt-2"
+                  >
+                    <Button
+                      onClick={handleContinue}
+                      size="lg"
+                      className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0 btn-instant"
+                      data-testid="button-continue-age"
+                    >
+                      CONTINUAR
+                    </Button>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.div>
           )}
