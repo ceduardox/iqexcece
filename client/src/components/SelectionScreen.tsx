@@ -1,23 +1,42 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Sound utilities
+// Preloaded audio cache for instant playback
+const audioCache: { card?: HTMLAudioElement; button?: HTMLAudioElement } = {};
+
+// Preload sounds on first import
+if (typeof window !== 'undefined') {
+  const preloadAudio = (src: string): HTMLAudioElement => {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.load();
+    return audio;
+  };
+  audioCache.card = preloadAudio('/card.mp3');
+  audioCache.button = preloadAudio('/iphone.mp3');
+}
+
+// Play sound instantly using cloned preloaded audio
 const playCardSound = () => {
   try {
-    const audio = new Audio('/card.mp3');
-    audio.volume = 0.5;
-    audio.play().catch(() => {});
+    if (audioCache.card) {
+      const sound = audioCache.card.cloneNode() as HTMLAudioElement;
+      sound.volume = 0.5;
+      sound.play().catch(() => {});
+    }
   } catch (e) {}
 };
 
 const playButtonSound = () => {
   try {
-    const audio = new Audio('/iphone.mp3');
-    audio.volume = 0.6;
-    audio.play().catch(() => {});
+    if (audioCache.button) {
+      const sound = audioCache.button.cloneNode() as HTMLAudioElement;
+      sound.volume = 0.6;
+      sound.play().catch(() => {});
+    }
   } catch (e) {}
 };
 
@@ -577,7 +596,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <motion.div
                       key={group.id}
                       variants={itemVariants}
-                      layout
                       className="w-full"
                     >
                       <motion.button
@@ -600,10 +618,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           {isSelected ? (
                             <motion.div
                               key="expanded"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ opacity: 0, scaleY: 0.8 }}
+                              animate={{ opacity: 1, scaleY: 1 }}
+                              exit={{ opacity: 0, scaleY: 0.8 }}
+                              transition={{ 
+                                duration: 0.25, 
+                                ease: [0.4, 0, 0.2, 1]
+                              }}
+                              style={{ transformOrigin: "top" }}
                               className={`bg-gradient-to-br ${group.gradient}`}
                             >
                               <div className="relative">
@@ -647,9 +669,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                           ) : (
                             <motion.div
                               key="collapsed"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              transition={{ duration: 0.2, ease: "easeOut" }}
                               className="p-3 relative"
                             >
                               {/* Neon border effect */}
