@@ -53,7 +53,7 @@ export default function GestionPage() {
   const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
-  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos">("preescolar");
+  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes">("preescolar");
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   
@@ -88,12 +88,42 @@ export default function GestionPage() {
     ]
   };
 
+  const defaultAdolescentes = {
+    title: "EUTANASIA",
+    content: `El término eutanasia es todo acto u omisión cuya responsabilidad recae en personal médico o en individuos cercanos al enfermo, y que ocasiona la muerte inmediata de éste. La palabra deriva del griego: eu ("bueno") y thanatos ("muerte").
+
+Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongación artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". También sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
+
+Otros, en cambio, creen que los programas de eutanasia están en contraposición con los ideales con los que se defiende su implementación. Por ejemplo, se menciona que los médicos durante el régimen nazi hacían propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, según aquella propaganda, merecedoras de compasión, para conseguir así una opinión pública favorable a la eliminación que se estaba haciendo de enfermos, considerados minusválidos o débiles según criterios nazis.
+
+Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despenalizado la eutanasia, y en ellos todavía permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. Según los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos países.`,
+    imageUrl: "https://img.freepik.com/free-vector/teenager-student-concept-illustration_114360-1395.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/student-with-laptop-studying-online-course_74855-5293.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/reading-book-concept-illustration_114360-8503.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/teenager-student-concept-illustration_114360-1395.jpg",
+    questions: [
+      { question: "¿Qué es la eutanasia?", options: ["Es aquello que considera lo bueno y lo malo", "Es quitarse la vida para evitar el sufrimiento", "Es todo acto u omisión cuya responsabilidad recae en el medico y/o familiares"], correct: 2 },
+      { question: "¿Dónde surge la propaganda de realizar la eutanasia?", options: ["E.E.U.U.", "Alemania", "Rusia"], correct: 1 },
+      { question: "¿En qué países se ha despenalizado la eutanasia?", options: ["Alemania - Italia", "Bélgica - Holanda", "España - Inglaterra"], correct: 1 },
+      { question: "¿Quién fue juzgado como asesino por practicar la eutanasia en el gobierno nazi?", options: ["Arthun", "Nuberg", "Vemberth"], correct: 0 },
+    ]
+  };
+
   const [editContentPreescolar, setEditContentPreescolar] = useState(defaultPreescolar);
   const [editContentNinos, setEditContentNinos] = useState(defaultNinos);
+  const [editContentAdolescentes, setEditContentAdolescentes] = useState(defaultAdolescentes);
   const [saving, setSaving] = useState(false);
   
-  const currentEditContent = contentCategory === "preescolar" ? editContentPreescolar : editContentNinos;
-  const setCurrentEditContent = contentCategory === "preescolar" ? setEditContentPreescolar : setEditContentNinos;
+  const currentEditContent = contentCategory === "preescolar" 
+    ? editContentPreescolar 
+    : contentCategory === "ninos" 
+      ? editContentNinos 
+      : editContentAdolescentes;
+  const setCurrentEditContent = contentCategory === "preescolar" 
+    ? setEditContentPreescolar 
+    : contentCategory === "ninos" 
+      ? setEditContentNinos 
+      : setEditContentAdolescentes;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,12 +253,14 @@ export default function GestionPage() {
     if (isLoggedIn) {
       const loadContent = async () => {
         try {
-          const [preescolarRes, ninosRes] = await Promise.all([
+          const [preescolarRes, ninosRes, adolescentesRes] = await Promise.all([
             fetch("/api/reading/preescolar"),
             fetch("/api/reading/ninos"),
+            fetch("/api/reading/adolescentes"),
           ]);
           const preescolarData = await preescolarRes.json();
           const ninosData = await ninosRes.json();
+          const adolescentesData = await adolescentesRes.json();
           
           if (preescolarData.content) {
             const c = preescolarData.content;
@@ -252,6 +284,18 @@ export default function GestionPage() {
               pageSmallImage: c.pageSmallImage || defaultNinos.pageSmallImage,
               categoryImage: c.categoryImage || defaultNinos.categoryImage,
               questions: c.questions ? JSON.parse(c.questions) : defaultNinos.questions,
+            });
+          }
+          if (adolescentesData.content) {
+            const c = adolescentesData.content;
+            setEditContentAdolescentes({
+              title: c.title || defaultAdolescentes.title,
+              content: c.content || defaultAdolescentes.content,
+              imageUrl: c.imageUrl || defaultAdolescentes.imageUrl,
+              pageMainImage: c.pageMainImage || defaultAdolescentes.pageMainImage,
+              pageSmallImage: c.pageSmallImage || defaultAdolescentes.pageSmallImage,
+              categoryImage: c.categoryImage || defaultAdolescentes.categoryImage,
+              questions: c.questions ? JSON.parse(c.questions) : defaultAdolescentes.questions,
             });
           }
         } catch {}
@@ -761,7 +805,7 @@ export default function GestionPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4">
                 <Button
                   onClick={() => setContentCategory("preescolar")}
                   variant={contentCategory === "preescolar" ? "default" : "outline"}
@@ -777,6 +821,14 @@ export default function GestionPage() {
                   data-testid="button-content-ninos"
                 >
                   Niños
+                </Button>
+                <Button
+                  onClick={() => setContentCategory("adolescentes")}
+                  variant={contentCategory === "adolescentes" ? "default" : "outline"}
+                  className={contentCategory === "adolescentes" ? "bg-violet-600" : "border-violet-500/30 text-violet-400"}
+                  data-testid="button-content-adolescentes"
+                >
+                  Adolescentes
                 </Button>
               </div>
 
@@ -910,7 +962,7 @@ export default function GestionPage() {
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-600"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? "Guardando..." : `Guardar ${contentCategory === "preescolar" ? "Pre-escolar" : "Niños"}`}
+                {saving ? "Guardando..." : `Guardar ${contentCategory === "preescolar" ? "Pre-escolar" : contentCategory === "ninos" ? "Niños" : "Adolescentes"}`}
               </Button>
             </CardContent>
           </Card>
