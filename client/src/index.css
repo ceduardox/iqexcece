@@ -217,6 +217,42 @@
   }
 }
 
+/* Instant touch feedback for mobile - CSS is faster than JS */
+.touch-instant {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.touch-instant:active {
+  transform: scale(0.97) translateZ(0);
+  transition: transform 0.05s ease-out;
+}
+
+/* Card touch feedback */
+.card-touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+.card-touch:active {
+  transform: scale(0.985) translateZ(0);
+  transition: transform 0.04s ease-out;
+}
+
+/* Button instant press */
+.btn-instant {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 0.06s ease-out;
+}
+.btn-instant:active {
+  transform: scale(0.94) translateY(2px) translateZ(0);
+}
+
 /* Neon shimmer animation for cards */
 @keyframes shimmer {
   0%, 100% {

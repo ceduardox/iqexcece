@@ -556,7 +556,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.2 }}
               className="relative min-h-[85vh] flex flex-col"
             >
               {/* X-shaped girl image - full height, positioned to the left */}
@@ -638,7 +638,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         role="radio"
                         aria-checked={isSelected}
                         onClick={() => !isSelected && handleAgeSelect(group.id)}
-                        className={`w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 text-left cursor-pointer ${
+                        className={`w-full rounded-2xl border-2 overflow-hidden text-left cursor-pointer card-touch ${
                           isSelected
                             ? `${group.borderColor}`
                             : "border-purple-500/40 bg-background/95"
@@ -646,21 +646,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         style={isSelected ? {
                           boxShadow: "0 0 30px hsl(187 85% 53% / 0.4), 0 0 60px hsl(280 70% 50% / 0.3)",
                         } : {}}
-                        whileTap={!isSelected ? { scale: 0.98 } : {}}
                         data-testid={`button-age-${group.id}`}
                       >
                         <AnimatePresence mode="wait">
                           {isSelected ? (
                             <motion.div
                               key="expanded"
-                              initial={{ opacity: 0, scaleY: 0.8 }}
+                              initial={{ opacity: 0, scaleY: 0.9 }}
                               animate={{ opacity: 1, scaleY: 1 }}
-                              exit={{ opacity: 0, scaleY: 0.8 }}
+                              exit={{ opacity: 0, scaleY: 0.9 }}
                               transition={{ 
-                                duration: 0.25, 
-                                ease: [0.4, 0, 0.2, 1]
+                                duration: 0.12, 
+                                ease: "easeOut"
                               }}
-                              style={{ transformOrigin: "top" }}
+                              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
                               className={`bg-gradient-to-br ${group.gradient}`}
                             >
                               <div className="relative">
@@ -690,29 +689,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                                   <p className="text-sm md:text-base text-white/90 mb-4">
                                     {group.description}
                                   </p>
-                                  <motion.div
-                                      whileTap={{ scale: 0.95, y: 2 }}
-                                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                                    >
-                                      <Button
-                                        onClick={(e) => { e.stopPropagation(); handleContinue(); }}
-                                        size="lg"
-                                        className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0"
-                                        data-testid="button-continue-age"
-                                      >
-                                        CONTINUAR
-                                      </Button>
-                                    </motion.div>
+                                  <Button
+                                    onClick={(e) => { e.stopPropagation(); handleContinue(); }}
+                                    size="lg"
+                                    className="w-full text-base font-bold bg-gradient-to-r from-purple-500 to-cyan-500 border-0 btn-instant"
+                                    data-testid="button-continue-age"
+                                  >
+                                    CONTINUAR
+                                  </Button>
                                 </div>
                               </div>
                             </motion.div>
                           ) : (
                             <motion.div
                               key="collapsed"
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.95 }}
-                              transition={{ duration: 0.2, ease: "easeOut" }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.08 }}
                               className="p-3 relative"
                             >
                               {/* Neon border effect */}
@@ -762,20 +756,17 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <motion.button
+              <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 transition-colors"
-                whileHover={{ x: -4 }}
-                whileTap={{ scale: 0.92, y: 2 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 btn-instant"
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Volver
-              </motion.button>
+              </button>
 
               <motion.div 
                 className="text-center space-y-3 py-2"
@@ -852,7 +843,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         role="checkbox"
                         aria-checked={isSelected}
                         onClick={() => handleProblemToggle(problem.id)}
-                        className={`w-full rounded-2xl border-2 overflow-hidden text-left transition-all duration-300 ${
+                        className={`w-full rounded-2xl border-2 overflow-hidden text-left card-touch ${
                           isSelected
                             ? "border-purple-400"
                             : "border-border/30"
@@ -860,17 +851,17 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                         style={isSelected ? {
                           boxShadow: "0 0 25px hsl(280 70% 50% / 0.4)",
                         } : {}}
-                        whileTap={{ scale: 0.98 }}
                         data-testid={`button-problem-${problem.id}`}
                       >
                         <AnimatePresence mode="wait">
                           {isExpanded ? (
                             <motion.div
                               key="expanded"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ opacity: 0, scaleY: 0.9 }}
+                              animate={{ opacity: 1, scaleY: 1 }}
+                              exit={{ opacity: 0, scaleY: 0.9 }}
+                              transition={{ duration: 0.12, ease: "easeOut" }}
+                              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
                             >
                               <div className="relative">
                                 <div className="w-full h-48 md:h-56 bg-gradient-to-br from-purple-900/50 to-cyan-900/50">
@@ -961,20 +952,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 transition={{ delay: 0.6 }}
                 className="pt-2 pb-6"
               >
-                <motion.div
-                  whileTap={{ scale: 0.95, y: 2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                <Button
+                  onClick={handleContinue}
+                  disabled={selectedProblems.length === 0}
+                  size="lg"
+                  className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0 btn-instant"
+                  data-testid="button-continue-problems"
                 >
-                  <Button
-                    onClick={handleContinue}
-                    disabled={selectedProblems.length === 0}
-                    size="lg"
-                    className="w-full text-lg font-bold bg-gradient-to-r from-cyan-500 to-purple-500 border-0"
-                    data-testid="button-continue-problems"
-                  >
-                    CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
-                  </Button>
-                </motion.div>
+                  CONTINUAR ({selectedProblems.length} seleccionado{selectedProblems.length !== 1 ? "s" : ""})
+                </Button>
               </motion.div>
             </motion.div>
           )}
@@ -985,7 +971,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.2 }}
               className="flex flex-col items-center justify-center min-h-[70vh] space-y-8"
             >
               <motion.div
@@ -1142,20 +1128,17 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <motion.button
+              <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 transition-colors"
-                whileHover={{ x: -4 }}
-                whileTap={{ scale: 0.92, y: 2 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-400/50 bg-purple-400/10 text-purple-400 text-sm font-medium hover:bg-purple-400/20 btn-instant"
                 data-testid="button-back-options"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Volver
-              </motion.button>
+              </button>
 
               <motion.div 
                 className="text-center space-y-4 py-2"
@@ -1210,16 +1193,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 animate="visible"
                 className="space-y-4"
               >
-                <motion.button
+                <motion.div
                   variants={itemVariants}
                   onClick={() => handleOptionSelect("tests")}
-                  className="w-full rounded-3xl overflow-hidden text-left relative group"
+                  className="w-full rounded-3xl overflow-hidden text-left relative group cursor-pointer card-touch"
                   style={{
                     background: "linear-gradient(135deg, hsl(280 70% 45%) 0%, hsl(260 60% 35%) 50%, hsl(200 70% 40%) 100%)",
                   }}
-                  whileHover={{ scale: 1.03, y: -6 }}
-                  whileTap={{ scale: 0.95, y: 2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   data-testid="button-option-tests"
                 >
                   <motion.div 
@@ -1262,18 +1242,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       </motion.div>
                     </div>
                   </div>
-                </motion.button>
+                </motion.div>
 
-                <motion.button
+                <motion.div
                   variants={itemVariants}
                   onClick={() => handleOptionSelect("training")}
-                  className="w-full rounded-3xl overflow-hidden text-left relative group"
+                  className="w-full rounded-3xl overflow-hidden text-left relative group cursor-pointer card-touch"
                   style={{
                     background: "linear-gradient(135deg, hsl(187 70% 40%) 0%, hsl(200 60% 35%) 50%, hsl(220 70% 45%) 100%)",
                   }}
-                  whileHover={{ scale: 1.03, y: -6 }}
-                  whileTap={{ scale: 0.95, y: 2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   data-testid="button-option-training"
                 >
                   <motion.div 
@@ -1316,7 +1293,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       </motion.div>
                     </div>
                   </div>
-                </motion.button>
+                </motion.div>
               </motion.div>
             </motion.div>
           )}
