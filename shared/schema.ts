@@ -62,6 +62,8 @@ export const readingContents = pgTable("reading_contents", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
+  pageMainImage: text("page_main_image"),
+  pageSmallImage: text("page_small_image"),
   questions: text("questions").notNull(), // JSON string
   updatedAt: timestamp("updated_at").defaultNow(),
 });

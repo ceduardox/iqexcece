@@ -120,6 +120,7 @@ export class MemStorage implements IStorage {
       categoria: insertResult.categoria || "preescolar",
       tiempoLectura: insertResult.tiempoLectura || null,
       tiempoCuestionario: insertResult.tiempoCuestionario || null,
+      isPwa: insertResult.isPwa || false,
       createdAt: new Date(),
     };
     this.quizResults.set(id, result);
@@ -144,6 +145,8 @@ export class MemStorage implements IStorage {
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,
+      pageMainImage: insertContent.pageMainImage || null,
+      pageSmallImage: insertContent.pageSmallImage || null,
       questions: insertContent.questions,
       updatedAt: new Date(),
     };

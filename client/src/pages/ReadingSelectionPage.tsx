@@ -1,7 +1,13 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
+
+interface ReadingContent {
+  pageMainImage?: string;
+  pageSmallImage?: string;
+  title?: string;
+}
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -68,9 +74,34 @@ function ChildishBackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+const defaultImages = {
+  preescolar: {
+    mainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
+    smallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
+  },
+  ninos: {
+    mainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
+    smallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
+  },
+};
+
 export default function ReadingSelectionPage() {
   const [, setLocation] = useLocation();
   const { userData } = useUserData();
+  const [content, setContent] = useState<ReadingContent | null>(null);
+  
+  const categoria = userData.childCategory || "preescolar";
+
+  useEffect(() => {
+    fetch(`/api/reading/${categoria}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.content) {
+          setContent(data.content);
+        }
+      })
+      .catch(() => {});
+  }, [categoria]);
 
   const handleBack = useCallback(() => {
     playButtonSound();
@@ -83,8 +114,11 @@ export default function ReadingSelectionPage() {
   }, [setLocation]);
 
   const testName = testTitles[userData.selectedTest || "lectura"] || "Test Lectura";
-  const categoryLabel = categoryLabels[userData.childCategory || "preescolar"] || "Pre escolar";
-  const reading = categoryReadings[userData.childCategory || "preescolar"] || categoryReadings.preescolar;
+  const categoryLabel = categoryLabels[categoria] || "Pre escolar";
+  const reading = categoryReadings[categoria] || categoryReadings.preescolar;
+  
+  const mainImage = content?.pageMainImage || defaultImages[categoria as keyof typeof defaultImages]?.mainImage || defaultImages.preescolar.mainImage;
+  const smallImage = content?.pageSmallImage || defaultImages[categoria as keyof typeof defaultImages]?.smallImage || defaultImages.preescolar.smallImage;
 
   return (
     <motion.div
@@ -115,7 +149,7 @@ export default function ReadingSelectionPage() {
             className="relative z-10"
           >
             <img 
-              src="https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg"
+              src={mainImage}
               alt="Niño feliz"
               className="w-64 h-64 object-contain drop-shadow-2xl"
               style={{ filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.3))" }}
@@ -134,7 +168,7 @@ export default function ReadingSelectionPage() {
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
               <img 
-                src="https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg"
+                src={smallImage}
                 alt="Libro mascota"
                 className="w-full h-full object-cover"
               />

@@ -54,11 +54,14 @@ export default function GestionPage() {
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos">("preescolar");
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
   
   const defaultPreescolar = {
     title: "Paseando con mi perrito",
     content: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
     imageUrl: "https://img.freepik.com/free-vector/cute-girl-walking-dog-cartoon-vector-icon-illustration_138676-2600.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
     questions: [
       { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
       { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
@@ -71,6 +74,8 @@ export default function GestionPage() {
     title: "El jardín mágico",
     content: "Pedro encontró una puerta secreta en su jardín. Detrás había un mundo de colores brillantes con flores gigantes y mariposas que hablaban. Una mariposa azul le dijo que era el guardián del jardín. Pedro prometió cuidarlo y volver cada día.",
     imageUrl: "https://img.freepik.com/free-vector/magical-garden-illustration_23-2149508098.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
     questions: [
       { question: "¿Qué encontró Pedro?", options: ["Una llave", "Una puerta secreta", "Un tesoro"], correct: 1 },
       { question: "¿Qué había detrás de la puerta?", options: ["Un mundo de colores", "Una cueva", "Un río"], correct: 0 },
@@ -159,6 +164,8 @@ export default function GestionPage() {
           title: currentEditContent.title,
           content: currentEditContent.content,
           imageUrl: currentEditContent.imageUrl,
+          pageMainImage: currentEditContent.pageMainImage,
+          pageSmallImage: currentEditContent.pageSmallImage,
           questions: JSON.stringify(currentEditContent.questions),
         }),
       });
@@ -275,12 +282,74 @@ export default function GestionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
+      <aside className="w-64 bg-black/40 border-r border-white/10 p-4 hidden md:flex flex-col">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-white">Panel de Gestión</h1>
+          <p className="text-cyan-400 text-sm">IQxponencial</p>
+        </div>
+        
+        <nav className="flex-1 space-y-2">
+          <button
+            onClick={() => setActiveTab("sesiones")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "sesiones" ? "bg-cyan-600 text-white" : "text-cyan-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-sesiones"
+          >
+            <Users className="w-5 h-5" />
+            Sesiones
+          </button>
+          <button
+            onClick={() => setActiveTab("resultados")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "resultados" ? "bg-green-600 text-white" : "text-green-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-resultados"
+          >
+            <FileText className="w-5 h-5" />
+            Resultados
+          </button>
+          <button
+            onClick={() => setActiveTab("contenido")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "contenido" ? "bg-orange-600 text-white" : "text-orange-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-contenido"
+          >
+            <BookOpen className="w-5 h-5" />
+            Contenido
+          </button>
+        </nav>
+
+        <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
+          <Button
+            onClick={() => { fetchSessions(); fetchQuizResults(); }}
+            variant="outline"
+            className="w-full border-cyan-500/30 text-cyan-400"
+            disabled={loading}
+            data-testid="button-refresh"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            Actualizar
+          </Button>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="w-full border-red-500/30 text-red-400"
+            data-testid="button-logout"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Salir
+          </Button>
+        </div>
+      </aside>
+
+      <div className="flex-1 p-4 overflow-auto">
+        <div className="md:hidden flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">Panel de Gestión</h1>
-            <p className="text-cyan-400 text-sm">IQEXPONENCIAL</p>
+            <h1 className="text-lg font-bold text-white">Panel de Gestión</h1>
+            <p className="text-cyan-400 text-xs">IQxponencial</p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -289,48 +358,56 @@ export default function GestionPage() {
               size="icon"
               className="border-cyan-500/30 text-cyan-400"
               disabled={loading}
-              data-testid="button-refresh"
+              data-testid="button-mobile-refresh"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
             <Button
               onClick={handleLogout}
               variant="outline"
+              size="icon"
               className="border-red-500/30 text-red-400"
-              data-testid="button-logout"
+              data-testid="button-mobile-logout"
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              Salir
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
           <Button
             onClick={() => setActiveTab("sesiones")}
             variant={activeTab === "sesiones" ? "default" : "outline"}
+            size="sm"
             className={activeTab === "sesiones" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+            data-testid="mobile-tab-sesiones"
           >
-            <Users className="w-4 h-4 mr-2" />
+            <Users className="w-4 h-4 mr-1" />
             Sesiones
           </Button>
           <Button
             onClick={() => setActiveTab("resultados")}
             variant={activeTab === "resultados" ? "default" : "outline"}
+            size="sm"
             className={activeTab === "resultados" ? "bg-green-600" : "border-green-500/30 text-green-400"}
+            data-testid="mobile-tab-resultados"
           >
-            <FileText className="w-4 h-4 mr-2" />
+            <FileText className="w-4 h-4 mr-1" />
             Resultados
           </Button>
           <Button
             onClick={() => setActiveTab("contenido")}
             variant={activeTab === "contenido" ? "default" : "outline"}
+            size="sm"
             className={activeTab === "contenido" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+            data-testid="mobile-tab-contenido"
           >
-            <BookOpen className="w-4 h-4 mr-2" />
+            <BookOpen className="w-4 h-4 mr-1" />
             Contenido
           </Button>
         </div>
+
+        <div className="max-w-6xl mx-auto">
 
         {activeTab === "sesiones" && (
           <>
@@ -396,7 +473,7 @@ export default function GestionPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-white/60 border-b border-white/10">
@@ -445,6 +522,43 @@ export default function GestionPage() {
                       )}
                     </tbody>
                   </table>
+                </div>
+
+                <div className="md:hidden space-y-2">
+                  {data?.sessions.map((session) => (
+                    <div key={session.id} className="bg-white/5 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedSession(expandedSession === session.id ? null : session.id)}
+                        className="w-full p-3 flex items-center justify-between text-left"
+                        data-testid={`button-expand-session-${session.id}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${session.isCurrentlyActive ? "bg-green-400 animate-pulse" : "bg-gray-400"}`} />
+                          <span className="text-white font-medium text-sm">{session.device || "Dispositivo"}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs ${session.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                            {session.isPwa ? "PWA" : "Web"}
+                          </span>
+                        </div>
+                        <svg className={`w-5 h-5 text-white/60 transition-transform ${expandedSession === session.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {expandedSession === session.id && (
+                        <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
+                          <p className="text-white/60 pt-2">Estado: <span className={session.isCurrentlyActive ? "text-green-400" : "text-gray-400"}>{session.isCurrentlyActive ? "Activo" : "Inactivo"}</span></p>
+                          <p className="text-white/60">IP: <span className="text-white/80 font-mono text-xs">{session.ip || "-"}</span></p>
+                          <p className="text-white/60">Navegador: <span className="text-white/80">{session.browser || "-"}</span></p>
+                          <p className="text-white/60">Edad: <span className="text-white/80">{getAgeLabel(session.ageGroup)}</span></p>
+                          <p className="text-white/60">Última Actividad: <span className="text-white/60">{formatDate(session.lastActivity)}</span></p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {(!data?.sessions || data.sessions.length === 0) && (
+                    <div className="py-8 text-center text-white/40">
+                      No hay sesiones registradas
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -623,15 +737,46 @@ export default function GestionPage() {
               </div>
 
               <div>
-                <label className="text-white/60 text-sm mb-1 block">URL de imagen</label>
+                <label className="text-white/60 text-sm mb-1 block">URL de imagen de lectura</label>
                 <Input
                   value={currentEditContent.imageUrl}
                   onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, imageUrl: e.target.value }))}
                   className="bg-white/10 border-white/20 text-white"
+                  data-testid="input-content-image"
                 />
                 {currentEditContent.imageUrl && (
                   <img src={currentEditContent.imageUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-lg" />
                 )}
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="text-white font-semibold mb-3">Imágenes de página de selección</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen principal (grande)</label>
+                    <Input
+                      value={currentEditContent.pageMainImage || ""}
+                      onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, pageMainImage: e.target.value }))}
+                      className="bg-white/10 border-white/20 text-white"
+                      data-testid="input-page-main-image"
+                    />
+                    {currentEditContent.pageMainImage && (
+                      <img src={currentEditContent.pageMainImage} alt="Main" className="mt-2 w-24 h-24 object-cover rounded-lg" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen pequeña (flotante)</label>
+                    <Input
+                      value={currentEditContent.pageSmallImage || ""}
+                      onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, pageSmallImage: e.target.value }))}
+                      className="bg-white/10 border-white/20 text-white"
+                      data-testid="input-page-small-image"
+                    />
+                    {currentEditContent.pageSmallImage && (
+                      <img src={currentEditContent.pageSmallImage} alt="Small" className="mt-2 w-16 h-16 object-cover rounded-lg" />
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="border-t border-white/10 pt-4">
@@ -694,6 +839,7 @@ export default function GestionPage() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
