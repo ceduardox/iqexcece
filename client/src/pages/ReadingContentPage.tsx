@@ -20,10 +20,10 @@ interface Question {
   correct: number;
 }
 
-const readingContent: Record<string, { title: string; text: string; questions: Question[] }> = {
+const defaultReadingContent: Record<string, { title: string; text: string; questions: Question[] }> = {
   preescolar: {
     title: "Paseando con mi perrito",
-    text: "Mariana tiene un perrito de color café llamado Balu, lo saca a pasear todos los días al parque que esta frente su casa, un día se le escapo, estaba asustada y lloro llego hasta el kiosco y el señor le devolvió a su perrito.",
+    text: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
     questions: [
       { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
       { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
@@ -32,13 +32,14 @@ const readingContent: Record<string, { title: string; text: string; questions: Q
     ],
   },
   ninos: {
-    title: "La aventura del explorador",
-    text: "Carlos era un niño muy curioso que soñaba con ser explorador. Un día encontró un mapa antiguo en el ático de su abuela. Siguió las pistas por el jardín hasta descubrir un cofre enterrado con monedas antiguas y una carta de su bisabuelo.",
+    title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
+    text: "Hace muchos años, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en América Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podía comprar un tomate con un grano de cacao, o un conejo con 30 granos. Además, solo las personas importantes, como guerreros y nobles, podían tomar esa bebida.\n\nCuando los conquistadores españoles llegaron a América en el siglo XVI, llevaron el cacao a Europa. Allí, las personas comenzaron a mezclarlo con azúcar y leche, creando una bebida caliente más dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en países tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y además de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de ánimo y aportar energía, siempre que se consuma con moderación.",
     questions: [
-      { question: "¿Cómo se llamaba el niño?", options: ["Pedro", "Carlos", "Miguel"], correct: 1 },
-      { question: "¿Qué soñaba ser?", options: ["Astronauta", "Doctor", "Explorador"], correct: 2 },
-      { question: "¿Dónde encontró el mapa?", options: ["En su cuarto", "En el ático", "En el jardín"], correct: 1 },
-      { question: "¿Qué había en el cofre?", options: ["Juguetes", "Monedas antiguas", "Libros"], correct: 1 },
+      { question: "¿Qué civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
+      { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
+      { question: "Pregunta 3 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      { question: "Pregunta 4 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      { question: "Pregunta 5 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
     ],
   },
 };
@@ -196,8 +197,32 @@ export default function ReadingContentPage() {
     comentario: "",
   });
   const [answers, setAnswers] = useState<number[]>([]);
-
   const [quizFinished, setQuizFinished] = useState(false);
+  
+  const categoria = userData.childCategory || "preescolar";
+  const [content, setContent] = useState(defaultReadingContent[categoria] || defaultReadingContent.preescolar);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const res = await fetch(`/api/reading/${categoria}`);
+        const data = await res.json();
+        if (data.content) {
+          const questions = typeof data.content.questions === 'string' 
+            ? JSON.parse(data.content.questions) 
+            : data.content.questions;
+          setContent({
+            title: data.content.title || defaultReadingContent[categoria].title,
+            text: data.content.content || defaultReadingContent[categoria].text,
+            questions: questions || defaultReadingContent[categoria].questions,
+          });
+        }
+      } catch {
+        setContent(defaultReadingContent[categoria] || defaultReadingContent.preescolar);
+      }
+    };
+    fetchContent();
+  }, [categoria]);
 
   useEffect(() => {
     if (quizFinished) return;
@@ -229,8 +254,7 @@ export default function ReadingContentPage() {
     setSelectedAnswer(null);
   }, []);
 
-  const categoryLabel = categoryLabels[userData.childCategory || "preescolar"] || "Pre escolar";
-  const content = readingContent[userData.childCategory || "preescolar"] || readingContent.preescolar;
+  const categoryLabel = categoryLabels[categoria] || "Pre escolar";
   const currentQ = content.questions[currentQuestion];
 
   const handleSelectAnswer = useCallback((index: number) => {
