@@ -250,7 +250,7 @@ export default function RazonamientoQuizPage() {
                 transition={{ delay: 0.4 }}
                 className="text-gray-500 mt-2"
               >
-                Respuestas correctas: <span className="font-bold text-purple-600">{correctAnswers}/{questions.length}</span>
+                Completa tus datos para ver tus resultados
               </motion.p>
             </div>
 
