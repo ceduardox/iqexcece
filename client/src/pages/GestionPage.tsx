@@ -1801,7 +1801,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <h3 className="text-white font-semibold mb-3">Datos del ejercicio ({cerebralContent.exerciseType})</h3>
                 
                 {cerebralContent.exerciseType === "bailarina" && (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
                       <label className="text-white/60 text-sm mb-1 block">Instrucción</label>
                       <Input
@@ -1815,22 +1815,144 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         data-testid="input-cerebral-instruction"
                       />
                     </div>
+                    
+                    {/* Custom Answer Options */}
+                    <div className="border border-white/20 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-white/60 text-sm">Opciones de respuesta</label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const options = cerebralContent.exerciseData.answerOptions || [];
+                            const newId = String(Date.now());
+                            setCerebralContent(p => ({
+                              ...p,
+                              exerciseData: {
+                                ...p.exerciseData,
+                                answerOptions: [...options, { id: newId, label: "", value: "", position: options.length }]
+                              }
+                            }));
+                          }}
+                          className="border-cyan-500/50 text-cyan-400"
+                          data-testid="button-add-option"
+                        >
+                          <Plus className="w-3 h-3 mr-1" /> Agregar opción
+                        </Button>
+                      </div>
+                      
+                      {(!cerebralContent.exerciseData.answerOptions || cerebralContent.exerciseData.answerOptions.length === 0) && (
+                        <p className="text-white/40 text-sm text-center py-2">
+                          Sin opciones personalizadas. Se usarán: Izquierda, Derecha, Ambos
+                        </p>
+                      )}
+                      
+                      <div className="space-y-2">
+                        {(cerebralContent.exerciseData.answerOptions || []).map((opt: {id: string; label: string; value: string; position: number}, idx: number) => (
+                          <div key={opt.id} className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                            <div className="flex flex-col gap-1 flex-1">
+                              <Input
+                                value={opt.label}
+                                onChange={(e) => {
+                                  const options = [...(cerebralContent.exerciseData.answerOptions || [])];
+                                  options[idx] = { ...opt, label: e.target.value };
+                                  setCerebralContent(p => ({
+                                    ...p,
+                                    exerciseData: { ...p.exerciseData, answerOptions: options }
+                                  }));
+                                }}
+                                placeholder="Etiqueta visible (ej: Izquierda)"
+                                className="bg-white/10 border-white/20 text-white text-sm"
+                                data-testid={`input-option-label-${idx}`}
+                              />
+                              <Input
+                                value={opt.value}
+                                onChange={(e) => {
+                                  const options = [...(cerebralContent.exerciseData.answerOptions || [])];
+                                  options[idx] = { ...opt, value: e.target.value };
+                                  setCerebralContent(p => ({
+                                    ...p,
+                                    exerciseData: { ...p.exerciseData, answerOptions: options }
+                                  }));
+                                }}
+                                placeholder="Valor interno (ej: izquierda)"
+                                className="bg-white/10 border-white/20 text-white text-sm"
+                                data-testid={`input-option-value-${idx}`}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1 items-center">
+                              <span className="text-white/40 text-xs">Pos.</span>
+                              <Input
+                                type="number"
+                                min={0}
+                                value={opt.position}
+                                onChange={(e) => {
+                                  const options = [...(cerebralContent.exerciseData.answerOptions || [])];
+                                  options[idx] = { ...opt, position: parseInt(e.target.value) || 0 };
+                                  setCerebralContent(p => ({
+                                    ...p,
+                                    exerciseData: { ...p.exerciseData, answerOptions: options }
+                                  }));
+                                }}
+                                className="w-14 bg-white/10 border-white/20 text-white text-center text-sm"
+                                data-testid={`input-option-position-${idx}`}
+                              />
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                const options = (cerebralContent.exerciseData.answerOptions || []).filter((_: any, i: number) => i !== idx);
+                                setCerebralContent(p => ({
+                                  ...p,
+                                  exerciseData: { ...p.exerciseData, answerOptions: options }
+                                }));
+                              }}
+                              className="text-red-400"
+                              data-testid={`button-delete-option-${idx}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
-                      <select
-                        value={cerebralContent.exerciseData.correctAnswer || ""}
-                        onChange={(e) => setCerebralContent(p => ({ 
-                          ...p, 
-                          exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
-                        }))}
-                        className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
-                        data-testid="select-cerebral-answer"
-                      >
-                        <option value="" className="bg-gray-800">Seleccionar...</option>
-                        <option value="izquierda" className="bg-gray-800">Izquierda</option>
-                        <option value="derecha" className="bg-gray-800">Derecha</option>
-                        <option value="ambos" className="bg-gray-800">Ambos lados</option>
-                      </select>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta (valor interno)</label>
+                      {(cerebralContent.exerciseData.answerOptions && cerebralContent.exerciseData.answerOptions.length > 0) ? (
+                        <select
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                          data-testid="select-cerebral-answer"
+                        >
+                          <option value="" className="bg-gray-800">Seleccionar...</option>
+                          {(cerebralContent.exerciseData.answerOptions || []).map((opt: {id: string; label: string; value: string}) => (
+                            <option key={opt.id} value={opt.value} className="bg-gray-800">
+                              {opt.label} ({opt.value})
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <select
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                          data-testid="select-cerebral-answer"
+                        >
+                          <option value="" className="bg-gray-800">Seleccionar...</option>
+                          <option value="izquierda" className="bg-gray-800">Izquierda</option>
+                          <option value="derecha" className="bg-gray-800">Derecha</option>
+                          <option value="ambos" className="bg-gray-800">Ambos lados</option>
+                        </select>
+                      )}
                     </div>
                   </div>
                 )}

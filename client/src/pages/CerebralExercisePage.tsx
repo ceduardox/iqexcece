@@ -2,10 +2,17 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+
+interface AnswerOption {
+  id: string;
+  label: string;
+  value: string;
+  position: number;
+}
 
 interface CerebralContent {
   title: string;
@@ -37,7 +44,7 @@ export default function CerebralExercisePage() {
 
   const content = data?.content ? {
     ...data.content,
-    exerciseData: safeParseJSON(data.content.exerciseData, { instruction: "", correctAnswer: "" }),
+    exerciseData: safeParseJSON(data.content.exerciseData, { instruction: "", correctAnswer: "", answerOptions: [] }),
   } : null;
 
   const handleSubmit = () => {
@@ -57,34 +64,107 @@ export default function CerebralExercisePage() {
     setSubmitted(false);
   };
 
-  const renderBailarinaExercise = () => (
-    <div className="space-y-4">
-      <p className="text-white/80 text-center text-lg">{content?.exerciseData.instruction}</p>
-      {content?.imageUrl && (
-        <div className="flex justify-center">
-          <img 
-            src={content.imageUrl} 
-            alt="Ejercicio de bailarina"
-            style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
-            className="rounded-lg"
-          />
+  const handleReset = () => {
+    setUserAnswer("");
+    setSubmitted(false);
+  };
+
+  // Get answer options from exerciseData or use defaults
+  const getAnswerOptions = (): AnswerOption[] => {
+    if (content?.exerciseData?.answerOptions && content.exerciseData.answerOptions.length > 0) {
+      return content.exerciseData.answerOptions
+        .filter((opt: AnswerOption) => opt.label && opt.value)
+        .sort((a: AnswerOption, b: AnswerOption) => a.position - b.position);
+    }
+    // Default bailarina options
+    return [
+      { id: "1", label: "Izquierda", value: "izquierda", position: 0 },
+      { id: "2", label: "Derecha", value: "derecha", position: 1 },
+      { id: "3", label: "Ambos", value: "ambos", position: 2 },
+    ];
+  };
+
+  const renderBailarinaExercise = () => {
+    const options = getAnswerOptions();
+    
+    return (
+      <div className="space-y-6">
+        <p className="text-white/80 text-center text-lg">{content?.exerciseData.instruction}</p>
+        {content?.imageUrl && (
+          <div className="flex justify-center">
+            <img 
+              src={content.imageUrl} 
+              alt="Ejercicio de bailarina"
+              style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
+              className="rounded-lg"
+            />
+          </div>
+        )}
+        
+        {/* Modern Arrow Buttons */}
+        <div className="flex flex-wrap gap-4 justify-center mt-6">
+          {options.map((option) => {
+            const isSelected = userAnswer === option.value;
+            const isLeftArrow = option.value.toLowerCase().includes("izquierda") || option.value.toLowerCase().includes("left");
+            const isRightArrow = option.value.toLowerCase().includes("derecha") || option.value.toLowerCase().includes("right");
+            const isBothArrow = option.value.toLowerCase().includes("ambos") || option.value.toLowerCase().includes("both");
+            
+            return (
+              <button
+                key={option.id}
+                onClick={() => !submitted && setUserAnswer(option.value)}
+                disabled={submitted}
+                className={`
+                  relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl
+                  min-w-[100px] min-h-[100px] transition-colors overflow-visible
+                  ${isSelected 
+                    ? "bg-gradient-to-br from-purple-500 to-cyan-500 border border-purple-400 shadow-lg shadow-purple-500/40" 
+                    : "bg-white/10 border border-white/20 hover-elevate"
+                  }
+                  ${submitted ? "opacity-60 cursor-not-allowed" : "cursor-pointer active-elevate-2"}
+                `}
+                data-testid={`button-option-${option.value}`}
+              >
+                {/* Arrow Icon */}
+                <div className={`
+                  flex items-center justify-center w-12 h-12 rounded-full
+                  ${isSelected ? "bg-white/20" : "bg-gradient-to-br from-purple-500/30 to-cyan-500/30"}
+                `}>
+                  {isLeftArrow && <ChevronLeft className="w-8 h-8 text-white" />}
+                  {isRightArrow && <ChevronRight className="w-8 h-8 text-white" />}
+                  {isBothArrow && (
+                    <div className="flex">
+                      <ChevronLeft className="w-6 h-6 text-white -mr-2" />
+                      <ChevronRight className="w-6 h-6 text-white -ml-2" />
+                    </div>
+                  )}
+                  {!isLeftArrow && !isRightArrow && !isBothArrow && (
+                    <RotateCcw className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                
+                {/* Label */}
+                <span className={`text-sm font-semibold ${isSelected ? "text-white" : "text-white/80"}`}>
+                  {option.label}
+                </span>
+                
+                {/* Selection indicator */}
+                {isSelected && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-cyan-400 rounded-full flex items-center justify-center"
+                  >
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </motion.div>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
-      <div className="flex gap-2 justify-center mt-4">
-        {["izquierda", "derecha", "ambos"].map((option) => (
-          <Button
-            key={option}
-            onClick={() => setUserAnswer(option)}
-            variant={userAnswer === option ? "default" : "outline"}
-            disabled={submitted}
-            data-testid={`button-option-${option}`}
-          >
-            {option === "izquierda" ? "Izquierda" : option === "derecha" ? "Derecha" : "Ambos"}
-          </Button>
-        ))}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSecuenciaExercise = () => (
     <div className="space-y-4">
@@ -107,7 +187,7 @@ export default function CerebralExercisePage() {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Tu respuesta..."
-          className="text-center text-xl"
+          className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
           disabled={submitted}
           data-testid="input-sequence-answer"
         />
@@ -133,7 +213,7 @@ export default function CerebralExercisePage() {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Tu respuesta..."
-          className="text-center text-xl"
+          className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
           disabled={submitted}
           data-testid="input-generic-answer"
         />
@@ -145,7 +225,7 @@ export default function CerebralExercisePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
         <div className="max-w-md mx-auto space-y-4">
-          <Skeleton className="h-10 w-48 bg-white/10" />
+          <Skeleton className="h-16 w-full bg-white/10" />
           <Skeleton className="h-64 w-full rounded-xl bg-white/10" />
         </div>
       </div>
@@ -173,27 +253,47 @@ export default function CerebralExercisePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
       <div className="max-w-md mx-auto">
+        {/* Styled Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 mb-6"
+          className="mb-6"
         >
+          {/* Back Button - Modern Design */}
           <Button
-            variant="ghost"
-            size="icon"
             onClick={() => setLocation(`/cerebral/seleccion`)}
+            variant="ghost"
+            className="mb-4 text-white/70"
             data-testid="button-back"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver
           </Button>
-          <div>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-purple-400" />
-              {content.title || "Test Cerebral"}
-            </h1>
+          
+          {/* TEST CEREBRAL Header */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600/40 to-cyan-600/40 p-4 border border-white/10">
+            {/* Background X Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-white">
+                X
+              </div>
+            </div>
+            
+            <div className="relative flex items-center justify-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-center">
+                <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+                  TEST CEREBRAL
+                </h1>
+                <p className="text-white/60 text-xs mt-0.5">{content.title}</p>
+              </div>
+            </div>
           </div>
         </motion.div>
 
+        {/* Exercise Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -236,7 +336,7 @@ export default function CerebralExercisePage() {
               <Button
                 onClick={handleSubmit}
                 disabled={!userAnswer.trim()}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
                 data-testid="button-submit"
               >
                 Verificar respuesta
@@ -253,7 +353,7 @@ export default function CerebralExercisePage() {
                 </Button>
                 <Button
                   onClick={handleNext}
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
                   data-testid="button-next"
                 >
                   Siguiente
