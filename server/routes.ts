@@ -82,6 +82,48 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         { question: "Pregunta 4 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
       ])
     }
+  },
+  universitarios: {
+    1: {
+      temaNumero: 1,
+      title: "LECTURA UNIVERSITARIA - Tema 01",
+      content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+      imageUrl: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
+      pageMainImage: "https://img.freepik.com/free-vector/college-students-concept-illustration_114360-10205.jpg",
+      pageSmallImage: "https://img.freepik.com/free-vector/book-reading-concept-illustration_114360-4528.jpg",
+      categoryImage: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
+      questions: JSON.stringify([
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      ])
+    }
+  },
+  profesionales: {
+    1: {
+      temaNumero: 1,
+      title: "LECTURA PROFESIONAL - Tema 01",
+      content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+      imageUrl: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
+      pageMainImage: "https://img.freepik.com/free-vector/office-workers-concept-illustration_114360-2244.jpg",
+      pageSmallImage: "https://img.freepik.com/free-vector/business-team-concept-illustration_114360-3628.jpg",
+      categoryImage: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
+      questions: JSON.stringify([
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      ])
+    }
+  },
+  adulto_mayor: {
+    1: {
+      temaNumero: 1,
+      title: "LECTURA ADULTO MAYOR - Tema 01",
+      content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+      imageUrl: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
+      pageMainImage: "https://img.freepik.com/free-vector/elderly-people-concept-illustration_114360-4195.jpg",
+      pageSmallImage: "https://img.freepik.com/free-vector/reading-glasses-concept-illustration_114360-4890.jpg",
+      categoryImage: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
+      questions: JSON.stringify([
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+      ])
+    }
   }
 };
 

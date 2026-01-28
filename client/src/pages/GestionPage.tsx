@@ -53,7 +53,7 @@ export default function GestionPage() {
   const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
-  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes">("preescolar");
+  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
   const [selectedTema, setSelectedTema] = useState(1);
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
@@ -114,18 +114,64 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   const [editContentPreescolar, setEditContentPreescolar] = useState(defaultPreescolar);
   const [editContentNinos, setEditContentNinos] = useState(defaultNinos);
   const [editContentAdolescentes, setEditContentAdolescentes] = useState(defaultAdolescentes);
+  
+  const defaultUniversitarios = {
+    title: "LECTURA UNIVERSITARIA - Tema 01",
+    content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+    imageUrl: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/college-students-concept-illustration_114360-10205.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/book-reading-concept-illustration_114360-4528.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
+  };
+  const [editContentUniversitarios, setEditContentUniversitarios] = useState(defaultUniversitarios);
+  
+  const defaultProfesionales = {
+    title: "LECTURA PROFESIONAL - Tema 01",
+    content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+    imageUrl: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/office-workers-concept-illustration_114360-2244.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/business-team-concept-illustration_114360-3628.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
+  };
+  const [editContentProfesionales, setEditContentProfesionales] = useState(defaultProfesionales);
+  
+  const defaultAdultoMayor = {
+    title: "LECTURA ADULTO MAYOR - Tema 01",
+    content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
+    imageUrl: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
+    pageMainImage: "https://img.freepik.com/free-vector/elderly-people-concept-illustration_114360-4195.jpg",
+    pageSmallImage: "https://img.freepik.com/free-vector/reading-glasses-concept-illustration_114360-4890.jpg",
+    categoryImage: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
+  };
+  const [editContentAdultoMayor, setEditContentAdultoMayor] = useState(defaultAdultoMayor);
+  
   const [saving, setSaving] = useState(false);
   
   const currentEditContent = contentCategory === "preescolar" 
     ? editContentPreescolar 
     : contentCategory === "ninos" 
       ? editContentNinos 
-      : editContentAdolescentes;
+      : contentCategory === "adolescentes"
+        ? editContentAdolescentes
+        : contentCategory === "universitarios"
+          ? editContentUniversitarios
+          : contentCategory === "profesionales"
+            ? editContentProfesionales
+            : editContentAdultoMayor;
   const setCurrentEditContent = contentCategory === "preescolar" 
     ? setEditContentPreescolar 
     : contentCategory === "ninos" 
       ? setEditContentNinos 
-      : setEditContentAdolescentes;
+      : contentCategory === "adolescentes"
+        ? setEditContentAdolescentes
+        : contentCategory === "universitarios"
+          ? setEditContentUniversitarios
+          : contentCategory === "profesionales"
+            ? setEditContentProfesionales
+            : setEditContentAdultoMayor;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,16 +299,21 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       questions: [],
     };
     
+    const setContentByCategory = (content: typeof emptyContent) => {
+      switch (categoria) {
+        case "preescolar": setEditContentPreescolar(content); break;
+        case "ninos": setEditContentNinos(content); break;
+        case "adolescentes": setEditContentAdolescentes(content); break;
+        case "universitarios": setEditContentUniversitarios(content); break;
+        case "profesionales": setEditContentProfesionales(content); break;
+        case "adulto_mayor": setEditContentAdultoMayor(content); break;
+      }
+    };
+    
     try {
       const res = await fetch(`/api/reading/${categoria}?tema=${tema}`);
       if (!res.ok) {
-        if (categoria === "preescolar") {
-          setEditContentPreescolar(emptyContent);
-        } else if (categoria === "ninos") {
-          setEditContentNinos(emptyContent);
-        } else {
-          setEditContentAdolescentes(emptyContent);
-        }
+        setContentByCategory(emptyContent);
         return;
       }
       const data = await res.json();
@@ -278,30 +329,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           categoryImage: c.categoryImage || "",
           questions: questions || [],
         };
-        if (categoria === "preescolar") {
-          setEditContentPreescolar(newContent);
-        } else if (categoria === "ninos") {
-          setEditContentNinos(newContent);
-        } else {
-          setEditContentAdolescentes(newContent);
-        }
+        setContentByCategory(newContent);
       } else {
-        if (categoria === "preescolar") {
-          setEditContentPreescolar(emptyContent);
-        } else if (categoria === "ninos") {
-          setEditContentNinos(emptyContent);
-        } else {
-          setEditContentAdolescentes(emptyContent);
-        }
+        setContentByCategory(emptyContent);
       }
     } catch {
-      if (categoria === "preescolar") {
-        setEditContentPreescolar(emptyContent);
-      } else if (categoria === "ninos") {
-        setEditContentNinos(emptyContent);
-      } else {
-        setEditContentAdolescentes(emptyContent);
-      }
+      setContentByCategory(emptyContent);
     }
   };
   
@@ -929,6 +962,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 >
                   Adolescentes
                 </Button>
+                <Button
+                  onClick={() => { setContentCategory("universitarios"); setSelectedTema(1); }}
+                  variant={contentCategory === "universitarios" ? "default" : "outline"}
+                  className={contentCategory === "universitarios" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                  data-testid="button-content-universitarios"
+                >
+                  Universitarios
+                </Button>
+                <Button
+                  onClick={() => { setContentCategory("profesionales"); setSelectedTema(1); }}
+                  variant={contentCategory === "profesionales" ? "default" : "outline"}
+                  className={contentCategory === "profesionales" ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
+                  data-testid="button-content-profesionales"
+                >
+                  Profesionales
+                </Button>
+                <Button
+                  onClick={() => { setContentCategory("adulto_mayor"); setSelectedTema(1); }}
+                  variant={contentCategory === "adulto_mayor" ? "default" : "outline"}
+                  className={contentCategory === "adulto_mayor" ? "bg-amber-600" : "border-amber-500/30 text-amber-400"}
+                  data-testid="button-content-adulto-mayor"
+                >
+                  Adulto Mayor
+                </Button>
               </div>
 
               <div>
@@ -1162,7 +1219,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-600"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? "Guardando..." : `Guardar ${contentCategory === "preescolar" ? "Pre-escolar" : contentCategory === "ninos" ? "Niños" : "Adolescentes"}`}
+                {saving ? "Guardando..." : `Guardar ${
+                  contentCategory === "preescolar" ? "Pre-escolar" : 
+                  contentCategory === "ninos" ? "Niños" : 
+                  contentCategory === "adolescentes" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
+                }`}
               </Button>
             </CardContent>
           </Card>

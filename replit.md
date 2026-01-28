@@ -25,6 +25,12 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - Content automatically clears when creating new theme
   - Category change resets to first available theme
   - API endpoints updated to support theme-specific content retrieval
+- **Adult categories added**: Three new categories for adults
+  - Universitarios (University students)
+  - Profesionales (Professionals)
+  - Adulto Mayor (Elderly)
+  - Full reading test creation from admin panel for all 6 categories
+  - Dynamic question editor with add/delete functionality
 
 ## User Preferences
 
