@@ -253,13 +253,14 @@ export default function ReadingContentPage() {
   const [quizFinished, setQuizFinished] = useState(false);
   
   const categoria = userData.childCategory || "preescolar";
+  const selectedTema = userData.selectedTema || 1;
   const isAdolescent = categoria === "adolescentes";
   const [content, setContent] = useState(defaultReadingContent[categoria] || defaultReadingContent.preescolar);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const res = await fetch(`/api/reading/${categoria}`);
+        const res = await fetch(`/api/reading/${categoria}?tema=${selectedTema}`);
         const data = await res.json();
         if (data.content) {
           const questions = typeof data.content.questions === 'string' 
@@ -276,7 +277,7 @@ export default function ReadingContentPage() {
       }
     };
     fetchContent();
-  }, [categoria]);
+  }, [categoria, selectedTema]);
 
   useEffect(() => {
     if (quizFinished) return;

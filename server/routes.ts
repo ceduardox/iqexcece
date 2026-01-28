@@ -230,8 +230,12 @@ export async function registerRoutes(
     const categoria = req.params.categoria;
     const temaNumero = parseInt(req.query.tema as string) || 1;
     const savedContent = await storage.getReadingContent(categoria, temaNumero);
-    const defaultContent = defaultReadingContent[categoria]?.[temaNumero] || defaultReadingContent[categoria]?.[1] || null;
+    const defaultContent = defaultReadingContent[categoria]?.[temaNumero] || null;
     const content = savedContent || defaultContent;
+    if (!content) {
+      res.json({ content: null });
+      return;
+    }
     res.json({ content });
   });
 

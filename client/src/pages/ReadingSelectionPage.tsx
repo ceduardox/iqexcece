@@ -3,6 +3,12 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 
+interface ReadingTheme {
+  temaNumero: number | null;
+  title: string;
+  categoryImage?: string;
+}
+
 interface ReadingContent {
   pageMainImage?: string;
   pageSmallImage?: string;
@@ -31,11 +37,6 @@ const testTitles: Record<string, string> = {
 const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niño",
-};
-
-const categoryReadings: Record<string, { id: number; title: string }> = {
-  preescolar: { id: 1, title: "Paseando con mi perrito" },
-  ninos: { id: 1, title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria" },
 };
 
 function ChildishBackButton({ onClick }: { onClick: () => void }) {
@@ -87,8 +88,9 @@ const defaultImages = {
 
 export default function ReadingSelectionPage() {
   const [, setLocation] = useLocation();
-  const { userData } = useUserData();
+  const { userData, setUserData } = useUserData();
   const [content, setContent] = useState<ReadingContent | null>(null);
+  const [themes, setThemes] = useState<ReadingTheme[]>([]);
   
   const categoria = userData.childCategory || "preescolar";
 
@@ -101,6 +103,19 @@ export default function ReadingSelectionPage() {
         }
       })
       .catch(() => {});
+
+    fetch(`/api/reading/${categoria}/themes`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.themes && data.themes.length > 0) {
+          setThemes(data.themes);
+        } else {
+          setThemes([{ temaNumero: 1, title: "Lectura 01" }]);
+        }
+      })
+      .catch(() => {
+        setThemes([{ temaNumero: 1, title: "Lectura 01" }]);
+      });
   }, [categoria]);
 
   const handleBack = useCallback(() => {
@@ -108,14 +123,14 @@ export default function ReadingSelectionPage() {
     window.history.back();
   }, []);
 
-  const handleReadingSelect = useCallback(() => {
+  const handleReadingSelect = useCallback((temaNumero: number) => {
     playCardSound();
+    setUserData({ ...userData, selectedTema: temaNumero });
     setLocation("/lectura-contenido");
-  }, [setLocation]);
+  }, [setLocation, userData, setUserData]);
 
   const testName = testTitles[userData.selectedTest || "lectura"] || "Test Lectura";
   const categoryLabel = categoryLabels[categoria] || "Pre escolar";
-  const reading = categoryReadings[categoria] || categoryReadings.preescolar;
   
   const mainImage = content?.pageMainImage || defaultImages[categoria as keyof typeof defaultImages]?.mainImage || defaultImages.preescolar.mainImage;
   const smallImage = content?.pageSmallImage || defaultImages[categoria as keyof typeof defaultImages]?.smallImage || defaultImages.preescolar.smallImage;
@@ -229,10 +244,10 @@ export default function ReadingSelectionPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-12 shadow-2xl"
-          style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}
+          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-12 shadow-2xl overflow-y-auto"
+          style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.15)", maxHeight: "50vh" }}
         >
-          <div className="mb-8">
+          <div className="mb-6">
             <motion.p 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -251,31 +266,36 @@ export default function ReadingSelectionPage() {
             </motion.h2>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
-            onClick={handleReadingSelect}
-            className="cursor-pointer"
-            data-testid="card-reading-01"
-          >
-            <motion.div
-              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-5 border-2 border-gray-100 dark:border-gray-700"
-              whileHover={{ scale: 1.02, backgroundColor: "#F3F4F6" }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.15 }}
-            >
-              <span 
-                className="text-5xl font-thin tracking-tight"
-                style={{ color: "#D1D5DB" }}
+          <div className="space-y-4">
+            {themes.map((theme, index) => (
+              <motion.div
+                key={theme.temaNumero || index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}
+                onClick={() => handleReadingSelect(theme.temaNumero || 1)}
+                className="cursor-pointer"
+                data-testid={`card-reading-${String(theme.temaNumero || index + 1).padStart(2, '0')}`}
               >
-                01
-              </span>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                {reading.title}
-              </span>
-            </motion.div>
-          </motion.div>
+                <motion.div
+                  className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-5 border-2 border-gray-100 dark:border-gray-700"
+                  whileHover={{ scale: 1.02, backgroundColor: "#F3F4F6" }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <span 
+                    className="text-5xl font-thin tracking-tight"
+                    style={{ color: "#D1D5DB" }}
+                  >
+                    {String(theme.temaNumero || index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-lg font-bold text-gray-800 dark:text-gray-200 flex-1">
+                    {theme.title}
+                  </span>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </motion.div>

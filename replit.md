@@ -19,6 +19,12 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
 - Age-specific content for cognitive tests (5 age groups with unique content)
 - Session tracking with heartbeat and automatic deactivation
 - UserContext for passing age group data through the flow
+- **Multi-theme support**: Admin panel now supports multiple reading themes per age category
+  - Theme selector with numbered buttons (Tema 01, Tema 02, etc.)
+  - "+ Nuevo Tema" button to create additional themes
+  - Content automatically clears when creating new theme
+  - Category change resets to first available theme
+  - API endpoints updated to support theme-specific content retrieval
 
 ## User Preferences
 

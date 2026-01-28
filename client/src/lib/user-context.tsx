@@ -6,6 +6,7 @@ interface UserData {
   selectedProblems: string[];
   selectedTest: string | null;
   childCategory: string | null;
+  selectedTema: number | null;
 }
 
 interface UserContextType {
@@ -21,6 +22,7 @@ const defaultUserData: UserData = {
   selectedProblems: [],
   selectedTest: null,
   childCategory: null,
+  selectedTema: null,
 };
 
 const UserContext = createContext<UserContextType | null>(null);

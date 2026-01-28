@@ -54,6 +54,8 @@ export default function GestionPage() {
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes">("preescolar");
+  const [selectedTema, setSelectedTema] = useState(1);
+  const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   
@@ -202,6 +204,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         },
         body: JSON.stringify({
           categoria: contentCategory,
+          temaNumero: selectedTema,
           title: currentEditContent.title,
           content: currentEditContent.content,
           imageUrl: currentEditContent.imageUrl,
@@ -212,10 +215,94 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         }),
       });
       alert("Contenido guardado correctamente");
+      loadThemes();
     } catch {
       alert("Error al guardar");
     }
     setSaving(false);
+  };
+
+  const loadThemes = async () => {
+    try {
+      const res = await fetch(`/api/reading/${contentCategory}/themes`);
+      const data = await res.json();
+      if (data.themes && data.themes.length > 0) {
+        setAvailableThemes(data.themes);
+        const themeNumbers = data.themes.map((t: {temaNumero: number}) => t.temaNumero);
+        if (!themeNumbers.includes(selectedTema)) {
+          setSelectedTema(data.themes[0].temaNumero);
+        }
+      } else {
+        setAvailableThemes([{ temaNumero: 1, title: "Nuevo tema" }]);
+        setSelectedTema(1);
+      }
+    } catch {
+      setAvailableThemes([{ temaNumero: 1, title: "Tema 1" }]);
+      setSelectedTema(1);
+    }
+  };
+
+  const loadContentForTema = async (categoria: string, tema: number) => {
+    const emptyContent = {
+      title: "",
+      content: "",
+      imageUrl: "",
+      pageMainImage: "",
+      pageSmallImage: "",
+      categoryImage: "",
+      questions: [],
+    };
+    
+    try {
+      const res = await fetch(`/api/reading/${categoria}?tema=${tema}`);
+      if (!res.ok) {
+        if (categoria === "preescolar") {
+          setEditContentPreescolar(emptyContent);
+        } else if (categoria === "ninos") {
+          setEditContentNinos(emptyContent);
+        } else {
+          setEditContentAdolescentes(emptyContent);
+        }
+        return;
+      }
+      const data = await res.json();
+      if (data.content && data.content.temaNumero === tema) {
+        const c = data.content;
+        const questions = typeof c.questions === 'string' ? JSON.parse(c.questions) : c.questions;
+        const newContent = {
+          title: c.title || "",
+          content: c.content || "",
+          imageUrl: c.imageUrl || "",
+          pageMainImage: c.pageMainImage || "",
+          pageSmallImage: c.pageSmallImage || "",
+          categoryImage: c.categoryImage || "",
+          questions: questions || [],
+        };
+        if (categoria === "preescolar") {
+          setEditContentPreescolar(newContent);
+        } else if (categoria === "ninos") {
+          setEditContentNinos(newContent);
+        } else {
+          setEditContentAdolescentes(newContent);
+        }
+      } else {
+        if (categoria === "preescolar") {
+          setEditContentPreescolar(emptyContent);
+        } else if (categoria === "ninos") {
+          setEditContentNinos(emptyContent);
+        } else {
+          setEditContentAdolescentes(emptyContent);
+        }
+      }
+    } catch {
+      if (categoria === "preescolar") {
+        setEditContentPreescolar(emptyContent);
+      } else if (categoria === "ninos") {
+        setEditContentNinos(emptyContent);
+      } else {
+        setEditContentAdolescentes(emptyContent);
+      }
+    }
   };
   
   const filteredResults = quizResults.filter(r => {
@@ -251,12 +338,24 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   useEffect(() => {
     if (isLoggedIn) {
+      loadThemes();
+    }
+  }, [isLoggedIn, contentCategory]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      loadContentForTema(contentCategory, selectedTema);
+    }
+  }, [isLoggedIn, contentCategory, selectedTema]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
       const loadContent = async () => {
         try {
           const [preescolarRes, ninosRes, adolescentesRes] = await Promise.all([
-            fetch("/api/reading/preescolar"),
-            fetch("/api/reading/ninos"),
-            fetch("/api/reading/adolescentes"),
+            fetch("/api/reading/preescolar?tema=1"),
+            fetch("/api/reading/ninos?tema=1"),
+            fetch("/api/reading/adolescentes?tema=1"),
           ]);
           const preescolarData = await preescolarRes.json();
           const ninosData = await ninosRes.json();
@@ -807,7 +906,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2 mb-4">
                 <Button
-                  onClick={() => setContentCategory("preescolar")}
+                  onClick={() => { setContentCategory("preescolar"); setSelectedTema(1); }}
                   variant={contentCategory === "preescolar" ? "default" : "outline"}
                   className={contentCategory === "preescolar" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
                   data-testid="button-content-preescolar"
@@ -815,7 +914,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   Pre-escolar
                 </Button>
                 <Button
-                  onClick={() => setContentCategory("ninos")}
+                  onClick={() => { setContentCategory("ninos"); setSelectedTema(1); }}
                   variant={contentCategory === "ninos" ? "default" : "outline"}
                   className={contentCategory === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
                   data-testid="button-content-ninos"
@@ -823,13 +922,52 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   Niños
                 </Button>
                 <Button
-                  onClick={() => setContentCategory("adolescentes")}
+                  onClick={() => { setContentCategory("adolescentes"); setSelectedTema(1); }}
                   variant={contentCategory === "adolescentes" ? "default" : "outline"}
                   className={contentCategory === "adolescentes" ? "bg-violet-600" : "border-violet-500/30 text-violet-400"}
                   data-testid="button-content-adolescentes"
                 >
                   Adolescentes
                 </Button>
+              </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Tema de lectura</label>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {availableThemes.map((theme) => (
+                    <Button
+                      key={theme.temaNumero}
+                      size="sm"
+                      onClick={() => setSelectedTema(theme.temaNumero)}
+                      variant={selectedTema === theme.temaNumero ? "default" : "outline"}
+                      className={selectedTema === theme.temaNumero ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
+                      data-testid={`button-tema-${theme.temaNumero}`}
+                    >
+                      Tema {String(theme.temaNumero).padStart(2, '0')}
+                    </Button>
+                  ))}
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const maxTema = Math.max(...availableThemes.map(t => t.temaNumero), 0);
+                      setSelectedTema(maxTema + 1);
+                      setCurrentEditContent({
+                        title: "",
+                        content: "",
+                        imageUrl: "",
+                        pageMainImage: "",
+                        pageSmallImage: "",
+                        categoryImage: "",
+                        questions: [],
+                      });
+                    }}
+                    variant="outline"
+                    className="border-green-500/30 text-green-400 hover:bg-green-500/20"
+                    data-testid="button-add-tema"
+                  >
+                    + Nuevo Tema
+                  </Button>
+                </div>
               </div>
 
               <div>
