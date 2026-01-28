@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useUserData } from "@/lib/user-context";
 import { ArrowLeft, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CerebralTheme {
   temaNumero: number;
@@ -14,26 +15,13 @@ interface CerebralTheme {
 export default function CerebralSelectionPage() {
   const [, setLocation] = useLocation();
   const { userData } = useUserData();
-  const [themes, setThemes] = useState<CerebralTheme[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const categoria = userData.ageGroup || "adolescentes";
 
-  useEffect(() => {
-    const fetchThemes = async () => {
-      try {
-        const res = await fetch(`/api/cerebral/${categoria}/themes`);
-        const data = await res.json();
-        if (data.themes) {
-          setThemes(data.themes);
-        }
-      } catch (err) {
-        console.error("Error fetching cerebral themes:", err);
-      }
-      setLoading(false);
-    };
-    fetchThemes();
-  }, [categoria]);
+  const { data, isLoading } = useQuery<{ themes: CerebralTheme[] }>({
+    queryKey: [`/api/cerebral/${categoria}/themes`],
+  });
+
+  const themes = data?.themes || [];
 
   const getCategoryLabel = () => {
     switch (categoria) {
@@ -69,7 +57,6 @@ export default function CerebralSelectionPage() {
             variant="ghost"
             size="icon"
             onClick={() => setLocation("/tests")}
-            className="text-white hover:bg-white/10"
             data-testid="button-back-tests"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -83,9 +70,11 @@ export default function CerebralSelectionPage() {
           </div>
         </motion.div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full" />
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-lg bg-white/10" />
+            ))}
           </div>
         ) : themes.length === 0 ? (
           <motion.div
@@ -106,9 +95,9 @@ export default function CerebralSelectionPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Button
+                <div 
                   onClick={() => setLocation(`/cerebral/ejercicio/${categoria}/${theme.temaNumero}`)}
-                  className="w-full p-4 h-auto bg-gradient-to-r from-purple-600/80 to-indigo-600/80 hover:from-purple-500 hover:to-indigo-500 border border-purple-400/30 text-left justify-start"
+                  className="w-full p-4 rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-600/80 border border-purple-400/30 cursor-pointer hover-elevate"
                   data-testid={`button-cerebral-theme-${theme.temaNumero}`}
                 >
                   <div className="flex items-center gap-3 w-full">
@@ -122,7 +111,7 @@ export default function CerebralSelectionPage() {
                       <p className="text-sm text-white/60">{getExerciseTypeLabel(theme.exerciseType)}</p>
                     </div>
                   </div>
-                </Button>
+                </div>
               </motion.div>
             ))}
           </div>

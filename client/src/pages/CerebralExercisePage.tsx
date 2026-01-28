@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CerebralContent {
   title: string;
@@ -13,39 +15,30 @@ interface CerebralContent {
   exerciseData: any;
 }
 
+function safeParseJSON(data: any, fallback: any = {}): any {
+  if (typeof data === "object" && data !== null) return data;
+  try {
+    return JSON.parse(data);
+  } catch {
+    return fallback;
+  }
+}
+
 export default function CerebralExercisePage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria: string; tema: string }>();
-  const [content, setContent] = useState<CerebralContent | null>(null);
-  const [loading, setLoading] = useState(true);
   const [userAnswer, setUserAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        const res = await fetch(`/api/cerebral/${params.categoria}?tema=${params.tema}`);
-        const data = await res.json();
-        if (data.content) {
-          const exerciseData = typeof data.content.exerciseData === "string" 
-            ? JSON.parse(data.content.exerciseData) 
-            : data.content.exerciseData || {};
-          setContent({
-            title: data.content.title,
-            exerciseType: data.content.exerciseType,
-            imageUrl: data.content.imageUrl,
-            imageSize: data.content.imageSize || 100,
-            exerciseData: exerciseData,
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching cerebral content:", err);
-      }
-      setLoading(false);
-    };
-    fetchContent();
-  }, [params.categoria, params.tema]);
+  const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
+    queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
+  });
+
+  const content = data?.content ? {
+    ...data.content,
+    exerciseData: safeParseJSON(data.content.exerciseData, { instruction: "", correctAnswer: "" }),
+  } : null;
 
   const handleSubmit = () => {
     if (!content || !userAnswer.trim()) return;
@@ -83,10 +76,6 @@ export default function CerebralExercisePage() {
             key={option}
             onClick={() => setUserAnswer(option)}
             variant={userAnswer === option ? "default" : "outline"}
-            className={userAnswer === option 
-              ? "bg-purple-600" 
-              : "border-purple-500/30 text-purple-400"
-            }
             disabled={submitted}
             data-testid={`button-option-${option}`}
           >
@@ -118,7 +107,7 @@ export default function CerebralExercisePage() {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Tu respuesta..."
-          className="bg-white/10 border-purple-500/30 text-white text-center text-xl"
+          className="text-center text-xl"
           disabled={submitted}
           data-testid="input-sequence-answer"
         />
@@ -144,7 +133,7 @@ export default function CerebralExercisePage() {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Tu respuesta..."
-          className="bg-white/10 border-purple-500/30 text-white text-center text-xl"
+          className="text-center text-xl"
           disabled={submitted}
           data-testid="input-generic-answer"
         />
@@ -152,10 +141,13 @@ export default function CerebralExercisePage() {
     </div>
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-purple-400 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
+        <div className="max-w-md mx-auto space-y-4">
+          <Skeleton className="h-10 w-48 bg-white/10" />
+          <Skeleton className="h-64 w-full rounded-xl bg-white/10" />
+        </div>
       </div>
     );
   }
@@ -168,7 +160,7 @@ export default function CerebralExercisePage() {
           <p className="text-white/60 text-lg">Ejercicio no encontrado.</p>
           <Button
             onClick={() => setLocation(`/cerebral/seleccion`)}
-            className="mt-4 bg-purple-600"
+            className="mt-4"
             data-testid="button-back-selection"
           >
             Volver a selección
@@ -190,7 +182,6 @@ export default function CerebralExercisePage() {
             variant="ghost"
             size="icon"
             onClick={() => setLocation(`/cerebral/seleccion`)}
-            className="text-white hover:bg-white/10"
             data-testid="button-back"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -245,7 +236,7 @@ export default function CerebralExercisePage() {
               <Button
                 onClick={handleSubmit}
                 disabled={!userAnswer.trim()}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600"
+                className="flex-1"
                 data-testid="button-submit"
               >
                 Verificar respuesta
@@ -255,14 +246,14 @@ export default function CerebralExercisePage() {
                 <Button
                   onClick={() => setLocation(`/cerebral/seleccion`)}
                   variant="outline"
-                  className="flex-1 border-purple-500/30 text-purple-400"
+                  className="flex-1"
                   data-testid="button-more-exercises"
                 >
                   Más ejercicios
                 </Button>
                 <Button
                   onClick={handleNext}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600"
+                  className="flex-1"
                   data-testid="button-next"
                 >
                   Siguiente
