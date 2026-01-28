@@ -2003,7 +2003,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 {cerebralContent.exerciseType === "secuencia" && (
                   <div className="space-y-3">
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Secuencia (separada por comas)</label>
+                      <label className="text-white/60 text-sm mb-1 block">Secuencia a mostrar</label>
                       <Input
                         value={cerebralContent.exerciseData.sequence || ""}
                         onChange={(e) => setCerebralContent(p => ({ 
@@ -2016,17 +2016,46 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       />
                     </div>
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
+                      <label className="text-white/60 text-sm mb-1 block">Opciones de respuesta (separadas por coma)</label>
                       <Input
-                        value={cerebralContent.exerciseData.correctAnswer || ""}
+                        value={(cerebralContent.exerciseData.sequenceOptions || []).join(", ")}
                         onChange={(e) => setCerebralContent(p => ({ 
                           ...p, 
-                          exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          exerciseData: { ...p.exerciseData, sequenceOptions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
                         }))}
-                        placeholder="Ej: 10"
+                        placeholder="Ej: 8, 10, 12, 14"
                         className="bg-white/10 border-white/20 text-white"
-                        data-testid="input-cerebral-sequence-answer"
                       />
+                      <p className="text-white/40 text-xs mt-1">Deja vacío para entrada de texto libre</p>
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
+                      {(cerebralContent.exerciseData.sequenceOptions?.length > 0) ? (
+                        <select
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                        >
+                          <option value="" className="bg-gray-800">Seleccionar...</option>
+                          {(cerebralContent.exerciseData.sequenceOptions || []).map((opt: string) => (
+                            <option key={opt} value={opt} className="bg-gray-800">{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Input
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          placeholder="Ej: 10"
+                          className="bg-white/10 border-white/20 text-white"
+                          data-testid="input-cerebral-sequence-answer"
+                        />
+                      )}
                     </div>
                   </div>
                 )}

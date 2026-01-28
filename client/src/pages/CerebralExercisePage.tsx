@@ -183,34 +183,57 @@ export default function CerebralExercisePage() {
     );
   };
 
-  const renderSecuenciaExercise = () => (
-    <div className="space-y-4">
-      <p className="text-white/80 text-center text-lg">Completa la secuencia:</p>
-      <div className="text-center">
-        <p className="text-3xl font-bold text-white mb-4">{content?.exerciseData.sequence}</p>
-      </div>
-      {content?.imageUrl && (
-        <div className="flex justify-center">
-          <img 
-            src={content.imageUrl} 
-            alt="Secuencia"
-            style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
-            className="rounded-lg"
-          />
+  const renderSecuenciaExercise = () => {
+    const options = content?.exerciseData?.sequenceOptions || [];
+    return (
+      <div className="space-y-4">
+        <p className="text-white/80 text-center text-lg">Completa la secuencia:</p>
+        <div className="text-center">
+          <p className="text-3xl font-bold text-white mb-4">{content?.exerciseData.sequence}</p>
         </div>
-      )}
-      <div className="max-w-xs mx-auto">
-        <Input
-          value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
-          placeholder="Tu respuesta..."
-          className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
-          disabled={submitted}
-          data-testid="input-sequence-answer"
-        />
+        {content?.imageUrl && (
+          <div className="flex justify-center">
+            <img 
+              src={content.imageUrl} 
+              alt="Secuencia"
+              style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
+              className="rounded-lg"
+            />
+          </div>
+        )}
+        <div className="max-w-xs mx-auto">
+          {options.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {options.map((opt: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => !submitted && setUserAnswer(opt)}
+                  disabled={submitted}
+                  className={`p-4 rounded-xl text-xl font-bold transition-colors ${
+                    userAnswer === opt 
+                      ? 'bg-purple-600 text-white border-2 border-purple-400' 
+                      : 'bg-white/10 text-white border border-white/20 hover-elevate'
+                  } ${submitted ? 'opacity-60' : ''}`}
+                  data-testid={`button-sequence-option-${idx}`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <Input
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Tu respuesta..."
+              className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              disabled={submitted}
+              data-testid="input-sequence-answer"
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderGenericExercise = () => (
     <div className="space-y-4">
