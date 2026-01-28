@@ -3,22 +3,33 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Home, Share2, MessageCircle } from "lucide-react";
 
+interface PreferenciaAnswer {
+  tema: string;
+  imageUrl: string;
+  meaning: string;
+}
+
 export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
   
   // Get stored answers from sessionStorage
-  const storedAnswers = sessionStorage.getItem('lateralidadAnswers');
-  const answers: string[] = storedAnswers ? JSON.parse(storedAnswers) : [];
+  const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
+  const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
+  const lateralidadAnswers: string[] = storedLateralidad ? JSON.parse(storedLateralidad) : [];
+  const preferenciaAnswers: PreferenciaAnswer[] = storedPreferencia ? JSON.parse(storedPreferencia) : [];
   
-  // Calculate percentages based on answers
-  const leftCount = answers.filter(a => a.toLowerCase().includes('izquierda') || a.toLowerCase() === 'izquierda').length;
-  const rightCount = answers.filter(a => a.toLowerCase().includes('derecha') || a.toLowerCase() === 'derecha').length;
+  // Calculate percentages based on lateralidad answers
+  const leftCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('izquierda') || a.toLowerCase() === 'izquierda').length;
+  const rightCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('derecha') || a.toLowerCase() === 'derecha').length;
   const total = leftCount + rightCount || 1;
   
   const leftPercent = Math.round((leftCount / total) * 100);
   const rightPercent = 100 - leftPercent;
   
   const isDominantLeft = leftPercent >= rightPercent;
+
+  // Get unique personality traits from preferencia answers
+  const personalityTraits = preferenciaAnswers.map(a => a.meaning).filter(Boolean);
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
@@ -168,6 +179,28 @@ export default function CerebralResultPage() {
             </p>
             <p className="text-gray-800 text-xl font-bold">más dominante.</p>
           </motion.div>
+
+          {/* Personality traits from preferencia */}
+          {personalityTraits.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8 }}
+              className="mt-6 pt-4 border-t border-gray-200"
+            >
+              <p className="text-gray-600 text-sm mb-2 text-center">Tu perfil revela:</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {personalityTraits.map((trait, idx) => (
+                  <span 
+                    key={idx} 
+                    className="px-3 py-1 bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-sm rounded-full"
+                  >
+                    {trait}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Bottom buttons */}
@@ -180,6 +213,7 @@ export default function CerebralResultPage() {
           <Button
             onClick={() => {
               sessionStorage.removeItem('lateralidadAnswers');
+              sessionStorage.removeItem('preferenciaAnswers');
               setLocation('/cerebral/seleccion');
             }}
             className="flex flex-col items-center gap-1 py-6 bg-blue-500 hover:bg-blue-600"

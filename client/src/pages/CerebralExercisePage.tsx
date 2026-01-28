@@ -66,13 +66,15 @@ export default function CerebralExercisePage() {
     }
   }, [shouldRedirectToResults, params.categoria, setLocation]);
 
-  // Check for lateralidad results redirect when no more exercises
+  // Check for lateralidad/preferencia results redirect when no more exercises
   useEffect(() => {
     if (!content && !isLoading) {
-      const storedAnswers = sessionStorage.getItem('lateralidadAnswers');
-      if (storedAnswers) {
-        const answers = JSON.parse(storedAnswers);
-        if (answers.length > 0) {
+      const lateralidadAnswers = sessionStorage.getItem('lateralidadAnswers');
+      const preferenciaAnswers = sessionStorage.getItem('preferenciaAnswers');
+      if (lateralidadAnswers || preferenciaAnswers) {
+        const latAnswers = lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [];
+        const prefAnswers = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
+        if (latAnswers.length > 0 || prefAnswers.length > 0) {
           setShouldRedirectToResults(true);
         }
       }
@@ -517,6 +519,19 @@ export default function CerebralExercisePage() {
                   if (!selectedPreference) {
                     setSelectedPreference(opt);
                     setUserAnswer(opt.meaning);
+                    // Save answer to sessionStorage for final results
+                    const stored = sessionStorage.getItem('preferenciaAnswers');
+                    const answers = stored ? JSON.parse(stored) : [];
+                    answers.push({ 
+                      tema: params.tema,
+                      imageUrl: opt.imageUrl, 
+                      meaning: opt.meaning 
+                    });
+                    sessionStorage.setItem('preferenciaAnswers', JSON.stringify(answers));
+                    // Auto-advance after selection
+                    setTimeout(() => {
+                      handleNext();
+                    }, 1200);
                   }
                 }}
                 disabled={!!selectedPreference}
@@ -760,6 +775,8 @@ export default function CerebralExercisePage() {
           {content.exerciseType === "preferencia" && renderPreferenciaExercise()}
           {content.exerciseType === "lateralidad" && renderLateralidadExercise()}
 
+          {/* Hide correct/incorrect for preferencia and lateralidad (projective tests) */}
+          {content.exerciseType !== "preferencia" && content.exerciseType !== "lateralidad" && (
           <AnimatePresence>
             {submitted && (
               <motion.div
@@ -787,9 +804,10 @@ export default function CerebralExercisePage() {
               </motion.div>
             )}
           </AnimatePresence>
+          )}
 
-          {/* Hide buttons for lateralidad (auto-advances) */}
-          {content.exerciseType !== "lateralidad" && (
+          {/* Hide buttons for lateralidad and preferencia (auto-advance) */}
+          {content.exerciseType !== "lateralidad" && content.exerciseType !== "preferencia" && (
             <div className="mt-6 flex gap-3">
               {!submitted ? (
                 <Button
