@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -55,6 +55,15 @@ export interface IStorage {
   saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem>;
   updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null>;
   deleteEntrenamientoItem(id: string): Promise<void>;
+  
+  // Prep pages
+  getPrepPages(): Promise<any[]>;
+  getPrepPageById(id: string): Promise<any | null>;
+  savePrepPage(page: any): Promise<any>;
+  updatePrepPage(id: string, page: any): Promise<any | null>;
+  deletePrepPage(id: string): Promise<void>;
+  getCategoriaPrepPage(categoria: string): Promise<any | null>;
+  setCategoriaPrepPage(categoria: string, prepPageId: string | null): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -299,6 +308,15 @@ export class MemStorage implements IStorage {
     return null;
   }
   async deleteEntrenamientoItem(_id: string): Promise<void> {}
+  
+  // Prep pages stubs
+  async getPrepPages(): Promise<any[]> { return []; }
+  async getPrepPageById(_id: string): Promise<any | null> { return null; }
+  async savePrepPage(page: any): Promise<any> { return { id: randomUUID(), ...page }; }
+  async updatePrepPage(_id: string, _page: any): Promise<any | null> { return null; }
+  async deletePrepPage(_id: string): Promise<void> {}
+  async getCategoriaPrepPage(_categoria: string): Promise<any | null> { return null; }
+  async setCategoriaPrepPage(_categoria: string, _prepPageId: string | null): Promise<any> { return {}; }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -663,6 +681,52 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEntrenamientoItem(id: string): Promise<void> {
     await db.delete(entrenamientoItems).where(eq(entrenamientoItems.id, id));
+  }
+
+  // Prep pages
+  async getPrepPages(): Promise<any[]> {
+    return await db.select().from(prepPages).orderBy(desc(prepPages.createdAt));
+  }
+
+  async getPrepPageById(id: string): Promise<any | null> {
+    const [page] = await db.select().from(prepPages).where(eq(prepPages.id, id));
+    return page || null;
+  }
+
+  async savePrepPage(page: any): Promise<any> {
+    const [created] = await db.insert(prepPages).values(page).returning();
+    return created;
+  }
+
+  async updatePrepPage(id: string, page: any): Promise<any | null> {
+    const [updated] = await db.update(prepPages)
+      .set(page)
+      .where(eq(prepPages.id, id))
+      .returning();
+    return updated || null;
+  }
+
+  async deletePrepPage(id: string): Promise<void> {
+    await db.delete(prepPages).where(eq(prepPages.id, id));
+  }
+
+  async getCategoriaPrepPage(categoria: string): Promise<any | null> {
+    const [mapping] = await db.select().from(categoriaPrepPage).where(eq(categoriaPrepPage.categoria, categoria));
+    return mapping || null;
+  }
+
+  async setCategoriaPrepPage(categoria: string, prepPageId: string | null): Promise<any> {
+    const existing = await this.getCategoriaPrepPage(categoria);
+    if (existing) {
+      const [updated] = await db.update(categoriaPrepPage)
+        .set({ prepPageId })
+        .where(eq(categoriaPrepPage.categoria, categoria))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(categoriaPrepPage).values({ categoria, prepPageId }).returning();
+      return created;
+    }
   }
 }
 

@@ -188,9 +188,30 @@ export const entrenamientoItems = pgTable("entrenamiento_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Preparation pages (templates that can be selected per category)
+export const prepPages = pgTable("prep_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nombre: text("nombre").notNull(),
+  imagen: text("imagen"),
+  titulo: text("titulo"),
+  subtitulo: text("subtitulo"),
+  instrucciones: text("instrucciones"),
+  textoBoton: text("texto_boton").default("Empezar"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Category to prep page mapping
+export const categoriaPrepPage = pgTable("categoria_prep_page", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull().unique(),
+  prepPageId: text("prep_page_id"),
+});
+
 export const insertEntrenamientoCardSchema = createInsertSchema(entrenamientoCards).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoPageSchema = createInsertSchema(entrenamientoPages).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoItemSchema = createInsertSchema(entrenamientoItems).omit({ id: true, updatedAt: true });
+export const insertPrepPageSchema = createInsertSchema(prepPages).omit({ id: true, createdAt: true });
+export const insertCategoriaPrepPageSchema = createInsertSchema(categoriaPrepPage).omit({ id: true });
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
@@ -210,3 +231,7 @@ export type EntrenamientoPage = typeof entrenamientoPages.$inferSelect;
 export type InsertEntrenamientoPage = z.infer<typeof insertEntrenamientoPageSchema>;
 export type EntrenamientoItem = typeof entrenamientoItems.$inferSelect;
 export type InsertEntrenamientoItem = z.infer<typeof insertEntrenamientoItemSchema>;
+export type PrepPage = typeof prepPages.$inferSelect;
+export type InsertPrepPage = z.infer<typeof insertPrepPageSchema>;
+export type CategoriaPrepPage = typeof categoriaPrepPage.$inferSelect;
+export type InsertCategoriaPrepPage = z.infer<typeof insertCategoriaPrepPageSchema>;

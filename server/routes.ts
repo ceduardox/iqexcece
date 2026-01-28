@@ -583,5 +583,83 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  // ============ PREP PAGES (Páginas de Preparación) ============
+  
+  // Get all prep pages (admin)
+  app.get("/api/admin/prep-pages", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const pages = await storage.getPrepPages();
+    res.json({ pages });
+  });
+
+  // Create prep page (admin)
+  app.post("/api/admin/prep-pages", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const page = await storage.savePrepPage(req.body);
+    res.json({ page });
+  });
+
+  // Update prep page (admin)
+  app.put("/api/admin/prep-pages/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const page = await storage.updatePrepPage(req.params.id, req.body);
+    res.json({ page });
+  });
+
+  // Delete prep page (admin)
+  app.delete("/api/admin/prep-pages/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    await storage.deletePrepPage(req.params.id);
+    res.json({ success: true });
+  });
+
+  // Get categoria prep page mapping (admin)
+  app.get("/api/admin/categoria-prep/:categoria", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const mapping = await storage.getCategoriaPrepPage(req.params.categoria);
+    res.json({ mapping });
+  });
+
+  // Set categoria prep page mapping (admin)
+  app.put("/api/admin/categoria-prep/:categoria", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const mapping = await storage.setCategoriaPrepPage(req.params.categoria, req.body.prepPageId);
+    res.json({ mapping });
+  });
+
+  // Public: Get prep page for a categoria (for user-facing app)
+  app.get("/api/prep-page/:categoria", async (req, res) => {
+    const mapping = await storage.getCategoriaPrepPage(req.params.categoria);
+    if (!mapping?.prepPageId) {
+      return res.json({ page: null });
+    }
+    const page = await storage.getPrepPageById(mapping.prepPageId);
+    res.json({ page });
+  });
+
   return httpServer;
 }

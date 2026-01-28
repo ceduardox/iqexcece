@@ -139,6 +139,11 @@ export default function GestionPage() {
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
+  // Páginas de preparación
+  const [prepPages, setPrepPages] = useState<{id: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string}[]>([]);
+  const [selectedPrepPageId, setSelectedPrepPageId] = useState<string | null>(null);
+  const [editingPrepPage, setEditingPrepPage] = useState<{id?: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string} | null>(null);
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -3133,17 +3138,23 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     onClick={async () => {
                       setEntrenamientoCategory(cat);
                       try {
-                        const [cardRes, pageRes, itemsRes] = await Promise.all([
+                        const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
                           fetch(`/api/entrenamiento/${cat}/card`),
                           fetch(`/api/entrenamiento/${cat}/page`),
-                          fetch(`/api/entrenamiento/${cat}/items`)
+                          fetch(`/api/entrenamiento/${cat}/items`),
+                          fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
+                          fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
                         ]);
                         const cardData = await cardRes.json();
                         const pageData = await pageRes.json();
                         const itemsData = await itemsRes.json();
+                        const prepPagesData = await prepPagesRes.json();
+                        const catPrepData = await catPrepRes.json();
                         if (cardData.card) setEntrenamientoCard(cardData.card);
                         if (pageData.page) setEntrenamientoPage(pageData.page);
                         setEntrenamientoItems(itemsData.items || []);
+                        setPrepPages(prepPagesData.pages || []);
+                        setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
                       } catch (e) { console.error(e); }
                     }}
                     variant={entrenamientoCategory === cat ? "default" : "outline"}
@@ -3153,6 +3164,186 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
                   </Button>
                 ))}
+              </div>
+
+              {/* Página de Preparación */}
+              <div className="p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl border border-purple-500/30 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-semibold flex items-center gap-2">
+                    <span>📋</span> Página de Preparación
+                  </h3>
+                  <Button
+                    size="sm"
+                    onClick={() => setEditingPrepPage({ nombre: "", titulo: "", subtitulo: "", instrucciones: "", textoBoton: "Empezar" })}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    + Nueva Página
+                  </Button>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <label className="text-white/70 text-sm">Página asignada a esta categoría:</label>
+                  <select
+                    value={selectedPrepPageId || ""}
+                    onChange={async (e) => {
+                      const newPrepPageId = e.target.value || null;
+                      setSelectedPrepPageId(newPrepPageId);
+                      await fetch(`/api/admin/categoria-prep/${entrenamientoCategory}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ prepPageId: newPrepPageId })
+                      });
+                    }}
+                    className="bg-white/10 border border-purple-500/30 text-white rounded-md px-3 py-2"
+                  >
+                    <option value="" className="bg-gray-800">Sin página de preparación</option>
+                    {prepPages.map(p => (
+                      <option key={p.id} value={p.id} className="bg-gray-800">{p.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {prepPages.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {prepPages.map(p => (
+                      <div
+                        key={p.id}
+                        className={`px-3 py-2 rounded-lg text-sm cursor-pointer flex items-center gap-2 ${selectedPrepPageId === p.id ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/70'}`}
+                        onClick={() => setEditingPrepPage(p)}
+                      >
+                        {p.nombre}
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (confirm("¿Eliminar esta página de preparación?")) {
+                              await fetch(`/api/admin/prep-pages/${p.id}`, {
+                                method: "DELETE",
+                                headers: { Authorization: `Bearer ${token}` }
+                              });
+                              setPrepPages(prepPages.filter(pp => pp.id !== p.id));
+                              if (selectedPrepPageId === p.id) setSelectedPrepPageId(null);
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {editingPrepPage && (
+                  <div className="mt-4 p-4 bg-white/5 rounded-xl border border-purple-500/20">
+                    <h4 className="text-white font-medium mb-3">{editingPrepPage.id ? "Editar" : "Nueva"} Página de Preparación</h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-white/60 text-xs">Nombre (interno)</label>
+                        <Input
+                          value={editingPrepPage.nombre}
+                          onChange={(e) => setEditingPrepPage({...editingPrepPage, nombre: e.target.value})}
+                          className="bg-white/10 border-purple-500/30 text-white"
+                          placeholder="Ej: Preparación Lectura Rápida"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-xs">Imagen</label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={editingPrepPage.imagen || ""}
+                            onChange={(e) => setEditingPrepPage({...editingPrepPage, imagen: e.target.value})}
+                            className="bg-white/10 border-purple-500/30 text-white"
+                            placeholder="URL de imagen"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-purple-500/30 text-purple-400"
+                            onClick={() => {
+                              setImagePickerCallback(() => (url: string) => {
+                                setEditingPrepPage({...editingPrepPage!, imagen: url});
+                                setShowImagePicker(false);
+                              });
+                              setShowImagePicker(true);
+                            }}
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-xs">Título</label>
+                        <Input
+                          value={editingPrepPage.titulo || ""}
+                          onChange={(e) => setEditingPrepPage({...editingPrepPage, titulo: e.target.value})}
+                          className="bg-white/10 border-purple-500/30 text-white"
+                          placeholder="Ej: Mejora tu Velocidad de Lectura"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-xs">Subtítulo</label>
+                        <Input
+                          value={editingPrepPage.subtitulo || ""}
+                          onChange={(e) => setEditingPrepPage({...editingPrepPage, subtitulo: e.target.value})}
+                          className="bg-white/10 border-purple-500/30 text-white"
+                          placeholder="Ej: ¡Mejora tu lectura rápidamente!"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="text-white/60 text-xs">Instrucciones</label>
+                        <textarea
+                          value={editingPrepPage.instrucciones || ""}
+                          onChange={(e) => setEditingPrepPage({...editingPrepPage, instrucciones: e.target.value})}
+                          className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2"
+                          placeholder="Ej: Observa las palabras sin leer en voz alta..."
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-xs">Texto del Botón</label>
+                        <Input
+                          value={editingPrepPage.textoBoton || ""}
+                          onChange={(e) => setEditingPrepPage({...editingPrepPage, textoBoton: e.target.value})}
+                          className="bg-white/10 border-purple-500/30 text-white"
+                          placeholder="Empezar"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            if (editingPrepPage.id) {
+                              const res = await fetch(`/api/admin/prep-pages/${editingPrepPage.id}`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                body: JSON.stringify(editingPrepPage)
+                              });
+                              const data = await res.json();
+                              setPrepPages(prepPages.map(p => p.id === data.page.id ? data.page : p));
+                            } else {
+                              const res = await fetch(`/api/admin/prep-pages`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                body: JSON.stringify(editingPrepPage)
+                              });
+                              const data = await res.json();
+                              setPrepPages([data.page, ...prepPages]);
+                            }
+                            setEditingPrepPage(null);
+                            alert("Página guardada");
+                          } catch (e) { alert("Error al guardar"); }
+                        }}
+                        className="bg-purple-600"
+                      >
+                        Guardar
+                      </Button>
+                      <Button variant="outline" onClick={() => setEditingPrepPage(null)} className="border-white/20 text-white">
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">

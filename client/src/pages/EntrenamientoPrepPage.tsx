@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
 interface PrepData {
-  prepImage: string;
-  prepTitle: string;
-  prepSubtitle: string;
-  prepInstructions: string;
-  prepButtonText: string;
+  imagen: string;
+  titulo: string;
+  subtitulo: string;
+  instrucciones: string;
+  textoBoton: string;
 }
 
 export default function EntrenamientoPrepPage() {
@@ -20,16 +20,31 @@ export default function EntrenamientoPrepPage() {
   useEffect(() => {
     const loadPrepData = async () => {
       try {
-        const res = await fetch(`/api/entrenamiento/item/${itemId}`);
-        const data = await res.json();
-        if (data.item) {
+        // Primero intenta cargar la página de preparación de la categoría
+        const prepRes = await fetch(`/api/prep-page/${categoria}`);
+        const prepPageData = await prepRes.json();
+        
+        if (prepPageData.page) {
           setPrepData({
-            prepImage: data.item.prepImage || "",
-            prepTitle: data.item.prepTitle || data.item.title || "Preparación",
-            prepSubtitle: data.item.prepSubtitle || "",
-            prepInstructions: data.item.prepInstructions || "",
-            prepButtonText: data.item.prepButtonText || "Empezar",
+            imagen: prepPageData.page.imagen || "",
+            titulo: prepPageData.page.titulo || "Preparación",
+            subtitulo: prepPageData.page.subtitulo || "",
+            instrucciones: prepPageData.page.instrucciones || "",
+            textoBoton: prepPageData.page.textoBoton || "Empezar",
           });
+        } else {
+          // Fallback: usa los datos del item
+          const itemRes = await fetch(`/api/entrenamiento/item/${itemId}`);
+          const itemData = await itemRes.json();
+          if (itemData.item) {
+            setPrepData({
+              imagen: itemData.item.prepImage || "",
+              titulo: itemData.item.prepTitle || itemData.item.title || "Preparación",
+              subtitulo: itemData.item.prepSubtitle || "",
+              instrucciones: itemData.item.prepInstructions || "",
+              textoBoton: itemData.item.prepButtonText || "Empezar",
+            });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -38,7 +53,7 @@ export default function EntrenamientoPrepPage() {
       }
     };
     loadPrepData();
-  }, [itemId]);
+  }, [categoria, itemId]);
 
   if (loading) {
     return (
@@ -68,9 +83,9 @@ export default function EntrenamientoPrepPage() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          {prepData?.prepImage && (
+          {prepData?.imagen && (
             <img 
-              src={prepData.prepImage} 
+              src={prepData.imagen} 
               alt="" 
               className="w-48 h-48 object-contain"
               data-testid="img-prep"
@@ -88,24 +103,24 @@ export default function EntrenamientoPrepPage() {
             className="text-3xl font-bold text-white"
             data-testid="text-prep-title"
           >
-            {prepData?.prepTitle}
+            {prepData?.titulo}
           </h1>
           
-          {prepData?.prepSubtitle && (
+          {prepData?.subtitulo && (
             <p 
               className="text-xl font-semibold text-white"
               data-testid="text-prep-subtitle"
             >
-              {prepData.prepSubtitle}
+              {prepData.subtitulo}
             </p>
           )}
           
-          {prepData?.prepInstructions && (
+          {prepData?.instrucciones && (
             <p 
               className="text-white/90 text-lg max-w-sm mx-auto"
               data-testid="text-prep-instructions"
             >
-              {prepData.prepInstructions}
+              {prepData.instrucciones}
             </p>
           )}
         </motion.div>
@@ -122,7 +137,7 @@ export default function EntrenamientoPrepPage() {
           className="mt-10 px-12 py-4 bg-orange-500 text-white font-bold text-xl rounded-full shadow-lg"
           data-testid="button-start"
         >
-          {prepData?.prepButtonText || "Empezar"}
+          {prepData?.textoBoton || "Empezar"}
         </motion.button>
       </main>
     </div>
