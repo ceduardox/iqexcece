@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 interface PrepData {
   prepImage: string;
@@ -125,17 +125,6 @@ export default function EntrenamientoPrepPage() {
           {prepData?.prepButtonText || "Empezar"}
         </motion.button>
       </main>
-
-      <footer className="fixed bottom-0 left-0 right-0 bg-white py-4 px-6 shadow-lg">
-        <button
-          onClick={() => setLocation("/")}
-          className="flex items-center justify-center gap-2 w-full text-gray-700 font-semibold"
-          data-testid="button-home"
-        >
-          <Home className="w-5 h-5" />
-          Ir al Inicio
-        </button>
-      </footer>
     </div>
   );
 }
