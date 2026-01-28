@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, users, userSessions, quizResults, readingContents, razonamientoContents } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { eq, desc, and, gt } from "drizzle-orm";
 import { db } from "./db";
@@ -28,6 +28,11 @@ export interface IStorage {
   getRazonamientoContent(categoria: string, temaNumero?: number): Promise<RazonamientoContent | undefined>;
   getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]>;
   saveRazonamientoContent(content: InsertRazonamientoContent): Promise<RazonamientoContent>;
+  
+  // Cerebral content
+  getCerebralContent(categoria: string, temaNumero?: number): Promise<CerebralContent | undefined>;
+  getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]>;
+  saveCerebralContent(content: InsertCerebralContent): Promise<CerebralContent>;
 }
 
 export class MemStorage implements IStorage {
@@ -190,6 +195,30 @@ export class MemStorage implements IStorage {
       imageUrl: insertContent.imageUrl || null,
       imageSize: insertContent.imageSize || 100,
       questions: insertContent.questions,
+      updatedAt: new Date(),
+    };
+    return content;
+  }
+
+  async getCerebralContent(categoria: string, temaNumero: number = 1): Promise<CerebralContent | undefined> {
+    return undefined;
+  }
+
+  async getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]> {
+    return [];
+  }
+
+  async saveCerebralContent(insertContent: InsertCerebralContent): Promise<CerebralContent> {
+    const content: CerebralContent = {
+      id: randomUUID(),
+      categoria: insertContent.categoria,
+      temaNumero: insertContent.temaNumero || 1,
+      title: insertContent.title,
+      exerciseType: insertContent.exerciseType,
+      imageUrl: insertContent.imageUrl || null,
+      imageSize: insertContent.imageSize || 100,
+      exerciseData: insertContent.exerciseData,
+      isActive: insertContent.isActive ?? true,
       updatedAt: new Date(),
     };
     return content;
@@ -373,6 +402,57 @@ export class DatabaseStorage implements IStorage {
       imageUrl: insertContent.imageUrl || null,
       imageSize: insertContent.imageSize || 100,
       questions: insertContent.questions,
+    }).returning();
+    return created;
+  }
+
+  async getCerebralContent(categoria: string, temaNumero: number = 1): Promise<CerebralContent | undefined> {
+    const [content] = await db.select().from(cerebralContents)
+      .where(and(
+        eq(cerebralContents.categoria, categoria),
+        eq(cerebralContents.temaNumero, temaNumero)
+      ));
+    return content;
+  }
+
+  async getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]> {
+    return db.select().from(cerebralContents)
+      .where(eq(cerebralContents.categoria, categoria))
+      .orderBy(cerebralContents.temaNumero);
+  }
+
+  async saveCerebralContent(insertContent: InsertCerebralContent): Promise<CerebralContent> {
+    const temaNumero = insertContent.temaNumero || 1;
+    const existing = await this.getCerebralContent(insertContent.categoria, temaNumero);
+    
+    if (existing) {
+      const [updated] = await db.update(cerebralContents)
+        .set({
+          title: insertContent.title,
+          exerciseType: insertContent.exerciseType,
+          imageUrl: insertContent.imageUrl || null,
+          imageSize: insertContent.imageSize || 100,
+          exerciseData: insertContent.exerciseData,
+          isActive: insertContent.isActive ?? true,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(cerebralContents.categoria, insertContent.categoria),
+          eq(cerebralContents.temaNumero, temaNumero)
+        ))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db.insert(cerebralContents).values({
+      categoria: insertContent.categoria,
+      temaNumero: temaNumero,
+      title: insertContent.title,
+      exerciseType: insertContent.exerciseType,
+      imageUrl: insertContent.imageUrl || null,
+      imageSize: insertContent.imageSize || 100,
+      exerciseData: insertContent.exerciseData,
+      isActive: insertContent.isActive ?? true,
     }).returning();
     return created;
   }

@@ -82,9 +82,24 @@ export const razonamientoContents = pgTable("razonamiento_contents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Cerebral test content table
+export const cerebralContents = pgTable("cerebral_contents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull(),
+  temaNumero: integer("tema_numero").default(1),
+  title: text("title").notNull(),
+  exerciseType: text("exercise_type").notNull(), // "bailarina", "secuencia", "memoria", etc.
+  imageUrl: text("image_url"),
+  imageSize: integer("image_size").default(100),
+  exerciseData: text("exercise_data").notNull(), // JSON string with exercise-specific data
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertQuizResultSchema = createInsertSchema(quizResults).omit({ id: true, createdAt: true });
 export const insertReadingContentSchema = createInsertSchema(readingContents).omit({ id: true, updatedAt: true });
 export const insertRazonamientoContentSchema = createInsertSchema(razonamientoContents).omit({ id: true, updatedAt: true });
+export const insertCerebralContentSchema = createInsertSchema(cerebralContents).omit({ id: true, updatedAt: true });
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
@@ -92,3 +107,5 @@ export type ReadingContent = typeof readingContents.$inferSelect;
 export type InsertReadingContent = z.infer<typeof insertReadingContentSchema>;
 export type RazonamientoContent = typeof razonamientoContents.$inferSelect;
 export type InsertRazonamientoContent = z.infer<typeof insertRazonamientoContentSchema>;
+export type CerebralContent = typeof cerebralContents.$inferSelect;
+export type InsertCerebralContent = z.infer<typeof insertCerebralContentSchema>;

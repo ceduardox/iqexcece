@@ -361,5 +361,42 @@ export async function registerRoutes(
     }
   });
 
+  // Cerebral content endpoints
+  app.get("/api/cerebral/:categoria", async (req, res) => {
+    const categoria = req.params.categoria;
+    const temaNumero = parseInt(req.query.tema as string) || 1;
+    const content = await storage.getCerebralContent(categoria, temaNumero);
+    res.json({ content: content || null });
+  });
+
+  app.get("/api/cerebral/:categoria/themes", async (req, res) => {
+    const categoria = req.params.categoria;
+    const savedContents = await storage.getCerebralContentsByCategory(categoria);
+    
+    const savedThemes = savedContents.map(c => ({
+      temaNumero: c.temaNumero,
+      title: c.title,
+      exerciseType: c.exerciseType,
+      isActive: c.isActive
+    }));
+    
+    res.json({ themes: savedThemes });
+  });
+
+  // Save cerebral content (admin)
+  app.post("/api/admin/cerebral", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const content = await storage.saveCerebralContent(req.body);
+      res.json({ success: true, content });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save cerebral content" });
+    }
+  });
+
   return httpServer;
 }
