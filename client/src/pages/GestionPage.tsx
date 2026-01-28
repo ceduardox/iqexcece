@@ -52,7 +52,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido" | "imagenes">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
@@ -60,7 +60,7 @@ export default function GestionPage() {
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral" | "imagenes">("lectura");
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
   
   // Images state
   const [uploadedImages, setUploadedImages] = useState<any[]>([]);
@@ -625,13 +625,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   // Load uploaded images
   useEffect(() => {
-    if (isLoggedIn && contentType === "imagenes") {
+    if (isLoggedIn && activeTab === "imagenes") {
       fetch("/api/images")
         .then(res => res.json())
         .then(data => setUploadedImages(data || []))
         .catch(() => setUploadedImages([]));
     }
-  }, [isLoggedIn, contentType]);
+  }, [isLoggedIn, activeTab]);
 
   // Image handling functions
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -926,6 +926,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <BookOpen className="w-5 h-5" />
             Contenido
           </button>
+          <button
+            onClick={() => setActiveTab("imagenes")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "imagenes" ? "bg-pink-600 text-white" : "text-pink-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-imagenes"
+          >
+            <ImageIcon className="w-5 h-5" />
+            Imágenes
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1010,6 +1020,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <BookOpen className="w-4 h-4 mr-1" />
             Contenido
+          </Button>
+          <Button
+            onClick={() => setActiveTab("imagenes")}
+            variant={activeTab === "imagenes" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "imagenes" ? "bg-pink-600" : "border-pink-500/30 text-pink-400"}
+            data-testid="mobile-tab-imagenes"
+          >
+            <ImageIcon className="w-4 h-4 mr-1" />
+            Imágenes
           </Button>
         </div>
 
@@ -1337,15 +1357,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 >
                   <Zap className="w-4 h-4 mr-2" />
                   Test Cerebral
-                </Button>
-                <Button
-                  onClick={() => setContentType("imagenes")}
-                  variant={contentType === "imagenes" ? "default" : "outline"}
-                  className={contentType === "imagenes" ? "bg-pink-600" : "border-pink-500/30 text-pink-400"}
-                  data-testid="button-content-type-imagenes"
-                >
-                  <ImageIcon className="w-4 h-4 mr-2" />
-                  Imágenes
                 </Button>
               </div>
               
@@ -2494,7 +2505,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         )}
 
         {/* Images Panel */}
-        {contentType === "imagenes" && (
+        {activeTab === "imagenes" && (
           <Card className="bg-gradient-to-br from-pink-900/40 to-purple-900/40 border-pink-500/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
