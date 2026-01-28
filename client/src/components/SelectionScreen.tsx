@@ -457,12 +457,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (option === "tests") {
       setLocation("/tests");
     } else {
-      onComplete({ 
-        ageGroup: selectedAge!, 
-        ageLabel: getAgeLabel(selectedAge!),
-        problems: selectedProblems,
-        problemTitles: selectedProblems.map(getProblemTitle)
-      });
+      setLocation(`/entrenamiento/${selectedAge || 'ninos'}`);
     }
   };
 
