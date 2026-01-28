@@ -682,6 +682,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   const saveImage = async () => {
     if (!imagePreview || !imageName) return;
+    
+    // Get token from state or localStorage
+    const authToken = token || localStorage.getItem("adminToken");
+    if (!authToken) {
+      setError("No autorizado. Por favor inicia sesión de nuevo.");
+      return;
+    }
+    
     setSaving(true);
     try {
       const img = new Image();
@@ -692,13 +700,22 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       let width = img.width;
       let height = img.height;
       
-      if (crop && crop.width && crop.height) {
-        canvas.width = crop.width;
-        canvas.height = crop.height;
+      // Calculate crop in pixels based on displayed image dimensions
+      if (crop && crop.width && crop.height && imgRef.current) {
+        const scaleX = img.naturalWidth / imgRef.current.width;
+        const scaleY = img.naturalHeight / imgRef.current.height;
+        
+        const cropX = (crop.x || 0) * scaleX;
+        const cropY = (crop.y || 0) * scaleY;
+        const cropW = crop.width * scaleX;
+        const cropH = crop.height * scaleY;
+        
+        canvas.width = cropW;
+        canvas.height = cropH;
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, crop.x || 0, crop.y || 0, crop.width, crop.height, 0, 0, crop.width, crop.height);
-        width = crop.width;
-        height = crop.height;
+        ctx?.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+        width = Math.round(cropW);
+        height = Math.round(cropH);
       } else {
         canvas.width = width;
         canvas.height = height;
@@ -710,7 +727,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       
       const res = await fetch("/api/admin/images", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
         body: JSON.stringify({ 
           name: imageName, 
           data,
@@ -735,9 +752,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   const deleteImage = async (id: string) => {
+    const authToken = token || localStorage.getItem("adminToken");
     await fetch(`/api/admin/images/${id}`, {
       method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` },
+      headers: { "Authorization": `Bearer ${authToken}` },
     });
     setUploadedImages(prev => prev.filter(img => img.id !== id));
   };
@@ -2540,10 +2558,28 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   />
                   
                   {/* Crop Area */}
-                  <div className="max-h-64 overflow-auto bg-gray-900 rounded">
-                    <ReactCrop crop={crop} onChange={c => setCrop(c)}>
-                      <img ref={imgRef} src={imagePreview} alt="Preview" className="max-w-full" />
-                    </ReactCrop>
+                  <div className="space-y-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop(undefined)}>
+                        Sin recorte
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 10, y: 10, width: 80, height: 80 })}>
+                        Recortar centro
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 0, y: 0, width: 100, height: 100 })}>
+                        Toda la imagen
+                      </Button>
+                    </div>
+                    <p className="text-white/40 text-xs">Arrastra las esquinas o bordes para ajustar el recorte</p>
+                    <div className="max-h-64 overflow-auto bg-gray-900 rounded p-2">
+                      <ReactCrop 
+                        crop={crop} 
+                        onChange={c => setCrop(c)}
+                        ruleOfThirds
+                      >
+                        <img ref={imgRef} src={imagePreview} alt="Preview" className="max-w-full" />
+                      </ReactCrop>
+                    </div>
                   </div>
                   
                   {/* Compression */}
