@@ -1754,6 +1754,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     </option>
                   ))}
                 </select>
+                <p className="text-white/40 text-xs mt-1">
+                  {cerebralContent.exerciseType === "bailarina" && "Usuario indica dirección (izq/der) de una imagen"}
+                  {cerebralContent.exerciseType === "secuencia" && "Usuario completa el número faltante en una serie"}
+                  {cerebralContent.exerciseType === "memoria" && "Usuario memoriza y recuerda elementos visuales"}
+                  {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrón en una secuencia visual"}
+                </p>
               </div>
 
               <div>
