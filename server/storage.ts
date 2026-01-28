@@ -20,7 +20,8 @@ export interface IStorage {
   getAllQuizResults(): Promise<QuizResult[]>;
   
   // Reading content
-  getReadingContent(categoria: string): Promise<ReadingContent | undefined>;
+  getReadingContent(categoria: string, temaNumero?: number): Promise<ReadingContent | undefined>;
+  getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]>;
   saveReadingContent(content: InsertReadingContent): Promise<ReadingContent>;
 }
 
@@ -135,15 +136,25 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async getReadingContent(categoria: string): Promise<ReadingContent | undefined> {
-    return this.readingContents.get(categoria);
+  async getReadingContent(categoria: string, temaNumero: number = 1): Promise<ReadingContent | undefined> {
+    const key = `${categoria}_${temaNumero}`;
+    return this.readingContents.get(key);
+  }
+
+  async getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]> {
+    return Array.from(this.readingContents.values())
+      .filter(c => c.categoria === categoria)
+      .sort((a, b) => (a.temaNumero || 1) - (b.temaNumero || 1));
   }
 
   async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
-    const existing = this.readingContents.get(insertContent.categoria);
+    const temaNumero = insertContent.temaNumero || 1;
+    const key = `${insertContent.categoria}_${temaNumero}`;
+    const existing = this.readingContents.get(key);
     const content: ReadingContent = {
       id: existing?.id || randomUUID(),
       categoria: insertContent.categoria,
+      temaNumero: temaNumero,
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,
@@ -153,7 +164,7 @@ export class MemStorage implements IStorage {
       questions: insertContent.questions,
       updatedAt: new Date(),
     };
-    this.readingContents.set(insertContent.categoria, content);
+    this.readingContents.set(key, content);
     return content;
   }
 }
@@ -239,13 +250,24 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
   }
 
-  async getReadingContent(categoria: string): Promise<ReadingContent | undefined> {
-    const [content] = await db.select().from(readingContents).where(eq(readingContents.categoria, categoria));
+  async getReadingContent(categoria: string, temaNumero: number = 1): Promise<ReadingContent | undefined> {
+    const [content] = await db.select().from(readingContents)
+      .where(and(
+        eq(readingContents.categoria, categoria),
+        eq(readingContents.temaNumero, temaNumero)
+      ));
     return content;
   }
 
+  async getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]> {
+    return db.select().from(readingContents)
+      .where(eq(readingContents.categoria, categoria))
+      .orderBy(readingContents.temaNumero);
+  }
+
   async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
-    const existing = await this.getReadingContent(insertContent.categoria);
+    const temaNumero = insertContent.temaNumero || 1;
+    const existing = await this.getReadingContent(insertContent.categoria, temaNumero);
     
     if (existing) {
       const [updated] = await db.update(readingContents)
@@ -259,13 +281,17 @@ export class DatabaseStorage implements IStorage {
           questions: insertContent.questions,
           updatedAt: new Date(),
         })
-        .where(eq(readingContents.categoria, insertContent.categoria))
+        .where(and(
+          eq(readingContents.categoria, insertContent.categoria),
+          eq(readingContents.temaNumero, temaNumero)
+        ))
         .returning();
       return updated;
     }
 
     const [created] = await db.insert(readingContents).values({
       categoria: insertContent.categoria,
+      temaNumero: temaNumero,
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,

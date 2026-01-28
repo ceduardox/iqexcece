@@ -58,14 +58,15 @@ export const quizResults = pgTable("quiz_results", {
 // Reading content table
 export const readingContents = pgTable("reading_contents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  categoria: text("categoria").notNull().unique(),
+  categoria: text("categoria").notNull(),
+  temaNumero: integer("tema_numero").default(1),
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
   pageMainImage: text("page_main_image"),
   pageSmallImage: text("page_small_image"),
-  categoryImage: text("category_image"), // Image for category selection card
-  questions: text("questions").notNull(), // JSON string
+  categoryImage: text("category_image"),
+  questions: text("questions").notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
