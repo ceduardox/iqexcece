@@ -69,19 +69,14 @@ export default function CerebralExercisePage() {
     setSubmitted(false);
   };
 
-  // Get answer options from exerciseData or use defaults
+  // Get answer options from exerciseData - ONLY what's saved in database
   const getAnswerOptions = (): AnswerOption[] => {
     if (content?.exerciseData?.answerOptions && content.exerciseData.answerOptions.length > 0) {
       return content.exerciseData.answerOptions
         .filter((opt: AnswerOption) => opt.label && opt.value)
         .sort((a: AnswerOption, b: AnswerOption) => a.position - b.position);
     }
-    // Default bailarina options
-    return [
-      { id: "1", label: "Izquierda", value: "izquierda", position: 0 },
-      { id: "2", label: "Derecha", value: "derecha", position: 1 },
-      { id: "3", label: "Ambos", value: "ambos", position: 2 },
-    ];
+    return [];
   };
 
   const renderBailarinaExercise = () => {
