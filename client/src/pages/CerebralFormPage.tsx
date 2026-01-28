@@ -69,11 +69,11 @@ export default function CerebralFormPage() {
   };
 
   const formFields = [
-    { key: "nombre", type: "text", placeholder: "Tu nombre *", icon: User, required: true },
-    { key: "email", type: "email", placeholder: "Email (opcional)", icon: Mail },
-    { key: "edad", type: "number", placeholder: "Edad (opcional)", icon: User },
-    { key: "ciudad", type: "text", placeholder: "Ciudad (opcional)", icon: MapPin },
-    { key: "telefono", type: "tel", placeholder: "Teléfono (opcional)", icon: Phone },
+    { key: "nombre", type: "text", placeholder: "Tu nombre *", icon: User, required: true, inputMode: "text" as const },
+    { key: "email", type: "email", placeholder: "Email (opcional)", icon: Mail, inputMode: "email" as const },
+    { key: "edad", type: "text", placeholder: "Edad (opcional)", icon: User, inputMode: "numeric" as const },
+    { key: "ciudad", type: "text", placeholder: "Ciudad (opcional)", icon: MapPin, inputMode: "text" as const },
+    { key: "telefono", type: "tel", placeholder: "Teléfono (opcional)", icon: Phone, inputMode: "tel" as const },
   ];
 
   return (
@@ -131,22 +131,25 @@ export default function CerebralFormPage() {
           transition={{ delay: 0.2, type: "spring" }}
           className="bg-gradient-to-br from-white/95 to-white/90 rounded-3xl p-6 shadow-2xl shadow-purple-500/20 backdrop-blur-sm border border-white/50"
         >
-          <div className="space-y-3">
-            {formFields.map(({ key, type, placeholder, icon: Icon, required }, idx) => (
+          <div className="space-y-4">
+            {formFields.map(({ key, type, placeholder, icon: Icon, required, inputMode }, idx) => (
               <motion.div 
                 key={key}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.05 }}
-                className="relative"
+                className="relative group"
               >
-                <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center group-focus-within:from-purple-200 group-focus-within:to-purple-100 transition-all">
+                  <Icon className="w-5 h-5 text-purple-600" />
+                </div>
                 <Input
                   type={type}
+                  inputMode={inputMode}
                   placeholder={placeholder}
                   value={formData[key as keyof typeof formData]}
                   onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                  className="pl-10 border-2 border-gray-200 focus:border-purple-400 bg-gray-50 rounded-xl h-12 transition-all text-gray-800 placeholder:text-gray-400"
+                  className="pl-16 pr-4 border-2 border-purple-100 focus:border-purple-400 bg-white hover:bg-purple-50/30 rounded-2xl h-14 transition-all text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:shadow-md focus:shadow-purple-200/50"
                   required={required}
                   data-testid={`input-${key}`}
                 />
@@ -157,15 +160,17 @@ export default function CerebralFormPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.35 }}
-              className="relative"
+              className="relative group"
             >
-              <MessageSquare className="absolute left-3 top-4 w-5 h-5 text-purple-500" />
+              <div className="absolute left-4 top-4 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center group-focus-within:from-purple-200 group-focus-within:to-purple-100 transition-all">
+                <MessageSquare className="w-5 h-5 text-purple-600" />
+              </div>
               <textarea
                 placeholder="Comentario (opcional)"
                 value={formData.comentario}
                 onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
-                rows={2}
-                className="w-full pl-10 p-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 bg-gray-50 resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400"
+                rows={3}
+                className="w-full pl-16 pr-4 py-4 rounded-2xl border-2 border-purple-100 focus:border-purple-400 bg-white hover:bg-purple-50/30 resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:shadow-md focus:shadow-purple-200/50"
                 data-testid="input-comentario"
               />
             </motion.div>
