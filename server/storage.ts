@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -44,6 +44,16 @@ export interface IStorage {
   // Cerebral results
   saveCerebralResult(result: InsertCerebralResult): Promise<CerebralResult>;
   getCerebralResults(categoria?: string): Promise<CerebralResult[]>;
+  
+  // Entrenamiento
+  getEntrenamientoCard(categoria: string): Promise<EntrenamientoCard | null>;
+  saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard>;
+  getEntrenamientoPage(categoria: string): Promise<EntrenamientoPage | null>;
+  saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage>;
+  getEntrenamientoItems(categoria: string): Promise<EntrenamientoItem[]>;
+  saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem>;
+  updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null>;
+  deleteEntrenamientoItem(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -262,6 +272,29 @@ export class MemStorage implements IStorage {
   async getCerebralResults(_categoria?: string): Promise<CerebralResult[]> {
     return [];
   }
+  
+  async getEntrenamientoCard(_categoria: string): Promise<EntrenamientoCard | null> {
+    return null;
+  }
+  async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
+    return { id: randomUUID(), ...card, updatedAt: new Date() } as EntrenamientoCard;
+  }
+  async getEntrenamientoPage(_categoria: string): Promise<EntrenamientoPage | null> {
+    return null;
+  }
+  async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
+    return { id: randomUUID(), ...page, updatedAt: new Date() } as EntrenamientoPage;
+  }
+  async getEntrenamientoItems(_categoria: string): Promise<EntrenamientoItem[]> {
+    return [];
+  }
+  async saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem> {
+    return { id: randomUUID(), ...item, updatedAt: new Date() } as EntrenamientoItem;
+  }
+  async updateEntrenamientoItem(_id: string, _item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null> {
+    return null;
+  }
+  async deleteEntrenamientoItem(_id: string): Promise<void> {}
 }
 
 export class DatabaseStorage implements IStorage {
@@ -559,6 +592,68 @@ export class DatabaseStorage implements IStorage {
       return db.select().from(cerebralResults).where(eq(cerebralResults.categoria, categoria)).orderBy(desc(cerebralResults.createdAt));
     }
     return db.select().from(cerebralResults).orderBy(desc(cerebralResults.createdAt));
+  }
+
+  // Entrenamiento Card
+  async getEntrenamientoCard(categoria: string): Promise<EntrenamientoCard | null> {
+    const [card] = await db.select().from(entrenamientoCards).where(eq(entrenamientoCards.categoria, categoria));
+    return card || null;
+  }
+
+  async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
+    const existing = await this.getEntrenamientoCard(card.categoria);
+    if (existing) {
+      const [updated] = await db.update(entrenamientoCards)
+        .set({ ...card, updatedAt: new Date() })
+        .where(eq(entrenamientoCards.categoria, card.categoria))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(entrenamientoCards).values(card).returning();
+    return created;
+  }
+
+  // Entrenamiento Page
+  async getEntrenamientoPage(categoria: string): Promise<EntrenamientoPage | null> {
+    const [page] = await db.select().from(entrenamientoPages).where(eq(entrenamientoPages.categoria, categoria));
+    return page || null;
+  }
+
+  async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
+    const existing = await this.getEntrenamientoPage(page.categoria);
+    if (existing) {
+      const [updated] = await db.update(entrenamientoPages)
+        .set({ ...page, updatedAt: new Date() })
+        .where(eq(entrenamientoPages.categoria, page.categoria))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(entrenamientoPages).values(page).returning();
+    return created;
+  }
+
+  // Entrenamiento Items
+  async getEntrenamientoItems(categoria: string): Promise<EntrenamientoItem[]> {
+    return db.select().from(entrenamientoItems)
+      .where(eq(entrenamientoItems.categoria, categoria))
+      .orderBy(entrenamientoItems.sortOrder);
+  }
+
+  async saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem> {
+    const [created] = await db.insert(entrenamientoItems).values(item).returning();
+    return created;
+  }
+
+  async updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null> {
+    const [updated] = await db.update(entrenamientoItems)
+      .set({ ...item, updatedAt: new Date() })
+      .where(eq(entrenamientoItems.id, id))
+      .returning();
+    return updated || null;
+  }
+
+  async deleteEntrenamientoItem(id: string): Promise<void> {
+    await db.delete(entrenamientoItems).where(eq(entrenamientoItems.id, id));
   }
 }
 

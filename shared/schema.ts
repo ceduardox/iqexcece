@@ -149,6 +149,44 @@ export const uploadedImages = pgTable("uploaded_images", {
 
 export const insertUploadedImageSchema = createInsertSchema(uploadedImages).omit({ id: true, createdAt: true });
 
+// Entrenamiento card (for main selection page)
+export const entrenamientoCards = pgTable("entrenamiento_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull().unique(),
+  imageUrl: text("image_url"),
+  title: text("title").default("Entrenamiento"),
+  description: text("description").default("Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"),
+  buttonText: text("button_text").default("Comenzar"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Entrenamiento page config (banner and title)
+export const entrenamientoPages = pgTable("entrenamiento_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull().unique(),
+  bannerText: text("banner_text").default("¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!"),
+  pageTitle: text("page_title").default("Entrenamientos"),
+  pageDescription: text("page_description").default("Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Entrenamiento items (list of training options)
+export const entrenamientoItems = pgTable("entrenamiento_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull(),
+  imageUrl: text("image_url"),
+  title: text("title").notNull(),
+  description: text("description"),
+  linkUrl: text("link_url"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEntrenamientoCardSchema = createInsertSchema(entrenamientoCards).omit({ id: true, updatedAt: true });
+export const insertEntrenamientoPageSchema = createInsertSchema(entrenamientoPages).omit({ id: true, updatedAt: true });
+export const insertEntrenamientoItemSchema = createInsertSchema(entrenamientoItems).omit({ id: true, updatedAt: true });
+
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
 export type ReadingContent = typeof readingContents.$inferSelect;
@@ -161,3 +199,9 @@ export type CerebralResult = typeof cerebralResults.$inferSelect;
 export type InsertCerebralResult = z.infer<typeof insertCerebralResultSchema>;
 export type UploadedImage = typeof uploadedImages.$inferSelect;
 export type InsertUploadedImage = z.infer<typeof insertUploadedImageSchema>;
+export type EntrenamientoCard = typeof entrenamientoCards.$inferSelect;
+export type InsertEntrenamientoCard = z.infer<typeof insertEntrenamientoCardSchema>;
+export type EntrenamientoPage = typeof entrenamientoPages.$inferSelect;
+export type InsertEntrenamientoPage = z.infer<typeof insertEntrenamientoPageSchema>;
+export type EntrenamientoItem = typeof entrenamientoItems.$inferSelect;
+export type InsertEntrenamientoItem = z.infer<typeof insertEntrenamientoItemSchema>;
