@@ -73,6 +73,12 @@ export default function GestionPage() {
   // Cerebral state
   const [cerebralThemes, setCerebralThemes] = useState<{temaNumero: number; title: string; exerciseType: string}[]>([]);
   const [selectedCerebralTema, setSelectedCerebralTema] = useState(1);
+  const DEFAULT_BAILARINA_OPTIONS = [
+    { id: "1", label: "Izquierda", value: "izquierda", position: 0 },
+    { id: "2", label: "Derecha", value: "derecha", position: 1 },
+    { id: "3", label: "Ambos", value: "ambos", position: 2 }
+  ];
+  
   const [cerebralContent, setCerebralContent] = useState<{
     title: string; 
     exerciseType: string; 
@@ -85,7 +91,7 @@ export default function GestionPage() {
     exerciseType: "bailarina",
     imageUrl: "",
     imageSize: 100,
-    exerciseData: { instruction: "", correctAnswer: "" },
+    exerciseData: { instruction: "", correctAnswer: "", answerOptions: DEFAULT_BAILARINA_OPTIONS },
     isActive: true
   });
   
@@ -1722,7 +1728,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       setSelectedCerebralTema(maxTema + 1);
                       setCerebralContent({ 
                         title: "", exerciseType: "bailarina", imageUrl: "", imageSize: 100, 
-                        exerciseData: { instruction: "", correctAnswer: "" }, isActive: true 
+                        exerciseData: { instruction: "", correctAnswer: "", answerOptions: DEFAULT_BAILARINA_OPTIONS }, isActive: true 
                       });
                     }}
                     variant="outline"
