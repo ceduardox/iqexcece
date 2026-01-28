@@ -454,6 +454,7 @@ export default function CerebralExercisePage() {
   };
 
   const [selectedPreference, setSelectedPreference] = useState<{ imageUrl: string; meaning: string } | null>(null);
+  const [selectedLat, setSelectedLat] = useState<string | null>(null);
 
   const renderPreferenciaExercise = () => {
     const options = content?.exerciseData?.prefOptions || [];
@@ -526,6 +527,79 @@ export default function CerebralExercisePage() {
             >
               <p className="text-cyan-400 font-bold text-lg mb-1">Tu elección revela:</p>
               <p className="text-white text-xl">{selectedPreference.meaning}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
+  const renderLateralidadExercise = () => {
+    const instruction = content?.exerciseData?.latInstruction || "Coloca una mano sobre tu cabeza.";
+    const question = content?.exerciseData?.latQuestion || "¿Qué mano has utilizado?";
+    const leftOption = content?.exerciseData?.latLeft || "Izquierda";
+    const rightOption = content?.exerciseData?.latRight || "Derecha";
+
+    return (
+      <div className="space-y-8">
+        {/* Instruction */}
+        <div className="text-center">
+          <p className="text-gray-700 text-lg">{instruction}</p>
+        </div>
+
+        {/* Question */}
+        <div className="text-center">
+          <p className="text-gray-900 font-bold text-xl">{question}</p>
+        </div>
+
+        {/* Options */}
+        <div className="flex gap-4 justify-center">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (!selectedLat) {
+                setSelectedLat(leftOption);
+                setUserAnswer(leftOption);
+              }
+            }}
+            disabled={!!selectedLat}
+            className={`px-8 py-4 rounded-lg border-2 text-lg font-medium transition-all ${
+              selectedLat === leftOption
+                ? 'bg-purple-100 border-purple-500 text-purple-700'
+                : 'bg-white border-gray-300 text-gray-700 hover-elevate'
+            } ${selectedLat && selectedLat !== leftOption ? 'opacity-40' : ''}`}
+          >
+            {leftOption}
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (!selectedLat) {
+                setSelectedLat(rightOption);
+                setUserAnswer(rightOption);
+              }
+            }}
+            disabled={!!selectedLat}
+            className={`px-8 py-4 rounded-lg border-2 text-lg font-medium transition-all ${
+              selectedLat === rightOption
+                ? 'bg-purple-100 border-purple-500 text-purple-700'
+                : 'bg-white border-gray-300 text-gray-700 hover-elevate'
+            } ${selectedLat && selectedLat !== rightOption ? 'opacity-40' : ''}`}
+          >
+            {rightOption}
+          </motion.button>
+        </div>
+
+        {/* Selection confirmation */}
+        <AnimatePresence>
+          {selectedLat && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 rounded-lg bg-gradient-to-r from-purple-600/30 to-cyan-600/30 border border-purple-500/30 text-center"
+            >
+              <p className="text-cyan-400 font-bold text-lg">Seleccionaste: {selectedLat}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -646,6 +720,7 @@ export default function CerebralExercisePage() {
           {content.exerciseType === "patron" && renderPatronExercise()}
           {content.exerciseType === "stroop" && renderStroopExercise()}
           {content.exerciseType === "preferencia" && renderPreferenciaExercise()}
+          {content.exerciseType === "lateralidad" && renderLateralidadExercise()}
 
           <AnimatePresence>
             {submitted && (

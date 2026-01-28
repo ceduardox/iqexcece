@@ -116,6 +116,7 @@ export default function GestionPage() {
     { value: "patron", label: "Patrón visual" },
     { value: "stroop", label: "Test Stroop (color vs palabra)" },
     { value: "preferencia", label: "Preferencia visual (proyectivo)" },
+    { value: "lateralidad", label: "Lateralidad (izquierda/derecha)" },
   ];
   
   const defaultPreescolar = {
@@ -1969,6 +1970,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   {cerebralContent.exerciseType === "secuencia" && "Usuario completa el número faltante en una serie"}
                   {cerebralContent.exerciseType === "memoria" && "Usuario memoriza y recuerda elementos visuales"}
                   {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrón en una secuencia visual"}
+                  {cerebralContent.exerciseType === "lateralidad" && "Usuario responde qué mano usó (izquierda o derecha)"}
                   {cerebralContent.exerciseType === "stroop" && "Usuario elige el COLOR del texto, no la palabra escrita"}
                   {cerebralContent.exerciseType === "preferencia" && "Test proyectivo: usuario elige imagen que le atrae, revela personalidad"}
                 </p>
@@ -2541,6 +2543,61 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     >
                       + Agregar opción
                     </Button>
+                  </div>
+                )}
+
+                {cerebralContent.exerciseType === "lateralidad" && (
+                  <div className="space-y-4">
+                    <p className="text-white/40 text-xs">Test de lateralidad: el usuario realiza una acción y responde qué mano usó.</p>
+                    
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Instrucción (acción a realizar)</label>
+                      <Input
+                        value={cerebralContent.exerciseData.latInstruction || "Coloca una mano sobre tu cabeza."}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, latInstruction: e.target.value } 
+                        }))}
+                        placeholder="Coloca una mano sobre tu cabeza."
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Pregunta</label>
+                      <Input
+                        value={cerebralContent.exerciseData.latQuestion || "¿Qué mano has utilizado?"}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, latQuestion: e.target.value } 
+                        }))}
+                        placeholder="¿Qué mano has utilizado?"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Opción izquierda</label>
+                      <Input
+                        value={cerebralContent.exerciseData.latLeft || "Izquierda"}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, latLeft: e.target.value } 
+                        }))}
+                        placeholder="Izquierda"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Opción derecha</label>
+                      <Input
+                        value={cerebralContent.exerciseData.latRight || "Derecha"}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, latRight: e.target.value } 
+                        }))}
+                        placeholder="Derecha"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
