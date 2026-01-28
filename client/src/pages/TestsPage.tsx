@@ -158,11 +158,10 @@ export default function TestsPage() {
         setLocation("/child-category");
       }
     } else if (testId === "razonamiento") {
-      if (userData.ageGroup === "ninos") {
-        setLocation("/razonamiento-selection/ninos");
-      } else {
-        console.log("Selected razonamiento test for:", userData.ageGroup);
-      }
+      const category = userData.ageGroup || "adolescentes";
+      setLocation(`/razonamiento-selection/${category}`);
+    } else if (testId === "cerebral") {
+      setLocation("/cerebral/seleccion");
     } else {
       console.log("Selected test:", testId, "for age group:", userData.ageGroup);
     }

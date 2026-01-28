@@ -15,6 +15,8 @@ import GestionPage from "@/pages/GestionPage";
 import RazonamientoSelectionPage from "@/pages/RazonamientoSelectionPage";
 import RazonamientoQuizPage from "@/pages/RazonamientoQuizPage";
 import RazonamientoResultPage from "@/pages/RazonamientoResultPage";
+import CerebralSelectionPage from "@/pages/CerebralSelectionPage";
+import CerebralExercisePage from "@/pages/CerebralExercisePage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +35,8 @@ function Router() {
       <Route path="/razonamiento-selection/:category" component={RazonamientoSelectionPage}/>
       <Route path="/razonamiento-quiz/:category/:tema" component={RazonamientoQuizPage}/>
       <Route path="/razonamiento-result/:category" component={RazonamientoResultPage}/>
+      <Route path="/cerebral/seleccion" component={CerebralSelectionPage}/>
+      <Route path="/cerebral/ejercicio/:categoria/:tema" component={CerebralExercisePage}/>
       <Route component={NotFound} />
     </Switch>
   );
