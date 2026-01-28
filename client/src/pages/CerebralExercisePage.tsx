@@ -59,10 +59,10 @@ export default function CerebralExercisePage() {
     }
   }, [content?.exerciseData?.timerEnabled, content?.exerciseData?.timerSeconds]);
 
-  // Handle redirect to results
+  // Handle redirect to form (before results)
   useEffect(() => {
     if (shouldRedirectToResults) {
-      setLocation(`/cerebral/resultado/${params.categoria}`);
+      setLocation(`/cerebral/formulario/${params.categoria}`);
     }
   }, [shouldRedirectToResults, params.categoria, setLocation]);
 
@@ -528,10 +528,10 @@ export default function CerebralExercisePage() {
                       meaning: opt.meaning 
                     });
                     sessionStorage.setItem('preferenciaAnswers', JSON.stringify(answers));
-                    // Auto-advance after selection
+                    // Auto-advance immediately after selection
                     setTimeout(() => {
                       handleNext();
-                    }, 1200);
+                    }, 400);
                   }
                 }}
                 disabled={!!selectedPreference}
@@ -553,19 +553,6 @@ export default function CerebralExercisePage() {
           })}
         </div>
 
-        {/* Result message - no right/wrong, just meaning */}
-        <AnimatePresence>
-          {selectedPreference && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 rounded-lg bg-gradient-to-r from-purple-600/30 to-cyan-600/30 border border-purple-500/30 text-center"
-            >
-              <p className="text-cyan-400 font-bold text-lg mb-1">Tu elección revela:</p>
-              <p className="text-white text-xl">{selectedPreference.meaning}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     );
   };
