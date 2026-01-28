@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 
 interface ReadingTheme {
@@ -37,6 +37,10 @@ const testTitles: Record<string, string> = {
 const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niño",
+  adolescentes: "Adolescente",
+  universitarios: "Universitario",
+  profesionales: "Profesional",
+  adulto_mayor: "Adulto Mayor",
 };
 
 function ChildishBackButton({ onClick }: { onClick: () => void }) {
@@ -75,7 +79,7 @@ function ChildishBackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-const defaultImages = {
+const defaultImages: Record<string, { mainImage: string; smallImage: string }> = {
   preescolar: {
     mainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
     smallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
@@ -84,15 +88,32 @@ const defaultImages = {
     mainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     smallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
   },
+  adolescentes: {
+    mainImage: "https://img.freepik.com/free-vector/student-boy-with-book-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
+    smallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
+  },
+  universitarios: {
+    mainImage: "https://img.freepik.com/free-vector/college-student-concept-illustration_114360-12640.jpg",
+    smallImage: "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg",
+  },
+  profesionales: {
+    mainImage: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
+    smallImage: "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg",
+  },
+  adulto_mayor: {
+    mainImage: "https://img.freepik.com/free-vector/elderly-couple-concept-illustration_114360-5765.jpg",
+    smallImage: "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg",
+  },
 };
 
 export default function ReadingSelectionPage() {
   const [, setLocation] = useLocation();
+  const params = useParams<{ category?: string }>();
   const { userData, setUserData } = useUserData();
   const [content, setContent] = useState<ReadingContent | null>(null);
   const [themes, setThemes] = useState<ReadingTheme[]>([]);
   
-  const categoria = userData.childCategory || "preescolar";
+  const categoria = params.category || userData.childCategory || "preescolar";
 
   useEffect(() => {
     fetch(`/api/reading/${categoria}`)
@@ -125,15 +146,15 @@ export default function ReadingSelectionPage() {
 
   const handleReadingSelect = useCallback((temaNumero: number) => {
     playCardSound();
-    setUserData({ ...userData, selectedTema: temaNumero });
+    setUserData({ ...userData, selectedTema: temaNumero, childCategory: categoria });
     setLocation("/lectura-contenido");
-  }, [setLocation, userData, setUserData]);
+  }, [setLocation, userData, setUserData, categoria]);
 
   const testName = testTitles[userData.selectedTest || "lectura"] || "Test Lectura";
   const categoryLabel = categoryLabels[categoria] || "Pre escolar";
   
-  const mainImage = content?.pageMainImage || defaultImages[categoria as keyof typeof defaultImages]?.mainImage || defaultImages.preescolar.mainImage;
-  const smallImage = content?.pageSmallImage || defaultImages[categoria as keyof typeof defaultImages]?.smallImage || defaultImages.preescolar.smallImage;
+  const mainImage = content?.pageMainImage || defaultImages[categoria]?.mainImage || defaultImages.preescolar.mainImage;
+  const smallImage = content?.pageSmallImage || defaultImages[categoria]?.smallImage || defaultImages.preescolar.smallImage;
 
   return (
     <motion.div

@@ -21,6 +21,7 @@ function Router() {
       <Route path="/tests" component={TestsPage}/>
       <Route path="/child-category" component={ChildCategoryPage}/>
       <Route path="/reading-selection" component={ReadingSelectionPage}/>
+      <Route path="/reading-selection/:category" component={ReadingSelectionPage}/>
       <Route path="/lectura-contenido" component={ReadingContentPage}/>
       <Route path="/adolescente" component={AdolescentePage}/>
       <Route path="/adolescente-reading" component={AdolescenteReadingPage}/>

@@ -143,10 +143,20 @@ export default function TestsPage() {
     playCardSound();
     updateUserData({ selectedTest: testId });
     
-    if (userData.ageGroup === "ninos") {
-      setLocation("/child-category");
-    } else if (userData.ageGroup === "adolescentes") {
-      setLocation("/adolescente");
+    if (testId === "lectura") {
+      if (userData.ageGroup === "ninos") {
+        setLocation("/child-category");
+      } else if (userData.ageGroup === "adolescentes") {
+        setLocation("/adolescente");
+      } else if (userData.ageGroup === "universitarios") {
+        setLocation("/reading-selection/universitarios");
+      } else if (userData.ageGroup === "profesionales") {
+        setLocation("/reading-selection/profesionales");
+      } else if (userData.ageGroup === "adulto_mayor") {
+        setLocation("/reading-selection/adulto_mayor");
+      } else {
+        setLocation("/child-category");
+      }
     } else {
       console.log("Selected test:", testId, "for age group:", userData.ageGroup);
     }
