@@ -699,8 +699,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePrepPage(id: string, page: any): Promise<any | null> {
+    const { id: _id, createdAt: _createdAt, ...updateData } = page;
     const [updated] = await db.update(prepPages)
-      .set(page)
+      .set(updateData)
       .where(eq(prepPages.id, id))
       .returning();
     return updated || null;
