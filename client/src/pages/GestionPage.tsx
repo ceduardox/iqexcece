@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1046,10 +1046,38 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
 
               <div className="border-t border-white/10 pt-4">
-                <h3 className="text-white font-semibold mb-3">Preguntas del cuestionario</h3>
+                <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                  <h3 className="text-white font-semibold">Preguntas del cuestionario ({currentEditContent.questions.length})</h3>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const newQ = [...currentEditContent.questions, { question: "", options: ["", "", ""], correct: 0 }];
+                      setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
+                    }}
+                    data-testid="button-add-question"
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Agregar Pregunta
+                  </Button>
+                </div>
+                {currentEditContent.questions.length === 0 && (
+                  <p className="text-white/40 text-sm text-center py-4">No hay preguntas. Haz clic en "Agregar Pregunta" para crear una.</p>
+                )}
                 {currentEditContent.questions.map((q: { question: string; options: string[]; correct: number }, qi: number) => (
-                  <div key={qi} className="mb-4 p-3 bg-white/5 rounded-lg">
-                    <label className="text-orange-400 text-sm mb-1 block">Pregunta {qi + 1}</label>
+                  <div key={qi} className="mb-4 p-3 bg-white/5 rounded-lg relative">
+                    <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                      <label className="text-orange-400 text-sm">Pregunta {qi + 1}</label>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          const newQ = currentEditContent.questions.filter((_: any, i: number) => i !== qi);
+                          setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
+                        }}
+                        data-testid={`button-delete-question-${qi}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                     <Input
                       value={q.question}
                       onChange={(e) => {
@@ -1057,12 +1085,27 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         newQ[qi].question = e.target.value;
                         setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                       }}
-                      className="bg-white/10 border-white/20 text-white mb-2"
+                      placeholder="Escribe la pregunta..."
+                      className="bg-white/10 border-white/20 text-white mb-3"
+                      data-testid={`input-question-${qi}`}
                     />
-                    <div className="grid grid-cols-3 gap-2">
+                    <label className="text-white/40 text-xs mb-2 block">Opciones (haz clic en la correcta):</label>
+                    <div className="space-y-2">
                       {q.options.map((opt: string, oi: number) => (
-                        <div key={oi}>
-                          <label className="text-white/40 text-xs">Opción {oi + 1}</label>
+                        <div key={oi} className="flex flex-wrap gap-2 items-center">
+                          <Button
+                            size="sm"
+                            variant={q.correct === oi ? "default" : "outline"}
+                            onClick={() => {
+                              const newQ = [...currentEditContent.questions];
+                              newQ[qi].correct = oi;
+                              setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
+                            }}
+                            className={q.correct === oi ? "toggle-elevate toggle-elevated" : "toggle-elevate"}
+                            data-testid={`button-correct-${qi}-${oi}`}
+                          >
+                            {oi + 1}
+                          </Button>
                           <Input
                             value={opt}
                             onChange={(e) => {
@@ -1070,26 +1113,45 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               newQ[qi].options[oi] = e.target.value;
                               setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                             }}
-                            className="bg-white/10 border-white/20 text-white"
+                            placeholder={`Opción ${oi + 1}...`}
+                            className="bg-white/10 border-white/20 text-white flex-1"
+                            data-testid={`input-option-${qi}-${oi}`}
                           />
+                          {q.options.length > 2 && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                const newQ = [...currentEditContent.questions];
+                                newQ[qi].options = newQ[qi].options.filter((_: string, i: number) => i !== oi);
+                                if (newQ[qi].correct >= newQ[qi].options.length) {
+                                  newQ[qi].correct = newQ[qi].options.length - 1;
+                                }
+                                setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
+                              }}
+                              data-testid={`button-delete-option-${qi}-${oi}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
-                    <div className="mt-2">
-                      <label className="text-white/40 text-xs">Respuesta correcta (0, 1, 2)</label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={2}
-                        value={q.correct}
-                        onChange={(e) => {
+                    {q.options.length < 5 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
                           const newQ = [...currentEditContent.questions];
-                          newQ[qi].correct = parseInt(e.target.value) || 0;
+                          newQ[qi].options.push("");
                           setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                         }}
-                        className="bg-white/10 border-white/20 text-white w-20"
-                      />
-                    </div>
+                        className="mt-2"
+                        data-testid={`button-add-option-${qi}`}
+                      >
+                        + Agregar opción
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
