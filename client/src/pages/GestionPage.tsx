@@ -947,6 +947,36 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return `${mins}:${String(secs).padStart(2, '0')}`;
   };
 
+  // Load entrenamiento data when tab is activated
+  useEffect(() => {
+    if (isLoggedIn && activeTab === "entrenamiento") {
+      const loadEntrenamientoData = async () => {
+        const token = localStorage.getItem("admin_token") || "";
+        const cat = entrenamientoCategory;
+        try {
+          const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
+            fetch(`/api/entrenamiento/${cat}/card`),
+            fetch(`/api/entrenamiento/${cat}/page`),
+            fetch(`/api/entrenamiento/${cat}/items`),
+            fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
+          ]);
+          const cardData = await cardRes.json();
+          const pageData = await pageRes.json();
+          const itemsData = await itemsRes.json();
+          const prepPagesData = await prepPagesRes.json();
+          const catPrepData = await catPrepRes.json();
+          if (cardData.card) setEntrenamientoCard(cardData.card);
+          if (pageData.page) setEntrenamientoPage(pageData.page);
+          setEntrenamientoItems(itemsData.items || []);
+          setPrepPages(prepPagesData.pages || []);
+          setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
+        } catch (e) { console.error(e); }
+      };
+      loadEntrenamientoData();
+    }
+  }, [isLoggedIn, activeTab, entrenamientoCategory]);
+
   const getAgeLabel = (age: string | null) => {
     const labels: Record<string, string> = {
       ninos: "Niños",
