@@ -42,6 +42,8 @@ export default function CerebralExercisePage() {
   const [memoriaTimer, setMemoriaTimer] = useState(5);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [shouldRedirectToResults, setShouldRedirectToResults] = useState(false);
+  const [selectedPreference, setSelectedPreference] = useState<{ imageUrl: string; meaning: string } | null>(null);
+  const [selectedLat, setSelectedLat] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
     queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
@@ -475,9 +477,6 @@ export default function CerebralExercisePage() {
       </div>
     );
   };
-
-  const [selectedPreference, setSelectedPreference] = useState<{ imageUrl: string; meaning: string } | null>(null);
-  const [selectedLat, setSelectedLat] = useState<string | null>(null);
 
   const renderPreferenciaExercise = () => {
     const options = content?.exerciseData?.prefOptions || [];
