@@ -469,6 +469,18 @@ export default function CerebralExercisePage() {
           <p className="text-white font-semibold text-xl">{title2}</p>
         </div>
 
+        {/* Main header image if provided */}
+        {content?.imageUrl && (
+          <div className="flex justify-center">
+            <img 
+              src={content.imageUrl} 
+              alt="Imagen del ejercicio"
+              style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
+              className="rounded-lg"
+            />
+          </div>
+        )}
+
         {/* Image options - center last item if odd count */}
         <div className="grid grid-cols-2 gap-3">
           {options.map((opt: { imageUrl: string; meaning: string }, idx: number) => {
