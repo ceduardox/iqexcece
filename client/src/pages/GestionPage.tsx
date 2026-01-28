@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +58,15 @@ export default function GestionPage() {
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento">("lectura");
+  
+  // Razonamiento state
+  const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [selectedRazonamientoTema, setSelectedRazonamientoTema] = useState(1);
+  const [razonamientoContent, setRazonamientoContent] = useState<{title: string; questions: {question: string; options: string[]; correct: number}[]}>({
+    title: "",
+    questions: []
+  });
   
   const defaultPreescolar = {
     title: "Paseando con mi perrito",
@@ -268,6 +277,38 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setSaving(false);
   };
 
+  const handleSaveRazonamiento = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/razonamiento", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          categoria: contentCategory,
+          temaNumero: selectedRazonamientoTema,
+          title: razonamientoContent.title,
+          questions: JSON.stringify(razonamientoContent.questions),
+        }),
+      });
+      if (res.ok) {
+        alert("Razonamiento guardado correctamente");
+        const themesRes = await fetch(`/api/razonamiento/${contentCategory}/themes`);
+        const themesData = await themesRes.json();
+        if (themesData.themes) {
+          setRazonamientoThemes(themesData.themes);
+        }
+      } else {
+        alert("Error al guardar");
+      }
+    } catch {
+      alert("Error al guardar");
+    }
+    setSaving(false);
+  };
+
   const loadThemes = async () => {
     try {
       const res = await fetch(`/api/reading/${contentCategory}/themes`);
@@ -370,16 +411,65 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   }, [isLoggedIn, token]);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && contentType === "lectura") {
       loadThemes();
     }
-  }, [isLoggedIn, contentCategory]);
+  }, [isLoggedIn, contentCategory, contentType]);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && contentType === "lectura") {
       loadContentForTema(contentCategory, selectedTema);
     }
-  }, [isLoggedIn, contentCategory, selectedTema]);
+  }, [isLoggedIn, contentCategory, selectedTema, contentType]);
+
+  // Load razonamiento themes
+  useEffect(() => {
+    if (isLoggedIn && contentType === "razonamiento") {
+      const loadRazonamientoThemes = async () => {
+        try {
+          const res = await fetch(`/api/razonamiento/${contentCategory}/themes`);
+          const data = await res.json();
+          if (data.themes && data.themes.length > 0) {
+            setRazonamientoThemes(data.themes);
+            setSelectedRazonamientoTema(data.themes[0].temaNumero);
+          } else {
+            setRazonamientoThemes([]);
+            setSelectedRazonamientoTema(1);
+            setRazonamientoContent({ title: "", questions: [] });
+          }
+        } catch {
+          setRazonamientoThemes([]);
+        }
+      };
+      loadRazonamientoThemes();
+    }
+  }, [isLoggedIn, contentCategory, contentType]);
+
+  // Load razonamiento content for selected theme
+  useEffect(() => {
+    if (isLoggedIn && contentType === "razonamiento") {
+      const loadRazonamientoContent = async () => {
+        try {
+          const res = await fetch(`/api/razonamiento/${contentCategory}?tema=${selectedRazonamientoTema}`);
+          const data = await res.json();
+          if (data.content) {
+            const questions = typeof data.content.questions === "string" 
+              ? JSON.parse(data.content.questions) 
+              : data.content.questions || [];
+            setRazonamientoContent({
+              title: data.content.title || "",
+              questions: questions,
+            });
+          } else {
+            setRazonamientoContent({ title: "", questions: [] });
+          }
+        } catch {
+          setRazonamientoContent({ title: "", questions: [] });
+        }
+      };
+      loadRazonamientoContent();
+    }
+  }, [isLoggedIn, contentCategory, selectedRazonamientoTema, contentType]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -932,11 +1022,36 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           <Card className="bg-black/40 border-orange-500/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-orange-400" />
-                Editar Contenido de Lectura
+                {contentType === "lectura" ? (
+                  <BookOpen className="w-5 h-5 text-orange-400" />
+                ) : (
+                  <Brain className="w-5 h-5 text-cyan-400" />
+                )}
+                Editar Contenido de {contentType === "lectura" ? "Lectura" : "Razonamiento"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex gap-2 mb-4 border-b border-white/10 pb-4">
+                <Button
+                  onClick={() => setContentType("lectura")}
+                  variant={contentType === "lectura" ? "default" : "outline"}
+                  className={contentType === "lectura" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+                  data-testid="button-content-type-lectura"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Lectura
+                </Button>
+                <Button
+                  onClick={() => setContentType("razonamiento")}
+                  variant={contentType === "razonamiento" ? "default" : "outline"}
+                  className={contentType === "razonamiento" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                  data-testid="button-content-type-razonamiento"
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  Razonamiento
+                </Button>
+              </div>
+              
               <div className="flex flex-wrap gap-2 mb-4">
                 <Button
                   onClick={() => { setContentCategory("preescolar"); setSelectedTema(1); }}
@@ -988,6 +1103,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </Button>
               </div>
 
+              {contentType === "lectura" && (
+              <>
               <div>
                 <label className="text-white/60 text-sm mb-1 block">Tema de lectura</label>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -1217,6 +1334,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 onClick={handleSaveContent}
                 disabled={saving}
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-600"
+                data-testid="button-save-lectura"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Guardando..." : `Guardar ${
@@ -1227,6 +1345,181 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
+              </>
+              )}
+
+              {contentType === "razonamiento" && (
+              <>
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Tema de razonamiento</label>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {razonamientoThemes.map((theme) => (
+                    <Button
+                      key={theme.temaNumero}
+                      size="sm"
+                      onClick={() => setSelectedRazonamientoTema(theme.temaNumero)}
+                      variant={selectedRazonamientoTema === theme.temaNumero ? "default" : "outline"}
+                      className={selectedRazonamientoTema === theme.temaNumero ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                      data-testid={`button-razonamiento-tema-${theme.temaNumero}`}
+                    >
+                      Tema {String(theme.temaNumero).padStart(2, '0')}
+                    </Button>
+                  ))}
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const maxTema = Math.max(...razonamientoThemes.map(t => t.temaNumero), 0);
+                      setSelectedRazonamientoTema(maxTema + 1);
+                      setRazonamientoContent({ title: "", questions: [] });
+                    }}
+                    variant="outline"
+                    className="border-green-500/30 text-green-400"
+                    data-testid="button-add-razonamiento-tema"
+                  >
+                    + Nuevo Tema
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Título del test</label>
+                <Input
+                  value={razonamientoContent.title}
+                  onChange={(e) => setRazonamientoContent(p => ({ ...p, title: e.target.value }))}
+                  className="bg-white/10 border-white/20 text-white"
+                  data-testid="input-razonamiento-title"
+                />
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <div className="flex flex-wrap gap-2 items-center justify-between mb-3">
+                  <h3 className="text-white font-semibold">Preguntas de razonamiento</h3>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setRazonamientoContent(p => ({
+                        ...p,
+                        questions: [...p.questions, { question: "", options: ["", ""], correct: 0 }]
+                      }));
+                    }}
+                    className="bg-cyan-600"
+                    data-testid="button-add-razonamiento-question"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Agregar pregunta
+                  </Button>
+                </div>
+                {razonamientoContent.questions.map((q, qi) => (
+                  <div key={qi} className="bg-white/5 rounded-lg p-4 mb-3">
+                    <div className="flex flex-wrap gap-2 items-center justify-between mb-2">
+                      <span className="text-cyan-400 font-medium">Pregunta {qi + 1}</span>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          const newQ = razonamientoContent.questions.filter((_, i) => i !== qi);
+                          setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                        }}
+                        data-testid={`button-delete-razonamiento-question-${qi}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <Input
+                      value={q.question}
+                      onChange={(e) => {
+                        const newQ = [...razonamientoContent.questions];
+                        newQ[qi].question = e.target.value;
+                        setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                      }}
+                      placeholder="Escribe la pregunta..."
+                      className="bg-white/10 border-white/20 text-white mb-3"
+                      data-testid={`input-razonamiento-question-${qi}`}
+                    />
+                    <label className="text-white/40 text-xs mb-2 block">Opciones (haz clic en la correcta):</label>
+                    <div className="space-y-2">
+                      {q.options.map((opt, oi) => (
+                        <div key={oi} className="flex flex-wrap gap-2 items-center">
+                          <Button
+                            size="sm"
+                            variant={q.correct === oi ? "default" : "outline"}
+                            onClick={() => {
+                              const newQ = [...razonamientoContent.questions];
+                              newQ[qi].correct = oi;
+                              setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                            }}
+                            className={q.correct === oi ? "toggle-elevate toggle-elevated" : "toggle-elevate"}
+                            data-testid={`button-razonamiento-correct-${qi}-${oi}`}
+                          >
+                            {oi + 1}
+                          </Button>
+                          <Input
+                            value={opt}
+                            onChange={(e) => {
+                              const newQ = [...razonamientoContent.questions];
+                              newQ[qi].options[oi] = e.target.value;
+                              setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                            }}
+                            placeholder={`Opción ${oi + 1}...`}
+                            className="bg-white/10 border-white/20 text-white flex-1"
+                            data-testid={`input-razonamiento-option-${qi}-${oi}`}
+                          />
+                          {q.options.length > 2 && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                const newQ = [...razonamientoContent.questions];
+                                newQ[qi].options = newQ[qi].options.filter((_, i) => i !== oi);
+                                if (newQ[qi].correct >= newQ[qi].options.length) {
+                                  newQ[qi].correct = newQ[qi].options.length - 1;
+                                }
+                                setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                              }}
+                              data-testid={`button-delete-razonamiento-option-${qi}-${oi}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {q.options.length < 5 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const newQ = [...razonamientoContent.questions];
+                          newQ[qi].options.push("");
+                          setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                        }}
+                        className="mt-2"
+                        data-testid={`button-add-razonamiento-option-${qi}`}
+                      >
+                        + Agregar opción
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={handleSaveRazonamiento}
+                disabled={saving}
+                className="w-full bg-gradient-to-r from-cyan-500 to-purple-600"
+                data-testid="button-save-razonamiento"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? "Guardando..." : `Guardar Razonamiento ${
+                  contentCategory === "preescolar" ? "Pre-escolar" : 
+                  contentCategory === "ninos" ? "Niños" : 
+                  contentCategory === "adolescentes" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
+                }`}
+              </Button>
+              </>
+              )}
             </CardContent>
           </Card>
         )}

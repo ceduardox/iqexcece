@@ -1,5 +1,13 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
+interface RazonamientoResults {
+  correct: number;
+  total: number;
+  time: number;
+  categoria: string;
+  title: string;
+}
+
 interface UserData {
   ageGroup: string | null;
   ageLabel: string | null;
@@ -9,6 +17,7 @@ interface UserData {
   selectedTema: number | null;
   selectedRazonamientoTest: number | null;
   selectedRazonamientoTitle: string | null;
+  razonamientoResults?: RazonamientoResults;
 }
 
 interface UserContextType {

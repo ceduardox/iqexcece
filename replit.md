@@ -31,6 +31,14 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - Adulto Mayor (Elderly)
   - Full reading test creation from admin panel for all 6 categories
   - Dynamic question editor with add/delete functionality
+- **Razonamiento (Reasoning) test system**: Complete reasoning test flow
+  - Database table: razonamiento_contents with themes and questions
+  - Admin panel "Razonamiento" sub-tab for content management
+  - Unlimited theme creation per category (following reading tests pattern)
+  - RazonamientoSelectionPage: Fetches themes from database
+  - RazonamientoQuizPage: Displays multiple-choice questions with progress tracking
+  - RazonamientoResultPage: Shows score, statistics, and navigation options
+  - Full user flow: Selection → Quiz → Submit Form → Results
 
 ## User Preferences
 

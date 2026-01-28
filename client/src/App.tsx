@@ -13,6 +13,8 @@ import AdolescentePage from "@/pages/AdolescentePage";
 import AdolescenteReadingPage from "@/pages/AdolescenteReadingPage";
 import GestionPage from "@/pages/GestionPage";
 import RazonamientoSelectionPage from "@/pages/RazonamientoSelectionPage";
+import RazonamientoQuizPage from "@/pages/RazonamientoQuizPage";
+import RazonamientoResultPage from "@/pages/RazonamientoResultPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/gestion" component={GestionPage}/>
       <Route path="/razonamiento-selection" component={RazonamientoSelectionPage}/>
       <Route path="/razonamiento-selection/:category" component={RazonamientoSelectionPage}/>
+      <Route path="/razonamiento-quiz/:category/:tema" component={RazonamientoQuizPage}/>
+      <Route path="/razonamiento-result/:category" component={RazonamientoResultPage}/>
       <Route component={NotFound} />
     </Switch>
   );
