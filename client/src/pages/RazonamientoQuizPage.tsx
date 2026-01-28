@@ -269,13 +269,13 @@ export default function RazonamientoQuizPage() {
                   transition={{ delay }}
                   className="relative"
                 >
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500" />
                   <Input
                     type={type}
                     placeholder={placeholder}
                     value={formData[key as keyof typeof formData]}
                     onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                    className="pl-10 border-2 border-purple-100 focus:border-purple-400 rounded-xl h-12 transition-all"
+                    className="pl-10 border-2 border-gray-200 focus:border-cyan-400 bg-gray-50 rounded-xl h-12 transition-all text-gray-800 placeholder:text-gray-400"
                     data-testid={`input-${key}`}
                   />
                 </motion.div>
@@ -286,13 +286,13 @@ export default function RazonamientoQuizPage() {
                 transition={{ delay: 0.35 }}
                 className="relative"
               >
-                <MessageSquare className="absolute left-3 top-4 w-5 h-5 text-purple-400" />
+                <MessageSquare className="absolute left-3 top-4 w-5 h-5 text-cyan-500" />
                 <textarea
                   placeholder="Comentario (opcional)"
                   value={formData.comentario}
                   onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
                   rows={2}
-                  className="w-full pl-10 p-3 rounded-xl border-2 border-purple-100 focus:border-purple-400 resize-none text-sm transition-all outline-none"
+                  className="w-full pl-10 p-3 rounded-xl border-2 border-gray-200 focus:border-cyan-400 bg-gray-50 resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400"
                   data-testid="input-comentario"
                 />
               </motion.div>
