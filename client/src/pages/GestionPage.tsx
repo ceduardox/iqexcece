@@ -63,8 +63,10 @@ export default function GestionPage() {
   // Razonamiento state
   const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [selectedRazonamientoTema, setSelectedRazonamientoTema] = useState(1);
-  const [razonamientoContent, setRazonamientoContent] = useState<{title: string; questions: {question: string; options: string[]; correct: number}[]}>({
+  const [razonamientoContent, setRazonamientoContent] = useState<{title: string; imageUrl: string; imageSize: number; questions: {question: string; options: string[]; correct: number}[]}>({
     title: "",
+    imageUrl: "",
+    imageSize: 100,
     questions: []
   });
   
@@ -290,6 +292,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           categoria: contentCategory,
           temaNumero: selectedRazonamientoTema,
           title: razonamientoContent.title,
+          imageUrl: razonamientoContent.imageUrl || null,
+          imageSize: razonamientoContent.imageSize || 100,
           questions: JSON.stringify(razonamientoContent.questions),
         }),
       });
@@ -435,7 +439,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           } else {
             setRazonamientoThemes([]);
             setSelectedRazonamientoTema(1);
-            setRazonamientoContent({ title: "", questions: [] });
+            setRazonamientoContent({ title: "", imageUrl: "", imageSize: 100, questions: [] });
           }
         } catch {
           setRazonamientoThemes([]);
@@ -458,13 +462,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               : data.content.questions || [];
             setRazonamientoContent({
               title: data.content.title || "",
+              imageUrl: data.content.imageUrl || "",
+              imageSize: data.content.imageSize || 100,
               questions: questions,
             });
           } else {
-            setRazonamientoContent({ title: "", questions: [] });
+            setRazonamientoContent({ title: "", imageUrl: "", imageSize: 100, questions: [] });
           }
         } catch {
-          setRazonamientoContent({ title: "", questions: [] });
+          setRazonamientoContent({ title: "", imageUrl: "", imageSize: 100, questions: [] });
         }
       };
       loadRazonamientoContent();
@@ -1370,7 +1376,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     onClick={() => {
                       const maxTema = Math.max(...razonamientoThemes.map(t => t.temaNumero), 0);
                       setSelectedRazonamientoTema(maxTema + 1);
-                      setRazonamientoContent({ title: "", questions: [] });
+                      setRazonamientoContent({ title: "", imageUrl: "", imageSize: 100, questions: [] });
                     }}
                     variant="outline"
                     className="border-green-500/30 text-green-400"
@@ -1390,6 +1396,42 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   data-testid="input-razonamiento-title"
                 />
               </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">URL de imagen (opcional)</label>
+                <Input
+                  value={razonamientoContent.imageUrl}
+                  onChange={(e) => setRazonamientoContent(p => ({ ...p, imageUrl: e.target.value }))}
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  className="bg-white/10 border-white/20 text-white"
+                  data-testid="input-razonamiento-image-url"
+                />
+              </div>
+
+              {razonamientoContent.imageUrl && (
+                <div>
+                  <label className="text-white/60 text-sm mb-1 block">Tamaño de imagen: {razonamientoContent.imageSize}%</label>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    step="5"
+                    value={razonamientoContent.imageSize}
+                    onChange={(e) => setRazonamientoContent(p => ({ ...p, imageSize: parseInt(e.target.value) }))}
+                    className="w-full"
+                    data-testid="slider-razonamiento-image-size"
+                  />
+                  <div className="mt-2 flex justify-center">
+                    <img 
+                      src={razonamientoContent.imageUrl} 
+                      alt="Vista previa" 
+                      style={{ width: `${razonamientoContent.imageSize}%`, maxWidth: '300px' }}
+                      className="rounded-lg border border-white/20"
+                      onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="border-t border-white/10 pt-4">
                 <div className="flex flex-wrap gap-2 items-center justify-between mb-3">

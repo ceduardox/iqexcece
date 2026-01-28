@@ -76,6 +76,8 @@ export const razonamientoContents = pgTable("razonamiento_contents", {
   categoria: text("categoria").notNull(),
   temaNumero: integer("tema_numero").default(1),
   title: text("title").notNull(),
+  imageUrl: text("image_url"),
+  imageSize: integer("image_size").default(100),
   questions: text("questions").notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

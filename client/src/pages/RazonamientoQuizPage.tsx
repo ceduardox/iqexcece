@@ -45,6 +45,8 @@ export default function RazonamientoQuizPage() {
   
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageSize, setImageSize] = useState(100);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -72,6 +74,8 @@ export default function RazonamientoQuizPage() {
             ? JSON.parse(data.content.questions) 
             : data.content.questions || [];
           setTitle(data.content.title || `Razonamiento Tema ${tema}`);
+          setImageUrl(data.content.imageUrl || "");
+          setImageSize(data.content.imageSize || 100);
           setQuestions(parsedQuestions);
         } else {
           setQuestions([]);
@@ -333,7 +337,7 @@ export default function RazonamientoQuizPage() {
       </div>
 
       {/* Question */}
-      <div className="flex-1 px-4 pb-8">
+      <div className="flex-1 px-4 pb-8 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
@@ -342,6 +346,26 @@ export default function RazonamientoQuizPage() {
             exit={{ opacity: 0, x: -50 }}
             className="space-y-4"
           >
+            {/* Test Title */}
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white uppercase tracking-wide" data-testid="text-razonamiento-title">
+                {title}
+              </h2>
+            </div>
+
+            {/* Image if present */}
+            {imageUrl && (
+              <div className="flex justify-center">
+                <img 
+                  src={imageUrl} 
+                  alt={title}
+                  style={{ width: `${imageSize}%`, maxWidth: '300px' }}
+                  className="rounded-lg shadow-lg"
+                  data-testid="img-razonamiento"
+                />
+              </div>
+            )}
+
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
               <h3 className="text-xl font-bold text-white leading-relaxed">
                 {currentQ?.question}

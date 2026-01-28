@@ -187,6 +187,8 @@ export class MemStorage implements IStorage {
       categoria: insertContent.categoria,
       temaNumero: insertContent.temaNumero || 1,
       title: insertContent.title,
+      imageUrl: insertContent.imageUrl || null,
+      imageSize: insertContent.imageSize || 100,
       questions: insertContent.questions,
       updatedAt: new Date(),
     };
@@ -351,6 +353,8 @@ export class DatabaseStorage implements IStorage {
       const [updated] = await db.update(razonamientoContents)
         .set({
           title: insertContent.title,
+          imageUrl: insertContent.imageUrl || null,
+          imageSize: insertContent.imageSize || 100,
           questions: insertContent.questions,
           updatedAt: new Date(),
         })
@@ -366,6 +370,8 @@ export class DatabaseStorage implements IStorage {
       categoria: insertContent.categoria,
       temaNumero: temaNumero,
       title: insertContent.title,
+      imageUrl: insertContent.imageUrl || null,
+      imageSize: insertContent.imageSize || 100,
       questions: insertContent.questions,
     }).returning();
     return created;
