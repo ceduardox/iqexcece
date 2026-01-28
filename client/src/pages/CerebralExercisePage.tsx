@@ -403,6 +403,56 @@ export default function CerebralExercisePage() {
     );
   };
 
+  const renderStroopExercise = () => {
+    const word = content?.exerciseData?.stroopWord || "";
+    const color = content?.exerciseData?.stroopColor || "red";
+    const options = content?.exerciseData?.stroopOptions || [];
+    
+    return (
+      <div className="space-y-6">
+        {/* Instruction */}
+        <p className="text-white/80 text-center text-sm">
+          Escoge el <span className="text-cyan-400 font-bold">COLOR</span>, no la palabra.
+        </p>
+
+        {/* Word display with color */}
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="flex justify-center py-6"
+        >
+          <span 
+            className="text-4xl font-black"
+            style={{ color: color }}
+          >
+            {word}
+          </span>
+        </motion.div>
+
+        {/* Options */}
+        <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+          {options.map((opt: string, idx: number) => (
+            <motion.button
+              key={idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              onClick={() => !submitted && setUserAnswer(opt)}
+              disabled={submitted}
+              className={`py-4 px-6 rounded-xl text-lg font-semibold border-2 transition-colors ${
+                userAnswer === opt 
+                  ? 'bg-purple-600 border-purple-400 text-white' 
+                  : 'bg-white border-gray-200 text-gray-800 hover-elevate'
+              } ${submitted ? 'opacity-60' : ''}`}
+            >
+              {opt}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
@@ -483,6 +533,27 @@ export default function CerebralExercisePage() {
           </div>
         </motion.div>
 
+        {/* Progress Bar - Visible countdown */}
+        {timeLeft !== null && content?.exerciseData?.timerEnabled && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-4"
+          >
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`} />
+              <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                <motion.div 
+                  className={`h-full ${timeLeft <= 10 ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-cyan-400'}`}
+                  initial={{ width: '100%' }}
+                  animate={{ width: `${(timeLeft / (content?.exerciseData?.timerSeconds || 30)) * 100}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Exercise Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -493,6 +564,7 @@ export default function CerebralExercisePage() {
           {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
           {content.exerciseType === "memoria" && renderMemoriaExercise()}
           {content.exerciseType === "patron" && renderPatronExercise()}
+          {content.exerciseType === "stroop" && renderStroopExercise()}
 
           <AnimatePresence>
             {submitted && (

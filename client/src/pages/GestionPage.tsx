@@ -100,6 +100,7 @@ export default function GestionPage() {
     { value: "secuencia", label: "Secuencia numérica" },
     { value: "memoria", label: "Memoria visual" },
     { value: "patron", label: "Patrón visual" },
+    { value: "stroop", label: "Test Stroop (color vs palabra)" },
   ];
   
   const defaultPreescolar = {
@@ -1759,6 +1760,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   {cerebralContent.exerciseType === "secuencia" && "Usuario completa el número faltante en una serie"}
                   {cerebralContent.exerciseType === "memoria" && "Usuario memoriza y recuerda elementos visuales"}
                   {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrón en una secuencia visual"}
+                  {cerebralContent.exerciseType === "stroop" && "Usuario elige el COLOR del texto, no la palabra escrita"}
                 </p>
               </div>
 
@@ -2144,6 +2146,85 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         >
                           <option value="" className="bg-gray-800">Seleccionar...</option>
                           {(cerebralContent.exerciseData.patronOptions || []).map((opt: string) => (
+                            <option key={opt} value={opt} className="bg-gray-800">{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Input
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          placeholder="Respuesta esperada..."
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {cerebralContent.exerciseType === "stroop" && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Palabra a mostrar</label>
+                      <Input
+                        value={cerebralContent.exerciseData.stroopWord || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, stroopWord: e.target.value } 
+                        }))}
+                        placeholder="Ej: Rojo, Azul, Verde..."
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Color del texto (hex o nombre)</label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={cerebralContent.exerciseData.stroopColor || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, stroopColor: e.target.value } 
+                          }))}
+                          placeholder="Ej: red, blue, #FF0000..."
+                          className="bg-white/10 border-white/20 text-white flex-1"
+                        />
+                        {cerebralContent.exerciseData.stroopWord && cerebralContent.exerciseData.stroopColor && (
+                          <div 
+                            className="px-4 py-2 bg-white rounded-md font-bold text-xl"
+                            style={{ color: cerebralContent.exerciseData.stroopColor }}
+                          >
+                            {cerebralContent.exerciseData.stroopWord}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Opciones de respuesta (separadas por coma)</label>
+                      <Input
+                        value={(cerebralContent.exerciseData.stroopOptions || []).join(", ")}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, stroopOptions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
+                        }))}
+                        placeholder="Ej: Rojo, Azul, Verde, Amarillo"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta (el COLOR, no la palabra)</label>
+                      {(cerebralContent.exerciseData.stroopOptions?.length > 0) ? (
+                        <select
+                          value={cerebralContent.exerciseData.correctAnswer || ""}
+                          onChange={(e) => setCerebralContent(p => ({ 
+                            ...p, 
+                            exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                          }))}
+                          className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                        >
+                          <option value="" className="bg-gray-800">Seleccionar...</option>
+                          {(cerebralContent.exerciseData.stroopOptions || []).map((opt: string) => (
                             <option key={opt} value={opt} className="bg-gray-800">{opt}</option>
                           ))}
                         </select>
