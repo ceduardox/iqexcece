@@ -3367,8 +3367,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </div>
 
                         <div className="flex gap-4">
-                          <div className="flex-shrink-0">
-                            <p className="text-white/60 text-xs mb-2 text-center">Imagen</p>
+                          <div className="flex-shrink-0 space-y-2">
+                            <p className="text-white/60 text-xs text-center">Imagen</p>
                             <div 
                               className="w-24 h-24 bg-white/10 rounded-xl overflow-hidden cursor-pointer border-2 border-dashed border-white/30 flex items-center justify-center"
                               onClick={() => {
@@ -3386,10 +3386,20 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               ) : (
                                 <div className="text-center">
                                   <ImageIcon className="w-8 h-8 text-white/30 mx-auto" />
-                                  <span className="text-white/40 text-xs">Agregar</span>
+                                  <span className="text-white/40 text-xs">Galería</span>
                                 </div>
                               )}
                             </div>
+                            <Input
+                              value={item.imageUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...entrenamientoItems];
+                                updated[idx].imageUrl = e.target.value;
+                                setEntrenamientoItems(updated);
+                              }}
+                              className="w-24 bg-white/10 border-teal-500/30 text-white text-xs p-1"
+                              placeholder="URL..."
+                            />
                           </div>
 
                           <div className="flex-1 space-y-3">
