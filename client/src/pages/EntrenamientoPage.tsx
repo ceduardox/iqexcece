@@ -49,13 +49,7 @@ export default function EntrenamientoPage() {
   };
 
   const handleItemClick = (item: EntrenamientoItem) => {
-    if (item.linkUrl) {
-      if (item.linkUrl.startsWith("http")) {
-        window.open(item.linkUrl, "_blank");
-      } else {
-        setLocation(item.linkUrl);
-      }
-    }
+    setLocation(`/entrenamiento/${categoria}/prep/${item.id}`);
   };
 
   const gradients = [

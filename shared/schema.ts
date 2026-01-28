@@ -180,6 +180,11 @@ export const entrenamientoItems = pgTable("entrenamiento_items", {
   linkUrl: text("link_url"),
   sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(true),
+  prepImage: text("prep_image"),
+  prepTitle: text("prep_title"),
+  prepSubtitle: text("prep_subtitle"),
+  prepInstructions: text("prep_instructions"),
+  prepButtonText: text("prep_button_text").default("Empezar"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

@@ -20,6 +20,7 @@ import CerebralExercisePage from "@/pages/CerebralExercisePage";
 import CerebralFormPage from "@/pages/CerebralFormPage";
 import CerebralResultPage from "@/pages/CerebralResultPage";
 import EntrenamientoPage from "@/pages/EntrenamientoPage";
+import EntrenamientoPrepPage from "@/pages/EntrenamientoPrepPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/cerebral/formulario/:categoria" component={CerebralFormPage}/>
       <Route path="/cerebral/resultado/:categoria" component={CerebralResultPage}/>
       <Route path="/entrenamiento/:categoria" component={EntrenamientoPage}/>
+      <Route path="/entrenamiento/:categoria/prep/:itemId" component={EntrenamientoPrepPage}/>
       <Route component={NotFound} />
     </Switch>
   );

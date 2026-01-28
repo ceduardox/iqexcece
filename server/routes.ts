@@ -522,6 +522,12 @@ export async function registerRoutes(
     res.json({ items });
   });
 
+  // Get single entrenamiento item by ID (public)
+  app.get("/api/entrenamiento/item/:id", async (req, res) => {
+    const item = await storage.getEntrenamientoItemById(req.params.id);
+    res.json({ item });
+  });
+
   // Save entrenamiento card (admin)
   app.post("/api/admin/entrenamiento/card", async (req, res) => {
     const auth = req.headers.authorization;

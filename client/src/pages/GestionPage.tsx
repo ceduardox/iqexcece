@@ -136,7 +136,7 @@ export default function GestionPage() {
     pageTitle: "Entrenamientos",
     pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
   });
-  const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean}[]>([]);
+  const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
   const EXERCISE_TYPES = [
@@ -3432,23 +3432,125 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
-                          <Button
-                            onClick={async () => {
-                              try {
-                                await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                                  method: "PUT",
-                                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                                  body: JSON.stringify(item)
-                                });
-                                alert("Sección guardada correctamente");
-                              } catch (e) { alert("Error al guardar"); }
-                            }}
-                            className="bg-gradient-to-r from-teal-500 to-cyan-500"
-                          >
-                            <Save className="w-4 h-4 mr-2" />
-                            Guardar Sección
-                          </Button>
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <div className="mb-4">
+                            <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                              <span className="text-lg">📋</span>
+                              Página de Preparación
+                              <span className="text-white/40 text-xs font-normal">(antes de empezar ejercicios)</span>
+                            </h4>
+                            <div className="grid md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl">
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-white/60 text-xs mb-1 block">Imagen de preparación</label>
+                                  <div className="flex gap-2">
+                                    <Input
+                                      value={item.prepImage || ""}
+                                      onChange={(e) => {
+                                        const updated = [...entrenamientoItems];
+                                        updated[idx].prepImage = e.target.value;
+                                        setEntrenamientoItems(updated);
+                                      }}
+                                      className="bg-white/10 border-purple-500/30 text-white text-sm"
+                                      placeholder="URL de imagen..."
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-purple-500/30 text-purple-400 px-2"
+                                      onClick={() => {
+                                        setImagePickerCallback(() => (url: string) => {
+                                          const updated = [...entrenamientoItems];
+                                          updated[idx].prepImage = url;
+                                          setEntrenamientoItems(updated);
+                                          setShowImagePicker(false);
+                                        });
+                                        setShowImagePicker(true);
+                                      }}
+                                    >
+                                      <ImageIcon className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                  {item.prepImage && (
+                                    <img src={item.prepImage} alt="" className="w-16 h-16 object-contain mt-2 rounded bg-white/10" />
+                                  )}
+                                </div>
+                                <div>
+                                  <label className="text-white/60 text-xs mb-1 block">Título</label>
+                                  <Input
+                                    value={item.prepTitle || ""}
+                                    onChange={(e) => {
+                                      const updated = [...entrenamientoItems];
+                                      updated[idx].prepTitle = e.target.value;
+                                      setEntrenamientoItems(updated);
+                                    }}
+                                    className="bg-white/10 border-purple-500/30 text-white"
+                                    placeholder="Ej: Mejora tu Velocidad de Lectura"
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
+                                  <Input
+                                    value={item.prepSubtitle || ""}
+                                    onChange={(e) => {
+                                      const updated = [...entrenamientoItems];
+                                      updated[idx].prepSubtitle = e.target.value;
+                                      setEntrenamientoItems(updated);
+                                    }}
+                                    className="bg-white/10 border-purple-500/30 text-white"
+                                    placeholder="Ej: ¡Mejora tu lectura rápidamente!"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
+                                  <textarea
+                                    value={item.prepInstructions || ""}
+                                    onChange={(e) => {
+                                      const updated = [...entrenamientoItems];
+                                      updated[idx].prepInstructions = e.target.value;
+                                      setEntrenamientoItems(updated);
+                                    }}
+                                    className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                                    placeholder="Ej: Observa las palabras sin leer en voz alta..."
+                                    rows={2}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón</label>
+                                  <Input
+                                    value={item.prepButtonText || ""}
+                                    onChange={(e) => {
+                                      const updated = [...entrenamientoItems];
+                                      updated[idx].prepButtonText = e.target.value;
+                                      setEntrenamientoItems(updated);
+                                    }}
+                                    className="bg-white/10 border-purple-500/30 text-white"
+                                    placeholder="Empezar"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                    body: JSON.stringify(item)
+                                  });
+                                  alert("Sección guardada correctamente");
+                                } catch (e) { alert("Error al guardar"); }
+                              }}
+                              className="bg-gradient-to-r from-teal-500 to-cyan-500"
+                            >
+                              <Save className="w-4 h-4 mr-2" />
+                              Guardar Sección
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
