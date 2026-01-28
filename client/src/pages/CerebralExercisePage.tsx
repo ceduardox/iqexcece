@@ -186,10 +186,10 @@ export default function CerebralExercisePage() {
   const renderSecuenciaExercise = () => {
     const options = content?.exerciseData?.sequenceOptions || [];
     return (
-      <div className="space-y-4">
-        <p className="text-white/80 text-center text-lg">Completa la secuencia:</p>
+      <div className="space-y-3">
+        <p className="text-white/80 text-center text-sm">Completa la secuencia:</p>
         <div className="text-center">
-          <p className="text-3xl font-bold text-white mb-4">{content?.exerciseData.sequence}</p>
+          <p className="text-xl font-bold text-white mb-2">{content?.exerciseData.sequence}</p>
         </div>
         {content?.imageUrl && (
           <div className="flex justify-center">
@@ -203,13 +203,13 @@ export default function CerebralExercisePage() {
         )}
         <div className="max-w-xs mx-auto">
           {options.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-4 gap-2">
               {options.map((opt: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => !submitted && setUserAnswer(opt)}
                   disabled={submitted}
-                  className={`p-4 rounded-xl text-xl font-bold transition-colors ${
+                  className={`p-2 rounded-lg text-sm font-bold transition-colors ${
                     userAnswer === opt 
                       ? 'bg-purple-600 text-white border-2 border-purple-400' 
                       : 'bg-white/10 text-white border border-white/20 hover-elevate'
