@@ -331,31 +331,77 @@ export default function CerebralExercisePage() {
     );
   };
 
-  const renderGenericExercise = () => (
-    <div className="space-y-4">
-      <p className="text-white/80 text-center text-lg">{content?.exerciseData.instruction}</p>
-      {content?.imageUrl && (
-        <div className="flex justify-center">
-          <img 
-            src={content.imageUrl} 
-            alt="Ejercicio"
-            style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
-            className="rounded-lg"
-          />
+  const renderPatronExercise = () => {
+    const sequence = content?.exerciseData?.patronSequence || [];
+    const options = content?.exerciseData?.patronOptions || [];
+    
+    return (
+      <div className="space-y-4">
+        <p className="text-white/80 text-center text-sm">¿Qué sigue en el patrón?</p>
+        
+        {/* Pattern sequence display */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {sequence.map((item: string, idx: number) => (
+            <motion.div
+              key={idx}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: idx * 0.1 }}
+              className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${
+                item === '?' 
+                  ? 'bg-purple-600/50 border-2 border-dashed border-purple-400 text-purple-300' 
+                  : 'bg-white/10 border border-white/20'
+              }`}
+            >
+              {item}
+            </motion.div>
+          ))}
         </div>
-      )}
-      <div className="max-w-xs mx-auto">
-        <Input
-          value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
-          placeholder="Tu respuesta..."
-          className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
-          disabled={submitted}
-          data-testid="input-generic-answer"
-        />
+
+        {/* Image if provided */}
+        {content?.imageUrl && (
+          <div className="flex justify-center">
+            <img 
+              src={content.imageUrl} 
+              alt="Patrón"
+              style={{ width: `${content.imageSize}%`, maxWidth: '200px' }}
+              className="rounded-lg"
+            />
+          </div>
+        )}
+
+        {/* Options */}
+        <div className="max-w-xs mx-auto">
+          {options.length > 0 ? (
+            <div className="grid grid-cols-4 gap-2">
+              {options.map((opt: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => !submitted && setUserAnswer(opt)}
+                  disabled={submitted}
+                  className={`p-3 rounded-lg text-xl flex items-center justify-center transition-colors ${
+                    userAnswer === opt 
+                      ? 'bg-purple-600 border-2 border-purple-400' 
+                      : 'bg-white/10 border border-white/20 hover-elevate'
+                  } ${submitted ? 'opacity-60' : ''}`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <Input
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Tu respuesta..."
+              className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              disabled={submitted}
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (isLoading) {
     return (
@@ -446,7 +492,7 @@ export default function CerebralExercisePage() {
           {content.exerciseType === "bailarina" && renderBailarinaExercise()}
           {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
           {content.exerciseType === "memoria" && renderMemoriaExercise()}
-          {content.exerciseType === "patron" && renderGenericExercise()}
+          {content.exerciseType === "patron" && renderPatronExercise()}
 
           <AnimatePresence>
             {submitted && (
