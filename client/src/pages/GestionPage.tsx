@@ -789,8 +789,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setUploadedImages(prev => prev.filter(img => img.id !== id));
   };
 
-  const copyImageUrl = (id: string, data: string) => {
-    navigator.clipboard.writeText(data);
+  const copyImageUrl = (id: string) => {
+    // Use the short URL format that serves the actual image
+    const url = `${window.location.origin}/api/images/${id}`;
+    navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -2660,7 +2662,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           size="sm"
                           variant="outline"
                           className="flex-1 text-xs border-cyan-500/30 text-cyan-400"
-                          onClick={() => copyImageUrl(img.id, img.data)}
+                          onClick={() => copyImageUrl(img.id)}
                         >
                           {copiedId === img.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         </Button>

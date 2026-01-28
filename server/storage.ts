@@ -467,6 +467,11 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(uploadedImages).orderBy(uploadedImages.createdAt);
   }
 
+  async getImageById(id: string) {
+    const [image] = await db.select().from(uploadedImages).where(eq(uploadedImages.id, id));
+    return image;
+  }
+
   async deleteImage(id: string) {
     await db.delete(uploadedImages).where(eq(uploadedImages.id, id));
   }
