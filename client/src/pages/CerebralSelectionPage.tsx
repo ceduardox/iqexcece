@@ -96,7 +96,10 @@ export default function CerebralSelectionPage() {
                 transition={{ delay: index * 0.1 }}
               >
                 <div 
-                  onClick={() => setLocation(`/cerebral/ejercicio/${categoria}/${theme.temaNumero}`)}
+                  onClick={() => {
+                    sessionStorage.removeItem('lateralidadAnswers');
+                    setLocation(`/cerebral/ejercicio/${categoria}/${theme.temaNumero}`);
+                  }}
                   className="w-full p-4 rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-600/80 border border-purple-400/30 cursor-pointer hover-elevate"
                   data-testid={`button-cerebral-theme-${theme.temaNumero}`}
                 >

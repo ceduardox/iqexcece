@@ -560,6 +560,15 @@ export default function CerebralExercisePage() {
               if (!selectedLat) {
                 setSelectedLat(leftOption);
                 setUserAnswer(leftOption);
+                // Save answer to sessionStorage
+                const stored = sessionStorage.getItem('lateralidadAnswers');
+                const answers = stored ? JSON.parse(stored) : [];
+                answers.push(leftOption);
+                sessionStorage.setItem('lateralidadAnswers', JSON.stringify(answers));
+                // Auto-advance after selection
+                setTimeout(() => {
+                  handleNext();
+                }, 600);
               }
             }}
             disabled={!!selectedLat}
@@ -578,6 +587,15 @@ export default function CerebralExercisePage() {
               if (!selectedLat) {
                 setSelectedLat(rightOption);
                 setUserAnswer(rightOption);
+                // Save answer to sessionStorage
+                const stored = sessionStorage.getItem('lateralidadAnswers');
+                const answers = stored ? JSON.parse(stored) : [];
+                answers.push(rightOption);
+                sessionStorage.setItem('lateralidadAnswers', JSON.stringify(answers));
+                // Auto-advance after selection
+                setTimeout(() => {
+                  handleNext();
+                }, 600);
               }
             }}
             disabled={!!selectedLat}
@@ -590,19 +608,6 @@ export default function CerebralExercisePage() {
             {rightOption}
           </motion.button>
         </div>
-
-        {/* Selection confirmation */}
-        <AnimatePresence>
-          {selectedLat && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 rounded-lg bg-gradient-to-r from-purple-600/30 to-cyan-600/30 border border-purple-500/30 text-center"
-            >
-              <p className="text-cyan-400 font-bold text-lg">Seleccionaste: {selectedLat}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     );
   };
@@ -619,6 +624,26 @@ export default function CerebralExercisePage() {
   }
 
   if (!content) {
+    // Check if we have lateralidad answers stored - redirect to results
+    const storedAnswers = sessionStorage.getItem('lateralidadAnswers');
+    if (storedAnswers) {
+      const answers = JSON.parse(storedAnswers);
+      if (answers.length > 0) {
+        // Redirect to result page
+        setTimeout(() => {
+          setLocation(`/cerebral/resultado/${params.categoria}`);
+        }, 100);
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-white/60">Calculando resultados...</p>
+            </div>
+          </div>
+        );
+      }
+    }
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
         <div className="max-w-md mx-auto text-center py-12">
@@ -750,37 +775,40 @@ export default function CerebralExercisePage() {
             )}
           </AnimatePresence>
 
-          <div className="mt-6 flex gap-3">
-            {!submitted ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={!userAnswer.trim()}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
-                data-testid="button-submit"
-              >
-                Verificar respuesta
-              </Button>
-            ) : (
-              <>
+          {/* Hide buttons for lateralidad (auto-advances) */}
+          {content.exerciseType !== "lateralidad" && (
+            <div className="mt-6 flex gap-3">
+              {!submitted ? (
                 <Button
-                  onClick={() => setLocation(`/cerebral/seleccion`)}
-                  variant="outline"
-                  className="flex-1"
-                  data-testid="button-more-exercises"
-                >
-                  Más ejercicios
-                </Button>
-                <Button
-                  onClick={handleNext}
+                  onClick={handleSubmit}
+                  disabled={!userAnswer.trim()}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
-                  data-testid="button-next"
+                  data-testid="button-submit"
                 >
-                  Siguiente
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  Verificar respuesta
                 </Button>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => setLocation(`/cerebral/seleccion`)}
+                    variant="outline"
+                    className="flex-1"
+                    data-testid="button-more-exercises"
+                  >
+                    Más ejercicios
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
+                    data-testid="button-next"
+                  >
+                    Siguiente
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
