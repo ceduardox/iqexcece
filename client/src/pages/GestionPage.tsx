@@ -3276,10 +3276,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
 
               <div className="space-y-4 p-4 bg-white/5 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Items de Entrenamiento</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">Secciones de Entrenamiento</h3>
+                    <p className="text-white/50 text-sm">Cada sección aparecerá como una tarjeta en la app</p>
+                  </div>
                   <Button
-                    size="sm"
                     onClick={async () => {
                       try {
                         const res = await fetch("/api/admin/entrenamiento/item", {
@@ -3287,8 +3289,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                           body: JSON.stringify({
                             categoria: entrenamientoCategory,
-                            title: "Nuevo Entrenamiento",
-                            description: "Descripción del entrenamiento",
+                            title: "Nueva Sección",
+                            description: "Descripción de la sección",
                             imageUrl: "",
                             linkUrl: "",
                             sortOrder: entrenamientoItems.length,
@@ -3299,100 +3301,76 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         setEntrenamientoItems([...entrenamientoItems, data.item]);
                       } catch (e) { alert("Error al crear"); }
                     }}
-                    className="bg-teal-600"
+                    className="bg-gradient-to-r from-teal-500 to-cyan-500"
                   >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nueva Sección
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  {entrenamientoItems.length === 0 && (
-                    <p className="text-white/40 text-center py-4">No hay items. Haz clic en Agregar para crear uno.</p>
-                  )}
-                  {entrenamientoItems.map((item, idx) => (
-                    <div key={item.id} className="bg-white/5 rounded-lg p-4 space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-16 h-16 bg-white/10 rounded-lg flex-shrink-0 overflow-hidden">
-                          {item.imageUrl ? (
-                            <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white/30">
-                              <ImageIcon className="w-6 h-6" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Input
-                            value={item.title}
-                            onChange={(e) => {
-                              const updated = [...entrenamientoItems];
-                              updated[idx].title = e.target.value;
-                              setEntrenamientoItems(updated);
-                            }}
-                            className="bg-white/10 border-teal-500/30 text-white mb-2"
-                            placeholder="Título"
-                          />
-                          <Input
-                            value={item.description || ""}
-                            onChange={(e) => {
-                              const updated = [...entrenamientoItems];
-                              updated[idx].description = e.target.value;
-                              setEntrenamientoItems(updated);
-                            }}
-                            className="bg-white/10 border-teal-500/30 text-white text-sm"
-                            placeholder="Descripción"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className={item.isActive ? "border-green-500/30 text-green-400" : "border-red-500/30 text-red-400"}
-                            onClick={() => {
-                              const updated = [...entrenamientoItems];
-                              updated[idx].isActive = !updated[idx].isActive;
-                              setEntrenamientoItems(updated);
-                            }}
-                          >
-                            {item.isActive ? "ON" : "OFF"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-red-500/30 text-red-400"
-                            onClick={async () => {
-                              if (confirm("¿Eliminar este item?")) {
-                                await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                                  method: "DELETE",
-                                  headers: { Authorization: `Bearer ${token}` }
-                                });
-                                setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
-                              }
-                            }}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-white/40 text-xs">URL de Imagen</label>
-                          <div className="flex gap-1 mt-1">
-                            <Input
-                              value={item.imageUrl || ""}
-                              onChange={(e) => {
-                                const updated = [...entrenamientoItems];
-                                updated[idx].imageUrl = e.target.value;
-                                setEntrenamientoItems(updated);
-                              }}
-                              className="bg-white/10 border-teal-500/30 text-white text-xs"
-                              placeholder="URL"
-                            />
+                {entrenamientoItems.length === 0 ? (
+                  <div className="text-center py-12 border-2 border-dashed border-white/20 rounded-xl">
+                    <Zap className="w-12 h-12 text-teal-400/50 mx-auto mb-3" />
+                    <p className="text-white/60 mb-2">No hay secciones creadas</p>
+                    <p className="text-white/40 text-sm">Haz clic en "Nueva Sección" para agregar una</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {entrenamientoItems.map((item, idx) => (
+                      <div 
+                        key={item.id} 
+                        className={`rounded-2xl p-5 border-2 transition-all ${
+                          item.isActive 
+                            ? "bg-gradient-to-r from-purple-900/40 to-cyan-900/40 border-teal-500/50" 
+                            : "bg-black/30 border-white/10 opacity-60"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <span className="bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded">
+                              #{idx + 1}
+                            </span>
+                            <span className="text-white/60 text-sm">
+                              {item.isActive ? "Visible en la app" : "Oculto"}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-teal-500/30 text-teal-400 px-2"
+                              className={item.isActive ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}
+                              onClick={() => {
+                                const updated = [...entrenamientoItems];
+                                updated[idx].isActive = !updated[idx].isActive;
+                                setEntrenamientoItems(updated);
+                              }}
+                            >
+                              {item.isActive ? "Activo" : "Inactivo"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-500/50 text-red-400"
+                              onClick={async () => {
+                                if (confirm("¿Eliminar esta sección?")) {
+                                  await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                    method: "DELETE",
+                                    headers: { Authorization: `Bearer ${token}` }
+                                  });
+                                  setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                          <div className="flex-shrink-0">
+                            <p className="text-white/60 text-xs mb-2 text-center">Imagen</p>
+                            <div 
+                              className="w-24 h-24 bg-white/10 rounded-xl overflow-hidden cursor-pointer border-2 border-dashed border-white/30 flex items-center justify-center"
                               onClick={() => {
                                 setImagePickerCallback(() => (url: string) => {
                                   const updated = [...entrenamientoItems];
@@ -3403,44 +3381,69 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 setShowImagePicker(true);
                               }}
                             >
-                              <ImageIcon className="w-3 h-3" />
-                            </Button>
+                              {item.imageUrl ? (
+                                <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="text-center">
+                                  <ImageIcon className="w-8 h-8 text-white/30 mx-auto" />
+                                  <span className="text-white/40 text-xs">Agregar</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Título de la sección</label>
+                              <Input
+                                value={item.title}
+                                onChange={(e) => {
+                                  const updated = [...entrenamientoItems];
+                                  updated[idx].title = e.target.value;
+                                  setEntrenamientoItems(updated);
+                                }}
+                                className="bg-white/10 border-teal-500/30 text-white font-semibold"
+                                placeholder="Ej: Mejora tu Velocidad de Lectura"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Descripción breve</label>
+                              <Input
+                                value={item.description || ""}
+                                onChange={(e) => {
+                                  const updated = [...entrenamientoItems];
+                                  updated[idx].description = e.target.value;
+                                  setEntrenamientoItems(updated);
+                                }}
+                                className="bg-white/10 border-teal-500/30 text-white/80"
+                                placeholder="Ej: Para procesar palabras rápidamente"
+                              />
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <label className="text-white/40 text-xs">Link URL</label>
-                          <Input
-                            value={item.linkUrl || ""}
-                            onChange={(e) => {
-                              const updated = [...entrenamientoItems];
-                              updated[idx].linkUrl = e.target.value;
-                              setEntrenamientoItems(updated);
+
+                        <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
+                          <Button
+                            onClick={async () => {
+                              try {
+                                await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                  body: JSON.stringify(item)
+                                });
+                                alert("Sección guardada correctamente");
+                              } catch (e) { alert("Error al guardar"); }
                             }}
-                            className="bg-white/10 border-teal-500/30 text-white text-xs mt-1"
-                            placeholder="/ruta o https://..."
-                          />
+                            className="bg-gradient-to-r from-teal-500 to-cyan-500"
+                          >
+                            <Save className="w-4 h-4 mr-2" />
+                            Guardar Sección
+                          </Button>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                              method: "PUT",
-                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                              body: JSON.stringify(item)
-                            });
-                            alert("Guardado");
-                          } catch (e) { alert("Error"); }
-                        }}
-                        className="w-full bg-teal-600"
-                      >
-                        <Save className="w-3 h-3 mr-1" />
-                        Guardar Item
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
