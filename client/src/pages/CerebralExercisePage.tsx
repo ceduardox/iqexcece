@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronRight, RotateCcw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +37,7 @@ export default function CerebralExercisePage() {
   const [userAnswer, setUserAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
     queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
@@ -46,6 +47,27 @@ export default function CerebralExercisePage() {
     ...data.content,
     exerciseData: safeParseJSON(data.content.exerciseData, { instruction: "", correctAnswer: "", answerOptions: [] }),
   } : null;
+
+  // Timer effect
+  useEffect(() => {
+    if (content?.exerciseData?.timerEnabled && !submitted) {
+      setTimeLeft(content.exerciseData.timerSeconds || 30);
+    }
+  }, [content?.exerciseData?.timerEnabled, content?.exerciseData?.timerSeconds]);
+
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0 || submitted) return;
+    const timer = setInterval(() => {
+      setTimeLeft(t => {
+        if (t && t <= 1) {
+          handleNext(); // Auto-skip when time runs out
+          return null;
+        }
+        return t ? t - 1 : null;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, submitted]);
 
   const handleSubmit = () => {
     if (!content || !userAnswer.trim()) return;
@@ -274,16 +296,24 @@ export default function CerebralExercisePage() {
               </div>
             </div>
             
-            <div className="relative flex items-center justify-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+                    TEST CEREBRAL
+                  </h1>
+                  <p className="text-white/60 text-xs mt-0.5">{content.title}</p>
+                </div>
               </div>
-              <div className="text-center">
-                <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-                  TEST CEREBRAL
-                </h1>
-                <p className="text-white/60 text-xs mt-0.5">{content.title}</p>
-              </div>
+              {timeLeft !== null && (
+                <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${timeLeft <= 10 ? 'bg-red-500/30 text-red-300' : 'bg-white/10 text-white/80'}`}>
+                  <Clock className="w-4 h-4" />
+                  <span className="font-mono font-bold">{timeLeft}s</span>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

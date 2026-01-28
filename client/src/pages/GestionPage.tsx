@@ -1809,6 +1809,37 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </div>
               )}
 
+              <div className="flex items-center gap-4 p-3 rounded-md bg-white/5 border border-white/10">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cerebralContent.exerciseData.timerEnabled || false}
+                    onChange={(e) => setCerebralContent(p => ({
+                      ...p,
+                      exerciseData: { ...p.exerciseData, timerEnabled: e.target.checked }
+                    }))}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-white/80 text-sm">Límite de tiempo</span>
+                </label>
+                {cerebralContent.exerciseData.timerEnabled && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={cerebralContent.exerciseData.timerSeconds || 30}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, timerSeconds: parseInt(e.target.value) || 30 }
+                      }))}
+                      className="w-20 bg-white/10 border-white/20 text-white text-center"
+                      min={5}
+                      max={300}
+                    />
+                    <span className="text-white/60 text-sm">segundos</span>
+                  </div>
+                )}
+              </div>
+
               <div className="border-t border-white/10 pt-4">
                 <h3 className="text-white font-semibold mb-3">Datos del ejercicio ({cerebralContent.exerciseType})</h3>
                 
