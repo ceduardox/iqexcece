@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, users, userSessions, quizResults, readingContents } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, users, userSessions, quizResults, readingContents, razonamientoContents } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { eq, desc, and, gt } from "drizzle-orm";
 import { db } from "./db";
@@ -23,6 +23,11 @@ export interface IStorage {
   getReadingContent(categoria: string, temaNumero?: number): Promise<ReadingContent | undefined>;
   getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]>;
   saveReadingContent(content: InsertReadingContent): Promise<ReadingContent>;
+  
+  // Razonamiento content
+  getRazonamientoContent(categoria: string, temaNumero?: number): Promise<RazonamientoContent | undefined>;
+  getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]>;
+  saveRazonamientoContent(content: InsertRazonamientoContent): Promise<RazonamientoContent>;
 }
 
 export class MemStorage implements IStorage {
@@ -167,6 +172,26 @@ export class MemStorage implements IStorage {
     this.readingContents.set(key, content);
     return content;
   }
+
+  async getRazonamientoContent(categoria: string, temaNumero: number = 1): Promise<RazonamientoContent | undefined> {
+    return undefined;
+  }
+
+  async getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]> {
+    return [];
+  }
+
+  async saveRazonamientoContent(insertContent: InsertRazonamientoContent): Promise<RazonamientoContent> {
+    const content: RazonamientoContent = {
+      id: randomUUID(),
+      categoria: insertContent.categoria,
+      temaNumero: insertContent.temaNumero || 1,
+      title: insertContent.title,
+      questions: insertContent.questions,
+      updatedAt: new Date(),
+    };
+    return content;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -298,6 +323,49 @@ export class DatabaseStorage implements IStorage {
       pageMainImage: insertContent.pageMainImage || null,
       pageSmallImage: insertContent.pageSmallImage || null,
       categoryImage: insertContent.categoryImage || null,
+      questions: insertContent.questions,
+    }).returning();
+    return created;
+  }
+
+  async getRazonamientoContent(categoria: string, temaNumero: number = 1): Promise<RazonamientoContent | undefined> {
+    const [content] = await db.select().from(razonamientoContents)
+      .where(and(
+        eq(razonamientoContents.categoria, categoria),
+        eq(razonamientoContents.temaNumero, temaNumero)
+      ));
+    return content;
+  }
+
+  async getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]> {
+    return db.select().from(razonamientoContents)
+      .where(eq(razonamientoContents.categoria, categoria))
+      .orderBy(razonamientoContents.temaNumero);
+  }
+
+  async saveRazonamientoContent(insertContent: InsertRazonamientoContent): Promise<RazonamientoContent> {
+    const temaNumero = insertContent.temaNumero || 1;
+    const existing = await this.getRazonamientoContent(insertContent.categoria, temaNumero);
+    
+    if (existing) {
+      const [updated] = await db.update(razonamientoContents)
+        .set({
+          title: insertContent.title,
+          questions: insertContent.questions,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(razonamientoContents.categoria, insertContent.categoria),
+          eq(razonamientoContents.temaNumero, temaNumero)
+        ))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db.insert(razonamientoContents).values({
+      categoria: insertContent.categoria,
+      temaNumero: temaNumero,
+      title: insertContent.title,
       questions: insertContent.questions,
     }).returning();
     return created;

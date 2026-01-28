@@ -326,5 +326,40 @@ export async function registerRoutes(
     }
   });
 
+  // Razonamiento content endpoints
+  app.get("/api/razonamiento/:categoria", async (req, res) => {
+    const categoria = req.params.categoria;
+    const temaNumero = parseInt(req.query.tema as string) || 1;
+    const content = await storage.getRazonamientoContent(categoria, temaNumero);
+    res.json({ content: content || null });
+  });
+
+  app.get("/api/razonamiento/:categoria/themes", async (req, res) => {
+    const categoria = req.params.categoria;
+    const savedContents = await storage.getRazonamientoContentsByCategory(categoria);
+    
+    const savedThemes = savedContents.map(c => ({
+      temaNumero: c.temaNumero,
+      title: c.title
+    }));
+    
+    res.json({ themes: savedThemes });
+  });
+
+  // Save razonamiento content (admin)
+  app.post("/api/admin/razonamiento", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const content = await storage.saveRazonamientoContent(req.body);
+      res.json({ success: true, content });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save razonamiento content" });
+    }
+  });
+
   return httpServer;
 }

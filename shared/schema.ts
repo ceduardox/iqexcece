@@ -70,10 +70,23 @@ export const readingContents = pgTable("reading_contents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Razonamiento content table
+export const razonamientoContents = pgTable("razonamiento_contents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull(),
+  temaNumero: integer("tema_numero").default(1),
+  title: text("title").notNull(),
+  questions: text("questions").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertQuizResultSchema = createInsertSchema(quizResults).omit({ id: true, createdAt: true });
 export const insertReadingContentSchema = createInsertSchema(readingContents).omit({ id: true, updatedAt: true });
+export const insertRazonamientoContentSchema = createInsertSchema(razonamientoContents).omit({ id: true, updatedAt: true });
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
 export type ReadingContent = typeof readingContents.$inferSelect;
 export type InsertReadingContent = z.infer<typeof insertReadingContentSchema>;
+export type RazonamientoContent = typeof razonamientoContents.$inferSelect;
+export type InsertRazonamientoContent = z.infer<typeof insertRazonamientoContentSchema>;
