@@ -38,6 +38,9 @@ export default function CerebralExercisePage() {
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [memoriaPhase, setMemoriaPhase] = useState<'memorize' | 'recall'>('memorize');
+  const [memoriaTimer, setMemoriaTimer] = useState(5);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
     queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
@@ -70,8 +73,20 @@ export default function CerebralExercisePage() {
   }, [timeLeft, submitted]);
 
   const handleSubmit = () => {
-    if (!content || !userAnswer.trim()) return;
+    if (!content) return;
     
+    // Special handling for memoria
+    if (content.exerciseType === 'memoria') {
+      const correctItems = content.exerciseData.memoriaItems || [];
+      const userItems = selectedItems;
+      const isMatch = correctItems.length === userItems.length && 
+        correctItems.every((item: string) => userItems.includes(item));
+      setIsCorrect(isMatch);
+      setSubmitted(true);
+      return;
+    }
+    
+    if (!userAnswer.trim()) return;
     const correctAnswer = content.exerciseData.correctAnswer?.toString().toLowerCase().trim();
     const userAnswerLower = userAnswer.toLowerCase().trim();
     
@@ -235,6 +250,87 @@ export default function CerebralExercisePage() {
     );
   };
 
+  // Memoria timer effect
+  useEffect(() => {
+    if (content?.exerciseType !== 'memoria' || memoriaPhase !== 'memorize') return;
+    const time = content?.exerciseData?.memorizeTime || 5;
+    setMemoriaTimer(time);
+    const interval = setInterval(() => {
+      setMemoriaTimer(t => {
+        if (t <= 1) {
+          setMemoriaPhase('recall');
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [content?.exerciseType, content?.exerciseData?.memorizeTime]);
+
+  const renderMemoriaExercise = () => {
+    const items = content?.exerciseData?.memoriaItems || [];
+    const allOptions = content?.exerciseData?.memoriaOptions || items;
+    
+    if (memoriaPhase === 'memorize') {
+      return (
+        <div className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-yellow-400">
+            <Clock className="w-5 h-5" />
+            <span className="font-bold text-lg">Memoriza: {memoriaTimer}s</span>
+          </div>
+          <p className="text-white/60 text-sm">Recuerda estos elementos</p>
+          <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+            {items.map((item: string, idx: number) => (
+              <motion.div
+                key={idx}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                className="aspect-square bg-gradient-to-br from-purple-500/30 to-cyan-500/30 rounded-xl flex items-center justify-center text-2xl border border-white/20"
+              >
+                {item}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3 text-center">
+        <p className="text-white/80 text-sm">¿Cuáles viste? Selecciona:</p>
+        <div className="grid grid-cols-4 gap-2 max-w-xs mx-auto">
+          {allOptions.map((item: string, idx: number) => {
+            const isSelected = selectedItems.includes(item);
+            return (
+              <button
+                key={idx}
+                onClick={() => {
+                  if (submitted) return;
+                  setSelectedItems(prev => 
+                    isSelected ? prev.filter(i => i !== item) : [...prev, item]
+                  );
+                  setUserAnswer(isSelected 
+                    ? selectedItems.filter(i => i !== item).join(',')
+                    : [...selectedItems, item].join(',')
+                  );
+                }}
+                disabled={submitted}
+                className={`aspect-square rounded-lg text-xl flex items-center justify-center transition-colors ${
+                  isSelected 
+                    ? 'bg-purple-600 border-2 border-purple-400' 
+                    : 'bg-white/10 border border-white/20 hover-elevate'
+                } ${submitted ? 'opacity-60' : ''}`}
+              >
+                {item}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const renderGenericExercise = () => (
     <div className="space-y-4">
       <p className="text-white/80 text-center text-lg">{content?.exerciseData.instruction}</p>
@@ -349,7 +445,8 @@ export default function CerebralExercisePage() {
         >
           {content.exerciseType === "bailarina" && renderBailarinaExercise()}
           {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
-          {(content.exerciseType === "memoria" || content.exerciseType === "patron") && renderGenericExercise()}
+          {content.exerciseType === "memoria" && renderMemoriaExercise()}
+          {content.exerciseType === "patron" && renderGenericExercise()}
 
           <AnimatePresence>
             {submitted && (

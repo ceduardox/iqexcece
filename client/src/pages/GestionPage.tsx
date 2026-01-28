@@ -2060,7 +2060,51 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                 )}
 
-                {(cerebralContent.exerciseType === "memoria" || cerebralContent.exerciseType === "patron") && (
+                {cerebralContent.exerciseType === "memoria" && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Elementos a memorizar (emojis o texto, separados por coma)</label>
+                      <Input
+                        value={(cerebralContent.exerciseData.memoriaItems || []).join(", ")}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, memoriaItems: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
+                        }))}
+                        placeholder="Ej: 🍎, 🍊, 🍋, 🍇"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Opciones totales (incluye distractores)</label>
+                      <Input
+                        value={(cerebralContent.exerciseData.memoriaOptions || []).join(", ")}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, memoriaOptions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
+                        }))}
+                        placeholder="Ej: 🍎, 🍊, 🍋, 🍇, 🍓, 🍑, 🥝, 🍒"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                      <p className="text-white/40 text-xs mt-1">Incluye los correctos + algunos extras para confundir</p>
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Tiempo para memorizar: {cerebralContent.exerciseData.memorizeTime || 5}s</label>
+                      <input
+                        type="range"
+                        min={3}
+                        max={15}
+                        value={cerebralContent.exerciseData.memorizeTime || 5}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, memorizeTime: parseInt(e.target.value) } 
+                        }))}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {cerebralContent.exerciseType === "patron" && (
                   <div className="space-y-3">
                     <div>
                       <label className="text-white/60 text-sm mb-1 block">Instrucción</label>
