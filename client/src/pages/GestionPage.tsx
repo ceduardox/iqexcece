@@ -479,10 +479,33 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("adminToken");
-    if (savedToken) {
-      setToken(savedToken);
-      setIsLoggedIn(true);
+    // Try to auto-login with saved credentials (tokens expire on server restart)
+    const savedUser = localStorage.getItem("adminUser");
+    const savedPass = localStorage.getItem("adminPass");
+    
+    if (savedUser && savedPass) {
+      // Auto-login to get fresh token
+      fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: savedUser, password: savedPass }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            setToken(data.token);
+            localStorage.setItem("adminToken", data.token);
+            setIsLoggedIn(true);
+          } else {
+            // Clear invalid saved credentials
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminUser");
+            localStorage.removeItem("adminPass");
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem("adminToken");
+        });
     }
   }, []);
 
@@ -745,7 +768,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         setImagePreview("");
         setCrop(undefined);
         setImageName("");
+        alert("Imagen guardada correctamente. Usa el botón 'Copiar' para obtener el link.");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Error al guardar: ${errData.error || res.statusText}. Intenta cerrar sesión y volver a entrar.`);
       }
+    } catch (err) {
+      alert("Error al guardar la imagen. Verifica tu conexión.");
     } finally {
       setSaving(false);
     }
