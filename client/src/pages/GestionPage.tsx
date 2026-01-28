@@ -101,6 +101,7 @@ export default function GestionPage() {
     { value: "memoria", label: "Memoria visual" },
     { value: "patron", label: "Patrón visual" },
     { value: "stroop", label: "Test Stroop (color vs palabra)" },
+    { value: "preferencia", label: "Preferencia visual (proyectivo)" },
   ];
   
   const defaultPreescolar = {
@@ -1761,6 +1762,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   {cerebralContent.exerciseType === "memoria" && "Usuario memoriza y recuerda elementos visuales"}
                   {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrón en una secuencia visual"}
                   {cerebralContent.exerciseType === "stroop" && "Usuario elige el COLOR del texto, no la palabra escrita"}
+                  {cerebralContent.exerciseType === "preferencia" && "Test proyectivo: usuario elige imagen que le atrae, revela personalidad"}
                 </p>
               </div>
 
@@ -2240,6 +2242,71 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         />
                       )}
                     </div>
+                  </div>
+                )}
+
+                {cerebralContent.exerciseType === "preferencia" && (
+                  <div className="space-y-4">
+                    <p className="text-white/40 text-xs">Agrega imágenes. Cada una representa un rasgo de personalidad. No hay respuesta correcta.</p>
+                    
+                    {/* Dynamic image options */}
+                    {(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }]).map((opt: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-white/5 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/60 text-sm">Opción {idx + 1}</span>
+                          {idx > 0 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-400 h-6 px-2"
+                              onClick={() => {
+                                const opts = [...(cerebralContent.exerciseData.prefOptions || [])];
+                                opts.splice(idx, 1);
+                                setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                          )}
+                        </div>
+                        <Input
+                          value={opt.imageUrl || ""}
+                          onChange={(e) => {
+                            const opts = [...(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }])];
+                            opts[idx] = { ...opts[idx], imageUrl: e.target.value };
+                            setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
+                          }}
+                          placeholder="URL de la imagen..."
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                        <Input
+                          value={opt.meaning || ""}
+                          onChange={(e) => {
+                            const opts = [...(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }])];
+                            opts[idx] = { ...opts[idx], meaning: e.target.value };
+                            setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
+                          }}
+                          placeholder="Significado (ej: Creatividad, Armonía, Dinamismo...)"
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                        {opt.imageUrl && (
+                          <img src={opt.imageUrl} alt={`Opción ${idx + 1}`} className="w-16 h-16 object-contain rounded bg-white/10" />
+                        )}
+                      </div>
+                    ))}
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-500/30 text-green-400"
+                      onClick={() => {
+                        const opts = [...(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }])];
+                        opts.push({ imageUrl: "", meaning: "" });
+                        setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
+                      }}
+                    >
+                      + Agregar opción
+                    </Button>
                   </div>
                 )}
               </div>
