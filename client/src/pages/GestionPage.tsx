@@ -52,7 +52,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "contenido" | "imagenes">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [cerebralResults, setCerebralResults] = useState<any[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
@@ -122,6 +122,22 @@ export default function GestionPage() {
   // Image picker state
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [imagePickerCallback, setImagePickerCallback] = useState<((url: string) => void) | null>(null);
+  
+  // Entrenamiento state
+  const [entrenamientoCategory, setEntrenamientoCategory] = useState<"ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("ninos");
+  const [entrenamientoCard, setEntrenamientoCard] = useState({
+    imageUrl: "",
+    title: "Entrenamiento",
+    description: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas",
+    buttonText: "Comenzar"
+  });
+  const [entrenamientoPage, setEntrenamientoPage] = useState({
+    bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
+    pageTitle: "Entrenamientos",
+    pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
+  });
+  const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean}[]>([]);
+  const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
@@ -1057,6 +1073,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <ImageIcon className="w-5 h-5" />
             Imágenes
           </button>
+          <button
+            onClick={() => setActiveTab("entrenamiento")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "entrenamiento" ? "bg-teal-600 text-white" : "text-teal-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-entrenamiento"
+          >
+            <Zap className="w-5 h-5" />
+            Entrenamiento
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1161,6 +1187,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <ImageIcon className="w-4 h-4 mr-1" />
             Imágenes
+          </Button>
+          <Button
+            onClick={() => setActiveTab("entrenamiento")}
+            variant={activeTab === "entrenamiento" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "entrenamiento" ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
+            data-testid="mobile-tab-entrenamiento"
+          >
+            <Zap className="w-4 h-4 mr-1" />
+            Entrena
           </Button>
         </div>
 
@@ -3073,6 +3109,335 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "entrenamiento" && (
+          <Card className="bg-black/40 border-teal-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-teal-400" />
+                Gestión de Entrenamientos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {(["ninos", "adolescentes", "universitarios", "profesionales", "adulto_mayor"] as const).map((cat) => (
+                  <Button
+                    key={cat}
+                    onClick={async () => {
+                      setEntrenamientoCategory(cat);
+                      try {
+                        const [cardRes, pageRes, itemsRes] = await Promise.all([
+                          fetch(`/api/entrenamiento/${cat}/card`),
+                          fetch(`/api/entrenamiento/${cat}/page`),
+                          fetch(`/api/entrenamiento/${cat}/items`)
+                        ]);
+                        const cardData = await cardRes.json();
+                        const pageData = await pageRes.json();
+                        const itemsData = await itemsRes.json();
+                        if (cardData.card) setEntrenamientoCard(cardData.card);
+                        if (pageData.page) setEntrenamientoPage(pageData.page);
+                        setEntrenamientoItems(itemsData.items || []);
+                      } catch (e) { console.error(e); }
+                    }}
+                    variant={entrenamientoCategory === cat ? "default" : "outline"}
+                    size="sm"
+                    className={entrenamientoCategory === cat ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
+                  >
+                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4 p-4 bg-white/5 rounded-xl">
+                  <h3 className="text-white font-semibold">Card Principal (Página de Selección)</h3>
+                  <div>
+                    <label className="text-white/60 text-sm">Imagen</label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        value={entrenamientoCard.imageUrl}
+                        onChange={(e) => setEntrenamientoCard({...entrenamientoCard, imageUrl: e.target.value})}
+                        className="bg-white/10 border-teal-500/30 text-white"
+                        placeholder="URL de imagen"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-teal-500/30 text-teal-400"
+                        onClick={() => {
+                          setImagePickerCallback(() => (url: string) => {
+                            setEntrenamientoCard({...entrenamientoCard, imageUrl: url});
+                            setShowImagePicker(false);
+                          });
+                          setShowImagePicker(true);
+                        }}
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {entrenamientoCard.imageUrl && (
+                      <img src={entrenamientoCard.imageUrl} alt="" className="w-20 h-20 object-cover rounded mt-2" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm">Título</label>
+                    <Input
+                      value={entrenamientoCard.title}
+                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
+                      className="bg-white/10 border-teal-500/30 text-white mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm">Descripción</label>
+                    <textarea
+                      value={entrenamientoCard.description}
+                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
+                      className="w-full bg-white/10 border border-teal-500/30 text-white rounded-md p-2 mt-1"
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm">Texto del Botón</label>
+                    <Input
+                      value={entrenamientoCard.buttonText}
+                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
+                      className="bg-white/10 border-teal-500/30 text-white mt-1"
+                    />
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await fetch("/api/admin/entrenamiento/card", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory })
+                        });
+                        alert("Card guardado");
+                      } catch (e) { alert("Error al guardar"); }
+                    }}
+                    className="w-full bg-teal-600"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Card
+                  </Button>
+                </div>
+
+                <div className="space-y-4 p-4 bg-white/5 rounded-xl">
+                  <h3 className="text-white font-semibold">Configuración de Página</h3>
+                  <div>
+                    <label className="text-white/60 text-sm">Banner (texto superior)</label>
+                    <Input
+                      value={entrenamientoPage.bannerText}
+                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
+                      className="bg-white/10 border-teal-500/30 text-white mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm">Título de Página</label>
+                    <Input
+                      value={entrenamientoPage.pageTitle}
+                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
+                      className="bg-white/10 border-teal-500/30 text-white mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-sm">Descripción</label>
+                    <textarea
+                      value={entrenamientoPage.pageDescription}
+                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
+                      className="w-full bg-white/10 border border-teal-500/30 text-white rounded-md p-2 mt-1"
+                      rows={2}
+                    />
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await fetch("/api/admin/entrenamiento/page", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory })
+                        });
+                        alert("Página guardada");
+                      } catch (e) { alert("Error al guardar"); }
+                    }}
+                    className="w-full bg-teal-600"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Página
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-4 bg-white/5 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-white font-semibold">Items de Entrenamiento</h3>
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/admin/entrenamiento/item", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({
+                            categoria: entrenamientoCategory,
+                            title: "Nuevo Entrenamiento",
+                            description: "Descripción del entrenamiento",
+                            imageUrl: "",
+                            linkUrl: "",
+                            sortOrder: entrenamientoItems.length,
+                            isActive: true
+                          })
+                        });
+                        const data = await res.json();
+                        setEntrenamientoItems([...entrenamientoItems, data.item]);
+                      } catch (e) { alert("Error al crear"); }
+                    }}
+                    className="bg-teal-600"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Agregar
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {entrenamientoItems.length === 0 && (
+                    <p className="text-white/40 text-center py-4">No hay items. Haz clic en Agregar para crear uno.</p>
+                  )}
+                  {entrenamientoItems.map((item, idx) => (
+                    <div key={item.id} className="bg-white/5 rounded-lg p-4 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-16 h-16 bg-white/10 rounded-lg flex-shrink-0 overflow-hidden">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white/30">
+                              <ImageIcon className="w-6 h-6" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...entrenamientoItems];
+                              updated[idx].title = e.target.value;
+                              setEntrenamientoItems(updated);
+                            }}
+                            className="bg-white/10 border-teal-500/30 text-white mb-2"
+                            placeholder="Título"
+                          />
+                          <Input
+                            value={item.description || ""}
+                            onChange={(e) => {
+                              const updated = [...entrenamientoItems];
+                              updated[idx].description = e.target.value;
+                              setEntrenamientoItems(updated);
+                            }}
+                            className="bg-white/10 border-teal-500/30 text-white text-sm"
+                            placeholder="Descripción"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className={item.isActive ? "border-green-500/30 text-green-400" : "border-red-500/30 text-red-400"}
+                            onClick={() => {
+                              const updated = [...entrenamientoItems];
+                              updated[idx].isActive = !updated[idx].isActive;
+                              setEntrenamientoItems(updated);
+                            }}
+                          >
+                            {item.isActive ? "ON" : "OFF"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-red-500/30 text-red-400"
+                            onClick={async () => {
+                              if (confirm("¿Eliminar este item?")) {
+                                await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                  method: "DELETE",
+                                  headers: { Authorization: `Bearer ${token}` }
+                                });
+                                setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-white/40 text-xs">URL de Imagen</label>
+                          <div className="flex gap-1 mt-1">
+                            <Input
+                              value={item.imageUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...entrenamientoItems];
+                                updated[idx].imageUrl = e.target.value;
+                                setEntrenamientoItems(updated);
+                              }}
+                              className="bg-white/10 border-teal-500/30 text-white text-xs"
+                              placeholder="URL"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-teal-500/30 text-teal-400 px-2"
+                              onClick={() => {
+                                setImagePickerCallback(() => (url: string) => {
+                                  const updated = [...entrenamientoItems];
+                                  updated[idx].imageUrl = url;
+                                  setEntrenamientoItems(updated);
+                                  setShowImagePicker(false);
+                                });
+                                setShowImagePicker(true);
+                              }}
+                            >
+                              <ImageIcon className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-white/40 text-xs">Link URL</label>
+                          <Input
+                            value={item.linkUrl || ""}
+                            onChange={(e) => {
+                              const updated = [...entrenamientoItems];
+                              updated[idx].linkUrl = e.target.value;
+                              setEntrenamientoItems(updated);
+                            }}
+                            className="bg-white/10 border-teal-500/30 text-white text-xs mt-1"
+                            placeholder="/ruta o https://..."
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                              method: "PUT",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                              body: JSON.stringify(item)
+                            });
+                            alert("Guardado");
+                          } catch (e) { alert("Error"); }
+                        }}
+                        className="w-full bg-teal-600"
+                      >
+                        <Save className="w-3 h-3 mr-1" />
+                        Guardar Item
+                      </Button>
                     </div>
                   ))}
                 </div>
