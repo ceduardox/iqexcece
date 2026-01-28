@@ -420,6 +420,27 @@ export async function registerRoutes(
     }
   });
 
+  // Cerebral results endpoints
+  app.post("/api/cerebral-result", async (req, res) => {
+    try {
+      const result = await storage.saveCerebralResult(req.body);
+      res.json({ success: true, result });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save cerebral result" });
+    }
+  });
+
+  app.get("/api/admin/cerebral-results", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const categoria = req.query.categoria as string | undefined;
+    const results = await storage.getCerebralResults(categoria);
+    res.json(results);
+  });
+
   // Image upload endpoints
   app.get("/api/images", async (req, res) => {
     const images = await storage.getImages();

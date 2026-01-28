@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, uploadedImages } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -40,6 +40,10 @@ export interface IStorage {
   // Cerebral intro
   getCerebralIntro(categoria: string): Promise<CerebralIntro | null>;
   saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro>;
+  
+  // Cerebral results
+  saveCerebralResult(result: InsertCerebralResult): Promise<CerebralResult>;
+  getCerebralResults(categoria?: string): Promise<CerebralResult[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -245,6 +249,18 @@ export class MemStorage implements IStorage {
       buttonText: intro.buttonText || "Empezar",
       updatedAt: new Date(),
     };
+  }
+
+  async saveCerebralResult(result: InsertCerebralResult): Promise<CerebralResult> {
+    return {
+      id: randomUUID(),
+      ...result,
+      createdAt: new Date(),
+    } as CerebralResult;
+  }
+
+  async getCerebralResults(_categoria?: string): Promise<CerebralResult[]> {
+    return [];
   }
 }
 
@@ -530,6 +546,19 @@ export class DatabaseStorage implements IStorage {
 
   async deleteImage(id: string) {
     await db.delete(uploadedImages).where(eq(uploadedImages.id, id));
+  }
+
+  // Cerebral results
+  async saveCerebralResult(result: InsertCerebralResult): Promise<CerebralResult> {
+    const [created] = await db.insert(cerebralResults).values(result).returning();
+    return created;
+  }
+
+  async getCerebralResults(categoria?: string): Promise<CerebralResult[]> {
+    if (categoria) {
+      return db.select().from(cerebralResults).where(eq(cerebralResults.categoria, categoria)).orderBy(desc(cerebralResults.createdAt));
+    }
+    return db.select().from(cerebralResults).orderBy(desc(cerebralResults.createdAt));
   }
 }
 

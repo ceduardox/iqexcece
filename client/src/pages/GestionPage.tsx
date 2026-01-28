@@ -52,8 +52,9 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "contenido" | "imagenes">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "contenido" | "imagenes">("sesiones");
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [cerebralResults, setCerebralResults] = useState<any[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
   const [selectedTema, setSelectedTema] = useState(1);
@@ -301,6 +302,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       if (res.ok) {
         const { results } = await res.json();
         setQuizResults(results);
+      }
+      
+      // Also fetch cerebral results
+      const cerebralRes = await fetch("/api/admin/cerebral-results", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (cerebralRes.ok) {
+        const cerebralData = await cerebralRes.json();
+        setCerebralResults(cerebralData);
       }
     } catch {
       console.error("Error fetching quiz results");
@@ -1010,7 +1020,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             data-testid="sidebar-resultados"
           >
             <FileText className="w-5 h-5" />
-            Resultados
+            Resultados Lectura
+          </button>
+          <button
+            onClick={() => setActiveTab("resultados-cerebral")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "resultados-cerebral" ? "bg-purple-600 text-white" : "text-purple-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-resultados-cerebral"
+          >
+            <Brain className="w-5 h-5" />
+            Resultados Cerebral
           </button>
           <button
             onClick={() => setActiveTab("contenido")}

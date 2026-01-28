@@ -29,7 +29,19 @@ export default function CerebralFormPage() {
       const lateralidadAnswers = sessionStorage.getItem('lateralidadAnswers');
       const preferenciaAnswers = sessionStorage.getItem('preferenciaAnswers');
       
-      await fetch("/api/quiz-result", {
+      const latAnswers: string[] = lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [];
+      const prefAnswers: { meaning: string }[] = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
+      
+      // Calculate brain dominance
+      const leftCount = latAnswers.filter(a => a.toLowerCase().includes('izquierda')).length;
+      const rightCount = latAnswers.filter(a => a.toLowerCase().includes('derecha')).length;
+      const total = leftCount + rightCount || 1;
+      const leftPercent = Math.round((leftCount / total) * 100);
+      const rightPercent = 100 - leftPercent;
+      const dominantSide = leftPercent >= rightPercent ? 'izquierdo' : 'derecho';
+      const personalityTraits = prefAnswers.map(a => a.meaning).filter(Boolean);
+      
+      await fetch("/api/cerebral-result", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,13 +52,13 @@ export default function CerebralFormPage() {
           telefono: formData.telefono || null,
           comentario: formData.comentario || null,
           categoria: params.categoria,
-          tiempoLectura: null,
-          tiempoCuestionario: null,
+          lateralidadData: lateralidadAnswers || null,
+          preferenciaData: preferenciaAnswers || null,
+          leftPercent,
+          rightPercent,
+          dominantSide,
+          personalityTraits: JSON.stringify(personalityTraits),
           isPwa: isPwa,
-          cerebralData: {
-            lateralidad: lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [],
-            preferencia: preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [],
-          }
         }),
       });
     } catch (error) {

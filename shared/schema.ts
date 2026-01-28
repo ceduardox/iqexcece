@@ -113,6 +113,28 @@ export const insertRazonamientoContentSchema = createInsertSchema(razonamientoCo
 export const insertCerebralContentSchema = createInsertSchema(cerebralContents).omit({ id: true, updatedAt: true });
 export const insertCerebralIntroSchema = createInsertSchema(cerebralIntros).omit({ id: true, updatedAt: true });
 
+// Cerebral results table
+export const cerebralResults = pgTable("cerebral_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nombre: text("nombre").notNull(),
+  email: text("email"),
+  edad: text("edad"),
+  ciudad: text("ciudad"),
+  telefono: text("telefono"),
+  comentario: text("comentario"),
+  categoria: text("categoria").notNull(),
+  lateralidadData: text("lateralidad_data"), // JSON string of answers
+  preferenciaData: text("preferencia_data"), // JSON string of answers
+  leftPercent: integer("left_percent"),
+  rightPercent: integer("right_percent"),
+  dominantSide: text("dominant_side"),
+  personalityTraits: text("personality_traits"), // JSON array of traits
+  isPwa: boolean("is_pwa").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCerebralResultSchema = createInsertSchema(cerebralResults).omit({ id: true, createdAt: true });
+
 // Uploaded images table
 export const uploadedImages = pgTable("uploaded_images", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -135,5 +157,7 @@ export type RazonamientoContent = typeof razonamientoContents.$inferSelect;
 export type InsertRazonamientoContent = z.infer<typeof insertRazonamientoContentSchema>;
 export type CerebralContent = typeof cerebralContents.$inferSelect;
 export type InsertCerebralContent = z.infer<typeof insertCerebralContentSchema>;
+export type CerebralResult = typeof cerebralResults.$inferSelect;
+export type InsertCerebralResult = z.infer<typeof insertCerebralResultSchema>;
 export type UploadedImage = typeof uploadedImages.$inferSelect;
 export type InsertUploadedImage = z.infer<typeof insertUploadedImageSchema>;
