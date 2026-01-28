@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown } from "lucide-react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,7 @@ export default function GestionPage() {
   const [selectedTema, setSelectedTema] = useState(1);
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
   
@@ -1457,84 +1458,136 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               {cerebralResults.length === 0 ? (
                 <p className="text-white/60 text-center py-8">No hay resultados de Test Cerebral aún</p>
               ) : (
-                <>
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-white/60 border-b border-white/10">
-                          <th className="pb-3 px-2">Nombre</th>
-                          <th className="pb-3 px-2">Email</th>
-                          <th className="pb-3 px-2">Edad</th>
-                          <th className="pb-3 px-2">Ciudad</th>
-                          <th className="pb-3 px-2">Hemisferio Izq.</th>
-                          <th className="pb-3 px-2">Hemisferio Der.</th>
-                          <th className="pb-3 px-2">Dominante</th>
-                          <th className="pb-3 px-2">Fecha</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cerebralResults.map((r) => (
-                          <tr key={r.id} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="py-3 px-2 text-white">{r.nombre}</td>
-                            <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
-                            <td className="py-3 px-2 text-white/80">{r.edad || "-"}</td>
-                            <td className="py-3 px-2 text-white/80">{r.ciudad || "-"}</td>
-                            <td className="py-3 px-2 text-cyan-400 font-bold">{r.leftPercent}%</td>
-                            <td className="py-3 px-2 text-purple-400 font-bold">{r.rightPercent}%</td>
-                            <td className="py-3 px-2">
+                <div className="space-y-3">
+                  {cerebralResults.map((r) => {
+                    const isExpanded = expandedCerebralResult === r.id;
+                    const lateralidadAnswers = r.lateralidadData ? JSON.parse(r.lateralidadData) : [];
+                    const preferenciaAnswers = r.preferenciaData ? JSON.parse(r.preferenciaData) : [];
+                    const personalityTraits = r.personalityTraits ? (typeof r.personalityTraits === 'string' ? JSON.parse(r.personalityTraits) : r.personalityTraits) : [];
+                    
+                    return (
+                      <div 
+                        key={r.id} 
+                        className={`bg-white/5 rounded-lg border transition-all cursor-pointer ${isExpanded ? 'border-purple-400' : 'border-purple-500/20 hover:border-purple-500/40'}`}
+                        onClick={() => setExpandedCerebralResult(isExpanded ? null : r.id)}
+                      >
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-white font-medium text-lg">{r.nombre}</span>
                               <span className={`px-2 py-1 rounded text-xs ${r.dominantSide === 'izquierdo' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
-                                {r.dominantSide === 'izquierdo' ? 'Izquierdo' : 'Derecho'}
+                                {r.dominantSide === 'izquierdo' ? 'Hemisferio Izquierdo' : 'Hemisferio Derecho'}
                               </span>
-                            </td>
-                            <td className="py-3 px-2 text-white/60 text-xs">
-                              {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES') : "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="md:hidden space-y-3">
-                    {cerebralResults.map((r) => (
-                      <div key={r.id} className="bg-white/5 rounded-lg p-4 border border-purple-500/20">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-white font-medium">{r.nombre}</span>
-                          <span className={`px-2 py-1 rounded text-xs ${r.dominantSide === 'izquierdo' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
-                            {r.dominantSide === 'izquierdo' ? 'Izquierdo' : 'Derecho'}
-                          </span>
-                        </div>
-                        <div className="text-sm text-white/60 space-y-1">
-                          {r.email && <p>Email: {r.email}</p>}
-                          {r.edad && <p>Edad: {r.edad}</p>}
-                          {r.ciudad && <p>Ciudad: {r.ciudad}</p>}
-                        </div>
-                        <div className="flex gap-4 mt-3">
-                          <div className="text-center">
-                            <span className="text-cyan-400 font-bold text-lg">{r.leftPercent}%</span>
-                            <p className="text-white/40 text-xs">Izquierdo</p>
+                            </div>
+                            <ChevronDown className={`w-5 h-5 text-purple-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                           </div>
-                          <div className="text-center">
-                            <span className="text-purple-400 font-bold text-lg">{r.rightPercent}%</span>
-                            <p className="text-white/40 text-xs">Derecho</p>
+                          
+                          <div className="flex flex-wrap gap-4 md:gap-8 items-center text-sm">
+                            <div className="flex gap-4">
+                              <div className="text-center">
+                                <span className="text-cyan-400 font-bold text-xl">{r.leftPercent}%</span>
+                                <p className="text-white/40 text-xs">Izquierdo</p>
+                              </div>
+                              <div className="text-center">
+                                <span className="text-purple-400 font-bold text-xl">{r.rightPercent}%</span>
+                                <p className="text-white/40 text-xs">Derecho</p>
+                              </div>
+                            </div>
+                            <div className="hidden md:flex gap-4 text-white/60">
+                              {r.email && <span>📧 {r.email}</span>}
+                              {r.edad && <span>🎂 {r.edad} años</span>}
+                              {r.ciudad && <span>📍 {r.ciudad}</span>}
+                            </div>
+                            <span className="text-white/40 text-xs ml-auto">
+                              {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
+                            </span>
                           </div>
                         </div>
-                        {r.personalityTraits && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {(typeof r.personalityTraits === 'string' ? JSON.parse(r.personalityTraits) : r.personalityTraits).slice(0, 3).map((trait: string, i: number) => (
-                              <span key={i} className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">
-                                {trait}
-                              </span>
-                            ))}
+                        
+                        {isExpanded && (
+                          <div className="border-t border-purple-500/20 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div className="md:hidden text-sm text-white/60 space-y-1">
+                                {r.email && <p>📧 {r.email}</p>}
+                                {r.edad && <p>🎂 {r.edad} años</p>}
+                                {r.ciudad && <p>📍 {r.ciudad}</p>}
+                                {r.telefono && <p>📱 {r.telefono}</p>}
+                              </div>
+                              
+                              <div>
+                                <h4 className="text-cyan-400 font-semibold mb-2 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
+                                  Respuestas de Lateralidad ({lateralidadAnswers.length})
+                                </h4>
+                                {lateralidadAnswers.length > 0 ? (
+                                  <div className="space-y-1">
+                                    {lateralidadAnswers.map((answer: string, i: number) => (
+                                      <div key={i} className="flex items-center gap-2 text-sm">
+                                        <span className="text-white/40 w-5">{i + 1}.</span>
+                                        <span className={`px-2 py-0.5 rounded text-xs ${answer.toLowerCase().includes('izquierda') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
+                                          {answer}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-white/40 text-sm">Sin respuestas registradas</p>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <h4 className="text-purple-400 font-semibold mb-2 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                                  Rasgos de Personalidad ({personalityTraits.length})
+                                </h4>
+                                {personalityTraits.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {personalityTraits.map((trait: string, i: number) => (
+                                      <span key={i} className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">
+                                        {trait}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-white/40 text-sm">Sin rasgos registrados</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {preferenciaAnswers.length > 0 && (
+                              <div>
+                                <h4 className="text-pink-400 font-semibold mb-2 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-pink-400 rounded-full"></span>
+                                  Preferencias Visuales ({preferenciaAnswers.length})
+                                </h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                  {preferenciaAnswers.map((pref: { option: string; meaning: string }, i: number) => (
+                                    <div key={i} className="bg-white/5 rounded p-2 text-center">
+                                      <span className="text-white/80 text-sm block">{pref.option || `Opción ${i + 1}`}</span>
+                                      <span className="text-pink-300 text-xs">{pref.meaning}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {r.comentario && (
+                              <div className="bg-white/5 rounded p-3">
+                                <h4 className="text-white/60 text-xs mb-1">Comentario:</h4>
+                                <p className="text-white/80 text-sm">{r.comentario}</p>
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                              <span className="text-white/40 text-xs">ID: {r.id}</span>
+                              <span className="text-white/40 text-xs">PWA: {r.isPwa ? 'Sí' : 'No'}</span>
+                            </div>
                           </div>
                         )}
-                        <p className="text-white/40 text-xs mt-2">
-                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES') : "-"}
-                        </p>
                       </div>
-                    ))}
-                  </div>
-                </>
+                    );
+                  })}
+                </div>
               )}
             </CardContent>
           </Card>
