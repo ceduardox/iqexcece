@@ -54,6 +54,16 @@ export default function CerebralExercisePage() {
     exerciseData: safeParseJSON(data.content.exerciseData, { instruction: "", correctAnswer: "", answerOptions: [] }),
   } : null;
 
+  // Reset states when tema/categoria changes (navigating to next exercise)
+  useEffect(() => {
+    setSelectedPreference(null);
+    setSelectedLat(null);
+    setUserAnswer("");
+    setSubmitted(false);
+    setMemoriaPhase('memorize');
+    setSelectedItems([]);
+  }, [params.tema, params.categoria]);
+
   // Timer effect
   useEffect(() => {
     if (content?.exerciseData?.timerEnabled && !submitted) {
