@@ -39,6 +39,14 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - RazonamientoQuizPage: Displays multiple-choice questions with progress tracking
   - RazonamientoResultPage: Shows score, statistics, and navigation options
   - Full user flow: Selection → Quiz → Submit Form → Results
+- **Test Cerebral system**: Cognitive exercise flow with multiple exercise types
+  - Database table: cerebral_contents with exerciseType, exerciseData JSON fields
+  - Admin panel "Test Cerebral" sub-tab for exercise management
+  - Exercise types: bailarina (direction visual), secuencia (numeric sequence), memoria (visual memory), patron (visual pattern)
+  - CerebralSelectionPage: Displays available exercises from database
+  - CerebralExercisePage: Interactive exercise with answer verification
+  - Supports image upload with size control (20-100%)
+  - Active/inactive toggle for exercises
 
 ## User Preferences
 
