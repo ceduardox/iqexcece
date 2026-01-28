@@ -2457,6 +2457,32 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   <div className="space-y-4">
                     <p className="text-white/40 text-xs">Agrega imágenes. Cada una representa un rasgo de personalidad. No hay respuesta correcta.</p>
                     
+                    {/* Editable instruction texts */}
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Texto superior</label>
+                      <Input
+                        value={cerebralContent.exerciseData.prefTitle1 || "De los siguientes dibujos"}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, prefTitle1: e.target.value } 
+                        }))}
+                        placeholder="De los siguientes dibujos"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-white/60 text-sm">Texto principal (pregunta)</label>
+                      <Input
+                        value={cerebralContent.exerciseData.prefTitle2 || "¿cuál te atrae más?"}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, prefTitle2: e.target.value } 
+                        }))}
+                        placeholder="¿cuál te atrae más?"
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    </div>
+                    
                     {/* Dynamic image options */}
                     {(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }]).map((opt: any, idx: number) => (
                       <div key={idx} className="p-3 bg-white/5 rounded-lg space-y-2">

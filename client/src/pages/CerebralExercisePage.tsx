@@ -457,43 +457,51 @@ export default function CerebralExercisePage() {
 
   const renderPreferenciaExercise = () => {
     const options = content?.exerciseData?.prefOptions || [];
+    const title1 = content?.exerciseData?.prefTitle1 || "De los siguientes dibujos";
+    const title2 = content?.exerciseData?.prefTitle2 || "¿cuál te atrae más?";
+    const isOdd = options.length % 2 !== 0;
     
     return (
       <div className="space-y-6">
-        {/* Instruction */}
+        {/* Instruction - editable from admin */}
         <div className="text-center space-y-1">
-          <p className="text-white/80 text-lg">De los siguientes dibujos</p>
-          <p className="text-white font-semibold text-xl">¿cuál te atrae más?</p>
+          <p className="text-white/80 text-lg">{title1}</p>
+          <p className="text-white font-semibold text-xl">{title2}</p>
         </div>
 
-        {/* Image options */}
-        <div className={`grid gap-3 ${options.length <= 2 ? 'grid-cols-2' : options.length === 3 ? 'grid-cols-2' : 'grid-cols-2'}`}>
-          {options.map((opt: { imageUrl: string; meaning: string }, idx: number) => (
-            <motion.button
-              key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.1 }}
-              onClick={() => {
-                if (!selectedPreference) {
-                  setSelectedPreference(opt);
-                  setUserAnswer(opt.meaning);
-                }
-              }}
-              disabled={!!selectedPreference}
-              className={`aspect-square p-4 rounded-xl border-2 transition-all flex items-center justify-center bg-white ${
-                selectedPreference?.imageUrl === opt.imageUrl 
-                  ? 'border-purple-500 ring-2 ring-purple-400' 
-                  : 'border-gray-200 hover-elevate'
-              } ${selectedPreference && selectedPreference.imageUrl !== opt.imageUrl ? 'opacity-40' : ''}`}
-            >
-              {opt.imageUrl ? (
-                <img src={opt.imageUrl} alt={`Opción ${idx + 1}`} className="max-w-full max-h-full object-contain" />
-              ) : (
-                <span className="text-gray-400">Imagen {idx + 1}</span>
-              )}
-            </motion.button>
-          ))}
+        {/* Image options - center last item if odd count */}
+        <div className="grid grid-cols-2 gap-3">
+          {options.map((opt: { imageUrl: string; meaning: string }, idx: number) => {
+            const isLastOdd = isOdd && idx === options.length - 1;
+            return (
+              <motion.button
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => {
+                  if (!selectedPreference) {
+                    setSelectedPreference(opt);
+                    setUserAnswer(opt.meaning);
+                  }
+                }}
+                disabled={!!selectedPreference}
+                className={`aspect-square p-4 rounded-xl border-2 transition-all flex items-center justify-center bg-white ${
+                  isLastOdd ? 'col-span-2 mx-auto w-1/2' : ''
+                } ${
+                  selectedPreference?.imageUrl === opt.imageUrl 
+                    ? 'border-purple-500 ring-2 ring-purple-400' 
+                    : 'border-gray-200 hover-elevate'
+                } ${selectedPreference && selectedPreference.imageUrl !== opt.imageUrl ? 'opacity-40' : ''}`}
+              >
+                {opt.imageUrl ? (
+                  <img src={opt.imageUrl} alt={`Opción ${idx + 1}`} className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <span className="text-gray-400">Imagen {idx + 1}</span>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
 
         {/* Result message - no right/wrong, just meaning */}
