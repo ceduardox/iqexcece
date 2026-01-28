@@ -544,12 +544,12 @@ export default function CerebralExercisePage() {
       <div className="space-y-8">
         {/* Instruction */}
         <div className="text-center">
-          <p className="text-gray-700 text-lg">{instruction}</p>
+          <p className="text-white/80 text-lg">{instruction}</p>
         </div>
 
         {/* Question */}
         <div className="text-center">
-          <p className="text-gray-900 font-bold text-xl">{question}</p>
+          <p className="text-white font-bold text-xl">{question}</p>
         </div>
 
         {/* Options */}
@@ -563,11 +563,11 @@ export default function CerebralExercisePage() {
               }
             }}
             disabled={!!selectedLat}
-            className={`px-8 py-4 rounded-lg border-2 text-lg font-medium transition-all ${
+            className={`px-10 py-4 rounded-xl border-2 text-lg font-semibold transition-all ${
               selectedLat === leftOption
-                ? 'bg-purple-100 border-purple-500 text-purple-700'
-                : 'bg-white border-gray-300 text-gray-700 hover-elevate'
-            } ${selectedLat && selectedLat !== leftOption ? 'opacity-40' : ''}`}
+                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 border-purple-400 text-white shadow-lg shadow-purple-500/30'
+                : 'bg-white/10 border-white/30 text-white hover-elevate backdrop-blur-sm'
+            } ${selectedLat && selectedLat !== leftOption ? 'opacity-30' : ''}`}
           >
             {leftOption}
           </motion.button>
@@ -581,11 +581,11 @@ export default function CerebralExercisePage() {
               }
             }}
             disabled={!!selectedLat}
-            className={`px-8 py-4 rounded-lg border-2 text-lg font-medium transition-all ${
+            className={`px-10 py-4 rounded-xl border-2 text-lg font-semibold transition-all ${
               selectedLat === rightOption
-                ? 'bg-purple-100 border-purple-500 text-purple-700'
-                : 'bg-white border-gray-300 text-gray-700 hover-elevate'
-            } ${selectedLat && selectedLat !== rightOption ? 'opacity-40' : ''}`}
+                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 border-purple-400 text-white shadow-lg shadow-purple-500/30'
+                : 'bg-white/10 border-white/30 text-white hover-elevate backdrop-blur-sm'
+            } ${selectedLat && selectedLat !== rightOption ? 'opacity-30' : ''}`}
           >
             {rightOption}
           </motion.button>
