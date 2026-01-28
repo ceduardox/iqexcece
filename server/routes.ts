@@ -398,5 +398,32 @@ export async function registerRoutes(
     }
   });
 
+  // Image upload endpoints
+  app.get("/api/images", async (req, res) => {
+    const images = await storage.getImages();
+    res.json(images);
+  });
+
+  app.post("/api/admin/images", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const { name, data, originalSize, compressedSize, width, height } = req.body;
+    const image = await storage.saveImage({ name, data, originalSize, compressedSize, width, height });
+    res.json(image);
+  });
+
+  app.delete("/api/admin/images/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    await storage.deleteImage(req.params.id);
+    res.json({ success: true });
+  });
+
   return httpServer;
 }

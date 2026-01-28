@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check } from "lucide-react";
+import ReactCrop, { type Crop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +60,19 @@ export default function GestionPage() {
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral" | "imagenes">("lectura");
+  
+  // Images state
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [crop, setCrop] = useState<Crop>();
+  const [compressionQuality, setCompressionQuality] = useState(80);
+  const [originalSize, setOriginalSize] = useState(0);
+  const [compressedSize, setCompressedSize] = useState(0);
+  const [imageName, setImageName] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   
   // Razonamiento state
   const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
@@ -608,6 +622,131 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       loadCerebralContent();
     }
   }, [isLoggedIn, contentCategory, selectedCerebralTema, contentType]);
+
+  // Load uploaded images
+  useEffect(() => {
+    if (isLoggedIn && contentType === "imagenes") {
+      fetch("/api/images")
+        .then(res => res.json())
+        .then(data => setUploadedImages(data || []))
+        .catch(() => setUploadedImages([]));
+    }
+  }, [isLoggedIn, contentType]);
+
+  // Image handling functions
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImageName(file.name.replace(/\.[^/.]+$/, ""));
+    setOriginalSize(file.size);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result as string);
+      compressImage(reader.result as string, compressionQuality);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const compressImage = useCallback((src: string, quality: number) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      // Apply crop if set
+      if (crop && crop.width && crop.height) {
+        canvas.width = crop.width;
+        canvas.height = crop.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, crop.x || 0, crop.y || 0, crop.width, crop.height, 0, 0, crop.width, crop.height);
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+      }
+      
+      const compressed = canvas.toDataURL('image/jpeg', quality / 100);
+      setCompressedSize(Math.round(compressed.length * 0.75)); // Approx base64 to bytes
+    };
+    img.src = src;
+  }, [crop]);
+
+  useEffect(() => {
+    if (imagePreview) {
+      compressImage(imagePreview, compressionQuality);
+    }
+  }, [compressionQuality, crop, imagePreview, compressImage]);
+
+  const saveImage = async () => {
+    if (!imagePreview || !imageName) return;
+    setSaving(true);
+    try {
+      const img = new Image();
+      img.src = imagePreview;
+      await new Promise(resolve => img.onload = resolve);
+      
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      if (crop && crop.width && crop.height) {
+        canvas.width = crop.width;
+        canvas.height = crop.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, crop.x || 0, crop.y || 0, crop.width, crop.height, 0, 0, crop.width, crop.height);
+        width = crop.width;
+        height = crop.height;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+      }
+      
+      const data = canvas.toDataURL('image/jpeg', compressionQuality / 100);
+      
+      const res = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ 
+          name: imageName, 
+          data,
+          originalSize,
+          compressedSize,
+          width,
+          height
+        }),
+      });
+      
+      if (res.ok) {
+        const newImage = await res.json();
+        setUploadedImages(prev => [newImage, ...prev]);
+        setImageFile(null);
+        setImagePreview("");
+        setCrop(undefined);
+        setImageName("");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteImage = async (id: string) => {
+    await fetch(`/api/admin/images/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+    setUploadedImages(prev => prev.filter(img => img.id !== id));
+  };
+
+  const copyImageUrl = (id: string, data: string) => {
+    navigator.clipboard.writeText(data);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -1198,6 +1337,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 >
                   <Zap className="w-4 h-4 mr-2" />
                   Test Cerebral
+                </Button>
+                <Button
+                  onClick={() => setContentType("imagenes")}
+                  variant={contentType === "imagenes" ? "default" : "outline"}
+                  className={contentType === "imagenes" ? "bg-pink-600" : "border-pink-500/30 text-pink-400"}
+                  data-testid="button-content-type-imagenes"
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Imágenes
                 </Button>
               </div>
               
@@ -2341,6 +2489,118 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </Button>
               </>
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Images Panel */}
+        {contentType === "imagenes" && (
+          <Card className="bg-gradient-to-br from-pink-900/40 to-purple-900/40 border-pink-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <ImageIcon className="w-5 h-5" />
+                Gestor de Imágenes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Upload Section */}
+              <div className="p-4 border-2 border-dashed border-white/20 rounded-lg">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                  <Upload className="w-8 h-8 text-white/60" />
+                  <span className="text-white/60 text-sm">Subir imagen</span>
+                </label>
+              </div>
+
+              {/* Image Editor */}
+              {imagePreview && (
+                <div className="space-y-4 p-4 bg-black/30 rounded-lg">
+                  <Input
+                    value={imageName}
+                    onChange={(e) => setImageName(e.target.value)}
+                    placeholder="Nombre de la imagen..."
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                  
+                  {/* Crop Area */}
+                  <div className="max-h-64 overflow-auto bg-gray-900 rounded">
+                    <ReactCrop crop={crop} onChange={c => setCrop(c)}>
+                      <img ref={imgRef} src={imagePreview} alt="Preview" className="max-w-full" />
+                    </ReactCrop>
+                  </div>
+                  
+                  {/* Compression */}
+                  <div>
+                    <div className="flex justify-between text-white/60 text-sm mb-1">
+                      <span>Compresión: {compressionQuality}%</span>
+                      <span className="text-cyan-400">
+                        {(originalSize / 1024).toFixed(1)}KB → {(compressedSize / 1024).toFixed(1)}KB
+                        ({Math.round((1 - compressedSize / originalSize) * 100)}% menos)
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="100"
+                      value={compressionQuality}
+                      onChange={(e) => setCompressionQuality(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button onClick={saveImage} disabled={saving} className="flex-1 bg-green-600">
+                      <Save className="w-4 h-4 mr-2" />
+                      {saving ? "Guardando..." : "Guardar"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => { setImagePreview(""); setImageFile(null); setCrop(undefined); }}
+                      className="border-red-500/30 text-red-400"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery */}
+              <div className="space-y-2">
+                <h3 className="text-white/80 font-semibold">Imágenes guardadas ({uploadedImages.length})</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {uploadedImages.map((img) => (
+                    <div key={img.id} className="bg-white/10 rounded-lg p-2 space-y-2">
+                      <img src={img.data} alt={img.name} className="w-full h-20 object-cover rounded" />
+                      <p className="text-white/60 text-xs truncate">{img.name}</p>
+                      <p className="text-white/40 text-xs">{img.width}x{img.height} • {(img.compressedSize / 1024).toFixed(1)}KB</p>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 text-xs border-cyan-500/30 text-cyan-400"
+                          onClick={() => copyImageUrl(img.id, img.data)}
+                        >
+                          {copiedId === img.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs border-red-500/30 text-red-400"
+                          onClick={() => deleteImage(img.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}

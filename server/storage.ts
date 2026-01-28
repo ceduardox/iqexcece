@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, uploadedImages } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { eq, desc, and, gt } from "drizzle-orm";
 import { db } from "./db";
@@ -455,6 +455,20 @@ export class DatabaseStorage implements IStorage {
       isActive: insertContent.isActive ?? true,
     }).returning();
     return created;
+  }
+
+  // Uploaded images
+  async saveImage(data: { name: string; data: string; originalSize?: number; compressedSize?: number; width?: number; height?: number }) {
+    const [created] = await db.insert(uploadedImages).values(data).returning();
+    return created;
+  }
+
+  async getImages() {
+    return db.select().from(uploadedImages).orderBy(uploadedImages.createdAt);
+  }
+
+  async deleteImage(id: string) {
+    await db.delete(uploadedImages).where(eq(uploadedImages.id, id));
   }
 }
 

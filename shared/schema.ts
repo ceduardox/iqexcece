@@ -101,6 +101,20 @@ export const insertReadingContentSchema = createInsertSchema(readingContents).om
 export const insertRazonamientoContentSchema = createInsertSchema(razonamientoContents).omit({ id: true, updatedAt: true });
 export const insertCerebralContentSchema = createInsertSchema(cerebralContents).omit({ id: true, updatedAt: true });
 
+// Uploaded images table
+export const uploadedImages = pgTable("uploaded_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  data: text("data").notNull(), // base64 data
+  originalSize: integer("original_size"),
+  compressedSize: integer("compressed_size"),
+  width: integer("width"),
+  height: integer("height"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUploadedImageSchema = createInsertSchema(uploadedImages).omit({ id: true, createdAt: true });
+
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
 export type ReadingContent = typeof readingContents.$inferSelect;
@@ -109,3 +123,5 @@ export type RazonamientoContent = typeof razonamientoContents.$inferSelect;
 export type InsertRazonamientoContent = z.infer<typeof insertRazonamientoContentSchema>;
 export type CerebralContent = typeof cerebralContents.$inferSelect;
 export type InsertCerebralContent = z.infer<typeof insertCerebralContentSchema>;
+export type UploadedImage = typeof uploadedImages.$inferSelect;
+export type InsertUploadedImage = z.infer<typeof insertUploadedImageSchema>;
