@@ -489,5 +489,93 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  // ===========================================
+  // ENTRENAMIENTO ENDPOINTS
+  // ===========================================
+  
+  // Get entrenamiento card for category (public)
+  app.get("/api/entrenamiento/:categoria/card", async (req, res) => {
+    const card = await storage.getEntrenamientoCard(req.params.categoria);
+    res.json({ card: card || {
+      categoria: req.params.categoria,
+      title: "Entrenamiento",
+      description: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas",
+      buttonText: "Comenzar",
+      imageUrl: null
+    }});
+  });
+
+  // Get entrenamiento page config (public)
+  app.get("/api/entrenamiento/:categoria/page", async (req, res) => {
+    const page = await storage.getEntrenamientoPage(req.params.categoria);
+    res.json({ page: page || {
+      categoria: req.params.categoria,
+      bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
+      pageTitle: "Entrenamientos",
+      pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
+    }});
+  });
+
+  // Get entrenamiento items (public)
+  app.get("/api/entrenamiento/:categoria/items", async (req, res) => {
+    const items = await storage.getEntrenamientoItems(req.params.categoria);
+    res.json({ items });
+  });
+
+  // Save entrenamiento card (admin)
+  app.post("/api/admin/entrenamiento/card", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const card = await storage.saveEntrenamientoCard(req.body);
+    res.json({ card });
+  });
+
+  // Save entrenamiento page config (admin)
+  app.post("/api/admin/entrenamiento/page", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const page = await storage.saveEntrenamientoPage(req.body);
+    res.json({ page });
+  });
+
+  // Create entrenamiento item (admin)
+  app.post("/api/admin/entrenamiento/item", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const item = await storage.saveEntrenamientoItem(req.body);
+    res.json({ item });
+  });
+
+  // Update entrenamiento item (admin)
+  app.put("/api/admin/entrenamiento/item/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const item = await storage.updateEntrenamientoItem(req.params.id, req.body);
+    res.json({ item });
+  });
+
+  // Delete entrenamiento item (admin)
+  app.delete("/api/admin/entrenamiento/item/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    await storage.deleteEntrenamientoItem(req.params.id);
+    res.json({ success: true });
+  });
+
   return httpServer;
 }
