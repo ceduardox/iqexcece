@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +58,7 @@ export default function GestionPage() {
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<"lectura" | "razonamiento">("lectura");
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
   
   // Razonamiento state
   const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
@@ -69,6 +69,32 @@ export default function GestionPage() {
     imageSize: 100,
     questions: []
   });
+  
+  // Cerebral state
+  const [cerebralThemes, setCerebralThemes] = useState<{temaNumero: number; title: string; exerciseType: string}[]>([]);
+  const [selectedCerebralTema, setSelectedCerebralTema] = useState(1);
+  const [cerebralContent, setCerebralContent] = useState<{
+    title: string; 
+    exerciseType: string; 
+    imageUrl: string; 
+    imageSize: number; 
+    exerciseData: any;
+    isActive: boolean;
+  }>({
+    title: "",
+    exerciseType: "bailarina",
+    imageUrl: "",
+    imageSize: 100,
+    exerciseData: { instruction: "", correctAnswer: "" },
+    isActive: true
+  });
+  
+  const EXERCISE_TYPES = [
+    { value: "bailarina", label: "Bailarina (dirección visual)" },
+    { value: "secuencia", label: "Secuencia numérica" },
+    { value: "memoria", label: "Memoria visual" },
+    { value: "patron", label: "Patrón visual" },
+  ];
   
   const defaultPreescolar = {
     title: "Paseando con mi perrito",
@@ -313,6 +339,42 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setSaving(false);
   };
 
+  const handleSaveCerebral = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/cerebral", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          categoria: contentCategory,
+          temaNumero: selectedCerebralTema,
+          title: cerebralContent.title,
+          exerciseType: cerebralContent.exerciseType,
+          imageUrl: cerebralContent.imageUrl || null,
+          imageSize: cerebralContent.imageSize || 100,
+          exerciseData: JSON.stringify(cerebralContent.exerciseData),
+          isActive: cerebralContent.isActive,
+        }),
+      });
+      if (res.ok) {
+        alert("Test Cerebral guardado correctamente");
+        const themesRes = await fetch(`/api/cerebral/${contentCategory}/themes`);
+        const themesData = await themesRes.json();
+        if (themesData.themes) {
+          setCerebralThemes(themesData.themes);
+        }
+      } else {
+        alert("Error al guardar");
+      }
+    } catch {
+      alert("Error al guardar");
+    }
+    setSaving(false);
+  };
+
   const loadThemes = async () => {
     try {
       const res = await fetch(`/api/reading/${contentCategory}/themes`);
@@ -476,6 +538,68 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       loadRazonamientoContent();
     }
   }, [isLoggedIn, contentCategory, selectedRazonamientoTema, contentType]);
+
+  // Load cerebral themes
+  useEffect(() => {
+    if (isLoggedIn && contentType === "cerebral") {
+      const loadCerebralThemes = async () => {
+        try {
+          const res = await fetch(`/api/cerebral/${contentCategory}/themes`);
+          const data = await res.json();
+          if (data.themes && data.themes.length > 0) {
+            setCerebralThemes(data.themes);
+            setSelectedCerebralTema(data.themes[0].temaNumero);
+          } else {
+            setCerebralThemes([]);
+            setSelectedCerebralTema(1);
+            setCerebralContent({ 
+              title: "", exerciseType: "bailarina", imageUrl: "", imageSize: 100, 
+              exerciseData: { instruction: "", correctAnswer: "" }, isActive: true 
+            });
+          }
+        } catch {
+          setCerebralThemes([]);
+        }
+      };
+      loadCerebralThemes();
+    }
+  }, [isLoggedIn, contentCategory, contentType]);
+
+  // Load cerebral content for selected theme
+  useEffect(() => {
+    if (isLoggedIn && contentType === "cerebral") {
+      const loadCerebralContent = async () => {
+        try {
+          const res = await fetch(`/api/cerebral/${contentCategory}?tema=${selectedCerebralTema}`);
+          const data = await res.json();
+          if (data.content) {
+            const exerciseData = typeof data.content.exerciseData === "string" 
+              ? JSON.parse(data.content.exerciseData) 
+              : data.content.exerciseData || {};
+            setCerebralContent({
+              title: data.content.title || "",
+              exerciseType: data.content.exerciseType || "bailarina",
+              imageUrl: data.content.imageUrl || "",
+              imageSize: data.content.imageSize || 100,
+              exerciseData: exerciseData,
+              isActive: data.content.isActive ?? true,
+            });
+          } else {
+            setCerebralContent({ 
+              title: "", exerciseType: "bailarina", imageUrl: "", imageSize: 100, 
+              exerciseData: { instruction: "", correctAnswer: "" }, isActive: true 
+            });
+          }
+        } catch {
+          setCerebralContent({ 
+            title: "", exerciseType: "bailarina", imageUrl: "", imageSize: 100, 
+            exerciseData: { instruction: "", correctAnswer: "" }, isActive: true 
+          });
+        }
+      };
+      loadCerebralContent();
+    }
+  }, [isLoggedIn, contentCategory, selectedCerebralTema, contentType]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -1030,10 +1154,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               <CardTitle className="text-white flex items-center gap-2">
                 {contentType === "lectura" ? (
                   <BookOpen className="w-5 h-5 text-orange-400" />
-                ) : (
+                ) : contentType === "razonamiento" ? (
                   <Brain className="w-5 h-5 text-cyan-400" />
+                ) : (
+                  <Zap className="w-5 h-5 text-purple-400" />
                 )}
-                Editar Contenido de {contentType === "lectura" ? "Lectura" : "Razonamiento"}
+                Editar Contenido de {contentType === "lectura" ? "Lectura" : contentType === "razonamiento" ? "Razonamiento" : "Test Cerebral"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -1055,6 +1181,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 >
                   <Brain className="w-4 h-4 mr-2" />
                   Razonamiento
+                </Button>
+                <Button
+                  onClick={() => setContentType("cerebral")}
+                  variant={contentType === "cerebral" ? "default" : "outline"}
+                  className={contentType === "cerebral" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+                  data-testid="button-content-type-cerebral"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Test Cerebral
                 </Button>
               </div>
               
@@ -1553,6 +1688,237 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Guardando..." : `Guardar Razonamiento ${
+                  contentCategory === "preescolar" ? "Pre-escolar" : 
+                  contentCategory === "ninos" ? "Niños" : 
+                  contentCategory === "adolescentes" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
+                }`}
+              </Button>
+              </>
+              )}
+
+              {contentType === "cerebral" && (
+              <>
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Ejercicio de Test Cerebral</label>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {cerebralThemes.map((theme) => (
+                    <Button
+                      key={theme.temaNumero}
+                      size="sm"
+                      onClick={() => setSelectedCerebralTema(theme.temaNumero)}
+                      variant={selectedCerebralTema === theme.temaNumero ? "default" : "outline"}
+                      className={selectedCerebralTema === theme.temaNumero ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+                      data-testid={`button-cerebral-tema-${theme.temaNumero}`}
+                    >
+                      Ejercicio {String(theme.temaNumero).padStart(2, '0')}
+                    </Button>
+                  ))}
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const maxTema = Math.max(...cerebralThemes.map(t => t.temaNumero), 0);
+                      setSelectedCerebralTema(maxTema + 1);
+                      setCerebralContent({ 
+                        title: "", exerciseType: "bailarina", imageUrl: "", imageSize: 100, 
+                        exerciseData: { instruction: "", correctAnswer: "" }, isActive: true 
+                      });
+                    }}
+                    variant="outline"
+                    className="border-green-500/30 text-green-400"
+                    data-testid="button-add-cerebral-tema"
+                  >
+                    + Nuevo Ejercicio
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Tipo de ejercicio</label>
+                <select
+                  value={cerebralContent.exerciseType}
+                  onChange={(e) => setCerebralContent(p => ({ ...p, exerciseType: e.target.value }))}
+                  className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                  data-testid="select-cerebral-type"
+                >
+                  {EXERCISE_TYPES.map(type => (
+                    <option key={type.value} value={type.value} className="bg-gray-800">
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">Título del ejercicio</label>
+                <Input
+                  value={cerebralContent.title}
+                  onChange={(e) => setCerebralContent(p => ({ ...p, title: e.target.value }))}
+                  placeholder="Ej: Ejercicio de Bailarina - Nivel 1"
+                  className="bg-white/10 border-white/20 text-white"
+                  data-testid="input-cerebral-title"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/60 text-sm mb-1 block">URL de imagen</label>
+                <Input
+                  value={cerebralContent.imageUrl}
+                  onChange={(e) => setCerebralContent(p => ({ ...p, imageUrl: e.target.value }))}
+                  placeholder="https://ejemplo.com/bailarina.jpg"
+                  className="bg-white/10 border-white/20 text-white"
+                  data-testid="input-cerebral-image-url"
+                />
+              </div>
+
+              {cerebralContent.imageUrl && (
+                <div>
+                  <label className="text-white/60 text-sm mb-1 block">Tamaño de imagen: {cerebralContent.imageSize}%</label>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    step="5"
+                    value={cerebralContent.imageSize}
+                    onChange={(e) => setCerebralContent(p => ({ ...p, imageSize: parseInt(e.target.value) }))}
+                    className="w-full"
+                    data-testid="slider-cerebral-image-size"
+                  />
+                  <div className="mt-2 flex justify-center">
+                    <img 
+                      src={cerebralContent.imageUrl} 
+                      alt="Vista previa" 
+                      style={{ width: `${cerebralContent.imageSize}%`, maxWidth: '300px' }}
+                      className="rounded-lg border border-white/20"
+                      onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="text-white font-semibold mb-3">Datos del ejercicio ({cerebralContent.exerciseType})</h3>
+                
+                {cerebralContent.exerciseType === "bailarina" && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Instrucción</label>
+                      <Input
+                        value={cerebralContent.exerciseData.instruction || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, instruction: e.target.value } 
+                        }))}
+                        placeholder="Ej: ¿Hacia dónde gira la bailarina?"
+                        className="bg-white/10 border-white/20 text-white"
+                        data-testid="input-cerebral-instruction"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
+                      <select
+                        value={cerebralContent.exerciseData.correctAnswer || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                        }))}
+                        className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white"
+                        data-testid="select-cerebral-answer"
+                      >
+                        <option value="" className="bg-gray-800">Seleccionar...</option>
+                        <option value="izquierda" className="bg-gray-800">Izquierda</option>
+                        <option value="derecha" className="bg-gray-800">Derecha</option>
+                        <option value="ambos" className="bg-gray-800">Ambos lados</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {cerebralContent.exerciseType === "secuencia" && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Secuencia (separada por comas)</label>
+                      <Input
+                        value={cerebralContent.exerciseData.sequence || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, sequence: e.target.value } 
+                        }))}
+                        placeholder="Ej: 2, 4, 6, 8, ?"
+                        className="bg-white/10 border-white/20 text-white"
+                        data-testid="input-cerebral-sequence"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
+                      <Input
+                        value={cerebralContent.exerciseData.correctAnswer || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                        }))}
+                        placeholder="Ej: 10"
+                        className="bg-white/10 border-white/20 text-white"
+                        data-testid="input-cerebral-sequence-answer"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {(cerebralContent.exerciseType === "memoria" || cerebralContent.exerciseType === "patron") && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Instrucción</label>
+                      <Input
+                        value={cerebralContent.exerciseData.instruction || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, instruction: e.target.value } 
+                        }))}
+                        placeholder="Escribe la instrucción del ejercicio..."
+                        className="bg-white/10 border-white/20 text-white"
+                        data-testid="input-cerebral-generic-instruction"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
+                      <Input
+                        value={cerebralContent.exerciseData.correctAnswer || ""}
+                        onChange={(e) => setCerebralContent(p => ({ 
+                          ...p, 
+                          exerciseData: { ...p.exerciseData, correctAnswer: e.target.value } 
+                        }))}
+                        placeholder="Respuesta esperada..."
+                        className="bg-white/10 border-white/20 text-white"
+                        data-testid="input-cerebral-generic-answer"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 py-2">
+                <label className="text-white/60 text-sm">Estado del ejercicio:</label>
+                <Button
+                  size="sm"
+                  onClick={() => setCerebralContent(p => ({ ...p, isActive: !p.isActive }))}
+                  variant={cerebralContent.isActive ? "default" : "outline"}
+                  className={cerebralContent.isActive ? "bg-green-600" : "border-red-500/30 text-red-400"}
+                  data-testid="button-toggle-cerebral-active"
+                >
+                  {cerebralContent.isActive ? "Activo" : "Inactivo"}
+                </Button>
+              </div>
+
+              <Button
+                onClick={handleSaveCerebral}
+                disabled={saving}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-600"
+                data-testid="button-save-cerebral"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? "Guardando..." : `Guardar Test Cerebral ${
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
