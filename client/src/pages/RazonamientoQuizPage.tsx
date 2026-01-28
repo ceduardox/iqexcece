@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { ArrowLeft, Brain, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -228,71 +228,100 @@ export default function RazonamientoQuizPage() {
             className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl"
           >
             <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", delay: 0.2 }}
+                className="w-20 h-20 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+              >
                 <Brain className="w-10 h-10 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-              <p className="text-gray-500 mt-2">
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold text-gray-800"
+              >
+                {title}
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-gray-500 mt-2"
+              >
                 Respuestas correctas: <span className="font-bold text-purple-600">{correctAnswers}/{questions.length}</span>
-              </p>
+              </motion.p>
             </div>
 
             <div className="space-y-3">
-              <Input
-                placeholder="Tu nombre *"
-                value={formData.nombre}
-                onChange={(e) => setFormData(p => ({ ...p, nombre: e.target.value }))}
-                className="border-gray-200"
-                data-testid="input-nombre"
-              />
-              <Input
-                type="email"
-                placeholder="Correo electrónico"
-                value={formData.email}
-                onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
-                className="border-gray-200"
-                data-testid="input-email"
-              />
-              <Input
-                placeholder="Edad"
-                value={formData.edad}
-                onChange={(e) => setFormData(p => ({ ...p, edad: e.target.value }))}
-                className="border-gray-200"
-                data-testid="input-edad"
-              />
-              <Input
-                placeholder="Ciudad"
-                value={formData.ciudad}
-                onChange={(e) => setFormData(p => ({ ...p, ciudad: e.target.value }))}
-                className="border-gray-200"
-                data-testid="input-ciudad"
-              />
-              <Input
-                placeholder="Teléfono"
-                value={formData.telefono}
-                onChange={(e) => setFormData(p => ({ ...p, telefono: e.target.value }))}
-                className="border-gray-200"
-                data-testid="input-telefono"
-              />
-              <textarea
-                placeholder="Comentario (opcional)"
-                value={formData.comentario}
-                onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
-                rows={2}
-                className="w-full p-3 rounded-lg border border-gray-200 resize-none text-sm"
-                data-testid="input-comentario"
-              />
+              {[
+                { icon: User, placeholder: "Tu nombre *", key: "nombre", type: "text", delay: 0.1 },
+                { icon: Mail, placeholder: "Correo electrónico", key: "email", type: "email", delay: 0.15 },
+                { icon: Calendar, placeholder: "Edad", key: "edad", type: "text", delay: 0.2 },
+                { icon: MapPin, placeholder: "Ciudad", key: "ciudad", type: "text", delay: 0.25 },
+                { icon: Phone, placeholder: "Teléfono", key: "telefono", type: "tel", delay: 0.3 },
+              ].map(({ icon: Icon, placeholder, key, type, delay }) => (
+                <motion.div 
+                  key={key}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay }}
+                  className="relative"
+                >
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                  <Input
+                    type={type}
+                    placeholder={placeholder}
+                    value={formData[key as keyof typeof formData]}
+                    onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
+                    className="pl-10 border-2 border-purple-100 focus:border-purple-400 rounded-xl h-12 transition-all"
+                    data-testid={`input-${key}`}
+                  />
+                </motion.div>
+              ))}
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35 }}
+                className="relative"
+              >
+                <MessageSquare className="absolute left-3 top-4 w-5 h-5 text-purple-400" />
+                <textarea
+                  placeholder="Comentario (opcional)"
+                  value={formData.comentario}
+                  onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
+                  rows={2}
+                  className="w-full pl-10 p-3 rounded-xl border-2 border-purple-100 focus:border-purple-400 resize-none text-sm transition-all outline-none"
+                  data-testid="input-comentario"
+                />
+              </motion.div>
             </div>
 
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || !formData.nombre.trim()}
-              size="lg"
-              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold"
-              data-testid="button-submit-results"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
             >
-              {submitting ? "Enviando..." : "Ver mis resultados"}
-            </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting || !formData.nombre.trim()}
+                size="lg"
+                className="w-full mt-5 bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-500 text-white font-bold shadow-lg hover:shadow-xl transition-shadow"
+                data-testid="button-submit-results"
+              >
+                {submitting ? (
+                  <motion.span
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
+                    Enviando...
+                  </motion.span>
+                ) : (
+                  "Ver mis resultados"
+                )}
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>
