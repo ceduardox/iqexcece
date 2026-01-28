@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Share2, MessageCircle } from "lucide-react";
+import { Home, Share2, MessageCircle, Sparkles, Brain } from "lucide-react";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -12,13 +12,11 @@ interface PreferenciaAnswer {
 export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
   
-  // Get stored answers from sessionStorage
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
   const lateralidadAnswers: string[] = storedLateralidad ? JSON.parse(storedLateralidad) : [];
   const preferenciaAnswers: PreferenciaAnswer[] = storedPreferencia ? JSON.parse(storedPreferencia) : [];
   
-  // Calculate percentages based on lateralidad answers
   const leftCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('izquierda') || a.toLowerCase() === 'izquierda').length;
   const rightCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('derecha') || a.toLowerCase() === 'derecha').length;
   const total = leftCount + rightCount || 1;
@@ -27,52 +25,127 @@ export default function CerebralResultPage() {
   const rightPercent = 100 - leftPercent;
   
   const isDominantLeft = leftPercent >= rightPercent;
-
-  // Get unique personality traits from preferencia answers
   const personalityTraits = preferenciaAnswers.map(a => a.meaning).filter(Boolean);
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-cyan-500 to-teal-500 p-4">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="text-center py-6">
-          <p className="text-white/80 text-sm uppercase tracking-wider">RESULTADO</p>
-          <h1 className="text-3xl font-bold text-white mt-2">Test Cerebral</h1>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 overflow-hidden">
+      {/* Animated background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-purple-500/30 rounded-full"
+            initial={{ 
+              x: Math.random() * 400, 
+              y: Math.random() * 800,
+              scale: Math.random() * 0.5 + 0.5
+            }}
+            animate={{ 
+              y: [null, -100],
+              opacity: [0.3, 0]
+            }}
+            transition={{ 
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2
+            }}
+          />
+        ))}
+      </div>
 
-        {/* Result Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
+      <div className="max-w-md mx-auto relative z-10">
+        {/* Header with glow effect */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl p-6 shadow-xl"
+          className="text-center py-6"
         >
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">¡Felicidades!</h2>
+          <motion.div
+            animate={{ 
+              textShadow: ["0 0 20px rgba(147, 51, 234, 0.5)", "0 0 40px rgba(147, 51, 234, 0.8)", "0 0 20px rgba(147, 51, 234, 0.5)"]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <p className="text-purple-300 text-xs uppercase tracking-[0.3em] font-medium mb-2">✦ RESULTADO ✦</p>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+              Test Cerebral
+            </h1>
+          </motion.div>
+        </motion.div>
+
+        {/* Main Result Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, type: "spring" }}
+          className="bg-gradient-to-br from-white/95 to-white/90 rounded-3xl p-6 shadow-2xl shadow-purple-500/20 backdrop-blur-sm border border-white/50"
+        >
+          {/* Celebration header */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.4, type: "spring", bounce: 0.5 }}
+            className="text-center mb-6"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              className="inline-block"
+            >
+              <Sparkles className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+            </motion.div>
+            <h2 className="text-3xl font-black bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
+              ¡Felicidades!
+            </h2>
+          </motion.div>
           
-          {/* Brain Visualization */}
-          <div className="relative flex justify-center items-center mb-6">
+          {/* Brain Visualization - Enhanced 3D style */}
+          <div className="relative flex justify-center items-center mb-8">
             {/* Left traits */}
-            <div className="absolute left-0 text-right pr-4 space-y-1">
+            <div className="absolute left-0 text-right pr-2 space-y-1 w-20">
               {leftTraits.map((trait, idx) => (
                 <motion.p
                   key={trait}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + idx * 0.1 }}
-                  className={`text-sm ${idx === 3 ? 'font-semibold text-gray-800' : 'text-gray-500'}`}
+                  transition={{ delay: 0.6 + idx * 0.1, type: "spring" }}
+                  className={`text-xs transition-all ${
+                    idx === 3 
+                      ? 'font-bold text-purple-700 text-sm' 
+                      : 'text-gray-500 font-medium'
+                  }`}
                 >
                   {trait}
                 </motion.p>
               ))}
             </div>
 
-            {/* Brain SVG */}
-            <div className="relative w-48 h-56">
-              <svg viewBox="0 0 200 220" className="w-full h-full">
-                {/* Brain outline */}
+            {/* 3D Brain SVG */}
+            <motion.div 
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.3, type: "spring", bounce: 0.4 }}
+              className="relative w-44 h-52"
+            >
+              {/* Glow effect behind brain */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 via-pink-400/30 to-cyan-400/30 blur-2xl rounded-full" />
+              
+              <svg viewBox="0 0 200 220" className="w-full h-full relative z-10 drop-shadow-xl">
                 <defs>
+                  <linearGradient id="leftBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#0891B2" />
+                  </linearGradient>
+                  <linearGradient id="rightBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#A855F7" />
+                    <stop offset="100%" stopColor="#7C3AED" />
+                  </linearGradient>
+                  <filter id="brainShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000" floodOpacity="0.3"/>
+                  </filter>
                   <clipPath id="leftHalf">
                     <rect x="0" y="0" width="100" height="220" />
                   </clipPath>
@@ -81,85 +154,106 @@ export default function CerebralResultPage() {
                   </clipPath>
                 </defs>
                 
-                {/* Left brain (cyan/teal) */}
-                <g clipPath="url(#leftHalf)">
+                {/* Left brain hemisphere */}
+                <g clipPath="url(#leftHalf)" filter="url(#brainShadow)">
                   <motion.path
-                    initial={{ fillOpacity: 0 }}
-                    animate={{ fillOpacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                    d="M100 20 C60 20 30 50 25 90 C20 130 30 160 40 180 C50 200 70 210 100 210 L100 20"
-                    fill="#14B8A6"
-                    stroke="#0D9488"
+                    initial={{ pathLength: 0, fillOpacity: 0 }}
+                    animate={{ pathLength: 1, fillOpacity: 1 }}
+                    transition={{ delay: 0.5, duration: 1 }}
+                    d="M100 15 C55 15 25 50 20 95 C15 140 25 170 40 190 C55 210 75 218 100 218 L100 15"
+                    fill="url(#leftBrainGrad)"
+                    stroke="#0E7490"
                     strokeWidth="2"
                   />
-                  {/* Brain folds left */}
-                  <path d="M50 70 Q70 80 60 100 Q50 120 70 130" fill="none" stroke="#0D9488" strokeWidth="2" />
-                  <path d="M40 120 Q60 130 50 150" fill="none" stroke="#0D9488" strokeWidth="2" />
-                </g>
-                
-                {/* Right brain (cyan lighter) */}
-                <g clipPath="url(#rightHalf)">
-                  <motion.path
-                    initial={{ fillOpacity: 0 }}
-                    animate={{ fillOpacity: 1 }}
-                    transition={{ delay: 0.5, duration: 0.8 }}
-                    d="M100 20 C140 20 170 50 175 90 C180 130 170 160 160 180 C150 200 130 210 100 210 L100 20"
-                    fill="#22D3EE"
-                    stroke="#06B6D4"
-                    strokeWidth="2"
-                  />
-                  {/* Brain folds right */}
-                  <path d="M150 70 Q130 80 140 100 Q150 120 130 130" fill="none" stroke="#06B6D4" strokeWidth="2" />
-                  <path d="M160 120 Q140 130 150 150" fill="none" stroke="#06B6D4" strokeWidth="2" />
-                </g>
-                
-                {/* Center line */}
-                <line x1="100" y1="20" x2="100" y2="210" stroke="#1F2937" strokeWidth="2" />
-                
-                {/* Percentage labels */}
-                <motion.text
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                  x="55"
-                  y="130"
-                  textAnchor="middle"
-                  className="text-xl font-bold"
-                  fill="white"
-                >
-                  <motion.tspan
+                  {/* Brain folds - left */}
+                  <motion.g 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2 }}
                   >
-                    {leftPercent}%
-                  </motion.tspan>
-                </motion.text>
+                    <path d="M45 60 Q65 75 55 95 Q45 115 65 130 Q75 145 60 165" fill="none" stroke="#0E7490" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M35 100 Q55 115 45 140 Q40 160 55 175" fill="none" stroke="#0E7490" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M70 45 Q80 60 75 80" fill="none" stroke="#0E7490" strokeWidth="2" strokeLinecap="round" />
+                  </motion.g>
+                </g>
                 
+                {/* Right brain hemisphere */}
+                <g clipPath="url(#rightHalf)" filter="url(#brainShadow)">
+                  <motion.path
+                    initial={{ pathLength: 0, fillOpacity: 0 }}
+                    animate={{ pathLength: 1, fillOpacity: 1 }}
+                    transition={{ delay: 0.5, duration: 1 }}
+                    d="M100 15 C145 15 175 50 180 95 C185 140 175 170 160 190 C145 210 125 218 100 218 L100 15"
+                    fill="url(#rightBrainGrad)"
+                    stroke="#6D28D9"
+                    strokeWidth="2"
+                  />
+                  {/* Brain folds - right */}
+                  <motion.g 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.2 }}
+                  >
+                    <path d="M155 60 Q135 75 145 95 Q155 115 135 130 Q125 145 140 165" fill="none" stroke="#6D28D9" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M165 100 Q145 115 155 140 Q160 160 145 175" fill="none" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M130 45 Q120 60 125 80" fill="none" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
+                  </motion.g>
+                </g>
+
+                {/* Center line */}
+                <motion.line 
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  x1="100" y1="15" x2="100" y2="218" 
+                  stroke="#374151" 
+                  strokeWidth="2" 
+                  strokeDasharray="4,4"
+                />
+
+                {/* Percentage labels with animated counters */}
                 <motion.text
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.4 }}
-                  x="145"
-                  y="130"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.5, type: "spring" }}
+                  x="50"
+                  y="120"
                   textAnchor="middle"
-                  className="text-xl font-bold"
+                  className="text-2xl font-black"
                   fill="white"
+                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+                >
+                  {leftPercent}%
+                </motion.text>
+                <motion.text
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.5, type: "spring" }}
+                  x="150"
+                  y="120"
+                  textAnchor="middle"
+                  className="text-2xl font-black"
+                  fill="white"
+                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
                 >
                   {rightPercent}%
                 </motion.text>
               </svg>
-            </div>
+            </motion.div>
 
             {/* Right traits */}
-            <div className="absolute right-0 text-left pl-4 space-y-1">
+            <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
               {rightTraits.map((trait, idx) => (
                 <motion.p
                   key={trait}
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + idx * 0.1 }}
-                  className={`text-sm ${idx === 3 ? 'font-semibold text-gray-800' : 'text-gray-500'}`}
+                  transition={{ delay: 0.6 + idx * 0.1, type: "spring" }}
+                  className={`text-xs transition-all ${
+                    idx === 3 
+                      ? 'font-bold text-purple-700 text-sm' 
+                      : 'text-gray-500 font-medium'
+                  }`}
                 >
                   {trait}
                 </motion.p>
@@ -167,75 +261,95 @@ export default function CerebralResultPage() {
             </div>
           </div>
 
-          {/* Result text */}
+          {/* Result text with animation */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            className="text-center mt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.8 }}
+            className="text-center"
           >
-            <p className="text-gray-700 text-lg">
-              El lado <span className="font-bold">{isDominantLeft ? 'izquierdo' : 'derecho'}</span> de tu cerebro es
+            <p className="text-gray-600 text-lg">
+              El lado <span className="font-bold bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                {isDominantLeft ? 'izquierdo' : 'derecho'}
+              </span> de tu cerebro es
             </p>
-            <p className="text-gray-800 text-xl font-bold">más dominante.</p>
+            <motion.p 
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ delay: 2, duration: 0.5 }}
+              className="text-2xl font-black text-gray-800 mt-1"
+            >
+              más dominante.
+            </motion.p>
           </motion.div>
 
-          {/* Personality traits from preferencia */}
+          {/* Personality traits */}
           {personalityTraits.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.8 }}
-              className="mt-6 pt-4 border-t border-gray-200"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.2 }}
+              className="mt-6 pt-5 border-t-2 border-dashed border-purple-200"
             >
-              <p className="text-gray-600 text-sm mb-2 text-center">Tu perfil revela:</p>
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Brain className="w-4 h-4 text-purple-500" />
+                <p className="text-purple-600 font-semibold text-sm">Tu perfil revela:</p>
+              </div>
               <div className="flex flex-wrap justify-center gap-2">
                 {personalityTraits.map((trait, idx) => (
-                  <span 
-                    key={idx} 
-                    className="px-3 py-1 bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-sm rounded-full"
+                  <motion.span 
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 2.4 + idx * 0.1, type: "spring" }}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-sm font-medium rounded-full shadow-lg shadow-purple-500/30"
                   >
                     {trait}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </motion.div>
           )}
         </motion.div>
 
-        {/* Bottom buttons */}
+        {/* Action buttons with better styling */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8 }}
+          transition={{ delay: 2.5 }}
           className="mt-6 grid grid-cols-3 gap-3"
         >
-          <Button
-            onClick={() => {
-              sessionStorage.removeItem('lateralidadAnswers');
-              sessionStorage.removeItem('preferenciaAnswers');
-              setLocation('/cerebral/seleccion');
-            }}
-            className="flex flex-col items-center gap-1 py-6 bg-blue-500 hover:bg-blue-600"
-            data-testid="button-new-test"
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-xs">Nuevo Test</span>
-          </Button>
-          <Button
-            className="flex flex-col items-center gap-1 py-6 bg-blue-500 hover:bg-blue-600"
-            data-testid="button-share"
-          >
-            <Share2 className="w-6 h-6" />
-            <span className="text-xs">Compartir</span>
-          </Button>
-          <Button
-            className="flex flex-col items-center gap-1 py-6 bg-blue-500 hover:bg-blue-600"
-            data-testid="button-contact"
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span className="text-xs">Escríbenos</span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={() => {
+                sessionStorage.removeItem('lateralidadAnswers');
+                sessionStorage.removeItem('preferenciaAnswers');
+                setLocation('/cerebral/seleccion');
+              }}
+              className="w-full flex flex-col items-center gap-2 py-6 bg-gradient-to-br from-purple-600 to-purple-700 border border-purple-400 shadow-lg shadow-purple-500/30"
+              data-testid="button-new-test"
+            >
+              <Home className="w-6 h-6" />
+              <span className="text-xs font-medium">Nuevo Test</span>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              className="w-full flex flex-col items-center gap-2 py-6 bg-gradient-to-br from-cyan-500 to-cyan-600 border border-cyan-400 shadow-lg shadow-cyan-500/30"
+              data-testid="button-share"
+            >
+              <Share2 className="w-6 h-6" />
+              <span className="text-xs font-medium">Compartir</span>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              className="w-full flex flex-col items-center gap-2 py-6 bg-gradient-to-br from-pink-500 to-pink-600 border border-pink-400 shadow-lg shadow-pink-500/30"
+              data-testid="button-contact"
+            >
+              <MessageCircle className="w-6 h-6" />
+              <span className="text-xs font-medium">Escríbenos</span>
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </div>
