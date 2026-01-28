@@ -157,6 +157,12 @@ export default function TestsPage() {
       } else {
         setLocation("/child-category");
       }
+    } else if (testId === "razonamiento") {
+      if (userData.ageGroup === "ninos") {
+        setLocation("/razonamiento-selection/ninos");
+      } else {
+        console.log("Selected razonamiento test for:", userData.ageGroup);
+      }
     } else {
       console.log("Selected test:", testId, "for age group:", userData.ageGroup);
     }

@@ -12,6 +12,7 @@ import ReadingContentPage from "@/pages/ReadingContentPage";
 import AdolescentePage from "@/pages/AdolescentePage";
 import AdolescenteReadingPage from "@/pages/AdolescenteReadingPage";
 import GestionPage from "@/pages/GestionPage";
+import RazonamientoSelectionPage from "@/pages/RazonamientoSelectionPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,8 @@ function Router() {
       <Route path="/adolescente" component={AdolescentePage}/>
       <Route path="/adolescente-reading" component={AdolescenteReadingPage}/>
       <Route path="/gestion" component={GestionPage}/>
+      <Route path="/razonamiento-selection" component={RazonamientoSelectionPage}/>
+      <Route path="/razonamiento-selection/:category" component={RazonamientoSelectionPage}/>
       <Route component={NotFound} />
     </Switch>
   );

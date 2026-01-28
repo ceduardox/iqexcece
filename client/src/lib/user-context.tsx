@@ -7,6 +7,8 @@ interface UserData {
   selectedTest: string | null;
   childCategory: string | null;
   selectedTema: number | null;
+  selectedRazonamientoTest: number | null;
+  selectedRazonamientoTitle: string | null;
 }
 
 interface UserContextType {
@@ -23,6 +25,8 @@ const defaultUserData: UserData = {
   selectedTest: null,
   childCategory: null,
   selectedTema: null,
+  selectedRazonamientoTest: null,
+  selectedRazonamientoTitle: null,
 };
 
 const UserContext = createContext<UserContextType | null>(null);
