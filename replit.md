@@ -47,6 +47,14 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - CerebralExercisePage: Interactive exercise with answer verification
   - Supports image upload with size control (20-100%)
   - Active/inactive toggle for exercises
+- **Entrenamiento (Training) system**: Complete training content management
+  - Database tables: entrenamiento_cards, entrenamiento_pages, entrenamiento_items
+  - Admin panel "Entrenamiento" tab for content management per category
+  - Card editor: Main card displayed on selection page (image, title, description, button text)
+  - Page config: Banner text, page title, page description
+  - Training items: CRUD for individual training options with images, links, and sort order
+  - Support for 5 categories: ninos, adolescentes, universitarios, profesionales, adulto_mayor
+  - EntrenamientoPage: Displays training options fetched from database
 
 ## User Preferences
 
