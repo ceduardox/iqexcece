@@ -118,6 +118,10 @@ export default function GestionPage() {
     buttonText: "Empezar"
   });
   
+  // Image picker state
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [imagePickerCallback, setImagePickerCallback] = useState<((url: string) => void) | null>(null);
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -1125,7 +1129,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             data-testid="mobile-tab-resultados"
           >
             <FileText className="w-4 h-4 mr-1" />
-            Resultados
+            Lectura
+          </Button>
+          <Button
+            onClick={() => setActiveTab("resultados-cerebral")}
+            variant={activeTab === "resultados-cerebral" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "resultados-cerebral" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+            data-testid="mobile-tab-resultados-cerebral"
+          >
+            <Brain className="w-4 h-4 mr-1" />
+            Cerebral
           </Button>
           <Button
             onClick={() => setActiveTab("contenido")}
@@ -1427,6 +1441,101 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "resultados-cerebral" && (
+          <Card className="bg-black/40 border-purple-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-400" />
+                Resultados Test Cerebral ({cerebralResults.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {cerebralResults.length === 0 ? (
+                <p className="text-white/60 text-center py-8">No hay resultados de Test Cerebral aún</p>
+              ) : (
+                <>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-white/60 border-b border-white/10">
+                          <th className="pb-3 px-2">Nombre</th>
+                          <th className="pb-3 px-2">Email</th>
+                          <th className="pb-3 px-2">Edad</th>
+                          <th className="pb-3 px-2">Ciudad</th>
+                          <th className="pb-3 px-2">Hemisferio Izq.</th>
+                          <th className="pb-3 px-2">Hemisferio Der.</th>
+                          <th className="pb-3 px-2">Dominante</th>
+                          <th className="pb-3 px-2">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cerebralResults.map((r) => (
+                          <tr key={r.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="py-3 px-2 text-white">{r.nombre}</td>
+                            <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
+                            <td className="py-3 px-2 text-white/80">{r.edad || "-"}</td>
+                            <td className="py-3 px-2 text-white/80">{r.ciudad || "-"}</td>
+                            <td className="py-3 px-2 text-cyan-400 font-bold">{r.leftPercent}%</td>
+                            <td className="py-3 px-2 text-purple-400 font-bold">{r.rightPercent}%</td>
+                            <td className="py-3 px-2">
+                              <span className={`px-2 py-1 rounded text-xs ${r.dominantSide === 'izquierdo' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
+                                {r.dominantSide === 'izquierdo' ? 'Izquierdo' : 'Derecho'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-white/60 text-xs">
+                              {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES') : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="md:hidden space-y-3">
+                    {cerebralResults.map((r) => (
+                      <div key={r.id} className="bg-white/5 rounded-lg p-4 border border-purple-500/20">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-white font-medium">{r.nombre}</span>
+                          <span className={`px-2 py-1 rounded text-xs ${r.dominantSide === 'izquierdo' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
+                            {r.dominantSide === 'izquierdo' ? 'Izquierdo' : 'Derecho'}
+                          </span>
+                        </div>
+                        <div className="text-sm text-white/60 space-y-1">
+                          {r.email && <p>Email: {r.email}</p>}
+                          {r.edad && <p>Edad: {r.edad}</p>}
+                          {r.ciudad && <p>Ciudad: {r.ciudad}</p>}
+                        </div>
+                        <div className="flex gap-4 mt-3">
+                          <div className="text-center">
+                            <span className="text-cyan-400 font-bold text-lg">{r.leftPercent}%</span>
+                            <p className="text-white/40 text-xs">Izquierdo</p>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-purple-400 font-bold text-lg">{r.rightPercent}%</span>
+                            <p className="text-white/40 text-xs">Derecho</p>
+                          </div>
+                        </div>
+                        {r.personalityTraits && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {(typeof r.personalityTraits === 'string' ? JSON.parse(r.personalityTraits) : r.personalityTraits).slice(0, 3).map((trait: string, i: number) => (
+                              <span key={i} className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">
+                                {trait}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-white/40 text-xs mt-2">
+                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES') : "-"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         )}
