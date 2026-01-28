@@ -1,4 +1,7 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, uploadedImages } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, uploadedImages } from "@shared/schema";
+
+type CerebralIntro = typeof cerebralIntros.$inferSelect;
+type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
 import { randomUUID } from "crypto";
 import { eq, desc, and, gt } from "drizzle-orm";
 import { db } from "./db";
@@ -33,6 +36,10 @@ export interface IStorage {
   getCerebralContent(categoria: string, temaNumero?: number): Promise<CerebralContent | undefined>;
   getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]>;
   saveCerebralContent(content: InsertCerebralContent): Promise<CerebralContent>;
+  
+  // Cerebral intro
+  getCerebralIntro(categoria: string): Promise<CerebralIntro | null>;
+  saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro>;
 }
 
 export class MemStorage implements IStorage {
@@ -222,6 +229,22 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
     return content;
+  }
+
+  async getCerebralIntro(categoria: string): Promise<CerebralIntro | null> {
+    return null;
+  }
+
+  async saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro> {
+    return {
+      id: randomUUID(),
+      categoria: intro.categoria,
+      imageUrl: intro.imageUrl || null,
+      title: intro.title || "¿Cuál lado de tu cerebro es más dominante?",
+      subtitle: intro.subtitle || "El test tiene una duración de 30 segundos.",
+      buttonText: intro.buttonText || "Empezar",
+      updatedAt: new Date(),
+    };
   }
 }
 
@@ -453,6 +476,39 @@ export class DatabaseStorage implements IStorage {
       imageSize: insertContent.imageSize || 100,
       exerciseData: insertContent.exerciseData,
       isActive: insertContent.isActive ?? true,
+    }).returning();
+    return created;
+  }
+
+  // Cerebral intro
+  async getCerebralIntro(categoria: string): Promise<CerebralIntro | null> {
+    const [intro] = await db.select().from(cerebralIntros).where(eq(cerebralIntros.categoria, categoria));
+    return intro || null;
+  }
+
+  async saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro> {
+    const existing = await this.getCerebralIntro(intro.categoria);
+    
+    if (existing) {
+      const [updated] = await db.update(cerebralIntros)
+        .set({
+          imageUrl: intro.imageUrl,
+          title: intro.title,
+          subtitle: intro.subtitle,
+          buttonText: intro.buttonText,
+          updatedAt: new Date(),
+        })
+        .where(eq(cerebralIntros.categoria, intro.categoria))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db.insert(cerebralIntros).values({
+      categoria: intro.categoria,
+      imageUrl: intro.imageUrl,
+      title: intro.title,
+      subtitle: intro.subtitle,
+      buttonText: intro.buttonText,
     }).returning();
     return created;
   }

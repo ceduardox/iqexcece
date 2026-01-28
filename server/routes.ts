@@ -383,6 +383,28 @@ export async function registerRoutes(
     res.json({ themes: savedThemes });
   });
 
+  // Get cerebral intro for category
+  app.get("/api/cerebral/:categoria/intro", async (req, res) => {
+    const categoria = req.params.categoria;
+    const intro = await storage.getCerebralIntro(categoria);
+    res.json({ intro });
+  });
+
+  // Save cerebral intro (admin)
+  app.post("/api/admin/cerebral/intro", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const intro = await storage.saveCerebralIntro(req.body);
+      res.json({ success: true, intro });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save cerebral intro" });
+    }
+  });
+
   // Save cerebral content (admin)
   app.post("/api/admin/cerebral", async (req, res) => {
     const auth = req.headers.authorization;

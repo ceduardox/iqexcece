@@ -96,10 +96,22 @@ export const cerebralContents = pgTable("cerebral_contents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Cerebral intro screen configuration
+export const cerebralIntros = pgTable("cerebral_intros", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoria: text("categoria").notNull().unique(),
+  imageUrl: text("image_url"),
+  title: text("title").default("¿Cuál lado de tu cerebro es más dominante?"),
+  subtitle: text("subtitle").default("El test tiene una duración de 30 segundos."),
+  buttonText: text("button_text").default("Empezar"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertQuizResultSchema = createInsertSchema(quizResults).omit({ id: true, createdAt: true });
 export const insertReadingContentSchema = createInsertSchema(readingContents).omit({ id: true, updatedAt: true });
 export const insertRazonamientoContentSchema = createInsertSchema(razonamientoContents).omit({ id: true, updatedAt: true });
 export const insertCerebralContentSchema = createInsertSchema(cerebralContents).omit({ id: true, updatedAt: true });
+export const insertCerebralIntroSchema = createInsertSchema(cerebralIntros).omit({ id: true, updatedAt: true });
 
 // Uploaded images table
 export const uploadedImages = pgTable("uploaded_images", {

@@ -41,6 +41,7 @@ export default function CerebralExercisePage() {
   const [memoriaPhase, setMemoriaPhase] = useState<'memorize' | 'recall'>('memorize');
   const [memoriaTimer, setMemoriaTimer] = useState(5);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [shouldRedirectToResults, setShouldRedirectToResults] = useState(false);
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
     queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
@@ -57,6 +58,26 @@ export default function CerebralExercisePage() {
       setTimeLeft(content.exerciseData.timerSeconds || 30);
     }
   }, [content?.exerciseData?.timerEnabled, content?.exerciseData?.timerSeconds]);
+
+  // Handle redirect to results
+  useEffect(() => {
+    if (shouldRedirectToResults) {
+      setLocation(`/cerebral/resultado/${params.categoria}`);
+    }
+  }, [shouldRedirectToResults, params.categoria, setLocation]);
+
+  // Check for lateralidad results redirect when no more exercises
+  useEffect(() => {
+    if (!content && !isLoading) {
+      const storedAnswers = sessionStorage.getItem('lateralidadAnswers');
+      if (storedAnswers) {
+        const answers = JSON.parse(storedAnswers);
+        if (answers.length > 0) {
+          setShouldRedirectToResults(true);
+        }
+      }
+    }
+  }, [content, isLoading]);
 
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0 || submitted) return;
@@ -623,26 +644,18 @@ export default function CerebralExercisePage() {
     );
   }
 
+  if (shouldRedirectToResults) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-white/60">Calculando resultados...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!content) {
-    // Check if we have lateralidad answers stored - redirect to results
-    const storedAnswers = sessionStorage.getItem('lateralidadAnswers');
-    if (storedAnswers) {
-      const answers = JSON.parse(storedAnswers);
-      if (answers.length > 0) {
-        // Redirect to result page
-        setTimeout(() => {
-          setLocation(`/cerebral/resultado/${params.categoria}`);
-        }, 100);
-        return (
-          <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-white/60">Calculando resultados...</p>
-            </div>
-          </div>
-        );
-      }
-    }
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">

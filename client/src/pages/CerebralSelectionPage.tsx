@@ -2,9 +2,17 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useUserData } from "@/lib/user-context";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+
+interface CerebralIntro {
+  imageUrl: string;
+  title: string;
+  subtitle: string;
+  duration: string;
+  buttonText: string;
+}
 
 interface CerebralTheme {
   temaNumero: number;
@@ -17,37 +25,77 @@ export default function CerebralSelectionPage() {
   const { userData } = useUserData();
   const categoria = userData.ageGroup || "adolescentes";
 
-  const { data, isLoading } = useQuery<{ themes: CerebralTheme[] }>({
+  const { data: themesData, isLoading: themesLoading } = useQuery<{ themes: CerebralTheme[] }>({
     queryKey: [`/api/cerebral/${categoria}/themes`],
   });
 
-  const themes = data?.themes || [];
+  const { data: introData, isLoading: introLoading } = useQuery<{ intro: CerebralIntro | null }>({
+    queryKey: [`/api/cerebral/${categoria}/intro`],
+  });
 
-  const getCategoryLabel = () => {
-    switch (categoria) {
-      case "preescolar": return "Pre-escolar";
-      case "ninos": return "Niños";
-      case "adolescentes": return "Adolescentes";
-      case "universitarios": return "Universitarios";
-      case "profesionales": return "Profesionales";
-      case "adulto_mayor": return "Adulto Mayor";
-      default: return categoria;
+  const themes = themesData?.themes || [];
+  const intro = introData?.intro || {
+    imageUrl: "",
+    title: "¿Cuál lado de tu cerebro es más dominante?",
+    subtitle: "El test tiene una duración de 30 segundos.",
+    duration: "30",
+    buttonText: "Empezar"
+  };
+
+  const isLoading = themesLoading || introLoading;
+
+  const handleStart = () => {
+    sessionStorage.removeItem('lateralidadAnswers');
+    if (themes.length > 0) {
+      setLocation(`/cerebral/ejercicio/${categoria}/${themes[0].temaNumero}`);
     }
   };
 
-  const getExerciseTypeLabel = (type: string) => {
-    switch (type) {
-      case "bailarina": return "Dirección Visual";
-      case "secuencia": return "Secuencia Numérica";
-      case "memoria": return "Memoria Visual";
-      case "patron": return "Patrón Visual";
-      default: return type;
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-cyan-500 to-blue-600 p-4">
+        <div className="max-w-md mx-auto space-y-4">
+          <Skeleton className="h-10 w-40 bg-white/20" />
+          <Skeleton className="h-64 w-full rounded-xl bg-white/20" />
+          <Skeleton className="h-20 w-full bg-white/20" />
+        </div>
+      </div>
+    );
+  }
+
+  if (themes.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-cyan-500 to-blue-600 p-4">
+        <div className="max-w-md mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 mb-6"
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLocation("/tests")}
+              className="text-white"
+              data-testid="button-back-tests"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </Button>
+            <h1 className="text-2xl font-bold text-white">Test Cerebral</h1>
+          </motion.div>
+          <div className="text-center py-12">
+            <p className="text-white/80 text-lg">No hay ejercicios disponibles.</p>
+            <p className="text-white/60 text-sm mt-2">El administrador debe crear ejercicios primero.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
+    <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-cyan-500 to-blue-600 p-4">
       <div className="max-w-md mx-auto">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -57,68 +105,77 @@ export default function CerebralSelectionPage() {
             variant="ghost"
             size="icon"
             onClick={() => setLocation("/tests")}
+            className="text-white hover:bg-white/20"
             data-testid="button-back-tests"
           >
             <ArrowLeft className="w-6 h-6" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Zap className="w-6 h-6 text-purple-400" />
-              Test Cerebral
-            </h1>
-            <p className="text-white/60 text-sm">Categoría: {getCategoryLabel()}</p>
-          </div>
+          <h1 className="text-2xl font-bold text-white">Test Cerebral</h1>
         </motion.div>
 
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-lg bg-white/10" />
-            ))}
+        {/* Brain Image */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-center mb-8"
+        >
+          {intro.imageUrl ? (
+            <img 
+              src={intro.imageUrl} 
+              alt="Cerebro" 
+              className="w-64 h-64 object-contain"
+            />
+          ) : (
+            <div className="w-64 h-64 flex items-center justify-center">
+              <svg viewBox="0 0 200 200" className="w-full h-full">
+                {/* Brain cartoon placeholder */}
+                <ellipse cx="100" cy="100" rx="80" ry="70" fill="#F8BBD9" stroke="#EC407A" strokeWidth="3"/>
+                <path d="M60 60 Q80 40 100 60 Q120 40 140 60" fill="none" stroke="#EC407A" strokeWidth="2"/>
+                <path d="M50 100 Q30 80 50 60" fill="none" stroke="#EC407A" strokeWidth="2"/>
+                <path d="M150 100 Q170 80 150 60" fill="none" stroke="#EC407A" strokeWidth="2"/>
+                <circle cx="75" cy="95" r="8" fill="#333"/>
+                <circle cx="125" cy="95" r="8" fill="#333"/>
+                <circle cx="77" cy="93" r="3" fill="#fff"/>
+                <circle cx="127" cy="93" r="3" fill="#fff"/>
+                <path d="M90 120 Q100 130 110 120" fill="none" stroke="#333" strokeWidth="2"/>
+                {/* Question mark */}
+                <g transform="translate(150, 30)">
+                  <circle cx="20" cy="30" r="25" fill="#E91E63"/>
+                  <text x="20" y="40" textAnchor="middle" fill="white" fontSize="30" fontWeight="bold">?</text>
+                </g>
+              </svg>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Content Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-3xl p-8 shadow-xl text-center"
+        >
+          {/* Title */}
+          <h2 className="text-xl font-bold text-gray-800 mb-4 leading-tight">
+            {intro.title}
+          </h2>
+
+          {/* Duration */}
+          <div className="flex items-center justify-center gap-2 text-gray-600 mb-6">
+            <Clock className="w-5 h-5" />
+            <p>{intro.subtitle}</p>
           </div>
-        ) : themes.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
+
+          {/* Start Button */}
+          <Button
+            onClick={handleStart}
+            className="px-12 py-6 text-lg font-semibold rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
+            data-testid="button-start-test"
           >
-            <Zap className="w-16 h-16 text-white/30 mx-auto mb-4" />
-            <p className="text-white/60 text-lg">No hay ejercicios disponibles para esta categoría.</p>
-            <p className="text-white/40 text-sm mt-2">El administrador debe crear ejercicios primero.</p>
-          </motion.div>
-        ) : (
-          <div className="space-y-3">
-            {themes.map((theme, index) => (
-              <motion.div
-                key={theme.temaNumero}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <div 
-                  onClick={() => {
-                    sessionStorage.removeItem('lateralidadAnswers');
-                    setLocation(`/cerebral/ejercicio/${categoria}/${theme.temaNumero}`);
-                  }}
-                  className="w-full p-4 rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-600/80 border border-purple-400/30 cursor-pointer hover-elevate"
-                  data-testid={`button-cerebral-theme-${theme.temaNumero}`}
-                >
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/30 flex items-center justify-center">
-                      <Zap className="w-5 h-5 text-purple-300" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-white">
-                        {theme.title || `Ejercicio ${String(theme.temaNumero).padStart(2, '0')}`}
-                      </p>
-                      <p className="text-sm text-white/60">{getExerciseTypeLabel(theme.exerciseType)}</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
+            {intro.buttonText}
+          </Button>
+        </motion.div>
       </div>
     </div>
   );

@@ -109,6 +109,14 @@ export default function GestionPage() {
     isActive: true
   });
   
+  // Cerebral intro content state
+  const [cerebralIntro, setCerebralIntro] = useState({
+    imageUrl: "",
+    title: "¿Cuál lado de tu cerebro es más dominante?",
+    subtitle: "El test tiene una duración de 30 segundos.",
+    buttonText: "Empezar"
+  });
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -398,6 +406,31 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setSaving(false);
   };
 
+  const handleSaveCerebralIntro = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/cerebral/intro", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          categoria: contentCategory,
+          ...cerebralIntro
+        }),
+      });
+      if (res.ok) {
+        alert("Intro de Test Cerebral guardado correctamente");
+      } else {
+        alert("Error al guardar intro");
+      }
+    } catch {
+      alert("Error al guardar intro");
+    }
+    setSaving(false);
+  };
+
   const loadThemes = async () => {
     try {
       const res = await fetch(`/api/reading/${contentCategory}/themes`);
@@ -585,7 +618,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
   }, [isLoggedIn, contentCategory, selectedRazonamientoTema, contentType]);
 
-  // Load cerebral themes
+  // Load cerebral themes and intro
   useEffect(() => {
     if (isLoggedIn && contentType === "cerebral") {
       const loadCerebralThemes = async () => {
@@ -606,6 +639,19 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         } catch {
           setCerebralThemes([]);
         }
+        // Also load intro
+        try {
+          const introRes = await fetch(`/api/cerebral/${contentCategory}/intro`);
+          const introData = await introRes.json();
+          if (introData.intro) {
+            setCerebralIntro({
+              imageUrl: introData.intro.imageUrl || "",
+              title: introData.intro.title || "¿Cuál lado de tu cerebro es más dominante?",
+              subtitle: introData.intro.subtitle || "El test tiene una duración de 30 segundos.",
+              buttonText: introData.intro.buttonText || "Empezar"
+            });
+          }
+        } catch {}
       };
       loadCerebralThemes();
     }
@@ -1917,6 +1963,93 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
               {contentType === "cerebral" && (
               <>
+              {/* Intro Screen Configuration */}
+              <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/20 space-y-4 mb-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <Brain className="w-4 h-4" />
+                  Pantalla de Introducción
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen del cerebro (URL)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={cerebralIntro.imageUrl}
+                        onChange={(e) => setCerebralIntro(p => ({ ...p, imageUrl: e.target.value }))}
+                        placeholder="URL de imagen del cerebro"
+                        className="flex-1 p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                        data-testid="input-cerebral-intro-image"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setImagePickerCallback((url: string) => {
+                            setCerebralIntro(p => ({ ...p, imageUrl: url }));
+                          });
+                          setShowImagePicker(true);
+                        }}
+                        variant="outline"
+                        className="border-purple-500/30 text-purple-400"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {cerebralIntro.imageUrl && (
+                      <img src={cerebralIntro.imageUrl} alt="Intro preview" className="mt-2 w-24 h-24 object-contain rounded-lg border border-white/20" />
+                    )}
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Título</label>
+                      <input
+                        type="text"
+                        value={cerebralIntro.title}
+                        onChange={(e) => setCerebralIntro(p => ({ ...p, title: e.target.value }))}
+                        placeholder="¿Cuál lado de tu cerebro es más dominante?"
+                        className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                        data-testid="input-cerebral-intro-title"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Subtítulo</label>
+                      <input
+                        type="text"
+                        value={cerebralIntro.subtitle}
+                        onChange={(e) => setCerebralIntro(p => ({ ...p, subtitle: e.target.value }))}
+                        placeholder="El test tiene una duración de 30 segundos."
+                        className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                        data-testid="input-cerebral-intro-subtitle"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Texto del botón</label>
+                      <input
+                        type="text"
+                        value={cerebralIntro.buttonText}
+                        onChange={(e) => setCerebralIntro(p => ({ ...p, buttonText: e.target.value }))}
+                        placeholder="Empezar"
+                        className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                        data-testid="input-cerebral-intro-button"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={handleSaveCerebralIntro}
+                  disabled={saving}
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-500 to-teal-500"
+                  data-testid="button-save-cerebral-intro"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar Introducción
+                </Button>
+              </div>
+              
               <div>
                 <label className="text-white/60 text-sm mb-1 block">Ejercicio de Test Cerebral</label>
                 <div className="flex flex-wrap gap-2 items-center">
