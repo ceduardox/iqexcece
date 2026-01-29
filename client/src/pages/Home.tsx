@@ -16,7 +16,7 @@ interface UserSelection {
 }
 
 export default function Home() {
-  const [appState, setAppState] = useState<AppState>("loading");
+  const [appState, setAppState] = useState<AppState>("selection");
   const [selection, setSelection] = useState<UserSelection | null>(null);
   
   const { updateSession } = useSessionTracking(selection?.ageGroup, selection?.problems);

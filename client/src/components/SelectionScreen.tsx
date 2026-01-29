@@ -364,7 +364,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (step === "age" && selectedAge) {
       setStep("problems");
     } else if (step === "problems" && selectedProblems.length > 0) {
-      setStep("fingerprint");
+      setStep("options");
     }
   };
 
@@ -466,10 +466,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (step === "problems") {
       setStep("age");
       setExpandedProblem(null);
-    } else if (step === "fingerprint") {
-      setStep("problems");
     } else if (step === "options") {
-      setStep("fingerprint");
+      setStep("problems");
     }
   };
 
