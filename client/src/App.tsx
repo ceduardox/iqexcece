@@ -21,7 +21,6 @@ import CerebralFormPage from "@/pages/CerebralFormPage";
 import CerebralResultPage from "@/pages/CerebralResultPage";
 import EntrenamientoPage from "@/pages/EntrenamientoPage";
 import EntrenamientoPrepPage from "@/pages/EntrenamientoPrepPage";
-import VelocidadLevelPage from "@/pages/VelocidadLevelPage";
 import VelocidadExercisePage from "@/pages/VelocidadExercisePage";
 import NotFound from "@/pages/not-found";
 
@@ -47,8 +46,7 @@ function Router() {
       <Route path="/cerebral/resultado/:categoria" component={CerebralResultPage}/>
       <Route path="/entrenamiento/:categoria" component={EntrenamientoPage}/>
       <Route path="/entrenamiento/:categoria/prep/:itemId" component={EntrenamientoPrepPage}/>
-      <Route path="/velocidad/:categoria/:itemId" component={VelocidadLevelPage}/>
-      <Route path="/velocidad/:categoria/:itemId/ejercicio/:nivelNum" component={VelocidadExercisePage}/>
+      <Route path="/velocidad/:categoria/:itemId" component={VelocidadExercisePage}/>
       <Route component={NotFound} />
     </Switch>
   );

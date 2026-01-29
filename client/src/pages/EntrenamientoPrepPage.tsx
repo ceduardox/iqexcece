@@ -135,13 +135,13 @@ export default function EntrenamientoPrepPage() {
           onClick={() => {
             const tipo = prepData?.tipoEjercicio || "velocidad";
             if (tipo === "velocidad") {
-              setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
+              setLocation(`/velocidad/${categoria}/${itemId}`);
             } else if (tipo === "lectura") {
               setLocation(`/lectura/${categoria}/${itemId}`);
             } else if (tipo === "memoria") {
               setLocation(`/memoria/${categoria}/${itemId}`);
             } else {
-              setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
+              setLocation(`/velocidad/${categoria}/${itemId}`);
             }
           }}
           className="mt-10 px-12 py-4 bg-orange-500 text-white font-bold text-xl rounded-full shadow-lg"
