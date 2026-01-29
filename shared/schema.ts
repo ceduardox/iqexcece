@@ -223,12 +223,27 @@ export const velocidadEjercicios = pgTable("velocidad_ejercicios", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Numeros y Letras exercises (linked to entrenamiento items)
+export const numerosEjercicios = pgTable("numeros_ejercicios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entrenamientoItemId: text("entrenamiento_item_id").notNull(),
+  titulo: text("titulo").default("Identifica Números y Letras"),
+  descripcion: text("descripcion").default("¡Haz más fuerte tu vista jugando!"),
+  subtitulo: text("subtitulo").default("Identifica el número o letra para ver el mundo más grande"),
+  imagenCabecera: text("imagen_cabecera"),
+  niveles: text("niveles").notNull(), // JSON array [{id, tipo: "numero"|"letra", objetivo: "7", opciones: ["5","7","9","2"], tiempoMs: 1500}]
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertEntrenamientoCardSchema = createInsertSchema(entrenamientoCards).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoPageSchema = createInsertSchema(entrenamientoPages).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoItemSchema = createInsertSchema(entrenamientoItems).omit({ id: true, updatedAt: true });
 export const insertPrepPageSchema = createInsertSchema(prepPages).omit({ id: true, createdAt: true });
 export const insertCategoriaPrepPageSchema = createInsertSchema(categoriaPrepPage).omit({ id: true });
 export const insertVelocidadEjercicioSchema = createInsertSchema(velocidadEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertNumerosEjercicioSchema = createInsertSchema(numerosEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
@@ -254,3 +269,5 @@ export type CategoriaPrepPage = typeof categoriaPrepPage.$inferSelect;
 export type InsertCategoriaPrepPage = z.infer<typeof insertCategoriaPrepPageSchema>;
 export type VelocidadEjercicio = typeof velocidadEjercicios.$inferSelect;
 export type InsertVelocidadEjercicio = z.infer<typeof insertVelocidadEjercicioSchema>;
+export type NumerosEjercicio = typeof numerosEjercicios.$inferSelect;
+export type InsertNumerosEjercicio = z.infer<typeof insertNumerosEjercicioSchema>;
