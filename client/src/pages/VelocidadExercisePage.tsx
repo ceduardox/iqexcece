@@ -202,15 +202,32 @@ export default function VelocidadExercisePage() {
     }
     
     if (ejercicioActual < ejercicios.length - 1) {
-      setGameState("transicion");
+      setEsSegundoEjercicioEnAdelante(true);
       setTimeout(() => {
+        const nextEjercicio = ejercicios[ejercicioActual + 1];
+        if (!nextEjercicio) return;
+        
+        const todasPalabras = nextEjercicio.palabras.split(",").map(p => p.trim()).filter(p => p);
+        const todasOpciones = nextEjercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
+        const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
+        const respuestaCorrectaCalc = getRespuestaCorrecta(nextEjercicio.tipoPregunta, shuffled);
+        
+        let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
+        if (!opcionesMezcladas.some(op => op.toLowerCase() === respuestaCorrectaCalc.toLowerCase())) {
+          opcionesMezcladas[Math.floor(Math.random() * opcionesMezcladas.length)] = respuestaCorrectaCalc;
+        }
+        
+        const totalPos = getTotalPositions(nextEjercicio.patron);
         setEjercicioActual(e => e + 1);
-        setEsSegundoEjercicioEnAdelante(true);
-        setGameState("ready");
-        setTimeout(() => {
-          iniciarEjercicioSiguiente();
-        }, 100);
-      }, 700);
+        setPalabrasRonda(shuffled);
+        setOpcionesRonda(opcionesMezcladas);
+        setShownWords(Array(totalPos).fill(""));
+        setCurrentPosition(-1);
+        setPreguntaActual(getPreguntaTexto(nextEjercicio.tipoPregunta));
+        setRespuestaCorrecta(respuestaCorrectaCalc);
+        setUltimaRespuesta(null);
+        setGameState("playing");
+      }, 500);
     } else {
       setGameState("final");
     }
