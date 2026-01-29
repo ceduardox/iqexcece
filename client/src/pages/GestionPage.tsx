@@ -154,6 +154,7 @@ export default function GestionPage() {
     descripcion: string;
     imagenCabecera: string;
     niveles: NivelConfig[];
+    tiempoAnimacionInicial: number;
     isActive: boolean;
   } | null>(null);
   
@@ -3807,6 +3808,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         { nivel: 3, patron: "1x3", velocidad: 1000, contenido: ["AB", "CD", "EF"] },
                                         { nivel: 4, patron: "2x2", velocidad: 800, contenido: ["AB", "CD", "EF", "GH"] }
                                       ],
+                                      tiempoAnimacionInicial: ej.tiempoAnimacionInicial || 3,
                                       isActive: ej.isActive ?? true
                                     });
                                   } else {
@@ -3820,6 +3822,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         { nivel: 2, patron: "3x2", velocidad: 200, palabras: "luna, estrella, cielo, mar, rio, lago, monte, flor, arbol, nube", opciones: "luna, mar, lago, cielo, flor, nube", tipoPregunta: "primera" },
                                         { nivel: 3, patron: "3x3", velocidad: 250, palabras: "amor, paz, luz, vida, alma, mente, cuerpo, mundo, tiempo, espacio", opciones: "amor, paz, vida, mente, mundo, espacio", tipoPregunta: "primera" }
                                       ],
+                                      tiempoAnimacionInicial: 3,
                                       isActive: true
                                     });
                                   }
@@ -3915,6 +3918,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </div>
                         <span className="text-white/40 text-sm">Clic para seleccionar imagen</span>
                       </div>
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Tiempo de animación inicial (segundos)</label>
+                      <p className="text-white/40 text-xs mb-2">Duración del círculo rebotando antes de empezar las palabras</p>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={velocidadEjercicio.tiempoAnimacionInicial}
+                        onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, tiempoAnimacionInicial: parseInt(e.target.value) || 3})}
+                        className="w-24 bg-white/10 border-purple-500/30 text-white rounded-md p-2 text-sm"
+                      />
                     </div>
                   </div>
                   

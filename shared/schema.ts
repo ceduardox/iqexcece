@@ -216,6 +216,7 @@ export const velocidadEjercicios = pgTable("velocidad_ejercicios", {
   descripcion: text("descripcion"),
   imagenCabecera: text("imagen_cabecera"),
   niveles: text("niveles").notNull(), // JSON array of level configs [{nivel: 1, patron: "2x3", velocidad: 1000, contenido: ["A","B","C"]}]
+  tiempoAnimacionInicial: integer("tiempo_animacion_inicial").default(3), // Segundos de animación del círculo rebotando al inicio
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

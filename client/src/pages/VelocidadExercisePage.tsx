@@ -19,11 +19,13 @@ export default function VelocidadExercisePage() {
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [titulo, setTitulo] = useState("Velocidad Lectora");
   const [loading, setLoading] = useState(true);
+  const [tiempoAnimacionInicial, setTiempoAnimacionInicial] = useState(3);
   
-  const [gameState, setGameState] = useState<"ready" | "playing" | "question" | "transicion" | "final">("ready");
+  const [gameState, setGameState] = useState<"ready" | "animacion_inicial" | "playing" | "question" | "transicion" | "final">("ready");
   const [correctos, setCorrectos] = useState(0);
   const [incorrectos, setIncorrectos] = useState(0);
   const [ultimaRespuesta, setUltimaRespuesta] = useState<"correcta" | "incorrecta" | null>(null);
+  const [esSegundoEjercicioEnAdelante, setEsSegundoEjercicioEnAdelante] = useState(false);
   
   const [currentPosition, setCurrentPosition] = useState(-1);
   const [shownWords, setShownWords] = useState<string[]>([]);
@@ -44,13 +46,16 @@ export default function VelocidadExercisePage() {
         
         if (velocidadData.ejercicio && velocidadData.ejercicio.niveles) {
           const todosNiveles: Ejercicio[] = JSON.parse(velocidadData.ejercicio.niveles);
-          // Filtrar por patrón seleccionado
           const patronDecoded = decodeURIComponent(patron || "");
           const nivelesFiltrados = patronDecoded 
             ? todosNiveles.filter(n => n.patron === patronDecoded)
             : todosNiveles;
           setEjercicios(nivelesFiltrados);
           setTitulo(velocidadData.ejercicio.titulo || itemData.item?.title || "Velocidad Lectora");
+          
+          if (velocidadData.ejercicio.tiempoAnimacionInicial) {
+            setTiempoAnimacionInicial(velocidadData.ejercicio.tiempoAnimacionInicial);
+          }
         }
       } catch (e) {
         console.error(e);
@@ -98,7 +103,18 @@ export default function VelocidadExercisePage() {
     const todasOpciones = ejercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
     
     const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
-    const opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
+    
+    const respuestaCorrectaCalculada = getRespuestaCorrecta(ejercicio.tipoPregunta, shuffled);
+    
+    let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
+    const respuestaExiste = opcionesMezcladas.some(
+      op => op.toLowerCase() === respuestaCorrectaCalculada.toLowerCase()
+    );
+    
+    if (!respuestaExiste) {
+      const posicionAleatoria = Math.floor(Math.random() * opcionesMezcladas.length);
+      opcionesMezcladas[posicionAleatoria] = respuestaCorrectaCalculada;
+    }
     
     const totalPos = getTotalPositions(ejercicio.patron);
     setPalabrasRonda(shuffled);
@@ -106,12 +122,43 @@ export default function VelocidadExercisePage() {
     setShownWords(Array(totalPos).fill(""));
     setCurrentPosition(-1);
     setPreguntaActual(getPreguntaTexto(ejercicio.tipoPregunta));
-    setRespuestaCorrecta(getRespuestaCorrecta(ejercicio.tipoPregunta, shuffled));
+    setRespuestaCorrecta(respuestaCorrectaCalculada);
     setUltimaRespuesta(null);
-    setGameState("playing");
-  }, [ejercicio]);
+    
+    if (esSegundoEjercicioEnAdelante) {
+      setGameState("playing");
+    } else {
+      setGameState("animacion_inicial");
+    }
+  }, [ejercicio, esSegundoEjercicioEnAdelante]);
 
-  // Animación de palabras
+  useEffect(() => {
+    if (gameState !== "animacion_inicial" || !ejercicio) return;
+    
+    const totalPos = getTotalPositions(ejercicio.patron);
+    const duracionMs = tiempoAnimacionInicial * 1000;
+    const intervaloPorPosicion = duracionMs / (totalPos * 3);
+    let posicion = 0;
+    let ciclos = 0;
+    const maxCiclos = 3;
+    
+    const interval = setInterval(() => {
+      setCurrentPosition(posicion);
+      posicion++;
+      if (posicion >= totalPos) {
+        posicion = 0;
+        ciclos++;
+        if (ciclos >= maxCiclos) {
+          clearInterval(interval);
+          setCurrentPosition(-1);
+          setGameState("playing");
+        }
+      }
+    }, intervaloPorPosicion);
+    
+    return () => clearInterval(interval);
+  }, [gameState, ejercicio, tiempoAnimacionInicial]);
+
   useEffect(() => {
     if (gameState !== "playing" || !ejercicio || palabrasRonda.length === 0) return;
     
@@ -135,7 +182,7 @@ export default function VelocidadExercisePage() {
         clearInterval(interval);
         setCurrentPosition(-1);
         setShownWords([]);
-        setTimeout(() => setGameState("question"), 400);
+        setTimeout(() => setGameState("question"), 300);
       }
     }, intervalMs);
     
@@ -152,19 +199,51 @@ export default function VelocidadExercisePage() {
       setUltimaRespuesta("incorrecta");
     }
     
-    // Verificar si hay más ejercicios
     if (ejercicioActual < ejercicios.length - 1) {
       setGameState("transicion");
-      // Pasar al siguiente ejercicio después de 1.5 segundos
       setTimeout(() => {
         setEjercicioActual(e => e + 1);
+        setEsSegundoEjercicioEnAdelante(true);
         setGameState("ready");
-      }, 1500);
+        setTimeout(() => {
+          iniciarEjercicioSiguiente();
+        }, 100);
+      }, 700);
     } else {
-      // Era el último ejercicio - mostrar resultado final
       setGameState("final");
     }
   };
+
+  const iniciarEjercicioSiguiente = useCallback(() => {
+    const nextEjercicio = ejercicios[ejercicioActual + 1];
+    if (!nextEjercicio) return;
+    
+    const todasPalabras = nextEjercicio.palabras.split(",").map(p => p.trim()).filter(p => p);
+    const todasOpciones = nextEjercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
+    
+    const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
+    const respuestaCorrectaCalculada = getRespuestaCorrecta(nextEjercicio.tipoPregunta, shuffled);
+    
+    let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
+    const respuestaExiste = opcionesMezcladas.some(
+      op => op.toLowerCase() === respuestaCorrectaCalculada.toLowerCase()
+    );
+    
+    if (!respuestaExiste) {
+      const posicionAleatoria = Math.floor(Math.random() * opcionesMezcladas.length);
+      opcionesMezcladas[posicionAleatoria] = respuestaCorrectaCalculada;
+    }
+    
+    const totalPos = getTotalPositions(nextEjercicio.patron);
+    setPalabrasRonda(shuffled);
+    setOpcionesRonda(opcionesMezcladas);
+    setShownWords(Array(totalPos).fill(""));
+    setCurrentPosition(-1);
+    setPreguntaActual(getPreguntaTexto(nextEjercicio.tipoPregunta));
+    setRespuestaCorrecta(respuestaCorrectaCalculada);
+    setUltimaRespuesta(null);
+    setGameState("playing");
+  }, [ejercicios, ejercicioActual]);
 
   if (loading) {
     return (
@@ -203,7 +282,6 @@ export default function VelocidadExercisePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
-      {/* Header */}
       <header className="bg-gradient-to-r from-purple-800/80 to-pink-700/80 backdrop-blur px-4 py-3 flex items-center justify-between">
         <h1 className="text-white font-bold text-lg">{titulo}</h1>
         <motion.button
@@ -217,7 +295,6 @@ export default function VelocidadExercisePage() {
         </motion.button>
       </header>
 
-      {/* Barra de progreso y resultados */}
       <div className="bg-purple-900/40 backdrop-blur px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-purple-200 text-xs">EJERCICIO</span>
@@ -226,28 +303,18 @@ export default function VelocidadExercisePage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <span className="text-2xl">😊</span>
-            <span className="text-white text-xl font-bold">{correctos}</span>
+            <span className="text-green-400 text-sm font-bold">CORRECTO</span>
+            <span className="text-white text-xl font-bold ml-1">{correctos}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-2xl">😔</span>
-            <span className="text-white text-xl font-bold">{incorrectos}</span>
+            <span className="text-red-400 text-sm font-bold">INCORRECTO</span>
+            <span className="text-white text-xl font-bold ml-1">{incorrectos}</span>
           </div>
-          {ultimaRespuesta && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${
-                ultimaRespuesta === "correcta" ? "bg-green-500" : "bg-red-500"
-              }`}
-            >
-              {ultimaRespuesta === "correcta" ? "✓" : "✗"}
-            </motion.div>
-          )}
         </div>
       </div>
 
       <main className="flex-1 flex flex-col items-center px-6 py-8">
-        {/* Info del ejercicio actual */}
         <motion.div 
           key={ejercicioActual}
           initial={{ opacity: 0, y: -20 }} 
@@ -259,9 +326,8 @@ export default function VelocidadExercisePage() {
           </span>
         </motion.div>
 
-        {/* Grid de palabras */}
         <AnimatePresence mode="wait">
-          {(gameState === "ready" || gameState === "playing") && (
+          {(gameState === "ready" || gameState === "animacion_inicial" || gameState === "playing") && (
             <motion.div 
               key={`grid-${ejercicioActual}`}
               initial={{ opacity: 0 }}
@@ -278,14 +344,24 @@ export default function VelocidadExercisePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="h-8 flex items-center justify-center">
-                    {currentPosition === idx && shownWords[idx] && (
+                  <div className="h-10 flex items-center justify-center relative">
+                    {gameState === "animacion_inicial" && currentPosition === idx && (
+                      <motion.div
+                        key={`circle-${idx}`}
+                        initial={{ scale: 0, y: -20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        exit={{ scale: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        className="w-8 h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
+                      />
+                    )}
+                    {gameState === "playing" && currentPosition === idx && shownWords[idx] && (
                       <motion.span
                         key={`word-${idx}-${shownWords[idx]}`}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.15 }}
+                        transition={{ duration: 0.1 }}
                         className="text-white font-bold text-xl"
                       >
                         {shownWords[idx]}
@@ -295,9 +371,10 @@ export default function VelocidadExercisePage() {
                   <motion.div 
                     className="w-full h-1 rounded-full"
                     animate={{ 
-                      backgroundColor: currentPosition === idx ? "#c084fc" : "#7c3aed",
-                      scaleY: currentPosition === idx ? 1.5 : 1
+                      backgroundColor: currentPosition === idx ? "#facc15" : "#7c3aed",
+                      scaleY: currentPosition === idx ? 2 : 1
                     }}
+                    transition={{ duration: 0.1 }}
                   />
                 </motion.div>
               ))}
@@ -305,7 +382,6 @@ export default function VelocidadExercisePage() {
           )}
         </AnimatePresence>
 
-        {/* Botón Iniciar */}
         <AnimatePresence>
           {gameState === "ready" && (
             <motion.button
@@ -324,7 +400,6 @@ export default function VelocidadExercisePage() {
           )}
         </AnimatePresence>
 
-        {/* Pregunta y opciones */}
         <AnimatePresence>
           {gameState === "question" && (
             <motion.div 
@@ -344,7 +419,7 @@ export default function VelocidadExercisePage() {
                     key={idx}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: idx * 0.08, type: "spring", stiffness: 200 }}
+                    transition={{ delay: idx * 0.05, type: "spring", stiffness: 200 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRespuesta(opcion)}
@@ -359,7 +434,6 @@ export default function VelocidadExercisePage() {
           )}
         </AnimatePresence>
 
-        {/* Transición entre ejercicios */}
         <AnimatePresence>
           {gameState === "transicion" && (
             <motion.div
@@ -371,26 +445,19 @@ export default function VelocidadExercisePage() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-4xl ${
+                className={`w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center text-3xl ${
                   ultimaRespuesta === "correcta" ? "bg-green-500" : "bg-red-500"
                 }`}
               >
                 {ultimaRespuesta === "correcta" ? "😊" : "😔"}
               </motion.div>
-              <p className="text-white text-lg">
-                {ultimaRespuesta === "correcta" ? "¡Correcto!" : "Incorrecto"}
-              </p>
-              <p className="text-white/70 text-sm mt-2">
-                Respuesta: <span className="font-bold text-yellow-300">{respuestaCorrecta}</span>
-              </p>
-              <p className="text-white/60 text-sm mt-4">
-                Siguiente ejercicio...
+              <p className="text-white text-lg font-bold">
+                {ultimaRespuesta === "correcta" ? "¡CORRECTO!" : "INCORRECTO"}
               </p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Resultado Final */}
         <AnimatePresence>
           {gameState === "final" && (
             <motion.div 
@@ -417,12 +484,12 @@ export default function VelocidadExercisePage() {
                   <div className="text-center">
                     <span className="text-4xl">😊</span>
                     <p className="text-white text-2xl font-bold">{correctos}</p>
-                    <p className="text-white/60 text-sm">Correctos</p>
+                    <p className="text-green-400 text-sm font-bold">CORRECTOS</p>
                   </div>
                   <div className="text-center">
                     <span className="text-4xl">😔</span>
                     <p className="text-white text-2xl font-bold">{incorrectos}</p>
-                    <p className="text-white/60 text-sm">Incorrectos</p>
+                    <p className="text-red-400 text-sm font-bold">INCORRECTOS</p>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-white/20">
@@ -442,6 +509,7 @@ export default function VelocidadExercisePage() {
                     setCorrectos(0);
                     setIncorrectos(0);
                     setUltimaRespuesta(null);
+                    setEsSegundoEjercicioEnAdelante(false);
                     setGameState("ready");
                   }}
                   className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg"
