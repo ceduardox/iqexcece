@@ -3959,20 +3959,20 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           const newNivel = velocidadEjercicio.niveles.length + 1;
                           setVelocidadEjercicio({
                             ...velocidadEjercicio,
-                            niveles: [...velocidadEjercicio.niveles, { 
+                            niveles: [{ 
                               nivel: newNivel, 
                               patron: "3x2", 
                               velocidad: 150, 
                               palabras: "vista, atomo, iglesia, olvido, orar, opaco",
                               opciones: "atomo, olvido, orar, vista, iglesia, opaco",
                               tipoPregunta: "ultima"
-                            }]
+                            }, ...velocidadEjercicio.niveles]
                           });
                         }}
                         className="bg-purple-600"
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Agregar Nivel
+                        Crear Ejercicio
                       </Button>
                     </div>
                     
