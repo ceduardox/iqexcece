@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 interface Nivel {
   nivel: number;
@@ -17,17 +17,27 @@ export default function VelocidadLevelPage() {
   const [, setLocation] = useLocation();
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [titulo, setTitulo] = useState("Velocidad Lectora");
+  const [imagen, setImagen] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch(`/api/velocidad/${itemId}`);
-        const data = await res.json();
-        if (data.ejercicio) {
-          setTitulo(data.ejercicio.titulo || "Velocidad Lectora");
-          const parsed = JSON.parse(data.ejercicio.niveles || "[]");
+        const [velocidadRes, itemRes] = await Promise.all([
+          fetch(`/api/velocidad/${itemId}`),
+          fetch(`/api/entrenamiento/item/${itemId}`)
+        ]);
+        const velocidadData = await velocidadRes.json();
+        const itemData = await itemRes.json();
+        
+        if (velocidadData.ejercicio) {
+          setTitulo(velocidadData.ejercicio.titulo || "Velocidad Lectora");
+          const parsed = JSON.parse(velocidadData.ejercicio.niveles || "[]");
           setNiveles(parsed);
+        }
+        
+        if (itemData.item?.prepImage) {
+          setImagen(itemData.item.prepImage);
         }
       } catch (e) {
         console.error(e);
@@ -37,6 +47,47 @@ export default function VelocidadLevelPage() {
     };
     loadData();
   }, [itemId]);
+
+  const getPatronIcon = (patron: string) => {
+    const patrones: Record<string, JSX.Element> = {
+      "2x2": (
+        <div className="grid grid-cols-2 gap-1.5">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="w-3 h-3 rounded-full bg-purple-400" />
+          ))}
+        </div>
+      ),
+      "3x3": (
+        <div className="grid grid-cols-3 gap-1">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+          ))}
+        </div>
+      ),
+      "2x3": (
+        <div className="grid grid-cols-3 gap-1">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+          ))}
+        </div>
+      ),
+      "3x2": (
+        <div className="grid grid-cols-2 gap-1.5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+          ))}
+        </div>
+      ),
+      "4x4": (
+        <div className="grid grid-cols-4 gap-0.5">
+          {[...Array(16)].map((_, i) => (
+            <div key={i} className="w-2 h-2 rounded-full bg-purple-400" />
+          ))}
+        </div>
+      ),
+    };
+    return patrones[patron] || patrones["2x2"];
+  };
 
   if (loading) {
     return (
@@ -79,33 +130,52 @@ export default function VelocidadLevelPage() {
         </button>
       </header>
 
-      <main className="flex-1 flex flex-col items-center px-6 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <Zap className="w-16 h-16 text-yellow-300 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white mb-2">{titulo}</h1>
-          <p className="text-white/80">Selecciona un nivel</p>
-        </motion.div>
+      <main className="flex-1 flex flex-col">
+        {imagen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center mb-4"
+          >
+            <img 
+              src={imagen} 
+              alt="Ejercicio" 
+              className="w-48 h-48 object-contain"
+            />
+          </motion.div>
+        )}
 
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-          {niveles.map((nivel, index) => (
-            <motion.button
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/${nivel.nivel}`)}
-              className="bg-white/20 backdrop-blur-sm border-2 border-white/40 rounded-2xl p-6 text-center hover:bg-white/30 transition-all"
-              data-testid={`button-nivel-${nivel.nivel}`}
-            >
-              <div className="text-4xl font-bold text-white mb-2">{nivel.nivel}</div>
-              <div className="text-lg text-yellow-200 font-semibold">{nivel.velocidad} pal/min</div>
-              <div className="text-xs text-white/60 mt-1">Patrón {nivel.patron}</div>
-            </motion.button>
-          ))}
+        <div className="bg-white rounded-t-3xl flex-1 px-6 py-8">
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-2xl font-bold text-gray-800 text-center mb-6"
+          >
+            {titulo}
+          </motion.h1>
+
+          <p className="text-gray-600 mb-4">Elige un nivel:</p>
+
+          <div className="grid grid-cols-2 gap-4">
+            {niveles.map((nivel, index) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/${nivel.nivel}`)}
+                className="bg-white border-2 border-purple-200 rounded-2xl p-6 text-center hover:border-purple-400 hover:shadow-lg transition-all"
+                data-testid={`button-nivel-${nivel.nivel}`}
+              >
+                <div className="flex justify-center mb-3">
+                  <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+                    {getPatronIcon(nivel.patron)}
+                  </div>
+                </div>
+                <div className="text-lg font-semibold text-gray-700">Nivel {nivel.nivel}</div>
+              </motion.button>
+            ))}
+          </div>
         </div>
       </main>
     </div>
