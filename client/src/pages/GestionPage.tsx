@@ -3677,6 +3677,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
                               >
                                 <option value="velocidad" className="bg-gray-700 text-white">Velocidad de lectura</option>
+                                <option value="numeros" className="bg-gray-700 text-white">Identifica Números y Letras</option>
                                 <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
