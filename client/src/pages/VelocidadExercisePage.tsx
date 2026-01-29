@@ -355,19 +355,17 @@ export default function VelocidadExercisePage() {
           {(gameState === "ready" || gameState === "animacion_inicial" || gameState === "playing") && (
             <motion.div 
               key={`grid-${ejercicioActual}`}
-              initial={{ opacity: 0 }}
+              initial={esSegundoEjercicioEnAdelante ? { opacity: 1 } : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="grid gap-6 mb-8 w-full max-w-md"
               style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
             >
               {Array.from({ length: totalPos }).map((_, idx) => (
-                <motion.div 
+                <div 
                   key={idx} 
                   className="flex flex-col items-center gap-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
                 >
                   <div className="h-10 flex items-center justify-center relative">
                     {gameState === "animacion_inicial" && currentPosition === idx && (
@@ -401,7 +399,7 @@ export default function VelocidadExercisePage() {
                     }}
                     transition={{ duration: 0.1 }}
                   />
-                </motion.div>
+                </div>
               ))}
             </motion.div>
           )}
