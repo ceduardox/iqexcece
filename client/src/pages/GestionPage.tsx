@@ -136,7 +136,7 @@ export default function GestionPage() {
     pageTitle: "Entrenamientos",
     pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
   });
-  const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
+  const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
   // Páginas de preparación
@@ -3662,6 +3662,23 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 className="bg-white/10 border-teal-500/30 text-white/80"
                                 placeholder="Ej: Para procesar palabras rápidamente"
                               />
+                            </div>
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Tipo de ejercicio</label>
+                              <select
+                                value={item.tipoEjercicio || "velocidad"}
+                                onChange={(e) => {
+                                  const updated = [...entrenamientoItems];
+                                  updated[idx].tipoEjercicio = e.target.value;
+                                  setEntrenamientoItems(updated);
+                                }}
+                                className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
+                              >
+                                <option value="velocidad" className="bg-gray-700 text-white">Velocidad de lectura</option>
+                                <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
+                                <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
+                                <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
+                              </select>
                             </div>
                           </div>
                         </div>

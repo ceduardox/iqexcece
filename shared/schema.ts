@@ -178,6 +178,7 @@ export const entrenamientoItems = pgTable("entrenamiento_items", {
   title: text("title").notNull(),
   description: text("description"),
   linkUrl: text("link_url"),
+  tipoEjercicio: text("tipo_ejercicio").default("velocidad"),
   sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(true),
   prepImage: text("prep_image"),
