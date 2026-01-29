@@ -22,7 +22,7 @@ export default function VelocidadExercisePage() {
   const [tiempoAnimacionInicial, setTiempoAnimacionInicial] = useState(3);
   const [velocidadAnimacion, setVelocidadAnimacion] = useState(5);
   
-  const [gameState, setGameState] = useState<"ready" | "animacion_inicial" | "playing" | "question" | "transicion" | "final">("ready");
+  const [gameState, setGameState] = useState<"ready" | "animacion_inicial" | "preparando" | "playing" | "question" | "transicion" | "final">("ready");
   const [correctos, setCorrectos] = useState(0);
   const [incorrectos, setIncorrectos] = useState(0);
   const [ultimaRespuesta, setUltimaRespuesta] = useState<"correcta" | "incorrecta" | null>(null);
@@ -177,6 +177,17 @@ export default function VelocidadExercisePage() {
     return () => clearInterval(interval);
   }, [gameState, ejercicio, tiempoAnimacionInicial, velocidadAnimacion]);
 
+  // Estado "preparando": muestra círculos estáticos por 800ms antes de empezar
+  useEffect(() => {
+    if (gameState !== "preparando") return;
+    
+    const timeout = setTimeout(() => {
+      setGameState("playing");
+    }, 800);
+    
+    return () => clearTimeout(timeout);
+  }, [gameState]);
+
   useEffect(() => {
     if (gameState !== "playing" || palabrasRonda.length === 0) return;
     
@@ -260,7 +271,7 @@ export default function VelocidadExercisePage() {
         setVelocidadActual(nextEjercicio.velocidad);
         setPatronActual(nextEjercicio.patron);
         setPlayingKey(k => k + 1);
-        setGameState("playing");
+        setGameState("preparando");
       }, 500);
     } else {
       setGameState("final");
@@ -377,7 +388,7 @@ export default function VelocidadExercisePage() {
         </div>
 
         <AnimatePresence mode="wait">
-          {(gameState === "ready" || gameState === "animacion_inicial" || gameState === "playing") && (
+          {(gameState === "ready" || gameState === "animacion_inicial" || gameState === "preparando" || gameState === "playing") && (
             <motion.div 
               key={`grid-${ejercicioActual}`}
               initial={esSegundoEjercicioEnAdelante ? { opacity: 1 } : { opacity: 0 }}
@@ -400,6 +411,15 @@ export default function VelocidadExercisePage() {
                         animate={{ scale: 1, y: 0 }}
                         exit={{ scale: 0 }}
                         transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        className="w-6 h-6 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"
+                      />
+                    )}
+                    {gameState === "preparando" && (
+                      <motion.div
+                        key={`static-circle-${idx}`}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: idx * 0.05, type: "spring", stiffness: 400, damping: 15 }}
                         className="w-6 h-6 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"
                       />
                     )}
