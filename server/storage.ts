@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -64,6 +64,13 @@ export interface IStorage {
   deletePrepPage(id: string): Promise<void>;
   getCategoriaPrepPage(categoria: string): Promise<any | null>;
   setCategoriaPrepPage(categoria: string, prepPageId: string | null): Promise<any>;
+  
+  // Velocidad exercises
+  getVelocidadEjerciciosByItem(entrenamientoItemId: string): Promise<VelocidadEjercicio[]>;
+  getVelocidadEjercicioById(id: string): Promise<VelocidadEjercicio | null>;
+  saveVelocidadEjercicio(ejercicio: InsertVelocidadEjercicio): Promise<VelocidadEjercicio>;
+  updateVelocidadEjercicio(id: string, ejercicio: Partial<InsertVelocidadEjercicio>): Promise<VelocidadEjercicio | null>;
+  deleteVelocidadEjercicio(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -728,6 +735,33 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(categoriaPrepPage).values({ categoria, prepPageId }).returning();
       return created;
     }
+  }
+
+  // Velocidad exercises
+  async getVelocidadEjerciciosByItem(entrenamientoItemId: string): Promise<VelocidadEjercicio[]> {
+    return await db.select().from(velocidadEjercicios).where(eq(velocidadEjercicios.entrenamientoItemId, entrenamientoItemId));
+  }
+
+  async getVelocidadEjercicioById(id: string): Promise<VelocidadEjercicio | null> {
+    const [ejercicio] = await db.select().from(velocidadEjercicios).where(eq(velocidadEjercicios.id, id));
+    return ejercicio || null;
+  }
+
+  async saveVelocidadEjercicio(ejercicio: InsertVelocidadEjercicio): Promise<VelocidadEjercicio> {
+    const [created] = await db.insert(velocidadEjercicios).values(ejercicio).returning();
+    return created;
+  }
+
+  async updateVelocidadEjercicio(id: string, ejercicio: Partial<InsertVelocidadEjercicio>): Promise<VelocidadEjercicio | null> {
+    const [updated] = await db.update(velocidadEjercicios)
+      .set({ ...ejercicio, updatedAt: new Date() })
+      .where(eq(velocidadEjercicios.id, id))
+      .returning();
+    return updated || null;
+  }
+
+  async deleteVelocidadEjercicio(id: string): Promise<void> {
+    await db.delete(velocidadEjercicios).where(eq(velocidadEjercicios.id, id));
   }
 }
 

@@ -207,11 +207,25 @@ export const categoriaPrepPage = pgTable("categoria_prep_page", {
   prepPageId: text("prep_page_id"),
 });
 
+// Velocidad exercises (linked to entrenamiento items)
+export const velocidadEjercicios = pgTable("velocidad_ejercicios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entrenamientoItemId: text("entrenamiento_item_id").notNull(),
+  titulo: text("titulo").default("Mejora tu Velocidad"),
+  descripcion: text("descripcion"),
+  imagenCabecera: text("imagen_cabecera"),
+  niveles: text("niveles").notNull(), // JSON array of level configs [{nivel: 1, patron: "2x3", velocidad: 1000, contenido: ["A","B","C"]}]
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertEntrenamientoCardSchema = createInsertSchema(entrenamientoCards).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoPageSchema = createInsertSchema(entrenamientoPages).omit({ id: true, updatedAt: true });
 export const insertEntrenamientoItemSchema = createInsertSchema(entrenamientoItems).omit({ id: true, updatedAt: true });
 export const insertPrepPageSchema = createInsertSchema(prepPages).omit({ id: true, createdAt: true });
 export const insertCategoriaPrepPageSchema = createInsertSchema(categoriaPrepPage).omit({ id: true });
+export const insertVelocidadEjercicioSchema = createInsertSchema(velocidadEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
@@ -235,3 +249,5 @@ export type PrepPage = typeof prepPages.$inferSelect;
 export type InsertPrepPage = z.infer<typeof insertPrepPageSchema>;
 export type CategoriaPrepPage = typeof categoriaPrepPage.$inferSelect;
 export type InsertCategoriaPrepPage = z.infer<typeof insertCategoriaPrepPageSchema>;
+export type VelocidadEjercicio = typeof velocidadEjercicios.$inferSelect;
+export type InsertVelocidadEjercicio = z.infer<typeof insertVelocidadEjercicioSchema>;
