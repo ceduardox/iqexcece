@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Play } from "lucide-react";
@@ -36,6 +36,8 @@ export default function VelocidadExercisePage() {
   const [respuestaCorrecta, setRespuestaCorrecta] = useState("");
   const [velocidadActual, setVelocidadActual] = useState(150);
   const [patronActual, setPatronActual] = useState("3x2");
+  const [playingKey, setPlayingKey] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -141,6 +143,7 @@ export default function VelocidadExercisePage() {
     setUltimaRespuesta(null);
     setVelocidadActual(ejercicio.velocidad);
     setPatronActual(ejercicio.patron);
+    setPlayingKey(k => k + 1);
     
     if (esSegundoEjercicioEnAdelante) {
       setGameState("playing");
@@ -177,32 +180,47 @@ export default function VelocidadExercisePage() {
   useEffect(() => {
     if (gameState !== "playing" || palabrasRonda.length === 0) return;
     
+    // Limpiar cualquier intervalo anterior
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
     const totalPos = getTotalPositions(patronActual);
     const totalPalabras = palabrasRonda.length;
     const intervalMs = getIntervalMs(velocidadActual);
     let wordIndex = 0;
     
+    // Mostrar primera palabra inmediatamente
     const posActual = wordIndex % totalPos;
     setCurrentPosition(posActual);
     setShownWords(Array(totalPos).fill("").map((_, i) => i === posActual ? palabrasRonda[wordIndex] : ""));
     wordIndex = 1;
     
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       if (wordIndex < totalPalabras) {
         const pos = wordIndex % totalPos;
         setCurrentPosition(pos);
         setShownWords(Array(totalPos).fill("").map((_, i) => i === pos ? palabrasRonda[wordIndex] : ""));
         wordIndex++;
       } else {
-        clearInterval(interval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         setCurrentPosition(-1);
         setShownWords([]);
         setTimeout(() => setGameState("question"), 300);
       }
     }, intervalMs);
     
-    return () => clearInterval(interval);
-  }, [gameState, patronActual, velocidadActual, palabrasRonda]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [gameState, playingKey]);
 
   const handleRespuesta = (opcion: string) => {
     const esCorrecta = opcion.toLowerCase() === respuestaCorrecta.toLowerCase();
@@ -241,6 +259,7 @@ export default function VelocidadExercisePage() {
         setUltimaRespuesta(null);
         setVelocidadActual(nextEjercicio.velocidad);
         setPatronActual(nextEjercicio.patron);
+        setPlayingKey(k => k + 1);
         setGameState("playing");
       }, 500);
     } else {
