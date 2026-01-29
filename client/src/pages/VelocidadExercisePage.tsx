@@ -77,6 +77,15 @@ export default function VelocidadExercisePage() {
     return { cols: parseInt(parts[0]) || 3, rows: parseInt(parts[1]) || 2 };
   };
 
+  const getNivelFromPatron = (patron: string): number => {
+    const parts = patron.split("x");
+    const total = (parseInt(parts[0]) || 2) * (parseInt(parts[1]) || 2);
+    if (total <= 4) return 1;
+    if (total <= 6) return 2;
+    if (total <= 8) return 3;
+    return 4;
+  };
+
   const getTotalPositions = (patron: string) => {
     const { cols, rows } = getGridDimensions(patron);
     return cols * rows;
@@ -315,7 +324,7 @@ export default function VelocidadExercisePage() {
       <div className="bg-purple-900/60 px-4 py-3 flex items-center justify-between">
         <div className="text-center">
           <span className="text-purple-300 text-xs block">NIVEL</span>
-          <span className="text-white text-2xl font-bold">{ejercicio.patron}</span>
+          <span className="text-white text-2xl font-bold">{getNivelFromPatron(ejercicio.patron)}</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-center">

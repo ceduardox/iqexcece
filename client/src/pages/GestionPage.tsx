@@ -3980,7 +3980,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       {velocidadEjercicio.niveles.map((nivel, nivelIdx) => (
                         <div key={nivelIdx} className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-purple-400 font-semibold">Nivel {nivel.nivel}</span>
+                            <span className="text-purple-400 font-semibold">Ejercicio {nivel.nivel}</span>
                             {velocidadEjercicio.niveles.length > 1 && (
                               <Button
                                 size="sm"
@@ -4008,11 +4008,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 }}
                                 className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
-                                <option value="3x2" className="bg-gray-700 text-white">3x2 (6)</option>
-                                <option value="3x3" className="bg-gray-700 text-white">3x3 (9)</option>
-                                <option value="2x2" className="bg-gray-700 text-white">2x2 (4)</option>
-                                <option value="2x3" className="bg-gray-700 text-white">2x3 (6)</option>
-                                <option value="2x4" className="bg-gray-700 text-white">2x4 (8)</option>
+                                <option value="2x2" className="bg-gray-700 text-white">Nivel 1 - 2x2 (4)</option>
+                                <option value="2x3" className="bg-gray-700 text-white">Nivel 2 - 2x3 (6)</option>
+                                <option value="3x2" className="bg-gray-700 text-white">Nivel 2 - 3x2 (6)</option>
+                                <option value="2x4" className="bg-gray-700 text-white">Nivel 3 - 2x4 (8)</option>
+                                <option value="3x3" className="bg-gray-700 text-white">Nivel 4 - 3x3 (9)</option>
                               </select>
                             </div>
                             <div>
