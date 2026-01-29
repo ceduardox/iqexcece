@@ -13,7 +13,7 @@ interface Ejercicio {
 }
 
 export default function VelocidadExercisePage() {
-  const { categoria, itemId } = useParams<{ categoria: string; itemId: string }>();
+  const { categoria, itemId, patron } = useParams<{ categoria: string; itemId: string; patron: string }>();
   const [, setLocation] = useLocation();
   const [ejercicios, setEjercicios] = useState<Ejercicio[]>([]);
   const [ejercicioActual, setEjercicioActual] = useState(0);
@@ -43,8 +43,13 @@ export default function VelocidadExercisePage() {
         const itemData = await itemRes.json();
         
         if (velocidadData.ejercicio && velocidadData.ejercicio.niveles) {
-          const niveles = JSON.parse(velocidadData.ejercicio.niveles);
-          setEjercicios(niveles);
+          const todosNiveles: Ejercicio[] = JSON.parse(velocidadData.ejercicio.niveles);
+          // Filtrar por patrón seleccionado
+          const patronDecoded = decodeURIComponent(patron || "");
+          const nivelesFiltrados = patronDecoded 
+            ? todosNiveles.filter(n => n.patron === patronDecoded)
+            : todosNiveles;
+          setEjercicios(nivelesFiltrados);
           setTitulo(velocidadData.ejercicio.titulo || itemData.item?.title || "Velocidad Lectora");
         }
       } catch (e) {
@@ -54,7 +59,7 @@ export default function VelocidadExercisePage() {
       }
     };
     loadData();
-  }, [itemId]);
+  }, [itemId, patron]);
 
   const ejercicio = ejercicios[ejercicioActual];
 
