@@ -136,6 +136,8 @@ export default function EntrenamientoPrepPage() {
             const tipo = prepData?.tipoEjercicio || "velocidad";
             if (tipo === "velocidad") {
               setLocation(`/velocidad/${categoria}/${itemId}`);
+            } else if (tipo === "numeros") {
+              setLocation(`/numeros/${categoria}/${itemId}`);
             } else if (tipo === "lectura") {
               setLocation(`/lectura/${categoria}/${itemId}`);
             } else if (tipo === "memoria") {
