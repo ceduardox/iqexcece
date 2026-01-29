@@ -38,6 +38,27 @@ export default function VelocidadExercisePage() {
   const [patronActual, setPatronActual] = useState("3x2");
   const [playingKey, setPlayingKey] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Refs para tener siempre valores actuales en el intervalo
+  const velocidadRef = useRef(velocidadActual);
+  const patronRef = useRef(patronActual);
+  const palabrasRef = useRef<string[]>([]);
+  
+  // Sincronizar refs con estado
+  useEffect(() => {
+    velocidadRef.current = velocidadActual;
+    console.log("velocidadRef actualizado:", velocidadActual);
+  }, [velocidadActual]);
+  
+  useEffect(() => {
+    patronRef.current = patronActual;
+    console.log("patronRef actualizado:", patronActual);
+  }, [patronActual]);
+  
+  useEffect(() => {
+    palabrasRef.current = palabrasRonda;
+    console.log("palabrasRef actualizadas:", palabrasRonda.length, "palabras");
+  }, [palabrasRonda]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -189,30 +210,47 @@ export default function VelocidadExercisePage() {
   }, [gameState]);
 
   useEffect(() => {
-    if (gameState !== "playing" || palabrasRonda.length === 0) return;
+    if (gameState !== "playing") return;
     
-    // Limpiar cualquier intervalo anterior
+    // Limpiar cualquier intervalo anterior SIEMPRE
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
     
-    const totalPos = getTotalPositions(patronActual);
-    const totalPalabras = palabrasRonda.length;
-    const intervalMs = getIntervalMs(velocidadActual);
+    // Usar refs para obtener valores más recientes
+    const velocidadParaUsar = velocidadRef.current;
+    const patronParaUsar = patronRef.current;
+    const palabrasParaUsar = [...palabrasRef.current];
+    
+    if (palabrasParaUsar.length === 0) {
+      console.log("No hay palabras, saltando...");
+      return;
+    }
+    
+    const totalPos = getTotalPositions(patronParaUsar);
+    const totalPalabras = palabrasParaUsar.length;
+    const intervalMs = getIntervalMs(velocidadParaUsar);
+    
+    console.log("=== PLAYING STATE (desde refs) ===");
+    console.log("velocidad:", velocidadParaUsar);
+    console.log("intervalMs:", intervalMs);
+    console.log("patron:", patronParaUsar);
+    console.log("totalPalabras:", totalPalabras);
+    
     let wordIndex = 0;
     
     // Mostrar primera palabra inmediatamente
     const posActual = wordIndex % totalPos;
     setCurrentPosition(posActual);
-    setShownWords(Array(totalPos).fill("").map((_, i) => i === posActual ? palabrasRonda[wordIndex] : ""));
+    setShownWords(Array(totalPos).fill("").map((_, i) => i === posActual ? palabrasParaUsar[wordIndex] : ""));
     wordIndex = 1;
     
     intervalRef.current = setInterval(() => {
       if (wordIndex < totalPalabras) {
         const pos = wordIndex % totalPos;
         setCurrentPosition(pos);
-        setShownWords(Array(totalPos).fill("").map((_, i) => i === pos ? palabrasRonda[wordIndex] : ""));
+        setShownWords(Array(totalPos).fill("").map((_, i) => i === pos ? palabrasParaUsar[wordIndex] : ""));
         wordIndex++;
       } else {
         if (intervalRef.current) {
