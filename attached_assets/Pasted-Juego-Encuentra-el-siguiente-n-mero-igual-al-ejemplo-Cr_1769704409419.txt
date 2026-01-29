@@ -1,0 +1,77 @@
+Juego “Encuentra el siguiente número” (igual al ejemplo)
+
+Cree una pantalla estilo app móvil como el ejercicio de la imagen: header verde con título y métricas, texto de instrucción, cuadro verde con el número objetivo y un tablero 5x5 + botón Iniciar. Debe incluir animaciones cortas y el mismo comportamiento.
+
+1) Tablero (NO secuencial)
+
+El tablero tiene 25 casillas (5x5).
+
+Contiene los números 1 al 25, pero mezclados aleatoriamente (shuffle real Fisher–Yates).
+
+El objetivo (target) inicia en 1 y luego sigue 2,3,4… hasta 25.
+
+2) Estados visuales (muy importante)
+
+ANTES DE INICIAR
+
+El tablero está bloqueado (no permite clicks).
+
+Todas las casillas se ven GRISES (estado inactivo).
+
+DESPUÉS DE PRESIONAR “INICIAR”
+
+El tablero se habilita.
+
+Todas las casillas cambian inmediatamente a un COLOR ACTIVO (por ejemplo celeste/verde suave), ya NO están grises.
+
+Debe existir una transición suave (fade/scale leve) al activar.
+
+AL TERMINAR EL TIEMPO (0s) O AL COMPLETAR 25
+
+El tablero vuelve a gris/bloqueado y el objetivo vuelve a “?” (o muestra ✓ antes de reset).
+
+3) Respuesta al toque (sin marcar permanente)
+
+Correcto:
+
+NO deja la casilla marcada (no verde permanente, no deshabilitar).
+
+Solo avanza al siguiente objetivo y suma “correctos”.
+
+Puede animar el cuadro del objetivo con un “pop” breve.
+
+Incorrecto:
+
+La casilla hace flash rojo momentáneo (120–200ms) y vuelve a su color activo normal.
+
+Opcional: pequeño “shake”.
+
+Suma “incorrectos”.
+
+En ningún caso queda una casilla marcada permanentemente.
+
+4) Tiempo y contadores
+
+Temporizador visible de 60 segundos.
+
+Contadores visibles: Correctos e Incorrectos.
+
+El tiempo baja cada segundo.
+
+En 0 segundos: fin de ronda y bloqueo.
+
+5) UI / Layout
+
+Diseño responsive móvil.
+
+Header superior verde con “X”.
+
+Métricas en el header (nivel, tiempo, correctos, incorrectos).
+
+Texto centrado: “Encuentra el siguiente número en el tablero:”
+
+Cuadro verde del objetivo grande.
+
+Tablero 5x5 con separación y esquinas redondeadas.
+
+Botón “Iniciar” naranja abajo.
