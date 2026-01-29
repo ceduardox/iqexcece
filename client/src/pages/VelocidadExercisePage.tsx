@@ -33,7 +33,7 @@ export default function VelocidadExercisePage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch(`/api/velocidad-ejercicios/${itemId}`);
+        const res = await fetch(`/api/velocidad/${itemId}`);
         const data = await res.json();
         if (data.ejercicio && data.ejercicio.niveles) {
           const niveles = JSON.parse(data.ejercicio.niveles);

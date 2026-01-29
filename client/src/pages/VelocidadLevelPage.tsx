@@ -22,7 +22,7 @@ export default function VelocidadLevelPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch(`/api/velocidad-ejercicios/${itemId}`);
+        const res = await fetch(`/api/velocidad/${itemId}`);
         const data = await res.json();
         if (data.ejercicio) {
           setTitulo(data.ejercicio.titulo || "Velocidad Lectora");
