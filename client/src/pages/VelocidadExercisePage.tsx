@@ -84,16 +84,16 @@ export default function VelocidadExercisePage() {
     const todasPalabras = nivel.palabras.split(",").map(p => p.trim()).filter(p => p);
     const todasOpciones = nivel.opciones.split(",").map(o => o.trim()).filter(o => o);
     
+    // Mezclar palabras y usar TODAS (no solo las que caben en el patrón)
     const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
-    const palabrasSeleccionadas = shuffled.slice(0, totalPos);
     const opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
     
-    setPalabrasRonda(palabrasSeleccionadas);
+    setPalabrasRonda(shuffled); // Usar todas las palabras
     setOpcionesRonda(opcionesMezcladas);
     setShownWords(Array(totalPos).fill(""));
     setCurrentPosition(-1);
     setPreguntaActual(getPreguntaTexto(nivel.tipoPregunta));
-    setRespuestaCorrecta(getRespuestaCorrecta(nivel.tipoPregunta, palabrasSeleccionadas));
+    setRespuestaCorrecta(getRespuestaCorrecta(nivel.tipoPregunta, shuffled));
     setShowCircles(true);
     setGameState("animating");
   }, [nivel]);
@@ -120,18 +120,21 @@ export default function VelocidadExercisePage() {
   useEffect(() => {
     if (gameState !== "playing" || !nivel || palabrasRonda.length === 0) return;
     const totalPos = getTotalPositions(nivel.patron);
+    const totalPalabras = palabrasRonda.length;
     const intervalMs = getIntervalMs(nivel.velocidad);
     let wordIndex = 0;
     
-    // Mostrar primera palabra inmediatamente
-    setCurrentPosition(0);
-    setShownWords(Array(totalPos).fill("").map((_, i) => i === 0 ? (palabrasRonda[0] || "") : ""));
+    // Mostrar primera palabra inmediatamente en posición 0
+    const posActual = wordIndex % totalPos;
+    setCurrentPosition(posActual);
+    setShownWords(Array(totalPos).fill("").map((_, i) => i === posActual ? palabrasRonda[wordIndex] : ""));
     wordIndex = 1;
     
     const interval = setInterval(() => {
-      if (wordIndex < totalPos) {
-        setCurrentPosition(wordIndex);
-        setShownWords(Array(totalPos).fill("").map((_, i) => i === wordIndex ? (palabrasRonda[wordIndex] || "") : ""));
+      if (wordIndex < totalPalabras) {
+        const pos = wordIndex % totalPos; // Posición cíclica
+        setCurrentPosition(pos);
+        setShownWords(Array(totalPos).fill("").map((_, i) => i === pos ? palabrasRonda[wordIndex] : ""));
         wordIndex++;
       } else {
         clearInterval(interval);
