@@ -32,8 +32,16 @@ export default function VelocidadPatronPage() {
         
         if (velocidadData.ejercicio && velocidadData.ejercicio.niveles) {
           const niveles: Ejercicio[] = JSON.parse(velocidadData.ejercicio.niveles);
-          // Extraer patrones únicos
+          // Extraer patrones únicos y ordenarlos por nivel
           const patronesUnicos = Array.from(new Set(niveles.map(n => n.patron)));
+          // Ordenar por nivel (usando getPatronOrder)
+          const getOrder = (p: string) => {
+            const order: Record<string, number> = {
+              "2x2": 1, "1x3": 1, "2x3": 2, "3x2": 2, "2x4": 3, "4x2": 3, "3x3": 4, "4x4": 5
+            };
+            return order[p] || 99;
+          };
+          patronesUnicos.sort((a, b) => getOrder(a) - getOrder(b));
           setPatrones(patronesUnicos);
           setTitulo(velocidadData.ejercicio.titulo || itemData.item?.title || "Mejora tu Velocidad de Lectura");
         }
@@ -62,23 +70,30 @@ export default function VelocidadPatronPage() {
         {[...Array(total)].map((_, i) => (
           <div 
             key={i} 
-            className="w-3 h-3 rounded-full bg-purple-400"
+            className="w-3 h-3 rounded-full bg-white/90 shadow-sm"
           />
         ))}
       </div>
     );
   };
 
-  const getPatronLabel = (patron: string) => {
-    const labels: Record<string, string> = {
-      "2x2": "Nivel 1",
-      "2x3": "Nivel 2",
-      "3x2": "Nivel 2",
-      "3x3": "Nivel 3",
-      "4x4": "Nivel 4",
-      "1x3": "Nivel 1",
+  const getPatronOrder = (patron: string) => {
+    const order: Record<string, number> = {
+      "2x2": 1,
+      "1x3": 1,
+      "2x3": 2,
+      "3x2": 2,
+      "2x4": 3,
+      "4x2": 3,
+      "3x3": 4,
+      "4x4": 5,
     };
-    return labels[patron] || `Patrón ${patron}`;
+    return order[patron] || 99;
+  };
+
+  const getPatronLabel = (patron: string) => {
+    const order = getPatronOrder(patron);
+    return `Nivel ${order}`;
   };
 
   if (loading) {
@@ -146,26 +161,31 @@ export default function VelocidadPatronPage() {
             {titulo}
           </motion.h1>
 
-          <p className="text-gray-600 mb-4">Elige un nivel:</p>
+          <p className="text-gray-500 text-sm mb-6">Selecciona el nivel de dificultad:</p>
 
           <div className="grid grid-cols-2 gap-4">
             {patrones.map((patron, index) => (
               <motion.button
                 key={patron}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/patron/${encodeURIComponent(patron)}`)}
-                className="bg-white border-2 border-purple-200 rounded-2xl p-6 text-center hover:border-purple-400 hover:shadow-lg transition-all"
+                className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-5 text-center hover:border-purple-500 hover:shadow-xl hover:scale-105 transition-all duration-200"
                 data-testid={`button-patron-${patron}`}
               >
-                <div className="flex justify-center mb-3">
-                  <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
-                    {getPatronIcon(patron)}
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
+                    <div className="scale-110">
+                      {getPatronIcon(patron)}
+                    </div>
                   </div>
                 </div>
-                <div className="text-lg font-semibold text-gray-700">
+                <div className="text-lg font-bold text-gray-800">
                   {getPatronLabel(patron)}
+                </div>
+                <div className="text-xs text-purple-500 mt-1 font-medium">
+                  {patron}
                 </div>
               </motion.button>
             ))}
