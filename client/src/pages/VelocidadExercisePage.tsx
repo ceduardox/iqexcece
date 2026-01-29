@@ -118,22 +118,26 @@ export default function VelocidadExercisePage() {
   }, [gameState, nivel]);
 
   useEffect(() => {
-    if (gameState !== "playing" || !nivel) return;
-    const totalPos = getTotalPositions(nivel.patron);
+    if (gameState !== "playing" || !nivel || palabrasRonda.length === 0) return;
+    const totalPos = palabrasRonda.length;
     const intervalMs = getIntervalMs(nivel.velocidad);
     let wordIndex = 0;
+    
+    // Mostrar primera palabra inmediatamente
+    setCurrentPosition(0);
+    setShownWords(palabrasRonda.map((_, i) => i === 0 ? palabrasRonda[0] : ""));
+    wordIndex = 1;
+    
     const interval = setInterval(() => {
       if (wordIndex < totalPos) {
-        setShownWords(prev => {
-          const newWords = [...prev];
-          newWords[wordIndex] = palabrasRonda[wordIndex] || "";
-          return newWords;
-        });
         setCurrentPosition(wordIndex);
+        setShownWords(palabrasRonda.map((_, i) => i === wordIndex ? palabrasRonda[wordIndex] : ""));
         wordIndex++;
       } else {
         clearInterval(interval);
-        setTimeout(() => setGameState("question"), 600);
+        setCurrentPosition(-1);
+        setShownWords([]);
+        setTimeout(() => setGameState("question"), 400);
       }
     }, intervalMs);
     return () => clearInterval(interval);
