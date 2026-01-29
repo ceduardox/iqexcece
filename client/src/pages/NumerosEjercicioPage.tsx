@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Clock, Check, XCircle, Zap } from "lucide-react";
+import { X } from "lucide-react";
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -33,14 +33,22 @@ export default function NumerosEjercicioPage() {
   useEffect(() => {
     if (gameState !== "playing") return;
     if (timeLeft <= 0) {
-      setGameState("finished");
+      const sinResponder = 25 - target + 1;
+      sessionStorage.setItem("numerosResultados", JSON.stringify({
+        correctas: correctCount,
+        incorrectas: incorrectCount,
+        sinResponder: sinResponder > 0 ? sinResponder : 0,
+        tiempo: 60,
+        nivel: "Números"
+      }));
+      navigate("/numeros-resultado");
       return;
     }
     const timer = setInterval(() => {
       setTimeLeft(t => t - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [gameState, timeLeft]);
+  }, [gameState, timeLeft, target, correctCount, incorrectCount, navigate]);
 
   const handleStart = useCallback(() => {
     const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
@@ -68,8 +76,14 @@ export default function NumerosEjercicioPage() {
       }, 150);
 
       if (target === 25) {
-        setGameState("finished");
-        setLevel(l => l + 1);
+        sessionStorage.setItem("numerosResultados", JSON.stringify({
+          correctas: correctCount + 1,
+          incorrectas: incorrectCount,
+          sinResponder: 0,
+          tiempo: 60 - timeLeft,
+          nivel: "Números"
+        }));
+        navigate("/numeros-resultado");
       } else {
         setTarget(t => t + 1);
       }
@@ -194,50 +208,7 @@ export default function NumerosEjercicioPage() {
             </motion.button>
           )}
 
-          {gameState === "finished" && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-center"
-            >
-              <div className="bg-white rounded-2xl p-6 shadow-xl mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  {target > 25 ? "¡Completado!" : "¡Tiempo agotado!"}
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Encontraste <span className="text-teal-600 font-bold">{correctCount}</span> números correctamente
-                </p>
-                <div className="flex justify-center gap-6 text-sm">
-                  <div className="flex items-center gap-1 text-green-600">
-                    <Check className="w-5 h-5" />
-                    <span>{correctCount} correctos</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-red-500">
-                    <XCircle className="w-5 h-5" />
-                    <span>{incorrectCount} errores</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={() => window.history.back()}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-full transition-colors"
-                  data-testid="button-back-result"
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={handleStart}
-                  className="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full shadow-lg transition-colors"
-                  data-testid="button-retry"
-                >
-                  Reintentar
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  </AnimatePresence>
       </main>
     </div>
   );

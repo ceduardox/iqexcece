@@ -26,6 +26,7 @@ import VelocidadExercisePage from "@/pages/VelocidadExercisePage";
 import NumerosIntroPage from "@/pages/NumerosIntroPage";
 import NumerosNivelesPage from "@/pages/NumerosNivelesPage";
 import NumerosEjercicioPage from "@/pages/NumerosEjercicioPage";
+import NumerosResultPage from "@/pages/NumerosResultPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/numeros/:categoria/:itemId" component={NumerosIntroPage}/>
       <Route path="/numeros/:categoria/:itemId/niveles" component={NumerosNivelesPage}/>
       <Route path="/numeros-ejercicio" component={NumerosEjercicioPage}/>
+      <Route path="/numeros-resultado" component={NumerosResultPage}/>
       <Route component={NotFound} />
     </Switch>
   );
