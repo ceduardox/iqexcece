@@ -1,15 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Play, Smile, Frown } from "lucide-react";
+import { X, Play } from "lucide-react";
 
 interface Nivel {
   nivel: number;
-  velocidad: number; // palabras por minuto
-  patron: string; // ej: "3x2" = 3 columnas, 2 filas
-  palabras: string; // palabras separadas por comas
-  opciones: string; // opciones separadas por comas
-  tipoPregunta: string; // "ultima", "primera", "penultima"
+  velocidad: number;
+  patron: string;
+  palabras: string;
+  opciones: string;
+  tipoPregunta: string;
 }
 
 export default function VelocidadExercisePage() {
@@ -22,13 +22,13 @@ export default function VelocidadExercisePage() {
   const [correctos, setCorrectos] = useState(0);
   const [incorrectos, setIncorrectos] = useState(0);
   
-  // Para la animación y palabras
   const [currentPosition, setCurrentPosition] = useState(-1);
   const [shownWords, setShownWords] = useState<string[]>([]);
   const [palabrasRonda, setPalabrasRonda] = useState<string[]>([]);
   const [opcionesRonda, setOpcionesRonda] = useState<string[]>([]);
   const [preguntaActual, setPreguntaActual] = useState("");
   const [respuestaCorrecta, setRespuestaCorrecta] = useState("");
+  const [showCircles, setShowCircles] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,9 +38,7 @@ export default function VelocidadExercisePage() {
         if (data.ejercicio && data.ejercicio.niveles) {
           const niveles = JSON.parse(data.ejercicio.niveles);
           const found = niveles.find((n: Nivel) => n.nivel === parseInt(nivelNum || "1"));
-          if (found) {
-            setNivel(found);
-          }
+          if (found) setNivel(found);
         }
       } catch (e) {
         console.error(e);
@@ -61,17 +59,13 @@ export default function VelocidadExercisePage() {
     return cols * rows;
   };
 
-  const getIntervalMs = (palabrasPorMinuto: number) => {
-    // palabras por minuto -> ms por palabra
-    return Math.round(60000 / palabrasPorMinuto);
-  };
+  const getIntervalMs = (palabrasPorMinuto: number) => Math.round(60000 / palabrasPorMinuto);
 
   const getPreguntaTexto = (tipo: string) => {
     switch (tipo) {
       case "primera": return "Selecciona la primera palabra que viste";
-      case "penultima": return "Selecciona la penúltima palabra que viste";
-      case "ultima": 
-      default: return "Selecciona la última palabra que recuerdas";
+      case "penultima": return "Selecciona la penultima palabra que viste";
+      default: return "Selecciona la ultima palabra que recuerdas";
     }
   };
 
@@ -79,7 +73,6 @@ export default function VelocidadExercisePage() {
     switch (tipo) {
       case "primera": return palabras[0];
       case "penultima": return palabras[palabras.length - 2];
-      case "ultima": 
       default: return palabras[palabras.length - 1];
     }
   };
@@ -91,11 +84,8 @@ export default function VelocidadExercisePage() {
     const todasPalabras = nivel.palabras.split(",").map(p => p.trim()).filter(p => p);
     const todasOpciones = nivel.opciones.split(",").map(o => o.trim()).filter(o => o);
     
-    // Seleccionar palabras aleatorias para esta ronda
     const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
     const palabrasSeleccionadas = shuffled.slice(0, totalPos);
-    
-    // Mezclar opciones
     const opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
     
     setPalabrasRonda(palabrasSeleccionadas);
@@ -104,42 +94,34 @@ export default function VelocidadExercisePage() {
     setCurrentPosition(-1);
     setPreguntaActual(getPreguntaTexto(nivel.tipoPregunta));
     setRespuestaCorrecta(getRespuestaCorrecta(nivel.tipoPregunta, palabrasSeleccionadas));
-    
-    // Empezar animación de pelota
+    setShowCircles(true);
     setGameState("animating");
   }, [nivel]);
 
-  // Animación de pelota moviéndose por las posiciones
   useEffect(() => {
     if (gameState !== "animating" || !nivel) return;
-    
     const totalPos = getTotalPositions(nivel.patron);
     let pos = 0;
-    
     const interval = setInterval(() => {
       setCurrentPosition(pos);
       pos++;
       if (pos >= totalPos) {
         clearInterval(interval);
-        // Después de la animación, empezar las palabras
         setTimeout(() => {
+          setShowCircles(false);
           setCurrentPosition(-1);
           setGameState("playing");
-        }, 300);
+        }, 400);
       }
-    }, 200);
-    
+    }, 250);
     return () => clearInterval(interval);
   }, [gameState, nivel]);
 
-  // Mostrar palabras una por una
   useEffect(() => {
     if (gameState !== "playing" || !nivel) return;
-    
     const totalPos = getTotalPositions(nivel.patron);
     const intervalMs = getIntervalMs(nivel.velocidad);
     let wordIndex = 0;
-    
     const interval = setInterval(() => {
       if (wordIndex < totalPos) {
         setShownWords(prev => {
@@ -151,13 +133,9 @@ export default function VelocidadExercisePage() {
         wordIndex++;
       } else {
         clearInterval(interval);
-        // Mostrar pregunta
-        setTimeout(() => {
-          setGameState("question");
-        }, 500);
+        setTimeout(() => setGameState("question"), 600);
       }
     }, intervalMs);
-    
     return () => clearInterval(interval);
   }, [gameState, nivel, palabrasRonda]);
 
@@ -167,144 +145,185 @@ export default function VelocidadExercisePage() {
     } else {
       setIncorrectos(i => i + 1);
     }
-    // Reiniciar para siguiente ronda
     setGameState("ready");
+    setShownWords([]);
+    setShowCircles(true);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex items-center justify-center">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full"
+        />
       </div>
     );
   }
 
   if (!nivel) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-purple-700 to-pink-500 flex flex-col items-center justify-center p-4">
         <p className="text-white text-xl mb-4">Nivel no encontrado</p>
-        <button
-          onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
-          className="bg-white/20 text-white px-6 py-3 rounded-full"
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+          className="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-semibold"
         >
           Volver
-        </button>
+        </motion.button>
       </div>
     );
   }
 
-  const { cols, rows } = getGridDimensions(nivel.patron);
-  const totalPos = cols * rows;
+  const { cols } = getGridDimensions(nivel.patron);
+  const totalPos = getTotalPositions(nivel.patron);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex flex-col">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-purple-700 to-pink-600 px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
+      <header className="bg-gradient-to-r from-purple-800/80 to-pink-700/80 backdrop-blur px-4 py-3 flex items-center justify-between">
         <h1 className="text-white font-bold text-lg">Mejora tu Velocidad de Lectura</h1>
-        <button
-          onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
-          className="text-white/80 hover:text-white"
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+          className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all"
           data-testid="button-close"
         >
-          <X className="w-6 h-6" />
-        </button>
+          <X className="w-5 h-5" />
+        </motion.button>
       </header>
 
-      {/* Stats bar */}
-      <div className="bg-purple-800/50 px-4 py-2 flex items-center gap-6">
-        <div className="text-white">
-          <span className="text-xs text-white/60">NIVEL</span>
-          <div className="text-2xl font-bold">{nivel.nivel}</div>
+      <div className="bg-purple-900/40 backdrop-blur px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-purple-200 text-xs">NIVEL</span>
+          <span className="text-white text-2xl font-bold">{nivel.nivel}</span>
         </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="text-xs text-white/60">CORRECTOS</span>
-          <Smile className="w-5 h-5 text-yellow-400" />
-          <span className="text-xl font-bold">{correctos}</span>
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="text-xs text-white/60">INCORRECTOS</span>
-          <Frown className="w-5 h-5 text-orange-400" />
-          <span className="text-xl font-bold">{incorrectos}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-purple-200 text-xs">CORRECTOS</span>
+            <span className="text-2xl">😊</span>
+            <span className="text-white text-xl font-bold">{correctos}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-purple-200 text-xs">INCORRECTOS</span>
+            <span className="text-2xl">😔</span>
+            <span className="text-white text-xl font-bold">{incorrectos}</span>
+          </div>
         </div>
       </div>
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col items-center px-6 py-8">
-        {/* Nivel y velocidad */}
-        <div className="text-center mb-8">
-          <span className="text-purple-200 text-sm font-medium">NIVEL {nivel.nivel}</span>
-          <h2 className="text-white text-2xl font-bold">{nivel.velocidad} palabras /min.</h2>
-        </div>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+          <span className="text-purple-200 text-sm font-medium tracking-wider">NIVEL {nivel.nivel}</span>
+          <h2 className="text-white text-3xl font-bold">{nivel.velocidad} palabras /min.</h2>
+        </motion.div>
 
-        {/* Grid de posiciones */}
-        <div 
-          className="grid gap-4 mb-8 w-full max-w-md"
-          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
-        >
-          {Array.from({ length: totalPos }).map((_, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-2">
-              {/* Círculo / Pelota */}
-              <motion.div
-                animate={{
-                  scale: currentPosition === idx ? 1.3 : 1,
-                  backgroundColor: currentPosition === idx ? "#a855f7" : "#c084fc"
-                }}
-                className="w-4 h-4 rounded-full"
-              />
-              {/* Palabra o línea */}
-              <div className="w-full min-h-[28px] flex items-center justify-center">
-                {shownWords[idx] ? (
-                  <span className="text-gray-800 font-medium text-lg">{shownWords[idx]}</span>
-                ) : null}
-              </div>
-              {/* Línea base */}
-              <div className="w-full h-0.5 bg-purple-400" />
-            </div>
-          ))}
-        </div>
-
-        {/* Estado: Listo para iniciar */}
-        {gameState === "ready" && (
-          <motion.button
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={iniciarRonda}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-12 py-4 rounded-full font-bold text-xl flex items-center gap-3 shadow-lg hover:shadow-xl transition-shadow"
-            data-testid="button-iniciar"
-          >
-            Iniciar
-            <Play className="w-6 h-6 fill-white" />
-          </motion.button>
-        )}
-
-        {/* Estado: Pregunta */}
-        {gameState === "question" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-md"
-          >
-            <p className="text-gray-800 text-lg mb-6">{preguntaActual}</p>
-            <div 
-              className="grid gap-3"
-              style={{ gridTemplateColumns: `repeat(${Math.min(cols, 3)}, 1fr)` }}
+        <AnimatePresence mode="wait">
+          {gameState !== "question" && (
+            <motion.div 
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="grid gap-6 mb-8 w-full max-w-md"
+              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
             >
-              {opcionesRonda.map((opcion, idx) => (
-                <motion.button
-                  key={idx}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+              {Array.from({ length: totalPos }).map((_, idx) => (
+                <motion.div 
+                  key={idx} 
+                  className="flex flex-col items-center gap-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  onClick={() => handleRespuesta(opcion)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-                  data-testid={`button-opcion-${idx}`}
                 >
-                  {opcion}
-                </motion.button>
+                  <AnimatePresence>
+                    {showCircles && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ 
+                          scale: currentPosition === idx ? 1.4 : 1,
+                          backgroundColor: currentPosition === idx ? "#c084fc" : "#a855f7"
+                        }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="w-5 h-5 rounded-full shadow-lg"
+                        style={{ boxShadow: currentPosition === idx ? "0 0 20px rgba(168, 85, 247, 0.6)" : "none" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  
+                  <div className="w-full min-h-[32px] flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                      {shownWords[idx] && (
+                        <motion.span
+                          key={shownWords[idx]}
+                          initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                          animate={{ opacity: currentPosition === idx ? 1 : 0.5, scale: currentPosition === idx ? 1.1 : 1, y: 0 }}
+                          className="text-gray-800 font-semibold text-xl"
+                        >
+                          {shownWords[idx]}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  
+                  <motion.div 
+                    className="w-full h-0.5 rounded-full"
+                    animate={{ backgroundColor: currentPosition === idx ? "#c084fc" : "#9333ea" }}
+                  />
+                </motion.div>
               ))}
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {gameState === "ready" && (
+            <motion.button
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={iniciarRonda}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-14 py-5 rounded-full font-bold text-xl shadow-xl flex items-center gap-3"
+              data-testid="button-iniciar"
+            >
+              Iniciar
+              <Play className="w-6 h-6 fill-white" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {gameState === "question" && (
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full max-w-md">
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-gray-800 text-xl font-medium mb-6 text-center">
+                {preguntaActual}
+              </motion.p>
+              <div className="grid grid-cols-3 gap-3">
+                {opcionesRonda.map((opcion, idx) => (
+                  <motion.button
+                    key={idx}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.3 + idx * 0.08, type: "spring", stiffness: 200 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRespuesta(opcion)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white py-4 px-4 rounded-xl font-semibold text-lg shadow-lg transition-colors"
+                    data-testid={`button-opcion-${idx}`}
+                  >
+                    {opcion}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
