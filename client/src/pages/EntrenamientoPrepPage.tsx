@@ -26,6 +26,12 @@ export default function EntrenamientoPrepPage() {
         const itemData = await itemRes.json();
         const tipoEjercicio = itemData.item?.tipoEjercicio || "velocidad";
         
+        // Si es tipo "numeros", redirigir directamente a NumerosIntroPage
+        if (tipoEjercicio === "numeros") {
+          setLocation(`/numeros/${categoria}/${itemId}`);
+          return;
+        }
+        
         // Intentar cargar la página de preparación de la categoría
         const prepRes = await fetch(`/api/prep-page/${categoria}`);
         const prepPageData = await prepRes.json();
@@ -56,7 +62,7 @@ export default function EntrenamientoPrepPage() {
       }
     };
     loadPrepData();
-  }, [categoria, itemId]);
+  }, [categoria, itemId, setLocation]);
 
   if (loading) {
     return (
