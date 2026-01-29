@@ -12,39 +12,79 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXY".split("");
+
 export default function NumerosEjercicioPage() {
   const [, navigate] = useLocation();
   const [gameState, setGameState] = useState<"idle" | "playing" | "finished">("idle");
-  const [board, setBoard] = useState<number[]>([]);
-  const [target, setTarget] = useState(1);
+  const [board, setBoard] = useState<(number | string)[]>([]);
+  const [targetIndex, setTargetIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
-  const [level, setLevel] = useState(1);
   const [flashingCell, setFlashingCell] = useState<number | null>(null);
   const [flashType, setFlashType] = useState<"correct" | "incorrect" | null>(null);
   const [targetPop, setTargetPop] = useState(false);
   const [nivelesPath, setNivelesPath] = useState("/");
+  const [nivel, setNivel] = useState<"numeros" | "letras" | "romanos">("numeros");
+
+  const getNivelNombre = () => {
+    switch (nivel) {
+      case "numeros": return "Números";
+      case "letras": return "Letras";
+      case "romanos": return "Romanos";
+      default: return "Números";
+    }
+  };
+
+  const getTargetDisplay = () => {
+    if (gameState === "finished") return "✓";
+    if (gameState === "idle") return "?";
+    
+    if (nivel === "numeros") {
+      return targetIndex + 1;
+    } else if (nivel === "letras") {
+      return LETTERS[targetIndex];
+    }
+    return targetIndex + 1;
+  };
+
+  const getInstructionText = () => {
+    if (nivel === "letras") {
+      return "Encuentra la siguiente letra en el tablero:";
+    }
+    return "Encuentra el siguiente número en el tablero:";
+  };
 
   useEffect(() => {
-    const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
-    setBoard(shuffleArray(numbers));
+    const storedNivel = sessionStorage.getItem("numerosNivelSeleccionado");
+    if (storedNivel === "letras" || storedNivel === "romanos" || storedNivel === "numeros") {
+      setNivel(storedNivel);
+    }
+    
     const storedPath = sessionStorage.getItem("numerosNivelesPath");
     if (storedPath) {
       setNivelesPath(storedPath);
+    }
+
+    if (storedNivel === "letras") {
+      setBoard(shuffleArray([...LETTERS]));
+    } else {
+      const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
+      setBoard(shuffleArray(numbers));
     }
   }, []);
 
   useEffect(() => {
     if (gameState !== "playing") return;
     if (timeLeft <= 0) {
-      const sinResponder = 25 - target + 1;
+      const sinResponder = 25 - targetIndex - 1;
       sessionStorage.setItem("numerosResultados", JSON.stringify({
         correctas: correctCount,
         incorrectas: incorrectCount,
         sinResponder: sinResponder > 0 ? sinResponder : 0,
         tiempo: 60,
-        nivel: "Números"
+        nivel: getNivelNombre()
       }));
       navigate("/numeros-resultado");
       return;
@@ -53,22 +93,33 @@ export default function NumerosEjercicioPage() {
       setTimeLeft(t => t - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [gameState, timeLeft, target, correctCount, incorrectCount, navigate]);
+  }, [gameState, timeLeft, targetIndex, correctCount, incorrectCount, navigate, nivel]);
 
   const handleStart = useCallback(() => {
-    const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
-    setBoard(shuffleArray(numbers));
-    setTarget(1);
+    if (nivel === "letras") {
+      setBoard(shuffleArray([...LETTERS]));
+    } else {
+      const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
+      setBoard(shuffleArray(numbers));
+    }
+    setTargetIndex(0);
     setTimeLeft(60);
     setCorrectCount(0);
     setIncorrectCount(0);
     setGameState("playing");
-  }, []);
+  }, [nivel]);
 
-  const handleCellClick = useCallback((num: number, index: number) => {
+  const handleCellClick = useCallback((value: number | string, index: number) => {
     if (gameState !== "playing") return;
 
-    if (num === target) {
+    let isCorrect = false;
+    if (nivel === "numeros") {
+      isCorrect = value === targetIndex + 1;
+    } else if (nivel === "letras") {
+      isCorrect = value === LETTERS[targetIndex];
+    }
+
+    if (isCorrect) {
       setCorrectCount(c => c + 1);
       setFlashingCell(index);
       setFlashType("correct");
@@ -80,17 +131,17 @@ export default function NumerosEjercicioPage() {
         setTargetPop(false);
       }, 150);
 
-      if (target === 25) {
+      if (targetIndex === 24) {
         sessionStorage.setItem("numerosResultados", JSON.stringify({
           correctas: correctCount + 1,
           incorrectas: incorrectCount,
           sinResponder: 0,
           tiempo: 60 - timeLeft,
-          nivel: "Números"
+          nivel: getNivelNombre()
         }));
         navigate("/numeros-resultado");
       } else {
-        setTarget(t => t + 1);
+        setTargetIndex(t => t + 1);
       }
     } else {
       setIncorrectCount(c => c + 1);
@@ -102,13 +153,7 @@ export default function NumerosEjercicioPage() {
         setFlashType(null);
       }, 200);
     }
-  }, [gameState, target]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  }, [gameState, targetIndex, nivel, correctCount, incorrectCount, timeLeft, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -129,7 +174,7 @@ export default function NumerosEjercicioPage() {
         <div className="bg-teal-600/50 rounded-full px-4 py-2 flex items-center justify-between text-xs">
           <div className="text-center">
             <span className="text-white/70 block text-[10px]">NIVEL</span>
-            <span className="font-bold">Números</span>
+            <span className="font-bold">{getNivelNombre()}</span>
           </div>
           <div className="text-center">
             <span className="text-white/70 block text-[10px]">TIEMPO</span>
@@ -148,7 +193,7 @@ export default function NumerosEjercicioPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-6">
         <p className="text-gray-700 text-center text-lg mb-4 font-medium">
-          Encuentra el siguiente número en el tablero:
+          {getInstructionText()}
         </p>
 
         <motion.div
@@ -157,12 +202,12 @@ export default function NumerosEjercicioPage() {
           transition={{ duration: 0.15 }}
         >
           <span className="text-white text-5xl font-bold" data-testid="text-target">
-            {gameState === "finished" ? "✓" : gameState === "idle" ? "?" : target}
+            {getTargetDisplay()}
           </span>
         </motion.div>
 
         <div className="grid grid-cols-5 gap-2 mb-8">
-          {board.map((num, index) => {
+          {board.map((value, index) => {
             const isFlashing = flashingCell === index;
             const isCorrectFlash = isFlashing && flashType === "correct";
             const isIncorrectFlash = isFlashing && flashType === "incorrect";
@@ -172,7 +217,7 @@ export default function NumerosEjercicioPage() {
             return (
               <motion.button
                 key={index}
-                onClick={() => handleCellClick(num, index)}
+                onClick={() => handleCellClick(value, index)}
                 disabled={!isActive}
                 className={`
                   w-14 h-14 rounded-xl text-xl font-bold flex items-center justify-center
@@ -191,9 +236,9 @@ export default function NumerosEjercicioPage() {
                   duration: isIncorrectFlash ? 0.2 : 0.3, 
                   delay: gameState === "playing" ? index * 0.02 : 0 
                 }}
-                data-testid={`cell-${num}`}
+                data-testid={`cell-${value}`}
               >
-                {num}
+                {value}
               </motion.button>
             );
           })}
@@ -212,8 +257,7 @@ export default function NumerosEjercicioPage() {
               Iniciar
             </motion.button>
           )}
-
-                  </AnimatePresence>
+        </AnimatePresence>
       </main>
     </div>
   );
