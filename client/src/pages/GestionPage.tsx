@@ -3337,7 +3337,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <textarea
                           value={editingPrepPage.instrucciones || ""}
                           onChange={(e) => setEditingPrepPage({...editingPrepPage, instrucciones: e.target.value})}
-                          className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2"
+                          className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2"
                           placeholder="Ej: Observa las palabras sin leer en voz alta..."
                           rows={2}
                         />
@@ -3433,7 +3433,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <textarea
                       value={entrenamientoCard.description}
                       onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
-                      className="w-full bg-white/10 border border-teal-500/30 text-white rounded-md p-2 mt-1"
+                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
                       rows={2}
                     />
                   </div>
@@ -3486,7 +3486,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <textarea
                       value={entrenamientoPage.pageDescription}
                       onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
-                      className="w-full bg-white/10 border border-teal-500/30 text-white rounded-md p-2 mt-1"
+                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
                       rows={2}
                     />
                   </div>
@@ -3746,7 +3746,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       updated[idx].prepInstructions = e.target.value;
                                       setEntrenamientoItems(updated);
                                     }}
-                                    className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                                    className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                                     placeholder="Ej: Observa las palabras sin leer en voz alta..."
                                     rows={2}
                                   />
@@ -3873,7 +3873,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <textarea
                         value={velocidadEjercicio.descripcion}
                         onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, descripcion: e.target.value})}
-                        className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                        className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                         rows={2}
                         placeholder="Ejercita tu capacidad de percepción visual..."
                       />
@@ -3990,7 +3990,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   updated[nivelIdx].tipoPregunta = e.target.value;
                                   setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
                                 }}
-                                className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                                className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
                                 <option value="ultima">Última</option>
                                 <option value="primera">Primera</option>
@@ -4011,7 +4011,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 updated[nivelIdx].palabras = e.target.value;
                                 setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
                               }}
-                              className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                              className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               rows={2}
                               placeholder="vista, atomo, iglesia, olvido, orar, opaco, casa, perro, gato..."
                             />
