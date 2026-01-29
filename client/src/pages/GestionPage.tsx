@@ -3982,9 +3982,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               />
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Pregunta</label>
+                              <label className="text-white/60 text-xs mb-1 block">¿Qué posición preguntar?</label>
                               <select
-                                value={nivel.tipoPregunta || "ultima"}
+                                value={nivel.tipoPregunta || "1"}
                                 onChange={(e) => {
                                   const updated = [...velocidadEjercicio.niveles];
                                   updated[nivelIdx].tipoPregunta = e.target.value;
@@ -3992,9 +3992,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 }}
                                 className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
-                                <option value="ultima">Última</option>
-                                <option value="primera">Primera</option>
-                                <option value="penultima">Penúltima</option>
+                                {Array.from({ length: nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6 }).map((_, i) => (
+                                  <option key={i+1} value={String(i+1)} className="bg-gray-700 text-white">Posición {i+1}</option>
+                                ))}
                               </select>
                             </div>
                           </div>
