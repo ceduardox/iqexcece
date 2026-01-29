@@ -3957,13 +3957,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   updated[nivelIdx].patron = e.target.value;
                                   setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
                                 }}
-                                className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                                className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
-                                <option value="3x2">3x2 (6)</option>
-                                <option value="3x3">3x3 (9)</option>
-                                <option value="2x2">2x2 (4)</option>
-                                <option value="2x3">2x3 (6)</option>
-                                <option value="2x4">2x4 (8)</option>
+                                <option value="3x2" className="bg-gray-700 text-white">3x2 (6)</option>
+                                <option value="3x3" className="bg-gray-700 text-white">3x3 (9)</option>
+                                <option value="2x2" className="bg-gray-700 text-white">2x2 (4)</option>
+                                <option value="2x3" className="bg-gray-700 text-white">2x3 (6)</option>
+                                <option value="2x4" className="bg-gray-700 text-white">2x4 (8)</option>
                               </select>
                             </div>
                             <div>
