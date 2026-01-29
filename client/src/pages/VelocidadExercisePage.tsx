@@ -1,13 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Play, RotateCcw, CheckCircle } from "lucide-react";
+import { X, Play, Smile, Frown } from "lucide-react";
 
 interface Nivel {
   nivel: number;
-  patron: string;
-  velocidad: number;
-  contenido: string;
+  velocidad: number; // palabras por minuto
+  patron: string; // ej: "3x2" = 3 columnas, 2 filas
+  palabras: string; // palabras separadas por comas
+  opciones: string; // opciones separadas por comas
+  tipoPregunta: string; // "ultima", "primera", "penultima"
 }
 
 export default function VelocidadExercisePage() {
@@ -15,9 +17,18 @@ export default function VelocidadExercisePage() {
   const [, setLocation] = useLocation();
   const [nivel, setNivel] = useState<Nivel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [gameState, setGameState] = useState<"ready" | "playing" | "finished">("ready");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [items, setItems] = useState<string[]>([]);
+  
+  const [gameState, setGameState] = useState<"ready" | "animating" | "playing" | "question">("ready");
+  const [correctos, setCorrectos] = useState(0);
+  const [incorrectos, setIncorrectos] = useState(0);
+  
+  // Para la animación y palabras
+  const [currentPosition, setCurrentPosition] = useState(-1);
+  const [shownWords, setShownWords] = useState<string[]>([]);
+  const [palabrasRonda, setPalabrasRonda] = useState<string[]>([]);
+  const [opcionesRonda, setOpcionesRonda] = useState<string[]>([]);
+  const [preguntaActual, setPreguntaActual] = useState("");
+  const [respuestaCorrecta, setRespuestaCorrecta] = useState("");
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,11 +36,10 @@ export default function VelocidadExercisePage() {
         const res = await fetch(`/api/velocidad-ejercicios/${itemId}`);
         const data = await res.json();
         if (data.ejercicio && data.ejercicio.niveles) {
-          const found = data.ejercicio.niveles.find((n: Nivel) => n.nivel === parseInt(nivelNum || "1"));
+          const niveles = JSON.parse(data.ejercicio.niveles);
+          const found = niveles.find((n: Nivel) => n.nivel === parseInt(nivelNum || "1"));
           if (found) {
             setNivel(found);
-            const contenido = found.contenido.split("\n").filter((s: string) => s.trim());
-            setItems(contenido);
           }
         }
       } catch (e) {
@@ -41,176 +51,257 @@ export default function VelocidadExercisePage() {
     loadData();
   }, [itemId, nivelNum]);
 
-  const getGridClass = (patron: string) => {
-    switch (patron) {
-      case "1x3": return "grid-cols-1";
-      case "2x2": return "grid-cols-2";
-      case "2x3": return "grid-cols-2";
-      case "3x3": return "grid-cols-3";
-      case "1x4": return "grid-cols-1";
-      case "2x4": return "grid-cols-2";
-      default: return "grid-cols-2";
-    }
+  const getGridDimensions = (patron: string) => {
+    const parts = patron.split("x");
+    return { cols: parseInt(parts[0]) || 3, rows: parseInt(parts[1]) || 2 };
   };
 
-  const getPointCount = (patron: string) => {
-    const [cols, rows] = patron.split("x").map(Number);
+  const getTotalPositions = (patron: string) => {
+    const { cols, rows } = getGridDimensions(patron);
     return cols * rows;
   };
 
-  const startGame = useCallback(() => {
-    setCurrentIndex(0);
-    setGameState("playing");
-  }, []);
-
-  useEffect(() => {
-    if (gameState !== "playing" || !nivel) return;
-
-    if (currentIndex >= items.length) {
-      setGameState("finished");
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-    }, nivel.velocidad);
-
-    return () => clearTimeout(timer);
-  }, [gameState, currentIndex, items.length, nivel]);
-
-  const getCurrentItems = () => {
-    if (!nivel) return [];
-    const pointCount = getPointCount(nivel.patron);
-    const start = Math.floor(currentIndex / pointCount) * pointCount;
-    return items.slice(start, start + pointCount);
+  const getIntervalMs = (palabrasPorMinuto: number) => {
+    // palabras por minuto -> ms por palabra
+    return Math.round(60000 / palabrasPorMinuto);
   };
 
-  const getActivePoint = () => {
-    if (!nivel) return 0;
-    const pointCount = getPointCount(nivel.patron);
-    return currentIndex % pointCount;
+  const getPreguntaTexto = (tipo: string) => {
+    switch (tipo) {
+      case "primera": return "Selecciona la primera palabra que viste";
+      case "penultima": return "Selecciona la penúltima palabra que viste";
+      case "ultima": 
+      default: return "Selecciona la última palabra que recuerdas";
+    }
+  };
+
+  const getRespuestaCorrecta = (tipo: string, palabras: string[]) => {
+    switch (tipo) {
+      case "primera": return palabras[0];
+      case "penultima": return palabras[palabras.length - 2];
+      case "ultima": 
+      default: return palabras[palabras.length - 1];
+    }
+  };
+
+  const iniciarRonda = useCallback(() => {
+    if (!nivel) return;
+    
+    const totalPos = getTotalPositions(nivel.patron);
+    const todasPalabras = nivel.palabras.split(",").map(p => p.trim()).filter(p => p);
+    const todasOpciones = nivel.opciones.split(",").map(o => o.trim()).filter(o => o);
+    
+    // Seleccionar palabras aleatorias para esta ronda
+    const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
+    const palabrasSeleccionadas = shuffled.slice(0, totalPos);
+    
+    // Mezclar opciones
+    const opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
+    
+    setPalabrasRonda(palabrasSeleccionadas);
+    setOpcionesRonda(opcionesMezcladas);
+    setShownWords(Array(totalPos).fill(""));
+    setCurrentPosition(-1);
+    setPreguntaActual(getPreguntaTexto(nivel.tipoPregunta));
+    setRespuestaCorrecta(getRespuestaCorrecta(nivel.tipoPregunta, palabrasSeleccionadas));
+    
+    // Empezar animación de pelota
+    setGameState("animating");
+  }, [nivel]);
+
+  // Animación de pelota moviéndose por las posiciones
+  useEffect(() => {
+    if (gameState !== "animating" || !nivel) return;
+    
+    const totalPos = getTotalPositions(nivel.patron);
+    let pos = 0;
+    
+    const interval = setInterval(() => {
+      setCurrentPosition(pos);
+      pos++;
+      if (pos >= totalPos) {
+        clearInterval(interval);
+        // Después de la animación, empezar las palabras
+        setTimeout(() => {
+          setCurrentPosition(-1);
+          setGameState("playing");
+        }, 300);
+      }
+    }, 200);
+    
+    return () => clearInterval(interval);
+  }, [gameState, nivel]);
+
+  // Mostrar palabras una por una
+  useEffect(() => {
+    if (gameState !== "playing" || !nivel) return;
+    
+    const totalPos = getTotalPositions(nivel.patron);
+    const intervalMs = getIntervalMs(nivel.velocidad);
+    let wordIndex = 0;
+    
+    const interval = setInterval(() => {
+      if (wordIndex < totalPos) {
+        setShownWords(prev => {
+          const newWords = [...prev];
+          newWords[wordIndex] = palabrasRonda[wordIndex] || "";
+          return newWords;
+        });
+        setCurrentPosition(wordIndex);
+        wordIndex++;
+      } else {
+        clearInterval(interval);
+        // Mostrar pregunta
+        setTimeout(() => {
+          setGameState("question");
+        }, 500);
+      }
+    }, intervalMs);
+    
+    return () => clearInterval(interval);
+  }, [gameState, nivel, palabrasRonda]);
+
+  const handleRespuesta = (opcion: string) => {
+    if (opcion.toLowerCase() === respuestaCorrecta.toLowerCase()) {
+      setCorrectos(c => c + 1);
+    } else {
+      setIncorrectos(i => i + 1);
+    }
+    // Reiniciar para siguiente ronda
+    setGameState("ready");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-purple-900 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
       </div>
     );
   }
 
   if (!nivel) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-purple-900 flex flex-col">
-        <header className="p-4">
-          <button
-            onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
-            className="flex items-center gap-2 text-white font-semibold"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-            Volver
-          </button>
-        </header>
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-white text-xl">Nivel no encontrado</p>
-        </main>
+      <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex flex-col items-center justify-center p-4">
+        <p className="text-white text-xl mb-4">Nivel no encontrado</p>
+        <button
+          onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
+          className="bg-white/20 text-white px-6 py-3 rounded-full"
+        >
+          Volver
+        </button>
       </div>
     );
   }
 
+  const { cols, rows } = getGridDimensions(nivel.patron);
+  const totalPos = cols * rows;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-purple-900 flex flex-col">
-      <header className="p-4 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-pink-500 flex flex-col">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-purple-700 to-pink-600 px-4 py-3 flex items-center justify-between">
+        <h1 className="text-white font-bold text-lg">Mejora tu Velocidad de Lectura</h1>
         <button
           onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
-          className="flex items-center gap-2 text-white font-semibold"
-          data-testid="button-back"
+          className="text-white/80 hover:text-white"
+          data-testid="button-close"
         >
-          <ArrowLeft className="w-6 h-6" />
-          Volver
+          <X className="w-6 h-6" />
         </button>
-        <div className="text-cyan-400 font-bold">Nivel {nivel.nivel}</div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6">
-        {gameState === "ready" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center"
-          >
-            <h2 className="text-2xl font-bold text-white mb-4">Velocidad Lectora</h2>
-            <p className="text-white/70 mb-2">Patrón: {nivel.patron}</p>
-            <p className="text-white/70 mb-8">Velocidad: {nivel.velocidad}ms</p>
-            <button
-              onClick={startGame}
-              className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-8 py-4 rounded-full font-bold text-xl flex items-center gap-3 mx-auto hover:scale-105 transition-transform"
-              data-testid="button-start"
-            >
-              <Play className="w-6 h-6" />
-              Empezar
-            </button>
-          </motion.div>
-        )}
+      {/* Stats bar */}
+      <div className="bg-purple-800/50 px-4 py-2 flex items-center gap-6">
+        <div className="text-white">
+          <span className="text-xs text-white/60">NIVEL</span>
+          <div className="text-2xl font-bold">{nivel.nivel}</div>
+        </div>
+        <div className="flex items-center gap-2 text-white">
+          <span className="text-xs text-white/60">CORRECTOS</span>
+          <Smile className="w-5 h-5 text-yellow-400" />
+          <span className="text-xl font-bold">{correctos}</span>
+        </div>
+        <div className="flex items-center gap-2 text-white">
+          <span className="text-xs text-white/60">INCORRECTOS</span>
+          <Frown className="w-5 h-5 text-orange-400" />
+          <span className="text-xl font-bold">{incorrectos}</span>
+        </div>
+      </div>
 
-        {gameState === "playing" && (
-          <div className="w-full max-w-md">
-            <div className={`grid ${getGridClass(nivel.patron)} gap-4`}>
-              {getCurrentItems().map((item, idx) => (
-                <motion.div
-                  key={`${currentIndex}-${idx}`}
-                  initial={{ opacity: 0.3, scale: 0.95 }}
-                  animate={{ 
-                    opacity: getActivePoint() === idx ? 1 : 0.4,
-                    scale: getActivePoint() === idx ? 1.1 : 1,
-                  }}
-                  className={`
-                    p-4 rounded-xl text-center font-bold text-xl
-                    ${getActivePoint() === idx 
-                      ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-lg shadow-purple-500/50" 
-                      : "bg-white/10 text-white/50"
-                    }
-                  `}
-                >
-                  {item}
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-8 text-center text-white/60">
-              {Math.min(currentIndex + 1, items.length)} / {items.length}
-            </div>
-          </div>
-        )}
+      {/* Main content */}
+      <main className="flex-1 flex flex-col items-center px-6 py-8">
+        {/* Nivel y velocidad */}
+        <div className="text-center mb-8">
+          <span className="text-purple-200 text-sm font-medium">NIVEL {nivel.nivel}</span>
+          <h2 className="text-white text-2xl font-bold">{nivel.velocidad} palabras /min.</h2>
+        </div>
 
-        {gameState === "finished" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
-            <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-white mb-2">¡Completado!</h2>
-            <p className="text-white/70 mb-8">Has terminado el ejercicio</p>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => {
-                  setCurrentIndex(0);
-                  setGameState("ready");
+        {/* Grid de posiciones */}
+        <div 
+          className="grid gap-4 mb-8 w-full max-w-md"
+          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+        >
+          {Array.from({ length: totalPos }).map((_, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-2">
+              {/* Círculo / Pelota */}
+              <motion.div
+                animate={{
+                  scale: currentPosition === idx ? 1.3 : 1,
+                  backgroundColor: currentPosition === idx ? "#a855f7" : "#c084fc"
                 }}
-                className="bg-white/20 text-white px-6 py-3 rounded-full font-semibold flex items-center gap-2 hover:bg-white/30"
-                data-testid="button-retry"
-              >
-                <RotateCcw className="w-5 h-5" />
-                Repetir
-              </button>
-              <button
-                onClick={() => setLocation(`/velocidad/${categoria}/${itemId}`)}
-                className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform"
-                data-testid="button-levels"
-              >
-                Otros niveles
-              </button>
+                className="w-4 h-4 rounded-full"
+              />
+              {/* Palabra o línea */}
+              <div className="w-full min-h-[28px] flex items-center justify-center">
+                {shownWords[idx] ? (
+                  <span className="text-gray-800 font-medium text-lg">{shownWords[idx]}</span>
+                ) : null}
+              </div>
+              {/* Línea base */}
+              <div className="w-full h-0.5 bg-purple-400" />
+            </div>
+          ))}
+        </div>
+
+        {/* Estado: Listo para iniciar */}
+        {gameState === "ready" && (
+          <motion.button
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={iniciarRonda}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-12 py-4 rounded-full font-bold text-xl flex items-center gap-3 shadow-lg hover:shadow-xl transition-shadow"
+            data-testid="button-iniciar"
+          >
+            Iniciar
+            <Play className="w-6 h-6 fill-white" />
+          </motion.button>
+        )}
+
+        {/* Estado: Pregunta */}
+        {gameState === "question" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md"
+          >
+            <p className="text-gray-800 text-lg mb-6">{preguntaActual}</p>
+            <div 
+              className="grid gap-3"
+              style={{ gridTemplateColumns: `repeat(${Math.min(cols, 3)}, 1fr)` }}
+            >
+              {opcionesRonda.map((opcion, idx) => (
+                <motion.button
+                  key={idx}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => handleRespuesta(opcion)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  data-testid={`button-opcion-${idx}`}
+                >
+                  {opcion}
+                </motion.button>
+              ))}
             </div>
           </motion.div>
         )}

@@ -145,7 +145,7 @@ export default function GestionPage() {
   const [editingPrepPage, setEditingPrepPage] = useState<{id?: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string} | null>(null);
   
   // Ejercicios de velocidad
-  type NivelConfig = { nivel: number; patron: string; velocidad: number; contenido: string[] };
+  type NivelConfig = { nivel: number; patron: string; velocidad: number; palabras: string; opciones: string; tipoPregunta: string };
   const [editingVelocidadItem, setEditingVelocidadItem] = useState<string | null>(null);
   const [velocidadEjercicio, setVelocidadEjercicio] = useState<{
     id?: string;
@@ -3799,10 +3799,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       descripcion: "",
                                       imagenCabecera: "",
                                       niveles: [
-                                        { nivel: 1, patron: "2x3", velocidad: 1500, contenido: ["A", "B", "C", "D", "E", "F"] },
-                                        { nivel: 2, patron: "3x3", velocidad: 1200, contenido: ["A", "B", "C", "D", "E", "F", "G", "H", "I"] },
-                                        { nivel: 3, patron: "1x3", velocidad: 1000, contenido: ["AB", "CD", "EF"] },
-                                        { nivel: 4, patron: "2x2", velocidad: 800, contenido: ["AB", "CD", "EF", "GH"] }
+                                        { nivel: 1, patron: "3x2", velocidad: 150, palabras: "vista, atomo, iglesia, olvido, orar, opaco, casa, perro, gato, sol", opciones: "atomo, olvido, orar, vista, iglesia, opaco", tipoPregunta: "ultima" },
+                                        { nivel: 2, patron: "3x2", velocidad: 200, palabras: "luna, estrella, cielo, mar, rio, lago, monte, flor, arbol, nube", opciones: "luna, mar, lago, cielo, flor, nube", tipoPregunta: "primera" },
+                                        { nivel: 3, patron: "3x3", velocidad: 250, palabras: "amor, paz, luz, vida, alma, mente, cuerpo, mundo, tiempo, espacio", opciones: "amor, paz, vida, mente, mundo, espacio", tipoPregunta: "penultima" }
                                       ],
                                       isActive: true
                                     });
@@ -3911,7 +3910,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           const newNivel = velocidadEjercicio.niveles.length + 1;
                           setVelocidadEjercicio({
                             ...velocidadEjercicio,
-                            niveles: [...velocidadEjercicio.niveles, { nivel: newNivel, patron: "2x2", velocidad: 1000, contenido: ["A", "B", "C", "D"] }]
+                            niveles: [...velocidadEjercicio.niveles, { 
+                              nivel: newNivel, 
+                              patron: "3x2", 
+                              velocidad: 150, 
+                              palabras: "vista, atomo, iglesia, olvido, orar, opaco",
+                              opciones: "atomo, olvido, orar, vista, iglesia, opaco",
+                              tipoPregunta: "ultima"
+                            }]
                           });
                         }}
                         className="bg-purple-600"
@@ -3941,11 +3947,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             )}
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="grid grid-cols-3 gap-3 mb-3">
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Patrón de puntos</label>
+                              <label className="text-white/60 text-xs mb-1 block">Patrón</label>
                               <select
-                                value={nivel.patron}
+                                value={nivel.patron || "3x2"}
                                 onChange={(e) => {
                                   const updated = [...velocidadEjercicio.niveles];
                                   updated[nivelIdx].patron = e.target.value;
@@ -3953,46 +3959,73 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 }}
                                 className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
-                                <option value="2x3">2x3 (6 puntos)</option>
-                                <option value="3x3">3x3 (9 puntos)</option>
-                                <option value="1x3">1x3 (3 puntos)</option>
-                                <option value="2x2">2x2 (4 puntos)</option>
-                                <option value="1x4">1x4 (4 puntos)</option>
-                                <option value="2x4">2x4 (8 puntos)</option>
+                                <option value="3x2">3x2 (6)</option>
+                                <option value="3x3">3x3 (9)</option>
+                                <option value="2x2">2x2 (4)</option>
+                                <option value="2x3">2x3 (6)</option>
+                                <option value="2x4">2x4 (8)</option>
                               </select>
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Velocidad (ms)</label>
+                              <label className="text-white/60 text-xs mb-1 block">Palabras/min</label>
                               <Input
                                 type="number"
-                                value={nivel.velocidad}
+                                value={nivel.velocidad || 150}
                                 onChange={(e) => {
                                   const updated = [...velocidadEjercicio.niveles];
-                                  updated[nivelIdx].velocidad = parseInt(e.target.value) || 1000;
+                                  updated[nivelIdx].velocidad = parseInt(e.target.value) || 150;
                                   setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
                                 }}
                                 className="bg-white/10 border-purple-500/30 text-white"
-                                min={100}
-                                step={100}
+                                min={50}
+                                step={10}
                               />
+                            </div>
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Pregunta</label>
+                              <select
+                                value={nivel.tipoPregunta || "ultima"}
+                                onChange={(e) => {
+                                  const updated = [...velocidadEjercicio.niveles];
+                                  updated[nivelIdx].tipoPregunta = e.target.value;
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                                className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                              >
+                                <option value="ultima">Última</option>
+                                <option value="primera">Primera</option>
+                                <option value="penultima">Penúltima</option>
+                              </select>
                             </div>
                           </div>
                           
-                          <div>
-                            <label className="text-white/60 text-xs mb-1 block">Contenido (separado por comas)</label>
-                            <Input
-                              value={nivel.contenido.join(", ")}
+                          <div className="mb-3">
+                            <label className="text-white/60 text-xs mb-1 block">Palabras (separadas por comas)</label>
+                            <textarea
+                              value={nivel.palabras || ""}
                               onChange={(e) => {
                                 const updated = [...velocidadEjercicio.niveles];
-                                updated[nivelIdx].contenido = e.target.value.split(",").map(s => s.trim()).filter(s => s);
+                                updated[nivelIdx].palabras = e.target.value;
+                                setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                              }}
+                              className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                              rows={2}
+                              placeholder="vista, atomo, iglesia, olvido, orar, opaco, casa, perro, gato..."
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta (separadas por comas)</label>
+                            <Input
+                              value={nivel.opciones || ""}
+                              onChange={(e) => {
+                                const updated = [...velocidadEjercicio.niveles];
+                                updated[nivelIdx].opciones = e.target.value;
                                 setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
                               }}
                               className="bg-white/10 border-purple-500/30 text-white"
-                              placeholder="A, B, C, D, E, F"
+                              placeholder="atomo, olvido, orar, vista, iglesia, opaco"
                             />
-                            <p className="text-white/40 text-xs mt-1">
-                              Letras, palabras o números que aparecerán en el ejercicio
-                            </p>
                           </div>
                         </div>
                       ))}

@@ -7,20 +7,16 @@ interface Nivel {
   nivel: number;
   patron: string;
   velocidad: number;
-  contenido: string;
-}
-
-interface VelocidadEjercicio {
-  id: number;
-  entrenamientoItemId: number;
-  niveles: Nivel[];
-  activo: boolean;
+  palabras: string;
+  opciones: string;
+  tipoPregunta: string;
 }
 
 export default function VelocidadLevelPage() {
   const { categoria, itemId } = useParams<{ categoria: string; itemId: string }>();
   const [, setLocation] = useLocation();
-  const [ejercicio, setEjercicio] = useState<VelocidadEjercicio | null>(null);
+  const [niveles, setNiveles] = useState<Nivel[]>([]);
+  const [titulo, setTitulo] = useState("Velocidad Lectora");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +25,9 @@ export default function VelocidadLevelPage() {
         const res = await fetch(`/api/velocidad-ejercicios/${itemId}`);
         const data = await res.json();
         if (data.ejercicio) {
-          setEjercicio(data.ejercicio);
+          setTitulo(data.ejercicio.titulo || "Velocidad Lectora");
+          const parsed = JSON.parse(data.ejercicio.niveles || "[]");
+          setNiveles(parsed);
         }
       } catch (e) {
         console.error(e);
@@ -42,15 +40,15 @@ export default function VelocidadLevelPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-cyan-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (!ejercicio || !ejercicio.niveles || ejercicio.niveles.length === 0) {
+  if (niveles.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-cyan-500 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
         <header className="p-4">
           <button
             onClick={() => setLocation(`/entrenamiento/${categoria}`)}
@@ -69,7 +67,7 @@ export default function VelocidadLevelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-cyan-500 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
       <header className="p-4">
         <button
           onClick={() => setLocation(`/entrenamiento/${categoria}`)}
@@ -88,12 +86,12 @@ export default function VelocidadLevelPage() {
           className="text-center mb-8"
         >
           <Zap className="w-16 h-16 text-yellow-300 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white mb-2">Velocidad Lectora</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{titulo}</h1>
           <p className="text-white/80">Selecciona un nivel</p>
         </motion.div>
 
         <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-          {ejercicio.niveles.map((nivel, index) => (
+          {niveles.map((nivel, index) => (
             <motion.button
               key={index}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -104,8 +102,8 @@ export default function VelocidadLevelPage() {
               data-testid={`button-nivel-${nivel.nivel}`}
             >
               <div className="text-4xl font-bold text-white mb-2">{nivel.nivel}</div>
-              <div className="text-sm text-white/80">Patrón {nivel.patron}</div>
-              <div className="text-xs text-cyan-200 mt-1">{nivel.velocidad}ms</div>
+              <div className="text-lg text-yellow-200 font-semibold">{nivel.velocidad} pal/min</div>
+              <div className="text-xs text-white/60 mt-1">Patrón {nivel.patron}</div>
             </motion.button>
           ))}
         </div>
