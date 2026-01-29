@@ -13,6 +13,7 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXY".split("");
+const ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV"];
 
 export default function NumerosEjercicioPage() {
   const [, navigate] = useLocation();
@@ -45,6 +46,8 @@ export default function NumerosEjercicioPage() {
       return targetIndex + 1;
     } else if (nivel === "letras") {
       return LETTERS[targetIndex];
+    } else if (nivel === "romanos") {
+      return ROMANOS[targetIndex];
     }
     return targetIndex + 1;
   };
@@ -69,6 +72,8 @@ export default function NumerosEjercicioPage() {
 
     if (storedNivel === "letras") {
       setBoard(shuffleArray([...LETTERS]));
+    } else if (storedNivel === "romanos") {
+      setBoard(shuffleArray([...ROMANOS]));
     } else {
       const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
       setBoard(shuffleArray(numbers));
@@ -98,6 +103,8 @@ export default function NumerosEjercicioPage() {
   const handleStart = useCallback(() => {
     if (nivel === "letras") {
       setBoard(shuffleArray([...LETTERS]));
+    } else if (nivel === "romanos") {
+      setBoard(shuffleArray([...ROMANOS]));
     } else {
       const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
       setBoard(shuffleArray(numbers));
@@ -117,6 +124,8 @@ export default function NumerosEjercicioPage() {
       isCorrect = value === targetIndex + 1;
     } else if (nivel === "letras") {
       isCorrect = value === LETTERS[targetIndex];
+    } else if (nivel === "romanos") {
+      isCorrect = value === ROMANOS[targetIndex];
     }
 
     if (isCorrect) {
