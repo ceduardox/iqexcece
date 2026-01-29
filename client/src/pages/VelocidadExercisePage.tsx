@@ -284,49 +284,46 @@ export default function VelocidadExercisePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
-      <header className="bg-gradient-to-r from-purple-800/80 to-pink-700/80 backdrop-blur px-4 py-3 flex items-center justify-between">
-        <h1 className="text-white font-bold text-lg">{titulo}</h1>
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 90 }}
-          whileTap={{ scale: 0.9 }}
+      <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
+        <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
+        <button
           onClick={() => setLocation(`/entrenamiento/${categoria}`)}
-          className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all"
+          className="w-8 h-8 flex items-center justify-center text-white/80"
           data-testid="button-close"
         >
           <X className="w-5 h-5" />
-        </motion.button>
+        </button>
       </header>
 
-      <div className="bg-purple-900/40 backdrop-blur px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-purple-200 text-xs">EJERCICIO</span>
-          <span className="text-white text-xl font-bold">{ejercicioActual + 1}/{ejercicios.length}</span>
+      <div className="bg-purple-900/60 px-4 py-3 flex items-center justify-between">
+        <div className="text-center">
+          <span className="text-purple-300 text-xs block">NIVEL</span>
+          <span className="text-white text-2xl font-bold">{ejercicioActual + 1}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <span className="text-2xl">😊</span>
-            <span className="text-green-400 text-sm font-bold">CORRECTO</span>
-            <span className="text-white text-xl font-bold ml-1">{correctos}</span>
+        <div className="flex items-center gap-6">
+          <div className="text-center">
+            <span className="text-purple-300 text-xs block">CORRECTOS</span>
+            <div className="flex items-center justify-center gap-1">
+              <span className="text-xl">😊</span>
+              <span className="text-white text-2xl font-bold">{correctos}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-2xl">😔</span>
-            <span className="text-red-400 text-sm font-bold">INCORRECTO</span>
-            <span className="text-white text-xl font-bold ml-1">{incorrectos}</span>
+          <div className="text-center">
+            <span className="text-purple-300 text-xs block">INCORRECTOS</span>
+            <div className="flex items-center justify-center gap-1">
+              <span className="text-xl">😔</span>
+              <span className="text-white text-2xl font-bold">{incorrectos}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center px-6 py-8">
-        <motion.div 
-          key={ejercicioActual}
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          className="text-center mb-8"
-        >
-          <span className="text-purple-200 text-sm font-medium tracking-wider">
-            {ejercicio.velocidad} palabras/min
+      <main className="flex-1 flex flex-col items-center px-6 py-6">
+        <div className="text-center mb-6">
+          <span className="text-white text-lg font-bold">
+            {ejercicio.velocidad} palabras /min.
           </span>
-        </motion.div>
+        </div>
 
         <AnimatePresence mode="wait">
           {(gameState === "ready" || gameState === "animacion_inicial" || gameState === "playing") && (
