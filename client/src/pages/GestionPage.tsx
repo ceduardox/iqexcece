@@ -144,6 +144,19 @@ export default function GestionPage() {
   const [selectedPrepPageId, setSelectedPrepPageId] = useState<string | null>(null);
   const [editingPrepPage, setEditingPrepPage] = useState<{id?: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string} | null>(null);
   
+  // Ejercicios de velocidad
+  type NivelConfig = { nivel: number; patron: string; velocidad: number; contenido: string[] };
+  const [editingVelocidadItem, setEditingVelocidadItem] = useState<string | null>(null);
+  const [velocidadEjercicio, setVelocidadEjercicio] = useState<{
+    id?: string;
+    entrenamientoItemId: string;
+    titulo: string;
+    descripcion: string;
+    imagenCabecera: string;
+    niveles: NivelConfig[];
+    isActive: boolean;
+  } | null>(null);
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -3754,7 +3767,54 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               </div>
                             </div>
                           </div>
-                          <div className="flex justify-end">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              onClick={async () => {
+                                setEditingVelocidadItem(item.id);
+                                try {
+                                  const res = await fetch(`/api/admin/velocidad/${item.id}`, {
+                                    headers: { Authorization: `Bearer ${token}` }
+                                  });
+                                  const data = await res.json();
+                                  if (data.ejercicios && data.ejercicios.length > 0) {
+                                    const ej = data.ejercicios[0];
+                                    setVelocidadEjercicio({
+                                      id: ej.id,
+                                      entrenamientoItemId: item.id,
+                                      titulo: ej.titulo || "Mejora tu Velocidad",
+                                      descripcion: ej.descripcion || "",
+                                      imagenCabecera: ej.imagenCabecera || "",
+                                      niveles: ej.niveles ? JSON.parse(ej.niveles) : [
+                                        { nivel: 1, patron: "2x3", velocidad: 1500, contenido: ["A", "B", "C", "D", "E", "F"] },
+                                        { nivel: 2, patron: "3x3", velocidad: 1200, contenido: ["A", "B", "C", "D", "E", "F", "G", "H", "I"] },
+                                        { nivel: 3, patron: "1x3", velocidad: 1000, contenido: ["AB", "CD", "EF"] },
+                                        { nivel: 4, patron: "2x2", velocidad: 800, contenido: ["AB", "CD", "EF", "GH"] }
+                                      ],
+                                      isActive: ej.isActive ?? true
+                                    });
+                                  } else {
+                                    setVelocidadEjercicio({
+                                      entrenamientoItemId: item.id,
+                                      titulo: "Mejora tu Velocidad",
+                                      descripcion: "",
+                                      imagenCabecera: "",
+                                      niveles: [
+                                        { nivel: 1, patron: "2x3", velocidad: 1500, contenido: ["A", "B", "C", "D", "E", "F"] },
+                                        { nivel: 2, patron: "3x3", velocidad: 1200, contenido: ["A", "B", "C", "D", "E", "F", "G", "H", "I"] },
+                                        { nivel: 3, patron: "1x3", velocidad: 1000, contenido: ["AB", "CD", "EF"] },
+                                        { nivel: 4, patron: "2x2", velocidad: 800, contenido: ["AB", "CD", "EF", "GH"] }
+                                      ],
+                                      isActive: true
+                                    });
+                                  }
+                                } catch (e) { console.error(e); }
+                              }}
+                              variant="outline"
+                              className="border-purple-500/50 text-purple-400"
+                            >
+                              <Zap className="w-4 h-4 mr-2" />
+                              Ejercicios
+                            </Button>
                             <Button
                               onClick={async () => {
                                 try {
@@ -3781,6 +3841,207 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             </CardContent>
           </Card>
         )}
+          
+        {/* Modal de Ejercicios de Velocidad */}
+          {editingVelocidadItem && velocidadEjercicio && (
+            <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-gradient-to-b from-slate-900 to-purple-900/50 rounded-2xl border border-purple-500/30 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b border-purple-500/30 flex items-center justify-between sticky top-0 bg-slate-900/95 z-10">
+                  <h2 className="text-xl font-bold text-white">Ejercicios de Velocidad</h2>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setEditingVelocidadItem(null); setVelocidadEjercicio(null); }}
+                    className="text-white/60 hover:text-white"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Título del ejercicio</label>
+                      <Input
+                        value={velocidadEjercicio.titulo}
+                        onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, titulo: e.target.value})}
+                        className="bg-white/10 border-purple-500/30 text-white"
+                        placeholder="Mejora tu Velocidad de Lectura"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Descripción (opcional)</label>
+                      <textarea
+                        value={velocidadEjercicio.descripcion}
+                        onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, descripcion: e.target.value})}
+                        className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                        rows={2}
+                        placeholder="Ejercita tu capacidad de percepción visual..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm mb-1 block">Imagen de cabecera</label>
+                      <div className="flex gap-2 items-center">
+                        <div 
+                          className="w-20 h-20 bg-white/10 rounded-xl overflow-hidden cursor-pointer border-2 border-dashed border-purple-500/30 flex items-center justify-center"
+                          onClick={() => {
+                            setImagePickerCallback(() => (url: string) => {
+                              setVelocidadEjercicio({...velocidadEjercicio, imagenCabecera: url});
+                            });
+                            setShowImagePicker(true);
+                          }}
+                        >
+                          {velocidadEjercicio.imagenCabecera ? (
+                            <img src={velocidadEjercicio.imagenCabecera} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <Plus className="w-6 h-6 text-purple-400" />
+                          )}
+                        </div>
+                        <span className="text-white/40 text-sm">Clic para seleccionar imagen</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-purple-500/30 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-white font-semibold">Niveles de Dificultad</h3>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          const newNivel = velocidadEjercicio.niveles.length + 1;
+                          setVelocidadEjercicio({
+                            ...velocidadEjercicio,
+                            niveles: [...velocidadEjercicio.niveles, { nivel: newNivel, patron: "2x2", velocidad: 1000, contenido: ["A", "B", "C", "D"] }]
+                          });
+                        }}
+                        className="bg-purple-600"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Agregar Nivel
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {velocidadEjercicio.niveles.map((nivel, nivelIdx) => (
+                        <div key={nivelIdx} className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-purple-400 font-semibold">Nivel {nivel.nivel}</span>
+                            {velocidadEjercicio.niveles.length > 1 && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 h-6"
+                                onClick={() => {
+                                  const updated = velocidadEjercicio.niveles.filter((_, i) => i !== nivelIdx);
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Patrón de puntos</label>
+                              <select
+                                value={nivel.patron}
+                                onChange={(e) => {
+                                  const updated = [...velocidadEjercicio.niveles];
+                                  updated[nivelIdx].patron = e.target.value;
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                                className="w-full bg-white/10 border border-purple-500/30 text-white rounded-md p-2 text-sm"
+                              >
+                                <option value="2x3">2x3 (6 puntos)</option>
+                                <option value="3x3">3x3 (9 puntos)</option>
+                                <option value="1x3">1x3 (3 puntos)</option>
+                                <option value="2x2">2x2 (4 puntos)</option>
+                                <option value="1x4">1x4 (4 puntos)</option>
+                                <option value="2x4">2x4 (8 puntos)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-white/60 text-xs mb-1 block">Velocidad (ms)</label>
+                              <Input
+                                type="number"
+                                value={nivel.velocidad}
+                                onChange={(e) => {
+                                  const updated = [...velocidadEjercicio.niveles];
+                                  updated[nivelIdx].velocidad = parseInt(e.target.value) || 1000;
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                                className="bg-white/10 border-purple-500/30 text-white"
+                                min={100}
+                                step={100}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="text-white/60 text-xs mb-1 block">Contenido (separado por comas)</label>
+                            <Input
+                              value={nivel.contenido.join(", ")}
+                              onChange={(e) => {
+                                const updated = [...velocidadEjercicio.niveles];
+                                updated[nivelIdx].contenido = e.target.value.split(",").map(s => s.trim()).filter(s => s);
+                                setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                              }}
+                              className="bg-white/10 border-purple-500/30 text-white"
+                              placeholder="A, B, C, D, E, F"
+                            />
+                            <p className="text-white/40 text-xs mt-1">
+                              Letras, palabras o números que aparecerán en el ejercicio
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-6 border-t border-purple-500/30 flex justify-end gap-3 sticky bottom-0 bg-slate-900/95">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setEditingVelocidadItem(null); setVelocidadEjercicio(null); }}
+                    className="border-white/20 text-white/60"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const payload = {
+                          ...velocidadEjercicio,
+                          niveles: JSON.stringify(velocidadEjercicio.niveles)
+                        };
+                        if (velocidadEjercicio.id) {
+                          await fetch(`/api/admin/velocidad/${velocidadEjercicio.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                          });
+                        } else {
+                          await fetch("/api/admin/velocidad", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                          });
+                        }
+                        alert("Ejercicio guardado correctamente");
+                        setEditingVelocidadItem(null);
+                        setVelocidadEjercicio(null);
+                      } catch (e) { alert("Error al guardar"); }
+                    }}
+                    className="bg-gradient-to-r from-purple-600 to-cyan-600"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Ejercicio
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
