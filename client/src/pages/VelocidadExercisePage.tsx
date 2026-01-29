@@ -119,19 +119,19 @@ export default function VelocidadExercisePage() {
 
   useEffect(() => {
     if (gameState !== "playing" || !nivel || palabrasRonda.length === 0) return;
-    const totalPos = palabrasRonda.length;
+    const totalPos = getTotalPositions(nivel.patron);
     const intervalMs = getIntervalMs(nivel.velocidad);
     let wordIndex = 0;
     
     // Mostrar primera palabra inmediatamente
     setCurrentPosition(0);
-    setShownWords(palabrasRonda.map((_, i) => i === 0 ? palabrasRonda[0] : ""));
+    setShownWords(Array(totalPos).fill("").map((_, i) => i === 0 ? (palabrasRonda[0] || "") : ""));
     wordIndex = 1;
     
     const interval = setInterval(() => {
       if (wordIndex < totalPos) {
         setCurrentPosition(wordIndex);
-        setShownWords(palabrasRonda.map((_, i) => i === wordIndex ? palabrasRonda[wordIndex] : ""));
+        setShownWords(Array(totalPos).fill("").map((_, i) => i === wordIndex ? (palabrasRonda[wordIndex] || "") : ""));
         wordIndex++;
       } else {
         clearInterval(interval);
@@ -243,7 +243,8 @@ export default function VelocidadExercisePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <AnimatePresence>
+                  {/* Contenedor fijo para círculo - mantiene altura aunque círculo desaparezca */}
+                  <div className="h-7 flex items-center justify-center">
                     {showCircles && (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -257,9 +258,10 @@ export default function VelocidadExercisePage() {
                         style={{ boxShadow: currentPosition === idx ? "0 0 20px rgba(168, 85, 247, 0.6)" : "none" }}
                       />
                     )}
-                  </AnimatePresence>
+                  </div>
                   
-                  <div className="w-full min-h-[32px] flex items-center justify-center">
+                  {/* Contenedor fijo para palabra */}
+                  <div className="h-8 flex items-center justify-center">
                     {currentPosition === idx && shownWords[idx] && (
                       <motion.span
                         key={`word-${idx}-${shownWords[idx]}`}
