@@ -20,6 +20,7 @@ export default function VelocidadExercisePage() {
   const [titulo, setTitulo] = useState("Velocidad Lectora");
   const [loading, setLoading] = useState(true);
   const [tiempoAnimacionInicial, setTiempoAnimacionInicial] = useState(3);
+  const [velocidadAnimacion, setVelocidadAnimacion] = useState(5);
   
   const [gameState, setGameState] = useState<"ready" | "animacion_inicial" | "playing" | "question" | "transicion" | "final">("ready");
   const [correctos, setCorrectos] = useState(0);
@@ -55,6 +56,9 @@ export default function VelocidadExercisePage() {
           
           if (velocidadData.ejercicio.tiempoAnimacionInicial) {
             setTiempoAnimacionInicial(velocidadData.ejercicio.tiempoAnimacionInicial);
+          }
+          if (velocidadData.ejercicio.velocidadAnimacion) {
+            setVelocidadAnimacion(velocidadData.ejercicio.velocidadAnimacion);
           }
         }
       } catch (e) {
@@ -137,27 +141,25 @@ export default function VelocidadExercisePage() {
     
     const totalPos = getTotalPositions(ejercicio.patron);
     const duracionMs = tiempoAnimacionInicial * 1000;
-    const intervaloPorPosicion = duracionMs / (totalPos * 3);
+    // velocidadAnimacion: 1=lento (500ms), 5=normal (250ms), 10=rápido (100ms)
+    const baseInterval = 600 - (velocidadAnimacion * 50); // 1=550ms, 5=350ms, 10=100ms
+    const totalSaltos = Math.floor(duracionMs / baseInterval);
     let posicion = 0;
-    let ciclos = 0;
-    const maxCiclos = 3;
+    let saltos = 0;
     
     const interval = setInterval(() => {
       setCurrentPosition(posicion);
-      posicion++;
-      if (posicion >= totalPos) {
-        posicion = 0;
-        ciclos++;
-        if (ciclos >= maxCiclos) {
-          clearInterval(interval);
-          setCurrentPosition(-1);
-          setGameState("playing");
-        }
+      posicion = (posicion + 1) % totalPos;
+      saltos++;
+      if (saltos >= totalSaltos) {
+        clearInterval(interval);
+        setCurrentPosition(-1);
+        setGameState("playing");
       }
-    }, intervaloPorPosicion);
+    }, baseInterval);
     
     return () => clearInterval(interval);
-  }, [gameState, ejercicio, tiempoAnimacionInicial]);
+  }, [gameState, ejercicio, tiempoAnimacionInicial, velocidadAnimacion]);
 
   useEffect(() => {
     if (gameState !== "playing" || !ejercicio || palabrasRonda.length === 0) return;
@@ -352,7 +354,7 @@ export default function VelocidadExercisePage() {
                         animate={{ scale: 1, y: 0 }}
                         exit={{ scale: 0 }}
                         transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                        className="w-8 h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
+                        className="w-6 h-6 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"
                       />
                     )}
                     {gameState === "playing" && currentPosition === idx && shownWords[idx] && (
@@ -371,7 +373,7 @@ export default function VelocidadExercisePage() {
                   <motion.div 
                     className="w-full h-1 rounded-full"
                     animate={{ 
-                      backgroundColor: currentPosition === idx ? "#facc15" : "#7c3aed",
+                      backgroundColor: currentPosition === idx ? "#c084fc" : "#6b21a8",
                       scaleY: currentPosition === idx ? 2 : 1
                     }}
                     transition={{ duration: 0.1 }}

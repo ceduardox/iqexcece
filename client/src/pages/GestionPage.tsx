@@ -155,6 +155,7 @@ export default function GestionPage() {
     imagenCabecera: string;
     niveles: NivelConfig[];
     tiempoAnimacionInicial: number;
+    velocidadAnimacion: number;
     isActive: boolean;
   } | null>(null);
   
@@ -3809,6 +3810,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         { nivel: 4, patron: "2x2", velocidad: 800, contenido: ["AB", "CD", "EF", "GH"] }
                                       ],
                                       tiempoAnimacionInicial: ej.tiempoAnimacionInicial || 3,
+                                      velocidadAnimacion: ej.velocidadAnimacion || 5,
                                       isActive: ej.isActive ?? true
                                     });
                                   } else {
@@ -3823,6 +3825,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         { nivel: 3, patron: "3x3", velocidad: 250, palabras: "amor, paz, luz, vida, alma, mente, cuerpo, mundo, tiempo, espacio", opciones: "amor, paz, vida, mente, mundo, espacio", tipoPregunta: "primera" }
                                       ],
                                       tiempoAnimacionInicial: 3,
+                                      velocidadAnimacion: 5,
                                       isActive: true
                                     });
                                   }
@@ -3919,17 +3922,31 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <span className="text-white/40 text-sm">Clic para seleccionar imagen</span>
                       </div>
                     </div>
-                    <div>
-                      <label className="text-white/60 text-sm mb-1 block">Tiempo de animación inicial (segundos)</label>
-                      <p className="text-white/40 text-xs mb-2">Duración del círculo rebotando antes de empezar las palabras</p>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={velocidadEjercicio.tiempoAnimacionInicial}
-                        onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, tiempoAnimacionInicial: parseInt(e.target.value) || 3})}
-                        className="w-24 bg-white/10 border-purple-500/30 text-white rounded-md p-2 text-sm"
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-white/60 text-sm mb-1 block">Duración animación (segundos)</label>
+                        <p className="text-white/40 text-xs mb-2">Cuánto tiempo dura la animación del círculo</p>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={velocidadEjercicio.tiempoAnimacionInicial}
+                          onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, tiempoAnimacionInicial: parseInt(e.target.value) || 3})}
+                          className="w-24 bg-white/10 border-purple-500/30 text-white rounded-md p-2 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-sm mb-1 block">Velocidad del círculo (1-10)</label>
+                        <p className="text-white/40 text-xs mb-2">1=Lento, 5=Normal, 10=Rápido</p>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={velocidadEjercicio.velocidadAnimacion}
+                          onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, velocidadAnimacion: Math.min(10, Math.max(1, parseInt(e.target.value) || 5))})}
+                          className="w-24 bg-white/10 border-purple-500/30 text-white rounded-md p-2 text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                   
