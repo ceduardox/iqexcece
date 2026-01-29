@@ -71,13 +71,19 @@ export default function VelocidadExercisePage() {
   const getIntervalMs = (palabrasPorMinuto: number) => Math.round(60000 / palabrasPorMinuto);
 
   const getPreguntaTexto = (tipo: string) => {
-    const pos = parseInt(tipo) || 1;
-    return `¿Qué palabra estaba en la posición ${pos}?`;
+    if (tipo === "primera") {
+      return "¿Cuál fue la primera palabra?";
+    } else if (tipo === "ultima") {
+      return "¿Cuál fue la última palabra?";
+    }
+    return "¿Cuál fue la primera palabra?";
   };
 
   const getRespuestaCorrecta = (tipo: string, palabras: string[]) => {
-    const pos = parseInt(tipo) || 1;
-    return palabras[pos - 1] || palabras[0];
+    if (tipo === "ultima") {
+      return palabras[palabras.length - 1] || palabras[0];
+    }
+    return palabras[0];
   };
 
   const iniciarEjercicio = useCallback(() => {

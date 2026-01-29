@@ -3818,7 +3818,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       niveles: [
                                         { nivel: 1, patron: "3x2", velocidad: 150, palabras: "vista, atomo, iglesia, olvido, orar, opaco, casa, perro, gato, sol", opciones: "atomo, olvido, orar, vista, iglesia, opaco", tipoPregunta: "ultima" },
                                         { nivel: 2, patron: "3x2", velocidad: 200, palabras: "luna, estrella, cielo, mar, rio, lago, monte, flor, arbol, nube", opciones: "luna, mar, lago, cielo, flor, nube", tipoPregunta: "primera" },
-                                        { nivel: 3, patron: "3x3", velocidad: 250, palabras: "amor, paz, luz, vida, alma, mente, cuerpo, mundo, tiempo, espacio", opciones: "amor, paz, vida, mente, mundo, espacio", tipoPregunta: "penultima" }
+                                        { nivel: 3, patron: "3x3", velocidad: 250, palabras: "amor, paz, luz, vida, alma, mente, cuerpo, mundo, tiempo, espacio", opciones: "amor, paz, vida, mente, mundo, espacio", tipoPregunta: "primera" }
                                       ],
                                       isActive: true
                                     });
@@ -4001,7 +4001,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <div>
                               <label className="text-white/60 text-xs mb-1 block">¿Qué posición preguntar?</label>
                               <select
-                                value={nivel.tipoPregunta || "1"}
+                                value={nivel.tipoPregunta || "primera"}
                                 onChange={(e) => {
                                   const updated = [...velocidadEjercicio.niveles];
                                   updated[nivelIdx].tipoPregunta = e.target.value;
@@ -4009,9 +4009,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 }}
                                 className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
-                                {Array.from({ length: nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6 }).map((_, i) => (
-                                  <option key={i+1} value={String(i+1)} className="bg-gray-700 text-white">Posición {i+1}</option>
-                                ))}
+                                <option value="primera" className="bg-gray-700 text-white">Primera palabra</option>
+                                <option value="ultima" className="bg-gray-700 text-white">Última palabra</option>
                               </select>
                             </div>
                           </div>
