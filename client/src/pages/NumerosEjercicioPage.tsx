@@ -93,31 +93,36 @@ export default function NumerosEjercicioPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center justify-between text-white">
-        <button
-          onClick={() => window.history.back()}
-          className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
-          data-testid="button-close"
-        >
-          <X className="w-5 h-5" />
-        </button>
+      <header className="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 text-white">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-bold leading-tight">
+            Identifica rápidamente<br/>Números y Letras
+          </h1>
+          <button
+            onClick={() => window.history.back()}
+            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+            data-testid="button-close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
         
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1">
-            <Zap className="w-4 h-4" />
-            <span>Nivel {level}</span>
+        <div className="bg-teal-600/50 rounded-full px-4 py-2 flex items-center justify-between text-xs">
+          <div className="text-center">
+            <span className="text-white/70 block text-[10px]">NIVEL</span>
+            <span className="font-bold">Números</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>{formatTime(timeLeft)}</span>
+          <div className="text-center">
+            <span className="text-white/70 block text-[10px]">TIEMPO</span>
+            <span className="font-bold">{timeLeft}s 😊</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Check className="w-4 h-4 text-green-300" />
-            <span>{correctCount}</span>
+          <div className="text-center">
+            <span className="text-white/70 block text-[10px]">CORRECTOS</span>
+            <span className="font-bold">{correctCount}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <XCircle className="w-4 h-4 text-red-300" />
-            <span>{incorrectCount}</span>
+          <div className="text-center">
+            <span className="text-white/70 block text-[10px]">INCORRECTOS</span>
+            <span className="font-bold">{incorrectCount}</span>
           </div>
         </div>
       </header>
