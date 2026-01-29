@@ -260,18 +260,18 @@ export default function VelocidadExercisePage() {
                   </AnimatePresence>
                   
                   <div className="w-full min-h-[32px] flex items-center justify-center">
-                    <AnimatePresence mode="wait">
-                      {shownWords[idx] && (
-                        <motion.span
-                          key={shownWords[idx]}
-                          initial={{ opacity: 0, scale: 0.5, y: 10 }}
-                          animate={{ opacity: currentPosition === idx ? 1 : 0.5, scale: currentPosition === idx ? 1.1 : 1, y: 0 }}
-                          className="text-gray-800 font-semibold text-xl"
-                        >
-                          {shownWords[idx]}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
+                    {currentPosition === idx && shownWords[idx] && (
+                      <motion.span
+                        key={`word-${idx}-${shownWords[idx]}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        className="text-gray-800 font-bold text-xl"
+                      >
+                        {shownWords[idx]}
+                      </motion.span>
+                    )}
                   </div>
                   
                   <motion.div 
