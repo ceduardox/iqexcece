@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -71,6 +71,11 @@ export interface IStorage {
   saveVelocidadEjercicio(ejercicio: InsertVelocidadEjercicio): Promise<VelocidadEjercicio>;
   updateVelocidadEjercicio(id: string, ejercicio: Partial<InsertVelocidadEjercicio>): Promise<VelocidadEjercicio | null>;
   deleteVelocidadEjercicio(id: string): Promise<void>;
+  
+  // Numeros exercises intro page
+  getNumerosIntroByItem(entrenamientoItemId: string): Promise<NumerosEjercicio | null>;
+  saveNumerosIntro(data: InsertNumerosEjercicio): Promise<NumerosEjercicio>;
+  updateNumerosIntro(id: string, data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -333,6 +338,12 @@ export class MemStorage implements IStorage {
   }
   async updateVelocidadEjercicio(_id: string, _ejercicio: Partial<InsertVelocidadEjercicio>): Promise<VelocidadEjercicio | null> { return null; }
   async deleteVelocidadEjercicio(_id: string): Promise<void> {}
+  
+  async getNumerosIntroByItem(_entrenamientoItemId: string): Promise<NumerosEjercicio | null> { return null; }
+  async saveNumerosIntro(data: InsertNumerosEjercicio): Promise<NumerosEjercicio> {
+    return { id: randomUUID(), ...data, isActive: true, createdAt: new Date(), updatedAt: new Date() } as NumerosEjercicio;
+  }
+  async updateNumerosIntro(_id: string, _data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null> { return null; }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -771,6 +782,25 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVelocidadEjercicio(id: string): Promise<void> {
     await db.delete(velocidadEjercicios).where(eq(velocidadEjercicios.id, id));
+  }
+
+  async getNumerosIntroByItem(entrenamientoItemId: string): Promise<NumerosEjercicio | null> {
+    const [intro] = await db.select().from(numerosEjercicios)
+      .where(eq(numerosEjercicios.entrenamientoItemId, entrenamientoItemId));
+    return intro || null;
+  }
+
+  async saveNumerosIntro(data: InsertNumerosEjercicio): Promise<NumerosEjercicio> {
+    const [intro] = await db.insert(numerosEjercicios).values(data).returning();
+    return intro;
+  }
+
+  async updateNumerosIntro(id: string, data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null> {
+    const [updated] = await db.update(numerosEjercicios)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(numerosEjercicios.id, id))
+      .returning();
+    return updated || null;
   }
 }
 

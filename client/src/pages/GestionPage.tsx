@@ -159,6 +159,16 @@ export default function GestionPage() {
     isActive: boolean;
   } | null>(null);
   
+  // Página de introducción de Números
+  const [numerosIntroData, setNumerosIntroData] = useState<{
+    id?: string;
+    entrenamientoItemId: string;
+    titulo: string;
+    descripcion: string;
+    subtitulo: string;
+    imagenCabecera: string;
+  } | null>(null);
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -3686,6 +3696,173 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                         </div>
 
+                        {/* Sección específica para tipo numeros */}
+                        {item.tipoEjercicio === "numeros" && (
+                          <div className="mt-4 pt-4 border-t border-white/10">
+                            <div className="mb-4">
+                              <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                                <span className="text-lg">🔢</span>
+                                Página de Introducción
+                                <span className="text-white/40 text-xs font-normal">(Identifica Números y Letras)</span>
+                              </h4>
+                              <div className="grid md:grid-cols-2 gap-4 bg-teal-900/30 p-4 rounded-xl border border-teal-500/30">
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Imagen de cabecera</label>
+                                    <div className="flex gap-2">
+                                      <Input
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.imagenCabecera || "") : ""}
+                                        onChange={(e) => {
+                                          setNumerosIntroData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                            imagenCabecera: e.target.value
+                                          }));
+                                        }}
+                                        className="bg-white/10 border-teal-500/30 text-white text-sm"
+                                        placeholder="URL de imagen..."
+                                      />
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-teal-500/30 text-teal-400 px-2"
+                                        onClick={() => {
+                                          setImagePickerCallback(() => (url: string) => {
+                                            setNumerosIntroData(prev => ({
+                                              ...prev,
+                                              entrenamientoItemId: item.id,
+                                              titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                              descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                              subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                              imagenCabecera: url
+                                            }));
+                                            setShowImagePicker(false);
+                                          });
+                                          setShowImagePicker(true);
+                                        }}
+                                      >
+                                        <ImageIcon className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    {(numerosIntroData?.entrenamientoItemId === item.id && numerosIntroData?.imagenCabecera) && (
+                                      <img src={numerosIntroData.imagenCabecera} alt="" className="w-20 h-20 object-contain mt-2 rounded bg-white/10" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Título principal</label>
+                                    <textarea
+                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "") : "Identifica rápidamente\nNúmeros y Letras"}
+                                      onChange={(e) => {
+                                        setNumerosIntroData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: e.target.value,
+                                          descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                          subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
+                                      placeholder="Ej: Identifica rápidamente\nNúmeros y Letras"
+                                      rows={2}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
+                                    <Input
+                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "") : "¡Haz más fuerte tu vista jugando!"}
+                                      onChange={(e) => {
+                                        setNumerosIntroData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                          descripcion: e.target.value,
+                                          subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="bg-white/10 border-teal-500/30 text-white"
+                                      placeholder="Ej: ¡Haz más fuerte tu vista jugando!"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
+                                    <Input
+                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "") : "Identifica el número o letra para ver el mundo más grande"}
+                                      onChange={(e) => {
+                                        setNumerosIntroData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                          descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                          subtitulo: e.target.value,
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="bg-white/10 border-teal-500/30 text-white"
+                                      placeholder="Ej: Identifica el número o letra..."
+                                    />
+                                  </div>
+                                  <div className="flex justify-end pt-2">
+                                    <Button
+                                      onClick={async () => {
+                                        if (!numerosIntroData || numerosIntroData.entrenamientoItemId !== item.id) return;
+                                        try {
+                                          const existing = await fetch(`/api/numeros-intro/${item.id}`);
+                                          const existingData = await existing.json();
+                                          
+                                          if (existingData.intro?.id) {
+                                            await fetch(`/api/admin/numeros-intro/${existingData.intro.id}`, {
+                                              method: "PUT",
+                                              headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: `Bearer ${token}`
+                                              },
+                                              body: JSON.stringify({
+                                                titulo: numerosIntroData.titulo,
+                                                descripcion: numerosIntroData.descripcion,
+                                                subtitulo: numerosIntroData.subtitulo,
+                                                imagenCabecera: numerosIntroData.imagenCabecera
+                                              })
+                                            });
+                                          } else {
+                                            await fetch("/api/admin/numeros-intro", {
+                                              method: "POST",
+                                              headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: `Bearer ${token}`
+                                              },
+                                              body: JSON.stringify({
+                                                entrenamientoItemId: item.id,
+                                                titulo: numerosIntroData.titulo,
+                                                descripcion: numerosIntroData.descripcion,
+                                                subtitulo: numerosIntroData.subtitulo,
+                                                imagenCabecera: numerosIntroData.imagenCabecera,
+                                                niveles: "[]"
+                                              })
+                                            });
+                                          }
+                                          alert("Página guardada correctamente");
+                                        } catch (e) { console.error(e); }
+                                      }}
+                                      className="bg-teal-600 hover:bg-teal-700 text-white"
+                                    >
+                                      Guardar Página
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sección Página de Preparación (para otros tipos) */}
+                        {item.tipoEjercicio !== "numeros" && (
                         <div className="mt-4 pt-4 border-t border-white/10">
                           <div className="mb-4">
                             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -3856,6 +4033,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             </Button>
                           </div>
                         </div>
+                        )}
                       </div>
                     ))}
                   </div>

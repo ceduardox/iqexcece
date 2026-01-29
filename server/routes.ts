@@ -719,5 +719,31 @@ export async function registerRoutes(
     res.json({ ejercicio });
   });
 
+  // Numeros intro page endpoints
+  app.get("/api/numeros-intro/:entrenamientoItemId", async (req, res) => {
+    const intro = await storage.getNumerosIntroByItem(req.params.entrenamientoItemId);
+    res.json({ intro });
+  });
+
+  app.post("/api/admin/numeros-intro", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const intro = await storage.saveNumerosIntro(req.body);
+    res.json({ intro });
+  });
+
+  app.put("/api/admin/numeros-intro/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const intro = await storage.updateNumerosIntro(req.params.id, req.body);
+    res.json({ intro });
+  });
+
   return httpServer;
 }
