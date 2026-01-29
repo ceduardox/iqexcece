@@ -34,6 +34,8 @@ export default function VelocidadExercisePage() {
   const [opcionesRonda, setOpcionesRonda] = useState<string[]>([]);
   const [preguntaActual, setPreguntaActual] = useState("");
   const [respuestaCorrecta, setRespuestaCorrecta] = useState("");
+  const [velocidadActual, setVelocidadActual] = useState(150);
+  const [patronActual, setPatronActual] = useState("3x2");
 
   useEffect(() => {
     const loadData = async () => {
@@ -137,6 +139,8 @@ export default function VelocidadExercisePage() {
     setPreguntaActual(getPreguntaTexto(ejercicio.tipoPregunta));
     setRespuestaCorrecta(respuestaCorrectaCalculada);
     setUltimaRespuesta(null);
+    setVelocidadActual(ejercicio.velocidad);
+    setPatronActual(ejercicio.patron);
     
     if (esSegundoEjercicioEnAdelante) {
       setGameState("playing");
@@ -171,11 +175,11 @@ export default function VelocidadExercisePage() {
   }, [gameState, ejercicio, tiempoAnimacionInicial, velocidadAnimacion]);
 
   useEffect(() => {
-    if (gameState !== "playing" || !ejercicio || palabrasRonda.length === 0) return;
+    if (gameState !== "playing" || palabrasRonda.length === 0) return;
     
-    const totalPos = getTotalPositions(ejercicio.patron);
+    const totalPos = getTotalPositions(patronActual);
     const totalPalabras = palabrasRonda.length;
-    const intervalMs = getIntervalMs(ejercicio.velocidad);
+    const intervalMs = getIntervalMs(velocidadActual);
     let wordIndex = 0;
     
     const posActual = wordIndex % totalPos;
@@ -198,7 +202,7 @@ export default function VelocidadExercisePage() {
     }, intervalMs);
     
     return () => clearInterval(interval);
-  }, [gameState, ejercicio, palabrasRonda]);
+  }, [gameState, patronActual, velocidadActual, palabrasRonda]);
 
   const handleRespuesta = (opcion: string) => {
     const esCorrecta = opcion.toLowerCase() === respuestaCorrecta.toLowerCase();
@@ -235,6 +239,8 @@ export default function VelocidadExercisePage() {
         setPreguntaActual(getPreguntaTexto(nextEjercicio.tipoPregunta));
         setRespuestaCorrecta(respuestaCorrectaCalc);
         setUltimaRespuesta(null);
+        setVelocidadActual(nextEjercicio.velocidad);
+        setPatronActual(nextEjercicio.patron);
         setGameState("playing");
       }, 500);
     } else {
