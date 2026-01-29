@@ -315,7 +315,7 @@ export default function VelocidadExercisePage() {
       <div className="bg-purple-900/60 px-4 py-3 flex items-center justify-between">
         <div className="text-center">
           <span className="text-purple-300 text-xs block">NIVEL</span>
-          <span className="text-white text-2xl font-bold">{ejercicioActual + 1}</span>
+          <span className="text-white text-2xl font-bold">{ejercicio.patron}</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-center">
