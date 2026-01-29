@@ -51,8 +51,6 @@ export default function EntrenamientoPage() {
   const handleItemClick = (item: EntrenamientoItem) => {
     if (item.linkUrl === "velocidad") {
       setLocation(`/velocidad/${categoria}/${item.id}`);
-    } else if (item.linkUrl === "numeros") {
-      setLocation(`/numeros/${categoria}/${item.id}`);
     } else if (item.linkUrl && item.linkUrl.startsWith("/")) {
       setLocation(item.linkUrl);
     } else {
