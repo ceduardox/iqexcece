@@ -130,9 +130,8 @@ export default function EntrenamientoPrepPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           onClick={() => {
-            // Por ahora vuelve a la página de entrenamiento
-            // Después aquí irá la ruta a los ejercicios
-            alert("Aquí comenzarán los ejercicios");
+            // Navegar a la página de ejercicio de velocidad
+            setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
           }}
           className="mt-10 px-12 py-4 bg-orange-500 text-white font-bold text-xl rounded-full shadow-lg"
           data-testid="button-start"
