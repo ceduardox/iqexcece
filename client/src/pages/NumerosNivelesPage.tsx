@@ -43,6 +43,7 @@ export default function NumerosNivelesPage() {
 
   const handleSelectNivel = (nivelId: string) => {
     sessionStorage.setItem("numerosNivelSeleccionado", nivelId);
+    sessionStorage.setItem("numerosNivelesPath", window.location.pathname);
     navigate("/numeros-ejercicio");
   };
 

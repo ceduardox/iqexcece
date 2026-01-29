@@ -12,11 +12,16 @@ export default function NumerosResultPage() {
     tiempo: 60,
     nivel: "Números"
   });
+  const [nivelesPath, setNivelesPath] = useState("/");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("numerosResultados");
     if (stored) {
       setResults(JSON.parse(stored));
+    }
+    const storedPath = sessionStorage.getItem("numerosNivelesPath");
+    if (storedPath) {
+      setNivelesPath(storedPath);
     }
   }, []);
 
@@ -102,7 +107,7 @@ export default function NumerosResultPage() {
       <footer className="p-4">
         <div className="bg-teal-600/50 rounded-full p-2 flex items-center justify-around">
           <button
-            onClick={() => navigate("/numeros-ejercicio")}
+            onClick={() => navigate(nivelesPath)}
             className="flex flex-col items-center gap-1 px-4 py-2 bg-orange-500 rounded-full text-white"
             data-testid="button-new-test"
           >

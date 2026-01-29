@@ -24,10 +24,15 @@ export default function NumerosEjercicioPage() {
   const [flashingCell, setFlashingCell] = useState<number | null>(null);
   const [flashType, setFlashType] = useState<"correct" | "incorrect" | null>(null);
   const [targetPop, setTargetPop] = useState(false);
+  const [nivelesPath, setNivelesPath] = useState("/");
 
   useEffect(() => {
     const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
     setBoard(shuffleArray(numbers));
+    const storedPath = sessionStorage.getItem("numerosNivelesPath");
+    if (storedPath) {
+      setNivelesPath(storedPath);
+    }
   }, []);
 
   useEffect(() => {
@@ -113,7 +118,7 @@ export default function NumerosEjercicioPage() {
             Identifica rápidamente<br/>Números y Letras
           </h1>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate(nivelesPath)}
             className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
             data-testid="button-close"
           >
