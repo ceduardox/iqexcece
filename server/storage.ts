@@ -324,6 +324,15 @@ export class MemStorage implements IStorage {
   async deletePrepPage(_id: string): Promise<void> {}
   async getCategoriaPrepPage(_categoria: string): Promise<any | null> { return null; }
   async setCategoriaPrepPage(_categoria: string, _prepPageId: string | null): Promise<any> { return {}; }
+  
+  // Velocidad exercises (stubs)
+  async getVelocidadEjerciciosByItem(_entrenamientoItemId: string): Promise<VelocidadEjercicio[]> { return []; }
+  async getVelocidadEjercicioById(_id: string): Promise<VelocidadEjercicio | null> { return null; }
+  async saveVelocidadEjercicio(ejercicio: InsertVelocidadEjercicio): Promise<VelocidadEjercicio> {
+    return { id: randomUUID(), ...ejercicio, isActive: true, createdAt: new Date(), updatedAt: new Date() } as VelocidadEjercicio;
+  }
+  async updateVelocidadEjercicio(_id: string, _ejercicio: Partial<InsertVelocidadEjercicio>): Promise<VelocidadEjercicio | null> { return null; }
+  async deleteVelocidadEjercicio(_id: string): Promise<void> {}
 }
 
 export class DatabaseStorage implements IStorage {

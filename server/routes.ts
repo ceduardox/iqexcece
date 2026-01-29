@@ -661,5 +661,63 @@ export async function registerRoutes(
     res.json({ page });
   });
 
+  // Velocidad exercises endpoints
+  // Get all exercises for an entrenamiento item (admin)
+  app.get("/api/admin/velocidad/:entrenamientoItemId", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const ejercicios = await storage.getVelocidadEjerciciosByItem(req.params.entrenamientoItemId);
+    res.json({ ejercicios });
+  });
+
+  // Create velocidad exercise (admin)
+  app.post("/api/admin/velocidad", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const ejercicio = await storage.saveVelocidadEjercicio(req.body);
+    res.json({ ejercicio });
+  });
+
+  // Update velocidad exercise (admin)
+  app.put("/api/admin/velocidad/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const ejercicio = await storage.updateVelocidadEjercicio(req.params.id, req.body);
+    res.json({ ejercicio });
+  });
+
+  // Delete velocidad exercise (admin)
+  app.delete("/api/admin/velocidad/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    await storage.deleteVelocidadEjercicio(req.params.id);
+    res.json({ success: true });
+  });
+
+  // Public: Get velocidad exercise for an entrenamiento item
+  app.get("/api/velocidad/:entrenamientoItemId", async (req, res) => {
+    const ejercicios = await storage.getVelocidadEjerciciosByItem(req.params.entrenamientoItemId);
+    const activeEjercicio = ejercicios.find(e => e.isActive);
+    res.json({ ejercicio: activeEjercicio || null });
+  });
+
+  // Public: Get velocidad exercise by id
+  app.get("/api/velocidad/ejercicio/:id", async (req, res) => {
+    const ejercicio = await storage.getVelocidadEjercicioById(req.params.id);
+    res.json({ ejercicio });
+  });
+
   return httpServer;
 }
