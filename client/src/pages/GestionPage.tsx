@@ -4000,7 +4000,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                           
                           <div className="mb-3">
-                            <label className="text-white/60 text-xs mb-1 block">Palabras (separadas por comas)</label>
+                            <label className="text-white/60 text-xs mb-1 block">
+                              Palabras (separadas por comas) 
+                              <span className="text-purple-300/60 ml-1">- Rotarán por las {nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6} posiciones del patrón</span>
+                            </label>
                             <textarea
                               value={nivel.palabras || ""}
                               onChange={(e) => {
@@ -4012,6 +4015,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               rows={2}
                               placeholder="vista, atomo, iglesia, olvido, orar, opaco, casa, perro, gato..."
                             />
+                            <span className="text-white/40 text-xs">
+                              {(nivel.palabras || "").split(",").filter((p: string) => p.trim()).length} palabras configuradas
+                            </span>
                           </div>
                           
                           <div>
