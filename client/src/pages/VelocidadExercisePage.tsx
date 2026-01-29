@@ -16,11 +16,14 @@ export default function VelocidadExercisePage() {
   const { categoria, itemId, nivelNum } = useParams<{ categoria: string; itemId: string; nivelNum: string }>();
   const [, setLocation] = useLocation();
   const [nivel, setNivel] = useState<Nivel | null>(null);
+  const [todosNiveles, setTodosNiveles] = useState<Nivel[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [gameState, setGameState] = useState<"ready" | "animating" | "playing" | "question">("ready");
+  const [gameState, setGameState] = useState<"ready" | "animating" | "playing" | "question" | "resultado">("ready");
   const [correctos, setCorrectos] = useState(0);
   const [incorrectos, setIncorrectos] = useState(0);
+  const [rondasJugadas, setRondasJugadas] = useState(0);
+  const [ultimaRespuesta, setUltimaRespuesta] = useState<"correcta" | "incorrecta" | null>(null);
   
   const [currentPosition, setCurrentPosition] = useState(-1);
   const [shownWords, setShownWords] = useState<string[]>([]);
@@ -37,6 +40,7 @@ export default function VelocidadExercisePage() {
         const data = await res.json();
         if (data.ejercicio && data.ejercicio.niveles) {
           const niveles = JSON.parse(data.ejercicio.niveles);
+          setTodosNiveles(niveles);
           const found = niveles.find((n: Nivel) => n.nivel === parseInt(nivelNum || "1"));
           if (found) setNivel(found);
         }
@@ -141,14 +145,32 @@ export default function VelocidadExercisePage() {
   }, [gameState, nivel, palabrasRonda]);
 
   const handleRespuesta = (opcion: string) => {
-    if (opcion.toLowerCase() === respuestaCorrecta.toLowerCase()) {
+    const esCorrecta = opcion.toLowerCase() === respuestaCorrecta.toLowerCase();
+    if (esCorrecta) {
       setCorrectos(c => c + 1);
+      setUltimaRespuesta("correcta");
     } else {
       setIncorrectos(i => i + 1);
+      setUltimaRespuesta("incorrecta");
     }
-    setGameState("ready");
+    setRondasJugadas(r => r + 1);
+    setGameState("resultado");
     setShownWords([]);
     setShowCircles(true);
+  };
+
+  const continuarSiguienteNivel = () => {
+    const nivelActual = parseInt(nivelNum || "1");
+    const siguienteNivel = todosNiveles.find(n => n.nivel === nivelActual + 1);
+    if (siguienteNivel) {
+      setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/${siguienteNivel.nivel}`);
+    } else {
+      setLocation(`/entrenamiento/${categoria}`);
+    }
+  };
+
+  const repetirNivel = () => {
+    setGameState("ready");
   };
 
   if (loading) {
@@ -323,6 +345,69 @@ export default function VelocidadExercisePage() {
                     {opcion}
                   </motion.button>
                 ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {gameState === "resultado" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0 }}
+              className="w-full max-w-md text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className={`w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center text-5xl ${
+                  ultimaRespuesta === "correcta" ? "bg-green-500" : "bg-red-500"
+                }`}
+              >
+                {ultimaRespuesta === "correcta" ? "😊" : "😔"}
+              </motion.div>
+              
+              <h3 className="text-white text-2xl font-bold mb-2">
+                {ultimaRespuesta === "correcta" ? "¡Correcto!" : "Incorrecto"}
+              </h3>
+              <p className="text-white/80 mb-6">
+                La respuesta era: <span className="font-bold text-yellow-300">{respuestaCorrecta}</span>
+              </p>
+
+              <div className="flex flex-col gap-3">
+                {todosNiveles.some(n => n.nivel === parseInt(nivelNum || "1") + 1) && (
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={continuarSiguienteNivel}
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg"
+                    data-testid="button-siguiente-nivel"
+                  >
+                    Siguiente Nivel →
+                  </motion.button>
+                )}
+                
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={repetirNivel}
+                  className="bg-white/20 backdrop-blur text-white px-8 py-4 rounded-full font-bold text-lg"
+                  data-testid="button-repetir"
+                >
+                  Repetir Ejercicio
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+                  className="text-white/70 underline"
+                  data-testid="button-volver-entrenamiento"
+                >
+                  Volver a Entrenamiento
+                </motion.button>
               </div>
             </motion.div>
           )}

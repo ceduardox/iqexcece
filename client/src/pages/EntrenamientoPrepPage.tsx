@@ -9,6 +9,7 @@ interface PrepData {
   subtitulo: string;
   instrucciones: string;
   textoBoton: string;
+  tipoEjercicio: string;
 }
 
 export default function EntrenamientoPrepPage() {
@@ -20,7 +21,12 @@ export default function EntrenamientoPrepPage() {
   useEffect(() => {
     const loadPrepData = async () => {
       try {
-        // Primero intenta cargar la página de preparación de la categoría
+        // Cargar datos del item para obtener el tipo de ejercicio
+        const itemRes = await fetch(`/api/entrenamiento/item/${itemId}`);
+        const itemData = await itemRes.json();
+        const tipoEjercicio = itemData.item?.tipoEjercicio || "velocidad";
+        
+        // Intentar cargar la página de preparación de la categoría
         const prepRes = await fetch(`/api/prep-page/${categoria}`);
         const prepPageData = await prepRes.json();
         
@@ -31,20 +37,17 @@ export default function EntrenamientoPrepPage() {
             subtitulo: prepPageData.page.subtitulo || "",
             instrucciones: prepPageData.page.instrucciones || "",
             textoBoton: prepPageData.page.textoBoton || "Empezar",
+            tipoEjercicio,
           });
-        } else {
-          // Fallback: usa los datos del item
-          const itemRes = await fetch(`/api/entrenamiento/item/${itemId}`);
-          const itemData = await itemRes.json();
-          if (itemData.item) {
-            setPrepData({
-              imagen: itemData.item.prepImage || "",
-              titulo: itemData.item.prepTitle || itemData.item.title || "Preparación",
-              subtitulo: itemData.item.prepSubtitle || "",
-              instrucciones: itemData.item.prepInstructions || "",
-              textoBoton: itemData.item.prepButtonText || "Empezar",
-            });
-          }
+        } else if (itemData.item) {
+          setPrepData({
+            imagen: itemData.item.prepImage || "",
+            titulo: itemData.item.prepTitle || itemData.item.title || "Preparación",
+            subtitulo: itemData.item.prepSubtitle || "",
+            instrucciones: itemData.item.prepInstructions || "",
+            textoBoton: itemData.item.prepButtonText || "Empezar",
+            tipoEjercicio,
+          });
         }
       } catch (e) {
         console.error(e);
@@ -130,8 +133,16 @@ export default function EntrenamientoPrepPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           onClick={() => {
-            // Navegar a la página de ejercicio de velocidad
-            setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
+            const tipo = prepData?.tipoEjercicio || "velocidad";
+            if (tipo === "velocidad") {
+              setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
+            } else if (tipo === "lectura") {
+              setLocation(`/lectura/${categoria}/${itemId}`);
+            } else if (tipo === "memoria") {
+              setLocation(`/memoria/${categoria}/${itemId}`);
+            } else {
+              setLocation(`/velocidad/${categoria}/${itemId}/ejercicio/1`);
+            }
           }}
           className="mt-10 px-12 py-4 bg-orange-500 text-white font-bold text-xl rounded-full shadow-lg"
           data-testid="button-start"
