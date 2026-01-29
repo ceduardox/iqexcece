@@ -47,17 +47,14 @@ export default function VelocidadExercisePage() {
   // Sincronizar refs con estado
   useEffect(() => {
     velocidadRef.current = velocidadActual;
-    console.log("velocidadRef actualizado:", velocidadActual);
   }, [velocidadActual]);
   
   useEffect(() => {
     patronRef.current = patronActual;
-    console.log("patronRef actualizado:", patronActual);
   }, [patronActual]);
   
   useEffect(() => {
     palabrasRef.current = palabrasRonda;
-    console.log("palabrasRef actualizadas:", palabrasRonda.length, "palabras");
   }, [palabrasRonda]);
 
   useEffect(() => {
@@ -224,19 +221,12 @@ export default function VelocidadExercisePage() {
     const palabrasParaUsar = [...palabrasRef.current];
     
     if (palabrasParaUsar.length === 0) {
-      console.log("No hay palabras, saltando...");
       return;
     }
     
     const totalPos = getTotalPositions(patronParaUsar);
     const totalPalabras = palabrasParaUsar.length;
     const intervalMs = getIntervalMs(velocidadParaUsar);
-    
-    console.log("=== PLAYING STATE (desde refs) ===");
-    console.log("velocidad:", velocidadParaUsar);
-    console.log("intervalMs:", intervalMs);
-    console.log("patron:", patronParaUsar);
-    console.log("totalPalabras:", totalPalabras);
     
     let wordIndex = 0;
     
@@ -350,11 +340,7 @@ export default function VelocidadExercisePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex items-center justify-center">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full"
-        />
+        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
       </div>
     );
   }
