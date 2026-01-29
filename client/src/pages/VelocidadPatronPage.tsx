@@ -62,15 +62,19 @@ export default function VelocidadPatronPage() {
     const [cols, rows] = patron.split("x").map(n => parseInt(n) || 2);
     const total = cols * rows;
     
+    // Ajustar tamaño de círculos según cantidad
+    const dotSize = total > 6 ? "w-2 h-2" : "w-2.5 h-2.5";
+    const gap = total > 6 ? "gap-1" : "gap-1.5";
+    
     return (
       <div 
-        className="grid gap-1.5"
+        className={`grid ${gap}`}
         style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
       >
         {[...Array(total)].map((_, i) => (
           <div 
             key={i} 
-            className="w-3 h-3 rounded-full bg-white/90 shadow-sm"
+            className={`${dotSize} rounded-full bg-white/90 shadow-sm`}
           />
         ))}
       </div>
@@ -175,10 +179,8 @@ export default function VelocidadPatronPage() {
                 data-testid={`button-patron-${patron}`}
               >
                 <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
-                    <div className="scale-110">
-                      {getPatronIcon(patron)}
-                    </div>
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
+                    {getPatronIcon(patron)}
                   </div>
                 </div>
                 <div className="text-lg font-bold text-gray-800">
