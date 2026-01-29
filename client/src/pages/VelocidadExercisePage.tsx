@@ -339,30 +339,35 @@ export default function VelocidadExercisePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
+        <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
+          <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
+          <button
+            onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+            className="w-8 h-8 flex items-center justify-center text-white/80"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </header>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="w-64 h-64 bg-white/10 rounded-2xl animate-pulse" />
+        </main>
       </div>
     );
   }
 
-  if (ejercicios.length === 0) {
+  if (ejercicios.length === 0 || !ejercicio) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-700 to-pink-500 flex flex-col items-center justify-center p-4">
         <p className="text-white text-xl mb-4">No hay ejercicios configurados</p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => setLocation(`/entrenamiento/${categoria}`)}
           className="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-semibold"
         >
           Volver
-        </motion.button>
+        </button>
       </div>
     );
-  }
-
-  if (!ejercicio) {
-    return null;
   }
 
   const { cols } = getGridDimensions(ejercicio.patron);

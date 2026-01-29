@@ -100,33 +100,16 @@ export default function VelocidadPatronPage() {
     return `Nivel ${order}`;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
+  // Skeleton para carga instantánea
+  const SkeletonCard = () => (
+    <div className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-5 animate-pulse">
+      <div className="flex justify-center mb-4">
+        <div className="w-20 h-20 rounded-2xl bg-purple-200" />
       </div>
-    );
-  }
-
-  if (patrones.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-        <header className="p-4">
-          <button
-            onClick={() => setLocation(`/entrenamiento/${categoria}`)}
-            className="flex items-center gap-2 text-white font-semibold"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-            Volver
-          </button>
-        </header>
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-white text-xl">No hay ejercicios disponibles</p>
-        </main>
-      </div>
-    );
-  }
+      <div className="h-5 bg-purple-200 rounded w-20 mx-auto mb-2" />
+      <div className="h-3 bg-purple-100 rounded w-12 mx-auto" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
@@ -143,54 +126,54 @@ export default function VelocidadPatronPage() {
 
       <main className="flex-1 flex flex-col">
         {imagen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center mb-4"
-          >
+          <div className="flex justify-center mb-4">
             <img 
               src={imagen} 
               alt="Ejercicio" 
               className="w-48 h-48 object-contain"
             />
-          </motion.div>
+          </div>
         )}
 
         <div className="bg-white rounded-t-3xl flex-1 px-6 py-8">
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-2xl font-bold text-gray-800 text-center mb-6"
-          >
+          <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
             {titulo}
-          </motion.h1>
+          </h1>
 
           <p className="text-gray-500 text-sm mb-6">Selecciona el nivel de dificultad:</p>
 
           <div className="grid grid-cols-2 gap-4">
-            {patrones.map((patron, index) => (
-              <motion.button
-                key={patron}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/patron/${encodeURIComponent(patron)}`)}
-                className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-5 text-center hover:border-purple-500 hover:shadow-xl hover:scale-105 transition-all duration-200"
-                data-testid={`button-patron-${patron}`}
-              >
-                <div className="flex justify-center mb-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
-                    {getPatronIcon(patron)}
+            {loading ? (
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : patrones.length === 0 ? (
+              <p className="col-span-2 text-center text-gray-500">No hay ejercicios disponibles</p>
+            ) : (
+              patrones.map((patron) => (
+                <button
+                  key={patron}
+                  onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/patron/${encodeURIComponent(patron)}`)}
+                  className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-5 text-center hover:border-purple-500 hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  data-testid={`button-patron-${patron}`}
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
+                      {getPatronIcon(patron)}
+                    </div>
                   </div>
-                </div>
-                <div className="text-lg font-bold text-gray-800">
-                  {getPatronLabel(patron)}
-                </div>
-                <div className="text-xs text-purple-500 mt-1 font-medium">
-                  {patron}
-                </div>
-              </motion.button>
-            ))}
+                  <div className="text-lg font-bold text-gray-800">
+                    {getPatronLabel(patron)}
+                  </div>
+                  <div className="text-xs text-purple-500 mt-1 font-medium">
+                    {patron}
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
       </main>
