@@ -306,7 +306,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
   const { setUserData } = useUserData();
-  const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("age");
+  // Start directly at "options" step - skip age and problems selection
+  const [step, setStep] = useState<"age" | "problems" | "fingerprint" | "options">("options");
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedProblems, setSelectedProblems] = useState<string[]>([]);
   const [expandedProblem, setExpandedProblem] = useState<string | null>(null);
@@ -1179,22 +1180,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           {step === "options" && (
             <motion.div
               key="options-selection"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              <button
-                onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium btn-instant"
-                style={{ borderColor: "#9333EA", backgroundColor: "rgba(147, 51, 234, 0.1)", color: "#9333EA" }}
-                data-testid="button-back-options"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Volver
-              </button>
-
               <motion.div 
                 className="text-center space-y-4 py-2"
                 initial={{ opacity: 0, y: -20 }}
