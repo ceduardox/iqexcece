@@ -46,18 +46,18 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {isMobile && (
-        <header className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="flex items-center gap-1">
-            <span className="text-2xl font-black" style={{ color: "#7C3AED" }}>IQ</span>
-            <span className="text-2xl font-black" style={{ 
-              background: "linear-gradient(90deg, #14B8A6, #7C3AED)", 
+        <header className="flex items-center justify-between px-5 py-4 bg-white sticky top-0 z-50">
+          <div className="flex items-center gap-0.5">
+            <span className="text-3xl font-black" style={{ color: "#7C3AED" }}>IQ</span>
+            <span className="text-3xl font-black" style={{ 
+              background: "linear-gradient(135deg, #14B8A6 0%, #7C3AED 100%)", 
               WebkitBackgroundClip: "text", 
               WebkitTextFillColor: "transparent" 
             }}>X</span>
           </div>
           <button 
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-600"
+            className="p-2 text-gray-500"
             data-testid="button-menu"
           >
             <Menu className="w-6 h-6" />
@@ -65,22 +65,42 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         </header>
       )}
 
-      <main className="flex-1 overflow-y-auto pb-20 md:pb-8">
-        <div 
-          className="relative w-full overflow-hidden"
-          style={{ 
-            backgroundImage: `url(${fondoImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center"
-          }}
-        >
-          <div className="relative z-10 px-5 pt-6 pb-8 md:px-8 md:pt-10 md:pb-12">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-5xl mx-auto">
-              <div className="flex-1 md:max-w-lg">
+      <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
+        <div className="relative w-full overflow-hidden">
+          <div 
+            className="absolute inset-0 z-0"
+            style={{ 
+              backgroundImage: `url(${fondoImg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center top"
+            }}
+          />
+          
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-16 z-10"
+            style={{
+              background: "white",
+              borderTopLeftRadius: "50% 100%",
+              borderTopRightRadius: "50% 100%",
+              transform: "translateY(50%)"
+            }}
+          />
+
+          <div className="relative z-5 px-5 pt-4 pb-16">
+            <div className="relative">
+              <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 -mr-8 -mt-4 opacity-90">
+                <img 
+                  src={brainHeaderImg} 
+                  alt="" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              
+              <div className="relative z-10 pr-32 md:pr-48">
                 <motion.h1 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-4"
+                  className="text-[28px] md:text-4xl font-black leading-[1.1] mb-4"
                 >
                   <span style={{ color: "#7C3AED" }}>Activa la</span>
                   <br />
@@ -92,53 +112,40 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     WebkitTextFillColor: "transparent" 
                   }}>eXponencial</span>
                 </motion.h1>
-                
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-sm md:text-base text-gray-700 mb-2"
-                >
-                  Un método científico de entrenamiento cognitivo
-                </motion.p>
-                
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="text-xs md:text-sm text-gray-600 leading-relaxed"
-                >
-                  basado en neuroplasticidad y activación de <span className="font-semibold text-gray-800">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de <span className="font-semibold text-gray-800">la vida</span>.
-                </motion.p>
               </div>
               
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="flex-shrink-0 mt-4 md:mt-0 md:ml-8"
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-sm text-gray-700 mb-3 max-w-[280px]"
               >
-                <img 
-                  src={brainHeaderImg} 
-                  alt="Cerebro" 
-                  className="w-40 h-auto md:w-56 lg:w-64 mx-auto md:mx-0"
-                />
-              </motion.div>
+                Un método científico de entrenamiento cognitivo
+              </motion.p>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="text-xs text-gray-500 leading-relaxed max-w-[320px]"
+              >
+                basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de <span className="font-semibold text-gray-700">la vida</span>.
+              </motion.p>
             </div>
           </div>
         </div>
 
-        <div className="px-4 md:px-8 py-6 space-y-6 max-w-5xl mx-auto">
+        <div className="px-5 pt-2 pb-6 space-y-4 max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
+            transition={{ delay: 0.2 }}
           >
-            <h2 className="text-lg font-bold text-gray-800 mb-3">Diagnóstico inicial</h2>
+            <h2 className="text-base font-bold text-gray-800 mb-3">Diagnóstico inicial</h2>
             
             <div 
               onClick={() => handleOptionSelect("tests")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer"
+              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm"
               style={{
                 backgroundImage: `url(${boton1Img})`,
                 backgroundSize: "cover",
@@ -146,16 +153,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               }}
               data-testid="button-option-tests"
             >
-              <div className="relative p-4 md:p-5 flex items-center gap-4">
-                <div className="w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <img src={avatar1Img} alt="" className="w-12 h-12 md:w-14 md:h-14 object-contain" />
+              <div className="p-4 flex items-start gap-3">
+                <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-white/80 flex items-center justify-center shadow-sm">
+                  <img src={avatar1Img} alt="" className="w-10 h-10 object-contain" />
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base md:text-lg font-bold" style={{ color: "#7C3AED" }}>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#7C3AED" }}>
                     Diagnóstico Cognitivo
                   </h3>
-                  <p className="text-xs md:text-sm text-gray-600 leading-snug">
+                  <p className="text-xs text-gray-600 leading-snug">
                     Conoce tu punto de partida y cómo funciona tu mente.
                   </p>
                 </div>
@@ -164,11 +171,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-white text-sm font-bold"
-                  style={{ background: "linear-gradient(90deg, #7C3AED, #14B8A6)" }}
+                  className="flex items-center justify-center gap-2 px-5 py-2 rounded-full text-white text-xs font-bold shadow-md"
+                  style={{ background: "linear-gradient(90deg, #7C3AED, #5B21B6)" }}
                   data-testid="button-iniciar-diagnostico"
                 >
-                  <Play className="w-4 h-4" />
+                  <Play className="w-3 h-3 fill-current" />
                   Iniciar diagnóstico
                 </motion.button>
               </div>
@@ -178,11 +185,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.25 }}
           >
             <div 
               onClick={() => handleOptionSelect("training")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer"
+              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm"
               style={{
                 backgroundImage: `url(${boton1Img})`,
                 backgroundSize: "cover",
@@ -190,16 +197,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               }}
               data-testid="button-option-training"
             >
-              <div className="relative p-4 md:p-5 flex items-center gap-4">
-                <div className="w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <img src={trainingImg} alt="" className="w-12 h-12 md:w-14 md:h-14 object-contain" />
+              <div className="p-4 flex items-start gap-3">
+                <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-white/60 flex items-center justify-center">
+                  <img src={trainingImg} alt="" className="w-10 h-10 object-contain" />
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base md:text-lg font-bold" style={{ color: "#14B8A6" }}>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#7C3AED" }}>
                     Entrenamiento
                   </h3>
-                  <p className="text-xs md:text-sm text-gray-600 leading-snug">
+                  <p className="text-xs text-gray-600 leading-snug">
                     Ejercicios diseñados para activar, decodificar y estructurar el aprendizaje
                   </p>
                 </div>
@@ -210,43 +217,43 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="rounded-2xl border border-purple-100 bg-white p-4 md:p-5"
+            transition={{ delay: 0.3 }}
+            className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-base md:text-lg font-bold text-gray-800 mb-1">Método X</h3>
-                <p className="text-xs md:text-sm text-gray-600">
+              <div className="flex-1 pr-4">
+                <h3 className="text-base font-bold text-gray-800 mb-0.5">Método X</h3>
+                <p className="text-xs text-gray-500">
                   Sistema de Neuro-Aceleración Cognitiva
                 </p>
               </div>
               
-              <div className="flex-shrink-0 ml-4">
-                <img src={xIconImg} alt="X" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+              <div className="flex-shrink-0">
+                <img src={xIconImg} alt="X" className="w-14 h-14 object-contain" />
               </div>
             </div>
             
             <button 
-              className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-purple-600 transition-colors"
+              className="mt-3 flex items-center justify-center gap-1 w-full py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               data-testid="button-conocer-metodo"
             >
               Conocer el método
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="rounded-2xl border border-purple-100 bg-white p-4 md:p-5"
+            transition={{ delay: 0.35 }}
+            className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm"
           >
-            <h3 className="text-base md:text-lg font-bold text-gray-800 mb-3">Contáctanos</h3>
+            <h3 className="text-base font-bold text-gray-800 mb-3">Contáctanos</h3>
             
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleWhatsApp}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-white text-xs font-medium shadow-sm"
                 style={{ background: "linear-gradient(90deg, #25D366, #128C7E)" }}
                 data-testid="button-whatsapp"
               >
@@ -256,9 +263,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               
               <button
                 onClick={handleEmail}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium shadow-sm"
                 style={{ 
-                  background: "linear-gradient(90deg, rgba(124, 58, 237, 0.1), rgba(20, 184, 166, 0.1))",
+                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(20, 184, 166, 0.15))",
                   color: "#7C3AED"
                 }}
                 data-testid="button-email"
@@ -268,7 +275,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </button>
             </div>
             
-            <p className="text-[10px] text-gray-400 text-center mt-3">
+            <p className="text-[10px] text-gray-400 text-center mt-2">
               soporte@inteligenciaexponencial.com
             </p>
           </motion.div>
@@ -276,10 +283,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       </main>
 
       {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-2 z-50">
-          <div className="flex items-center justify-around">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-2 z-50 shadow-lg">
+          <div className="flex items-center justify-around max-w-md mx-auto">
             <button 
-              className="flex flex-col items-center gap-1 px-3 py-1"
+              className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-inicio"
             >
               <Home className="w-5 h-5" style={{ color: "#7C3AED" }} />
@@ -288,7 +295,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             
             <button 
               onClick={() => handleOptionSelect("tests")}
-              className="flex flex-col items-center gap-1 px-3 py-1"
+              className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-diagnostico"
             >
               <Brain className="w-5 h-5 text-gray-400" />
@@ -297,7 +304,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             
             <button 
               onClick={() => handleOptionSelect("training")}
-              className="flex flex-col items-center gap-1 px-3 py-1"
+              className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-entrenar"
             >
               <Dumbbell className="w-5 h-5 text-gray-400" />
@@ -305,7 +312,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </button>
             
             <button 
-              className="flex flex-col items-center gap-1 px-3 py-1"
+              className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-progreso"
             >
               <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -313,7 +320,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </button>
             
             <button 
-              className="flex flex-col items-center gap-1 px-3 py-1"
+              className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-mas"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-400" />
