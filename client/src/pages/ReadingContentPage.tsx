@@ -2,6 +2,9 @@ import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw } from "lucide-react";
 import { useUserData } from "@/lib/user-context";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -608,6 +611,8 @@ export default function ReadingContentPage() {
           </div>
         )}
       </main>
+      
+      <BottomNavBar />
     </div>
   );
 }

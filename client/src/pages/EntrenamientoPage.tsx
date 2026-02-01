@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface EntrenamientoPage {
   bannerText: string;
@@ -70,32 +73,25 @@ export default function EntrenamientoPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-background"
+      className="min-h-screen bg-white flex flex-col"
     >
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-background/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-medium"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Volver</span>
-          </button>
-        </div>
-      </header>
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-teal-500 to-green-500 px-4 py-3"
+        className="bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-3 mx-4 mt-4 rounded-xl"
       >
         <p className="text-white text-sm font-medium text-center">
           {page?.bannerText || "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!"}
         </p>
       </motion.div>
 
-      <div className="px-4 py-6">
+      <div className="px-4 py-6 flex-1 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -156,6 +152,8 @@ export default function EntrenamientoPage() {
           ))}
         </div>
       </div>
+      
+      <BottomNavBar />
     </motion.div>
   );
 }

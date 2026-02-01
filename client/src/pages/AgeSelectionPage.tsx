@@ -4,6 +4,7 @@ import { ArrowLeft, Baby, GraduationCap, Users, Briefcase, Home, Menu, Dumbbell,
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {

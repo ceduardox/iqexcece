@@ -5,6 +5,9 @@ import { useUserData } from "@/lib/user-context";
 import { ArrowLeft, Clock, Brain, Sparkles, Zap, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface CerebralIntro {
   imageUrl: string;
@@ -328,12 +331,14 @@ export default function CerebralSelectionPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-center text-gray-400 text-xs mt-4"
+            className="text-center text-gray-400 text-xs mt-4 pb-20"
           >
             {themes.length} ejercicios disponibles
           </motion.p>
         </motion.div>
       </div>
+      
+      <BottomNavBar />
     </div>
   );
 }

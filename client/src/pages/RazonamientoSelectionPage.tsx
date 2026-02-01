@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { ArrowLeft, Brain } from "lucide-react";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface RazonamientoTheme {
   temaNumero: number;
@@ -201,6 +204,8 @@ export default function RazonamientoSelectionPage() {
           </div>
         )}
       </div>
+      
+      <BottomNavBar />
     </motion.div>
   );
 }

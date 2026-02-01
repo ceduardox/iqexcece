@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { ChevronLeft, BookOpen, Play } from "lucide-react";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface ReadingTheme {
   temaNumero: number | null;
@@ -122,33 +125,13 @@ export default function ReadingSelectionPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
-        <button 
-          onClick={handleBack}
-          className="absolute left-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-          data-testid="button-back-reading"
-        >
-          <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
-        </button>
-        
-        <div className="flex items-center justify-center" data-testid="header-logo">
-          <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8a3ffc" />
-                <stop offset="100%" stopColor="#00d9ff" />
-              </linearGradient>
-            </defs>
-            <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-              <tspan fill="#8a3ffc">i</tspan>
-              <tspan fill="#8a3ffc">Q</tspan>
-              <tspan fill="url(#logoGradient)">x</tspan>
-            </text>
-          </svg>
-        </div>
-      </header>
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
 
-      <main className="flex-1 overflow-y-auto pb-8">
+      <main className="flex-1 overflow-y-auto pb-24">
         <div 
           className="w-full"
           style={{
@@ -279,6 +262,8 @@ export default function ReadingSelectionPage() {
           </div>
         </div>
       </main>
+      
+      <BottomNavBar />
     </div>
   );
 }
