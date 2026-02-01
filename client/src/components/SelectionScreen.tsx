@@ -628,14 +628,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || "Email"}</span>
               </button>
             </div>
-            
-            <p 
-              className={`text-[10px] text-center mt-2 ${getEditableClass("email-contacto")}`}
-              onClick={(e) => { if (editorMode) handleElementClick("email-contacto", e); }}
-              style={{ color: styles["email-contacto"]?.textColor || "#9ca3af", ...getElementStyle("email-contacto") }}
-            >
-              soporte@inteligenciaexponencial.com
-            </p>
           </motion.div>
         </div>
       </main>
