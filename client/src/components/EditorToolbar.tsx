@@ -370,11 +370,11 @@ export function EditorToolbar({
                   />
                   <span className="text-white text-xs w-10">{currentStyle.imageSize || 100}%</span>
                 </div>
-                {selectedElement?.startsWith("icon-btn-") && (
+                {(selectedElement?.startsWith("icon-btn-") || selectedElement?.startsWith("card-") || selectedElement?.startsWith("icon-")) && (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-400 text-xs w-16">Icono:</span>
                     <Slider
-                      value={[currentStyle.iconSize || 14]}
+                      value={[currentStyle.iconSize || 50]}
                       onValueChange={([val]) => updateStyle({ iconSize: val })}
                       min={10}
                       max={150}
@@ -382,7 +382,7 @@ export function EditorToolbar({
                       className="flex-1"
                       data-testid="slider-icon-size"
                     />
-                    <span className="text-white text-xs w-12">{currentStyle.iconSize || 14}px</span>
+                    <span className="text-white text-xs w-12">{currentStyle.iconSize || 50}px</span>
                   </div>
                 )}
                 {currentStyle.imageUrl && (
