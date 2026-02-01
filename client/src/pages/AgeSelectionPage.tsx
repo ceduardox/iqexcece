@@ -159,7 +159,9 @@ export default function AgeSelectionPage() {
   }, []);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    console.log("saveStyles llamado", newStyles);
     const authToken = localStorage.getItem("adminToken");
+    console.log("Token:", authToken ? "existe" : "NO existe");
     if (!authToken) {
       alert("No hay sesión de admin. Inicia sesión en /gestion primero.");
       return;

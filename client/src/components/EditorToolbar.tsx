@@ -93,7 +93,7 @@ export function EditorToolbar({
           >
             {toolbarPosition === "bottom" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
-          <Button size="icon" variant="ghost" onClick={onSave} className="text-green-400 hover:text-green-300 h-7 w-7 sm:h-8 sm:w-8" data-testid="button-save-styles">
+          <Button size="icon" variant="ghost" onClick={() => { console.log("Botón guardar presionado"); onSave(); }} className="text-green-400 hover:text-green-300 h-7 w-7 sm:h-8 sm:w-8" data-testid="button-save-styles">
             <Save className="w-4 h-4" />
           </Button>
           <Button size="icon" variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white h-7 w-7 sm:h-8 sm:w-8" data-testid="button-close-editor">
