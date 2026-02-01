@@ -195,11 +195,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
       {isMobile && (
         <div
-          className={`w-full ${getEditableClass("menu-curve")}`}
+          className={`w-full relative z-50 ${getEditableClass("menu-curve")}`}
           onClick={(e) => handleElementClick("menu-curve", e)}
           style={{
             marginTop: styles["menu-curve"]?.marginTop || -4,
-            marginBottom: styles["menu-curve"]?.marginBottom || -2,
+            marginBottom: styles["menu-curve"]?.marginBottom || -20,
           }}
         >
           <img 
