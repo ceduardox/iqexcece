@@ -802,7 +802,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         ctx?.drawImage(img, 0, 0);
       }
       
-      const compressed = canvas.toDataURL('image/jpeg', quality / 100);
+      // Check if PNG (preserve transparency) or JPEG
+      const isPng = src.startsWith('data:image/png');
+      const compressed = isPng 
+        ? canvas.toDataURL('image/png')
+        : canvas.toDataURL('image/jpeg', quality / 100);
       setCompressedSize(Math.round(compressed.length * 0.75)); // Approx base64 to bytes
     };
     img.src = src;
@@ -857,7 +861,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         ctx?.drawImage(img, 0, 0);
       }
       
-      const data = canvas.toDataURL('image/jpeg', compressionQuality / 100);
+      // Preserve PNG transparency, otherwise use JPEG
+      const isPng = imagePreview.startsWith('data:image/png');
+      const data = isPng 
+        ? canvas.toDataURL('image/png')
+        : canvas.toDataURL('image/jpeg', compressionQuality / 100);
       
       const res = await fetch("/api/admin/images", {
         method: "POST",
