@@ -138,7 +138,7 @@ export default function AgeSelectionPage() {
   const testId = params.testId || "lectura";
   const { updateUserData } = useUserData();
   
-  const [editorMode, setEditorMode] = useState(false);
+  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,9 +159,7 @@ export default function AgeSelectionPage() {
   }, []);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
-    console.log("saveStyles llamado", newStyles);
     const authToken = localStorage.getItem("adminToken");
-    console.log("Token:", authToken ? "existe" : "NO existe");
     if (!authToken) {
       alert("No hay sesión de admin. Inicia sesión en /gestion primero.");
       return;
