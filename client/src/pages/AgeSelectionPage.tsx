@@ -195,7 +195,8 @@ export default function AgeSelectionPage() {
   const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
     const updated = { ...styles, [elementId]: { ...styles[elementId], ...newStyle } };
     setStyles(updated);
-  }, [styles]);
+    saveStyles(updated);
+  }, [styles, saveStyles]);
 
   const handleEditorClose = useCallback(() => {
     setSelectedElement(null);
