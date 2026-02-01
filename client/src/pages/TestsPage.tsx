@@ -430,7 +430,7 @@ export default function TestsPage() {
           selectedElement={selectedElement}
           styles={styles}
           onStyleChange={handleStyleChange}
-          onSave={() => {}}
+          onSave={() => saveStyles(styles)}
           onClose={handleEditorClose}
           onClearSelection={() => setSelectedElement(null)}
         />
