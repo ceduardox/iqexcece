@@ -338,15 +338,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <div 
               onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
               className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-tests")}`}
-              style={{
-                background: styles["card-tests"]?.background || "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)",
-                ...getElementStyle("card-tests")
-              }}
+              style={getElementStyle("card-tests", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
               data-testid="button-option-tests"
             >
               <div className="p-4 flex items-start gap-3">
-                <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm border border-purple-100">
-                  <img src={avatar1Img} alt="" className="w-10 h-10 object-contain" />
+                <div 
+                  className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-tests")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-tests", e); }}}
+                  style={getElementStyle("icon-tests")}
+                >
+                  <img 
+                    src={styles["icon-tests"]?.imageUrl || avatar1Img} 
+                    alt="" 
+                    className="w-10 h-10 object-contain" 
+                    style={{ width: styles["icon-tests"]?.imageSize ? `${styles["icon-tests"].imageSize}%` : undefined }}
+                  />
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
@@ -362,8 +368,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md"
-                  style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); }}}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
+                  style={getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")}
                   data-testid="button-iniciar-diagnostico"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
@@ -381,15 +388,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <div 
               onClick={(e) => editorMode ? handleElementClick("card-training", e) : handleOptionSelect("training")}
               className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-training")}`}
-              style={{
-                background: styles["card-training"]?.background || "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)",
-                ...getElementStyle("card-training")
-              }}
+              style={getElementStyle("card-training", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
               data-testid="button-option-training"
             >
               <div className="p-4 flex items-start gap-3">
-                <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-white flex items-center justify-center border border-purple-100">
-                  <img src={trainingImg} alt="" className="w-9 h-9 object-contain" />
+                <div 
+                  className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-training")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-training", e); }}}
+                  style={getElementStyle("icon-training")}
+                >
+                  <img 
+                    src={styles["icon-training"]?.imageUrl || trainingImg} 
+                    alt="" 
+                    className="w-10 h-10 object-contain"
+                    style={{ width: styles["icon-training"]?.imageSize ? `${styles["icon-training"].imageSize}%` : undefined }}
+                  />
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
@@ -401,6 +414,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   </p>
                 </div>
               </div>
+              
+              <div className="px-4 pb-4">
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); }}}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
+                  style={getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")}
+                  data-testid="button-iniciar-entrenamiento"
+                >
+                  <Dumbbell className="w-3.5 h-3.5" />
+                  Iniciar entrenamiento
+                </motion.button>
+              </div>
             </div>
           </motion.div>
 
@@ -408,7 +434,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm"
+            onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); }}
+            className={`rounded-2xl border border-purple-100 p-4 shadow-sm ${getEditableClass("card-metodox")}`}
+            style={getElementStyle("card-metodox", "white")}
           >
             <div className="flex items-center justify-between">
               <div className="flex-1 pr-4">
@@ -418,13 +446,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </p>
               </div>
               
-              <div className="flex-shrink-0">
-                <img src={xIconImg} alt="X" className="w-14 h-14 object-contain" />
+              <div 
+                className={`flex-shrink-0 ${getEditableClass("icon-metodox")}`}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-metodox", e); }}}
+                style={getElementStyle("icon-metodox")}
+              >
+                <img 
+                  src={styles["icon-metodox"]?.imageUrl || xIconImg} 
+                  alt="X" 
+                  className="w-14 h-14 object-contain"
+                  style={{ width: styles["icon-metodox"]?.imageSize ? `${styles["icon-metodox"].imageSize}%` : undefined }}
+                />
               </div>
             </div>
             
             <button 
-              className="mt-3 flex items-center justify-center gap-1 w-full py-2.5 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); }}}
+              className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
+              style={getElementStyle("btn-metodo")}
               data-testid="button-conocer-metodo"
             >
               Conocer el método
@@ -442,9 +481,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             
             <div className="flex gap-2">
               <button
-                onClick={handleWhatsApp}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-semibold shadow-sm"
-                style={{ background: "linear-gradient(90deg, #25D366, #128C7E)" }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
+                style={getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")}
                 data-testid="button-whatsapp"
               >
                 <MessageCircle className="w-4 h-4" />
@@ -452,16 +491,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </button>
               
               <button
-                onClick={handleEmail}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold shadow-sm border border-purple-200"
-                style={{ 
-                  background: "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))",
-                  color: "#8a3ffc"
-                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
+                style={getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")}
                 data-testid="button-email"
               >
                 <Mail className="w-4 h-4" />
-                Envíanos un Email
+                Email
               </button>
             </div>
             
@@ -476,45 +512,53 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-2 z-50 shadow-lg">
           <div className="flex items-center justify-around max-w-md mx-auto">
             <button 
-              className="flex flex-col items-center gap-0.5 px-3 py-1"
+              onClick={(e) => { if (editorMode) handleElementClick("nav-inicio", e); }}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-inicio")}`}
+              style={getElementStyle("nav-inicio")}
               data-testid="nav-inicio"
             >
-              <Home className="w-5 h-5" style={{ color: "#8a3ffc" }} />
-              <span className="text-[10px] font-medium" style={{ color: "#8a3ffc" }}>Inicio</span>
+              <Home className="w-5 h-5" style={{ color: styles["nav-inicio"]?.textColor || "#8a3ffc" }} />
+              <span className="text-[10px] font-medium" style={{ color: styles["nav-inicio"]?.textColor || "#8a3ffc" }}>Inicio</span>
             </button>
             
             <button 
-              onClick={() => handleOptionSelect("tests")}
-              className="flex flex-col items-center gap-0.5 px-3 py-1"
+              onClick={(e) => { if (editorMode) { handleElementClick("nav-diagnostico", e); } else { handleOptionSelect("tests"); }}}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-diagnostico")}`}
+              style={getElementStyle("nav-diagnostico")}
               data-testid="nav-diagnostico"
             >
-              <Brain className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Diagnóstico</span>
+              <Brain className="w-5 h-5" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px] font-medium" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }}>Diagnóstico</span>
             </button>
             
             <button 
-              onClick={() => handleOptionSelect("training")}
-              className="flex flex-col items-center gap-0.5 px-3 py-1"
+              onClick={(e) => { if (editorMode) { handleElementClick("nav-entrenar", e); } else { handleOptionSelect("training"); }}}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-entrenar")}`}
+              style={getElementStyle("nav-entrenar")}
               data-testid="nav-entrenar"
             >
-              <Dumbbell className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Entrenar</span>
+              <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px] font-medium" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>Entrenar</span>
             </button>
             
             <button 
-              className="flex flex-col items-center gap-0.5 px-3 py-1"
+              onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-progreso")}`}
+              style={getElementStyle("nav-progreso")}
               data-testid="nav-progreso"
             >
-              <TrendingUp className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Progreso</span>
+              <TrendingUp className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px] font-medium" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
             </button>
             
             <button 
-              className="flex flex-col items-center gap-0.5 px-3 py-1"
+              onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-mas")}`}
+              style={getElementStyle("nav-mas")}
               data-testid="nav-mas"
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Más</span>
+              <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px] font-medium" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
             </button>
           </div>
         </nav>
