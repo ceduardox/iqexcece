@@ -377,12 +377,12 @@ export function EditorToolbar({
                       value={[currentStyle.iconSize || 14]}
                       onValueChange={([val]) => updateStyle({ iconSize: val })}
                       min={10}
-                      max={40}
-                      step={1}
+                      max={150}
+                      step={2}
                       className="flex-1"
                       data-testid="slider-icon-size"
                     />
-                    <span className="text-white text-xs w-10">{currentStyle.iconSize || 14}px</span>
+                    <span className="text-white text-xs w-12">{currentStyle.iconSize || 14}px</span>
                   </div>
                 )}
                 {currentStyle.imageUrl && (
