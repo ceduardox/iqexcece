@@ -373,12 +373,16 @@ export default function TestsPage() {
                   {styles["hero-title"]?.buttonText?.split('\n')[0] || "Diagnóstico"}
                 </span>
                 <br />
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                </span>
+                <br />
                 <span style={{ 
                   background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
                   WebkitBackgroundClip: "text", 
                   WebkitTextFillColor: "transparent" 
                 }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[2] || "eXponencial"}
                 </span>
               </motion.h1>
               
@@ -390,7 +394,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                 style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
-                {styles["hero-subtitle"]?.buttonText || "Evalúa tus capacidades"}
+                {styles["hero-subtitle"]?.buttonText || "Un método científico de"}
               </motion.p>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -400,7 +404,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                 style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
-                {styles["hero-subtitle2"]?.buttonText || "mentales de forma integral"}
+                {styles["hero-subtitle2"]?.buttonText || "evaluación cognitiva"}
               </motion.p>
               
               <motion.p 
@@ -411,7 +415,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                 style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
-                {styles["hero-desc"]?.buttonText || "Selecciona un test para comenzar tu diagnóstico cognitivo personalizado y descubre cómo potenciar tu mente."}
+                {styles["hero-desc"]?.buttonText || "Selecciona un test para comenzar tu diagnóstico y descubre cómo potenciar tu mente con ejercicios personalizados."}
               </motion.p>
             </div>
           </div>
