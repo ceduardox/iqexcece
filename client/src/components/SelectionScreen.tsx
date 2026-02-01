@@ -1,9 +1,12 @@
-import { useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { EditorToolbar, type PageStyles, type ElementStyle } from "./EditorToolbar";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 import brainBgImg from "@/assets/ui/backgrounds/brain-bg.png";
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
@@ -19,6 +22,96 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [, setLocation] = useLocation();
   const { setUserData } = useUserData();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { toast } = useToast();
+  
+  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [styles, setStyles] = useState<PageStyles>({});
+  const [adminToken, setAdminToken] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const checkEditorMode = () => {
+      setEditorMode(localStorage.getItem("editorMode") === "true");
+    };
+    window.addEventListener("storage", checkEditorMode);
+    const interval = setInterval(checkEditorMode, 1000);
+    return () => {
+      window.removeEventListener("storage", checkEditorMode);
+      clearInterval(interval);
+    };
+  }, []);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    setAdminToken(token);
+  }, []);
+  
+  useEffect(() => {
+    fetch("/api/page-styles/selection-screen")
+      .then(res => res.json())
+      .then(data => {
+        if (data.style?.styles) {
+          try {
+            setStyles(JSON.parse(data.style.styles));
+          } catch (e) {
+            console.log("No saved styles");
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+  
+  const handleElementClick = (elementId: string, e: React.MouseEvent) => {
+    if (!editorMode) return;
+    e.stopPropagation();
+    setSelectedElement(elementId);
+  };
+  
+  const handleStyleChange = (elementId: string, style: ElementStyle) => {
+    setStyles(prev => ({ ...prev, [elementId]: style }));
+  };
+  
+  const handleSaveStyles = async () => {
+    if (!adminToken) {
+      toast({ title: "Error", description: "Debes iniciar sesión en el panel admin", variant: "destructive" });
+      return;
+    }
+    try {
+      await apiRequest("POST", "/api/admin/page-styles", {
+        pageName: "selection-screen",
+        styles: JSON.stringify(styles)
+      });
+      toast({ title: "Guardado", description: "Los estilos se guardaron correctamente" });
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo guardar", variant: "destructive" });
+    }
+  };
+  
+  const handleCloseEditor = () => {
+    setEditorMode(false);
+    localStorage.setItem("editorMode", "false");
+  };
+  
+  const getElementStyle = (elementId: string): React.CSSProperties => {
+    const style = styles[elementId];
+    if (!style) return {};
+    return {
+      background: style.background,
+      boxShadow: style.boxShadow,
+      marginTop: style.marginTop,
+      marginBottom: style.marginBottom,
+      marginLeft: style.marginLeft,
+      marginRight: style.marginRight,
+    };
+  };
+  
+  const getEditableClass = (elementId: string) => {
+    if (!editorMode) return "";
+    const base = "cursor-pointer transition-all duration-200";
+    return selectedElement === elementId 
+      ? `${base} ring-2 ring-cyan-400 ring-offset-2` 
+      : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
+  };
 
   const handleOptionSelect = useCallback((option: "tests" | "training") => {
     setUserData({
@@ -83,14 +176,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             }}
           >
             <div 
-              className="w-full"
+              className={`w-full ${getEditableClass("hero-section")}`}
+              onClick={(e) => handleElementClick("hero-section", e)}
               style={{
-                background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
+                background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
                 borderTopLeftRadius: "32px",
                 borderTopRightRadius: "32px",
                 paddingTop: "32px",
                 minHeight: "340px",
-                position: "relative"
+                position: "relative",
+                ...getElementStyle("hero-section")
               }}
               data-testid="hero-section"
             >
@@ -213,10 +308,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <h2 className="text-base font-bold text-gray-800 mb-3">Diagnóstico inicial</h2>
             
             <div 
-              onClick={() => handleOptionSelect("tests")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
+              onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-tests")}`}
               style={{
-                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)"
+                background: styles["card-tests"]?.background || "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)",
+                ...getElementStyle("card-tests")
               }}
               data-testid="button-option-tests"
             >
@@ -255,10 +351,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             transition={{ delay: 0.25 }}
           >
             <div 
-              onClick={() => handleOptionSelect("training")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
+              onClick={(e) => editorMode ? handleElementClick("card-training", e) : handleOptionSelect("training")}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-training")}`}
               style={{
-                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)"
+                background: styles["card-training"]?.background || "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)",
+                ...getElementStyle("card-training")
               }}
               data-testid="button-option-training"
             >
@@ -394,6 +491,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
         </nav>
       )}
+      
+      <AnimatePresence>
+        {editorMode && (
+          <EditorToolbar
+            selectedElement={selectedElement}
+            styles={styles}
+            onStyleChange={handleStyleChange}
+            onSave={handleSaveStyles}
+            onClose={handleCloseEditor}
+            onClearSelection={() => setSelectedElement(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

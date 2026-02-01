@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil } from "lucide-react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ export default function GestionPage() {
   const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");
   const [password, setPassword] = useState(() => localStorage.getItem("adminPass") || "");
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("adminUser"));
+  const [editorModeEnabled, setEditorModeEnabled] = useState(() => localStorage.getItem("editorMode") === "true");
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
@@ -1146,6 +1147,19 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
+          <Button
+            onClick={() => {
+              const newState = !editorModeEnabled;
+              setEditorModeEnabled(newState);
+              localStorage.setItem("editorMode", newState.toString());
+            }}
+            variant={editorModeEnabled ? "default" : "outline"}
+            className={editorModeEnabled ? "w-full bg-purple-600 hover:bg-purple-700" : "w-full border-purple-500/30 text-purple-400"}
+            data-testid="button-editor-toggle"
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            {editorModeEnabled ? "Editor: ON" : "Editor: OFF"}
+          </Button>
           <Button
             onClick={() => { fetchSessions(); fetchQuizResults(); }}
             variant="outline"
