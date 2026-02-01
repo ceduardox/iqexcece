@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
+import { ChevronLeft, BookOpen, Play } from "lucide-react";
 
 interface ReadingTheme {
   temaNumero: number | null;
@@ -42,42 +43,6 @@ const categoryLabels: Record<string, string> = {
   profesionales: "Profesional",
   adulto_mayor: "Adulto Mayor",
 };
-
-function ChildishBackButton({ onClick }: { onClick: () => void }) {
-  return (
-    <motion.button
-      onClick={onClick}
-      className="relative flex items-center justify-center"
-      whileTap={{ scale: 0.85 }}
-      whileHover={{ scale: 1.05 }}
-      data-testid="button-back-reading"
-    >
-      <motion.div
-        className="w-12 h-12 rounded-full flex items-center justify-center"
-        style={{ 
-          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-          boxShadow: "0 4px 15px rgba(255, 165, 0, 0.4)"
-        }}
-        animate={{ rotate: [0, -5, 5, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </motion.div>
-      <motion.div
-        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-pink-400"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full bg-cyan-400"
-        animate={{ scale: [1, 1.3, 1] }}
-        transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
-      />
-    </motion.button>
-  );
-}
 
 const defaultImages: Record<string, { mainImage: string; smallImage: string }> = {
   preescolar: {
@@ -154,171 +119,166 @@ export default function ReadingSelectionPage() {
   const categoryLabel = categoryLabels[categoria] || "Pre escolar";
   
   const mainImage = content?.pageMainImage || defaultImages[categoria]?.mainImage || defaultImages.preescolar.mainImage;
-  const smallImage = content?.pageSmallImage || defaultImages[categoria]?.smallImage || defaultImages.preescolar.smallImage;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col"
-      style={{ background: "linear-gradient(160deg, #9333EA 0%, #7C3AED 30%, #A855F7 70%, #C084FC 100%)" }}
-    >
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex items-center px-4 py-4 safe-area-inset"
-      >
-        <ChildishBackButton onClick={handleBack} />
-        <h1 className="flex-1 text-center text-xl font-bold text-white pr-12">
-          {testName}
-        </h1>
-      </motion.header>
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+        <button 
+          onClick={handleBack}
+          className="absolute left-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          data-testid="button-back-reading"
+        >
+          <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
+        </button>
+        
+        <div className="flex items-center justify-center" data-testid="header-logo">
+          <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#8a3ffc" />
+                <stop offset="100%" stopColor="#00d9ff" />
+              </linearGradient>
+            </defs>
+            <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+              <tspan fill="#8a3ffc">i</tspan>
+              <tspan fill="#8a3ffc">Q</tspan>
+              <tspan fill="url(#logoGradient)">x</tspan>
+            </text>
+          </svg>
+        </div>
+      </header>
 
-      <div className="relative flex-1 flex flex-col">
-        <div className="relative h-72 flex items-end justify-center overflow-visible">
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-            className="relative z-10"
-          >
-            <img 
-              src={mainImage}
-              alt="Niño feliz"
-              className="w-64 h-64 object-contain drop-shadow-2xl"
-              style={{ filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.3))" }}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30, rotate: -10 }}
-            animate={{ opacity: 1, x: 0, rotate: 0 }}
-            transition={{ delay: 0.5, duration: 0.4, type: "spring" }}
-            className="absolute right-2 bottom-12 z-20"
-          >
-            <motion.div 
-              className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <img 
-                src={smallImage}
-                alt="Libro mascota"
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          </motion.div>
-
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: 6 + Math.random() * 12,
-                height: 6 + Math.random() * 12,
-                left: `${5 + Math.random() * 90}%`,
-                top: `${10 + Math.random() * 80}%`,
-                backgroundColor: ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB"][Math.floor(Math.random() * 7)],
-              }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.5, 0.9, 0.5],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 2 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={`star-${i}`}
-              className="absolute"
-              style={{
-                left: `${10 + Math.random() * 80}%`,
-                top: `${15 + Math.random() * 60}%`,
-              }}
-              animate={{
-                rotate: [0, 180, 360],
-                scale: [0.8, 1.2, 0.8],
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD700">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            </motion.div>
-          ))}
+      <main className="flex-1 overflow-y-auto pb-8">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
+        >
+          <div className="relative px-5 pt-6 pb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm font-semibold mb-1"
+                  style={{ color: "#8a3ffc" }}
+                >
+                  {categoryLabel}
+                </motion.p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="text-2xl font-black leading-tight mb-2"
+                  style={{ color: "#1f2937" }}
+                >
+                  {testName}
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-xs leading-relaxed"
+                  style={{ color: "#6b7280" }}
+                >
+                  Selecciona una lectura para comenzar tu evaluación cognitiva.
+                </motion.p>
+              </div>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15 }}
+                className="flex-shrink-0"
+              >
+                <div 
+                  className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-white"
+                  style={{ boxShadow: "0 8px 24px rgba(138, 63, 252, 0.15)" }}
+                >
+                  <img 
+                    src={mainImage}
+                    alt={categoryLabel}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          className="flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] px-6 pt-8 pb-12 shadow-2xl overflow-y-auto"
-          style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.15)", maxHeight: "50vh" }}
-        >
-          <div className="mb-6">
-            <motion.p 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-purple-500 font-semibold text-base mb-1"
-            >
-              {categoryLabel}
-            </motion.p>
-            <motion.h2 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.45 }}
-              className="text-2xl font-black text-gray-900 dark:text-white"
-            >
-              Elige una lectura
-            </motion.h2>
-          </div>
+        <div className="px-5 pt-2 pb-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-base font-bold mb-4"
+            style={{ color: "#1f2937" }}
+          >
+            Lecturas disponibles
+          </motion.h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {themes.map((theme, index) => (
               <motion.div
                 key={theme.temaNumero || index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}
+                transition={{ delay: 0.25 + index * 0.08 }}
                 onClick={() => handleReadingSelect(theme.temaNumero || 1)}
                 className="cursor-pointer"
                 data-testid={`card-reading-${String(theme.temaNumero || index + 1).padStart(2, '0')}`}
               >
                 <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 flex items-center gap-5 border-2 border-gray-100 dark:border-gray-700"
-                  whileHover={{ scale: 1.02, backgroundColor: "#F3F4F6" }}
-                  whileTap={{ scale: 0.98 }}
+                  className="relative rounded-2xl overflow-hidden shadow-sm border border-purple-100"
+                  style={{ 
+                    background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)"
+                  }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <span 
-                    className="text-5xl font-thin tracking-tight"
-                    style={{ color: "#D1D5DB" }}
-                  >
-                    {String(theme.temaNumero || index + 1).padStart(2, '0')}
-                  </span>
-                  <span className="text-lg font-bold text-gray-800 dark:text-gray-200 flex-1">
-                    {theme.title}
-                  </span>
+                  <div className="p-4 flex items-center gap-4">
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ 
+                        background: "linear-gradient(135deg, rgba(138, 63, 252, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%)"
+                      }}
+                    >
+                      <BookOpen className="w-6 h-6" style={{ color: "#8a3ffc" }} />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <span 
+                        className="text-xs font-medium block mb-0.5"
+                        style={{ color: "#9ca3af" }}
+                      >
+                        Lectura {String(theme.temaNumero || index + 1).padStart(2, '0')}
+                      </span>
+                      <h3 
+                        className="text-sm font-bold truncate"
+                        style={{ color: "#1f2937" }}
+                      >
+                        {theme.title}
+                      </h3>
+                    </div>
+
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ 
+                        background: "linear-gradient(90deg, #8a3ffc, #6b21a8)",
+                        boxShadow: "0 4px 12px rgba(138, 63, 252, 0.3)"
+                      }}
+                    >
+                      <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                    </div>
+                  </div>
                 </motion.div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
-      </div>
-    </motion.div>
+        </div>
+      </main>
+    </div>
   );
 }
