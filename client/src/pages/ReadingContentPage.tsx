@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, ThumbsUp, ArrowRight } from "lucide-react";
+import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw } from "lucide-react";
 import { useUserData } from "@/lib/user-context";
 
 const playButtonSound = () => {
@@ -12,7 +12,10 @@ const playButtonSound = () => {
 const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niño",
-  adolescentes: "Adolesc.",
+  adolescentes: "Adolescente",
+  universitarios: "Universitario",
+  profesionales: "Profesional",
+  adulto_mayor: "Adulto Mayor",
 };
 
 interface Question {
@@ -26,18 +29,18 @@ const defaultReadingContent: Record<string, { title: string; text: string; quest
     title: "Paseando con mi perrito",
     text: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
     questions: [
-      { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
-      { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
-      { question: "¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
-      { question: "¿Dónde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
+      { question: "¿Qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
+      { question: "¿De qué color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
+      { question: "¿Dónde lo llevaba a pasear?", options: ["Parque", "Jardín", "Plaza"], correct: 0 },
+      { question: "¿Dónde encontró al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
     ],
   },
   ninos: {
-    title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
+    title: "LA HISTORIA DEL CHOCOLATE",
     text: "Hace muchos años, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en América Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podía comprar un tomate con un grano de cacao, o un conejo con 30 granos. Además, solo las personas importantes, como guerreros y nobles, podían tomar esa bebida.\n\nCuando los conquistadores españoles llegaron a América en el siglo XVI, llevaron el cacao a Europa. Allí, las personas comenzaron a mezclarlo con azúcar y leche, creando una bebida caliente más dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en países tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y además de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de ánimo y aportar energía, siempre que se consuma con moderación.",
     questions: [
       { question: "¿Qué civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
-      { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
+      { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "Una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
       { question: "¿Para qué usaban los aztecas los granos de cacao, además de preparar bebidas?", options: ["Intercambio.", "Moneda.", "Licor.", "Medicina natural."], correct: 1 },
       { question: "¿Qué cambios hizo Europa en la forma de consumir el cacao?", options: ["Comercializaron.", "Mezclaron con azúcar y leche.", "Usaban como bebida caliente.", "Lo intercambiaron."], correct: 1 },
       { question: "Menciona dos países actuales donde se cultiva el cacao.", options: ["Europa y África.", "Centro América y el caribe.", "Ecuador y Ghana.", "Brasil y Bolivia."], correct: 2 },
@@ -49,9 +52,7 @@ const defaultReadingContent: Record<string, { title: string; text: string; quest
 
 Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongación artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". También sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
 
-Otros, en cambio, creen que los programas de eutanasia están en contraposición con los ideales con los que se defiende su implementación. Por ejemplo, se menciona que los médicos durante el régimen nazi hacían propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, según aquella propaganda, merecedoras de compasión, para conseguir así una opinión pública favorable a la eliminación que se estaba haciendo de enfermos, considerados minusválidos o débiles según criterios nazis.
-
-Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despenalizado la eutanasia, y en ellos todavía permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. Según los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos países.`,
+Otros, en cambio, creen que los programas de eutanasia están en contraposición con los ideales con los que se defiende su implementación.`,
     questions: [
       { question: "¿Qué es la eutanasia?", options: ["Es aquello que considera lo bueno y lo malo", "Es quitarse la vida para evitar el sufrimiento", "Es todo acto u omisión cuya responsabilidad recae en el medico y/o familiares"], correct: 2 },
       { question: "¿Dónde surge la propaganda de realizar la eutanasia?", options: ["E.E.U.U.", "Alemania", "Rusia"], correct: 1 },
@@ -60,175 +61,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     ],
   },
 };
-
-const optionColors = [
-  { bg: "#f472b6", bg2: "#f43f5e", shadow: "rgba(244, 114, 182, 0.4)" },
-  { bg: "#22d3ee", bg2: "#14b8a6", shadow: "rgba(34, 211, 238, 0.4)" },
-  { bg: "#fbbf24", bg2: "#f97316", shadow: "rgba(251, 191, 36, 0.4)" },
-  { bg: "#a78bfa", bg2: "#8b5cf6", shadow: "rgba(167, 139, 250, 0.4)" },
-];
-
-const getShuffledColors = (questionIndex: number) => {
-  const shuffled = [...optionColors];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = (i + questionIndex) % shuffled.length;
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-function FloatingBubbles({ count = 20, opacity = 0.3, isAdolescent = false }: { count?: number; opacity?: number; isAdolescent?: boolean }) {
-  const adolescentColors = ["#FBBF24", "#F472B6", "#22D3EE", "#A78BFA", "#F97316", "#34D399", "#8B5CF6"];
-  const childColors = ["#FFD700", "#FF69B4", "#00CED1", "#98FB98", "#FFA500", "#DDA0DD", "#87CEEB", "#FFB6C1", "#90EE90", "#FFC0CB"];
-  const colors = isAdolescent ? adolescentColors : childColors;
-  
-  return (
-    <>
-      {[...Array(count)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: isAdolescent ? (6 + Math.random() * 14) : (8 + Math.random() * 18),
-            height: isAdolescent ? (6 + Math.random() * 14) : (8 + Math.random() * 18),
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-            opacity: opacity,
-          }}
-          animate={{
-            y: [0, isAdolescent ? -15 : -25, 0],
-            x: [0, Math.random() * 15 - 7.5, 0],
-            scale: [1, isAdolescent ? 1.15 : 1.3, 1],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 3,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-          }}
-        />
-      ))}
-      {!isAdolescent && [...Array(6)].map((_, i) => (
-        <motion.div
-          key={`star-${i}`}
-          className="absolute pointer-events-none"
-          style={{
-            left: `${10 + Math.random() * 80}%`,
-            top: `${10 + Math.random() * 80}%`,
-          }}
-          animate={{
-            rotate: [0, 180, 360],
-            scale: [0.5, 1, 0.5],
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: 4 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFD700">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-        </motion.div>
-      ))}
-    </>
-  );
-}
-
-function ChildishCloseButton({ onClick, isAdolescent = false }: { onClick: () => void; isAdolescent?: boolean }) {
-  if (isAdolescent) {
-    return (
-      <motion.button
-        onClick={onClick}
-        className="relative"
-        whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.05 }}
-        data-testid="button-close-reading"
-      >
-        <motion.div
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ 
-            background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)",
-            boxShadow: "0 4px 15px rgba(251, 191, 36, 0.4)"
-          }}
-        >
-          <X className="w-5 h-5 text-white" strokeWidth={2.5} />
-        </motion.div>
-        <motion.div
-          className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-pink-400"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
-        />
-      </motion.button>
-    );
-  }
-  
-  return (
-    <motion.button
-      onClick={onClick}
-      className="relative"
-      whileTap={{ scale: 0.8 }}
-      whileHover={{ scale: 1.1 }}
-      data-testid="button-close-reading"
-    >
-      <motion.div
-        className="w-12 h-12 rounded-full flex items-center justify-center"
-        style={{ 
-          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-          boxShadow: "0 4px 15px rgba(255, 165, 0, 0.5)"
-        }}
-        animate={{ rotate: [0, 5, -5, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <X className="w-6 h-6 text-white" strokeWidth={3} />
-      </motion.div>
-      <motion.div
-        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-pink-500"
-        animate={{ scale: [1, 1.4, 1] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full bg-cyan-400"
-        animate={{ scale: [1, 1.3, 1] }}
-        transition={{ duration: 1.8, repeat: Infinity, delay: 0.3 }}
-      />
-    </motion.button>
-  );
-}
-
-function InfoCard({ label, value, color, delay }: { label: string; value: string; color: string; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="relative py-3 px-2 text-center"
-    >
-      <motion.div
-        className="absolute inset-1 rounded-xl opacity-30"
-        style={{ backgroundColor: color }}
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 2, repeat: Infinity, delay: delay * 2 }}
-      />
-      <div className="relative">
-        <div className="text-white/70 text-[9px] font-bold mb-0.5 tracking-wider">{label}</div>
-        <motion.div 
-          className="font-black text-white text-sm"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay }}
-        >
-          {value}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
 
 export default function ReadingContentPage() {
   const { userData } = useUserData();
@@ -254,7 +86,6 @@ export default function ReadingContentPage() {
   
   const categoria = userData.childCategory || "preescolar";
   const selectedTema = userData.selectedTema || 1;
-  const isAdolescent = categoria === "adolescentes";
   const [content, setContent] = useState(defaultReadingContent[categoria] || defaultReadingContent.preescolar);
 
   useEffect(() => {
@@ -388,480 +219,395 @@ export default function ReadingContentPage() {
     window.location.href = "/";
   };
 
-  const bgGradient = isAdolescent 
-    ? "linear-gradient(180deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%)"
-    : "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: bgGradient }}
-    >
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FloatingBubbles count={isAdolescent ? 18 : 25} opacity={isAdolescent ? 0.3 : 0.4} isAdolescent={isAdolescent} />
-      </div>
-
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className={`relative z-10 flex items-center ${isAdolescent ? 'justify-center' : 'justify-between'} px-5 py-4`}
-      >
-        {isAdolescent && (
-          <div className="absolute right-4">
-            <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />
+  if (showResults) {
+    const percentage = Math.round((correctAnswers / content.questions.length) * 100);
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+          <div className="flex items-center justify-center" data-testid="header-logo">
+            <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#8a3ffc" />
+                  <stop offset="100%" stopColor="#00d9ff" />
+                </linearGradient>
+              </defs>
+              <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+                <tspan fill="#8a3ffc">i</tspan>
+                <tspan fill="#8a3ffc">Q</tspan>
+                <tspan fill="url(#logoGradient)">x</tspan>
+              </text>
+            </svg>
           </div>
-        )}
-        <motion.h1 
-          className={`font-bold text-white ${isAdolescent ? 'text-xl' : 'text-2xl font-black drop-shadow-lg'}`}
-          style={!isAdolescent ? { textShadow: "2px 2px 4px rgba(0,0,0,0.2)" } : {}}
-          animate={!isAdolescent ? { scale: [1, 1.03, 1] } : {}}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          Test Lectura
-        </motion.h1>
-        {!isAdolescent && <ChildishCloseButton onClick={handleClose} isAdolescent={isAdolescent} />}
-      </motion.header>
+        </header>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className={`relative z-10 flex mx-4 rounded-full overflow-hidden ${isAdolescent ? 'border-2 border-white/20' : 'border-4 border-white/30'}`}
-        style={{ boxShadow: isAdolescent ? "0 2px 15px rgba(0,0,0,0.15)" : "0 4px 20px rgba(0,0,0,0.2)" }}
-      >
-        <motion.button
-          onClick={() => setActiveTab("lectura")}
-          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
-            activeTab === "lectura" 
-              ? (isAdolescent ? "bg-violet-600 text-white" : "bg-purple-600 text-white")
-              : (isAdolescent ? "bg-violet-500/40 text-white/80" : "bg-purple-400/50 text-white/70")
-          }`}
-          whileTap={{ scale: 0.98 }}
-          data-testid="tab-lectura"
-        >
-          LECTURA
-        </motion.button>
-        <motion.button
-          onClick={() => setActiveTab("cuestionario")}
-          className={`flex-1 py-3 text-sm font-bold text-center transition-all ${
-            activeTab === "cuestionario" 
-              ? (isAdolescent ? "bg-violet-600 text-white" : "bg-purple-600 text-white")
-              : (isAdolescent ? "bg-violet-500/40 text-white/80" : "bg-purple-400/50 text-white/70")
-          }`}
-          whileTap={{ scale: 0.98 }}
-          data-testid="tab-cuestionario"
-        >
-          CUESTIONARIO
-        </motion.button>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.15 }}
-        className={`relative z-10 mx-4 mt-3 grid grid-cols-4 rounded-2xl overflow-hidden ${isAdolescent ? 'border-2 border-white/15' : 'border-4 border-white/20'}`}
-        style={{ 
-          background: isAdolescent 
-            ? "linear-gradient(135deg, #6D28D9 0%, #7C3AED 50%, #8B5CF6 100%)"
-            : "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A855F7 100%)",
-          boxShadow: isAdolescent ? "0 2px 15px rgba(109, 40, 217, 0.3)" : "0 4px 20px rgba(124, 58, 237, 0.4)"
-        }}
-      >
-        <InfoCard label="CATEGORÍA" value={categoryLabel} color={isAdolescent ? "#A78BFA" : "#FF69B4"} delay={0} />
-        <InfoCard label="TIEMPO" value={formatTime(readingTime)} color={isAdolescent ? "#22D3EE" : "#00CED1"} delay={0.1} />
-        <InfoCard label="TIEMPO" value={formatTime(questionTime)} color={isAdolescent ? "#FBBF24" : "#FFD700"} delay={0.2} />
-        <InfoCard label="PREGUNTAS" value={`${activeTab === "cuestionario" ? currentQuestion + 1 : 0} / ${content.questions.length}`} color={isAdolescent ? "#34D399" : "#98FB98"} delay={0.3} />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="relative z-10 flex-1 bg-white dark:bg-gray-900 rounded-t-[2.5rem] mx-0 mt-4 px-6 py-8 overflow-hidden"
-        style={{ boxShadow: "0 -10px 40px rgba(0,0,0,0.2)" }}
-      >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <FloatingBubbles count={15} opacity={0.15} isAdolescent={isAdolescent} />
-        </div>
-
-        {activeTab === "lectura" ? (
-          <div className="relative z-10 space-y-6">
-            <div className="text-center">
-              <motion.span 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.25 }}
-                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
+        <main className="flex-1 overflow-y-auto pb-8">
+          <div 
+            className="w-full"
+            style={{
+              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            }}
+          >
+            <div className="px-5 pt-8 pb-6 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", delay: 0.1 }}
+                className="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4"
+                style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%)" }}
               >
-                LECTURA
-              </motion.span>
-              <motion.h2 
+                <CheckCircle className="w-10 h-10" style={{ color: "#8a3ffc" }} />
+              </motion.div>
+              <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
+                transition={{ delay: 0.2 }}
+                className="text-2xl font-black mb-2"
+                style={{ color: "#1f2937" }}
               >
-                {content.title}
-              </motion.h2>
+                ¡Excelente!
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="text-sm"
+                style={{ color: "#6b7280" }}
+              >
+                Has completado el test de lectura
+              </motion.p>
             </div>
+          </div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.35 }}
-              className={`text-gray-600 dark:text-gray-300 leading-relaxed ${isAdolescent ? 'text-base' : 'text-lg'}`}
+          <div className="px-5 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-2xl overflow-hidden shadow-sm border border-purple-100 p-5"
+              style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)" }}
             >
-              {content.text}
-            </motion.p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Comprensión</p>
+                  <p className="text-3xl font-black" style={{ color: "#8a3ffc" }}>{percentage}%</p>
+                  <p className="text-xs" style={{ color: "#6b7280" }}>{correctAnswers}/{content.questions.length} correctas</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Velocidad</p>
+                  <p className="text-3xl font-black" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
+                  <p className="text-xs" style={{ color: "#6b7280" }}>palabras/min</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-purple-100 grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Tiempo lectura</p>
+                  <p className="text-lg font-bold" style={{ color: "#1f2937" }}>{formatTime(readingTime)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Tiempo preguntas</p>
+                  <p className="text-lg font-bold" style={{ color: "#1f2937" }}>{formatTime(questionTime)}</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="space-y-3"
+            >
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md"
+                style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
+                data-testid="button-share"
+              >
+                <Share2 className="w-5 h-5" />
+                Compartir resultado
+              </motion.button>
+              
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2"
+                style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
+                data-testid="button-whatsapp"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Más información
+              </motion.button>
+              
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleNewTest}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
+                style={{ color: "#6b7280" }}
+                data-testid="button-new-test"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Nuevo test
+              </motion.button>
+            </motion.div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+          <div className="flex items-center justify-center" data-testid="header-logo">
+            <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#8a3ffc" />
+                  <stop offset="100%" stopColor="#00d9ff" />
+                </linearGradient>
+              </defs>
+              <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+                <tspan fill="#8a3ffc">i</tspan>
+                <tspan fill="#8a3ffc">Q</tspan>
+                <tspan fill="url(#logoGradient2)">x</tspan>
+              </text>
+            </svg>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto pb-8">
+          <div 
+            className="w-full"
+            style={{
+              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            }}
+          >
+            <div className="px-5 pt-6 pb-4">
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xl font-black mb-1"
+                style={{ color: "#1f2937" }}
+              >
+                Completa tus datos
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="text-xs"
+                style={{ color: "#6b7280" }}
+              >
+                Para ver tus resultados, necesitamos algunos datos
+              </motion.p>
+            </div>
+          </div>
+
+          <div className="px-5 space-y-4">
+            {[
+              { id: "nombre", label: "Nombre completo", placeholder: "Tu nombre" },
+              { id: "email", label: "Correo electrónico", placeholder: "tu@email.com", type: "email" },
+              { id: "edad", label: "Edad", placeholder: "Tu edad", type: "number" },
+              { id: "ciudad", label: "Ciudad", placeholder: "Tu ciudad" },
+              { id: "telefono", label: "Teléfono", placeholder: "Tu teléfono", type: "tel" },
+            ].map((field, index) => (
+              <motion.div
+                key={field.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+              >
+                <label className="block text-xs font-medium mb-1.5" style={{ color: "#1f2937" }}>
+                  {field.label}
+                </label>
+                <input
+                  type={field.type || "text"}
+                  placeholder={field.placeholder}
+                  value={formData[field.id as keyof typeof formData]}
+                  onChange={(e) => handleFormChange(field.id, e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none"
+                  style={{ 
+                    borderColor: "#e5e7eb",
+                    color: "#1f2937",
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#8a3ffc"}
+                  onBlur={(e) => e.target.style.borderColor = "#e5e7eb"}
+                  data-testid={`input-${field.id}`}
+                />
+              </motion.div>
+            ))}
 
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              onClick={handleGoToQuestionnaire}
-              className={`relative w-full rounded-2xl font-bold text-white flex items-center justify-center gap-3 mt-8 overflow-hidden ${isAdolescent ? 'py-4 text-lg' : 'py-5 text-xl font-black'}`}
-              style={{ 
-                background: isAdolescent 
-                  ? "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)"
-                  : "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                boxShadow: isAdolescent 
-                  ? "0 6px 20px rgba(124, 58, 237, 0.4)"
-                  : "0 8px 25px rgba(249, 115, 22, 0.5)"
-              }}
               whileTap={{ scale: 0.98 }}
-              data-testid="button-go-questionnaire"
+              onClick={handleSubmitForm}
+              disabled={submitting || !formData.nombre}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-white font-bold shadow-md disabled:opacity-50 mt-6"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
+              data-testid="button-submit-form"
             >
-              {!isAdolescent && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ["-100%", "100%"] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              )}
-              <span className="relative">Ir a cuestionario</span>
-              <motion.span
-                className="relative"
-                animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <ArrowRight className="w-5 h-5" />
-              </motion.span>
+              {submitting ? "Enviando..." : "Ver resultados"}
             </motion.button>
           </div>
-        ) : showForm ? (
-          <div className="relative z-10 space-y-5 pb-6">
-            <div className="text-center">
-              <motion.span 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
-              >
-                CUESTIONARIO
-              </motion.span>
-              <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
-              >
-                {content.title}
-              </motion.h2>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+        <button 
+          onClick={handleClose}
+          className="absolute left-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          data-testid="button-close-reading"
+        >
+          <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
+        </button>
+        
+        <div className="flex items-center justify-center" data-testid="header-logo">
+          <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#8a3ffc" />
+                <stop offset="100%" stopColor="#00d9ff" />
+              </linearGradient>
+            </defs>
+            <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+              <tspan fill="#8a3ffc">i</tspan>
+              <tspan fill="#8a3ffc">Q</tspan>
+              <tspan fill="url(#logoGradient3)">x</tspan>
+            </text>
+          </svg>
+        </div>
+      </header>
+
+      <div className="flex mx-4 mt-3 rounded-full overflow-hidden border border-gray-200">
+        <button
+          onClick={() => setActiveTab("lectura")}
+          className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
+            activeTab === "lectura" 
+              ? "text-white"
+              : "text-gray-500"
+          }`}
+          style={activeTab === "lectura" ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" } : {}}
+          data-testid="tab-lectura"
+        >
+          LECTURA
+        </button>
+        <button
+          onClick={() => setActiveTab("cuestionario")}
+          className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
+            activeTab === "cuestionario" 
+              ? "text-white"
+              : "text-gray-500"
+          }`}
+          style={activeTab === "cuestionario" ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" } : {}}
+          data-testid="tab-cuestionario"
+        >
+          CUESTIONARIO
+        </button>
+      </div>
+
+      <div className="flex mx-4 mt-3 rounded-xl overflow-hidden border border-purple-100 divide-x divide-purple-100"
+        style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)" }}
+      >
+        <div className="flex-1 py-2.5 text-center">
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>CATEGORÍA</p>
+          <p className="text-xs font-bold" style={{ color: "#8a3ffc" }}>{categoryLabel}</p>
+        </div>
+        <div className="flex-1 py-2.5 text-center">
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>LECTURA</p>
+          <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{formatTime(readingTime)}</p>
+        </div>
+        <div className="flex-1 py-2.5 text-center">
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>PREGUNTAS</p>
+          <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{formatTime(questionTime)}</p>
+        </div>
+        <div className="flex-1 py-2.5 text-center">
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>PROGRESO</p>
+          <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{activeTab === "cuestionario" ? currentQuestion + 1 : 0}/{content.questions.length}</p>
+        </div>
+      </div>
+
+      <main className="flex-1 overflow-y-auto px-5 py-5">
+        {activeTab === "lectura" ? (
+          <div className="space-y-5">
+            <div>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>LECTURA</p>
+              <h2 className="text-lg font-black" style={{ color: "#1f2937" }}>{content.title}</h2>
             </div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className={`text-gray-600 dark:text-gray-300 ${isAdolescent ? 'text-sm' : 'text-base'}`}
+            <div 
+              className="rounded-2xl p-5 border border-purple-100"
+              style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.04) 0%, rgba(0, 217, 255, 0.02) 100%)" }}
             >
-              Para que puedas conocer tu resultado del Test, completa los siguientes datos con tu información
-            </motion.p>
-
-            <div className="space-y-3">
-              <motion.input
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                type="text"
-                placeholder="Nombre y Apellido"
-                value={formData.nombre}
-                onChange={(e) => handleFormChange("nombre", e.target.value)}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="input-nombre"
-              />
-
-              <motion.input
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => handleFormChange("email", e.target.value)}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="input-email"
-              />
-
-              <motion.input
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                type="text"
-                placeholder="Edad"
-                value={formData.edad}
-                onChange={(e) => handleFormChange("edad", e.target.value)}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="input-edad"
-              />
-              <motion.input
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                type="text"
-                placeholder="Ciudad"
-                value={formData.ciudad}
-                onChange={(e) => handleFormChange("ciudad", e.target.value)}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="input-ciudad"
-              />
-
-              <motion.input
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                type="tel"
-                placeholder="Teléfono"
-                value={formData.telefono}
-                onChange={(e) => handleFormChange("telefono", e.target.value)}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="input-telefono"
-              />
-
-              <motion.textarea
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-                placeholder="Comentario"
-                value={formData.comentario}
-                onChange={(e) => handleFormChange("comentario", e.target.value)}
-                rows={3}
-                className={`w-full rounded-2xl border-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none transition-colors resize-none ${isAdolescent ? 'py-3 px-4 border-violet-200 dark:border-violet-800 focus:border-violet-400' : 'py-4 px-5 border-gray-200 dark:border-gray-700 focus:border-purple-400'}`}
-                data-testid="textarea-comentario"
-              />
+              <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "#374151" }}>
+                {content.text}
+              </p>
             </div>
 
             <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              onClick={handleSubmitForm}
-              className={`relative w-full rounded-2xl font-bold text-white flex items-center justify-center gap-3 overflow-hidden ${isAdolescent ? 'py-4 text-lg' : 'py-5 text-xl font-black'}`}
-              style={{ 
-                background: isAdolescent 
-                  ? "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)"
-                  : "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                boxShadow: isAdolescent 
-                  ? "0 6px 20px rgba(124, 58, 237, 0.4)"
-                  : "0 8px 25px rgba(249, 115, 22, 0.5)"
-              }}
               whileTap={{ scale: 0.98 }}
-              data-testid="button-ver-resultado"
+              onClick={handleGoToQuestionnaire}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-white font-bold shadow-md"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
+              data-testid="button-start-quiz"
             >
-              {!isAdolescent && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ["-100%", "100%"] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              )}
-              <span className="relative">Ver mi resultado</span>
-              <motion.span
-                className="relative"
-                animate={!isAdolescent ? { x: [0, 8, 0] } : {}}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <ArrowRight className="w-5 h-5" />
-              </motion.span>
+              <HelpCircle className="w-5 h-5" />
+              Ir al cuestionario
             </motion.button>
           </div>
         ) : (
-          <div className="relative z-10 space-y-6">
-            <div className="text-center">
-              <motion.span 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`font-bold text-sm tracking-widest ${isAdolescent ? 'text-violet-500' : 'text-purple-500 font-black'}`}
-              >
-                CUESTIONARIO
-              </motion.span>
-              <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-gray-900 dark:text-white mt-2 ${isAdolescent ? 'text-xl font-bold' : 'text-2xl font-black'}`}
-              >
-                {content.title}
-              </motion.h2>
+          <div className="space-y-5">
+            <div>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>
+                PREGUNTA {currentQuestion + 1} DE {content.questions.length}
+              </p>
+              <h2 className="text-lg font-bold" style={{ color: "#1f2937" }}>{currentQ?.question}</h2>
             </div>
 
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className={`text-gray-800 dark:text-gray-200 font-semibold ${isAdolescent ? 'text-base' : 'text-lg'}`}
-            >
-              {currentQ.question}
-            </motion.p>
-
-            <div className={isAdolescent ? 'space-y-3' : 'space-y-4'}>
-              {currentQ.options.map((option, index) => {
-                const colors = getShuffledColors(currentQuestion);
-                const color = colors[index % colors.length];
-                return (
-                  <motion.button
-                    key={index}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 + index * 0.1, type: "spring" }}
-                    onClick={() => handleSelectAnswer(index)}
-                    className={`relative w-full text-left font-bold text-white overflow-hidden transition-all ${
-                      selectedAnswer === index ? "ring-4 ring-white ring-offset-2" : ""
-                    } ${isAdolescent ? 'py-4 px-5 rounded-xl text-base' : 'py-5 px-6 rounded-2xl text-lg'}`}
-                    style={{ 
-                      background: `linear-gradient(135deg, ${color.bg} 0%, ${color.bg2} 100%)`,
-                      boxShadow: `0 6px 20px ${color.shadow}`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    data-testid={`option-${index}`}
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                      animate={{ x: ["-100%", "100%"] }}
-                      transition={{ duration: 2.5, repeat: Infinity, delay: index * 0.3 }}
-                    />
-                    <span className="relative drop-shadow-md">{option}</span>
-                    {selectedAnswer === index && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center"
-                      >
-                        <span className="text-green-500 text-xl">✓</span>
-                      </motion.div>
-                    )}
-                  </motion.button>
-                );
-              })}
+            <div className="space-y-3">
+              {currentQ?.options.map((option, index) => (
+                <motion.button
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => selectedAnswer === null && handleSelectAnswer(index)}
+                  disabled={selectedAnswer !== null}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                    selectedAnswer === index 
+                      ? "border-purple-500 bg-purple-50" 
+                      : "border-gray-200 hover:border-purple-300"
+                  }`}
+                  style={selectedAnswer === index ? { borderColor: "#8a3ffc", background: "rgba(138, 63, 252, 0.08)" } : {}}
+                  data-testid={`option-${index}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${
+                        selectedAnswer === index ? "text-white" : "text-gray-500"
+                      }`}
+                      style={selectedAnswer === index 
+                        ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }
+                        : { background: "#f3f4f6" }
+                      }
+                    >
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: "#1f2937" }}>{option}</span>
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </div>
         )}
-      </motion.div>
-
-      {showResults && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex flex-col"
-          style={{ background: isAdolescent 
-            ? "linear-gradient(160deg, #8B5CF6 0%, #7C3AED 40%, #6D28D9 100%)"
-            : "linear-gradient(160deg, #E879F9 0%, #D946EF 30%, #A855F7 70%, #8B5CF6 100%)" 
-          }}
-        >
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <FloatingBubbles count={20} opacity={0.3} isAdolescent={isAdolescent} />
-          </div>
-
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8">
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-white/80 text-sm tracking-widest mb-2"
-            >
-              RESULTADO
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-4xl font-black text-white mb-4"
-              style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.2)" }}
-            >
-              Test Lectura
-            </motion.h1>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
-              className="mb-6"
-            >
-              <ThumbsUp className="w-16 h-16 text-white" />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl"
-            >
-              <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">{content.title}</h2>
-              
-              <div className="space-y-2 text-gray-700">
-                <p><span className="font-medium">Cant. Palabras:</span> <strong>{wordCount}</strong></p>
-                <p><span className="font-medium">Tiempo de Lectura:</span> <strong>{formatTime(readingTime)}</strong></p>
-                <p><span className="font-medium">Tiempo de Cuestionario:</span> <strong>{formatTime(questionTime)}</strong></p>
-              </div>
-
-              <div className="border-t mt-4 pt-4 space-y-2">
-                <p className="text-gray-700">
-                  Tu comprensión es de <strong className="text-purple-600">{Math.round((correctAnswers / content.questions.length) * 100)}%</strong>
-                </p>
-                <p className="text-gray-700">
-                  Tu velocidad es de <strong className="text-purple-600">{wordsPerMinute.toLocaleString()}</strong> palabras por minuto
-                </p>
-              </div>
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="relative z-10 flex gap-2 p-4 bg-white/10 backdrop-blur-sm"
-          >
-            <button
-              onClick={handleNewTest}
-              className="flex-1 flex flex-col items-center gap-1 py-4 rounded-2xl bg-purple-600 text-white font-bold"
-              data-testid="button-nuevo-test"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span className="text-sm">Nuevo Test</span>
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex-1 flex flex-col items-center gap-1 py-4 rounded-2xl bg-purple-600 text-white font-bold"
-              data-testid="button-compartir"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              <span className="text-sm">Compartir</span>
-            </button>
-            <button
-              onClick={handleWhatsApp}
-              className="flex-1 flex flex-col items-center gap-1 py-4 rounded-2xl bg-purple-600 text-white font-bold"
-              data-testid="button-escribenos"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-              <span className="text-sm">Escríbenos</span>
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
-    </motion.div>
+      </main>
+    </div>
   );
 }
