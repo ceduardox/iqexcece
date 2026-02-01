@@ -427,7 +427,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); }}}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); } else { handleOptionSelect("tests"); }}}
                   className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
                   style={{ 
                     fontSize: styles["btn-diagnostico"]?.fontSize || 12,
@@ -497,7 +497,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); }}}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); } else { handleOptionSelect("training"); }}}
                   className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
                   style={{ 
                     fontSize: styles["btn-entrenamiento"]?.fontSize || 12,
