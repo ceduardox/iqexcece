@@ -26,6 +26,8 @@ export interface ElementStyle {
   borderRadius?: number;
   buttonText?: string;
   iconSize?: number;
+  cardHeight?: number;
+  labelText?: string;
 }
 
 export interface PageStyles {
@@ -344,6 +346,21 @@ export function EditorToolbar({
                 <div className="text-center text-gray-400 text-xs">
                   Margen: T:{currentStyle.marginTop || 0} L:{currentStyle.marginLeft || 0}
                 </div>
+                {selectedElement?.startsWith("card-") && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-700">
+                    <span className="text-gray-400 text-xs w-16">Altura:</span>
+                    <Slider
+                      value={[currentStyle.cardHeight || 100]}
+                      onValueChange={([val]) => updateStyle({ cardHeight: val })}
+                      min={60}
+                      max={200}
+                      step={5}
+                      className="flex-1"
+                      data-testid="slider-card-height"
+                    />
+                    <span className="text-white text-xs w-10">{currentStyle.cardHeight || 100}px</span>
+                  </div>
+                )}
               </div>
             )}
 

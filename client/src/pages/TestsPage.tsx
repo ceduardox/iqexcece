@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, HelpCircle, Search, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, Stethoscope } from "lucide-react";
+import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, Stethoscope } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
@@ -22,14 +22,12 @@ const testIcons = {
   lectura: BookOpen,
   razonamiento: Brain,
   cerebral: HelpCircle,
-  iq: Search,
 };
 
 const testGradients = {
   lectura: "linear-gradient(135deg, #4DD0E1 0%, #26C6DA 50%, #00ACC1 100%)",
   razonamiento: "linear-gradient(135deg, #F48FB1 0%, #CE93D8 50%, #7E57C2 100%)",
   cerebral: "linear-gradient(135deg, #E1BEE7 0%, #CE93D8 50%, #BA68C8 100%)",
-  iq: "linear-gradient(135deg, #90CAF9 0%, #7986CB 50%, #5C6BC0 100%)",
 };
 
 interface TestCardProps {
@@ -58,6 +56,7 @@ function TestCard({
   const Icon = testIcons[testId as keyof typeof testIcons] || Brain;
   const gradient = testGradients[testId as keyof typeof testGradients] || testGradients.razonamiento;
   const cardId = `card-${testId}`;
+  const labelId = `label-${testId}`;
   const titleId = `title-${testId}`;
   const descId = `desc-${testId}`;
   const iconId = `icon-${testId}`;
@@ -65,6 +64,7 @@ function TestCard({
   const cardStyle = styles[cardId];
   const hasBackgroundImage = cardStyle?.imageUrl;
   const iconSize = styles[iconId]?.iconSize || 50;
+  const cardHeight = cardStyle?.cardHeight || 100;
   
   return (
     <motion.div
@@ -80,7 +80,8 @@ function TestCard({
         style={{ 
           background: hasBackgroundImage ? `url(${cardStyle.imageUrl}) center/cover no-repeat` : (cardStyle?.background || gradient),
           borderRadius: cardStyle?.borderRadius || 24,
-          boxShadow: cardStyle?.shadowBlur ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.3)"}` : "0 4px 15px rgba(0,0,0,0.15)"
+          boxShadow: cardStyle?.shadowBlur ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.3)"}` : "0 4px 15px rgba(0,0,0,0.15)",
+          minHeight: cardHeight
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
@@ -106,7 +107,16 @@ function TestCard({
         </div>
         
         <div className="flex-1 text-white py-2">
-          <p className="text-sm font-medium opacity-90 mb-0.5">Test</p>
+          <p 
+            className={`text-sm font-medium opacity-90 mb-0.5 ${getEditableClass(labelId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(labelId, e); }}}
+            style={{ 
+              fontSize: styles[labelId]?.fontSize || 14,
+              color: styles[labelId]?.textColor || "white"
+            }}
+          >
+            {styles[labelId]?.buttonText || "Test"}
+          </p>
           <h3 
             className={`text-2xl font-black mb-1 ${getEditableClass(titleId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
@@ -218,11 +228,33 @@ export default function TestsPage() {
   const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
     const style = styles[elementId];
     if (!style) return defaultBg ? { background: defaultBg } : {};
-    return {
-      background: style.background || defaultBg,
-      boxShadow: style.shadowBlur ? `0 0 ${style.shadowBlur}px ${style.shadowColor || "rgba(0,0,0,0.3)"}` : undefined,
-      borderRadius: style.borderRadius,
-    };
+    
+    const result: React.CSSProperties = {};
+    
+    if (style.backgroundType === "image" && style.imageUrl) {
+      result.backgroundImage = `url(${style.imageUrl})`;
+      result.backgroundSize = style.imageSize ? `${style.imageSize}%` : "cover";
+      result.backgroundPosition = "center";
+      result.backgroundRepeat = "no-repeat";
+      result.backgroundColor = "transparent";
+    } else if (style.background) {
+      result.background = style.background;
+    } else if (defaultBg) {
+      result.background = defaultBg;
+    }
+    
+    if (style.boxShadow) result.boxShadow = style.boxShadow;
+    if (style.marginTop) result.marginTop = style.marginTop;
+    if (style.marginBottom) result.marginBottom = style.marginBottom;
+    if (style.marginLeft) result.marginLeft = style.marginLeft;
+    if (style.marginRight) result.marginRight = style.marginRight;
+    if (style.textColor) result.color = style.textColor;
+    if (style.fontSize) result.fontSize = style.fontSize;
+    if (style.textAlign) result.textAlign = style.textAlign;
+    if (style.fontWeight) result.fontWeight = style.fontWeight;
+    if (style.borderRadius) result.borderRadius = style.borderRadius;
+    
+    return result;
   }, [styles]);
 
   const handleTestClick = useCallback((testId: string) => {
@@ -326,65 +358,80 @@ export default function TestsPage() {
             position: "relative",
             ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
+          data-testid="hero-section"
         >
-          <motion.div
-            className="px-6 pt-4 pb-6 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
-          >
-            <p 
-              className={`text-sm font-medium tracking-widest mb-2 ${getEditableClass("top-label")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("top-label", e); }}}
-              style={{
-                fontSize: styles["top-label"]?.fontSize || 12,
-                color: styles["top-label"]?.textColor || "#9ca3af",
-                letterSpacing: "0.15em"
-              }}
-            >
-              <span className="whitespace-pre-line">{styles["top-label"]?.buttonText || "DIAGNÓSTICO"}</span>
-            </p>
-            <h1 
-              className={`text-3xl font-black mb-3 ${getEditableClass("main-title")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
-              style={{
-                fontSize: styles["main-title"]?.fontSize || 32,
-                background: styles["main-title"]?.textColor ? styles["main-title"].textColor : "linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text"
-              }}
-            >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Desafía tu Mente"}</span>
-            </h1>
-            <p 
-              className={`text-gray-500 text-base leading-relaxed ${getEditableClass("main-subtitle")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
-              style={{
-                fontSize: styles["main-subtitle"]?.fontSize || 15,
-                color: styles["main-subtitle"]?.textColor || "#6b7280"
-              }}
-            >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Explora tu mente con nuestra serie de tests cognitivos interactivos."}</span>
-            </p>
-          </motion.div>
-
-          <div className="px-4 pb-8 space-y-4">
-            {genericTestCategories.map((category, index) => (
-              <TestCard
-                key={category.id}
-                testId={category.id}
-                title={category.title}
-                description={category.description}
-                index={index}
-                onClick={() => handleTestClick(category.id)}
-                editorMode={editorMode}
-                styles={styles}
-                onElementClick={handleElementClick}
-                getEditableClass={getEditableClass}
-              />
-            ))}
+          <div className="relative z-10 px-5 pb-8">
+            <div>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
+                style={getElementStyle("hero-title")}
+              >
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Diagnóstico"}
+                </span>
+                <br />
+                <span style={{ 
+                  background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
+                  WebkitBackgroundClip: "text", 
+                  WebkitTextFillColor: "transparent" 
+                }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
+                style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+              >
+                {styles["hero-subtitle"]?.buttonText || "Evalúa tus capacidades"}
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 }}
+                className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
+                style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+              >
+                {styles["hero-subtitle2"]?.buttonText || "mentales de forma integral"}
+              </motion.p>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
+                style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+              >
+                {styles["hero-desc"]?.buttonText || "Selecciona un test para comenzar tu diagnóstico cognitivo personalizado y descubre cómo potenciar tu mente."}
+              </motion.p>
+            </div>
           </div>
+        </div>
+
+        <div className="px-4 pb-8 space-y-4 -mt-2">
+          {genericTestCategories.map((category, index) => (
+            <TestCard
+              key={category.id}
+              testId={category.id}
+              title={category.title}
+              description={category.description}
+              index={index}
+              onClick={() => handleTestClick(category.id)}
+              editorMode={editorMode}
+              styles={styles}
+              onElementClick={handleElementClick}
+              getEditableClass={getEditableClass}
+            />
+          ))}
         </div>
       </main>
 
