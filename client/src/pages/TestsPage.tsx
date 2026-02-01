@@ -4,8 +4,6 @@ import { BookOpen, Brain, HelpCircle, Search, Menu, Home, Dumbbell, BarChart3, M
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -155,27 +153,41 @@ export default function TestsPage() {
     };
   }, []);
 
-  const { data: savedStyles } = useQuery<{ styles: PageStyles }>({
-    queryKey: ["/api/page-styles", "tests-page"],
-  });
-
   useEffect(() => {
-    if (savedStyles?.styles) {
-      setStyles(savedStyles.styles);
-    }
-  }, [savedStyles]);
+    fetch("/api/page-styles/tests-page")
+      .then(res => res.json())
+      .then(data => {
+        if (data.style?.styles) {
+          try {
+            setStyles(JSON.parse(data.style.styles));
+          } catch (e) {
+            console.log("No saved styles");
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-  const saveStylesMutation = useMutation({
-    mutationFn: async (newStyles: PageStyles) => {
-      return apiRequest("POST", "/api/page-styles", {
-        pageName: "tests-page",
-        styles: newStyles,
+  const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) return;
+    
+    try {
+      await fetch("/api/admin/page-styles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          pageName: "tests-page",
+          styles: JSON.stringify(newStyles)
+        })
       });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/page-styles", "tests-page"] });
-    },
-  });
+    } catch (error) {
+      console.error("Error saving styles:", error);
+    }
+  }, []);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -186,8 +198,8 @@ export default function TestsPage() {
   const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
     const updated = { ...styles, [elementId]: { ...styles[elementId], ...newStyle } };
     setStyles(updated);
-    saveStylesMutation.mutate(updated);
-  }, [styles, saveStylesMutation]);
+    saveStyles(updated);
+  }, [styles, saveStyles]);
 
   const handleEditorClose = useCallback(() => {
     setSelectedElement(null);
