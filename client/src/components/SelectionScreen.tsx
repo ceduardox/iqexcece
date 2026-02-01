@@ -217,14 +217,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="hero-section"
             >
               <div 
-                className="absolute right-0 top-0 w-[65%] h-full opacity-90"
+                className={`absolute right-0 top-0 w-[65%] h-full opacity-90 ${getEditableClass("hero-image")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
                 style={{ 
-                  backgroundImage: `url(${brainBgImg})`,
-                  backgroundSize: "contain",
-                  backgroundPosition: "right center",
+                  backgroundImage: `url(${styles["hero-image"]?.imageUrl || brainBgImg})`,
+                  backgroundSize: styles["hero-image"]?.imageSize ? `${styles["hero-image"].imageSize}%` : "contain",
+                  backgroundPosition: `calc(100% + ${styles["hero-image"]?.marginRight || 0}px) calc(50% + ${styles["hero-image"]?.marginTop || 0}px)`,
                   backgroundRepeat: "no-repeat",
                   borderTopRightRadius: "32px"
                 }}
+                data-testid="hero-image"
               />
 
               <div className="relative z-10 px-5 pb-8">
@@ -285,13 +287,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             data-testid="hero-section-desktop"
           >
             <div 
-              className="absolute right-0 top-0 w-[65%] h-full opacity-90"
+              className={`absolute right-0 top-0 w-[65%] h-full opacity-90 ${getEditableClass("hero-image")}`}
+              onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
               style={{ 
-                backgroundImage: `url(${brainBgImg})`,
-                backgroundSize: "contain",
-                backgroundPosition: "right center",
+                backgroundImage: `url(${styles["hero-image"]?.imageUrl || brainBgImg})`,
+                backgroundSize: styles["hero-image"]?.imageSize ? `${styles["hero-image"].imageSize}%` : "contain",
+                backgroundPosition: `calc(100% + ${styles["hero-image"]?.marginRight || 0}px) calc(50% + ${styles["hero-image"]?.marginTop || 0}px)`,
                 backgroundRepeat: "no-repeat"
               }}
+              data-testid="hero-image-desktop"
             />
 
             <div className="relative z-10 px-5 pt-10 pb-10">
@@ -494,13 +498,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div 
                 className={`flex-shrink-0 ${getEditableClass("icon-metodox")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-metodox", e); }}}
-                style={getElementStyle("icon-metodox")}
+                style={{
+                  ...getElementStyle("icon-metodox"),
+                  marginTop: styles["icon-metodox"]?.marginTop || 0,
+                  marginRight: styles["icon-metodox"]?.marginRight || 0,
+                }}
               >
                 <img 
                   src={styles["icon-metodox"]?.imageUrl || xIconImg} 
                   alt="X" 
                   className="w-14 h-14 object-contain"
-                  style={{ width: styles["icon-metodox"]?.imageSize ? `${styles["icon-metodox"].imageSize}%` : undefined }}
+                  style={{ 
+                    width: styles["icon-metodox"]?.imageSize ? `${styles["icon-metodox"].imageSize}%` : undefined,
+                  }}
                 />
               </div>
             </div>

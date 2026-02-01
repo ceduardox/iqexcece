@@ -46,6 +46,7 @@ export function EditorToolbar({
   onClearSelection 
 }: EditorToolbarProps) {
   const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
+  const [toolbarPosition, setToolbarPosition] = useState<"bottom" | "top">("bottom");
   const currentStyle = selectedElement ? (styles[selectedElement] || {}) : {};
   
   const updateStyle = (updates: Partial<ElementStyle>) => {
@@ -61,23 +62,37 @@ export function EditorToolbar({
     { id: "text", icon: Type, label: "Texto" },
   ] as const;
 
+  const positionClasses = toolbarPosition === "bottom" 
+    ? "bottom-4 left-1/2 -translate-x-1/2" 
+    : "top-4 left-1/2 -translate-x-1/2";
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-4 min-w-[340px] max-w-[90vw]"
+      exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
+      className={`fixed ${positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px]`}
       data-testid="editor-toolbar"
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-white font-medium text-sm">
-          {selectedElement ? `Editando: ${selectedElement}` : "Selecciona un elemento"}
+      <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
+        <span className="text-white font-medium text-xs sm:text-sm truncate flex-1">
+          {selectedElement ? `${selectedElement}` : "Selecciona elemento"}
         </span>
-        <div className="flex gap-2">
-          <Button size="icon" variant="ghost" onClick={onSave} className="text-green-400 hover:text-green-300" data-testid="button-save-styles">
+        <div className="flex gap-1">
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => setToolbarPosition(p => p === "bottom" ? "top" : "bottom")} 
+            className="text-cyan-400 hover:text-cyan-300 h-7 w-7 sm:h-8 sm:w-8" 
+            title={toolbarPosition === "bottom" ? "Mover arriba" : "Mover abajo"}
+            data-testid="button-move-toolbar"
+          >
+            {toolbarPosition === "bottom" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+          <Button size="icon" variant="ghost" onClick={onSave} className="text-green-400 hover:text-green-300 h-7 w-7 sm:h-8 sm:w-8" data-testid="button-save-styles">
             <Save className="w-4 h-4" />
           </Button>
-          <Button size="icon" variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white" data-testid="button-close-editor">
+          <Button size="icon" variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white h-7 w-7 sm:h-8 sm:w-8" data-testid="button-close-editor">
             <X className="w-4 h-4" />
           </Button>
         </div>
@@ -85,18 +100,18 @@ export function EditorToolbar({
 
       {selectedElement && (
         <>
-          <div className="flex gap-1 mb-3 flex-wrap">
+          <div className="flex gap-1 mb-2 sm:mb-3 overflow-x-auto">
             {tabs.map(tab => (
               <Button
                 key={tab.id}
                 size="sm"
                 variant={activeTab === tab.id ? "default" : "ghost"}
-                className={activeTab === tab.id ? "bg-cyan-600" : "text-gray-400"}
+                className={`${activeTab === tab.id ? "bg-cyan-600" : "text-gray-400"} h-7 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs whitespace-nowrap`}
                 onClick={() => setActiveTab(tab.id)}
                 data-testid={`tab-${tab.id}`}
               >
-                <tab.icon className="w-3 h-3 mr-1" />
-                {tab.label}
+                <tab.icon className="w-3 h-3 sm:mr-1" />
+                <span className="hidden sm:inline">{tab.label}</span>
               </Button>
             ))}
           </div>
