@@ -160,10 +160,13 @@ export default function AgeSelectionPage() {
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const authToken = localStorage.getItem("adminToken");
-    if (!authToken) return;
+    if (!authToken) {
+      alert("No hay sesión de admin. Inicia sesión en /gestion primero.");
+      return;
+    }
     
     try {
-      await fetch("/api/admin/page-styles", {
+      const res = await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -171,8 +174,16 @@ export default function AgeSelectionPage() {
         },
         body: JSON.stringify({ pageName: "age-selection", styles: JSON.stringify(newStyles) }),
       });
+      
+      if (res.ok) {
+        console.log("Estilos guardados correctamente");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Error al guardar: ${errData.error || res.statusText}`);
+      }
     } catch (err) {
       console.error("Error saving styles:", err);
+      alert("Error de conexión al guardar");
     }
   }, []);
 
