@@ -7,10 +7,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
 
-import brainBgImg from "@/assets/ui/backgrounds/brain-bg.png";
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 import trainingImg from "@/assets/ui/icons/training.png";
-import xIconImg from "@/assets/ui/icons/x-icon.png";
 
 interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
@@ -216,21 +214,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               }}
               data-testid="hero-section"
             >
-              <div 
-                className={`absolute right-0 top-0 w-[65%] h-full opacity-90 ${getEditableClass("hero-image")}`}
-                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
-                style={{ 
-                  backgroundImage: `url(${styles["hero-image"]?.imageUrl || brainBgImg})`,
-                  backgroundSize: styles["hero-image"]?.imageSize ? `${styles["hero-image"].imageSize}%` : "contain",
-                  backgroundPosition: `calc(100% + ${styles["hero-image"]?.marginRight || 0}px) calc(50% + ${styles["hero-image"]?.marginTop || 0}px)`,
-                  backgroundRepeat: "no-repeat",
-                  borderTopRightRadius: "32px"
-                }}
-                data-testid="hero-image"
-              />
-
               <div className="relative z-10 px-5 pb-8">
-                <div className="max-w-[60%] md:max-w-[50%]">
+                <div>
                   <motion.h1 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -286,20 +271,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             }}
             data-testid="hero-section-desktop"
           >
-            <div 
-              className={`absolute right-0 top-0 w-[65%] h-full opacity-90 ${getEditableClass("hero-image")}`}
-              onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
-              style={{ 
-                backgroundImage: `url(${styles["hero-image"]?.imageUrl || brainBgImg})`,
-                backgroundSize: styles["hero-image"]?.imageSize ? `${styles["hero-image"].imageSize}%` : "contain",
-                backgroundPosition: `calc(100% + ${styles["hero-image"]?.marginRight || 0}px) calc(50% + ${styles["hero-image"]?.marginTop || 0}px)`,
-                backgroundRepeat: "no-repeat"
-              }}
-              data-testid="hero-image-desktop"
-            />
-
             <div className="relative z-10 px-5 pt-10 pb-10">
-              <div className="max-w-[50%]">
+              <div>
                 <motion.h1 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -477,42 +450,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             className={`rounded-2xl border border-purple-100 p-4 shadow-sm ${getEditableClass("card-metodox")}`}
             style={getElementStyle("card-metodox", "white")}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1 pr-4">
-                <h3 
-                  className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
-                  style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
-                >
-                  Método X
-                </h3>
-                <p 
-                  className={`text-xs ${getEditableClass("desc-metodox")}`}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
-                  style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
-                >
-                  Sistema de Neuro Aceleración Cognitiva
-                </p>
-              </div>
-              
-              <div 
-                className={`flex-shrink-0 ${getEditableClass("icon-metodox")}`}
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-metodox", e); }}}
-                style={{
-                  ...getElementStyle("icon-metodox"),
-                  marginTop: styles["icon-metodox"]?.marginTop || 0,
-                  marginRight: styles["icon-metodox"]?.marginRight || 0,
-                }}
+            <div>
+              <h3 
+                className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
+                style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
               >
-                <img 
-                  src={styles["icon-metodox"]?.imageUrl || xIconImg} 
-                  alt="X" 
-                  className="w-14 h-14 object-contain"
-                  style={{ 
-                    width: styles["icon-metodox"]?.imageSize ? `${styles["icon-metodox"].imageSize}%` : undefined,
-                  }}
-                />
-              </div>
+                Método X
+              </h3>
+              <p 
+                className={`text-xs ${getEditableClass("desc-metodox")}`}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
+                style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
+              >
+                Sistema de Neuro Aceleración Cognitiva
+              </p>
             </div>
             
             <button 
