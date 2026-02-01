@@ -15,6 +15,8 @@ export interface ElementStyle {
   marginBottom?: number;
   marginLeft?: number;
   marginRight?: number;
+  paddingTop?: number;
+  paddingBottom?: number;
   imageUrl?: string;
   imageSize?: number;
   textColor?: string;

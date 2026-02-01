@@ -164,23 +164,46 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {isMobile && (
-        <header className="flex items-center justify-center px-5 py-4 bg-white sticky top-0 z-50">
+        <header 
+          className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+          onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
+          style={{
+            paddingTop: styles["header"]?.paddingTop || 10,
+            paddingBottom: styles["header"]?.paddingBottom || 10,
+            ...getElementStyle("header", "white")
+          }}
+        >
           <div className="absolute left-5 w-10" />
           
-          <div className="flex items-center justify-center" data-testid="header-logo">
-            <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#8a3ffc" />
-                  <stop offset="100%" stopColor="#00d9ff" />
-                </linearGradient>
-              </defs>
-              <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-                <tspan fill="#8a3ffc">i</tspan>
-                <tspan fill="#8a3ffc">Q</tspan>
-                <tspan fill="url(#logoGradient)">x</tspan>
-              </text>
-            </svg>
+          <div 
+            className={`flex items-center justify-center ${getEditableClass("header-logo")}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("header-logo", e); }}}
+            data-testid="header-logo"
+          >
+            {styles["header-logo"]?.imageUrl ? (
+              <img 
+                src={styles["header-logo"].imageUrl} 
+                alt="Logo" 
+                style={{ 
+                  height: styles["header-logo"]?.imageSize ? `${styles["header-logo"].imageSize}px` : "36px",
+                  width: "auto"
+                }}
+              />
+            ) : (
+              <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8a3ffc" />
+                    <stop offset="100%" stopColor="#00d9ff" />
+                  </linearGradient>
+                </defs>
+                <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+                  <tspan fill="#8a3ffc">i</tspan>
+                  <tspan fill="#8a3ffc">Q</tspan>
+                  <tspan fill="url(#logoGradient)">x</tspan>
+                </text>
+              </svg>
+            )}
           </div>
           
           <button 
@@ -249,11 +272,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle")}`}
+                    className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                     style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                   >
-                    Un método científico de entrenamiento cognitivo
+                    Un método científico de
+                  </motion.p>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.12 }}
+                    className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
+                    onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
+                    style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                  >
+                    entrenamiento cognitivo
                   </motion.p>
                   
                   <motion.p 
@@ -306,11 +339,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle")}`}
+                  className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                   style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                 >
-                  Un método científico de entrenamiento cognitivo
+                  Un método científico de
+                </motion.p>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 }}
+                  className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
+                  onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
+                  style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                >
+                  entrenamiento cognitivo
                 </motion.p>
                 
                 <motion.p 
@@ -388,7 +431,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   style={getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")}
                   data-testid="button-iniciar-diagnostico"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span 
+                    className={getEditableClass("icon-btn-diagnostico")}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-diagnostico", e); }}}
+                  >
+                    {styles["icon-btn-diagnostico"]?.imageUrl ? (
+                      <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-diagnostico"]?.imageSize || 14 }} />
+                    ) : (
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                    )}
+                  </span>
                   Iniciar diagnóstico
                 </motion.button>
               </div>
@@ -446,7 +498,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   style={getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")}
                   data-testid="button-iniciar-entrenamiento"
                 >
-                  <Dumbbell className="w-3.5 h-3.5" />
+                  <span 
+                    className={getEditableClass("icon-btn-entrenamiento")}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-entrenamiento", e); }}}
+                  >
+                    {styles["icon-btn-entrenamiento"]?.imageUrl ? (
+                      <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-entrenamiento"]?.imageSize || 14 }} />
+                    ) : (
+                      <Dumbbell className="w-3.5 h-3.5" />
+                    )}
+                  </span>
                   Iniciar entrenamiento
                 </motion.button>
               </div>
@@ -485,7 +546,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="button-conocer-metodo"
             >
               Conocer el método
-              <ChevronRight className="w-3.5 h-3.5" />
+              <span 
+                className={getEditableClass("icon-btn-metodo")}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
+              >
+                {styles["icon-btn-metodo"]?.imageUrl ? (
+                  <img src={styles["icon-btn-metodo"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-metodo"]?.imageSize || 14 }} />
+                ) : (
+                  <ChevronRight className="w-3.5 h-3.5" />
+                )}
+              </span>
             </button>
           </motion.div>
 
@@ -510,7 +580,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 style={getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")}
                 data-testid="button-whatsapp"
               >
-                <MessageCircle className="w-4 h-4" />
+                <span 
+                  className={getEditableClass("icon-btn-whatsapp")}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-whatsapp", e); }}}
+                >
+                  {styles["icon-btn-whatsapp"]?.imageUrl ? (
+                    <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" className="w-4 h-4" style={{ width: styles["icon-btn-whatsapp"]?.imageSize || 16 }} />
+                  ) : (
+                    <MessageCircle className="w-4 h-4" />
+                  )}
+                </span>
                 WhatsApp
               </button>
               
@@ -520,7 +599,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 style={getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")}
                 data-testid="button-email"
               >
-                <Mail className="w-4 h-4" />
+                <span 
+                  className={getEditableClass("icon-btn-email")}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-email", e); }}}
+                >
+                  {styles["icon-btn-email"]?.imageUrl ? (
+                    <img src={styles["icon-btn-email"].imageUrl} alt="" className="w-4 h-4" style={{ width: styles["icon-btn-email"]?.imageSize || 16 }} />
+                  ) : (
+                    <Mail className="w-4 h-4" />
+                  )}
+                </span>
                 Email
               </button>
             </div>
