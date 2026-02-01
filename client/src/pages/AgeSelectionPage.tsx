@@ -21,22 +21,25 @@ const playCardSound = () => {
 const ageIcons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   preescolar: Baby,
   ninos: Users,
-  adolescentes: GraduationCap,
-  adultos: Briefcase,
+  universitarios: GraduationCap,
+  profesionales: Briefcase,
+  adulto_mayor: Users,
 };
 
 const ageGradients: Record<string, string> = {
   preescolar: "linear-gradient(135deg, #FFB347 0%, #FF9A56 50%, #FF7043 100%)",
   ninos: "linear-gradient(135deg, #7C4DFF 0%, #651FFF 50%, #6200EA 100%)",
-  adolescentes: "linear-gradient(135deg, #00BCD4 0%, #00ACC1 50%, #0097A7 100%)",
-  adultos: "linear-gradient(135deg, #EC407A 0%, #D81B60 50%, #AD1457 100%)",
+  universitarios: "linear-gradient(135deg, #00BCD4 0%, #00ACC1 50%, #0097A7 100%)",
+  profesionales: "linear-gradient(135deg, #EC407A 0%, #D81B60 50%, #AD1457 100%)",
+  adulto_mayor: "linear-gradient(135deg, #9C27B0 0%, #7B1FA2 50%, #6A1B9A 100%)",
 };
 
 const ageCategories = [
   { id: "preescolar", label: "Pre-escolar", ageRange: "3-5 años", ageGroup: "preescolar" },
   { id: "ninos", label: "Niños", ageRange: "6-12 años", ageGroup: "ninos" },
-  { id: "adolescentes", label: "Adolescentes", ageRange: "13-17 años", ageGroup: "adolescentes" },
-  { id: "adultos", label: "Adultos", ageRange: "18+ años", ageGroup: "adultos" },
+  { id: "universitarios", label: "Universitarios", ageRange: "18-25 años", ageGroup: "universitarios" },
+  { id: "profesionales", label: "Profesionales", ageRange: "26-55 años", ageGroup: "profesionales" },
+  { id: "adulto_mayor", label: "Adulto Mayor", ageRange: "55+ años", ageGroup: "adulto_mayor" },
 ];
 
 interface AgeCardProps {
@@ -239,10 +242,8 @@ export default function AgeSelectionPage() {
     
     if (testId === "lectura") {
       if (category.ageGroup === "preescolar" || category.ageGroup === "ninos") {
-        setLocation("/child-category");
-      } else if (category.ageGroup === "adolescentes") {
-        setLocation("/adolescente");
-      } else if (category.ageGroup === "adultos") {
+        setLocation(`/reading-selection/${category.ageGroup}`);
+      } else if (category.ageGroup === "universitarios" || category.ageGroup === "profesionales" || category.ageGroup === "adulto_mayor") {
         setLocation("/reading-selection/universitarios");
       } else {
         setLocation(`/reading-selection/${category.ageGroup}`);

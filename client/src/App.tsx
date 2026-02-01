@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import Home from "@/pages/Home";
 import TestsPage from "@/pages/TestsPage";
-import ChildCategoryPage from "@/pages/ChildCategoryPage";
 import ReadingSelectionPage from "@/pages/ReadingSelectionPage";
 import ReadingContentPage from "@/pages/ReadingContentPage";
 import AdolescentePage from "@/pages/AdolescentePage";
@@ -36,7 +35,6 @@ function Router() {
       <Route path="/" component={Home}/>
       <Route path="/tests" component={TestsPage}/>
       <Route path="/age-selection/:testId" component={AgeSelectionPage}/>
-      <Route path="/child-category" component={ChildCategoryPage}/>
       <Route path="/reading-selection" component={ReadingSelectionPage}/>
       <Route path="/reading-selection/:category" component={ReadingSelectionPage}/>
       <Route path="/lectura-contenido" component={ReadingContentPage}/>
