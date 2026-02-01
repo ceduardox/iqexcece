@@ -802,12 +802,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         ctx?.drawImage(img, 0, 0);
       }
       
-      // Check if PNG (preserve transparency) or JPEG
+      // Check if PNG (preserve transparency) or JPEG with compression
       const isPng = src.startsWith('data:image/png');
       const compressed = isPng 
         ? canvas.toDataURL('image/png')
         : canvas.toDataURL('image/jpeg', quality / 100);
-      setCompressedSize(Math.round(compressed.length * 0.75)); // Approx base64 to bytes
+      
+      // Calculate actual compressed size from base64
+      const base64Length = compressed.split(',')[1]?.length || 0;
+      const actualBytes = Math.round(base64Length * 0.75);
+      setCompressedSize(actualBytes);
     };
     img.src = src;
   }, [crop]);
@@ -3195,9 +3199,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <span>Compresión: {compressionQuality}%</span>
                       <span className="text-cyan-400">
                         {(originalSize / 1024).toFixed(1)}KB → {(compressedSize / 1024).toFixed(1)}KB
-                        ({Math.round((1 - compressedSize / originalSize) * 100)}% menos)
+                        {originalSize > 0 && compressedSize < originalSize && ` (${Math.round((1 - compressedSize / originalSize) * 100)}% menos)`}
                       </span>
                     </div>
+                    {imagePreview?.startsWith('data:image/png') && (
+                      <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresión con pérdida</p>
+                    )}
                     <input
                       type="range"
                       min="10"
@@ -3205,6 +3212,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       value={compressionQuality}
                       onChange={(e) => setCompressionQuality(Number(e.target.value))}
                       className="w-full"
+                      disabled={imagePreview?.startsWith('data:image/png')}
                     />
                   </div>
 
