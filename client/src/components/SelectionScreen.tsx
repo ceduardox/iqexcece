@@ -95,8 +95,17 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const getElementStyle = (elementId: string): React.CSSProperties => {
     const style = styles[elementId];
     if (!style) return {};
+    
+    let background = style.background;
+    if (style.backgroundType === "image" && style.imageUrl) {
+      background = `url(${style.imageUrl})`;
+    }
+    
     return {
-      background: style.background,
+      background,
+      backgroundSize: style.imageSize ? `${style.imageSize}%` : undefined,
+      backgroundPosition: style.backgroundType === "image" ? "center" : undefined,
+      backgroundRepeat: style.backgroundType === "image" ? "no-repeat" : undefined,
       boxShadow: style.boxShadow,
       marginTop: style.marginTop,
       marginBottom: style.marginBottom,

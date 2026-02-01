@@ -55,6 +55,16 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - Training items: CRUD for individual training options with images, links, and sort order
   - Support for 5 categories: ninos, adolescentes, universitarios, profesionales, adulto_mayor
   - EntrenamientoPage: Displays training options fetched from database
+- **Visual Editor System**: In-page style editor for administrators
+  - Database table: page_styles with pageName and JSON styles
+  - Toggle "Editor: ON/OFF" button in admin panel sidebar
+  - EditorToolbar component: Floating toolbar with tabs for Background, Shadow, Position, Image
+  - Click-to-select editable elements (hero section, cards)
+  - Background controls: Color picker, gradient presets, or image URL
+  - Shadow controls: Blur slider and color input
+  - Position controls: Directional buttons (up/down/left/right) with reset
+  - Image controls: URL input and size slider (20-200%)
+  - Styles persist to PostgreSQL and load automatically on page refresh
 
 ## User Preferences
 
