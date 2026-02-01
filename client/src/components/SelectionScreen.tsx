@@ -14,24 +14,6 @@ interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
 }
 
-function CurvedDivider() {
-  return (
-    <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none" style={{ transform: "translateY(1px)" }}>
-      <svg 
-        viewBox="0 0 1200 120" 
-        preserveAspectRatio="none"
-        className="relative block w-full"
-        style={{ height: "40px" }}
-      >
-        <path 
-          d="M0,0 C300,100 900,100 1200,0 L1200,120 L0,120 Z" 
-          fill="white"
-        />
-      </svg>
-    </div>
-  );
-}
-
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
@@ -62,113 +44,165 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {isMobile && (
-        <div className="relative">
-          <header 
-            className="relative flex items-center justify-center px-5 py-4 z-50"
-            style={{
-              background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%)"
-            }}
-          >
-            <div className="absolute left-5 w-10" />
-            
-            <div className="flex items-center justify-center" data-testid="header-logo">
-              <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#8a3ffc" />
-                    <stop offset="100%" stopColor="#00d9ff" />
-                  </linearGradient>
-                </defs>
-                <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-                  <tspan fill="#8a3ffc">i</tspan>
-                  <tspan fill="#8a3ffc">Q</tspan>
-                  <tspan fill="url(#logoGradient)">x</tspan>
-                </text>
-              </svg>
-            </div>
-            
-            <button 
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              data-testid="button-menu"
-            >
-              <Menu className="w-6 h-6" strokeWidth={1.5} />
-            </button>
-          </header>
+        <header className="flex items-center justify-center px-5 py-4 bg-white sticky top-0 z-50">
+          <div className="absolute left-5 w-10" />
           
-          <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden" style={{ transform: "translateY(100%)", zIndex: 40 }}>
-            <svg 
-              viewBox="0 0 1200 60" 
-              preserveAspectRatio="none"
-              className="relative block w-full"
-              style={{ height: "20px" }}
-            >
-              <path 
-                d="M0,60 Q600,0 1200,60 L1200,0 L0,0 Z" 
-                fill="white"
-              />
+          <div className="flex items-center justify-center" data-testid="header-logo">
+            <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#8a3ffc" />
+                  <stop offset="100%" stopColor="#00d9ff" />
+                </linearGradient>
+              </defs>
+              <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+                <tspan fill="#8a3ffc">i</tspan>
+                <tspan fill="#8a3ffc">Q</tspan>
+                <tspan fill="url(#logoGradient)">x</tspan>
+              </text>
             </svg>
           </div>
-        </div>
+          
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            data-testid="button-menu"
+          >
+            <Menu className="w-6 h-6" strokeWidth={1.5} />
+          </button>
+        </header>
       )}
 
       <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
-        <div className="relative w-full overflow-hidden" style={{ minHeight: "300px" }}>
+        {isMobile && (
           <div 
-            className="absolute inset-0 z-0"
+            className="relative w-full"
             style={{ 
-              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.05) 0%, rgba(0, 217, 255, 0.03) 50%, rgba(255, 255, 255, 1) 100%)"
+              marginTop: "-24px",
+              zIndex: 40
             }}
-          />
-          
-          <div 
-            className="absolute right-0 top-0 w-[65%] h-full z-0 opacity-90"
-            style={{ 
-              backgroundImage: `url(${brainBgImg})`,
-              backgroundSize: "contain",
-              backgroundPosition: "right center",
-              backgroundRepeat: "no-repeat"
-            }}
-          />
+          >
+            <div 
+              className="w-full"
+              style={{
+                background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
+                borderTopLeftRadius: "32px",
+                borderTopRightRadius: "32px",
+                paddingTop: "32px",
+                minHeight: "340px",
+                position: "relative"
+              }}
+              data-testid="hero-section"
+            >
+              <div 
+                className="absolute right-0 top-0 w-[65%] h-full opacity-90"
+                style={{ 
+                  backgroundImage: `url(${brainBgImg})`,
+                  backgroundSize: "contain",
+                  backgroundPosition: "right center",
+                  backgroundRepeat: "no-repeat",
+                  borderTopRightRadius: "32px"
+                }}
+              />
 
-          <div className="relative z-5 px-5 pt-8 pb-10">
-            <div className="max-w-[60%] md:max-w-[50%]">
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-[26px] md:text-4xl font-black leading-[1.15] mb-4"
-              >
-                <span style={{ color: "#8a3ffc" }}>Activa la</span>
-                <br />
-                <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
-                <br />
-                <span style={{ 
-                  background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
-                  WebkitBackgroundClip: "text", 
-                  WebkitTextFillColor: "transparent" 
-                }}>eXponencial</span>
-              </motion.h1>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-sm font-semibold text-gray-800 mb-2"
-              >
-                Un método científico de entrenamiento cognitivo
-              </motion.p>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="text-xs text-gray-500 leading-relaxed"
-              >
-                basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
-              </motion.p>
+              <div className="relative z-10 px-5 pb-8">
+                <div className="max-w-[60%] md:max-w-[50%]">
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-[26px] md:text-4xl font-black leading-[1.15] mb-4"
+                  >
+                    <span style={{ color: "#8a3ffc" }}>Activa la</span>
+                    <br />
+                    <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
+                    <br />
+                    <span style={{ 
+                      background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
+                      WebkitBackgroundClip: "text", 
+                      WebkitTextFillColor: "transparent" 
+                    }}>eXponencial</span>
+                  </motion.h1>
+                  
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-sm font-semibold text-gray-800 mb-2"
+                  >
+                    Un método científico de entrenamiento cognitivo
+                  </motion.p>
+                  
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="text-xs text-gray-500 leading-relaxed"
+                  >
+                    basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                  </motion.p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {!isMobile && (
+          <div 
+            className="relative w-full"
+            style={{ 
+              minHeight: "320px",
+              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            }}
+          >
+            <div 
+              className="absolute right-0 top-0 w-[65%] h-full opacity-90"
+              style={{ 
+                backgroundImage: `url(${brainBgImg})`,
+                backgroundSize: "contain",
+                backgroundPosition: "right center",
+                backgroundRepeat: "no-repeat"
+              }}
+            />
+
+            <div className="relative z-10 px-5 pt-10 pb-10">
+              <div className="max-w-[50%]">
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-black leading-[1.15] mb-4"
+                >
+                  <span style={{ color: "#8a3ffc" }}>Activa la</span>
+                  <br />
+                  <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
+                  <br />
+                  <span style={{ 
+                    background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
+                    WebkitBackgroundClip: "text", 
+                    WebkitTextFillColor: "transparent" 
+                  }}>eXponencial</span>
+                </motion.h1>
+                
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm font-semibold text-gray-800 mb-2"
+                >
+                  Un método científico de entrenamiento cognitivo
+                </motion.p>
+                
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-xs text-gray-500 leading-relaxed"
+                >
+                  basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                </motion.p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="px-5 pb-6 space-y-4 max-w-lg mx-auto">
           <motion.div
