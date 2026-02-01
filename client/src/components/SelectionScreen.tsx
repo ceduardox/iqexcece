@@ -293,11 +293,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.h1 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-4xl font-black leading-[1.15] mb-4"
+                  className={`text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
+                  onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
+                  style={getElementStyle("hero-title")}
                 >
-                  <span style={{ color: "#8a3ffc" }}>Activa la</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Activa la</span>
                   <br />
-                  <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Inteligencia</span>
                   <br />
                   <span style={{ 
                     background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -310,7 +312,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="text-sm font-semibold text-gray-800 mb-2"
+                  className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle")}`}
+                  onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
+                  style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                 >
                   Un método científico de entrenamiento cognitivo
                 </motion.p>
@@ -319,9 +323,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-xs text-gray-500 leading-relaxed"
+                  className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
+                  onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
+                  style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                 >
-                  basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                  basado en neuroplasticidad y activación de <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
                 </motion.p>
               </div>
             </div>
@@ -334,7 +340,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="text-base font-bold text-gray-800 mb-3">Diagnóstico inicial</h2>
+            <h2 
+              className={`text-base font-bold mb-3 ${getEditableClass("section-diagnostico")}`}
+              onClick={(e) => { if (editorMode) handleElementClick("section-diagnostico", e); }}
+              style={{ color: styles["section-diagnostico"]?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
+            >
+              Diagnóstico inicial
+            </h2>
             
             <div 
               onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
@@ -504,7 +516,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             transition={{ delay: 0.35 }}
             className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm"
           >
-            <h3 className="text-base font-bold text-gray-800 mb-3">Contáctanos</h3>
+            <h3 
+              className={`text-base font-bold mb-3 ${getEditableClass("title-contacto")}`}
+              onClick={(e) => { if (editorMode) handleElementClick("title-contacto", e); }}
+              style={{ color: styles["title-contacto"]?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
+            >
+              Contáctanos
+            </h3>
             
             <div className="flex gap-2">
               <button
@@ -528,7 +546,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </button>
             </div>
             
-            <p className="text-[10px] text-gray-400 text-center mt-2">
+            <p 
+              className={`text-[10px] text-center mt-2 ${getEditableClass("email-contacto")}`}
+              onClick={(e) => { if (editorMode) handleElementClick("email-contacto", e); }}
+              style={{ color: styles["email-contacto"]?.textColor || "#9ca3af", ...getElementStyle("email-contacto") }}
+            >
               soporte@inteligenciaexponencial.com
             </p>
           </motion.div>
