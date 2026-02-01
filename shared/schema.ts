@@ -245,6 +245,16 @@ export const insertCategoriaPrepPageSchema = createInsertSchema(categoriaPrepPag
 export const insertVelocidadEjercicioSchema = createInsertSchema(velocidadEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNumerosEjercicioSchema = createInsertSchema(numerosEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 
+// Page styles for visual editor
+export const pageStyles = pgTable("page_styles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageName: text("page_name").notNull().unique(),
+  styles: text("styles").notNull(), // JSON string with all element styles
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPageStyleSchema = createInsertSchema(pageStyles).omit({ id: true, updatedAt: true });
+
 export type QuizResult = typeof quizResults.$inferSelect;
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
 export type ReadingContent = typeof readingContents.$inferSelect;
@@ -271,3 +281,5 @@ export type VelocidadEjercicio = typeof velocidadEjercicios.$inferSelect;
 export type InsertVelocidadEjercicio = z.infer<typeof insertVelocidadEjercicioSchema>;
 export type NumerosEjercicio = typeof numerosEjercicios.$inferSelect;
 export type InsertNumerosEjercicio = z.infer<typeof insertNumerosEjercicioSchema>;
+export type PageStyle = typeof pageStyles.$inferSelect;
+export type InsertPageStyle = z.infer<typeof insertPageStyleSchema>;

@@ -745,5 +745,22 @@ export async function registerRoutes(
     res.json({ intro });
   });
 
+  // Page styles for visual editor
+  app.get("/api/page-styles/:pageName", async (req, res) => {
+    const style = await storage.getPageStyle(req.params.pageName);
+    res.json({ style });
+  });
+
+  app.post("/api/admin/page-styles", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const { pageName, styles } = req.body;
+    const style = await storage.savePageStyle(pageName, styles);
+    res.json({ style });
+  });
+
   return httpServer;
 }

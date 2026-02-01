@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type PageStyle, type InsertPageStyle, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, pageStyles } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -76,6 +76,10 @@ export interface IStorage {
   getNumerosIntroByItem(entrenamientoItemId: string): Promise<NumerosEjercicio | null>;
   saveNumerosIntro(data: InsertNumerosEjercicio): Promise<NumerosEjercicio>;
   updateNumerosIntro(id: string, data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null>;
+  
+  // Page styles for visual editor
+  getPageStyle(pageName: string): Promise<PageStyle | null>;
+  savePageStyle(pageName: string, styles: string): Promise<PageStyle>;
 }
 
 export class MemStorage implements IStorage {
@@ -344,6 +348,12 @@ export class MemStorage implements IStorage {
     return { id: randomUUID(), ...data, isActive: true, createdAt: new Date(), updatedAt: new Date() } as NumerosEjercicio;
   }
   async updateNumerosIntro(_id: string, _data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null> { return null; }
+  
+  // Page styles stubs
+  async getPageStyle(_pageName: string): Promise<PageStyle | null> { return null; }
+  async savePageStyle(pageName: string, styles: string): Promise<PageStyle> {
+    return { id: randomUUID(), pageName, styles, updatedAt: new Date() } as PageStyle;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -801,6 +811,26 @@ export class DatabaseStorage implements IStorage {
       .where(eq(numerosEjercicios.id, id))
       .returning();
     return updated || null;
+  }
+
+  // Page styles for visual editor
+  async getPageStyle(pageName: string): Promise<PageStyle | null> {
+    const [style] = await db.select().from(pageStyles).where(eq(pageStyles.pageName, pageName));
+    return style || null;
+  }
+
+  async savePageStyle(pageName: string, styles: string): Promise<PageStyle> {
+    const existing = await this.getPageStyle(pageName);
+    if (existing) {
+      const [updated] = await db.update(pageStyles)
+        .set({ styles, updatedAt: new Date() })
+        .where(eq(pageStyles.pageName, pageName))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(pageStyles).values({ pageName, styles }).returning();
+      return created;
+    }
   }
 }
 
