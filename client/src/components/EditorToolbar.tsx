@@ -100,18 +100,18 @@ export function EditorToolbar({
 
       {selectedElement && (
         <>
-          <div className="flex gap-1 mb-2 sm:mb-3 overflow-x-auto">
+          <div className="flex gap-1 mb-2 sm:mb-3 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {tabs.map(tab => (
               <Button
                 key={tab.id}
                 size="sm"
                 variant={activeTab === tab.id ? "default" : "ghost"}
-                className={`${activeTab === tab.id ? "bg-cyan-600" : "text-gray-400"} h-7 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs whitespace-nowrap`}
+                className={`${activeTab === tab.id ? "bg-cyan-600" : "text-gray-400"} h-7 px-2 text-[10px] whitespace-nowrap flex-shrink-0`}
                 onClick={() => setActiveTab(tab.id)}
                 data-testid={`tab-${tab.id}`}
               >
-                <tab.icon className="w-3 h-3 sm:mr-1" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <tab.icon className="w-3 h-3 mr-1" />
+                {tab.label}
               </Button>
             ))}
           </div>
