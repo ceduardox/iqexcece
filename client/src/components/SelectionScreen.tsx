@@ -6,7 +6,6 @@ import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 
 import brainBgImg from "@/assets/ui/backgrounds/brain-bg.png";
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
@@ -77,10 +76,22 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       return;
     }
     try {
-      await apiRequest("POST", "/api/admin/page-styles", {
-        pageName: "selection-screen",
-        styles: JSON.stringify(styles)
+      const response = await fetch("/api/admin/page-styles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          pageName: "selection-screen",
+          styles: JSON.stringify(styles)
+        })
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to save");
+      }
+      
       toast({ title: "Guardado", description: "Los estilos se guardaron correctamente" });
     } catch (error) {
       toast({ title: "Error", description: "No se pudo guardar", variant: "destructive" });
@@ -252,11 +263,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
         {!isMobile && (
           <div 
-            className="relative w-full"
+            className={`relative w-full ${getEditableClass("hero-section")}`}
+            onClick={(e) => handleElementClick("hero-section", e)}
             style={{ 
               minHeight: "320px",
-              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+              background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
+              ...getElementStyle("hero-section")
             }}
+            data-testid="hero-section-desktop"
           >
             <div 
               className="absolute right-0 top-0 w-[65%] h-full opacity-90"
