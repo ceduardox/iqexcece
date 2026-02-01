@@ -24,6 +24,8 @@ export interface ElementStyle {
   textAlign?: "left" | "center" | "right";
   fontWeight?: "normal" | "bold";
   borderRadius?: number;
+  buttonText?: string;
+  iconSize?: number;
 }
 
 export interface PageStyles {
@@ -368,6 +370,21 @@ export function EditorToolbar({
                   />
                   <span className="text-white text-xs w-10">{currentStyle.imageSize || 100}%</span>
                 </div>
+                {selectedElement?.startsWith("icon-btn-") && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400 text-xs w-16">Icono:</span>
+                    <Slider
+                      value={[currentStyle.iconSize || 14]}
+                      onValueChange={([val]) => updateStyle({ iconSize: val })}
+                      min={10}
+                      max={40}
+                      step={1}
+                      className="flex-1"
+                      data-testid="slider-icon-size"
+                    />
+                    <span className="text-white text-xs w-10">{currentStyle.iconSize || 14}px</span>
+                  </div>
+                )}
                 {currentStyle.imageUrl && (
                   <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-400 truncate">
                     Vista: {currentStyle.imageUrl}
@@ -378,6 +395,19 @@ export function EditorToolbar({
 
             {activeTab === "text" && (
               <div className="space-y-3">
+                {selectedElement?.startsWith("btn-") && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400 text-xs w-16">Texto:</span>
+                    <Input
+                      type="text"
+                      value={currentStyle.buttonText || ""}
+                      onChange={(e) => updateStyle({ buttonText: e.target.value })}
+                      placeholder="Texto del botón"
+                      className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
+                      data-testid="input-button-text"
+                    />
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400 text-xs w-16">Color:</span>
                   <Input

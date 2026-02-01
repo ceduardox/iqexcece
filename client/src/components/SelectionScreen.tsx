@@ -427,8 +427,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); }}}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
-                  style={getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
+                  style={{ 
+                    fontSize: styles["btn-diagnostico"]?.fontSize || 12,
+                    ...getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")
+                  }}
                   data-testid="button-iniciar-diagnostico"
                 >
                   <span 
@@ -436,12 +439,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-diagnostico", e); }}}
                   >
                     {styles["icon-btn-diagnostico"]?.imageUrl ? (
-                      <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-diagnostico"]?.imageSize || 14 }} />
+                      <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} />
                     ) : (
-                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
                     )}
                   </span>
-                  Iniciar diagnóstico
+                  {styles["btn-diagnostico"]?.buttonText || "Iniciar diagnóstico"}
                 </motion.button>
               </div>
             </div>
@@ -494,8 +497,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); }}}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
-                  style={getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
+                  style={{ 
+                    fontSize: styles["btn-entrenamiento"]?.fontSize || 12,
+                    ...getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
+                  }}
                   data-testid="button-iniciar-entrenamiento"
                 >
                   <span 
@@ -503,12 +509,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-entrenamiento", e); }}}
                   >
                     {styles["icon-btn-entrenamiento"]?.imageUrl ? (
-                      <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-entrenamiento"]?.imageSize || 14 }} />
+                      <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                     ) : (
-                      <Dumbbell className="w-3.5 h-3.5" />
+                      <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                     )}
                   </span>
-                  Iniciar entrenamiento
+                  {styles["btn-entrenamiento"]?.buttonText || "Iniciar entrenamiento"}
                 </motion.button>
               </div>
             </div>
@@ -541,19 +547,22 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             
             <button 
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); }}}
-              className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
-              style={getElementStyle("btn-metodo")}
+              className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
+              style={{ 
+                fontSize: styles["btn-metodo"]?.fontSize || 12,
+                ...getElementStyle("btn-metodo")
+              }}
               data-testid="button-conocer-metodo"
             >
-              Conocer el método
+              {styles["btn-metodo"]?.buttonText || "Conocer el método"}
               <span 
                 className={getEditableClass("icon-btn-metodo")}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
               >
                 {styles["icon-btn-metodo"]?.imageUrl ? (
-                  <img src={styles["icon-btn-metodo"].imageUrl} alt="" className="w-3.5 h-3.5" style={{ width: styles["icon-btn-metodo"]?.imageSize || 14 }} />
+                  <img src={styles["icon-btn-metodo"].imageUrl} alt="" style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
                 ) : (
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
                 )}
               </span>
             </button>
@@ -576,8 +585,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <div className="flex gap-2">
               <button
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
-                style={getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
+                style={{ 
+                  fontSize: styles["btn-whatsapp"]?.fontSize || 12,
+                  ...getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")
+                }}
                 data-testid="button-whatsapp"
               >
                 <span 
@@ -585,18 +597,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-whatsapp", e); }}}
                 >
                   {styles["icon-btn-whatsapp"]?.imageUrl ? (
-                    <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" className="w-4 h-4" style={{ width: styles["icon-btn-whatsapp"]?.imageSize || 16 }} />
+                    <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
                   ) : (
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
                   )}
                 </span>
-                WhatsApp
+                {styles["btn-whatsapp"]?.buttonText || "WhatsApp"}
               </button>
               
               <button
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
-                style={getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
+                style={{ 
+                  fontSize: styles["btn-email"]?.fontSize || 12,
+                  ...getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")
+                }}
                 data-testid="button-email"
               >
                 <span 
@@ -604,12 +619,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-email", e); }}}
                 >
                   {styles["icon-btn-email"]?.imageUrl ? (
-                    <img src={styles["icon-btn-email"].imageUrl} alt="" className="w-4 h-4" style={{ width: styles["icon-btn-email"]?.imageSize || 16 }} />
+                    <img src={styles["icon-btn-email"].imageUrl} alt="" style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                   ) : (
-                    <Mail className="w-4 h-4" />
+                    <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                   )}
                 </span>
-                Email
+                {styles["btn-email"]?.buttonText || "Email"}
               </button>
             </div>
             
