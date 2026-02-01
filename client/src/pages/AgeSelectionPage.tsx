@@ -150,9 +150,12 @@ export default function AgeSelectionPage() {
     fetch("/api/page-styles/age-selection")
       .then(res => res.json())
       .then(data => {
-        if (data.styles) {
-          const parsed = typeof data.styles === 'string' ? JSON.parse(data.styles) : data.styles;
-          setStyles(parsed);
+        if (data.style?.styles) {
+          try {
+            setStyles(JSON.parse(data.style.styles));
+          } catch (e) {
+            console.log("No saved styles");
+          }
         }
       })
       .catch(() => {});
