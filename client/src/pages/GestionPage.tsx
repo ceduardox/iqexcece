@@ -64,6 +64,8 @@ export default function GestionPage() {
   const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
+  const [sessionPage, setSessionPage] = useState(1);
+  const SESSIONS_PER_PAGE = 20;
   
   // Images state
   const [uploadedImages, setUploadedImages] = useState<any[]>([]);
@@ -1337,96 +1339,154 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <CardTitle className="text-white flex items-center gap-2">
                   <Clock className="w-5 h-5 text-cyan-400" />
                   Sesiones de Usuarios
+                  {data?.sessions && data.sessions.length > 0 && (
+                    <span className="text-sm font-normal text-white/60">
+                      (Mostrando {Math.min(sessionPage * SESSIONS_PER_PAGE, data.sessions.length)} de {data.sessions.length})
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-white/60 border-b border-white/10">
-                        <th className="pb-3 px-2">Estado</th>
-                        <th className="pb-3 px-2">IP</th>
-                        <th className="pb-3 px-2">Dispositivo</th>
-                        <th className="pb-3 px-2">Navegador</th>
-                        <th className="pb-3 px-2">Tipo</th>
-                        <th className="pb-3 px-2">Edad</th>
-                        <th className="pb-3 px-2">Última Actividad</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data?.sessions.map((session) => (
-                        <tr key={session.id} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="py-3 px-2">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                              session.isCurrentlyActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"
-                            }`}>
-                              <span className={`w-2 h-2 rounded-full ${
-                                session.isCurrentlyActive ? "bg-green-400 animate-pulse" : "bg-gray-400"
-                              }`} />
-                              {session.isCurrentlyActive ? "Activo" : "Inactivo"}
-                            </span>
-                          </td>
-                          <td className="py-3 px-2 text-white/80 font-mono text-xs">{session.ip || "-"}</td>
-                          <td className="py-3 px-2 text-white/80">{session.device || "-"}</td>
-                          <td className="py-3 px-2 text-white/80">{session.browser || "-"}</td>
-                          <td className="py-3 px-2">
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              session.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"
-                            }`}>
-                              {session.isPwa ? "PWA" : "Web"}
-                            </span>
-                          </td>
-                          <td className="py-3 px-2 text-white/80">{getAgeLabel(session.ageGroup)}</td>
-                          <td className="py-3 px-2 text-white/60 text-xs">{formatDate(session.lastActivity)}</td>
-                        </tr>
-                      ))}
-                      {(!data?.sessions || data.sessions.length === 0) && (
-                        <tr>
-                          <td colSpan={7} className="py-8 text-center text-white/40">
-                            No hay sesiones registradas
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                {(() => {
+                  const allSessions = data?.sessions || [];
+                  const totalPages = Math.ceil(allSessions.length / SESSIONS_PER_PAGE);
+                  const startIdx = (sessionPage - 1) * SESSIONS_PER_PAGE;
+                  const paginatedSessions = allSessions.slice(startIdx, startIdx + SESSIONS_PER_PAGE);
+                  
+                  return (
+                    <>
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-left text-white/60 border-b border-white/10">
+                              <th className="pb-3 px-2">Estado</th>
+                              <th className="pb-3 px-2">IP</th>
+                              <th className="pb-3 px-2">Dispositivo</th>
+                              <th className="pb-3 px-2">Navegador</th>
+                              <th className="pb-3 px-2">Tipo</th>
+                              <th className="pb-3 px-2">Edad</th>
+                              <th className="pb-3 px-2">Última Actividad</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paginatedSessions.map((session) => (
+                              <tr key={session.id} className="border-b border-white/5 hover:bg-white/5">
+                                <td className="py-3 px-2">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                                    session.isCurrentlyActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"
+                                  }`}>
+                                    <span className={`w-2 h-2 rounded-full ${
+                                      session.isCurrentlyActive ? "bg-green-400 animate-pulse" : "bg-gray-400"
+                                    }`} />
+                                    {session.isCurrentlyActive ? "Activo" : "Inactivo"}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-2 text-white/80 font-mono text-xs">{session.ip || "-"}</td>
+                                <td className="py-3 px-2 text-white/80">{session.device || "-"}</td>
+                                <td className="py-3 px-2 text-white/80">{session.browser || "-"}</td>
+                                <td className="py-3 px-2">
+                                  <span className={`px-2 py-1 rounded text-xs ${
+                                    session.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"
+                                  }`}>
+                                    {session.isPwa ? "PWA" : "Web"}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-2 text-white/80">{getAgeLabel(session.ageGroup)}</td>
+                                <td className="py-3 px-2 text-white/60 text-xs">{formatDate(session.lastActivity)}</td>
+                              </tr>
+                            ))}
+                            {paginatedSessions.length === 0 && (
+                              <tr>
+                                <td colSpan={7} className="py-8 text-center text-white/40">
+                                  No hay sesiones registradas
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
 
-                <div className="md:hidden space-y-2">
-                  {data?.sessions.map((session) => (
-                    <div key={session.id} className="bg-white/5 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => setExpandedSession(expandedSession === session.id ? null : session.id)}
-                        className="w-full p-3 flex items-center justify-between text-left"
-                        data-testid={`button-expand-session-${session.id}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${session.isCurrentlyActive ? "bg-green-400 animate-pulse" : "bg-gray-400"}`} />
-                          <span className="text-white font-medium text-sm">{session.device || "Dispositivo"}</span>
-                          <span className={`px-2 py-0.5 rounded text-xs ${session.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
-                            {session.isPwa ? "PWA" : "Web"}
-                          </span>
-                        </div>
-                        <svg className={`w-5 h-5 text-white/60 transition-transform ${expandedSession === session.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      {expandedSession === session.id && (
-                        <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
-                          <p className="text-white/60 pt-2">Estado: <span className={session.isCurrentlyActive ? "text-green-400" : "text-gray-400"}>{session.isCurrentlyActive ? "Activo" : "Inactivo"}</span></p>
-                          <p className="text-white/60">IP: <span className="text-white/80 font-mono text-xs">{session.ip || "-"}</span></p>
-                          <p className="text-white/60">Navegador: <span className="text-white/80">{session.browser || "-"}</span></p>
-                          <p className="text-white/60">Edad: <span className="text-white/80">{getAgeLabel(session.ageGroup)}</span></p>
-                          <p className="text-white/60">Última Actividad: <span className="text-white/60">{formatDate(session.lastActivity)}</span></p>
+                      <div className="md:hidden space-y-2">
+                        {paginatedSessions.map((session) => (
+                          <div key={session.id} className="bg-white/5 rounded-lg overflow-hidden">
+                            <button
+                              onClick={() => setExpandedSession(expandedSession === session.id ? null : session.id)}
+                              className="w-full p-3 flex items-center justify-between text-left"
+                              data-testid={`button-expand-session-${session.id}`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${session.isCurrentlyActive ? "bg-green-400 animate-pulse" : "bg-gray-400"}`} />
+                                <span className="text-white font-medium text-sm">{session.device || "Dispositivo"}</span>
+                                <span className={`px-2 py-0.5 rounded text-xs ${session.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                                  {session.isPwa ? "PWA" : "Web"}
+                                </span>
+                              </div>
+                              <svg className={`w-5 h-5 text-white/60 transition-transform ${expandedSession === session.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            {expandedSession === session.id && (
+                              <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
+                                <p className="text-white/60 pt-2">Estado: <span className={session.isCurrentlyActive ? "text-green-400" : "text-gray-400"}>{session.isCurrentlyActive ? "Activo" : "Inactivo"}</span></p>
+                                <p className="text-white/60">IP: <span className="text-white/80 font-mono text-xs">{session.ip || "-"}</span></p>
+                                <p className="text-white/60">Navegador: <span className="text-white/80">{session.browser || "-"}</span></p>
+                                <p className="text-white/60">Edad: <span className="text-white/80">{getAgeLabel(session.ageGroup)}</span></p>
+                                <p className="text-white/60">Última Actividad: <span className="text-white/60">{formatDate(session.lastActivity)}</span></p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {paginatedSessions.length === 0 && (
+                          <div className="py-8 text-center text-white/40">
+                            No hay sesiones registradas
+                          </div>
+                        )}
+                      </div>
+
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/10">
+                          <Button
+                            onClick={() => setSessionPage(p => Math.max(1, p - 1))}
+                            disabled={sessionPage === 1}
+                            variant="outline"
+                            size="sm"
+                            className="border-cyan-500/30 text-cyan-400 disabled:opacity-30"
+                            data-testid="button-sessions-prev"
+                          >
+                            Anterior
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).slice(
+                              Math.max(0, sessionPage - 3),
+                              Math.min(totalPages, sessionPage + 2)
+                            ).map(page => (
+                              <Button
+                                key={page}
+                                onClick={() => setSessionPage(page)}
+                                variant={page === sessionPage ? "default" : "outline"}
+                                size="sm"
+                                className={page === sessionPage ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                                data-testid={`button-sessions-page-${page}`}
+                              >
+                                {page}
+                              </Button>
+                            ))}
+                          </div>
+                          <Button
+                            onClick={() => setSessionPage(p => Math.min(totalPages, p + 1))}
+                            disabled={sessionPage === totalPages}
+                            variant="outline"
+                            size="sm"
+                            className="border-cyan-500/30 text-cyan-400 disabled:opacity-30"
+                            data-testid="button-sessions-next"
+                          >
+                            Siguiente
+                          </Button>
                         </div>
                       )}
-                    </div>
-                  ))}
-                  {(!data?.sessions || data.sessions.length === 0) && (
-                    <div className="py-8 text-center text-white/40">
-                      No hay sesiones registradas
-                    </div>
-                  )}
-                </div>
+                    </>
+                  );
+                })()}
               </CardContent>
             </Card>
           </>
