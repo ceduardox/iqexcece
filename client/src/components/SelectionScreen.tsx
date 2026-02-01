@@ -444,7 +444,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
                     )}
                   </span>
-                  {styles["btn-diagnostico"]?.buttonText || "Iniciar diagnóstico"}
+                  <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || "Iniciar diagnóstico"}</span>
                 </motion.button>
               </div>
             </div>
@@ -514,7 +514,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                     )}
                   </span>
-                  {styles["btn-entrenamiento"]?.buttonText || "Iniciar entrenamiento"}
+                  <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || "Iniciar entrenamiento"}</span>
                 </motion.button>
               </div>
             </div>
@@ -554,7 +554,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               }}
               data-testid="button-conocer-metodo"
             >
-              {styles["btn-metodo"]?.buttonText || "Conocer el método"}
+              <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || "Conocer el método"}</span>
               <span 
                 className={getEditableClass("icon-btn-metodo")}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
@@ -602,7 +602,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <MessageCircle style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
                   )}
                 </span>
-                {styles["btn-whatsapp"]?.buttonText || "WhatsApp"}
+                <span className="whitespace-pre-line">{styles["btn-whatsapp"]?.buttonText || "WhatsApp"}</span>
               </button>
               
               <button
@@ -624,7 +624,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                   )}
                 </span>
-                {styles["btn-email"]?.buttonText || "Email"}
+                <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || "Email"}</span>
               </button>
             </div>
             

@@ -398,12 +398,12 @@ export function EditorToolbar({
                 {selectedElement?.startsWith("btn-") && (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-400 text-xs w-16">Texto:</span>
-                    <Input
-                      type="text"
+                    <textarea
                       value={currentStyle.buttonText || ""}
                       onChange={(e) => updateStyle({ buttonText: e.target.value })}
-                      placeholder="Texto del botón"
-                      className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
+                      placeholder="Texto del botón (Enter para salto de línea)"
+                      className="flex-1 min-h-[32px] text-xs bg-gray-800 border border-gray-700 text-white rounded px-2 py-1 resize-y"
+                      rows={2}
                       data-testid="input-button-text"
                     />
                   </div>
