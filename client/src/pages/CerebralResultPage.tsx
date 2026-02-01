@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Home, Share2, MessageCircle, Sparkles, Brain } from "lucide-react";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -352,6 +353,8 @@ export default function CerebralResultPage() {
           </motion.div>
         </motion.div>
       </div>
+      
+      <BottomNavBar />
     </div>
   );
 }

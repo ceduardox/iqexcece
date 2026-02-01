@@ -6,6 +6,7 @@ import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronR
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 interface AnswerOption {
   id: string;
@@ -838,6 +839,8 @@ export default function CerebralExercisePage() {
           )}
         </motion.div>
       </div>
+      
+      <BottomNavBar />
     </div>
   );
 }

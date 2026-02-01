@@ -4,6 +4,7 @@ import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brain, User, Mail, MapPin, Phone, MessageSquare, Sparkles } from "lucide-react";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 export default function CerebralFormPage() {
   const [, setLocation] = useLocation();
@@ -217,6 +218,8 @@ export default function CerebralFormPage() {
           </motion.p>
         </motion.div>
       </div>
+      
+      <BottomNavBar />
     </div>
   );
 }
