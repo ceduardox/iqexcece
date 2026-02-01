@@ -240,7 +240,6 @@ export default function TestsPage() {
     { id: "lectura", title: "Lectura", description: "Evalúa tu velocidad y comprensión lectora" },
     { id: "razonamiento", title: "Razonamiento", description: "Pon a prueba tu lógica y pensamiento analítico" },
     { id: "cerebral", title: "Test Cerebral", description: "Ejercicios para evaluar tus capacidades cognitivas" },
-    { id: "iq", title: "Test IQ", description: "Mide tu coeficiente intelectual con ejercicios variados" },
   ];
 
   return (
@@ -334,21 +333,35 @@ export default function TestsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <h1 
-              className={`text-3xl font-black text-gray-900 mb-2 ${getEditableClass("main-title")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
+            <p 
+              className={`text-sm font-medium tracking-widest mb-2 ${getEditableClass("top-label")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("top-label", e); }}}
               style={{
-                fontSize: styles["main-title"]?.fontSize || 30,
-                color: styles["main-title"]?.textColor || "#111827"
+                fontSize: styles["top-label"]?.fontSize || 12,
+                color: styles["top-label"]?.textColor || "#9ca3af",
+                letterSpacing: "0.15em"
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Descubre tu potencial"}</span>
+              <span className="whitespace-pre-line">{styles["top-label"]?.buttonText || "DIAGNÓSTICO"}</span>
+            </p>
+            <h1 
+              className={`text-3xl font-black mb-3 ${getEditableClass("main-title")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
+              style={{
+                fontSize: styles["main-title"]?.fontSize || 32,
+                background: styles["main-title"]?.textColor ? styles["main-title"].textColor : "linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text"
+              }}
+            >
+              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Desafía tu Mente"}</span>
             </h1>
             <p 
               className={`text-gray-500 text-base leading-relaxed ${getEditableClass("main-subtitle")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{
-                fontSize: styles["main-subtitle"]?.fontSize || 16,
+                fontSize: styles["main-subtitle"]?.fontSize || 15,
                 color: styles["main-subtitle"]?.textColor || "#6b7280"
               }}
             >
