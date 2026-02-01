@@ -5,12 +5,10 @@ import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import fondoImg from "@/assets/ui/backgrounds/fondo-1.png";
-import brainHeaderImg from "@/assets/ui/icons/brain-header.png";
+import brainBgImg from "@/assets/ui/backgrounds/brain-bg.png";
+import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 import trainingImg from "@/assets/ui/icons/training.png";
 import xIconImg from "@/assets/ui/icons/x-icon.png";
-import boton1Img from "@/assets/ui/buttons/boton-1.png";
-import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 
 interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
@@ -66,59 +64,58 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       )}
 
       <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
-        <div className="relative w-full overflow-hidden">
+        <div className="relative w-full overflow-hidden" style={{ minHeight: "320px" }}>
           <div 
             className="absolute inset-0 z-0"
             style={{ 
-              backgroundImage: `url(${fondoImg})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center top"
+              background: "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(20, 184, 166, 0.08) 50%, rgba(255, 255, 255, 0.9) 100%)"
             }}
           />
           
           <div 
-            className="absolute bottom-0 left-0 right-0 h-16 z-10"
+            className="absolute right-0 top-0 w-[70%] h-full z-0 opacity-90"
+            style={{ 
+              backgroundImage: `url(${brainBgImg})`,
+              backgroundSize: "contain",
+              backgroundPosition: "right center",
+              backgroundRepeat: "no-repeat"
+            }}
+          />
+          
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-12 z-10"
             style={{
               background: "white",
               borderTopLeftRadius: "50% 100%",
               borderTopRightRadius: "50% 100%",
-              transform: "translateY(50%)"
+              transform: "translateY(40%)"
             }}
           />
 
-          <div className="relative z-5 px-5 pt-4 pb-16">
-            <div className="relative">
-              <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 -mr-8 -mt-4 opacity-90">
-                <img 
-                  src={brainHeaderImg} 
-                  alt="" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              
-              <div className="relative z-10 pr-32 md:pr-48">
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-[28px] md:text-4xl font-black leading-[1.1] mb-4"
-                >
-                  <span style={{ color: "#7C3AED" }}>Activa la</span>
-                  <br />
-                  <span style={{ color: "#7C3AED" }}>Inteligencia</span>
-                  <br />
-                  <span style={{ 
-                    background: "linear-gradient(90deg, #14B8A6, #7C3AED)", 
-                    WebkitBackgroundClip: "text", 
-                    WebkitTextFillColor: "transparent" 
-                  }}>eXponencial</span>
-                </motion.h1>
-              </div>
+          <div className="relative z-5 px-5 pt-6 pb-14">
+            <div className="max-w-[65%] md:max-w-[50%]">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-[26px] md:text-4xl font-black leading-[1.15] mb-4"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                <span style={{ color: "#7C3AED" }}>Activa la</span>
+                <br />
+                <span style={{ color: "#7C3AED" }}>Inteligencia</span>
+                <br />
+                <span style={{ 
+                  background: "linear-gradient(90deg, #14B8A6, #7C3AED)", 
+                  WebkitBackgroundClip: "text", 
+                  WebkitTextFillColor: "transparent" 
+                }}>eXponencial</span>
+              </motion.h1>
               
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-sm text-gray-700 mb-3 max-w-[280px]"
+                className="text-sm font-semibold text-gray-800 mb-2"
               >
                 Un método científico de entrenamiento cognitivo
               </motion.p>
@@ -127,9 +124,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="text-xs text-gray-500 leading-relaxed max-w-[320px]"
+                className="text-xs text-gray-500 leading-relaxed"
               >
-                basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de <span className="font-semibold text-gray-700">la vida</span>.
+                basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
               </motion.p>
             </div>
           </div>
@@ -145,16 +142,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             
             <div 
               onClick={() => handleOptionSelect("tests")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm"
+              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
               style={{
-                backgroundImage: `url(${boton1Img})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center"
+                background: "linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(20, 184, 166, 0.06) 100%)"
               }}
               data-testid="button-option-tests"
             >
               <div className="p-4 flex items-start gap-3">
-                <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-white/80 flex items-center justify-center shadow-sm">
+                <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm border border-purple-100">
                   <img src={avatar1Img} alt="" className="w-10 h-10 object-contain" />
                 </div>
                 
@@ -171,11 +166,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 px-5 py-2 rounded-full text-white text-xs font-bold shadow-md"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md"
                   style={{ background: "linear-gradient(90deg, #7C3AED, #5B21B6)" }}
                   data-testid="button-iniciar-diagnostico"
                 >
-                  <Play className="w-3 h-3 fill-current" />
+                  <Play className="w-3.5 h-3.5 fill-current" />
                   Iniciar diagnóstico
                 </motion.button>
               </div>
@@ -189,17 +184,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           >
             <div 
               onClick={() => handleOptionSelect("training")}
-              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm"
+              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
               style={{
-                backgroundImage: `url(${boton1Img})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center"
+                background: "linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(20, 184, 166, 0.06) 100%)"
               }}
               data-testid="button-option-training"
             >
               <div className="p-4 flex items-start gap-3">
-                <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-white/60 flex items-center justify-center">
-                  <img src={trainingImg} alt="" className="w-10 h-10 object-contain" />
+                <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-white flex items-center justify-center border border-purple-100">
+                  <img src={trainingImg} alt="" className="w-9 h-9 object-contain" />
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
@@ -207,7 +200,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     Entrenamiento
                   </h3>
                   <p className="text-xs text-gray-600 leading-snug">
-                    Ejercicios diseñados para activar, decodificar y estructurar el aprendizaje
+                    Ejercicios diseñados para activar, decodificar y estructurar el aprendizaje.
                   </p>
                 </div>
               </div>
@@ -224,7 +217,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="flex-1 pr-4">
                 <h3 className="text-base font-bold text-gray-800 mb-0.5">Método X</h3>
                 <p className="text-xs text-gray-500">
-                  Sistema de Neuro-Aceleración Cognitiva
+                  Sistema de Neuro Aceleración Cognitiva
                 </p>
               </div>
               
@@ -234,7 +227,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </div>
             
             <button 
-              className="mt-3 flex items-center justify-center gap-1 w-full py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              className="mt-3 flex items-center justify-center gap-1 w-full py-2.5 rounded-full border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               data-testid="button-conocer-metodo"
             >
               Conocer el método
@@ -253,7 +246,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <div className="flex gap-2">
               <button
                 onClick={handleWhatsApp}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-white text-xs font-medium shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-semibold shadow-sm"
                 style={{ background: "linear-gradient(90deg, #25D366, #128C7E)" }}
                 data-testid="button-whatsapp"
               >
@@ -263,9 +256,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               
               <button
                 onClick={handleEmail}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold shadow-sm border border-purple-200"
                 style={{ 
-                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(20, 184, 166, 0.15))",
+                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(20, 184, 166, 0.08))",
                   color: "#7C3AED"
                 }}
                 data-testid="button-email"
