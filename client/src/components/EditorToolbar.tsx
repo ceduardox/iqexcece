@@ -21,6 +21,7 @@ export interface ElementStyle {
   fontSize?: number;
   textAlign?: "left" | "center" | "right";
   fontWeight?: "normal" | "bold";
+  borderRadius?: number;
 }
 
 export interface PageStyles {
@@ -251,6 +252,19 @@ export function EditorToolbar({
                     className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
                     data-testid="input-shadow-color"
                   />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-xs w-16">Borde:</span>
+                  <Slider
+                    value={[currentStyle.borderRadius || 0]}
+                    onValueChange={([val]) => updateStyle({ borderRadius: val })}
+                    min={0}
+                    max={50}
+                    step={1}
+                    className="flex-1"
+                    data-testid="slider-border-radius"
+                  />
+                  <span className="text-white text-xs w-10">{currentStyle.borderRadius || 0}px</span>
                 </div>
               </div>
             )}

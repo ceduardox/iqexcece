@@ -128,6 +128,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (style?.fontSize) result.fontSize = style.fontSize;
     if (style?.textAlign) result.textAlign = style.textAlign;
     if (style?.fontWeight) result.fontWeight = style.fontWeight;
+    if (style?.borderRadius) result.borderRadius = style.borderRadius;
     
     return result;
   };
@@ -356,10 +357,18 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#8a3ffc" }}>
+                  <h3 
+                    className={`text-sm font-bold mb-0.5 ${getEditableClass("title-tests")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-tests", e); }}}
+                    style={{ color: styles["title-tests"]?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
+                  >
                     Diagnóstico Cognitivo
                   </h3>
-                  <p className="text-xs text-gray-600 leading-snug">
+                  <p 
+                    className={`text-xs leading-snug ${getEditableClass("desc-tests")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-tests", e); }}}
+                    style={{ color: styles["desc-tests"]?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
+                  >
                     Conoce tu punto de partida y cómo funciona tu mente.
                   </p>
                 </div>
@@ -406,10 +415,18 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#8a3ffc" }}>
+                  <h3 
+                    className={`text-sm font-bold mb-0.5 ${getEditableClass("title-training")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-training", e); }}}
+                    style={{ color: styles["title-training"]?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
+                  >
                     Entrenamiento
                   </h3>
-                  <p className="text-xs text-gray-600 leading-snug">
+                  <p 
+                    className={`text-xs leading-snug ${getEditableClass("desc-training")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-training", e); }}}
+                    style={{ color: styles["desc-training"]?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
+                  >
                     Ejercicios diseñados para activar, decodificar y estructurar el aprendizaje.
                   </p>
                 </div>
@@ -440,8 +457,18 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           >
             <div className="flex items-center justify-between">
               <div className="flex-1 pr-4">
-                <h3 className="text-base font-bold text-gray-800 mb-0.5">Método X</h3>
-                <p className="text-xs text-gray-500">
+                <h3 
+                  className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
+                  style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
+                >
+                  Método X
+                </h3>
+                <p 
+                  className={`text-xs ${getEditableClass("desc-metodox")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
+                  style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
+                >
                   Sistema de Neuro Aceleración Cognitiva
                 </p>
               </div>
