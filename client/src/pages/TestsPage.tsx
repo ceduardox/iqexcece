@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Brain, HelpCircle, Search, Menu } from "lucide-react";
 import { useLocation } from "wouter";
-import { useUserData, getAgeTestContent } from "@/lib/user-context";
+import { useUserData } from "@/lib/user-context";
 
 class SoundPlayer {
   private audioContext: AudioContext | null = null;
@@ -126,13 +126,7 @@ function TestCard({
 
 export default function TestsPage() {
   const [, setLocation] = useLocation();
-  const { userData, updateUserData } = useUserData();
-  const [showNino, setShowNino] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowNino(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const { updateUserData } = useUserData();
 
   const handleBack = useCallback(() => {
     playButtonSound();
@@ -142,39 +136,14 @@ export default function TestsPage() {
   const handleTestClick = useCallback((testId: string) => {
     playCardSound();
     updateUserData({ selectedTest: testId });
-    
-    if (testId === "lectura") {
-      if (userData.ageGroup === "ninos") {
-        setLocation("/child-category");
-      } else if (userData.ageGroup === "adolescentes") {
-        setLocation("/adolescente");
-      } else if (userData.ageGroup === "universitarios") {
-        setLocation("/reading-selection/universitarios");
-      } else if (userData.ageGroup === "profesionales") {
-        setLocation("/reading-selection/profesionales");
-      } else if (userData.ageGroup === "adulto_mayor") {
-        setLocation("/reading-selection/adulto_mayor");
-      } else {
-        setLocation("/child-category");
-      }
-    } else if (testId === "razonamiento") {
-      const category = userData.ageGroup || "adolescentes";
-      setLocation(`/razonamiento-selection/${category}`);
-    } else if (testId === "cerebral") {
-      setLocation("/cerebral/seleccion");
-    } else {
-      console.log("Selected test:", testId, "for age group:", userData.ageGroup);
-    }
-  }, [userData.ageGroup, updateUserData, setLocation]);
+    setLocation(`/age-selection/${testId}`);
+  }, [updateUserData, setLocation]);
 
-  const ageContent = getAgeTestContent(userData.ageGroup);
-  const ageLabel = userData.ageLabel || "Usuario";
-
-  const testCategories = [
-    { id: "lectura", ...ageContent.lectura },
-    { id: "razonamiento", ...ageContent.razonamiento },
-    { id: "cerebral", ...ageContent.cerebral },
-    { id: "iq", ...ageContent.iq },
+  const genericTestCategories = [
+    { id: "lectura", title: "Lectura", description: "Evalúa tu velocidad y comprensión lectora" },
+    { id: "razonamiento", title: "Razonamiento", description: "Pon a prueba tu lógica y pensamiento analítico" },
+    { id: "cerebral", title: "Test Cerebral", description: "Ejercicios para evaluar tus capacidades cognitivas" },
+    { id: "iq", title: "Test IQ", description: "Mide tu coeficiente intelectual con ejercicios variados" },
   ];
 
   return (
@@ -182,58 +151,37 @@ export default function TestsPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-slate-50 dark:bg-background overflow-hidden relative"
+      className="min-h-screen bg-white overflow-hidden relative"
     >
-      <div className="fixed inset-0 z-0 opacity-30">
-        <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          transition={{ duration: 0.3 }}
-        >
-          <img
-            src="/nino2.png"
-            alt=""
-            className="w-full h-full object-cover object-center"
-          />
-        </motion.div>
-
-        <motion.div
-          className="absolute inset-0 overflow-hidden"
-          initial={{ clipPath: "inset(0 0 0 100%)" }}
-          animate={{ clipPath: showNino ? "inset(0 0 0 0%)" : "inset(0 0 0 100%)" }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <img
-            src="/nino.png"
-            alt=""
-            className="w-full h-full object-cover object-center opacity-60"
-          />
-        </motion.div>
-      </div>
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+        }}
+      />
 
       <div className="relative z-10 min-h-screen safe-area-inset">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex items-center justify-between px-4 py-4"
+          className="flex items-center justify-between px-4 py-4 bg-white/80 backdrop-blur-sm"
         >
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-medium btn-instant"
+            className="flex items-center gap-2 text-purple-600 font-medium"
             data-testid="button-back-tests"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Volver</span>
           </button>
           
-          <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-medium">
-            {ageLabel}
+          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold">
+            Diagnóstico
           </div>
           
           <button 
-            className="p-2 text-gray-600 dark:text-gray-400"
+            className="p-2 text-gray-400"
             data-testid="button-menu"
           >
             <Menu className="w-6 h-6" />
@@ -241,21 +189,21 @@ export default function TestsPage() {
         </motion.header>
 
         <motion.div
-          className="px-6 pt-2 pb-6"
+          className="px-6 pt-4 pb-6 text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-black text-gray-900 mb-2">
             Descubre tu potencial
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
+          <p className="text-gray-500 text-base leading-relaxed">
             Explora tu mente con nuestra serie de tests cognitivos interactivos.
           </p>
         </motion.div>
 
         <div className="px-4 pb-8 space-y-4">
-          {testCategories.map((category, index) => (
+          {genericTestCategories.map((category, index) => (
             <TestCard
               key={category.id}
               testId={category.id}

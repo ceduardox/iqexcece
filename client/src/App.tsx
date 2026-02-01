@@ -27,6 +27,7 @@ import NumerosIntroPage from "@/pages/NumerosIntroPage";
 import NumerosNivelesPage from "@/pages/NumerosNivelesPage";
 import NumerosEjercicioPage from "@/pages/NumerosEjercicioPage";
 import NumerosResultPage from "@/pages/NumerosResultPage";
+import AgeSelectionPage from "@/pages/AgeSelectionPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,6 +35,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home}/>
       <Route path="/tests" component={TestsPage}/>
+      <Route path="/age-selection/:testId" component={AgeSelectionPage}/>
       <Route path="/child-category" component={ChildCategoryPage}/>
       <Route path="/reading-selection" component={ReadingSelectionPage}/>
       <Route path="/reading-selection/:category" component={ReadingSelectionPage}/>
