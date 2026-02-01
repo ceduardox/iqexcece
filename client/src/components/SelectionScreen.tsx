@@ -14,6 +14,24 @@ interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
 }
 
+function CurvedDivider() {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none" style={{ transform: "translateY(1px)" }}>
+      <svg 
+        viewBox="0 0 1200 120" 
+        preserveAspectRatio="none"
+        className="relative block w-full"
+        style={{ height: "40px" }}
+      >
+        <path 
+          d="M0,0 C300,100 900,100 1200,0 L1200,120 L0,120 Z" 
+          fill="white"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
@@ -44,36 +62,67 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {isMobile && (
-        <header className="flex items-center justify-between px-5 py-4 bg-white sticky top-0 z-50">
-          <div className="flex items-center gap-0.5">
-            <span className="text-3xl font-black" style={{ color: "#7C3AED" }}>IQ</span>
-            <span className="text-3xl font-black" style={{ 
-              background: "linear-gradient(135deg, #14B8A6 0%, #7C3AED 100%)", 
-              WebkitBackgroundClip: "text", 
-              WebkitTextFillColor: "transparent" 
-            }}>X</span>
-          </div>
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-500"
-            data-testid="button-menu"
+        <div className="relative">
+          <header 
+            className="relative flex items-center justify-center px-5 py-4 z-50"
+            style={{
+              background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%)"
+            }}
           >
-            <Menu className="w-6 h-6" />
-          </button>
-        </header>
+            <div className="absolute left-5 w-10" />
+            
+            <div className="flex items-center justify-center" data-testid="header-logo">
+              <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8a3ffc" />
+                    <stop offset="100%" stopColor="#00d9ff" />
+                  </linearGradient>
+                </defs>
+                <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+                  <tspan fill="#8a3ffc">i</tspan>
+                  <tspan fill="#8a3ffc">Q</tspan>
+                  <tspan fill="url(#logoGradient)">x</tspan>
+                </text>
+              </svg>
+            </div>
+            
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              data-testid="button-menu"
+            >
+              <Menu className="w-6 h-6" strokeWidth={1.5} />
+            </button>
+          </header>
+          
+          <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden" style={{ transform: "translateY(100%)", zIndex: 40 }}>
+            <svg 
+              viewBox="0 0 1200 60" 
+              preserveAspectRatio="none"
+              className="relative block w-full"
+              style={{ height: "20px" }}
+            >
+              <path 
+                d="M0,60 Q600,0 1200,60 L1200,0 L0,0 Z" 
+                fill="white"
+              />
+            </svg>
+          </div>
+        </div>
       )}
 
       <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
-        <div className="relative w-full overflow-hidden" style={{ minHeight: "320px" }}>
+        <div className="relative w-full overflow-hidden" style={{ minHeight: "300px" }}>
           <div 
             className="absolute inset-0 z-0"
             style={{ 
-              background: "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(20, 184, 166, 0.08) 50%, rgba(255, 255, 255, 0.9) 100%)"
+              background: "linear-gradient(180deg, rgba(138, 63, 252, 0.05) 0%, rgba(0, 217, 255, 0.03) 50%, rgba(255, 255, 255, 1) 100%)"
             }}
           />
           
           <div 
-            className="absolute right-0 top-0 w-[70%] h-full z-0 opacity-90"
+            className="absolute right-0 top-0 w-[65%] h-full z-0 opacity-90"
             style={{ 
               backgroundImage: `url(${brainBgImg})`,
               backgroundSize: "contain",
@@ -81,31 +130,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               backgroundRepeat: "no-repeat"
             }}
           />
-          
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-12 z-10"
-            style={{
-              background: "white",
-              borderTopLeftRadius: "50% 100%",
-              borderTopRightRadius: "50% 100%",
-              transform: "translateY(40%)"
-            }}
-          />
 
-          <div className="relative z-5 px-5 pt-6 pb-14">
-            <div className="max-w-[65%] md:max-w-[50%]">
+          <div className="relative z-5 px-5 pt-8 pb-10">
+            <div className="max-w-[60%] md:max-w-[50%]">
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-[26px] md:text-4xl font-black leading-[1.15] mb-4"
-                style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                <span style={{ color: "#7C3AED" }}>Activa la</span>
+                <span style={{ color: "#8a3ffc" }}>Activa la</span>
                 <br />
-                <span style={{ color: "#7C3AED" }}>Inteligencia</span>
+                <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
                 <br />
                 <span style={{ 
-                  background: "linear-gradient(90deg, #14B8A6, #7C3AED)", 
+                  background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
                   WebkitBackgroundClip: "text", 
                   WebkitTextFillColor: "transparent" 
                 }}>eXponencial</span>
@@ -132,7 +170,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
         </div>
 
-        <div className="px-5 pt-2 pb-6 space-y-4 max-w-lg mx-auto">
+        <div className="px-5 pb-6 space-y-4 max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -144,7 +182,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               onClick={() => handleOptionSelect("tests")}
               className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
               style={{
-                background: "linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(20, 184, 166, 0.06) 100%)"
+                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)"
               }}
               data-testid="button-option-tests"
             >
@@ -154,7 +192,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#7C3AED" }}>
+                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#8a3ffc" }}>
                     Diagnóstico Cognitivo
                   </h3>
                   <p className="text-xs text-gray-600 leading-snug">
@@ -167,7 +205,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white text-xs font-bold shadow-md"
-                  style={{ background: "linear-gradient(90deg, #7C3AED, #5B21B6)" }}
+                  style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
                   data-testid="button-iniciar-diagnostico"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
@@ -186,7 +224,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               onClick={() => handleOptionSelect("training")}
               className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100"
               style={{
-                background: "linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(20, 184, 166, 0.06) 100%)"
+                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)"
               }}
               data-testid="button-option-training"
             >
@@ -196,7 +234,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </div>
                 
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#7C3AED" }}>
+                  <h3 className="text-sm font-bold mb-0.5" style={{ color: "#8a3ffc" }}>
                     Entrenamiento
                   </h3>
                   <p className="text-xs text-gray-600 leading-snug">
@@ -258,8 +296,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 onClick={handleEmail}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold shadow-sm border border-purple-200"
                 style={{ 
-                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(20, 184, 166, 0.08))",
-                  color: "#7C3AED"
+                  background: "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))",
+                  color: "#8a3ffc"
                 }}
                 data-testid="button-email"
               >
@@ -282,8 +320,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className="flex flex-col items-center gap-0.5 px-3 py-1"
               data-testid="nav-inicio"
             >
-              <Home className="w-5 h-5" style={{ color: "#7C3AED" }} />
-              <span className="text-[10px] font-medium" style={{ color: "#7C3AED" }}>Inicio</span>
+              <Home className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+              <span className="text-[10px] font-medium" style={{ color: "#8a3ffc" }}>Inicio</span>
             </button>
             
             <button 
