@@ -103,26 +103,33 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     localStorage.setItem("editorMode", "false");
   };
   
-  const getElementStyle = (elementId: string): React.CSSProperties => {
+  const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
     const style = styles[elementId];
-    if (!style) return {};
+    const result: React.CSSProperties = {};
     
-    let background = style.background;
-    if (style.backgroundType === "image" && style.imageUrl) {
-      background = `url(${style.imageUrl})`;
+    if (style?.backgroundType === "image" && style?.imageUrl) {
+      result.backgroundImage = `url(${style.imageUrl})`;
+      result.backgroundSize = style.imageSize ? `${style.imageSize}%` : "cover";
+      result.backgroundPosition = "center";
+      result.backgroundRepeat = "no-repeat";
+      result.backgroundColor = "transparent";
+    } else if (style?.background) {
+      result.background = style.background;
+    } else if (defaultBg) {
+      result.background = defaultBg;
     }
     
-    return {
-      background,
-      backgroundSize: style.imageSize ? `${style.imageSize}%` : undefined,
-      backgroundPosition: style.backgroundType === "image" ? "center" : undefined,
-      backgroundRepeat: style.backgroundType === "image" ? "no-repeat" : undefined,
-      boxShadow: style.boxShadow,
-      marginTop: style.marginTop,
-      marginBottom: style.marginBottom,
-      marginLeft: style.marginLeft,
-      marginRight: style.marginRight,
-    };
+    if (style?.boxShadow) result.boxShadow = style.boxShadow;
+    if (style?.marginTop) result.marginTop = style.marginTop;
+    if (style?.marginBottom) result.marginBottom = style.marginBottom;
+    if (style?.marginLeft) result.marginLeft = style.marginLeft;
+    if (style?.marginRight) result.marginRight = style.marginRight;
+    if (style?.textColor) result.color = style.textColor;
+    if (style?.fontSize) result.fontSize = style.fontSize;
+    if (style?.textAlign) result.textAlign = style.textAlign;
+    if (style?.fontWeight) result.fontWeight = style.fontWeight;
+    
+    return result;
   };
   
   const getEditableClass = (elementId: string) => {
@@ -199,13 +206,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               className={`w-full ${getEditableClass("hero-section")}`}
               onClick={(e) => handleElementClick("hero-section", e)}
               style={{
-                background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
                 borderTopLeftRadius: "32px",
                 borderTopRightRadius: "32px",
                 paddingTop: "32px",
                 minHeight: "340px",
                 position: "relative",
-                ...getElementStyle("hero-section")
+                ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
               }}
               data-testid="hero-section"
             >
@@ -267,8 +273,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             onClick={(e) => handleElementClick("hero-section", e)}
             style={{ 
               minHeight: "320px",
-              background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)",
-              ...getElementStyle("hero-section")
+              ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
             }}
             data-testid="hero-section-desktop"
           >

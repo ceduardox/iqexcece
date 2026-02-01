@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -17,6 +17,10 @@ export interface ElementStyle {
   marginRight?: number;
   imageUrl?: string;
   imageSize?: number;
+  textColor?: string;
+  fontSize?: number;
+  textAlign?: "left" | "center" | "right";
+  fontWeight?: "normal" | "bold";
 }
 
 export interface PageStyles {
@@ -40,7 +44,7 @@ export function EditorToolbar({
   onClose,
   onClearSelection 
 }: EditorToolbarProps) {
-  const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image">("background");
+  const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
   const currentStyle = selectedElement ? (styles[selectedElement] || {}) : {};
   
   const updateStyle = (updates: Partial<ElementStyle>) => {
@@ -53,6 +57,7 @@ export function EditorToolbar({
     { id: "shadow", icon: Square, label: "Sombra" },
     { id: "position", icon: Move, label: "Posición" },
     { id: "image", icon: Image, label: "Imagen" },
+    { id: "text", icon: Type, label: "Texto" },
   ] as const;
 
   return (
@@ -60,7 +65,7 @@ export function EditorToolbar({
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-4 min-w-[320px] max-w-[90vw]"
+      className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-4 min-w-[340px] max-w-[90vw]"
       data-testid="editor-toolbar"
     >
       <div className="flex items-center justify-between mb-3">
@@ -79,7 +84,7 @@ export function EditorToolbar({
 
       {selectedElement && (
         <>
-          <div className="flex gap-1 mb-3">
+          <div className="flex gap-1 mb-3 flex-wrap">
             {tabs.map(tab => (
               <Button
                 key={tab.id}
@@ -143,7 +148,7 @@ export function EditorToolbar({
                       value={currentStyle.background || ""}
                       onChange={(e) => updateStyle({ background: e.target.value })}
                       placeholder="#8a3ffc"
-                      className="flex-1 h-8 text-xs bg-gray-800 border-gray-700"
+                      className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
                       data-testid="input-bg-color-text"
                     />
                   </div>
@@ -156,7 +161,7 @@ export function EditorToolbar({
                       value={currentStyle.background || ""}
                       onChange={(e) => updateStyle({ background: e.target.value })}
                       placeholder="linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)"
-                      className="h-8 text-xs bg-gray-800 border-gray-700"
+                      className="h-8 text-xs bg-gray-800 border-gray-700 text-white"
                       data-testid="input-gradient"
                     />
                     <div className="flex gap-2">
@@ -183,14 +188,29 @@ export function EditorToolbar({
                 )}
                 
                 {currentStyle.backgroundType === "image" && (
-                  <Input
-                    type="text"
-                    value={currentStyle.background || ""}
-                    onChange={(e) => updateStyle({ background: e.target.value })}
-                    placeholder="url('/path/to/image.png')"
-                    className="h-8 text-xs bg-gray-800 border-gray-700"
-                    data-testid="input-bg-image"
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      type="text"
+                      value={currentStyle.imageUrl || ""}
+                      onChange={(e) => updateStyle({ imageUrl: e.target.value })}
+                      placeholder="https://ejemplo.com/imagen.jpg"
+                      className="h-8 text-xs bg-gray-800 border-gray-700 text-white"
+                      data-testid="input-bg-image-url"
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400 text-xs w-16">Tamaño:</span>
+                      <Slider
+                        value={[currentStyle.imageSize || 100]}
+                        onValueChange={([val]) => updateStyle({ imageSize: val })}
+                        min={20}
+                        max={200}
+                        step={5}
+                        className="flex-1"
+                        data-testid="slider-bg-image-size"
+                      />
+                      <span className="text-white text-xs w-10">{currentStyle.imageSize || 100}%</span>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -228,7 +248,7 @@ export function EditorToolbar({
                       });
                     }}
                     placeholder="rgba(0,0,0,0.3)"
-                    className="flex-1 h-8 text-xs bg-gray-800 border-gray-700"
+                    className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
                     data-testid="input-shadow-color"
                   />
                 </div>
@@ -299,9 +319,9 @@ export function EditorToolbar({
                 <Input
                   type="text"
                   value={currentStyle.imageUrl || ""}
-                  onChange={(e) => updateStyle({ imageUrl: e.target.value })}
-                  placeholder="URL de la imagen"
-                  className="h-8 text-xs bg-gray-800 border-gray-700"
+                  onChange={(e) => updateStyle({ imageUrl: e.target.value, backgroundType: "image" })}
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  className="h-8 text-xs bg-gray-800 border-gray-700 text-white"
                   data-testid="input-image-url"
                 />
                 <div className="flex items-center gap-2">
@@ -316,6 +336,96 @@ export function EditorToolbar({
                     data-testid="slider-image-size"
                   />
                   <span className="text-white text-xs w-10">{currentStyle.imageSize || 100}%</span>
+                </div>
+                {currentStyle.imageUrl && (
+                  <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-400 truncate">
+                    Vista: {currentStyle.imageUrl}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "text" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-xs w-16">Color:</span>
+                  <Input
+                    type="color"
+                    value={currentStyle.textColor || "#000000"}
+                    onChange={(e) => updateStyle({ textColor: e.target.value })}
+                    className="w-12 h-8 p-0 border-0"
+                    data-testid="input-text-color"
+                  />
+                  <Input
+                    type="text"
+                    value={currentStyle.textColor || ""}
+                    onChange={(e) => updateStyle({ textColor: e.target.value })}
+                    placeholder="#000000"
+                    className="flex-1 h-8 text-xs bg-gray-800 border-gray-700 text-white"
+                    data-testid="input-text-color-hex"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-xs w-16">Tamaño:</span>
+                  <Slider
+                    value={[currentStyle.fontSize || 16]}
+                    onValueChange={([val]) => updateStyle({ fontSize: val })}
+                    min={10}
+                    max={72}
+                    step={1}
+                    className="flex-1"
+                    data-testid="slider-font-size"
+                  />
+                  <span className="text-white text-xs w-10">{currentStyle.fontSize || 16}px</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={currentStyle.textAlign === "left" ? "default" : "outline"}
+                    onClick={() => updateStyle({ textAlign: "left" })}
+                    className="flex-1 text-xs"
+                    data-testid="btn-align-left"
+                  >
+                    Izquierda
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={currentStyle.textAlign === "center" ? "default" : "outline"}
+                    onClick={() => updateStyle({ textAlign: "center" })}
+                    className="flex-1 text-xs"
+                    data-testid="btn-align-center"
+                  >
+                    Centro
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={currentStyle.textAlign === "right" ? "default" : "outline"}
+                    onClick={() => updateStyle({ textAlign: "right" })}
+                    className="flex-1 text-xs"
+                    data-testid="btn-align-right"
+                  >
+                    Derecha
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={currentStyle.fontWeight === "normal" ? "default" : "outline"}
+                    onClick={() => updateStyle({ fontWeight: "normal" })}
+                    className="flex-1 text-xs"
+                    data-testid="btn-weight-normal"
+                  >
+                    Normal
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={currentStyle.fontWeight === "bold" ? "default" : "outline"}
+                    onClick={() => updateStyle({ fontWeight: "bold" })}
+                    className="flex-1 text-xs font-bold"
+                    data-testid="btn-weight-bold"
+                  >
+                    Negrita
+                  </Button>
                 </div>
               </div>
             )}

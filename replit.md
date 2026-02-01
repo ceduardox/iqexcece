@@ -58,12 +58,13 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
 - **Visual Editor System**: In-page style editor for administrators
   - Database table: page_styles with pageName and JSON styles
   - Toggle "Editor: ON/OFF" button in admin panel sidebar
-  - EditorToolbar component: Floating toolbar with tabs for Background, Shadow, Position, Image
+  - EditorToolbar component: Floating toolbar with 5 tabs
   - Click-to-select editable elements (hero section, cards)
-  - Background controls: Color picker, gradient presets, or image URL
-  - Shadow controls: Blur slider and color input
-  - Position controls: Directional buttons (up/down/left/right) with reset
-  - Image controls: URL input and size slider (20-200%)
+  - **Fondo tab**: Color picker, gradient presets (Purple→Cyan, Dark), or image URL with size control
+  - **Sombra tab**: Blur slider and color input for box shadows
+  - **Posición tab**: Directional buttons (up/down/left/right) with reset
+  - **Imagen tab**: URL input and size slider (20-200%)
+  - **Texto tab**: Color picker, font size slider (10-72px), alignment (left/center/right), weight (normal/bold)
   - Styles persist to PostgreSQL and load automatically on page refresh
 
 ## User Preferences
