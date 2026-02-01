@@ -356,6 +356,9 @@ export default function TestsPage() {
           style={{
             paddingTop: "16px",
             position: "relative",
+            backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
             ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
           data-testid="hero-section"
