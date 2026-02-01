@@ -64,6 +64,10 @@ function TestCard({
   const descId = `desc-${testId}`;
   const iconId = `icon-${testId}`;
   
+  const cardStyle = styles[cardId];
+  const hasBackgroundImage = cardStyle?.imageUrl;
+  const iconSize = styles[iconId]?.iconSize || 50;
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -76,24 +80,31 @@ function TestCard({
       <motion.div
         className="relative overflow-hidden rounded-3xl p-4 flex items-center gap-4"
         style={{ 
-          background: styles[cardId]?.background || gradient,
-          borderRadius: styles[cardId]?.borderRadius || 24
+          background: hasBackgroundImage ? `url(${cardStyle.imageUrl}) center/cover no-repeat` : (cardStyle?.background || gradient),
+          borderRadius: cardStyle?.borderRadius || 24,
+          boxShadow: cardStyle?.shadowBlur ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.3)"}` : "0 4px 15px rgba(0,0,0,0.15)"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
         <div 
-          className={`w-24 h-24 flex-shrink-0 flex items-center justify-center relative ${getEditableClass(iconId)}`}
+          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
+          style={{ width: iconSize + 20, height: iconSize + 20 }}
         >
-          <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
-          <div className="relative w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
-            {styles[iconId]?.imageUrl ? (
-              <img src={styles[iconId].imageUrl} alt="" style={{ width: styles[iconId]?.iconSize || 40, height: styles[iconId]?.iconSize || 40 }} />
-            ) : (
-              <Icon className="text-white drop-shadow-lg" style={{ width: styles[iconId]?.iconSize || 40, height: styles[iconId]?.iconSize || 40 }} />
-            )}
-          </div>
+          {styles[iconId]?.imageUrl ? (
+            <img 
+              src={styles[iconId].imageUrl} 
+              alt="" 
+              className="drop-shadow-lg"
+              style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
+            />
+          ) : (
+            <Icon 
+              className="text-white drop-shadow-lg" 
+              style={{ width: iconSize, height: iconSize }} 
+            />
+          )}
         </div>
         
         <div className="flex-1 text-white py-2">
