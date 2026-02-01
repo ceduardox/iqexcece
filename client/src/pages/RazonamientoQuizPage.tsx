@@ -5,6 +5,8 @@ import { useUserData } from "@/lib/user-context";
 import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
 
 interface Question {
   question: string;
@@ -439,6 +441,8 @@ export default function RazonamientoQuizPage() {
           </motion.div>
         </AnimatePresence>
       </div>
+      
+      <BottomNavBar />
     </motion.div>
   );
 }

@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { Brain, Home, RotateCcw, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -221,6 +223,8 @@ export default function RazonamientoResultPage() {
           </Button>
         </motion.div>
       </motion.div>
+      
+      <BottomNavBar />
     </motion.div>
   );
 }
