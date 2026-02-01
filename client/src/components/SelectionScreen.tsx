@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 import trainingImg from "@/assets/ui/icons/training.png";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
@@ -192,23 +193,25 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         </header>
       )}
 
+      {isMobile && (
+        <img 
+          src={menuCurveImg} 
+          alt="" 
+          className="w-full h-auto -mt-1"
+          style={{ marginBottom: "-2px" }}
+        />
+      )}
+
       <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
         {isMobile && (
           <div 
             className="relative w-full"
-            style={{ 
-              marginTop: "-24px",
-              zIndex: 40
-            }}
           >
             <div 
               className={`w-full ${getEditableClass("hero-section")}`}
               onClick={(e) => handleElementClick("hero-section", e)}
               style={{
-                borderTopLeftRadius: "32px",
-                borderTopRightRadius: "32px",
-                paddingTop: "32px",
-                minHeight: "340px",
+                paddingTop: "16px",
                 position: "relative",
                 ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
               }}
