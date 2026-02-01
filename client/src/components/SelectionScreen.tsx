@@ -232,11 +232,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   <motion.h1 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[26px] md:text-4xl font-black leading-[1.15] mb-4"
+                    className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
+                    onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
+                    style={getElementStyle("hero-title")}
                   >
-                    <span style={{ color: "#8a3ffc" }}>Activa la</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Activa la</span>
                     <br />
-                    <span style={{ color: "#8a3ffc" }}>Inteligencia</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Inteligencia</span>
                     <br />
                     <span style={{ 
                       background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -249,7 +251,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-sm font-semibold text-gray-800 mb-2"
+                    className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle")}`}
+                    onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
+                    style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                   >
                     Un método científico de entrenamiento cognitivo
                   </motion.p>
@@ -258,9 +262,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="text-xs text-gray-500 leading-relaxed"
+                    className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
+                    onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
+                    style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                   >
-                    basado en neuroplasticidad y activación de <span className="font-semibold text-gray-700">ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                    basado en neuroplasticidad y activación de <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
                   </motion.p>
                 </div>
               </div>
