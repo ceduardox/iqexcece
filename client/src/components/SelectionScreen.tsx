@@ -194,12 +194,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       )}
 
       {isMobile && (
-        <img 
-          src={menuCurveImg} 
-          alt="" 
-          className="w-full h-auto -mt-1"
-          style={{ marginBottom: "-2px" }}
-        />
+        <div
+          className={`w-full ${getEditableClass("menu-curve")}`}
+          onClick={(e) => handleElementClick("menu-curve", e)}
+          style={{
+            marginTop: styles["menu-curve"]?.marginTop || -4,
+            marginBottom: styles["menu-curve"]?.marginBottom || -2,
+          }}
+        >
+          <img 
+            src={menuCurveImg} 
+            alt="" 
+            className="w-full h-auto"
+          />
+        </div>
       )}
 
       <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
