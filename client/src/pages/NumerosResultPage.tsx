@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Home, Share2, MessageCircle } from "lucide-react";
+import { RotateCcw, Share2, Home } from "lucide-react";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 export default function NumerosResultPage() {
   const [, navigate] = useLocation();
@@ -37,141 +39,153 @@ export default function NumerosResultPage() {
     }
   };
 
+  const total = results.correctas + results.incorrectas + results.sinResponder || 1;
+  const percentage = Math.round((results.correctas / total) * 100);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-400 via-teal-500 to-emerald-600 flex flex-col">
-      <header className="p-6 text-center">
-        <p className="text-white/80 text-sm font-medium tracking-wider mb-2">
-          MÉTODOS AVANZADOS<br/>DE APRENDIZAJE
-        </p>
-        <div className="flex items-center justify-center gap-1 mb-1">
-          <span className="text-white text-4xl font-black tracking-tight">iQ</span>
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={() => navigate("/")} />
+
+      <main className="flex-1 overflow-y-auto pb-24 -mt-2">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
+        >
+          <div className="px-5 pt-6 pb-4 text-center">
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm font-semibold mb-2"
+              style={{ color: "#8a3ffc" }}
+            >
+              RESULTADO
+            </motion.p>
+            <motion.h1 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-xl font-bold text-gray-800"
+            >
+              Identifica rápidamente<br/>Números y Letras
+            </motion.h1>
+          </div>
         </div>
-        <p className="text-white text-2xl font-light italic">max</p>
-        <p className="text-white/90 text-sm mt-1">Intelecto al máximo</p>
-      </header>
 
-      <main className="flex-1 flex flex-col items-center px-6">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-6"
-        >
-          <p className="text-white/70 text-xs tracking-widest mb-2">RESULTADO</p>
-          <h1 className="text-2xl font-bold text-white leading-tight">
-            Identifica<br/>rápidamente<br/>Números y Letras
-          </h1>
-        </motion.div>
-
-        {/* Gráfico circular animado */}
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4, type: "spring" }}
-          className="mb-6"
-        >
-          <div className="relative w-36 h-36">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="rgba(255,255,255,0.3)"
-                strokeWidth="8"
-              />
-              <motion.circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="white"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 42}`}
-                initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
-                animate={{ 
-                  strokeDashoffset: 2 * Math.PI * 42 * (1 - (results.correctas / (results.correctas + results.incorrectas + results.sinResponder || 1))) 
-                }}
-                transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <motion.span
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1, type: "spring" }}
-                className="text-4xl font-black text-white"
-              >
-                {Math.round((results.correctas / (results.correctas + results.incorrectas + results.sinResponder || 1)) * 100)}%
-              </motion.span>
-              <span className="text-xs font-medium text-white/80">Aciertos</span>
+        <div className="px-5 flex flex-col items-center">
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, type: "spring" }}
+            className="mb-6"
+          >
+            <div className="relative w-32 h-32">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="10"
+                />
+                <motion.circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="url(#gradientNumeros)"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 42}`}
+                  initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                  animate={{ 
+                    strokeDashoffset: 2 * Math.PI * 42 * (1 - percentage / 100) 
+                  }}
+                  transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                />
+                <defs>
+                  <linearGradient id="gradientNumeros" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8a3ffc" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <motion.span
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1, type: "spring" }}
+                  className="text-3xl font-bold text-gray-800"
+                >
+                  {percentage}%
+                </motion.span>
+                <span className="text-xs text-gray-500">Aciertos</span>
+              </div>
             </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white border border-gray-200 rounded-lg p-5 w-full max-w-sm shadow-sm"
+          >
+            <div className="text-center mb-4">
+              <p className="text-gray-400 text-xs tracking-wider">NIVEL</p>
+              <p className="text-gray-800 text-lg font-bold">{results.nivel}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-green-50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <span className="text-lg">😊</span>
+                  <span className="text-2xl font-bold text-green-600">{results.correctas}</span>
+                </div>
+                <p className="text-xs text-gray-500">Correctas</p>
+              </div>
+              <div className="bg-red-50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <span className="text-lg">😢</span>
+                  <span className="text-2xl font-bold text-red-500">{results.incorrectas}</span>
+                </div>
+                <p className="text-xs text-gray-500">Incorrectas</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-gray-600">{results.sinResponder}</p>
+                <p className="text-xs text-gray-500">Sin responder</p>
+              </div>
+              <div className="bg-purple-50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-purple-600">{results.tiempo}s</p>
+                <p className="text-xs text-gray-500">Tiempo</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="flex gap-3 mt-6 w-full max-w-sm">
+            <button
+              onClick={() => navigate(nivelesPath)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 text-white font-semibold rounded-lg"
+              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+              data-testid="button-new-test"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Nuevo Test
+            </button>
+            
+            <button
+              onClick={handleShare}
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg"
+              data-testid="button-share"
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
           </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl"
-        >
-          <div className="text-center mb-4">
-            <p className="text-gray-500 text-xs tracking-wider">NIVEL</p>
-            <p className="text-gray-800 text-xl font-bold">{results.nivel}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="bg-teal-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-teal-600">{results.correctas}</p>
-              <p className="text-xs text-gray-500">Correctas</p>
-            </div>
-            <div className="bg-red-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-red-500">{results.incorrectas}</p>
-              <p className="text-xs text-gray-500">Incorrectas</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-gray-600">{results.sinResponder}</p>
-              <p className="text-xs text-gray-500">Sin responder</p>
-            </div>
-            <div className="bg-cyan-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-cyan-600">{results.tiempo}s</p>
-              <p className="text-xs text-gray-500">Tiempo</p>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </main>
 
-      <footer className="p-4">
-        <div className="bg-teal-600/50 rounded-full p-2 flex items-center justify-around">
-          <button
-            onClick={() => navigate(nivelesPath)}
-            className="flex flex-col items-center gap-1 px-4 py-2 bg-orange-500 rounded-full text-white"
-            data-testid="button-new-test"
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-xs font-medium">Nuevo Test</span>
-          </button>
-          
-          <button
-            onClick={handleShare}
-            className="flex flex-col items-center gap-1 px-4 py-2 text-white"
-            data-testid="button-share"
-          >
-            <Share2 className="w-5 h-5" />
-            <span className="text-xs font-medium">Compartir</span>
-          </button>
-          
-          <button
-            onClick={() => window.open("https://wa.me/", "_blank")}
-            className="flex flex-col items-center gap-1 px-4 py-2 text-white"
-            data-testid="button-contact"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-xs font-medium">Escríbenos</span>
-          </button>
-        </div>
-      </footer>
+      <BottomNavBar />
     </div>
   );
 }

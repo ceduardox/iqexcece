@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Play } from "lucide-react";
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -165,52 +165,58 @@ export default function NumerosEjercicioPage() {
   }, [gameState, targetIndex, nivel, correctCount, incorrectCount, timeLeft, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 text-white">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header 
+        className="px-4 py-3"
+        style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+      >
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold leading-tight">
-            Identifica rápidamente<br/>Números y Letras
+          <h1 className="text-white text-base font-bold leading-tight flex-1 text-center">
+            Identifica rápidamente Números y Letras
           </h1>
           <button
             onClick={() => navigate(nivelesPath)}
-            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+            className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"
             data-testid="button-close"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-white" />
           </button>
-        </div>
-        
-        <div className="bg-teal-600/50 rounded-full px-4 py-2 flex items-center justify-between text-xs">
-          <div className="text-center">
-            <span className="text-white/70 block text-[10px]">NIVEL</span>
-            <span className="font-bold">{getNivelNombre()}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-white/70 block text-[10px]">TIEMPO</span>
-            <span className="font-bold">{timeLeft}s 😊</span>
-          </div>
-          <div className="text-center">
-            <span className="text-white/70 block text-[10px]">CORRECTOS</span>
-            <span className="font-bold">{correctCount}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-white/70 block text-[10px]">INCORRECTOS</span>
-            <span className="font-bold">{incorrectCount}</span>
-          </div>
         </div>
       </header>
 
+      <div className="mx-4 bg-white rounded-xl shadow-lg px-4 py-3 -mt-2 relative z-10">
+        <div className="flex items-center justify-between text-xs">
+          <div className="text-center">
+            <span className="text-gray-400 block text-[10px]">NIVEL</span>
+            <span className="font-bold text-gray-800">{getNivelNombre()}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-gray-400 block text-[10px]">TIEMPO</span>
+            <span className="font-bold text-purple-600">{timeLeft}s</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-lg">😊</span>
+            <span className="font-bold text-green-500">{correctCount}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-lg">😢</span>
+            <span className="font-bold text-red-500">{incorrectCount}</span>
+          </div>
+        </div>
+      </div>
+
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-6">
-        <p className="text-gray-700 text-center text-lg mb-4 font-medium">
+        <p className="text-gray-600 text-center text-base mb-4 font-medium">
           {getInstructionText()}
         </p>
 
         <motion.div
-          className="w-24 h-24 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+          className="w-20 h-20 rounded-lg flex items-center justify-center mb-6 shadow-lg"
+          style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
           animate={targetPop ? { scale: [1, 1.15, 1] } : {}}
           transition={{ duration: 0.15 }}
         >
-          <span className="text-white text-5xl font-bold" data-testid="text-target">
+          <span className="text-white text-4xl font-bold" data-testid="text-target">
             {getTargetDisplay()}
           </span>
         </motion.div>
@@ -224,31 +230,22 @@ export default function NumerosEjercicioPage() {
             const isIdle = gameState === "idle" || gameState === "finished";
 
             return (
-              <motion.button
+              <button
                 key={index}
                 onClick={() => handleCellClick(value, index)}
                 disabled={!isActive}
                 className={`
-                  w-14 h-14 rounded-xl text-xl font-bold flex items-center justify-center
-                  transition-all duration-150 shadow-md
-                  ${isIdle ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""}
-                  ${isActive && !isFlashing ? "bg-gradient-to-br from-cyan-400 to-teal-400 text-white hover:from-cyan-500 hover:to-teal-500 cursor-pointer" : ""}
-                  ${isCorrectFlash ? "bg-green-400 text-white scale-95" : ""}
-                  ${isIncorrectFlash ? "bg-red-500 text-white animate-pulse" : ""}
+                  w-14 h-14 rounded-lg text-xl font-bold flex items-center justify-center
+                  transition-all duration-150 shadow-sm border
+                  ${isIdle ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" : ""}
+                  ${isActive && !isFlashing ? "bg-white text-gray-800 border-gray-200 hover:border-purple-400 hover:shadow-md cursor-pointer" : ""}
+                  ${isCorrectFlash ? "bg-green-500 text-white border-green-500 scale-95" : ""}
+                  ${isIncorrectFlash ? "bg-red-500 text-white border-red-500" : ""}
                 `}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ 
-                  scale: isIncorrectFlash ? [1, 0.95, 1.05, 1] : 1, 
-                  opacity: 1 
-                }}
-                transition={{ 
-                  duration: isIncorrectFlash ? 0.2 : 0.3, 
-                  delay: gameState === "playing" ? index * 0.02 : 0 
-                }}
                 data-testid={`cell-${value}`}
               >
                 {value}
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -256,14 +253,16 @@ export default function NumerosEjercicioPage() {
         <AnimatePresence mode="wait">
           {gameState === "idle" && (
             <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={handleStart}
-              className="px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xl rounded-full shadow-lg transition-colors"
+              className="px-10 py-4 text-white font-bold text-xl rounded-lg shadow-lg flex items-center gap-3"
+              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               data-testid="button-start"
             >
               Iniciar
+              <Play className="w-5 h-5 fill-white" />
             </motion.button>
           )}
         </AnimatePresence>

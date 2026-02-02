@@ -1,7 +1,8 @@
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 interface NivelConfig {
   id: string;
@@ -50,93 +51,95 @@ export default function NumerosNivelesPage() {
   const activeNiveles = niveles.filter(n => n.activo);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-emerald-600 flex flex-col">
-      <button
-        onClick={() => window.history.back()}
-        className="absolute top-4 left-4 z-10 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
-        data-testid="button-back"
-      >
-        <ArrowLeft className="w-5 h-5 text-white" />
-      </button>
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={() => window.history.back()} />
 
-      <div className="flex-1 flex flex-col items-center pt-8 pb-6 px-4">
-        {introData?.imagenCabecera && (
-          <motion.img
-            src={introData.imagenCabecera}
-            alt="Cerebro"
-            className="w-40 h-40 object-contain mb-4"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          />
-        )}
-
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-t-[40px] w-full max-w-md flex-1 px-6 py-8 mt-4"
+      <main className="flex-1 overflow-y-auto pb-24 -mt-2">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          <h1 className="text-2xl font-bold text-gray-800 text-center mb-2 whitespace-pre-line">
-            {introData?.titulo || "Identifica rápidamente\nNúmeros y Letras"}
-          </h1>
+          <div className="flex flex-col items-center pt-6 pb-4 px-4">
+            {introData?.imagenCabecera && (
+              <motion.img
+                src={introData.imagenCabecera}
+                alt="Cerebro"
+                className="w-32 h-32 object-contain mb-4"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            )}
 
-          <p className="text-gray-600 text-center mt-6 mb-4">
-            Elige un nivel:
-          </p>
+            <h1 className="text-xl font-bold text-gray-800 text-center mb-2 whitespace-pre-line">
+              {introData?.titulo || "Identifica rápidamente\nNúmeros y Letras"}
+            </h1>
 
-          <div className={`grid gap-4 mt-4 ${activeNiveles.length === 3 ? 'grid-cols-2' : activeNiveles.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <p className="text-gray-500 text-center mt-2">
+              Elige un nivel:
+            </p>
+          </div>
+        </div>
+
+        <div className="px-5 py-4">
+          <div className={`grid gap-3 ${activeNiveles.length === 3 ? 'grid-cols-2' : activeNiveles.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {activeNiveles.slice(0, 2).map((nivel, idx) => (
               <motion.button
                 key={nivel.id}
                 onClick={() => handleSelectNivel(nivel.id)}
-                className="bg-gray-50 hover:bg-teal-50 border-2 border-gray-200 hover:border-teal-300 rounded-2xl p-6 flex flex-col items-center justify-center transition-all"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="bg-white border border-gray-200 hover:border-purple-400 rounded-lg p-5 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
                 data-testid={`button-nivel-${nivel.id}`}
               >
                 {nivel.icono ? (
-                  <img src={nivel.icono} alt={nivel.nombre} className="w-20 h-20 object-contain mb-3" />
+                  <img src={nivel.icono} alt={nivel.nombre} className="w-16 h-16 object-contain mb-3" />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-teal-100 border-2 border-teal-300 flex items-center justify-center mb-3">
-                    <span className="text-teal-600 text-2xl font-bold">
+                  <div 
+                    className="w-16 h-16 rounded-lg flex items-center justify-center mb-3"
+                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+                  >
+                    <span className="text-white text-xl font-bold">
                       {nivel.id === "numeros" ? "123" : nivel.id === "letras" ? "ABC" : "XII"}
                     </span>
                   </div>
                 )}
-                <span className="text-gray-700 font-medium text-lg">{nivel.nombre}</span>
+                <span className="text-gray-800 font-semibold text-base">{nivel.nombre}</span>
               </motion.button>
             ))}
           </div>
 
           {activeNiveles.length >= 3 && (
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-3">
               <motion.button
                 onClick={() => handleSelectNivel(activeNiveles[2].id)}
-                className="bg-gray-50 hover:bg-teal-50 border-2 border-gray-200 hover:border-teal-300 rounded-2xl p-6 flex flex-col items-center justify-center transition-all w-1/2"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="bg-white border border-gray-200 hover:border-purple-400 rounded-lg p-5 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all w-1/2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
                 data-testid={`button-nivel-${activeNiveles[2].id}`}
               >
                 {activeNiveles[2].icono ? (
-                  <img src={activeNiveles[2].icono} alt={activeNiveles[2].nombre} className="w-20 h-20 object-contain mb-3" />
+                  <img src={activeNiveles[2].icono} alt={activeNiveles[2].nombre} className="w-16 h-16 object-contain mb-3" />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-teal-100 border-2 border-teal-300 flex items-center justify-center mb-3">
-                    <span className="text-teal-600 text-2xl font-bold">XII</span>
+                  <div 
+                    className="w-16 h-16 rounded-lg flex items-center justify-center mb-3"
+                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+                  >
+                    <span className="text-white text-xl font-bold">XII</span>
                   </div>
                 )}
-                <span className="text-gray-700 font-medium text-lg">{activeNiveles[2].nombre}</span>
+                <span className="text-gray-800 font-semibold text-base">{activeNiveles[2].nombre}</span>
               </motion.button>
             </div>
           )}
-        </motion.div>
-      </div>
+        </div>
+      </main>
+
+      <BottomNavBar />
     </div>
   );
 }
