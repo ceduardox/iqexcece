@@ -32,14 +32,18 @@ export default function AceleracionExercisePage() {
   const [pdfs, setPdfs] = useState<PDFFile[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<PDFFile | null>(null);
   const [showExercise, setShowExercise] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [words, setWords] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
   const [localSpeed, setLocalSpeed] = useState(200);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [totalReadingTime, setTotalReadingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationRef = useRef<number | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
   const { data, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["/api/aceleracion", itemId],
@@ -124,8 +128,8 @@ export default function AceleracionExercisePage() {
     if (showExercise) {
       setShowExercise(false);
       setIsPlaying(false);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     } else if (selectedPdf) {
       setSelectedPdf(null);
@@ -139,8 +143,8 @@ export default function AceleracionExercisePage() {
     playSound("iphone");
     setShowExercise(false);
     setIsPlaying(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
   };
 
@@ -199,16 +203,38 @@ export default function AceleracionExercisePage() {
   const handleStartExercise = () => {
     playSound("iphone");
     setShowExercise(true);
+    setShowResults(false);
     setCurrentWordIndex(0);
+    setStartTime(Date.now());
+    setTotalReadingTime(0);
+  };
+
+  const handleRestartExercise = () => {
+    playSound("iphone");
+    setShowResults(false);
+    setCurrentWordIndex(0);
+    setStartTime(Date.now());
+    setTotalReadingTime(0);
+  };
+
+  const handleBackToSelection = () => {
+    playSound("iphone");
+    setShowExercise(false);
+    setShowResults(false);
+    setSelectedPdf(null);
+    setWords([]);
+  };
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const togglePlay = useCallback(() => {
     setIsPlaying(prev => !prev);
   }, []);
-
-  const handleSpeedChange = (delta: number) => {
-    setLocalSpeed(prev => Math.max(50, Math.min(1000, prev + delta)));
-  };
 
   const handleSpeedDecrease = () => {
     playSound("iphone");
@@ -217,34 +243,176 @@ export default function AceleracionExercisePage() {
 
   const handleSpeedIncrease = () => {
     playSound("iphone");
-    setLocalSpeed(prev => Math.min(1000, prev + 10));
+    setLocalSpeed(prev => Math.min(920, prev + 10));
   };
 
-  // Word animation effect
+  // Handle exercise completion
+  const handleExerciseComplete = useCallback(() => {
+    setIsPlaying(false);
+    if (startTime) {
+      setTotalReadingTime(Date.now() - startTime);
+    }
+    setShowResults(true);
+  }, [startTime]);
+
+  // Word animation effect using requestAnimationFrame for high speeds
   useEffect(() => {
-    if (isPlaying && words.length > 0) {
-      const interval = (60 / localSpeed) * 1000; // ms per word
+    if (!isPlaying || words.length === 0) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
+
+    const msPerWord = (60 / localSpeed) * 1000;
+    lastUpdateRef.current = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - lastUpdateRef.current;
       
-      intervalRef.current = setInterval(() => {
+      if (elapsed >= msPerWord) {
+        lastUpdateRef.current = currentTime;
+        
         setCurrentWordIndex(prev => {
           if (prev >= words.length - 1) {
-            setIsPlaying(false);
+            handleExerciseComplete();
             return prev;
           }
           return prev + 1;
         });
-      }, interval);
+      }
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
 
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    }
-  }, [isPlaying, localSpeed, words.length]);
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [isPlaying, localSpeed, words.length, handleExerciseComplete]);
 
   const modeTitle = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
   const progress = words.length > 0 ? Math.round((currentWordIndex / words.length) * 100) : 0;
+  const wordsRead = currentWordIndex + 1;
+
+  // Results view - Professional executive design
+  if (showResults && selectedPdf) {
+    const readingTimeFormatted = formatTime(totalReadingTime);
+    const averageSpeed = totalReadingTime > 0 
+      ? Math.round((wordsRead / (totalReadingTime / 60000)))
+      : localSpeed;
+    
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Clean professional header */}
+        <header className="px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <img 
+              src="/logo.png" 
+              alt="IQ" 
+              className="h-8 object-contain"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+            <button
+              onClick={handleBackToSelection}
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-full transition-colors"
+              data-testid="button-close-results"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 px-5 py-8 flex flex-col">
+          {/* Success indicator */}
+          <div className="text-center mb-8">
+            <div 
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}
+            >
+              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              ¡Ejercicio Completado!
+            </h1>
+            <p className="text-gray-500">{selectedPdf.name}</p>
+          </div>
+
+          {/* Stats cards */}
+          <div className="space-y-4 mb-8">
+            {/* Time card */}
+            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Tiempo de Lectura</p>
+                  <p className="text-3xl font-bold text-gray-800">{readingTimeFormatted}</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Speed card */}
+            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Velocidad Promedio</p>
+                  <p className="text-3xl font-bold text-gray-800">{averageSpeed} <span className="text-lg font-normal text-gray-500">PPM</span></p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Words count card */}
+            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Palabras Leídas</p>
+                  <p className="text-3xl font-bold text-gray-800">{wordsRead.toLocaleString()}</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-cyan-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="mt-auto space-y-3">
+            <button
+              onClick={handleRestartExercise}
+              className="w-full py-4 rounded-xl text-white font-semibold text-lg shadow-lg transition-all active:scale-98"
+              style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)" }}
+              data-testid="button-restart"
+            >
+              Repetir Ejercicio
+            </button>
+            <button
+              onClick={handleBackToSelection}
+              className="w-full py-4 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-lg transition-all hover:bg-gray-50"
+              data-testid="button-back-selection"
+            >
+              Elegir otro documento
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // Exercise view - Golpe de Vista style (formal & creative)
   if (showExercise && selectedPdf) {
@@ -279,7 +447,7 @@ export default function AceleracionExercisePage() {
 
         {/* Main exercise area */}
         <main className="flex-1 flex flex-col items-center justify-between px-5 pb-8">
-          {/* Speed display - elegant card */}
+          {/* Speed display - clean without buttons */}
           <div className="w-full max-w-sm">
             <div 
               className="rounded-2xl p-4 backdrop-blur border border-white/10"
@@ -288,25 +456,9 @@ export default function AceleracionExercisePage() {
               <p className="text-gray-400 text-xs text-center mb-2 tracking-wide">
                 VELOCIDAD DE LECTURA
               </p>
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => handleSpeedChange(-50)}
-                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                  data-testid="button-speed-down"
-                >
-                  <span className="text-white font-bold">−</span>
-                </button>
-                <div className="text-center min-w-[140px]">
-                  <span className="text-white font-bold text-3xl">{localSpeed}</span>
-                  <span className="text-gray-400 text-sm ml-2">PPM</span>
-                </div>
-                <button
-                  onClick={() => handleSpeedChange(50)}
-                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                  data-testid="button-speed-up"
-                >
-                  <span className="text-white font-bold">+</span>
-                </button>
+              <div className="text-center">
+                <span className="text-white font-bold text-3xl">{localSpeed}</span>
+                <span className="text-gray-400 text-sm ml-2">PPM</span>
               </div>
             </div>
           </div>
@@ -335,10 +487,10 @@ export default function AceleracionExercisePage() {
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={currentWordIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.08 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.05 }}
                     className="text-white font-semibold text-3xl tracking-wide block text-center min-w-[200px]"
                     data-testid="text-current-word"
                   >
