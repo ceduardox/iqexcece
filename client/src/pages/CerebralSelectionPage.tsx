@@ -75,7 +75,7 @@ export default function CerebralSelectionPage() {
         <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
           <img src={menuCurveImg} alt="" className="w-full h-auto" />
         </div>
-        <main className="flex-1 p-5 space-y-4">
+        <main className="flex-1 p-5 space-y-4 pb-24">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-48 w-full rounded-2xl" />
           <Skeleton className="h-32 w-full rounded-2xl" />
@@ -92,7 +92,7 @@ export default function CerebralSelectionPage() {
         <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
           <img src={menuCurveImg} alt="" className="w-full h-auto" />
         </div>
-        <main className="flex-1 flex flex-col items-center justify-center p-6">
+        <main className="flex-1 flex flex-col items-center justify-center p-6 pb-24">
           <Brain className="w-16 h-16 text-purple-300 mb-4" />
           <p className="text-gray-700 text-lg font-medium">No hay ejercicios disponibles.</p>
           <p className="text-gray-400 text-sm mt-2">El administrador debe crear ejercicios primero.</p>
