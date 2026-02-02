@@ -1021,7 +1021,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     const labels: Record<string, string> = {
       ninos: "Niños",
       adolescentes: "Adolescentes",
-      universitarios: "Adolescentes",
+      universitarios: "Universitarios",
       profesionales: "Profesionales",
       adulto_mayor: "Adulto Mayor",
     };
@@ -1856,7 +1856,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   className={contentCategory === "universitarios" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
                   data-testid="button-content-universitarios"
                 >
-                  Adolescentes
+                  Universitarios
                 </Button>
                 <Button
                   onClick={() => { setContentCategory("profesionales"); setSelectedTema(1); }}
@@ -2138,7 +2138,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -2371,7 +2371,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -3176,7 +3176,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Adolescentes" :
+                  contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -3498,7 +3498,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     size="sm"
                     className={entrenamientoCategory === cat ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
                   >
-                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Adolescentes" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
+                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
                   </Button>
                 ))}
               </div>
