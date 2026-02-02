@@ -102,7 +102,7 @@ export default function VelocidadLevelPage() {
       <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
         <header className="p-4">
           <button
-            onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+            onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
             className="flex items-center gap-2 text-white font-semibold"
             data-testid="button-back"
           >
@@ -121,7 +121,7 @@ export default function VelocidadLevelPage() {
     <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
       <header className="p-4">
         <button
-          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+          onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
           className="flex items-center gap-2 text-white font-semibold"
           data-testid="button-back"
         >

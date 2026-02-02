@@ -343,7 +343,7 @@ export default function VelocidadExercisePage() {
         <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
           <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
           <button
-            onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+            onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
             className="w-8 h-8 flex items-center justify-center text-white/80"
           >
             <X className="w-6 h-6" />
@@ -361,7 +361,7 @@ export default function VelocidadExercisePage() {
       <div className="min-h-screen bg-gradient-to-b from-purple-700 to-pink-500 flex flex-col items-center justify-center p-4">
         <p className="text-white text-xl mb-4">No hay ejercicios configurados</p>
         <button
-          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+          onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
           className="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-semibold"
         >
           Volver
@@ -378,7 +378,7 @@ export default function VelocidadExercisePage() {
       <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
         <button
-          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+          onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
           className="w-8 h-8 flex items-center justify-center text-white/80"
           data-testid="button-close"
         >
@@ -618,7 +618,7 @@ export default function VelocidadExercisePage() {
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => setLocation(`/entrenamiento/${categoria}`)}
+                  onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
                   className="bg-white/20 backdrop-blur text-white px-8 py-4 rounded-full font-bold text-lg"
                   data-testid="button-volver"
                 >
