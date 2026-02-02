@@ -423,6 +423,16 @@ export default function RazonamientoQuizPage() {
                 <h3 className="text-lg font-bold text-white leading-relaxed">
                   {currentQ?.question}
                 </h3>
+                {(currentQ as any)?.imageUrl && (
+                  <div className="mt-3 flex justify-center">
+                    <img 
+                      src={(currentQ as any).imageUrl} 
+                      alt="Imagen de la pregunta"
+                      className="max-h-40 rounded-xl shadow-md object-contain"
+                      data-testid={`img-question-${currentQuestion}`}
+                    />
+                  </div>
+                )}
               </div>
 
             <div className="space-y-3">
