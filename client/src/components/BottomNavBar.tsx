@@ -2,6 +2,12 @@ import { useLocation } from "wouter";
 import { Home, Brain, Dumbbell, User } from "lucide-react";
 import { motion } from "framer-motion";
 
+const playButtonSound = () => {
+  const audio = new Audio('/iphone.mp3');
+  audio.volume = 0.5;
+  audio.play().catch(() => {});
+};
+
 interface NavItem {
   icon: typeof Home;
   label: string;
@@ -49,7 +55,7 @@ export function BottomNavBar() {
             return (
               <button
                 key={item.path}
-                onClick={() => setLocation(item.path)}
+                onClick={() => { playButtonSound(); setLocation(item.path); }}
                 className="flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-all duration-200"
                 style={{
                   background: active 
