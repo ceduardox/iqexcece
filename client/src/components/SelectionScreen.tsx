@@ -162,7 +162,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (option === "tests") {
       setLocation("/tests");
     } else {
-      setLocation("/entrenamiento/ninos");
+      setLocation("/entrenamiento");
     }
   }, [setUserData, setLocation, playCard]);
 

@@ -522,7 +522,7 @@ export default function TestsPage() {
             <span className="text-[10px] text-purple-600 font-medium">Diagnóstico</span>
           </button>
           <button 
-            onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); else setLocation("/entrenamiento/ninos"); }}
+            onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); else setLocation("/entrenamiento"); }}
             className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-entrenar")}`}
             style={getElementStyle("nav-entrenar")}
             data-testid="nav-entrenar"
