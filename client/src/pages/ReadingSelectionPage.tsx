@@ -2,9 +2,11 @@ import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { Check, Lock, Star, ChevronDown, BookOpen } from "lucide-react";
+import { Check, Lock, Star, ChevronDown, BookOpen, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 interface ReadingTheme {
   temaNumero: number | null;
@@ -138,13 +140,51 @@ export default function ReadingSelectionPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={handleBack} />
+      <header 
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+        }}
+      >
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255, 255, 255, 0.9)",
+                boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
+              }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+            </button>
+            
+            <div className="flex items-center justify-center">
+              <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+            </div>
+            
+            <div className="w-10" />
+          </div>
+        </div>
+      </header>
+
+      <div
+        className="w-full sticky z-40"
+        style={{
+          top: 56,
+          marginTop: -4,
+          marginBottom: -20,
+        }}
+      >
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
           className="w-full"
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
           <div className="relative px-5 pt-4 pb-6">
