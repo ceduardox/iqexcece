@@ -150,6 +150,7 @@ export default function TestsPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -164,6 +165,8 @@ export default function TestsPage() {
   }, []);
 
   useEffect(() => {
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
+    
     fetch("/api/page-styles/tests-page")
       .then(res => res.json())
       .then(data => {
@@ -174,8 +177,15 @@ export default function TestsPage() {
             console.log("No saved styles");
           }
         }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      });
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
@@ -227,7 +237,7 @@ export default function TestsPage() {
 
   const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
     const style = styles[elementId];
-    if (!style) return defaultBg ? { background: defaultBg } : {};
+    if (!style) return defaultBg ? { backgroundColor: defaultBg } : {};
     
     const result: React.CSSProperties = {};
     
@@ -238,9 +248,9 @@ export default function TestsPage() {
       result.backgroundRepeat = "no-repeat";
       result.backgroundColor = "transparent";
     } else if (style.background) {
-      result.background = style.background;
+      result.backgroundColor = style.background;
     } else if (defaultBg) {
-      result.background = defaultBg;
+      result.backgroundColor = defaultBg;
     }
     
     if (style.boxShadow) result.boxShadow = style.boxShadow;
@@ -273,6 +283,14 @@ export default function TestsPage() {
     { id: "razonamiento", title: "Razonamiento", description: "Pon a prueba tu lógica y pensamiento analítico" },
     { id: "cerebral", title: "Test Cerebral", description: "Ejercicios para evaluar tus capacidades cognitivas" },
   ];
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

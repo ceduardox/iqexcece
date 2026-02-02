@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
+import { usePreloadAssets } from "@/hooks/use-preload";
 import Home from "@/pages/Home";
 import TestsPage from "@/pages/TestsPage";
 import ReadingSelectionPage from "@/pages/ReadingSelectionPage";
@@ -63,6 +64,8 @@ function Router() {
 }
 
 function App() {
+  usePreloadAssets();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

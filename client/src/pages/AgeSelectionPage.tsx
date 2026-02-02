@@ -146,10 +146,13 @@ export default function AgeSelectionPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("editorMode");
     if (stored === "true") setEditorMode(true);
+    
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
     fetch("/api/page-styles/age-selection")
       .then(res => res.json())
@@ -161,8 +164,15 @@ export default function AgeSelectionPage() {
             console.log("No saved styles");
           }
         }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      });
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
@@ -221,9 +231,9 @@ export default function AgeSelectionPage() {
 
   const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
     const style = styles[elementId];
-    if (!style) return defaultBg ? { background: defaultBg } : {};
+    if (!style) return defaultBg ? { backgroundColor: defaultBg } : {};
     return {
-      background: style.background || defaultBg,
+      backgroundColor: style.background || defaultBg,
       boxShadow: style.shadowBlur ? `0 0 ${style.shadowBlur}px ${style.shadowColor || "rgba(0,0,0,0.3)"}` : undefined,
       borderRadius: style.borderRadius,
     };
@@ -261,6 +271,14 @@ export default function AgeSelectionPage() {
     playButtonSound();
     setLocation("/");
   }, [setLocation]);
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

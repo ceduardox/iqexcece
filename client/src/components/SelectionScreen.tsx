@@ -6,6 +6,7 @@ import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
+import { useSounds } from "@/hooks/use-sounds";
 
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 import trainingImg from "@/assets/ui/icons/training.png";
@@ -21,11 +22,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const { setUserData } = useUserData();
   const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
+  const { playClick, playCard } = useSounds();
   
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [adminToken, setAdminToken] = useState<string | null>(null);
+  const [stylesLoaded, setStylesLoaded] = useState(false);
   
   useEffect(() => {
     const checkEditorMode = () => {
@@ -45,6 +48,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   }, []);
   
   useEffect(() => {
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
+    
     fetch("/api/page-styles/selection-screen")
       .then(res => res.json())
       .then(data => {
@@ -55,8 +60,15 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             console.log("No saved styles");
           }
         }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      });
+    
+    return () => clearTimeout(timeout);
   }, []);
   
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
@@ -113,9 +125,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       result.backgroundRepeat = "no-repeat";
       result.backgroundColor = "transparent";
     } else if (style?.background) {
-      result.background = style.background;
+      result.backgroundColor = style.background;
     } else if (defaultBg) {
-      result.background = defaultBg;
+      result.backgroundColor = defaultBg;
     }
     
     if (style?.boxShadow) result.boxShadow = style.boxShadow;
@@ -141,6 +153,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   };
 
   const handleOptionSelect = useCallback((option: "tests" | "training") => {
+    playCard();
     setUserData({
       ageGroup: "ninos",
       ageLabel: "Usuario",
@@ -151,7 +164,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     } else {
       setLocation("/entrenamiento/ninos");
     }
-  }, [setUserData, setLocation]);
+  }, [setUserData, setLocation, playCard]);
 
   const handleWhatsApp = () => {
     window.open("https://wa.me/59178767696", "_blank");
@@ -160,6 +173,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const handleEmail = () => {
     window.location.href = "mailto:soporte@inteligenciaexponencial.com";
   };
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
