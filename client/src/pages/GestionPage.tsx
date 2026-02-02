@@ -1021,6 +1021,33 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           setEntrenamientoItems(itemsData.items || []);
           setPrepPages(prepPagesData.pages || []);
           setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
+          
+          // Cargar configuración de aceleración para items de tipo aceleracion_lectura
+          const aceleracionItem = (itemsData.items || []).find((i: {tipoEjercicio?: string}) => i.tipoEjercicio === "aceleracion_lectura");
+          if (aceleracionItem) {
+            try {
+              const accelRes = await fetch(`/api/aceleracion/${aceleracionItem.id}`);
+              const accelData = await accelRes.json();
+              if (accelData.ejercicio) {
+                setAceleracionData({
+                  id: accelData.ejercicio.id,
+                  entrenamientoItemId: aceleracionItem.id,
+                  imagenCabecera: accelData.ejercicio.imagenCabecera || "",
+                  titulo: accelData.ejercicio.titulo || "Acelera al máximo tu Lectura",
+                  velocidadPPM: accelData.ejercicio.velocidadPPM || 200,
+                  modoGolpePorcentaje: accelData.ejercicio.modoGolpePorcentaje || 50
+                });
+              } else {
+                setAceleracionData({
+                  entrenamientoItemId: aceleracionItem.id,
+                  imagenCabecera: "",
+                  titulo: "Acelera al máximo tu Lectura",
+                  velocidadPPM: 200,
+                  modoGolpePorcentaje: 50
+                });
+              }
+            } catch (e) { console.error(e); }
+          }
         } catch (e) { console.error(e); }
       };
       loadEntrenamientoData();
@@ -4281,8 +4308,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
                                               })
                                             });
+                                            setAceleracionData(prev => prev ? { ...prev, id: existingData.ejercicio.id } : prev);
                                           } else {
-                                            await fetch("/api/admin/aceleracion", {
+                                            const res = await fetch("/api/admin/aceleracion", {
                                               method: "POST",
                                               headers: {
                                                 "Content-Type": "application/json",
@@ -4296,6 +4324,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
                                               })
                                             });
+                                            const newData = await res.json();
+                                            if (newData.ejercicio?.id) {
+                                              setAceleracionData(prev => prev ? { ...prev, id: newData.ejercicio.id } : prev);
+                                            }
                                           }
                                           alert("Configuración guardada correctamente");
                                         } catch (e) { console.error(e); }
