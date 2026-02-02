@@ -3988,10 +3988,22 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               <label className="text-white/60 text-xs mb-1 block">Tipo de ejercicio</label>
                               <select
                                 value={item.tipoEjercicio || "velocidad"}
-                                onChange={(e) => {
+                                onChange={async (e) => {
+                                  const newType = e.target.value;
                                   const updated = [...entrenamientoItems];
-                                  updated[idx].tipoEjercicio = e.target.value;
+                                  updated[idx].tipoEjercicio = newType;
                                   setEntrenamientoItems(updated);
+                                  // Auto-guardar tipo de ejercicio
+                                  try {
+                                    await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                      method: "PUT",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`
+                                      },
+                                      body: JSON.stringify({ tipoEjercicio: newType })
+                                    });
+                                  } catch (e) { console.error(e); }
                                 }}
                                 className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
                               >
