@@ -342,7 +342,7 @@ export default function VelocidadExercisePage() {
       <div className="min-h-screen bg-white flex flex-col">
         <header 
           className="px-4 py-3 flex items-center justify-between"
-          style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+          style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
         >
           <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
           <button
@@ -379,8 +379,8 @@ export default function VelocidadExercisePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="relative px-4 pt-4 pb-8 flex items-center justify-between"
-        style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+        className="relative z-10 px-4 pt-4 pb-6 flex items-center justify-between"
+        style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
         <button
@@ -390,37 +390,29 @@ export default function VelocidadExercisePage() {
         >
           <X className="w-5 h-5" />
         </button>
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-4"
-          style={{
-            background: "white",
-            borderTopLeftRadius: "24px",
-            borderTopRightRadius: "24px",
-          }}
-        />
       </header>
 
-      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
-          >
-            <span className="text-white font-bold text-lg">{getNivelFromPatron(ejercicio.patron)}</span>
+      <div className="relative -mt-4 mx-4 bg-white rounded-xl shadow-lg px-4 py-3 z-20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500 text-sm">NIVEL</span>
+            <span className="text-gray-800 text-2xl font-bold">{getNivelFromPatron(ejercicio.patron)}</span>
           </div>
-          <div>
-            <span className="text-gray-400 text-xs block">NIVEL</span>
-            <span className="text-gray-800 text-sm font-semibold">Dificultad {getNivelFromPatron(ejercicio.patron)}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg">
-            <span className="text-lg">😊</span>
-            <span className="text-green-600 text-xl font-bold">{correctos}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
-            <span className="text-lg">😢</span>
-            <span className="text-red-500 text-xl font-bold">{incorrectos}</span>
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <span className="text-gray-400 text-xs">CORRECTOS</span>
+              <div className="flex items-center justify-center gap-1">
+                <span className="text-lg">😊</span>
+                <span className="text-green-500 text-xl font-bold">{correctos}</span>
+              </div>
+            </div>
+            <div className="text-center">
+              <span className="text-gray-400 text-xs">INCORRECTOS</span>
+              <div className="flex items-center justify-center gap-1">
+                <span className="text-lg">😢</span>
+                <span className="text-red-500 text-xl font-bold">{incorrectos}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -505,7 +497,7 @@ export default function VelocidadExercisePage() {
               whileTap={{ scale: 0.95 }}
               onClick={iniciarEjercicio}
               className="text-white px-14 py-4 rounded-lg font-bold text-xl shadow-lg flex items-center gap-3"
-              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               data-testid="button-iniciar"
             >
               Iniciar
@@ -584,7 +576,7 @@ export default function VelocidadExercisePage() {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
                 className="w-20 h-20 mx-auto mb-6 rounded-lg flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               >
                 <span className="text-white text-4xl">✓</span>
               </motion.div>
@@ -632,7 +624,7 @@ export default function VelocidadExercisePage() {
                     setGameState("ready");
                   }}
                   className="text-white px-8 py-3 rounded-lg font-semibold text-base shadow-md"
-                  style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                   data-testid="button-repetir-todo"
                 >
                   Repetir Todo
