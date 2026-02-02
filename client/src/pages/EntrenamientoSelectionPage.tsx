@@ -146,6 +146,15 @@ export default function EntrenamientoSelectionPage() {
       : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
   }, [editorMode, selectedElement]);
 
+  const getElementStyle = useCallback((elementId: string, defaultBg?: string) => {
+    const s = styles[elementId];
+    const result: React.CSSProperties = {};
+    if (s?.background) result.background = s.background;
+    else if (s?.imageUrl) result.background = `url(${s.imageUrl}) center/cover no-repeat`;
+    else if (defaultBg) result.background = defaultBg;
+    return result;
+  }, [styles]);
+
   const handleSelect = useCallback((item: EntrenamientoItem) => {
     if (editorMode) return;
     playCardSound();
@@ -197,63 +206,82 @@ export default function EntrenamientoSelectionPage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pb-24">
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
-          onClick={(e) => editorMode && handleElementClick("hero-section", e)}
+          onClick={(e) => handleElementClick("hero-section", e)}
           style={{
-            background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            paddingTop: "16px",
+            position: "relative",
+            backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
+          data-testid="hero-section"
         >
-          <div className="px-5 pt-6 pb-4 text-center">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.1 }}
-              className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${getEditableClass("hero-icon")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-icon", e); }}}
-              style={{ 
-                background: styles["hero-icon"]?.background || "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
-                width: styles["hero-icon"]?.iconSize || 64,
-                height: styles["hero-icon"]?.iconSize || 64
-              }}
-            >
-              {styles["hero-icon"]?.imageUrl ? (
-                <img src={styles["hero-icon"].imageUrl} alt="" className="w-8 h-8 object-contain" />
-              ) : (
-                <Dumbbell className="w-8 h-8 text-white" />
-              )}
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className={`text-2xl font-black mb-2 ${getEditableClass("hero-title")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); }}}
-              style={{ 
-                color: styles["hero-title"]?.textColor || "#1f2937",
-                fontSize: styles["hero-title"]?.fontSize || 24
-              }}
-            >
-              {styles["hero-title"]?.buttonText || "Entrenamientos"}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`text-sm ${getEditableClass("hero-subtitle")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}}
-              style={{ 
-                color: styles["hero-subtitle"]?.textColor || "#6b7280",
-                fontSize: styles["hero-subtitle"]?.fontSize || 14
-              }}
-            >
-              {styles["hero-subtitle"]?.buttonText || "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"}
-            </motion.p>
+          <div className="relative z-10 px-5 pb-8">
+            <div>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
+                style={getElementStyle("hero-title")}
+              >
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Entrenamiento"}
+                </span>
+                <br />
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                </span>
+                <br />
+                <span style={{ 
+                  background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
+                  WebkitBackgroundClip: "text", 
+                  WebkitTextFillColor: "transparent" 
+                }}>
+                  {styles["hero-title"]?.buttonText?.split('\n')[2] || "eXponencial"}
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
+                style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+              >
+                {styles["hero-subtitle"]?.buttonText || "Ejercicios diseñados para"}
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 }}
+                className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
+                style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+              >
+                {styles["hero-subtitle2"]?.buttonText || "potenciar tu mente"}
+              </motion.p>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
+                onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
+                style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+              >
+                {styles["hero-desc"]?.buttonText || "Selecciona un entrenamiento para comenzar y fortalece tus habilidades cognitivas con ejercicios personalizados."}
+              </motion.p>
+            </div>
           </div>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-4 pb-8 space-y-4 -mt-2">
           {items.length === 0 ? (
             <div className="text-center py-8">
               <Dumbbell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -272,7 +300,7 @@ export default function EntrenamientoSelectionPage() {
               const hasBackgroundImage = cardStyle?.imageUrl;
               const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
               const iconUrl = styles[iconId]?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const iconSize = styles[iconId]?.iconSize || 56;
+              const iconSize = styles[iconId]?.iconSize || 48;
               
               return (
                 <motion.div
@@ -309,66 +337,69 @@ export default function EntrenamientoSelectionPage() {
                       Entrenamiento
                     </div>
                     
-                    <div className="flex items-center gap-3 pt-6">
-                      <div 
-                        className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
-                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
-                        style={{ width: iconSize, height: iconSize }}
+                    <div className="pt-6">
+                      <h3 
+                        className={`text-base font-bold mb-3 uppercase tracking-wide ${getEditableClass(titleId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
+                        style={{ 
+                          fontSize: styles[titleId]?.fontSize || 15,
+                          color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
+                        }}
                       >
-                        <img 
-                          src={iconUrl} 
-                          alt="" 
-                          className="drop-shadow-md"
-                          style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
-                        />
-                      </div>
+                        {styles[titleId]?.buttonText || item.title}
+                      </h3>
                       
-                      <div className="flex-1 min-w-0">
-                        <h3 
-                          className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
-                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
-                          style={{ 
-                            fontSize: styles[titleId]?.fontSize || 18,
-                            color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
-                          }}
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
+                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
+                          style={{ width: iconSize, height: iconSize }}
                         >
-                          {styles[titleId]?.buttonText || item.title}
-                        </h3>
-                        {item.description && (
-                          <p 
-                            className={`text-sm leading-snug ${getEditableClass(descId)}`}
-                            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
-                            style={{ 
-                              fontSize: styles[descId]?.fontSize || 13,
-                              color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
-                            }}
-                          >
-                            {styles[descId]?.buttonText || item.description}
-                          </p>
-                        )}
+                          <img 
+                            src={iconUrl} 
+                            alt="" 
+                            className="drop-shadow-md"
+                            style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
+                          />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          {item.description && (
+                            <p 
+                              className={`text-sm leading-snug ${getEditableClass(descId)}`}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
+                              style={{ 
+                                fontSize: styles[descId]?.fontSize || 13,
+                                color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
+                              }}
+                            >
+                              {styles[descId]?.buttonText || item.description}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <motion.button
+                          className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            if (editorMode) {
+                              handleElementClick(btnId, e);
+                            } else {
+                              playButtonSound(); 
+                              handleSelect(item);
+                            }
+                          }}
+                          style={{
+                            background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
+                            color: styles[btnId]?.textColor || "white",
+                            border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
+                          }}
+                          whileTap={{ scale: editorMode ? 1 : 0.95 }}
+                        >
+                          {styles[btnId]?.buttonText || "Iniciar"}
+                          <ChevronRight className="w-4 h-4" />
+                        </motion.button>
                       </div>
-                      
-                      <motion.button
-                        className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          if (editorMode) {
-                            handleElementClick(btnId, e);
-                          } else {
-                            playButtonSound(); 
-                            handleSelect(item);
-                          }
-                        }}
-                        style={{
-                          background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
-                          color: styles[btnId]?.textColor || "white",
-                          border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
-                        }}
-                        whileTap={{ scale: editorMode ? 1 : 0.95 }}
-                      >
-                        {styles[btnId]?.buttonText || "Iniciar"}
-                        <ChevronRight className="w-4 h-4" />
-                      </motion.button>
                     </div>
                   </motion.div>
                 </motion.div>
