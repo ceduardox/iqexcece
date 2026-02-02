@@ -28,10 +28,12 @@ export default function NumerosResultPage() {
   }, []);
 
   const handleShare = async () => {
-    const text = `¡He completado el ejercicio de ${results.nivel}!\n✅ Correctas: ${results.correctas}\n❌ Incorrectas: ${results.incorrectas}\n⏱️ Tiempo: ${results.tiempo}s`;
+    const appUrl = "https://iqexponencial.app";
+    const exerciseName = "Identifica rápidamente Números y Letras";
+    const text = `🧠 ${exerciseName}\n\n¡He completado el ejercicio de ${results.nivel}!\n✅ Correctas: ${results.correctas}\n❌ Incorrectas: ${results.incorrectas}\n⏱️ Tiempo: ${results.tiempo}s\n\n🚀 Prueba tú también: ${appUrl}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Mi resultado - IQ Exponencial", text });
+        await navigator.share({ title: "Mi resultado - IQ Exponencial", text, url: appUrl });
       } catch (e) {}
     } else {
       navigator.clipboard.writeText(text);
@@ -46,14 +48,14 @@ export default function NumerosResultPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={() => navigate("/")} />
 
-      <main className="flex-1 overflow-y-auto pb-24 -mt-2">
+      <main className="flex-1 overflow-y-auto pb-24">
         <div 
-          className="w-full"
+          className="w-full -mt-3"
           style={{
             background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
-          <div className="px-5 pt-6 pb-4 text-center">
+          <div className="px-5 pt-8 pb-4 text-center">
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
