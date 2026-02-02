@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -11,6 +11,12 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
+interface EntrenamientoItem {
+  id: string;
+  title: string;
+  linkUrl: string | null;
+}
+
 const categorias = [
   { id: "ninos", label: "Niños", sublabel: "6-11 años", icon: "👦" },
   { id: "adolescentes", label: "Adolescentes", sublabel: "12-17 años", icon: "🧑" },
@@ -19,20 +25,24 @@ const categorias = [
   { id: "adulto_mayor", label: "Adulto Mayor", sublabel: "60+ años", icon: "👴" },
 ];
 
-const tipoLabels: Record<string, string> = {
-  velocidad: "Velocidad Visual",
-  memoria: "Memoria",
-  atencion: "Atención",
-};
-
-export default function EntrenamientoCategoriaPage() {
+export default function EntrenamientoEdadPage() {
   const [, setLocation] = useLocation();
-  const params = useParams<{ tipo: string }>();
-  const tipo = params.tipo || "velocidad";
+  const params = useParams<{ itemId: string }>();
+  const itemId = params.itemId;
+
+  const storedItem = sessionStorage.getItem("selectedEntrenamientoItem");
+  const item: EntrenamientoItem | null = storedItem ? JSON.parse(storedItem) : null;
 
   const handleSelect = (categoriaId: string) => {
     playCardSound();
-    setLocation(`/entrenamiento/${categoriaId}`);
+    
+    if (item?.linkUrl === "velocidad") {
+      setLocation(`/velocidad/${categoriaId}/${itemId}`);
+    } else if (item?.linkUrl && item.linkUrl.startsWith("/")) {
+      setLocation(item.linkUrl);
+    } else {
+      setLocation(`/entrenamiento/${categoriaId}/prep/${itemId}`);
+    }
   };
 
   const handleBack = () => {
@@ -53,11 +63,17 @@ export default function EntrenamientoCategoriaPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6"
         >
+          <div 
+            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+            style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+          >
+            <Dumbbell className="w-7 h-7 text-white" />
+          </div>
           <p className="text-sm font-semibold mb-1" style={{ color: "#8a3ffc" }}>
-            {tipoLabels[tipo] || "Entrenamiento"}
+            {item?.title || "Entrenamiento"}
           </p>
           <h1 className="text-xl font-bold mb-2" style={{ color: "#1f2937" }}>
-            Selecciona tu categoría
+            Selecciona tu edad
           </h1>
           <p className="text-sm text-gray-500">
             Elige tu grupo de edad para contenido personalizado
@@ -73,7 +89,7 @@ export default function EntrenamientoCategoriaPage() {
               transition={{ delay: 0.05 + index * 0.05 }}
               onClick={() => handleSelect(cat.id)}
               className="cursor-pointer"
-              data-testid={`categoria-${cat.id}`}
+              data-testid={`edad-${cat.id}`}
             >
               <div 
                 className="rounded-xl p-4 flex items-center gap-4 border-2 border-gray-100 hover:border-purple-300 transition-colors"
