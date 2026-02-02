@@ -4,7 +4,6 @@ import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface EntrenamientoPage {
   bannerText: string;
@@ -76,10 +75,6 @@ export default function EntrenamientoPage() {
       className="min-h-screen bg-white flex flex-col"
     >
       <CurvedHeader showBack onBack={handleBack} />
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
 
       <motion.div
         initial={{ opacity: 0, y: -10 }}

@@ -88,7 +88,7 @@ export default function EntrenamientoPrepPage() {
 
   const handleBack = () => {
     playButtonSound();
-    setLocation(`/entrenamiento/${categoria}`);
+    window.history.back();
   };
 
   if (loading) {
