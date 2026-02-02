@@ -24,12 +24,16 @@ export function BottomNavBar() {
   };
 
   return (
-    <motion.nav 
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50"
-      data-testid="bottom-nav"
-    >
+    <>
+      {/* Espaciador automático para que el contenido no quede oculto */}
+      <div className="h-24 flex-shrink-0" aria-hidden="true" />
+      
+      <motion.nav 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="fixed bottom-0 left-0 right-0 z-50"
+        data-testid="bottom-nav"
+      >
       <div 
         className="mx-3 mb-3 rounded-2xl shadow-lg border border-purple-100/50"
         style={{
@@ -73,5 +77,6 @@ export function BottomNavBar() {
         </div>
       </div>
     </motion.nav>
+    </>
   );
 }

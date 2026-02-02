@@ -213,7 +213,7 @@ export default function RazonamientoQuizPage() {
         className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(180deg, #c4b5fd 0%, #ddd6fe 40%, #f5f3ff 100%)" }}
       >
-        <main className="flex-1 overflow-y-auto px-4 py-6 pb-24">
+        <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="flex flex-col items-center mb-6">
             <div 
               className="w-16 h-16 rounded-full flex items-center justify-center mb-4"

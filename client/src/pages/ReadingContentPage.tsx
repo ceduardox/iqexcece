@@ -246,7 +246,7 @@ export default function ReadingContentPage() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-24">
+        <main className="flex-1 overflow-y-auto">
           <div 
             className="w-full"
             style={{
@@ -373,7 +373,7 @@ export default function ReadingContentPage() {
         className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(180deg, #c4b5fd 0%, #ddd6fe 40%, #f5f3ff 100%)" }}
       >
-        <main className="flex-1 overflow-y-auto px-4 py-6 pb-24">
+        <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="flex flex-col items-center mb-6">
             <div 
               className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
@@ -627,7 +627,7 @@ export default function ReadingContentPage() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto px-5 py-5 pb-24">
+      <main className="flex-1 overflow-y-auto px-5 py-5">
         {activeTab === "lectura" ? (
           <div className="space-y-5">
             <div>
