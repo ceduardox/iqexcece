@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
-import { ChevronRight } from "lucide-react";
+import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
-import type { PageStyles } from "@/components/EditorToolbar";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
   const audio = new Audio('/card.mp3');
@@ -61,10 +61,15 @@ const categorias = [
   },
 ];
 
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+
 export default function EntrenamientoEdadPage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ itemId: string }>();
   const itemId = params.itemId;
+  
+  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
 
@@ -72,6 +77,9 @@ export default function EntrenamientoEdadPage() {
   const item: EntrenamientoItem | null = storedItem ? JSON.parse(storedItem) : null;
 
   useEffect(() => {
+    const stored = localStorage.getItem("editorMode");
+    if (stored === "true") setEditorMode(true);
+    
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
     fetch("/api/page-styles/age-selection")
@@ -95,29 +103,52 @@ export default function EntrenamientoEdadPage() {
     return () => clearTimeout(timeout);
   }, []);
 
-  const handleSelect = (categoriaId: string) => {
-    playCardSound();
-    
-    if (item?.linkUrl === "velocidad") {
-      setLocation(`/velocidad/${categoriaId}/${itemId}`);
-    } else if (item?.linkUrl && item.linkUrl.startsWith("/")) {
-      setLocation(item.linkUrl);
-    } else {
-      setLocation(`/entrenamiento/${categoriaId}/prep/${itemId}`);
+  const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    const authToken = localStorage.getItem("adminToken");
+    if (!authToken) {
+      alert("Debes iniciar sesión como administrador");
+      return;
     }
-  };
+    
+    try {
+      await fetch("/api/page-styles/entrenamiento-edad", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ styles: JSON.stringify(newStyles) })
+      });
+    } catch (error) {
+      console.error("Error saving styles:", error);
+    }
+  }, []);
 
-  const handleBack = () => {
-    setLocation("/entrenamiento");
-  };
+  const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
+    if (!editorMode) return;
+    e.stopPropagation();
+    setSelectedElement(elementId);
+  }, [editorMode]);
 
-  if (!stylesLoaded) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
+    setStyles(prev => ({
+      ...prev,
+      [elementId]: { ...prev[elementId], ...newStyle }
+    }));
+  }, []);
+
+  const handleEditorClose = useCallback(() => {
+    setEditorMode(false);
+    localStorage.setItem("editorMode", "false");
+    setSelectedElement(null);
+  }, []);
+
+  const getEditableClass = (elementId: string): string => {
+    if (!editorMode) return "";
+    return selectedElement === elementId 
+      ? "ring-2 ring-purple-500 ring-offset-2" 
+      : "hover:ring-2 hover:ring-purple-300 hover:ring-offset-1 cursor-pointer";
+  };
 
   const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
     const s = styles[elementId];
@@ -138,41 +169,120 @@ export default function EntrenamientoEdadPage() {
     return result;
   };
 
+  const handleSelect = (categoriaId: string) => {
+    if (editorMode) return;
+    playCardSound();
+    
+    if (item?.linkUrl === "velocidad") {
+      setLocation(`/velocidad/${categoriaId}/${itemId}`);
+    } else if (item?.linkUrl && item.linkUrl.startsWith("/")) {
+      setLocation(item.linkUrl);
+    } else {
+      setLocation(`/entrenamiento/${categoriaId}/prep/${itemId}`);
+    }
+  };
+
+  const handleBack = () => {
+    setLocation("/entrenamiento");
+  };
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={handleBack} />
+      <header 
+        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+        onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
+        style={{
+          paddingTop: styles["header"]?.paddingTop || 10,
+          paddingBottom: styles["header"]?.paddingBottom || 10,
+          ...getElementStyle("header", "white")
+        }}
+      >
+        <button 
+          onClick={handleBack}
+          className="absolute left-5 p-2 text-purple-600"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        
+        <div 
+          className={`flex items-center justify-center ${getEditableClass("header-logo")}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("header-logo", e); }}}
+          data-testid="header-logo"
+        >
+          <img 
+            src={styles["header-logo"]?.imageUrl || LOGO_URL} 
+            alt="Logo" 
+            style={{ 
+              height: styles["header-logo"]?.imageSize ? `${styles["header-logo"].imageSize}px` : "36px",
+              width: "auto"
+            }}
+          />
+        </div>
+        
+        <div className="absolute right-5 w-6" />
+      </header>
+
+      <div
+        className={`w-full sticky z-40 ${getEditableClass("menu-curve")}`}
+        onClick={(e) => handleElementClick("menu-curve", e)}
+        style={{
+          top: (styles["header"]?.paddingTop || 10) + (styles["header"]?.paddingBottom || 10) + 36,
+          marginTop: styles["menu-curve"]?.marginTop || -4,
+          marginBottom: styles["menu-curve"]?.marginBottom || -20,
+        }}
+      >
+        <img 
+          src={menuCurveImg} 
+          alt="" 
+          className="w-full h-auto"
+        />
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-20">
         <div 
-          className="w-full"
+          className={`w-full ${getEditableClass("hero-section")}`}
+          onClick={(e) => handleElementClick("hero-section", e)}
           style={{
+            paddingTop: "16px",
+            position: "relative",
             ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
         >
           <motion.div
-            className="px-5 pt-6 pb-4"
+            className="px-5 pt-2 pb-4"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.25 }}
           >
             <h1 
-              className="font-bold mb-1"
+              className={`font-bold mb-1 ${getEditableClass("main-title")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{ 
                 fontSize: styles["main-title"]?.fontSize || 22, 
                 color: styles["main-title"]?.textColor || "#5b21b6", 
                 fontWeight: styles["main-title"]?.fontWeight || 700 
               }}
             >
-              {styles["main-title"]?.buttonText || "SELECCIONA TU EDAD"}
+              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "SELECCIONA TU EDAD"}</span>
             </h1>
             <p 
-              className="leading-relaxed"
+              className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{ 
                 fontSize: styles["main-subtitle"]?.fontSize || 13, 
                 color: styles["main-subtitle"]?.textColor || "#9ca3af" 
               }}
             >
-              {styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}
+              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}</span>
             </p>
           </motion.div>
 
@@ -191,8 +301,8 @@ export default function EntrenamientoEdadPage() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
-                  onClick={() => handleSelect(cat.id)}
-                  className="cursor-pointer"
+                  onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(cat.id)}
+                  className={`cursor-pointer ${getEditableClass(cardId)}`}
                   data-testid={`card-edad-${cat.id}`}
                 >
                   <motion.div
@@ -210,7 +320,8 @@ export default function EntrenamientoEdadPage() {
                     transition={{ duration: 0.1 }}
                   >
                     <div 
-                      className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                      className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
                       style={{ 
                         width: iconSize + 8, 
                         height: iconSize + 8,
@@ -228,7 +339,8 @@ export default function EntrenamientoEdadPage() {
                     
                     <div className="flex-1 min-w-0">
                       <h3 
-                        className="font-semibold leading-tight"
+                        className={`font-semibold leading-tight ${getEditableClass(titleId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
                         style={{
                           fontSize: styles[titleId]?.fontSize || 14,
                           color: styles[titleId]?.textColor || "#1f2937"
@@ -237,7 +349,8 @@ export default function EntrenamientoEdadPage() {
                         {styles[titleId]?.buttonText || cat.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
                       </h3>
                       <p 
-                        className="leading-tight mt-0.5"
+                        className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
                         style={{
                           fontSize: styles[descId]?.fontSize || 12,
                           color: styles[descId]?.textColor || "#9ca3af"
@@ -257,6 +370,17 @@ export default function EntrenamientoEdadPage() {
       </main>
 
       <BottomNavBar />
+
+      {editorMode && (
+        <EditorToolbar
+          selectedElement={selectedElement}
+          styles={styles}
+          onStyleChange={handleStyleChange}
+          onSave={() => saveStyles(styles)}
+          onClose={handleEditorClose}
+          onClearSelection={() => setSelectedElement(null)}
+        />
+      )}
     </div>
   );
 }
