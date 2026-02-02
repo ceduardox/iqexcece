@@ -5,7 +5,6 @@ import { useUserData } from "@/lib/user-context";
 import { Check, Lock, Star, ChevronDown, BookOpen } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface ReadingTheme {
   temaNumero: number | null;
@@ -140,10 +139,6 @@ export default function ReadingSelectionPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={handleBack} />
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 

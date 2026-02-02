@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface CerebralIntro {
   imageUrl: string;
@@ -72,9 +71,6 @@ export default function CerebralSelectionPage() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <CurvedHeader showBack onBack={handleBack} />
-        <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-          <img src={menuCurveImg} alt="" className="w-full h-auto" />
-        </div>
         <main className="flex-1 p-5 space-y-4">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-48 w-full rounded-2xl" />
@@ -89,9 +85,6 @@ export default function CerebralSelectionPage() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <CurvedHeader showBack onBack={handleBack} />
-        <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-          <img src={menuCurveImg} alt="" className="w-full h-auto" />
-        </div>
         <main className="flex-1 flex flex-col items-center justify-center p-6">
           <Brain className="w-16 h-16 text-purple-300 mb-4" />
           <p className="text-gray-700 text-lg font-medium">No hay ejercicios disponibles.</p>
@@ -105,10 +98,6 @@ export default function CerebralSelectionPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={handleBack} />
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
