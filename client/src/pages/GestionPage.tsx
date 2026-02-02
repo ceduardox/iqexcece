@@ -3194,6 +3194,76 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Sync Section */}
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-sm mb-2 font-medium">Sincronizar imágenes entre Dev y Prod:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/admin/images/export", {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `images_export_${new Date().toISOString().split("T")[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        alert(`Exportadas ${data.images?.length || 0} imágenes`);
+                      } catch (e) {
+                        alert("Error al exportar");
+                      }
+                    }}
+                    data-testid="button-export-images"
+                  >
+                    Exportar Imágenes (JSON)
+                  </Button>
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    id="import-images"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        const res = await fetch("/api/admin/images/import", {
+                          method: "POST",
+                          headers: { 
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}` 
+                          },
+                          body: JSON.stringify({ images: data.images })
+                        });
+                        const result = await res.json();
+                        alert(`Importadas: ${result.imported}, Omitidas (ya existían): ${result.skipped}`);
+                        fetch("/api/images").then(r => r.json()).then(d => setUploadedImages(d || []));
+                      } catch (err) {
+                        alert("Error al importar: " + (err as Error).message);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-green-500/30 text-green-400 hover:bg-green-500/20"
+                    onClick={() => document.getElementById("import-images")?.click()}
+                    data-testid="button-import-images"
+                  >
+                    Importar Imágenes (JSON)
+                  </Button>
+                </div>
+              </div>
+              
               {/* Upload Section */}
               <div className="p-4 border-2 border-dashed border-white/20 rounded-lg">
                 <input

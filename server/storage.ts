@@ -627,6 +627,11 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  async saveImageWithId(id: string, name: string, data: string, originalSize?: number, compressedSize?: number, width?: number, height?: number) {
+    const [created] = await db.insert(uploadedImages).values({ id, name, data, originalSize, compressedSize, width, height }).returning();
+    return created;
+  }
+
   async getImages() {
     return db.select().from(uploadedImages).orderBy(uploadedImages.createdAt);
   }

@@ -489,6 +489,46 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  // Export all images for sync between environments
+  app.get("/api/admin/images/export", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const images = await storage.getImages();
+    res.json({ images, exportedAt: new Date().toISOString() });
+  });
+
+  // Import images from another environment
+  app.post("/api/admin/images/import", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const { images } = req.body;
+    if (!images || !Array.isArray(images)) {
+      return res.status(400).json({ error: "Invalid images data" });
+    }
+    let imported = 0;
+    let skipped = 0;
+    for (const img of images) {
+      try {
+        const existing = await storage.getImageById(img.id);
+        if (!existing) {
+          await storage.saveImageWithId(img.id, img.name, img.data, img.originalSize, img.compressedSize, img.width, img.height);
+          imported++;
+        } else {
+          skipped++;
+        }
+      } catch (e) {
+        skipped++;
+      }
+    }
+    res.json({ success: true, imported, skipped });
+  });
+
   // ===========================================
   // ENTRENAMIENTO ENDPOINTS
   // ===========================================
