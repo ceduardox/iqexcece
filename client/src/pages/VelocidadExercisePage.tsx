@@ -379,7 +379,7 @@ export default function VelocidadExercisePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="px-4 py-3 flex items-center justify-between"
+        className="relative px-4 pt-4 pb-8 flex items-center justify-between"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
       >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
@@ -390,30 +390,42 @@ export default function VelocidadExercisePage() {
         >
           <X className="w-5 h-5" />
         </button>
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-4"
+          style={{
+            background: "white",
+            borderTopLeftRadius: "24px",
+            borderTopRightRadius: "24px",
+          }}
+        />
       </header>
 
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="text-center">
-          <span className="text-gray-500 text-xs block">NIVEL</span>
-          <span className="text-gray-800 text-2xl font-bold">{getNivelFromPatron(ejercicio.patron)}</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="text-center">
-            <span className="text-gray-500 text-xs block">CORRECTOS</span>
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-green-500 text-2xl font-bold">{correctos}</span>
-            </div>
+      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+          >
+            <span className="text-white font-bold text-lg">{getNivelFromPatron(ejercicio.patron)}</span>
           </div>
-          <div className="text-center">
-            <span className="text-gray-500 text-xs block">INCORRECTOS</span>
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-red-500 text-2xl font-bold">{incorrectos}</span>
-            </div>
+          <div>
+            <span className="text-gray-400 text-xs block">NIVEL</span>
+            <span className="text-gray-800 text-sm font-semibold">Dificultad {getNivelFromPatron(ejercicio.patron)}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg">
+            <span className="text-lg">😊</span>
+            <span className="text-green-600 text-xl font-bold">{correctos}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+            <span className="text-lg">😢</span>
+            <span className="text-red-500 text-xl font-bold">{incorrectos}</span>
           </div>
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center px-6 py-6 bg-gradient-to-b from-purple-50 to-white">
+      <main className="flex-1 flex flex-col items-center px-6 py-6 bg-gradient-to-b from-purple-50/50 to-white">
         <div className="text-center mb-6">
           <span className="text-purple-600 text-lg font-bold">
             {ejercicio.velocidad} palabras /min.
