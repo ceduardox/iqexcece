@@ -81,6 +81,8 @@ export default function EntrenamientoPrepPage() {
       setLocation(`/lectura/${categoria}/${itemId}`);
     } else if (tipo === "memoria") {
       setLocation(`/memoria/${categoria}/${itemId}`);
+    } else if (tipo === "aceleracion_lectura") {
+      setLocation(`/aceleracion/${categoria}/${itemId}`);
     } else {
       setLocation(`/velocidad/${categoria}/${itemId}`);
     }

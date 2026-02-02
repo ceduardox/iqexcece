@@ -18,6 +18,7 @@ interface EntrenamientoItem {
   title: string;
   description: string | null;
   linkUrl: string | null;
+  tipoEjercicio: string | null;
   sortOrder: number | null;
   isActive: boolean | null;
 }
@@ -51,9 +52,10 @@ export default function EntrenamientoPage() {
   };
 
   const handleItemClick = (item: EntrenamientoItem) => {
-    if (item.linkUrl === "velocidad") {
+    // Check tipoEjercicio first, then linkUrl for backwards compatibility
+    if (item.tipoEjercicio === "velocidad" || item.linkUrl === "velocidad") {
       setLocation(`/velocidad/${categoria}/${item.id}`);
-    } else if (item.linkUrl === "aceleracion_lectura") {
+    } else if (item.tipoEjercicio === "aceleracion_lectura" || item.linkUrl === "aceleracion_lectura") {
       setLocation(`/aceleracion/${categoria}/${item.id}`);
     } else if (item.linkUrl && item.linkUrl.startsWith("/")) {
       setLocation(item.linkUrl);
