@@ -2028,9 +2028,33 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                       }}
                       placeholder="Escribe la pregunta..."
-                      className="bg-white/10 border-white/20 text-white mb-3"
+                      className="bg-white/10 border-white/20 text-white mb-2"
                       data-testid={`input-question-${qi}`}
                     />
+                    <div className="mb-3">
+                      <label className="text-white/40 text-xs mb-1 block">URL de imagen (opcional)</label>
+                      <Input
+                        value={(q as any).imageUrl || ""}
+                        onChange={(e) => {
+                          const newQ = [...currentEditContent.questions];
+                          (newQ[qi] as any).imageUrl = e.target.value;
+                          setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
+                        }}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                        className="bg-white/10 border-white/20 text-white text-xs"
+                        data-testid={`input-question-image-${qi}`}
+                      />
+                      {(q as any).imageUrl && (
+                        <div className="mt-2 p-2 bg-black/30 rounded-lg">
+                          <img 
+                            src={(q as any).imageUrl} 
+                            alt="Vista previa" 
+                            className="max-h-24 mx-auto rounded object-contain"
+                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                          />
+                        </div>
+                      )}
+                    </div>
                     <label className="text-white/40 text-xs mb-2 block">Opciones (haz clic en la correcta):</label>
                     <div className="space-y-2">
                       {q.options.map((opt: string, oi: number) => (
@@ -2237,9 +2261,33 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         setRazonamientoContent(p => ({ ...p, questions: newQ }));
                       }}
                       placeholder="Escribe la pregunta..."
-                      className="bg-white/10 border-white/20 text-white mb-3"
+                      className="bg-white/10 border-white/20 text-white mb-2"
                       data-testid={`input-razonamiento-question-${qi}`}
                     />
+                    <div className="mb-3">
+                      <label className="text-white/40 text-xs mb-1 block">URL de imagen (opcional)</label>
+                      <Input
+                        value={(q as any).imageUrl || ""}
+                        onChange={(e) => {
+                          const newQ = [...razonamientoContent.questions];
+                          (newQ[qi] as any).imageUrl = e.target.value;
+                          setRazonamientoContent(p => ({ ...p, questions: newQ }));
+                        }}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                        className="bg-white/10 border-white/20 text-white text-xs"
+                        data-testid={`input-razonamiento-question-image-${qi}`}
+                      />
+                      {(q as any).imageUrl && (
+                        <div className="mt-2 p-2 bg-black/30 rounded-lg">
+                          <img 
+                            src={(q as any).imageUrl} 
+                            alt="Vista previa" 
+                            className="max-h-24 mx-auto rounded object-contain"
+                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                          />
+                        </div>
+                      )}
+                    </div>
                     <label className="text-white/40 text-xs mb-2 block">Opciones (haz clic en la correcta):</label>
                     <div className="space-y-2">
                       {q.options.map((opt, oi) => (
