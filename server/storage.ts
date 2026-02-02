@@ -80,6 +80,7 @@ export interface IStorage {
   // Page styles for visual editor
   getPageStyle(pageName: string): Promise<PageStyle | null>;
   savePageStyle(pageName: string, styles: string): Promise<PageStyle>;
+  getAllPageStyles(): Promise<PageStyle[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -354,6 +355,7 @@ export class MemStorage implements IStorage {
   async savePageStyle(pageName: string, styles: string): Promise<PageStyle> {
     return { id: randomUUID(), pageName, styles, updatedAt: new Date() } as PageStyle;
   }
+  async getAllPageStyles(): Promise<PageStyle[]> { return []; }
 }
 
 export class DatabaseStorage implements IStorage {

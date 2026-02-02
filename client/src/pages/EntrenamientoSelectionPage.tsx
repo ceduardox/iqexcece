@@ -296,11 +296,11 @@ export default function EntrenamientoSelectionPage() {
             </div>
           ) : (
             items.map((item, index) => {
-              const cardId = `card-${item.id}`;
-              const titleId = `title-${item.id}`;
-              const descId = `desc-${item.id}`;
-              const iconId = `icon-${item.id}`;
-              const btnId = `btn-${item.id}`;
+              const cardId = `ent-card-${index}`;
+              const titleId = `ent-title-${index}`;
+              const descId = `ent-desc-${index}`;
+              const iconId = `ent-icon-${index}`;
+              const btnId = `ent-btn-${index}`;
               
               const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
               const cardStyle = styles[cardId];
