@@ -1,10 +1,9 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Baby, GraduationCap, Users, Briefcase, Home, Menu, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, Check } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
-import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {
@@ -19,33 +18,58 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
-const ageIcons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
-  preescolar: Baby,
-  ninos: Users,
-  universitarios: GraduationCap,
-  profesionales: Briefcase,
-  adulto_mayor: Users,
-};
-
-const ageGradients: Record<string, string> = {
-  preescolar: "linear-gradient(135deg, #FFB347 0%, #FF9A56 50%, #FF7043 100%)",
-  ninos: "linear-gradient(135deg, #7C4DFF 0%, #651FFF 50%, #6200EA 100%)",
-  universitarios: "linear-gradient(135deg, #00BCD4 0%, #00ACC1 50%, #0097A7 100%)",
-  profesionales: "linear-gradient(135deg, #EC407A 0%, #D81B60 50%, #AD1457 100%)",
-  adulto_mayor: "linear-gradient(135deg, #9C27B0 0%, #7B1FA2 50%, #6A1B9A 100%)",
-};
-
 const ageCategories = [
-  { id: "preescolar", label: "Pre-escolar", ageRange: "3-5 años", ageGroup: "preescolar" },
-  { id: "ninos", label: "Niños", ageRange: "6-12 años", ageGroup: "ninos" },
-  { id: "universitarios", label: "Adolescentes", ageRange: "12-18 años", ageGroup: "universitarios" },
-  { id: "profesionales", label: "Profesionales", ageRange: "26-55 años", ageGroup: "profesionales" },
-  { id: "adulto_mayor", label: "Adulto Mayor", ageRange: "55+ años", ageGroup: "adulto_mayor" },
+  { 
+    id: "preescolar", 
+    label: "Pre-escolar", 
+    ageRange: "3-5", 
+    ageGroup: "preescolar",
+    description: "Juegos cortos, visuales y guiados.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588294.png",
+    iconBg: "linear-gradient(135deg, #FFE082 0%, #FFB300 100%)"
+  },
+  { 
+    id: "ninos", 
+    label: "Niños", 
+    ageRange: "6-11", 
+    ageGroup: "ninos",
+    description: "Atención, lectura y lógica básica.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/2232/2232688.png",
+    iconBg: "linear-gradient(135deg, #CE93D8 0%, #9C27B0 100%)"
+  },
+  { 
+    id: "universitarios", 
+    label: "Adolescentes", 
+    ageRange: "12-17", 
+    ageGroup: "universitarios",
+    description: "Velocidad, enfoque y memoria.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
+    iconBg: "linear-gradient(135deg, #B39DDB 0%, #7E57C2 100%)"
+  },
+  { 
+    id: "profesionales", 
+    label: "Adultos", 
+    ageRange: "18-59", 
+    ageGroup: "profesionales",
+    description: "Productividad, lectura y claridad mental.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png",
+    iconBg: "linear-gradient(135deg, #90CAF9 0%, #1976D2 100%)"
+  },
+  { 
+    id: "adulto_mayor", 
+    label: "Adulto mayor", 
+    ageRange: "60+", 
+    ageGroup: "adulto_mayor",
+    description: "Memoria, agilidad y prevención cognitiva.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png",
+    iconBg: "linear-gradient(135deg, #CE93D8 0%, #8E24AA 100%)"
+  },
 ];
 
 interface AgeCardProps {
   category: typeof ageCategories[0];
   index: number;
+  isSelected: boolean;
   onClick: () => void;
   editorMode: boolean;
   styles: PageStyles;
@@ -53,83 +77,105 @@ interface AgeCardProps {
   getEditableClass: (id: string) => string;
 }
 
-function AgeCard({ category, index, onClick, editorMode, styles, onElementClick, getEditableClass }: AgeCardProps) {
-  const Icon = ageIcons[category.id] || Users;
-  const gradient = ageGradients[category.id];
+function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onElementClick, getEditableClass }: AgeCardProps) {
   const cardId = `card-${category.id}`;
   const iconId = `icon-${category.id}`;
   const titleId = `title-${category.id}`;
   const descId = `desc-${category.id}`;
   
   const cardStyle = styles[cardId];
-  const hasBackgroundImage = cardStyle?.imageUrl;
-  const iconSize = styles[iconId]?.iconSize || 28;
+  const iconSize = styles[iconId]?.iconSize || 48;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
+      transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
       className={`cursor-pointer ${getEditableClass(cardId)}`}
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-2xl p-5 flex items-center gap-4"
+        className={`relative overflow-hidden rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
+          isSelected 
+            ? "border-purple-500 bg-purple-50/50 shadow-lg shadow-purple-100" 
+            : "border-gray-100 bg-white hover:border-purple-200 hover:shadow-md"
+        }`}
         style={{ 
-          background: hasBackgroundImage ? `url(${cardStyle.imageUrl}) center/cover no-repeat` : (cardStyle?.background || gradient),
           borderRadius: cardStyle?.borderRadius || 16,
-          boxShadow: cardStyle?.shadowBlur ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.3)"}` : "0 4px 15px rgba(0,0,0,0.15)"
+          boxShadow: cardStyle?.shadowBlur 
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.1)"}` 
+            : isSelected ? undefined : "0 2px 8px rgba(0,0,0,0.04)"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
         <div 
-          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
+          className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
-          style={{ width: iconSize + 28, height: iconSize + 28 }}
+          style={{ 
+            width: iconSize + 12, 
+            height: iconSize + 12,
+            background: styles[iconId]?.background || category.iconBg,
+            padding: 8
+          }}
         >
           {styles[iconId]?.imageUrl ? (
             <img 
               src={styles[iconId].imageUrl} 
               alt="" 
-              className="drop-shadow-lg"
-              style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
+              className="drop-shadow-sm"
+              style={{ width: iconSize - 8, height: iconSize - 8, objectFit: "contain" }} 
             />
           ) : (
-            <div className="bg-white/25 rounded-full flex items-center justify-center backdrop-blur-sm" style={{ width: iconSize + 14, height: iconSize + 14 }}>
-              <Icon className="text-white" style={{ width: iconSize, height: iconSize }} />
-            </div>
+            <img 
+              src={category.iconUrl} 
+              alt="" 
+              className="drop-shadow-sm"
+              style={{ width: iconSize - 8, height: iconSize - 8, objectFit: "contain" }} 
+            />
           )}
         </div>
         
-        <div className="flex-1 text-white">
-          <h3 
-            className={`text-xl font-bold mb-0.5 ${getEditableClass(titleId)}`}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
-            style={{
-              fontSize: styles[titleId]?.fontSize || 20,
-              color: styles[titleId]?.textColor || "white"
-            }}
-          >
-            {styles[titleId]?.buttonText || category.label}
-          </h3>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 
+              className={`text-base font-bold text-gray-800 ${getEditableClass(titleId)}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
+              style={{
+                fontSize: styles[titleId]?.fontSize || 16,
+                color: styles[titleId]?.textColor || "#1f2937"
+              }}
+            >
+              {styles[titleId]?.buttonText || category.label}
+            </h3>
+            <span 
+              className="text-sm font-semibold text-purple-600"
+              style={{ color: styles[titleId]?.textColor ? styles[titleId].textColor : "#7c3aed" }}
+            >
+              ({category.ageRange})
+            </span>
+          </div>
           <p 
-            className={`text-sm opacity-90 ${getEditableClass(descId)}`}
+            className={`text-sm text-gray-500 mt-0.5 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
-              fontSize: styles[descId]?.fontSize || 14,
-              color: styles[descId]?.textColor || "rgba(255,255,255,0.9)"
+              fontSize: styles[descId]?.fontSize || 13,
+              color: styles[descId]?.textColor || "#6b7280"
             }}
           >
-            {styles[descId]?.buttonText || category.ageRange}
+            {styles[descId]?.buttonText || category.description}
           </p>
         </div>
         
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+        <div 
+          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+            isSelected 
+              ? "bg-purple-600 border-purple-600" 
+              : "border-gray-300 bg-white"
+          }`}
+        >
+          {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
         </div>
       </motion.div>
     </motion.div>
@@ -147,6 +193,7 @@ export default function AgeSelectionPage() {
   const [styles, setStyles] = useState<PageStyles>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<typeof ageCategories[0] | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("editorMode");
@@ -178,46 +225,37 @@ export default function AgeSelectionPage() {
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const authToken = localStorage.getItem("adminToken");
     if (!authToken) {
-      alert("No hay sesión de admin. Inicia sesión en /gestion primero.");
+      alert("Debes iniciar sesión como administrador");
       return;
     }
-    
     try {
-      const res = await fetch("/api/admin/page-styles", {
+      await fetch("/api/page-styles/age-selection", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`
         },
-        body: JSON.stringify({ pageName: "age-selection", styles: JSON.stringify(newStyles) }),
+        body: JSON.stringify({ styles: JSON.stringify(newStyles) })
       });
-      
-      if (res.ok) {
-        console.log("Estilos guardados correctamente");
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(`Error al guardar: ${errData.error || res.statusText}`);
-      }
-    } catch (err) {
-      console.error("Error saving styles:", err);
-      alert("Error de conexión al guardar");
+    } catch (e) {
+      console.error("Error saving styles:", e);
     }
   }, []);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
+    if (!editorMode) return;
     e.stopPropagation();
     setSelectedElement(elementId);
-  }, []);
+  }, [editorMode]);
 
   const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
-    const updated = { ...styles, [elementId]: { ...styles[elementId], ...newStyle } };
-    setStyles(updated);
-    saveStyles(updated);
-  }, [styles, saveStyles]);
+    setStyles(prev => {
+      const updated = { ...prev, [elementId]: newStyle };
+      return updated;
+    });
+  }, []);
 
   const handleEditorClose = useCallback(() => {
-    setSelectedElement(null);
-    localStorage.setItem("editorMode", "false");
     setEditorMode(false);
   }, []);
 
@@ -244,28 +282,30 @@ export default function AgeSelectionPage() {
     setLocation("/tests");
   }, [setLocation]);
 
-  const handleAgeSelect = useCallback((category: typeof ageCategories[0]) => {
+  const handleCardSelect = useCallback((category: typeof ageCategories[0]) => {
     playCardSound();
+    setSelectedCategory(category);
+  }, []);
+
+  const handleContinue = useCallback(() => {
+    if (!selectedCategory) return;
+    playButtonSound();
+    
     updateUserData({ 
-      ageGroup: category.ageGroup, 
-      ageLabel: category.label 
+      ageGroup: selectedCategory.ageGroup, 
+      ageLabel: selectedCategory.label 
     });
     
     if (testId === "lectura") {
-      if (category.ageGroup === "preescolar" || category.ageGroup === "ninos") {
-        setLocation(`/reading-selection/${category.ageGroup}`);
-      } else if (category.ageGroup === "universitarios" || category.ageGroup === "profesionales" || category.ageGroup === "adulto_mayor") {
-        setLocation("/reading-selection/universitarios");
-      } else {
-        setLocation(`/reading-selection/${category.ageGroup}`);
-      }
+      setLocation(`/reading-selection/${selectedCategory.ageGroup}`);
     } else if (testId === "razonamiento") {
-      const razonamientoCategory = category.ageGroup === "adultos" ? "universitarios" : category.ageGroup;
-      setLocation(`/razonamiento-selection/${razonamientoCategory}`);
+      setLocation(`/razonamiento-selection/${selectedCategory.ageGroup}`);
     } else if (testId === "cerebral") {
-      setLocation("/cerebral/seleccion");
+      setLocation(`/cerebral-selection/${selectedCategory.ageGroup}`);
+    } else {
+      setLocation(`/quiz/${selectedCategory.ageGroup}/${testId}`);
     }
-  }, [testId, updateUserData, setLocation]);
+  }, [selectedCategory, testId, setLocation, updateUserData]);
 
   const handleNavHome = useCallback(() => {
     playButtonSound();
@@ -355,7 +395,7 @@ export default function AgeSelectionPage() {
         />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-32">
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
@@ -371,22 +411,11 @@ export default function AgeSelectionPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <p 
-              className={`text-sm font-medium tracking-widest mb-2 ${getEditableClass("top-label")}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("top-label", e); }}}
-              style={{
-                fontSize: styles["top-label"]?.fontSize || 12,
-                color: styles["top-label"]?.textColor || "#9ca3af",
-                letterSpacing: "0.15em"
-              }}
-            >
-              <span className="whitespace-pre-line">{styles["top-label"]?.buttonText || "SELECCIÓN"}</span>
-            </p>
             <h1 
-              className={`text-3xl font-black mb-3 ${getEditableClass("main-title")}`}
+              className={`text-2xl font-black mb-2 ${getEditableClass("main-title")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{
-                fontSize: styles["main-title"]?.fontSize || 32,
+                fontSize: styles["main-title"]?.fontSize || 26,
                 background: styles["main-title"]?.textColor ? styles["main-title"].textColor : "linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -396,24 +425,25 @@ export default function AgeSelectionPage() {
               <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Selecciona tu edad"}</span>
             </h1>
             <p 
-              className={`text-gray-500 text-base leading-relaxed ${getEditableClass("main-subtitle")}`}
+              className={`text-gray-500 text-sm leading-relaxed ${getEditableClass("main-subtitle")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{
-                fontSize: styles["main-subtitle"]?.fontSize || 15,
+                fontSize: styles["main-subtitle"]?.fontSize || 14,
                 color: styles["main-subtitle"]?.textColor || "#6b7280"
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Elige tu grupo de edad para personalizar la experiencia"}</span>
+              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Personaliza tu experiencia de aprendizaje"}</span>
             </p>
           </motion.div>
 
-          <div className="px-4 pb-8 space-y-3">
+          <div className="px-4 pb-6 space-y-3">
             {ageCategories.map((category, index) => (
               <AgeCard
                 key={category.id}
                 category={category}
                 index={index}
-                onClick={() => handleAgeSelect(category)}
+                isSelected={selectedCategory?.id === category.id}
+                onClick={() => handleCardSelect(category)}
                 editorMode={editorMode}
                 styles={styles}
                 onElementClick={handleElementClick}
@@ -423,6 +453,27 @@ export default function AgeSelectionPage() {
           </div>
         </div>
       </main>
+
+      <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 bg-gradient-to-t from-white via-white to-transparent pt-6 z-40">
+        <motion.button
+          onClick={handleContinue}
+          disabled={!selectedCategory}
+          className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${
+            selectedCategory
+              ? "text-white shadow-lg"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
+          style={{
+            background: selectedCategory 
+              ? "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" 
+              : undefined
+          }}
+          whileTap={selectedCategory ? { scale: 0.98 } : undefined}
+          data-testid="button-continue"
+        >
+          Continuar
+        </motion.button>
+      </div>
 
       <nav 
         className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 ${getEditableClass("nav-bar")}`}
