@@ -66,6 +66,7 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 export default function ReadingContentPage() {
   const { userData } = useUserData();
   const [activeTab, setActiveTab] = useState<"lectura" | "cuestionario">("lectura");
+  const [quizStarted, setQuizStarted] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
   const [questionTime, setQuestionTime] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -138,6 +139,7 @@ export default function ReadingContentPage() {
 
   const handleGoToQuestionnaire = useCallback(() => {
     playButtonSound();
+    setQuizStarted(true);
     setActiveTab("cuestionario");
     setCurrentQuestion(0);
     setSelectedAnswer(null);
@@ -643,13 +645,16 @@ export default function ReadingContentPage() {
           LECTURA
         </button>
         <button
-          onClick={() => setActiveTab("cuestionario")}
+          onClick={() => quizStarted && setActiveTab("cuestionario")}
           className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
             activeTab === "cuestionario" 
               ? "text-white"
-              : "text-gray-500"
+              : quizStarted 
+                ? "text-gray-500" 
+                : "text-gray-300 cursor-not-allowed"
           }`}
           style={activeTab === "cuestionario" ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" } : {}}
+          disabled={!quizStarted}
           data-testid="tab-cuestionario"
         >
           CUESTIONARIO
