@@ -230,11 +230,11 @@ export default function EntrenamientoSelectionPage() {
                 style={getElementStyle("hero-title")}
               >
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Entrenamiento"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Activa la"}
                 </span>
                 <br />
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Inteligencia"}
                 </span>
                 <br />
                 <span style={{ 
