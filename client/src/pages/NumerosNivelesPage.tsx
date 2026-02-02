@@ -17,6 +17,7 @@ interface NivelConfig {
 export default function NumerosNivelesPage() {
   const [, navigate] = useLocation();
   const [introData, setIntroData] = useState<any>(null);
+  const [introPath, setIntroPath] = useState("/");
   const [niveles, setNiveles] = useState<NivelConfig[]>([
     { id: "numeros", nombre: "Números", icono: "", activo: true },
     { id: "letras", nombre: "Letras", icono: "", activo: true },
@@ -24,6 +25,10 @@ export default function NumerosNivelesPage() {
   ]);
 
   useEffect(() => {
+    const storedIntroPath = sessionStorage.getItem("numerosIntroPath");
+    if (storedIntroPath) {
+      setIntroPath(storedIntroPath);
+    }
     const itemId = sessionStorage.getItem("numerosItemId");
     if (itemId) {
       fetch(`/api/numeros-intro/${itemId}`)
@@ -64,7 +69,7 @@ export default function NumerosNivelesPage() {
         <div className="relative pt-3 pb-2 px-5">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => window.history.back()}
+              onClick={() => navigate(introPath)}
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{
                 background: "rgba(255, 255, 255, 0.9)",

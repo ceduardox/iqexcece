@@ -57,7 +57,7 @@ export default function NumerosResultPage() {
         <div className="relative pt-3 pb-2 px-5">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(nivelesPath)}
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{
                 background: "rgba(255, 255, 255, 0.9)",

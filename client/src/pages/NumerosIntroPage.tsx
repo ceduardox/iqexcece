@@ -51,7 +51,7 @@ export default function NumerosIntroPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={() => setLocation(`/entrenamiento/${categoria}`)} />
+      <CurvedHeader showBack onBack={() => setLocation(`/entrenamiento/${categoria}/prep/${itemId}`)} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-24 -mt-2">
         <div 
@@ -110,6 +110,8 @@ export default function NumerosIntroPage() {
               transition={{ delay: 0.6, duration: 0.5 }}
               onClick={() => {
                 sessionStorage.setItem("numerosItemId", itemId || "");
+                sessionStorage.setItem("numerosCategoria", categoria || "");
+                sessionStorage.setItem("numerosIntroPath", `/numeros/${categoria}/${itemId}`);
                 setLocation(`/numeros/${categoria}/${itemId}/niveles`);
               }}
               className="mt-10 px-12 py-4 text-white font-bold text-xl rounded-lg shadow-lg hover:opacity-90 transition-opacity"
