@@ -202,40 +202,48 @@ export default function RazonamientoQuizPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex flex-col"
+        className="min-h-screen bg-white flex flex-col"
       >
-        <div className="p-4">
-          <motion.button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-white font-semibold text-lg"
-            whileTap={{ scale: 0.95 }}
-            data-testid="button-back-form"
-          >
-            <ArrowLeft className="w-6 h-6" />
-            <span>Resultados</span>
-          </motion.button>
+        <CurvedHeader showBack onBack={handleBack} />
+        
+        <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+          <img src={menuCurveImg} alt="" className="w-full h-auto" />
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div 
+          className="flex-1 flex flex-col items-center justify-start px-4 pb-8 pt-6"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
+        >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl"
+            className="w-full max-w-md rounded-2xl p-6 border border-purple-100/50"
+            style={{
+              background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(248,245,255,0.95) 100%)",
+              boxShadow: "0 8px 32px rgba(138, 63, 252, 0.1), 0 2px 8px rgba(0,0,0,0.04)"
+            }}
           >
             <div className="text-center mb-6">
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.2 }}
-                className="w-20 h-20 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ 
+                  background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
+                  boxShadow: "0 4px 16px rgba(138, 63, 252, 0.3)"
+                }}
               >
-                <Brain className="w-10 h-10 text-white" />
+                <Brain className="w-8 h-8 text-white" />
               </motion.div>
               <motion.h2 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-bold text-gray-800"
+                className="text-xl font-bold"
+                style={{ color: "#1f2937" }}
               >
                 {title}
               </motion.h2>
@@ -243,7 +251,8 @@ export default function RazonamientoQuizPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-gray-500 mt-2"
+                className="text-sm mt-2"
+                style={{ color: "#6b7280" }}
               >
                 Completa tus datos para ver tus resultados
               </motion.p>
@@ -264,13 +273,18 @@ export default function RazonamientoQuizPage() {
                   transition={{ delay }}
                   className="relative"
                 >
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500" />
+                  <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#8a3ffc" }} />
                   <Input
                     type={type}
                     placeholder={placeholder}
                     value={formData[key as keyof typeof formData]}
                     onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                    className="pl-10 border-2 border-gray-200 focus:border-cyan-400 bg-gray-50 rounded-xl h-12 transition-all text-gray-800 placeholder:text-gray-400"
+                    className="pl-12 h-12 rounded-xl transition-all text-gray-800 placeholder:text-gray-400"
+                    style={{
+                      background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
+                      border: "2px solid rgba(138, 63, 252, 0.15)",
+                      boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
+                    }}
                     data-testid={`input-${key}`}
                   />
                 </motion.div>
@@ -281,13 +295,18 @@ export default function RazonamientoQuizPage() {
                 transition={{ delay: 0.35 }}
                 className="relative"
               >
-                <MessageSquare className="absolute left-3 top-4 w-5 h-5 text-cyan-500" />
+                <MessageSquare className="absolute left-4 top-4 w-5 h-5" style={{ color: "#8a3ffc" }} />
                 <textarea
                   placeholder="Comentario (opcional)"
                   value={formData.comentario}
                   onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
                   rows={2}
-                  className="w-full pl-10 p-3 rounded-xl border-2 border-gray-200 focus:border-cyan-400 bg-gray-50 resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400"
+                  className="w-full pl-12 p-3 rounded-xl resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400"
+                  style={{
+                    background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
+                    border: "2px solid rgba(138, 63, 252, 0.15)",
+                    boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
+                  }}
                   data-testid="input-comentario"
                 />
               </motion.div>
@@ -302,7 +321,11 @@ export default function RazonamientoQuizPage() {
                 onClick={handleSubmit}
                 disabled={submitting || !formData.nombre.trim()}
                 size="lg"
-                className="w-full mt-5 bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-500 text-white font-bold shadow-lg hover:shadow-xl transition-shadow"
+                className="w-full mt-5 text-white font-bold transition-all"
+                style={{
+                  background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
+                  boxShadow: "0 4px 16px rgba(138, 63, 252, 0.3)"
+                }}
                 data-testid="button-submit-results"
               >
                 {submitting ? (
