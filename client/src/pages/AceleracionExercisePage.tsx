@@ -621,9 +621,9 @@ export default function AceleracionExercisePage() {
   // Exercise view - Golpe de Vista style (formal & creative)
   if (showExercise && selectedPdf) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)" }}>
+      <div className="h-[100dvh] flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)" }}>
         {/* Elegant header with gradient accent */}
-        <header className="relative px-5 pt-4 pb-6">
+        <header className="relative px-4 pt-3 pb-4 flex-shrink-0">
           {/* Decorative gradient line */}
           <div 
             className="absolute top-0 left-0 right-0 h-1"
@@ -631,20 +631,23 @@ export default function AceleracionExercisePage() {
           />
           
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-cyan-400 text-xs font-medium tracking-widest uppercase mb-1">
-                Entrenamiento Visual
-              </p>
-              <h1 className="text-white font-bold text-xl tracking-tight">
+            {/* Logo */}
+            <img 
+              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+              alt="IQEXPONENCIAL" 
+              className="h-7 sm:h-8 object-contain"
+            />
+            <div className="text-center flex-1 px-2">
+              <p className="text-cyan-400 text-[10px] sm:text-xs font-medium tracking-widest uppercase">
                 {modeTitle}
-              </h1>
+              </p>
             </div>
             <button
               onClick={handleClose}
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-all"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-all"
               data-testid="button-close-exercise"
             >
-              <X className="w-5 h-5 text-white" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </button>
           </div>
         </header>
