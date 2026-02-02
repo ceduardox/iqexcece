@@ -78,7 +78,7 @@ export default function CerebralResultPage() {
         </div>
       </header>
       
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+      <div className="w-full sticky z-40" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
