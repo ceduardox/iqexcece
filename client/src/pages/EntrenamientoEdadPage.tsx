@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { ChevronRight } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
+import type { PageStyles } from "@/components/EditorToolbar";
 
 const playCardSound = () => {
   const audio = new Audio('/card.mp3');
@@ -63,9 +65,35 @@ export default function EntrenamientoEdadPage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ itemId: string }>();
   const itemId = params.itemId;
+  const [styles, setStyles] = useState<PageStyles>({});
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   const storedItem = sessionStorage.getItem("selectedEntrenamientoItem");
   const item: EntrenamientoItem | null = storedItem ? JSON.parse(storedItem) : null;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
+    
+    fetch("/api/page-styles/age-selection")
+      .then(res => res.json())
+      .then(data => {
+        if (data.style?.styles) {
+          try {
+            setStyles(JSON.parse(data.style.styles));
+          } catch (e) {
+            console.log("No saved styles");
+          }
+        }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      });
+    
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleSelect = (categoriaId: string) => {
     playCardSound();
@@ -83,6 +111,33 @@ export default function EntrenamientoEdadPage() {
     setLocation("/entrenamiento");
   };
 
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
+    const s = styles[elementId];
+    if (!s) return defaultBg ? { background: defaultBg } : {};
+    
+    const result: React.CSSProperties = {};
+    
+    if (s.imageUrl) {
+      result.backgroundImage = `url(${s.imageUrl})`;
+      result.backgroundSize = "cover";
+      result.backgroundPosition = "center";
+    } else if (s.background) {
+      result.background = s.background;
+    } else if (defaultBg) {
+      result.background = defaultBg;
+    }
+    
+    return result;
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={handleBack} />
@@ -91,7 +146,7 @@ export default function EntrenamientoEdadPage() {
         <div 
           className="w-full"
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
         >
           <motion.div
@@ -102,74 +157,101 @@ export default function EntrenamientoEdadPage() {
           >
             <h1 
               className="font-bold mb-1"
-              style={{ fontSize: 22, color: "#5b21b6", fontWeight: 700 }}
+              style={{ 
+                fontSize: styles["main-title"]?.fontSize || 22, 
+                color: styles["main-title"]?.textColor || "#5b21b6", 
+                fontWeight: styles["main-title"]?.fontWeight || 700 
+              }}
             >
-              SELECCIONA TU EDAD
+              {styles["main-title"]?.buttonText || "SELECCIONA TU EDAD"}
             </h1>
             <p 
               className="leading-relaxed"
-              style={{ fontSize: 13, color: "#9ca3af" }}
+              style={{ 
+                fontSize: styles["main-subtitle"]?.fontSize || 13, 
+                color: styles["main-subtitle"]?.textColor || "#9ca3af" 
+              }}
             >
-              Así ajustamos ejercicios y dificultad.
+              {styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}
             </p>
           </motion.div>
 
           <div className="px-4 pb-4 space-y-2">
-            {categorias.map((cat, index) => (
-              <motion.div
-                key={cat.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
-                onClick={() => handleSelect(cat.id)}
-                className="cursor-pointer"
-                data-testid={`card-edad-${cat.id}`}
-              >
-                <motion.div
-                  className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
-                  style={{ 
-                    borderRadius: 16,
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  <div 
-                    className="flex-shrink-0 flex items-center justify-center rounded-xl"
-                    style={{ 
-                      width: 48, 
-                      height: 48,
-                      background: cat.iconBg,
-                      padding: 6
-                    }}
-                  >
-                    <img 
-                      src={cat.iconUrl} 
-                      alt="" 
-                      className="drop-shadow-sm"
-                      style={{ width: 34, height: 34, objectFit: "contain" }} 
-                    />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 
-                      className="font-semibold leading-tight"
-                      style={{ fontSize: 14, color: "#1f2937" }}
-                    >
-                      {cat.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
-                    </h3>
-                    <p 
-                      className="leading-tight mt-0.5"
-                      style={{ fontSize: 12, color: "#9ca3af" }}
-                    >
-                      {cat.description}
-                    </p>
-                  </div>
+            {categorias.map((cat, index) => {
+              const cardId = `card-${cat.id}`;
+              const iconId = `icon-${cat.id}`;
+              const titleId = `title-${cat.id}`;
+              const descId = `desc-${cat.id}`;
+              const cardStyle = styles[cardId];
+              const iconSize = styles[iconId]?.iconSize || 40;
 
-                  <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
+              return (
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
+                  onClick={() => handleSelect(cat.id)}
+                  className="cursor-pointer"
+                  data-testid={`card-edad-${cat.id}`}
+                >
+                  <motion.div
+                    className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
+                    style={{ 
+                      background: cardStyle?.imageUrl 
+                        ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+                        : cardStyle?.background || "white",
+                      borderRadius: cardStyle?.borderRadius || 16,
+                      boxShadow: cardStyle?.shadowBlur 
+                        ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
+                        : "0 1px 4px rgba(0,0,0,0.06)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <div 
+                      className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                      style={{ 
+                        width: iconSize + 8, 
+                        height: iconSize + 8,
+                        background: styles[iconId]?.background || cat.iconBg,
+                        padding: 6
+                      }}
+                    >
+                      <img 
+                        src={styles[iconId]?.imageUrl || cat.iconUrl} 
+                        alt="" 
+                        className="drop-shadow-sm"
+                        style={{ width: iconSize - 6, height: iconSize - 6, objectFit: "contain" }} 
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 
+                        className="font-semibold leading-tight"
+                        style={{
+                          fontSize: styles[titleId]?.fontSize || 14,
+                          color: styles[titleId]?.textColor || "#1f2937"
+                        }}
+                      >
+                        {styles[titleId]?.buttonText || cat.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
+                      </h3>
+                      <p 
+                        className="leading-tight mt-0.5"
+                        style={{
+                          fontSize: styles[descId]?.fontSize || 12,
+                          color: styles[descId]?.textColor || "#9ca3af"
+                        }}
+                      >
+                        {styles[descId]?.buttonText || cat.description}
+                      </p>
+                    </div>
+
+                    <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </main>
