@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight, Clock, Zap, Target, Brain } from "lucide-react";
+import { BottomNavBar } from "@/components/BottomNavBar";
+
+const playButtonSound = () => {
+  const audio = new Audio('/iphone.mp3');
+  audio.volume = 0.5;
+  audio.play().catch(() => {});
+};
 
 interface PrepData {
   imagen: string;
@@ -12,6 +19,8 @@ interface PrepData {
   tipoEjercicio: string;
 }
 
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+
 export default function EntrenamientoPrepPage() {
   const { categoria, itemId } = useParams<{ categoria: string; itemId: string }>();
   const [, setLocation] = useLocation();
@@ -21,18 +30,15 @@ export default function EntrenamientoPrepPage() {
   useEffect(() => {
     const loadPrepData = async () => {
       try {
-        // Cargar datos del item para obtener el tipo de ejercicio
         const itemRes = await fetch(`/api/entrenamiento/item/${itemId}`);
         const itemData = await itemRes.json();
         const tipoEjercicio = itemData.item?.tipoEjercicio || "velocidad";
         
-        // Si es tipo "numeros", redirigir directamente a NumerosIntroPage
         if (tipoEjercicio === "numeros") {
           setLocation(`/numeros/${categoria}/${itemId}`);
           return;
         }
         
-        // Intentar cargar la página de preparación de la categoría
         const prepRes = await fetch(`/api/prep-page/${categoria}`);
         const prepPageData = await prepRes.json();
         
@@ -42,7 +48,7 @@ export default function EntrenamientoPrepPage() {
             titulo: prepPageData.page.titulo || "Preparación",
             subtitulo: prepPageData.page.subtitulo || "",
             instrucciones: prepPageData.page.instrucciones || "",
-            textoBoton: prepPageData.page.textoBoton || "Empezar",
+            textoBoton: prepPageData.page.textoBoton || "Iniciar sesión",
             tipoEjercicio,
           });
         } else if (itemData.item) {
@@ -51,7 +57,7 @@ export default function EntrenamientoPrepPage() {
             titulo: itemData.item.prepTitle || itemData.item.title || "Preparación",
             subtitulo: itemData.item.prepSubtitle || "",
             instrucciones: itemData.item.prepInstructions || "",
-            textoBoton: itemData.item.prepButtonText || "Empezar",
+            textoBoton: itemData.item.prepButtonText || "Iniciar sesión",
             tipoEjercicio,
           });
         }
@@ -64,100 +70,244 @@ export default function EntrenamientoPrepPage() {
     loadPrepData();
   }, [categoria, itemId, setLocation]);
 
+  const handleStart = () => {
+    playButtonSound();
+    const tipo = prepData?.tipoEjercicio || "velocidad";
+    if (tipo === "velocidad") {
+      setLocation(`/velocidad/${categoria}/${itemId}`);
+    } else if (tipo === "numeros") {
+      setLocation(`/numeros/${categoria}/${itemId}`);
+    } else if (tipo === "lectura") {
+      setLocation(`/lectura/${categoria}/${itemId}`);
+    } else if (tipo === "memoria") {
+      setLocation(`/memoria/${categoria}/${itemId}`);
+    } else {
+      setLocation(`/velocidad/${categoria}/${itemId}`);
+    }
+  };
+
+  const handleBack = () => {
+    playButtonSound();
+    setLocation(`/entrenamiento/${categoria}`);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-      <header className="p-4 flex items-center">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100">
         <button
-          onClick={() => setLocation(`/entrenamiento/${categoria}`)}
-          className="flex items-center gap-2 text-white font-semibold text-lg"
+          onClick={handleBack}
+          className="absolute left-4 p-2 text-purple-600"
           data-testid="button-back"
         >
-          <ArrowLeft className="w-6 h-6" />
-          Volver
+          <ArrowLeft className="w-5 h-5" />
         </button>
+        
+        <img 
+          src={LOGO_URL} 
+          alt="IQX" 
+          className="h-8"
+        />
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6"
-        >
-          {prepData?.imagen && (
-            <img 
-              src={prepData.imagen} 
-              alt="" 
-              className="w-48 h-48 object-contain"
-              data-testid="img-prep"
-            />
-          )}
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-center space-y-4"
-        >
-          <h1 
-            className="text-3xl font-bold text-white"
-            data-testid="text-prep-title"
-          >
-            {prepData?.titulo}
-          </h1>
-          
-          {prepData?.subtitulo && (
-            <p 
-              className="text-xl font-semibold text-white"
-              data-testid="text-prep-subtitle"
-            >
-              {prepData.subtitulo}
-            </p>
-          )}
-          
-          {prepData?.instrucciones && (
-            <p 
-              className="text-white/90 text-lg max-w-sm mx-auto"
-              data-testid="text-prep-instructions"
-            >
-              {prepData.instrucciones}
-            </p>
-          )}
-        </motion.div>
-
-        <motion.button
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          onClick={() => {
-            const tipo = prepData?.tipoEjercicio || "velocidad";
-            if (tipo === "velocidad") {
-              setLocation(`/velocidad/${categoria}/${itemId}`);
-            } else if (tipo === "numeros") {
-              setLocation(`/numeros/${categoria}/${itemId}`);
-            } else if (tipo === "lectura") {
-              setLocation(`/lectura/${categoria}/${itemId}`);
-            } else if (tipo === "memoria") {
-              setLocation(`/memoria/${categoria}/${itemId}`);
-            } else {
-              setLocation(`/velocidad/${categoria}/${itemId}`);
-            }
+      <main className="flex-1 overflow-y-auto pb-28">
+        <div 
+          className="relative px-5 pt-6 pb-8"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 50%, rgba(255, 255, 255, 1) 100%)"
           }}
-          className="mt-10 px-12 py-4 bg-orange-500 text-white font-bold text-xl rounded-full shadow-lg"
-          data-testid="button-start"
         >
-          {prepData?.textoBoton || "Empezar"}
-        </motion.button>
+          <div className="flex items-start justify-between">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex-1 pr-4"
+            >
+              <h1 
+                className="text-2xl font-bold text-gray-800 leading-tight mb-2"
+                data-testid="text-prep-title"
+              >
+                {prepData?.titulo || "Acelera tu Lectura"}
+              </h1>
+              
+              {prepData?.subtitulo && (
+                <p 
+                  className="text-sm text-gray-500 leading-relaxed"
+                  data-testid="text-prep-subtitle"
+                >
+                  {prepData.subtitulo}
+                </p>
+              )}
+            </motion.div>
+
+            {prepData?.imagen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+                className="flex-shrink-0"
+              >
+                <img 
+                  src={prepData.imagen} 
+                  alt="" 
+                  className="w-24 h-24 object-contain"
+                  data-testid="img-prep"
+                />
+              </motion.div>
+            )}
+          </div>
+
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            onClick={handleStart}
+            className="w-full mt-6 py-3.5 rounded-full font-semibold text-white text-base shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)"
+            }}
+            whileTap={{ scale: 0.98 }}
+            data-testid="button-start"
+          >
+            {prepData?.textoBoton || "Iniciar sesión"}
+          </motion.button>
+        </div>
+
+        {prepData?.instrucciones && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+            className="px-5 py-4"
+          >
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-start gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)" }}
+                >
+                  <Target className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">Instrucciones</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed">
+                    {prepData.instrucciones}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="px-5 space-y-3">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
+            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #C084FC 0%, #818CF8 100%)" }}
+                >
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-sm">Reconocimiento Visual</h3>
+                  <p className="text-gray-400 text-xs">Entrena tu capacidad para reconocer palabras rápidamente.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">3 min</span>
+                <div className="w-12 h-7 rounded-full bg-purple-100 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-purple-600">0/10</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
+            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)" }}
+                >
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-sm">Sprint de Lectura</h3>
+                  <p className="text-gray-400 text-xs">Mejora tu velocidad de lectura.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-center">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-bold text-purple-600">02:00</span>
+                    <span className="text-[10px] text-gray-400">WPM</span>
+                  </div>
+                  <span className="text-[10px] text-gray-400">palabras/min</span>
+                </div>
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)" }}
+                >
+                  <div className="text-center">
+                    <span className="text-xs font-bold text-white">250</span>
+                    <span className="text-[8px] text-white block">WPM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.4 }}
+            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #F472B6 0%, #EC4899 100%)" }}
+                >
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-sm">Caza-palabras</h3>
+                  <p className="text-gray-400 text-xs">Prueba tus reflejos en la identificación rápida de palabras.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-300" />
+            </div>
+            <div className="mt-3 flex items-center gap-4 text-xs">
+              <span><span className="text-purple-600 font-semibold">Racha:</span> 8</span>
+              <span><span className="text-gray-600">Aciertos:</span> 42</span>
+              <span><span className="text-red-400">Errores:</span> 5</span>
+              <span className="text-cyan-500 font-semibold">Recha: 5</span>
+            </div>
+          </motion.div>
+        </div>
       </main>
+
+      <BottomNavBar />
     </div>
   );
 }
