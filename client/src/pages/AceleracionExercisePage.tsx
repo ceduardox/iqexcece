@@ -969,6 +969,18 @@ export default function AceleracionExercisePage() {
               </div>
             </div>
 
+            {/* Upload button when no PDFs */}
+            {pdfs.length === 0 && (
+              <button
+                onClick={() => setShowUploader(true)}
+                className="w-full py-3 mb-6 rounded-md border border-gray-300 text-gray-600 font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                data-testid="button-upload-pdf"
+              >
+                <Upload className="w-4 h-4" />
+                Subir PDF
+              </button>
+            )}
+
             {/* PDF list */}
             {pdfs.length > 0 && (
               <div className="space-y-3">
