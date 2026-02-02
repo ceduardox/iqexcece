@@ -220,12 +220,43 @@ export default function EntrenamientoSelectionPage() {
           }}
           data-testid="hero-section"
         >
+          {styles["hero-image"]?.imageUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-0 ${getEditableClass("hero-image")}`}
+              onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
+              style={{
+                width: styles["hero-image"]?.iconSize || 160,
+                height: styles["hero-image"]?.iconSize || 160,
+                opacity: styles["hero-image"]?.shadowBlur ? styles["hero-image"].shadowBlur / 100 : 0.8
+              }}
+            >
+              <img 
+                src={styles["hero-image"].imageUrl} 
+                alt="" 
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+          )}
+          
+          {!styles["hero-image"]?.imageUrl && editorMode && (
+            <div
+              className={`absolute right-4 top-1/2 -translate-y-1/2 z-0 border-2 border-dashed border-purple-300 rounded-xl flex items-center justify-center ${getEditableClass("hero-image")}`}
+              onClick={(e) => { e.stopPropagation(); handleElementClick("hero-image", e); }}
+              style={{ width: 120, height: 120 }}
+            >
+              <span className="text-xs text-purple-400 text-center px-2">Click para agregar imagen</span>
+            </div>
+          )}
+          
           <div className="relative z-10 px-5 pb-8">
-            <div>
+            <div style={{ maxWidth: styles["hero-image"]?.imageUrl ? "60%" : "100%" }}>
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
+                className={`text-[26px] md:text-4xl font-medium leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                 style={getElementStyle("hero-title")}
               >
