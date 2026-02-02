@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Upload, Play, Pause, X, FileText, Trash2, ChevronRight, ChevronsLeft, ChevronsRight, Eye, Type } from "lucide-react";
+import { ChevronLeft, Upload, Play, Pause, X, FileText, Trash2, ChevronRight, ChevronsLeft, ChevronsRight, Eye, Type, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
@@ -44,6 +44,8 @@ export default function AceleracionExercisePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const animationRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const { data, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["/api/aceleracion", itemId],
@@ -246,6 +248,40 @@ export default function AceleracionExercisePage() {
     setLocalSpeed(prev => Math.min(920, prev + 10));
   };
 
+  // Share functionality - capture screen and share
+  const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playSound("iphone");
+    
+    const shareText = `Mi resultado en ${modeTitle} - IQEXPONENCIAL\nVelocidad: ${localSpeed} PPM\n\nEntrena tu cerebro en: https://iqexponencial.app`;
+    
+    try {
+      // Try Web Share API with text only (fastest & most compatible)
+      if (navigator.share) {
+        await navigator.share({
+          title: `Resultado ${modeTitle} - IQEXPONENCIAL`,
+          text: shareText,
+          url: 'https://iqexponencial.app'
+        });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareText);
+        alert('Resultado copiado al portapapeles');
+      }
+    } catch (err) {
+      // User cancelled or error - try clipboard as fallback
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('Resultado copiado al portapapeles');
+      } catch {
+        console.log('Share cancelled');
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   // Handle exercise completion
   const handleExerciseComplete = useCallback(() => {
     setIsPlaying(false);
@@ -329,19 +365,33 @@ export default function AceleracionExercisePage() {
         <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "linear-gradient(135deg, #8B5CF6, #06B6D4)" }} />
         <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "linear-gradient(135deg, #EC4899, #8B5CF6)" }} />
 
-        <main className="flex-1 px-6 pt-10 pb-8 flex flex-col relative z-10">
+        <main className="flex-1 px-6 pt-6 pb-8 flex flex-col relative z-10">
+          {/* Logo IQEXPONENCIAL */}
+          <motion.div 
+            className="mx-auto mb-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <img 
+              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+              alt="IQEXPONENCIAL" 
+              className="h-10 object-contain"
+            />
+          </motion.div>
+
           {/* Brain icon */}
           <motion.div 
-            className="mx-auto mb-6"
+            className="mx-auto mb-4"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
           >
             <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
               style={{ background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)" }}
             >
-              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
@@ -459,7 +509,7 @@ export default function AceleracionExercisePage() {
 
           {/* Star rating */}
           <motion.div 
-            className="flex justify-center gap-2 mb-8"
+            className="flex justify-center gap-2 mb-4"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1, type: "spring" }}
@@ -478,6 +528,20 @@ export default function AceleracionExercisePage() {
               </motion.svg>
             ))}
           </motion.div>
+
+          {/* Share button */}
+          <motion.button
+            onClick={handleShare}
+            disabled={isSharing}
+            className="mx-auto mb-6 flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+            data-testid="button-share"
+          >
+            <Share2 className="w-5 h-5" />
+            {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
+          </motion.button>
 
           {/* Action buttons */}
           <motion.div 
@@ -847,18 +911,6 @@ export default function AceleracionExercisePage() {
               </div>
             </div>
 
-            {/* Main action button */}
-            <button
-              onClick={() => pdfs.length > 0 ? null : setShowUploader(true)}
-              className="w-full py-4 rounded-full text-white font-bold text-lg shadow-lg transition-transform active:scale-98 mb-6"
-              style={{ 
-                background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)"
-              }}
-              data-testid="button-main-action"
-            >
-              {pdfs.length > 0 ? "Selecciona un PDF" : "Subir PDF"}
-            </button>
-
             {/* Instructions card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
               <div className="flex items-center gap-3">
@@ -911,10 +963,10 @@ export default function AceleracionExercisePage() {
                   </motion.div>
                 ))}
 
-                {/* Add more button */}
+                {/* Add more button - minimal border radius */}
                 <button
                   onClick={() => setShowUploader(true)}
-                  className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-500 font-medium flex items-center justify-center gap-2 hover:border-gray-300 hover:text-gray-600 transition-colors"
+                  className="w-full py-3 rounded-md border border-gray-300 text-gray-600 font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                   data-testid="button-add-more-pdf"
                 >
                   <Upload className="w-4 h-4" />
