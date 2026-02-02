@@ -627,7 +627,7 @@ export default function ReadingContentPage() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto px-5 py-5">
+      <main className="flex-1 overflow-y-auto px-5 py-5 pb-24">
         {activeTab === "lectura" ? (
           <div className="space-y-5">
             <div>
