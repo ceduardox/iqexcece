@@ -1,11 +1,11 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { Dumbbell, Home, ChevronRight } from "lucide-react";
+import { Dumbbell, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
-import menuCurveImg from "@assets/menu_1769957804819.png";
+import { CurvedHeader } from "@/components/CurvedHeader";
 
 const playCardSound = () => {
   const audio = new Audio('/card.mp3');
@@ -169,11 +169,6 @@ export default function EntrenamientoSelectionPage() {
     setLocation(`/entrenamiento-edad/${item.id}`);
   }, [editorMode, setLocation]);
 
-  const handleNavHome = useCallback(() => {
-    playButtonSound();
-    setLocation("/");
-  }, [setLocation]);
-
   if (!stylesLoaded || isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -184,34 +179,7 @@ export default function EntrenamientoSelectionPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50">
-        <button 
-          onClick={handleNavHome}
-          className="absolute left-5 p-2 text-purple-600"
-          data-testid="button-home"
-        >
-          <Home className="w-5 h-5" />
-        </button>
-        <div className="flex items-center justify-center" data-testid="header-logo">
-          <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8a3ffc" />
-                <stop offset="100%" stopColor="#00d9ff" />
-              </linearGradient>
-            </defs>
-            <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-              <tspan fill="#8a3ffc">i</tspan>
-              <tspan fill="#8a3ffc">Q</tspan>
-              <tspan fill="url(#logoGradient)">x</tspan>
-            </text>
-          </svg>
-        </div>
-      </header>
-
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
+      <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation("/"); }} />
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
