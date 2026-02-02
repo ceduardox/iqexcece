@@ -285,22 +285,74 @@ export default function ReadingContentPage() {
           </div>
 
           <div className="px-5 space-y-4">
+            {/* Gráfico circular animado */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+              className="flex justify-center py-4"
+            >
+              <div className="relative w-40 h-40">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="8"
+                  />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="url(#progressGradient)"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 42}`}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - percentage / 100) }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                  />
+                  <defs>
+                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#8a3ffc" />
+                      <stop offset="100%" stopColor="#00d9ff" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1, type: "spring" }}
+                    className="text-4xl font-black"
+                    style={{ color: "#8a3ffc" }}
+                  >
+                    {percentage}%
+                  </motion.span>
+                  <span className="text-xs font-medium" style={{ color: "#6b7280" }}>Comprensión</span>
+                </div>
+              </div>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.5 }}
               className="rounded-2xl overflow-hidden shadow-sm border border-purple-100 p-5"
               style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)" }}
             >
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center">
-                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Comprensión</p>
-                  <p className="text-3xl font-black" style={{ color: "#8a3ffc" }}>{percentage}%</p>
-                  <p className="text-xs" style={{ color: "#6b7280" }}>{correctAnswers}/{content.questions.length} correctas</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Respuestas</p>
+                  <p className="text-2xl font-black" style={{ color: "#8a3ffc" }}>{correctAnswers}/{content.questions.length}</p>
+                  <p className="text-xs" style={{ color: "#6b7280" }}>correctas</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Velocidad</p>
-                  <p className="text-3xl font-black" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
+                  <p className="text-2xl font-black" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
                   <p className="text-xs" style={{ color: "#6b7280" }}>palabras/min</p>
                 </div>
               </div>

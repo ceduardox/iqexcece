@@ -63,13 +63,51 @@ export default function NumerosResultPage() {
           </h1>
         </motion.div>
 
+        {/* Gráfico circular animado */}
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, type: "spring" }}
-          className="text-6xl mb-6"
+          className="mb-6"
         >
-          👍
+          <div className="relative w-36 h-36">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="8"
+              />
+              <motion.circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="white"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 42}`}
+                initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                animate={{ 
+                  strokeDashoffset: 2 * Math.PI * 42 * (1 - (results.correctas / (results.correctas + results.incorrectas + results.sinResponder || 1))) 
+                }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <motion.span
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1, type: "spring" }}
+                className="text-4xl font-black text-white"
+              >
+                {Math.round((results.correctas / (results.correctas + results.incorrectas + results.sinResponder || 1)) * 100)}%
+              </motion.span>
+              <span className="text-xs font-medium text-white/80">Aciertos</span>
+            </div>
+          </div>
         </motion.div>
 
         <motion.div
@@ -84,21 +122,21 @@ export default function NumerosResultPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Correctas: </span>
-              <span className="text-teal-600 font-bold">{results.correctas}</span>
+            <div className="bg-teal-50 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-teal-600">{results.correctas}</p>
+              <p className="text-xs text-gray-500">Correctas</p>
             </div>
-            <div>
-              <span className="text-gray-600">Sin responder: </span>
-              <span className="text-gray-800 font-bold">{results.sinResponder}</span>
+            <div className="bg-red-50 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-red-500">{results.incorrectas}</p>
+              <p className="text-xs text-gray-500">Incorrectas</p>
             </div>
-            <div>
-              <span className="text-gray-600">Incorrectas: </span>
-              <span className="text-red-500 font-bold">{results.incorrectas}</span>
+            <div className="bg-gray-50 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-gray-600">{results.sinResponder}</p>
+              <p className="text-xs text-gray-500">Sin responder</p>
             </div>
-            <div>
-              <span className="text-gray-600">Tiempo: </span>
-              <span className="text-gray-800 font-bold">{results.tiempo}s</span>
+            <div className="bg-cyan-50 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-cyan-600">{results.tiempo}s</p>
+              <p className="text-xs text-gray-500">Tiempo</p>
             </div>
           </div>
         </motion.div>
