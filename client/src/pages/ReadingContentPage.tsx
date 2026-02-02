@@ -633,7 +633,10 @@ export default function ReadingContentPage() {
 
       <div className="flex mx-4 mt-3 rounded-full overflow-hidden border border-gray-200">
         <button
-          onClick={() => setActiveTab("lectura")}
+          onClick={() => {
+            playButtonSound();
+            setActiveTab("lectura");
+          }}
           className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
             activeTab === "lectura" 
               ? "text-white"
@@ -645,7 +648,12 @@ export default function ReadingContentPage() {
           LECTURA
         </button>
         <button
-          onClick={() => quizStarted && setActiveTab("cuestionario")}
+          onClick={() => {
+            if (quizStarted) {
+              playButtonSound();
+              setActiveTab("cuestionario");
+            }
+          }}
           className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
             activeTab === "cuestionario" 
               ? "text-white"
