@@ -300,115 +300,212 @@ export default function AceleracionExercisePage() {
   const progress = words.length > 0 ? Math.round((currentWordIndex / words.length) * 100) : 0;
   const wordsRead = currentWordIndex + 1;
 
-  // Results view - Professional executive design
+  // Results view - Styled like reference image with charts and animations
   if (showResults && selectedPdf) {
     const readingTimeFormatted = formatTime(totalReadingTime);
     const averageSpeed = totalReadingTime > 0 
       ? Math.round((wordsRead / (totalReadingTime / 60000)))
       : localSpeed;
     
+    // Calculate performance percentage (based on speed vs target 920 PPM max)
+    const performancePercent = Math.min(100, Math.round((averageSpeed / 920) * 100));
+    
+    // Calculate stars (1-5) based on performance
+    const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
+    
+    // Circle progress animation
+    const circumference = 2 * Math.PI * 58; // radius 58
+    const strokeDashoffset = circumference - (performancePercent / 100) * circumference;
+    
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        {/* Clean professional header */}
-        <header className="px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <img 
-              src="/logo.png" 
-              alt="IQ" 
-              className="h-8 object-contain"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-            <button
-              onClick={handleBackToSelection}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full transition-colors"
-              data-testid="button-close-results"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
+      <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
+        {/* Decorative gradient bar at top */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-2"
+          style={{ background: "linear-gradient(90deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)" }}
+        />
+        
+        {/* Decorative background circles */}
+        <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "linear-gradient(135deg, #8B5CF6, #06B6D4)" }} />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "linear-gradient(135deg, #EC4899, #8B5CF6)" }} />
 
-        <main className="flex-1 px-5 py-8 flex flex-col">
-          {/* Success indicator */}
-          <div className="text-center mb-8">
+        <main className="flex-1 px-6 pt-10 pb-8 flex flex-col relative z-10">
+          {/* Brain icon */}
+          <motion.div 
+            className="mx-auto mb-6"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
+          >
             <div 
-              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}
+              className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+              style={{ background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)" }}
             >
-              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              ¡Ejercicio Completado!
+          </motion.div>
+
+          {/* Title with animation */}
+          <motion.div 
+            className="text-center mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h1 className="text-2xl font-bold text-gray-800">
+              {performancePercent >= 50 ? "¡Excelente trabajo!" : "¡Sigue practicando!"}
             </h1>
-            <p className="text-gray-500">{selectedPdf.name}</p>
-          </div>
+          </motion.div>
 
-          {/* Stats cards */}
-          <div className="space-y-4 mb-8">
-            {/* Time card */}
-            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Tiempo de Lectura</p>
-                  <p className="text-3xl font-bold text-gray-800">{readingTimeFormatted}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
+          {/* Subtitle */}
+          <motion.p 
+            className="text-center text-purple-500 font-semibold text-sm uppercase tracking-wide mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            {modeTitle}
+          </motion.p>
+
+          {/* Circular progress chart */}
+          <motion.div 
+            className="relative mx-auto mb-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <div className="relative w-36 h-36">
+              {/* Background circle */}
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="58"
+                  stroke="#E5E7EB"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                {/* Animated progress circle */}
+                <motion.circle
+                  cx="60"
+                  cy="60"
+                  r="58"
+                  stroke="url(#progressGradient)"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeLinecap="round"
+                  initial={{ strokeDasharray: circumference, strokeDashoffset: circumference }}
+                  animate={{ strokeDashoffset: strokeDashoffset }}
+                  transition={{ delay: 0.6, duration: 1.5, ease: "easeOut" }}
+                />
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Center content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <motion.span 
+                  className="text-4xl font-bold text-gray-800"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                >
+                  {performancePercent}%
+                </motion.span>
+                <span className="text-gray-400 text-sm">Rendimiento</span>
               </div>
+              
+              {/* Decorative dot on progress */}
+              <motion.div 
+                className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-cyan-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              />
             </div>
+          </motion.div>
 
+          {/* Stats row */}
+          <motion.div 
+            className="flex justify-center gap-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            {/* Words card */}
+            <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
+              <p className="text-2xl font-bold text-purple-600">{wordsRead}</p>
+              <p className="text-gray-400 text-xs mt-1">Palabras</p>
+            </div>
+            
             {/* Speed card */}
-            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Velocidad Promedio</p>
-                  <p className="text-3xl font-bold text-gray-800">{averageSpeed} <span className="text-lg font-normal text-gray-500">PPM</span></p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-              </div>
+            <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
+              <p className="text-2xl font-bold text-gray-800">{averageSpeed}</p>
+              <p className="text-gray-400 text-xs mt-1">PPM</p>
             </div>
+            
+            {/* Time card */}
+            <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
+              <p className="text-2xl font-bold text-cyan-600">{readingTimeFormatted}</p>
+              <p className="text-gray-400 text-xs mt-1">Tiempo</p>
+            </div>
+          </motion.div>
 
-            {/* Words count card */}
-            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Palabras Leídas</p>
-                  <p className="text-3xl font-bold text-gray-800">{wordsRead.toLocaleString()}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-cyan-600" />
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Star rating */}
+          <motion.div 
+            className="flex justify-center gap-2 mb-8"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1, type: "spring" }}
+          >
+            {[1, 2, 3, 4, 5].map((star) => (
+              <motion.svg
+                key={star}
+                className={`w-7 h-7 ${star <= stars ? 'text-yellow-400' : 'text-gray-200'}`}
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 + star * 0.1 }}
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </motion.svg>
+            ))}
+          </motion.div>
 
           {/* Action buttons */}
-          <div className="mt-auto space-y-3">
+          <motion.div 
+            className="mt-auto space-y-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+          >
             <button
               onClick={handleRestartExercise}
-              className="w-full py-4 rounded-xl text-white font-semibold text-lg shadow-lg transition-all active:scale-98"
-              style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)" }}
+              className="w-full py-4 rounded-full text-white font-semibold text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%)" }}
               data-testid="button-restart"
             >
-              Repetir Ejercicio
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Intentar otro test
             </button>
             <button
               onClick={handleBackToSelection}
-              className="w-full py-4 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-lg transition-all hover:bg-gray-50"
+              className="w-full py-4 rounded-full border-2 border-gray-200 text-gray-500 font-semibold text-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-2"
               data-testid="button-back-selection"
             >
-              Elegir otro documento
+              <ChevronLeft className="w-5 h-5" />
+              Volver al inicio
             </button>
-          </div>
+          </motion.div>
         </main>
       </div>
     );
