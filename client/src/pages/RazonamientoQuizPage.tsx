@@ -411,9 +411,15 @@ export default function RazonamientoQuizPage() {
                 </div>
               )}
 
-              {/* Pregunta - Tarjeta formal */}
-              <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800 leading-relaxed text-center">
+              {/* Pregunta - Tarjeta formal futurista */}
+              <div 
+                className="rounded-2xl p-6 border border-purple-100/50"
+                style={{
+                  background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,245,255,0.9) 100%)",
+                  boxShadow: "0 4px 20px rgba(138, 63, 252, 0.08), 0 1px 3px rgba(0,0,0,0.05)"
+                }}
+              >
+                <h3 className="text-lg font-semibold leading-relaxed text-center" style={{ color: "#1f2937" }}>
                   {currentQ?.question}
                 </h3>
                 {(currentQ as any)?.imageUrl && (
@@ -421,27 +427,41 @@ export default function RazonamientoQuizPage() {
                     <img 
                       src={(currentQ as any).imageUrl} 
                       alt="Imagen de la pregunta"
-                      className="max-h-44 rounded-xl shadow-sm object-contain"
+                      className="max-h-44 rounded-xl object-contain"
+                      style={{ boxShadow: "0 4px 12px rgba(138, 63, 252, 0.12)" }}
                       data-testid={`img-question-${currentQuestion}`}
                     />
                   </div>
                 )}
               </div>
 
-            {/* Opciones - Tarjetas formales */}
+            {/* Opciones - Tarjetas formales futuristas */}
             <div className="space-y-3">
               {currentQ?.options.map((option, index) => {
                 const isSelected = selectedAnswer === index;
                 const isCorrect = questions[currentQuestion]?.correct === index;
                 const showResult = selectedAnswer !== null;
                 
-                let cardStyle = "bg-white border-gray-200 text-gray-700";
+                let bgStyle = "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)";
+                let borderColor = "rgba(138, 63, 252, 0.15)";
+                let textColor = "#374151";
+                let shadowStyle = "0 2px 8px rgba(138, 63, 252, 0.06)";
+                
                 if (showResult && isCorrect) {
-                  cardStyle = "bg-green-50 border-green-400 text-green-700";
+                  bgStyle = "linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%)";
+                  borderColor = "#10b981";
+                  textColor = "#065f46";
+                  shadowStyle = "0 4px 12px rgba(16, 185, 129, 0.15)";
                 } else if (showResult && isSelected && !isCorrect) {
-                  cardStyle = "bg-red-50 border-red-400 text-red-700";
+                  bgStyle = "linear-gradient(145deg, #fef2f2 0%, #fecaca 100%)";
+                  borderColor = "#ef4444";
+                  textColor = "#991b1b";
+                  shadowStyle = "0 4px 12px rgba(239, 68, 68, 0.15)";
                 } else if (isSelected) {
-                  cardStyle = "bg-purple-50 border-purple-400 text-purple-700";
+                  bgStyle = "linear-gradient(145deg, #f5f3ff 0%, #ede9fe 100%)";
+                  borderColor = "#8a3ffc";
+                  textColor = "#5b21b6";
+                  shadowStyle = "0 4px 12px rgba(138, 63, 252, 0.2)";
                 }
                 
                 return (
@@ -449,27 +469,33 @@ export default function RazonamientoQuizPage() {
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.08 }}
                     onClick={() => handleSelectAnswer(index)}
                     disabled={selectedAnswer !== null}
-                    className={`relative w-full text-left font-medium overflow-hidden transition-all py-4 px-5 rounded-xl border-2 shadow-sm ${cardStyle} ${
-                      showResult && !isSelected && !isCorrect ? "opacity-50" : ""
+                    className={`relative w-full text-left font-medium overflow-hidden transition-all py-4 px-5 rounded-xl ${
+                      showResult && !isSelected && !isCorrect ? "opacity-40" : ""
                     }`}
+                    style={{
+                      background: bgStyle,
+                      border: `2px solid ${borderColor}`,
+                      color: textColor,
+                      boxShadow: shadowStyle
+                    }}
                     data-testid={`button-option-${index}`}
                   >
                     <span className="flex items-center gap-3">
                       <span 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md"
                         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
                       >
                         {String.fromCharCode(65 + index)}
                       </span>
-                      <span className="flex-1">{option}</span>
+                      <span className="flex-1 text-base">{option}</span>
                       {showResult && isCorrect && (
-                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                        <CheckCircle2 className="w-6 h-6" style={{ color: "#10b981" }} />
                       )}
                       {showResult && isSelected && !isCorrect && (
-                        <XCircle className="w-6 h-6 text-red-500" />
+                        <XCircle className="w-6 h-6" style={{ color: "#ef4444" }} />
                       )}
                     </span>
                   </motion.button>
