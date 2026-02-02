@@ -30,14 +30,6 @@ const categoryLabels: Record<string, string> = {
   adulto_mayor: "Adulto Mayor",
 };
 
-const optionColors = [
-  { bg: "bg-gradient-to-r from-purple-500 to-purple-600", ring: "ring-purple-300" },
-  { bg: "bg-gradient-to-r from-cyan-500 to-cyan-600", ring: "ring-cyan-300" },
-  { bg: "bg-gradient-to-r from-teal-500 to-teal-600", ring: "ring-teal-300" },
-  { bg: "bg-gradient-to-r from-indigo-500 to-indigo-600", ring: "ring-indigo-300" },
-  { bg: "bg-gradient-to-r from-pink-500 to-pink-600", ring: "ring-pink-300" },
-];
-
 export default function RazonamientoQuizPage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string; tema?: string }>();
@@ -419,27 +411,38 @@ export default function RazonamientoQuizPage() {
                 </div>
               )}
 
-              <div className="bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 rounded-2xl p-5 shadow-lg">
-                <h3 className="text-lg font-bold text-white leading-relaxed">
+              {/* Pregunta - Tarjeta formal */}
+              <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 leading-relaxed text-center">
                   {currentQ?.question}
                 </h3>
                 {(currentQ as any)?.imageUrl && (
-                  <div className="mt-3 flex justify-center">
+                  <div className="mt-4 flex justify-center">
                     <img 
                       src={(currentQ as any).imageUrl} 
                       alt="Imagen de la pregunta"
-                      className="max-h-40 rounded-xl shadow-md object-contain"
+                      className="max-h-44 rounded-xl shadow-sm object-contain"
                       data-testid={`img-question-${currentQuestion}`}
                     />
                   </div>
                 )}
               </div>
 
+            {/* Opciones - Tarjetas formales */}
             <div className="space-y-3">
               {currentQ?.options.map((option, index) => {
-                const color = optionColors[index % optionColors.length];
                 const isSelected = selectedAnswer === index;
                 const isCorrect = questions[currentQuestion]?.correct === index;
+                const showResult = selectedAnswer !== null;
+                
+                let cardStyle = "bg-white border-gray-200 text-gray-700";
+                if (showResult && isCorrect) {
+                  cardStyle = "bg-green-50 border-green-400 text-green-700";
+                } else if (showResult && isSelected && !isCorrect) {
+                  cardStyle = "bg-red-50 border-red-400 text-red-700";
+                } else if (isSelected) {
+                  cardStyle = "bg-purple-50 border-purple-400 text-purple-700";
+                }
                 
                 return (
                   <motion.button
@@ -449,21 +452,24 @@ export default function RazonamientoQuizPage() {
                     transition={{ delay: index * 0.1 }}
                     onClick={() => handleSelectAnswer(index)}
                     disabled={selectedAnswer !== null}
-                    className={`relative w-full text-left font-bold text-white overflow-hidden transition-all py-4 px-5 rounded-xl ${color.bg} ${
-                      isSelected ? `ring-4 ${color.ring} ring-offset-2` : ""
-                    } ${selectedAnswer !== null && !isSelected ? "opacity-50" : ""}`}
+                    className={`relative w-full text-left font-medium overflow-hidden transition-all py-4 px-5 rounded-xl border-2 shadow-sm ${cardStyle} ${
+                      showResult && !isSelected && !isCorrect ? "opacity-50" : ""
+                    }`}
                     data-testid={`button-option-${index}`}
                   >
                     <span className="flex items-center gap-3">
-                      <span className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold">
+                      <span 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                        style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                      >
                         {String.fromCharCode(65 + index)}
                       </span>
                       <span className="flex-1">{option}</span>
-                      {selectedAnswer !== null && isCorrect && (
-                        <CheckCircle2 className="w-6 h-6 text-green-300" />
+                      {showResult && isCorrect && (
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
                       )}
-                      {selectedAnswer !== null && isSelected && !isCorrect && (
-                        <XCircle className="w-6 h-6 text-red-300" />
+                      {showResult && isSelected && !isCorrect && (
+                        <XCircle className="w-6 h-6 text-red-500" />
                       )}
                     </span>
                   </motion.button>
