@@ -4530,7 +4530,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                           
                           <div>
-                            <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta</label>
+                            <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta (distractores)</label>
+                            <p className="text-purple-300/60 text-xs mb-2">
+                              Las palabras se mezclan aleatoriamente. La respuesta correcta se agrega automáticamente si no está en las opciones.
+                            </p>
                             <div className="flex items-center gap-3 mb-2">
                               <span className="text-white/50 text-xs">Cantidad de opciones:</span>
                               <select
