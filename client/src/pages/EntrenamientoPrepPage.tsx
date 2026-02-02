@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, ChevronRight, Clock, Zap, Target, Brain } from "lucide-react";
+import { ArrowLeft, Target } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 
 const playButtonSound = () => {
@@ -206,105 +206,6 @@ export default function EntrenamientoPrepPage() {
             </div>
           </motion.div>
         )}
-
-        <div className="px-5 space-y-3">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #C084FC 0%, #818CF8 100%)" }}
-                >
-                  <Brain className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 text-sm">Reconocimiento Visual</h3>
-                  <p className="text-gray-400 text-xs">Entrena tu capacidad para reconocer palabras rápidamente.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">3 min</span>
-                <div className="w-12 h-7 rounded-full bg-purple-100 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-purple-600">0/10</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)" }}
-                >
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 text-sm">Sprint de Lectura</h3>
-                  <p className="text-gray-400 text-xs">Mejora tu velocidad de lectura.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-center">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-bold text-purple-600">02:00</span>
-                    <span className="text-[10px] text-gray-400">WPM</span>
-                  </div>
-                  <span className="text-[10px] text-gray-400">palabras/min</span>
-                </div>
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)" }}
-                >
-                  <div className="text-center">
-                    <span className="text-xs font-bold text-white">250</span>
-                    <span className="text-[8px] text-white block">WPM</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.4 }}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #F472B6 0%, #EC4899 100%)" }}
-                >
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 text-sm">Caza-palabras</h3>
-                  <p className="text-gray-400 text-xs">Prueba tus reflejos en la identificación rápida de palabras.</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-300" />
-            </div>
-            <div className="mt-3 flex items-center gap-4 text-xs">
-              <span><span className="text-purple-600 font-semibold">Racha:</span> 8</span>
-              <span><span className="text-gray-600">Aciertos:</span> 42</span>
-              <span><span className="text-red-400">Errores:</span> 5</span>
-              <span className="text-cyan-500 font-semibold">Recha: 5</span>
-            </div>
-          </motion.div>
-        </div>
       </main>
 
       <BottomNavBar />
