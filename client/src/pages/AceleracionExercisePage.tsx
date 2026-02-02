@@ -5,6 +5,7 @@ import { ChevronLeft, Upload, Play, Pause, X, FileText, Trash2, ChevronRight, Ch
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
+import html2canvas from "html2canvas";
 
 // PDF.js will be loaded from CDN
 declare global {
@@ -248,32 +249,74 @@ export default function AceleracionExercisePage() {
     setLocalSpeed(prev => Math.min(920, prev + 10));
   };
 
-  // Share functionality - capture screen and share
+  // Share functionality - capture screen as image and share
   const handleShare = async () => {
-    if (isSharing) return;
+    if (isSharing || !resultsRef.current) return;
     setIsSharing(true);
     playSound("iphone");
     
     const shareText = `Mi resultado en ${modeTitle} - IQEXPONENCIAL\nVelocidad: ${localSpeed} PPM\n\nEntrena tu cerebro en: https://iqexponencial.app`;
     
     try {
-      // Try Web Share API with text only (fastest & most compatible)
-      if (navigator.share) {
+      // Capture the results screen as image
+      const canvas = await html2canvas(resultsRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png', 1.0);
+      });
+      
+      const file = new File([blob], 'resultado-iqexponencial.png', { type: 'image/png' });
+      
+      // Check if Web Share API with files is supported
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `Resultado ${modeTitle} - IQEXPONENCIAL`,
+          text: shareText,
+          files: [file]
+        });
+      } else if (navigator.share) {
+        // Fallback: share without image
         await navigator.share({
           title: `Resultado ${modeTitle} - IQEXPONENCIAL`,
           text: shareText,
           url: 'https://iqexponencial.app'
         });
       } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareText);
-        alert('Resultado copiado al portapapeles');
+        // Desktop fallback: download the image
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado-iqexponencial.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('Imagen descargada');
       }
     } catch (err) {
-      // User cancelled or error - try clipboard as fallback
+      console.log('Share error:', err);
+      // Fallback: try text only
       try {
-        await navigator.clipboard.writeText(shareText);
-        alert('Resultado copiado al portapapeles');
+        if (navigator.share) {
+          await navigator.share({
+            title: `Resultado ${modeTitle} - IQEXPONENCIAL`,
+            text: shareText,
+            url: 'https://iqexponencial.app'
+          });
+        } else {
+          await navigator.clipboard.writeText(shareText);
+          alert('Resultado copiado al portapapeles');
+        }
       } catch {
         console.log('Share cancelled');
       }
@@ -354,7 +397,7 @@ export default function AceleracionExercisePage() {
     const strokeDashoffset = circumference - (performancePercent / 100) * circumference;
     
     return (
-      <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
+      <div ref={resultsRef} className="min-h-screen bg-white flex flex-col relative overflow-hidden">
         {/* Decorative gradient bar at top */}
         <div 
           className="absolute top-0 left-0 right-0 h-2"
