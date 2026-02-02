@@ -1,8 +1,10 @@
+import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Dumbbell, Home, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -28,7 +30,7 @@ interface EntrenamientoItem {
   isActive: boolean | null;
 }
 
-const cardStyles = [
+const defaultCardStyles = [
   { bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", textDark: true },
   { bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6366f1 100%)", textDark: false },
   { bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", textDark: true },
@@ -46,6 +48,10 @@ const defaultIcons = [
 
 export default function EntrenamientoSelectionPage() {
   const [, setLocation] = useLocation();
+  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [styles, setStyles] = useState<PageStyles>({});
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
     queryKey: ["/api/entrenamiento", "ninos", "items"],
@@ -57,18 +63,102 @@ export default function EntrenamientoSelectionPage() {
 
   const items = itemsData?.items?.filter(i => i.isActive !== false) || [];
 
-  const handleSelect = (item: EntrenamientoItem) => {
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setEditorMode(localStorage.getItem("editorMode") === "true");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(handleStorageChange, 500);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
+    
+    fetch("/api/page-styles/entrenamiento-page")
+      .then(res => res.json())
+      .then(data => {
+        if (data.style?.styles) {
+          try {
+            setStyles(JSON.parse(data.style.styles));
+          } catch (e) {
+            console.log("No saved styles");
+          }
+        }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      });
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) return;
+    
+    try {
+      await fetch("/api/admin/page-styles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          pageName: "entrenamiento-page",
+          styles: JSON.stringify(newStyles)
+        })
+      });
+    } catch (error) {
+      console.error("Error saving styles:", error);
+    }
+  }, []);
+
+  const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
+    if (!editorMode) return;
+    e.stopPropagation();
+    setSelectedElement(elementId);
+  }, [editorMode]);
+
+  const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
+    const updated = { ...styles, [elementId]: { ...styles[elementId], ...newStyle } };
+    setStyles(updated);
+    saveStyles(updated);
+  }, [styles, saveStyles]);
+
+  const handleEditorClose = useCallback(() => {
+    setSelectedElement(null);
+    localStorage.setItem("editorMode", "false");
+    setEditorMode(false);
+  }, []);
+
+  const getEditableClass = useCallback((elementId: string) => {
+    if (!editorMode) return "";
+    const base = "transition-all duration-200";
+    return selectedElement === elementId
+      ? `${base} ring-2 ring-purple-500 ring-offset-2`
+      : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
+  }, [editorMode, selectedElement]);
+
+  const handleSelect = useCallback((item: EntrenamientoItem) => {
+    if (editorMode) return;
     playCardSound();
     sessionStorage.setItem("selectedEntrenamientoItem", JSON.stringify(item));
     setLocation(`/entrenamiento-edad/${item.id}`);
-  };
+  }, [editorMode, setLocation]);
 
-  const handleNavHome = () => {
+  const handleNavHome = useCallback(() => {
     playButtonSound();
     setLocation("/");
-  };
+  }, [setLocation]);
 
-  if (isLoading) {
+  if (!stylesLoaded || isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -109,9 +199,10 @@ export default function EntrenamientoSelectionPage() {
 
       <main className="flex-1 overflow-y-auto">
         <div 
-          className="w-full"
+          className={`w-full ${getEditableClass("hero-section")}`}
+          onClick={(e) => editorMode && handleElementClick("hero-section", e)}
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            background: styles["hero-section"]?.background || "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
           <div className="px-5 pt-6 pb-4 text-center">
@@ -119,28 +210,45 @@ export default function EntrenamientoSelectionPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.1 }}
-              className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3"
-              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+              className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${getEditableClass("hero-icon")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-icon", e); }}}
+              style={{ 
+                background: styles["hero-icon"]?.background || "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
+                width: styles["hero-icon"]?.iconSize || 64,
+                height: styles["hero-icon"]?.iconSize || 64
+              }}
             >
-              <Dumbbell className="w-8 h-8 text-white" />
+              {styles["hero-icon"]?.imageUrl ? (
+                <img src={styles["hero-icon"].imageUrl} alt="" className="w-8 h-8 object-contain" />
+              ) : (
+                <Dumbbell className="w-8 h-8 text-white" />
+              )}
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-2xl font-black mb-2"
-              style={{ color: "#1f2937" }}
+              className={`text-2xl font-black mb-2 ${getEditableClass("hero-title")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); }}}
+              style={{ 
+                color: styles["hero-title"]?.textColor || "#1f2937",
+                fontSize: styles["hero-title"]?.fontSize || 24
+              }}
             >
-              Entrenamientos
+              {styles["hero-title"]?.buttonText || "Entrenamientos"}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-sm"
-              style={{ color: "#6b7280" }}
+              className={`text-sm ${getEditableClass("hero-subtitle")}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}}
+              style={{ 
+                color: styles["hero-subtitle"]?.textColor || "#6b7280",
+                fontSize: styles["hero-subtitle"]?.fontSize || 14
+              }}
             >
-              Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas
+              {styles["hero-subtitle"]?.buttonText || "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"}
             </motion.p>
           </div>
         </div>
@@ -153,9 +261,18 @@ export default function EntrenamientoSelectionPage() {
             </div>
           ) : (
             items.map((item, index) => {
-              const style = cardStyles[index % cardStyles.length];
-              const textDark = style.textDark;
-              const iconUrl = item.imageUrl || defaultIcons[index % defaultIcons.length];
+              const cardId = `card-${item.id}`;
+              const titleId = `title-${item.id}`;
+              const descId = `desc-${item.id}`;
+              const iconId = `icon-${item.id}`;
+              const btnId = `btn-${item.id}`;
+              
+              const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
+              const cardStyle = styles[cardId];
+              const hasBackgroundImage = cardStyle?.imageUrl;
+              const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
+              const iconUrl = styles[iconId]?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
+              const iconSize = styles[iconId]?.iconSize || 56;
               
               return (
                 <motion.div
@@ -163,18 +280,23 @@ export default function EntrenamientoSelectionPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
-                  onClick={() => handleSelect(item)}
-                  className="cursor-pointer"
+                  onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
+                  className={`cursor-pointer ${getEditableClass(cardId)}`}
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
                   <motion.div
                     className="relative overflow-hidden rounded-2xl p-4"
                     style={{ 
-                      background: style.bg,
-                      boxShadow: "0 4px 20px rgba(139, 92, 246, 0.15)",
-                      border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none"
+                      background: hasBackgroundImage 
+                        ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+                        : (cardStyle?.background || defaultStyle.bg),
+                      boxShadow: cardStyle?.shadowBlur 
+                        ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
+                        : "0 4px 20px rgba(139, 92, 246, 0.15)",
+                      border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none",
+                      borderRadius: cardStyle?.borderRadius || 20
                     }}
-                    whileTap={{ scale: 0.98 }}
+                    whileTap={{ scale: editorMode ? 1 : 0.98 }}
                     transition={{ duration: 0.1 }}
                   >
                     <div 
@@ -188,47 +310,63 @@ export default function EntrenamientoSelectionPage() {
                     </div>
                     
                     <div className="flex items-center gap-3 pt-6">
-                      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 56, height: 56 }}>
+                      <div 
+                        className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
+                        style={{ width: iconSize, height: iconSize }}
+                      >
                         <img 
                           src={iconUrl} 
                           alt="" 
                           className="drop-shadow-md"
-                          style={{ width: 56, height: 56, objectFit: "contain" }} 
+                          style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
                         />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <h3 
-                          className="text-lg font-bold mb-1"
-                          style={{ color: textDark ? "#1f2937" : "white" }}
+                          className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
+                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
+                          style={{ 
+                            fontSize: styles[titleId]?.fontSize || 18,
+                            color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
+                          }}
                         >
-                          {item.title}
+                          {styles[titleId]?.buttonText || item.title}
                         </h3>
                         {item.description && (
                           <p 
-                            className="text-sm leading-snug"
-                            style={{ color: textDark ? "#6b7280" : "rgba(255,255,255,0.9)" }}
+                            className={`text-sm leading-snug ${getEditableClass(descId)}`}
+                            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
+                            style={{ 
+                              fontSize: styles[descId]?.fontSize || 13,
+                              color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
+                            }}
                           >
-                            {item.description}
+                            {styles[descId]?.buttonText || item.description}
                           </p>
                         )}
                       </div>
                       
                       <motion.button
-                        className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1"
-                        style={{
-                          background: textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)",
-                          color: "white",
-                          border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
-                        }}
-                        whileTap={{ scale: 0.95 }}
+                        className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          playButtonSound(); 
-                          handleSelect(item);
+                          if (editorMode) {
+                            handleElementClick(btnId, e);
+                          } else {
+                            playButtonSound(); 
+                            handleSelect(item);
+                          }
                         }}
+                        style={{
+                          background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
+                          color: styles[btnId]?.textColor || "white",
+                          border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
+                        }}
+                        whileTap={{ scale: editorMode ? 1 : 0.95 }}
                       >
-                        Iniciar
+                        {styles[btnId]?.buttonText || "Iniciar"}
                         <ChevronRight className="w-4 h-4" />
                       </motion.button>
                     </div>
@@ -241,6 +379,17 @@ export default function EntrenamientoSelectionPage() {
       </main>
 
       <BottomNavBar />
+
+      {editorMode && (
+        <EditorToolbar
+          selectedElement={selectedElement}
+          styles={styles}
+          onStyleChange={handleStyleChange}
+          onSave={() => saveStyles(styles)}
+          onClose={handleEditorClose}
+          onClearSelection={() => setSelectedElement(null)}
+        />
+      )}
     </div>
   );
 }
