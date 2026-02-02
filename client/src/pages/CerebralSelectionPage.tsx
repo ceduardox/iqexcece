@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useUserData } from "@/lib/user-context";
 import { Brain, Clock, ChevronRight } from "lucide-react";
@@ -31,8 +31,9 @@ const playButtonSound = () => {
 
 export default function CerebralSelectionPage() {
   const [, setLocation] = useLocation();
+  const params = useParams<{ categoria?: string }>();
   const { userData } = useUserData();
-  const categoria = userData.ageGroup || "adolescentes";
+  const categoria = params.categoria || userData.ageGroup || "adolescentes";
 
   const { data: themesData, isLoading: themesLoading } = useQuery<{ themes: CerebralTheme[] }>({
     queryKey: [`/api/cerebral/${categoria}/themes`],

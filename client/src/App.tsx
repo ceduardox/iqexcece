@@ -47,6 +47,7 @@ function Router() {
       <Route path="/razonamiento-quiz/:category/:tema" component={RazonamientoQuizPage}/>
       <Route path="/razonamiento-result/:category" component={RazonamientoResultPage}/>
       <Route path="/cerebral/seleccion" component={CerebralSelectionPage}/>
+      <Route path="/cerebral-selection/:categoria" component={CerebralSelectionPage}/>
       <Route path="/cerebral/ejercicio/:categoria/:tema" component={CerebralExercisePage}/>
       <Route path="/cerebral/formulario/:categoria" component={CerebralFormPage}/>
       <Route path="/cerebral/resultado/:categoria" component={CerebralResultPage}/>
