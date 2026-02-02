@@ -30,6 +30,24 @@ const testGradients = {
   cerebral: "linear-gradient(135deg, #E1BEE7 0%, #CE93D8 50%, #BA68C8 100%)",
 };
 
+const testCardStyles: Record<string, { bg: string; textDark: boolean; iconUrl: string }> = {
+  lectura: { 
+    bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", 
+    textDark: true,
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588658.png"
+  },
+  razonamiento: { 
+    bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6366f1 100%)", 
+    textDark: false,
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
+  },
+  cerebral: { 
+    bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", 
+    textDark: true,
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png"
+  },
+};
+
 interface TestCardProps {
   testId: string;
   title: string;
@@ -53,91 +71,102 @@ function TestCard({
   onElementClick,
   getEditableClass
 }: TestCardProps) {
-  const Icon = testIcons[testId as keyof typeof testIcons] || Brain;
-  const gradient = testGradients[testId as keyof typeof testGradients] || testGradients.razonamiento;
   const cardId = `card-${testId}`;
-  const labelId = `label-${testId}`;
   const titleId = `title-${testId}`;
   const descId = `desc-${testId}`;
   const iconId = `icon-${testId}`;
   
   const cardStyle = styles[cardId];
   const hasBackgroundImage = cardStyle?.imageUrl;
-  const iconSize = styles[iconId]?.iconSize || 50;
-  const cardHeight = cardStyle?.cardHeight || 100;
+  const iconSize = styles[iconId]?.iconSize || 56;
+  const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
+  const textDark = defaultStyle.textDark;
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
+      transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
       className={`cursor-pointer ${getEditableClass(cardId)}`}
       data-testid={`card-test-${testId}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-3xl p-4 flex items-center gap-4"
+        className="relative overflow-hidden rounded-2xl p-4 flex items-center gap-3"
         style={{ 
-          background: hasBackgroundImage ? `url(${cardStyle.imageUrl}) center/cover no-repeat` : (cardStyle?.background || gradient),
-          borderRadius: cardStyle?.borderRadius || 24,
-          boxShadow: cardStyle?.shadowBlur ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.3)"}` : "0 4px 15px rgba(0,0,0,0.15)",
-          minHeight: cardHeight
+          background: hasBackgroundImage 
+            ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+            : (cardStyle?.background || defaultStyle.bg),
+          borderRadius: cardStyle?.borderRadius || 20,
+          boxShadow: cardStyle?.shadowBlur 
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
+            : "0 4px 20px rgba(139, 92, 246, 0.15)",
+          border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
         <div 
-          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
-          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
-          style={{ width: iconSize + 20, height: iconSize + 20 }}
+          className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${getEditableClass(`badge-${testId}`)}`}
+          style={{ 
+            background: textDark ? "rgba(139, 92, 246, 0.1)" : "rgba(255,255,255,0.2)",
+            color: textDark ? "#7c3aed" : "white"
+          }}
         >
-          {styles[iconId]?.imageUrl ? (
-            <img 
-              src={styles[iconId].imageUrl} 
-              alt="" 
-              className="drop-shadow-lg"
-              style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
-            />
-          ) : (
-            <Icon 
-              className="text-white drop-shadow-lg" 
-              style={{ width: iconSize, height: iconSize }} 
-            />
-          )}
+          Test
         </div>
         
-        <div className="flex-1 text-white py-2">
-          <p 
-            className={`text-sm font-medium opacity-90 mb-0.5 ${getEditableClass(labelId)}`}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(labelId, e); }}}
-            style={{ 
-              fontSize: styles[labelId]?.fontSize || 14,
-              color: styles[labelId]?.textColor || "white"
-            }}
-          >
-            {styles[labelId]?.buttonText || "Test"}
-          </p>
+        <div 
+          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
+          style={{ width: iconSize, height: iconSize, marginTop: 16 }}
+        >
+          <img 
+            src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} 
+            alt="" 
+            className="drop-shadow-md"
+            style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
+          />
+        </div>
+        
+        <div className="flex-1 py-2 mt-4">
           <h3 
-            className={`text-2xl font-black mb-1 ${getEditableClass(titleId)}`}
+            className={`text-lg font-bold mb-0.5 ${getEditableClass(titleId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
             style={{ 
-              fontSize: styles[titleId]?.fontSize || 24,
-              color: styles[titleId]?.textColor || "white"
+              fontSize: styles[titleId]?.fontSize || 18,
+              color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
             }}
           >
             {styles[titleId]?.buttonText || title}
           </h3>
           <p 
-            className={`text-sm opacity-90 leading-snug ${getEditableClass(descId)}`}
+            className={`text-sm leading-snug ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{ 
-              fontSize: styles[descId]?.fontSize || 14,
-              color: styles[descId]?.textColor || "white"
+              fontSize: styles[descId]?.fontSize || 13,
+              color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
             }}
           >
             {styles[descId]?.buttonText || description}
           </p>
         </div>
+        
+        <motion.button
+          className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1"
+          style={{
+            background: textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)",
+            color: "white",
+            border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
+          }}
+          whileTap={{ scale: 0.95 }}
+          onClick={(e) => { e.stopPropagation(); if (!editorMode) { playButtonSound(); onClick(); } }}
+        >
+          Iniciar
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </motion.button>
       </motion.div>
     </motion.div>
   );
