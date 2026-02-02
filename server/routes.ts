@@ -819,6 +819,32 @@ export async function registerRoutes(
     res.json({ intro });
   });
 
+  // Aceleracion de lectura endpoints
+  app.get("/api/aceleracion/:entrenamientoItemId", async (req, res) => {
+    const ejercicio = await storage.getAceleracionByItem(req.params.entrenamientoItemId);
+    res.json({ ejercicio });
+  });
+
+  app.post("/api/admin/aceleracion", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const ejercicio = await storage.saveAceleracion(req.body);
+    res.json({ ejercicio });
+  });
+
+  app.put("/api/admin/aceleracion/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const ejercicio = await storage.updateAceleracion(req.params.id, req.body);
+    res.json({ ejercicio });
+  });
+
   // Page styles for visual editor
   app.get("/api/page-styles/:pageName", async (req, res) => {
     const style = await storage.getPageStyle(req.params.pageName);

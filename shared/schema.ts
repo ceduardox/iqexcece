@@ -248,6 +248,21 @@ export const insertCategoriaPrepPageSchema = createInsertSchema(categoriaPrepPag
 export const insertVelocidadEjercicioSchema = createInsertSchema(velocidadEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNumerosEjercicioSchema = createInsertSchema(numerosEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 
+// Aceleracion de Lectura exercises
+export const aceleracionEjercicios = pgTable("aceleracion_ejercicios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entrenamientoItemId: text("entrenamiento_item_id").notNull(),
+  imagenCabecera: text("imagen_cabecera"),
+  titulo: text("titulo").default("Acelera al máximo tu Lectura"),
+  velocidadPPM: integer("velocidad_ppm").default(200), // Palabras por minuto
+  modoGolpePorcentaje: integer("modo_golpe_porcentaje").default(50), // % de palabras visibles
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAceleracionEjercicioSchema = createInsertSchema(aceleracionEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Page styles for visual editor
 export const pageStyles = pgTable("page_styles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -284,5 +299,7 @@ export type VelocidadEjercicio = typeof velocidadEjercicios.$inferSelect;
 export type InsertVelocidadEjercicio = z.infer<typeof insertVelocidadEjercicioSchema>;
 export type NumerosEjercicio = typeof numerosEjercicios.$inferSelect;
 export type InsertNumerosEjercicio = z.infer<typeof insertNumerosEjercicioSchema>;
+export type AceleracionEjercicio = typeof aceleracionEjercicios.$inferSelect;
+export type InsertAceleracionEjercicio = z.infer<typeof insertAceleracionEjercicioSchema>;
 export type PageStyle = typeof pageStyles.$inferSelect;
 export type InsertPageStyle = z.infer<typeof insertPageStyleSchema>;

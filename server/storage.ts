@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type PageStyle, type InsertPageStyle, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, pageStyles } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -76,6 +76,11 @@ export interface IStorage {
   getNumerosIntroByItem(entrenamientoItemId: string): Promise<NumerosEjercicio | null>;
   saveNumerosIntro(data: InsertNumerosEjercicio): Promise<NumerosEjercicio>;
   updateNumerosIntro(id: string, data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null>;
+  
+  // Aceleracion de lectura exercises
+  getAceleracionByItem(entrenamientoItemId: string): Promise<AceleracionEjercicio | null>;
+  saveAceleracion(data: InsertAceleracionEjercicio): Promise<AceleracionEjercicio>;
+  updateAceleracion(id: string, data: Partial<InsertAceleracionEjercicio>): Promise<AceleracionEjercicio | null>;
   
   // Page styles for visual editor
   getPageStyle(pageName: string): Promise<PageStyle | null>;
@@ -349,6 +354,13 @@ export class MemStorage implements IStorage {
     return { id: randomUUID(), ...data, isActive: true, createdAt: new Date(), updatedAt: new Date() } as NumerosEjercicio;
   }
   async updateNumerosIntro(_id: string, _data: Partial<InsertNumerosEjercicio>): Promise<NumerosEjercicio | null> { return null; }
+  
+  // Aceleracion stubs
+  async getAceleracionByItem(_entrenamientoItemId: string): Promise<AceleracionEjercicio | null> { return null; }
+  async saveAceleracion(data: InsertAceleracionEjercicio): Promise<AceleracionEjercicio> {
+    return { id: randomUUID(), ...data, isActive: true, createdAt: new Date(), updatedAt: new Date() } as AceleracionEjercicio;
+  }
+  async updateAceleracion(_id: string, _data: Partial<InsertAceleracionEjercicio>): Promise<AceleracionEjercicio | null> { return null; }
   
   // Page styles stubs
   async getPageStyle(_pageName: string): Promise<PageStyle | null> { return null; }
@@ -816,6 +828,26 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db.update(numerosEjercicios)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(numerosEjercicios.id, id))
+      .returning();
+    return updated || null;
+  }
+
+  // Aceleracion de lectura
+  async getAceleracionByItem(entrenamientoItemId: string): Promise<AceleracionEjercicio | null> {
+    const [ejercicio] = await db.select().from(aceleracionEjercicios)
+      .where(eq(aceleracionEjercicios.entrenamientoItemId, entrenamientoItemId));
+    return ejercicio || null;
+  }
+
+  async saveAceleracion(data: InsertAceleracionEjercicio): Promise<AceleracionEjercicio> {
+    const [created] = await db.insert(aceleracionEjercicios).values(data).returning();
+    return created;
+  }
+
+  async updateAceleracion(id: string, data: Partial<InsertAceleracionEjercicio>): Promise<AceleracionEjercicio | null> {
+    const [updated] = await db.update(aceleracionEjercicios)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(aceleracionEjercicios.id, id))
       .returning();
     return updated || null;
   }
