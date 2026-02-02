@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
-import { Dumbbell, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
 
@@ -18,6 +18,14 @@ interface EntrenamientoItem {
 
 const categorias = [
   { 
+    id: "preescolar", 
+    label: "Pre-escolar", 
+    ageRange: "3-5", 
+    description: "Juegos cortos, visuales y guiados.",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588294.png",
+    iconBg: "linear-gradient(135deg, #FFE082 0%, #FFB300 100%)"
+  },
+  { 
     id: "ninos", 
     label: "Niños", 
     ageRange: "6-11", 
@@ -34,24 +42,16 @@ const categorias = [
     iconBg: "linear-gradient(135deg, #B39DDB 0%, #7E57C2 100%)"
   },
   { 
-    id: "universitarios", 
-    label: "Universitarios", 
-    ageRange: "18-25", 
+    id: "adultos", 
+    label: "Adultos", 
+    ageRange: "18-59", 
     description: "Productividad, lectura y claridad mental.",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png",
     iconBg: "linear-gradient(135deg, #90CAF9 0%, #1976D2 100%)"
   },
   { 
-    id: "profesionales", 
-    label: "Profesionales", 
-    ageRange: "26-59", 
-    description: "Alto rendimiento y concentración.",
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png",
-    iconBg: "linear-gradient(135deg, #90CAF9 0%, #1976D2 100%)"
-  },
-  { 
     id: "adulto_mayor", 
-    label: "Adulto Mayor", 
+    label: "Adulto mayor", 
     ageRange: "60+", 
     description: "Memoria, agilidad y prevención cognitiva.",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png",
@@ -95,44 +95,23 @@ export default function EntrenamientoEdadPage() {
           }}
         >
           <motion.div
-            className="px-5 pt-4 pb-4"
+            className="px-5 pt-6 pb-4"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.25 }}
           >
-            <div className="flex items-start gap-4 mb-2">
-              <div className="flex-1">
-                <p className="text-sm font-semibold mb-0.5" style={{ color: "#8a3ffc" }}>
-                  {item?.title || "Entrenamiento"}
-                </p>
-                <h1 
-                  className="font-bold mb-1"
-                  style={{ fontSize: 22, color: "#5b21b6", fontWeight: 700 }}
-                >
-                  Selecciona tu etapa
-                </h1>
-                <p className="leading-relaxed" style={{ fontSize: 13, color: "#9ca3af" }}>
-                  Así ajustamos ejercicios y dificultad.
-                </p>
-              </div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.15 }}
-                className="flex-shrink-0"
-              >
-                <div 
-                  className="w-14 h-14 rounded-xl flex items-center justify-center"
-                  style={{ 
-                    background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
-                    boxShadow: "0 4px 16px rgba(138, 63, 252, 0.3)"
-                  }}
-                >
-                  <Dumbbell className="w-7 h-7 text-white" />
-                </div>
-              </motion.div>
-            </div>
+            <h1 
+              className="font-bold mb-1"
+              style={{ fontSize: 22, color: "#5b21b6", fontWeight: 700 }}
+            >
+              SELECCIONA TU EDAD
+            </h1>
+            <p 
+              className="leading-relaxed"
+              style={{ fontSize: 13, color: "#9ca3af" }}
+            >
+              Así ajustamos ejercicios y dificultad.
+            </p>
           </motion.div>
 
           <div className="px-4 pb-4 space-y-2">
