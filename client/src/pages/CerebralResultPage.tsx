@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Share2, MessageCircle, Brain } from "lucide-react";
+import { Home, Share2, MessageCircle, Brain, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -48,7 +49,34 @@ export default function CerebralResultPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader />
+      <header 
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+        }}
+      >
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setLocation("/")}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255, 255, 255, 0.9)",
+                boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
+              }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+            </button>
+            
+            <div className="flex items-center justify-center">
+              <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+            </div>
+            
+            <div className="w-10" />
+          </div>
+        </div>
+      </header>
       
       <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
@@ -58,7 +86,7 @@ export default function CerebralResultPage() {
         <div 
           className="w-full"
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
           <div className="px-5 pt-4 pb-2 text-center">
@@ -113,7 +141,7 @@ export default function CerebralResultPage() {
                 <svg viewBox="0 0 200 220" className="w-full h-full drop-shadow-lg">
                   <defs>
                     <linearGradient id="leftBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#00d9ff" />
+                      <stop offset="0%" stopColor="#06b6d4" />
                       <stop offset="100%" stopColor="#0891B2" />
                     </linearGradient>
                     <linearGradient id="rightBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -210,7 +238,7 @@ export default function CerebralResultPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.9 + idx * 0.1 }}
                       className="px-3 py-1.5 text-white text-xs font-medium rounded-full"
-                      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                     >
                       {trait}
                     </motion.span>
@@ -237,7 +265,7 @@ export default function CerebralResultPage() {
             </Button>
             <Button
               className="flex flex-col items-center gap-1 py-4"
-              style={{ background: "linear-gradient(135deg, #00d9ff 0%, #0891B2 100%)" }}
+              style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891B2 100%)" }}
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />

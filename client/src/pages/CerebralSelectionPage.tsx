@@ -2,11 +2,13 @@ import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useUserData } from "@/lib/user-context";
-import { Brain, Clock, ChevronRight } from "lucide-react";
+import { Brain, Clock, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 interface CerebralIntro {
   imageUrl: string;
@@ -67,10 +69,46 @@ export default function CerebralSelectionPage() {
     }
   };
 
+  const renderHeader = () => (
+    <>
+      <header 
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+        }}
+      >
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255, 255, 255, 0.9)",
+                boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
+              }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+            </button>
+            
+            <div className="flex items-center justify-center">
+              <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+            </div>
+            
+            <div className="w-10" />
+          </div>
+        </div>
+      </header>
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
+    </>
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <CurvedHeader showBack onBack={handleBack} />
+        {renderHeader()}
         <main className="flex-1 p-5 space-y-4">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-48 w-full rounded-2xl" />
@@ -84,7 +122,7 @@ export default function CerebralSelectionPage() {
   if (themes.length === 0) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <CurvedHeader showBack onBack={handleBack} />
+        {renderHeader()}
         <main className="flex-1 flex flex-col items-center justify-center p-6">
           <Brain className="w-16 h-16 text-purple-300 mb-4" />
           <p className="text-gray-700 text-lg font-medium">No hay ejercicios disponibles.</p>
@@ -97,13 +135,44 @@ export default function CerebralSelectionPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={handleBack} />
+      <header 
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+        }}
+      >
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255, 255, 255, 0.9)",
+                boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
+              }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+            </button>
+            
+            <div className="flex items-center justify-center">
+              <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+            </div>
+            
+            <div className="w-10" />
+          </div>
+        </div>
+      </header>
+
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
           className="w-full"
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
           <div className="relative px-5 pt-6 pb-8">
@@ -146,7 +215,7 @@ export default function CerebralSelectionPage() {
                 {intro.imageUrl ? (
                   <div 
                     className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-white"
-                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                   >
                     <img 
                       src={intro.imageUrl} 
@@ -157,7 +226,7 @@ export default function CerebralSelectionPage() {
                 ) : (
                   <div 
                     className="w-24 h-24 rounded-2xl flex items-center justify-center shadow-lg"
-                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                   >
                     <Brain className="w-12 h-12 text-white" />
                   </div>
@@ -192,7 +261,7 @@ export default function CerebralSelectionPage() {
                 >
                   <span 
                     className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                   >
                     {index + 1}
                   </span>
@@ -209,7 +278,7 @@ export default function CerebralSelectionPage() {
             <Button
               onClick={handleStart}
               className="w-full py-6 text-lg font-bold rounded-xl"
-              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               data-testid="button-start-test"
             >
               <span>{intro.buttonText}</span>
