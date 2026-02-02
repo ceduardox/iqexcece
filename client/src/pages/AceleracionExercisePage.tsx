@@ -210,12 +210,14 @@ export default function AceleracionExercisePage() {
     setLocalSpeed(prev => Math.max(50, Math.min(1000, prev + delta)));
   };
 
-  const handlePrevWord = () => {
-    setCurrentWordIndex(prev => Math.max(0, prev - 10));
+  const handleSpeedDecrease = () => {
+    playSound("iphone");
+    setLocalSpeed(prev => Math.max(50, prev - 10));
   };
 
-  const handleNextWord = () => {
-    setCurrentWordIndex(prev => Math.min(words.length - 1, prev + 10));
+  const handleSpeedIncrease = () => {
+    playSound("iphone");
+    setLocalSpeed(prev => Math.min(1000, prev + 10));
   };
 
   // Word animation effect
@@ -244,78 +246,100 @@ export default function AceleracionExercisePage() {
   const modeTitle = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
   const progress = words.length > 0 ? Math.round((currentWordIndex / words.length) * 100) : 0;
 
-  // Exercise view - Golpe de Vista style
+  // Exercise view - Golpe de Vista style (formal & creative)
   if (showExercise && selectedPdf) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        {/* Turquoise-blue gradient header */}
-        <header 
-          className="px-4 py-3"
-          style={{ 
-            background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)"
-          }}
-        >
+      <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)" }}>
+        {/* Elegant header with gradient accent */}
+        <header className="relative px-5 pt-4 pb-6">
+          {/* Decorative gradient line */}
+          <div 
+            className="absolute top-0 left-0 right-0 h-1"
+            style={{ background: "linear-gradient(90deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)" }}
+          />
+          
           <div className="flex items-center justify-between">
-            <h1 className="text-white font-bold text-lg">
-              Acelera al máximo tu Lectura
-            </h1>
+            <div>
+              <p className="text-cyan-400 text-xs font-medium tracking-widest uppercase mb-1">
+                Entrenamiento Visual
+              </p>
+              <h1 className="text-white font-bold text-xl tracking-tight">
+                {modeTitle}
+              </h1>
+            </div>
             <button
               onClick={handleClose}
-              className="text-white p-2 rounded-full hover:bg-white/20 transition-colors"
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-all"
               data-testid="button-close-exercise"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-white" />
             </button>
           </div>
         </header>
 
         {/* Main exercise area */}
-        <main className="flex-1 flex flex-col items-center justify-between px-4 py-8">
-          {/* Top section - Labels and speed */}
-          <div className="text-center">
-            <span className="text-blue-500 font-semibold text-sm tracking-wider">
-              JUEGO
-            </span>
-            <h2 className="text-gray-800 font-bold text-2xl mt-1">
-              {modeTitle}
-            </h2>
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <button
-                onClick={() => handleSpeedChange(-50)}
-                className="text-gray-400 hover:text-gray-600 p-1"
-                data-testid="button-speed-down"
-              >
-                <ChevronsLeft className="w-5 h-5" />
-              </button>
-              <span className="text-gray-800 font-bold text-2xl min-w-[180px]">
-                {localSpeed} palabras /min.
-              </span>
-              <button
-                onClick={() => handleSpeedChange(50)}
-                className="text-gray-400 hover:text-gray-600 p-1"
-                data-testid="button-speed-up"
-              >
-                <ChevronsRight className="w-5 h-5" />
-              </button>
+        <main className="flex-1 flex flex-col items-center justify-between px-5 pb-8">
+          {/* Speed display - elegant card */}
+          <div className="w-full max-w-sm">
+            <div 
+              className="rounded-2xl p-4 backdrop-blur border border-white/10"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+            >
+              <p className="text-gray-400 text-xs text-center mb-2 tracking-wide">
+                VELOCIDAD DE LECTURA
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => handleSpeedChange(-50)}
+                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  data-testid="button-speed-down"
+                >
+                  <span className="text-white font-bold">−</span>
+                </button>
+                <div className="text-center min-w-[140px]">
+                  <span className="text-white font-bold text-3xl">{localSpeed}</span>
+                  <span className="text-gray-400 text-sm ml-2">PPM</span>
+                </div>
+                <button
+                  onClick={() => handleSpeedChange(50)}
+                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  data-testid="button-speed-up"
+                >
+                  <span className="text-white font-bold">+</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Center - Word display with vertical line guide */}
-          <div className="flex-1 flex items-center justify-center w-full max-w-md">
-            <div className="relative w-full h-64 flex flex-col items-center justify-center">
-              {/* Top vertical line */}
-              <div className="w-0.5 h-16 bg-gray-300" />
+          {/* Center - Word display with elegant guide lines */}
+          <div className="flex-1 flex items-center justify-center w-full max-w-md py-8">
+            <div className="relative w-full flex flex-col items-center justify-center">
+              {/* Top guide line with gradient */}
+              <div 
+                className="w-px h-20 rounded-full"
+                style={{ background: "linear-gradient(180deg, transparent 0%, #06B6D4 100%)" }}
+              />
               
-              {/* Word display */}
-              <div className="py-6 px-4">
+              {/* Word display container */}
+              <div 
+                className="relative py-8 px-6 my-4 rounded-xl"
+                style={{ 
+                  background: "rgba(255,255,255,0.03)",
+                  boxShadow: "0 0 60px rgba(6, 182, 212, 0.1)"
+                }}
+              >
+                {/* Subtle side accents */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full bg-gradient-to-b from-cyan-500 to-purple-500 opacity-50" />
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full bg-gradient-to-b from-purple-500 to-pink-500 opacity-50" />
+                
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={currentWordIndex}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.1 }}
-                    className="text-gray-800 font-medium text-2xl"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.08 }}
+                    className="text-white font-semibold text-3xl tracking-wide block text-center min-w-[200px]"
                     data-testid="text-current-word"
                   >
                     {words[currentWordIndex] || "—"}
@@ -323,58 +347,81 @@ export default function AceleracionExercisePage() {
                 </AnimatePresence>
               </div>
 
-              {/* Bottom vertical line */}
-              <div className="w-0.5 h-16 bg-gray-300" />
+              {/* Bottom guide line with gradient */}
+              <div 
+                className="w-px h-20 rounded-full"
+                style={{ background: "linear-gradient(180deg, #EC4899 0%, transparent 100%)" }}
+              />
             </div>
           </div>
 
-          {/* Bottom controls */}
-          <div className="w-full max-w-md">
-            {/* Progress indicator */}
-            <div className="text-center text-gray-400 text-sm mb-4">
-              {currentWordIndex + 1} / {words.length} palabras
+          {/* Bottom controls - professional layout */}
+          <div className="w-full max-w-sm space-y-4">
+            {/* Progress bar */}
+            <div className="relative">
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full rounded-full"
+                  style={{ 
+                    background: "linear-gradient(90deg, #06B6D4 0%, #8B5CF6 100%)",
+                    width: `${progress}%`
+                  }}
+                  initial={false}
+                  animate={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="text-gray-500 text-xs">{currentWordIndex + 1} de {words.length}</span>
+                <span className="text-cyan-400 text-xs font-medium">{progress}%</span>
+              </div>
             </div>
 
             {/* Control buttons */}
-            <div className="flex items-center justify-center gap-4">
-              {/* Previous button - gray */}
+            <div className="flex items-center justify-center gap-3">
+              {/* Decrease speed button */}
               <button
-                onClick={handlePrevWord}
-                className="w-14 h-14 rounded-2xl bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors shadow-md"
-                data-testid="button-prev"
+                onClick={handleSpeedDecrease}
+                className="w-14 h-14 rounded-xl flex flex-col items-center justify-center transition-all active:scale-95"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+                data-testid="button-speed-decrease"
               >
-                <ChevronsLeft className="w-6 h-6 text-gray-600" />
+                <ChevronsLeft className="w-5 h-5 text-gray-400" />
+                <span className="text-[10px] text-gray-500 mt-0.5">-10</span>
               </button>
 
-              {/* Continue/Play button - orange */}
+              {/* Play/Pause button - gradient */}
               <button
                 onClick={togglePlay}
-                className="px-8 py-4 rounded-2xl text-white font-semibold text-lg flex items-center gap-2 shadow-lg transition-transform active:scale-95"
+                className="flex-1 max-w-[180px] py-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95"
                 style={{ 
-                  background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)"
+                  background: isPlaying 
+                    ? "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)"
+                    : "linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)"
                 }}
                 data-testid="button-play-pause"
               >
                 {isPlaying ? (
                   <>
                     <Pause className="w-5 h-5" />
-                    Pausar
+                    <span>Pausar</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-5 h-5" />
-                    Continuar
+                    <span>Iniciar</span>
                   </>
                 )}
               </button>
 
-              {/* Next button - gray */}
+              {/* Increase speed button */}
               <button
-                onClick={handleNextWord}
-                className="w-14 h-14 rounded-2xl bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors shadow-md"
-                data-testid="button-next"
+                onClick={handleSpeedIncrease}
+                className="w-14 h-14 rounded-xl flex flex-col items-center justify-center transition-all active:scale-95"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+                data-testid="button-speed-increase"
               >
-                <ChevronsRight className="w-6 h-6 text-gray-600" />
+                <ChevronsRight className="w-5 h-5 text-gray-400" />
+                <span className="text-[10px] text-gray-500 mt-0.5">+10</span>
               </button>
             </div>
           </div>
