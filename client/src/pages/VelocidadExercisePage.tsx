@@ -523,9 +523,9 @@ export default function VelocidadExercisePage() {
                 {opcionesRonda.map((opcion, idx) => (
                   <motion.button
                     key={idx}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: idx * 0.05, type: "spring", stiffness: 200 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.1 }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleRespuesta(opcion)}
@@ -586,28 +586,61 @@ export default function VelocidadExercisePage() {
               </h3>
               
               <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-                <p className="text-gray-500 mb-4">Resultados:</p>
-                <div className="flex justify-center gap-8">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                      <span className="text-green-600 font-bold text-xl">✓</span>
+                <div className="flex items-center justify-center mb-4">
+                  <div className="relative w-32 h-32">
+                    <svg className="w-32 h-32 transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="#e5e7eb"
+                        strokeWidth="12"
+                        fill="none"
+                      />
+                      <motion.circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="url(#gradient)"
+                        strokeWidth="12"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ strokeDasharray: "0 352" }}
+                        animate={{ 
+                          strokeDasharray: `${ejercicios.length > 0 ? (correctos / ejercicios.length) * 352 : 0} 352` 
+                        }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                      />
+                      <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#8a3ffc" />
+                          <stop offset="100%" stopColor="#06b6d4" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-gray-800 text-3xl font-bold">
+                        {ejercicios.length > 0 ? Math.round((correctos / ejercicios.length) * 100) : 0}%
+                      </span>
+                      <span className="text-gray-400 text-xs">Precisión</span>
                     </div>
-                    <p className="text-gray-800 text-2xl font-bold">{correctos}</p>
-                    <p className="text-green-600 text-sm font-medium">CORRECTOS</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                      <span className="text-red-600 font-bold text-xl">✗</span>
-                    </div>
-                    <p className="text-gray-800 text-2xl font-bold">{incorrectos}</p>
-                    <p className="text-red-600 text-sm font-medium">INCORRECTOS</p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-gray-500 text-sm">Precisión</p>
-                  <p className="text-purple-600 text-3xl font-bold">
-                    {ejercicios.length > 0 ? Math.round((correctos / ejercicios.length) * 100) : 0}%
-                  </p>
+                <div className="flex justify-center gap-8">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="text-2xl">😊</span>
+                      <span className="text-green-500 text-2xl font-bold">{correctos}</span>
+                    </div>
+                    <p className="text-gray-500 text-xs">CORRECTOS</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="text-2xl">😢</span>
+                      <span className="text-red-500 text-2xl font-bold">{incorrectos}</span>
+                    </div>
+                    <p className="text-gray-500 text-xs">INCORRECTOS</p>
+                  </div>
                 </div>
               </div>
 
