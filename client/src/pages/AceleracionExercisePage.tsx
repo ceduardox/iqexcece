@@ -258,6 +258,25 @@ export default function AceleracionExercisePage() {
     const shareText = `Mi resultado en ${modeTitle} - IQEXPONENCIAL\nVelocidad: ${localSpeed} PPM\n\nEntrena tu cerebro en: https://iqexponencial.app`;
     
     try {
+      // Pre-load the logo image as base64 to avoid CORS issues
+      const logoImg = resultsRef.current.querySelector('img[alt="IQEXPONENCIAL"]') as HTMLImageElement;
+      if (logoImg) {
+        try {
+          const response = await fetch(logoImg.src);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          logoImg.src = base64;
+          // Wait a bit for the image to update
+          await new Promise(r => setTimeout(r, 100));
+        } catch (e) {
+          console.log('Could not convert logo to base64');
+        }
+      }
+      
       // Capture the results screen as image
       const canvas = await html2canvas(resultsRef.current, {
         backgroundColor: '#ffffff',
