@@ -826,7 +826,11 @@ export default function AceleracionExercisePage() {
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-2">
-                <Eye className="w-5 h-5 text-white" />
+                <img 
+                  src="https://iqexponencial.app/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
+                  alt="Ojo" 
+                  className="w-6 h-6 object-contain"
+                />
                 <h1 className="text-white font-bold text-lg truncate max-w-[200px]">
                   {selectedPdf.name}
                 </h1>
@@ -968,8 +972,12 @@ export default function AceleracionExercisePage() {
                 </p>
               </div>
               {/* Avatar placeholder */}
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-                <Eye className="w-8 h-8 text-purple-500" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="https://iqexponencial.app/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
+                  alt="Ojo" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
             </div>
 
