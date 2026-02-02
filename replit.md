@@ -58,6 +58,12 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
 - **Visual Editor System**: In-page style editor for administrators
   - Database table: page_styles with pageName and JSON styles
   - Toggle "Editor: ON/OFF" button in admin panel sidebar
+- **Performance Optimizations** (Feb 2026):
+  - Style loading with spinner to prevent flash of old styles
+  - 2-second timeout fallback ensures UI never hangs
+  - Sound preloading at app startup for instant feedback
+  - Sound effects for buttons (iphone.mp3) and cards (card.mp3)
+  - Hooks: use-sounds.ts, use-preload.ts
   - EditorToolbar component: Floating toolbar with 5 tabs
   - Click-to-select editable elements (hero section, cards)
   - **Fondo tab**: Color picker, gradient presets (Purple→Cyan, Dark), or image URL with size control
