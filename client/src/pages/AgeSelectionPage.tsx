@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, Check } from "lucide-react";
+import { ArrowLeft, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
@@ -69,7 +69,6 @@ const ageCategories = [
 interface AgeCardProps {
   category: typeof ageCategories[0];
   index: number;
-  isSelected: boolean;
   onClick: () => void;
   editorMode: boolean;
   styles: PageStyles;
@@ -77,7 +76,7 @@ interface AgeCardProps {
   getEditableClass: (id: string) => string;
 }
 
-function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onElementClick, getEditableClass }: AgeCardProps) {
+function AgeCard({ category, index, onClick, editorMode, styles, onElementClick, getEditableClass }: AgeCardProps) {
   const cardId = `card-${category.id}`;
   const iconId = `icon-${category.id}`;
   const titleId = `title-${category.id}`;
@@ -96,21 +95,15 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className={`relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all ${
-          isSelected 
-            ? "bg-white" 
-            : "bg-white hover:shadow-md"
-        }`}
+        className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
         style={{ 
           background: cardStyle?.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : cardStyle?.background || "white",
           borderRadius: cardStyle?.borderRadius || 16,
-          boxShadow: isSelected 
-            ? "0 0 0 2px #8b5cf6, 0 4px 20px rgba(139, 92, 246, 0.25), 0 0 30px rgba(139, 92, 246, 0.15)"
-            : cardStyle?.shadowBlur 
-              ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
-              : "0 1px 4px rgba(0,0,0,0.06)"
+          boxShadow: cardStyle?.shadowBlur 
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
+            : "0 1px 4px rgba(0,0,0,0.06)"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
@@ -156,16 +149,7 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
           </p>
         </div>
 
-        <div 
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)}`}
-          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
-          style={{
-            backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#8b5cf6") : "white",
-            borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#8b5cf6") : "#d1d5db"
-          }}
-        >
-          {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
-        </div>
+        <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
       </motion.div>
     </motion.div>
   );
@@ -182,7 +166,6 @@ export default function AgeSelectionPage() {
   const [styles, setStyles] = useState<PageStyles>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [stylesLoaded, setStylesLoaded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<typeof ageCategories[0] | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("editorMode");
@@ -273,28 +256,22 @@ export default function AgeSelectionPage() {
 
   const handleCardSelect = useCallback((category: typeof ageCategories[0]) => {
     playCardSound();
-    setSelectedCategory(category);
-  }, []);
-
-  const handleContinue = useCallback(() => {
-    if (!selectedCategory) return;
-    playButtonSound();
     
     updateUserData({ 
-      ageGroup: selectedCategory.ageGroup, 
-      ageLabel: selectedCategory.label 
+      ageGroup: category.ageGroup, 
+      ageLabel: category.label 
     });
     
     if (testId === "lectura") {
-      setLocation(`/reading-selection/${selectedCategory.ageGroup}`);
+      setLocation(`/reading-selection/${category.ageGroup}`);
     } else if (testId === "razonamiento") {
-      setLocation(`/razonamiento-selection/${selectedCategory.ageGroup}`);
+      setLocation(`/razonamiento-selection/${category.ageGroup}`);
     } else if (testId === "cerebral") {
-      setLocation(`/cerebral-selection/${selectedCategory.ageGroup}`);
+      setLocation(`/cerebral-selection/${category.ageGroup}`);
     } else {
-      setLocation(`/quiz/${selectedCategory.ageGroup}/${testId}`);
+      setLocation(`/quiz/${category.ageGroup}/${testId}`);
     }
-  }, [selectedCategory, testId, setLocation, updateUserData]);
+  }, [testId, setLocation, updateUserData]);
 
   const handleNavHome = useCallback(() => {
     playButtonSound();
@@ -384,7 +361,7 @@ export default function AgeSelectionPage() {
         />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-32">
+      <main className="flex-1 overflow-y-auto pb-20">
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
@@ -429,7 +406,6 @@ export default function AgeSelectionPage() {
                 key={category.id}
                 category={category}
                 index={index}
-                isSelected={selectedCategory?.id === category.id}
                 onClick={() => handleCardSelect(category)}
                 editorMode={editorMode}
                 styles={styles}
@@ -440,39 +416,6 @@ export default function AgeSelectionPage() {
           </div>
         </div>
       </main>
-
-      <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 bg-gradient-to-t from-white via-white to-transparent pt-6 z-40">
-        <motion.button
-          onClick={(e) => {
-            if (editorMode) {
-              e.stopPropagation();
-              handleElementClick("btn-continue", e);
-            } else {
-              handleContinue();
-            }
-          }}
-          disabled={!selectedCategory && !editorMode}
-          className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${getEditableClass("btn-continue")} ${
-            selectedCategory || editorMode
-              ? "text-white shadow-lg"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-          style={{
-            background: styles["btn-continue"]?.background || (selectedCategory || editorMode
-              ? "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" 
-              : undefined),
-            color: styles["btn-continue"]?.textColor || "white",
-            fontSize: styles["btn-continue"]?.fontSize || 18,
-            marginTop: styles["btn-continue"]?.marginTop || 0,
-            marginBottom: styles["btn-continue"]?.marginBottom || 0,
-            borderRadius: styles["btn-continue"]?.borderRadius || 16
-          }}
-          whileTap={selectedCategory ? { scale: 0.98 } : undefined}
-          data-testid="button-continue"
-        >
-          {styles["btn-continue"]?.buttonText || "Continuar"}
-        </motion.button>
-      </div>
 
       <nav 
         className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 ${getEditableClass("nav-bar")}`}
