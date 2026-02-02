@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Play } from "lucide-react";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface Ejercicio {
   nivel: number;
@@ -379,7 +380,7 @@ export default function VelocidadExercisePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="relative z-10 px-4 pt-4 pb-6 flex items-center justify-between"
+        className="relative z-10 px-4 pt-4 pb-2 flex items-center justify-between"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
@@ -392,7 +393,11 @@ export default function VelocidadExercisePage() {
         </button>
       </header>
 
-      <div className="relative -mt-4 mx-4 bg-white rounded-xl shadow-lg px-4 py-3 z-20">
+      <div className="w-full relative z-20" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
+
+      <div className="relative z-10 mx-4 bg-white rounded-xl shadow-lg px-4 py-3 mt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-gray-500 text-sm">NIVEL</span>
@@ -509,16 +514,15 @@ export default function VelocidadExercisePage() {
         <AnimatePresence>
           {gameState === "question" && (
             <motion.div 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
+              transition={{ duration: 0.15 }}
               className="w-full max-w-md"
             >
-              <motion.p 
-                className="text-gray-800 text-xl font-medium mb-6 text-center"
-              >
+              <p className="text-gray-800 text-xl font-medium mb-6 text-center">
                 {preguntaActual}
-              </motion.p>
+              </p>
               <div className="grid grid-cols-3 gap-3">
                 {opcionesRonda.map((opcion, idx) => (
                   <button
