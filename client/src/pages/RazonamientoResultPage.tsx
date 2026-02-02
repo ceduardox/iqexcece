@@ -4,7 +4,6 @@ import { useUserData } from "@/lib/user-context";
 import { Brain, Home, RotateCcw, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
@@ -72,10 +71,6 @@ export default function RazonamientoResultPage() {
           </div>
         </div>
       </header>
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
