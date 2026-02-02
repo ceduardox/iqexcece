@@ -4,8 +4,9 @@ import { useUserData } from "@/lib/user-context";
 import { Brain, Home, RotateCcw, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -59,7 +60,18 @@ export default function RazonamientoResultPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader />
+      <header 
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+        }}
+      >
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-center">
+            <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+          </div>
+        </div>
+      </header>
       
       <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
@@ -69,7 +81,7 @@ export default function RazonamientoResultPage() {
         <div 
           className="w-full"
           style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
           <div className="px-5 pt-4 pb-2 text-center">
