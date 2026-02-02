@@ -4530,17 +4530,77 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                           
                           <div>
-                            <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta (separadas por comas)</label>
-                            <Input
-                              value={nivel.opciones || ""}
-                              onChange={(e) => {
-                                const updated = [...velocidadEjercicio.niveles];
-                                updated[nivelIdx].opciones = e.target.value;
-                                setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
-                              }}
-                              className="bg-white/10 border-purple-500/30 text-white"
-                              placeholder="atomo, olvido, orar, vista, iglesia, opaco"
-                            />
+                            <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta</label>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-white/50 text-xs">Cantidad de opciones:</span>
+                              <select
+                                value={(nivel.opciones || "").split(",").filter((p: string) => p.trim()).length || 6}
+                                onChange={(e) => {
+                                  const count = parseInt(e.target.value);
+                                  const palabrasArr = (nivel.palabras || "").split(",").map((p: string) => p.trim()).filter(Boolean);
+                                  const selected = palabrasArr.slice(0, count).join(", ");
+                                  const updated = [...velocidadEjercicio.niveles];
+                                  updated[nivelIdx].opciones = selected;
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                                className="bg-gray-700 border border-purple-500/30 text-white rounded-md px-2 py-1 text-sm"
+                              >
+                                {[4, 5, 6, 7, 8, 9, 10].map(n => (
+                                  <option key={n} value={n} className="bg-gray-700 text-white">{n}</option>
+                                ))}
+                              </select>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-purple-400 text-xs h-7"
+                                onClick={() => {
+                                  const palabrasArr = (nivel.palabras || "").split(",").map((p: string) => p.trim()).filter(Boolean);
+                                  const currentCount = (nivel.opciones || "").split(",").filter((p: string) => p.trim()).length || 6;
+                                  const selected = palabrasArr.slice(0, currentCount).join(", ");
+                                  const updated = [...velocidadEjercicio.niveles];
+                                  updated[nivelIdx].opciones = selected;
+                                  setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                }}
+                              >
+                                Generar de palabras
+                              </Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {(nivel.palabras || "").split(",").map((palabra: string, pIdx: number) => {
+                                const p = palabra.trim();
+                                if (!p) return null;
+                                const opcionesArr = (nivel.opciones || "").split(",").map((o: string) => o.trim());
+                                const isSelected = opcionesArr.includes(p);
+                                return (
+                                  <button
+                                    key={pIdx}
+                                    type="button"
+                                    onClick={() => {
+                                      let newOpciones: string[];
+                                      if (isSelected) {
+                                        newOpciones = opcionesArr.filter(o => o !== p);
+                                      } else {
+                                        newOpciones = [...opcionesArr.filter(Boolean), p];
+                                      }
+                                      const updated = [...velocidadEjercicio.niveles];
+                                      updated[nivelIdx].opciones = newOpciones.join(", ");
+                                      setVelocidadEjercicio({...velocidadEjercicio, niveles: updated});
+                                    }}
+                                    className={`px-2 py-1 rounded text-xs transition-all ${
+                                      isSelected 
+                                        ? "bg-purple-600 text-white" 
+                                        : "bg-white/10 text-white/60 hover:bg-white/20"
+                                    }`}
+                                  >
+                                    {p}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div className="text-white/40 text-xs">
+                              Seleccionadas: {(nivel.opciones || "").split(",").filter((p: string) => p.trim()).length} | 
+                              <span className="text-purple-300 ml-1">{nivel.opciones || "ninguna"}</span>
+                            </div>
                           </div>
                         </div>
                       ))}
