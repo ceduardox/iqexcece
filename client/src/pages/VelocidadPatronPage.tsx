@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Grid3X3 } from "lucide-react";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const playButtonSound = () => {
+  const audio = new Audio('/iphone.mp3');
+  audio.volume = 0.5;
+  audio.play().catch(() => {});
+};
 
 interface Ejercicio {
   nivel: number;
@@ -112,37 +121,52 @@ export default function VelocidadPatronPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-      <header className="p-4">
-        <button
-          onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
-          className="flex items-center gap-2 text-white font-semibold"
-          data-testid="button-back"
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation(`/entrenamiento-edad/${itemId}`); }} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
+
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          <ArrowLeft className="w-6 h-6" />
-          Volver
-        </button>
-      </header>
-
-      <main className="flex-1 flex flex-col">
-        {imagen && (
-          <div className="flex justify-center mb-4">
-            <img 
-              src={imagen} 
-              alt="Ejercicio" 
-              className="w-48 h-48 object-contain"
-            />
+          <div className="px-5 pt-4 pb-6">
+            {imagen && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex justify-center mb-4"
+              >
+                <img src={imagen} alt="" className="w-24 h-24 object-contain" />
+              </motion.div>
+            )}
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-xl font-bold text-gray-800 text-center mb-2"
+            >
+              {titulo}
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-sm text-gray-500 text-center"
+            >
+              Selecciona el nivel de dificultad
+            </motion.p>
           </div>
-        )}
+        </div>
 
-        <div className="bg-white rounded-t-3xl flex-1 px-6 py-8">
-          <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-            {titulo}
-          </h1>
-
-          <p className="text-gray-500 text-sm mb-6">Selecciona el nivel de dificultad:</p>
-
-          <div className="grid grid-cols-2 gap-4">
+        <div className="px-5 py-4">
+          <div className="grid grid-cols-2 gap-3">
             {loading ? (
               <>
                 <SkeletonCard />
@@ -153,30 +177,38 @@ export default function VelocidadPatronPage() {
             ) : patrones.length === 0 ? (
               <p className="col-span-2 text-center text-gray-500">No hay ejercicios disponibles</p>
             ) : (
-              patrones.map((patron) => (
-                <button
+              patrones.map((patron, idx) => (
+                <motion.button
                   key={patron}
-                  onClick={() => setLocation(`/velocidad/${categoria}/${itemId}/patron/${encodeURIComponent(patron)}`)}
-                  className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-5 text-center hover:border-purple-500 hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => { playButtonSound(); setLocation(`/velocidad/${categoria}/${itemId}/patron/${encodeURIComponent(patron)}`); }}
+                  className="bg-white border border-gray-200 rounded-lg p-4 text-center shadow-sm hover:shadow-md hover:border-purple-300 transition-all"
                   data-testid={`button-patron-${patron}`}
                 >
-                  <div className="flex justify-center mb-4">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
+                  <div className="flex justify-center mb-3">
+                    <div 
+                      className="w-14 h-14 rounded-lg flex items-center justify-center"
+                      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                    >
                       {getPatronIcon(patron)}
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-gray-800">
+                  <div className="text-sm font-semibold text-gray-800">
                     {getPatronLabel(patron)}
                   </div>
-                  <div className="text-xs text-purple-500 mt-1 font-medium">
+                  <div className="text-xs text-purple-500 mt-1">
                     {patron}
                   </div>
-                </button>
+                </motion.button>
               ))
             )}
           </div>
         </div>
       </main>
+
+      <BottomNavBar />
     </div>
   );
 }
