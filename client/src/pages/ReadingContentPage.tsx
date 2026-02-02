@@ -230,19 +230,11 @@ export default function ReadingContentPage() {
       <div className="min-h-screen bg-white flex flex-col">
         <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
           <div className="flex items-center justify-center" data-testid="header-logo">
-            <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#8a3ffc" />
-                  <stop offset="100%" stopColor="#00d9ff" />
-                </linearGradient>
-              </defs>
-              <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-                <tspan fill="#8a3ffc">i</tspan>
-                <tspan fill="#8a3ffc">Q</tspan>
-                <tspan fill="url(#logoGradient)">x</tspan>
-              </text>
-            </svg>
+            <img 
+              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+              alt="iQx" 
+              className="h-10 w-auto object-contain" 
+            />
           </div>
         </header>
 
@@ -615,41 +607,38 @@ export default function ReadingContentPage() {
         </button>
         
         <div className="flex items-center justify-center" data-testid="header-logo">
-          <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logoGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8a3ffc" />
-                <stop offset="100%" stopColor="#00d9ff" />
-              </linearGradient>
-            </defs>
-            <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-              <tspan fill="#8a3ffc">i</tspan>
-              <tspan fill="#8a3ffc">Q</tspan>
-              <tspan fill="url(#logoGradient3)">x</tspan>
-            </text>
-          </svg>
+          <img 
+            src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+            alt="iQx" 
+            className="h-10 w-auto object-contain" 
+          />
         </div>
       </header>
 
       <div className="flex mx-4 mt-3 rounded-full overflow-hidden border border-gray-200">
         <button
           onClick={() => {
-            playButtonSound();
-            setActiveTab("lectura");
+            if (activeTab !== "cuestionario") {
+              playButtonSound();
+              setActiveTab("lectura");
+            }
           }}
           className={`flex-1 py-2.5 text-xs font-bold text-center transition-all ${
             activeTab === "lectura" 
               ? "text-white"
-              : "text-gray-500"
+              : activeTab === "cuestionario"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500"
           }`}
           style={activeTab === "lectura" ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" } : {}}
+          disabled={activeTab === "cuestionario"}
           data-testid="tab-lectura"
         >
           LECTURA
         </button>
         <button
           onClick={() => {
-            if (quizStarted) {
+            if (quizStarted && activeTab !== "lectura") {
               playButtonSound();
               setActiveTab("cuestionario");
             }
@@ -662,7 +651,7 @@ export default function ReadingContentPage() {
                 : "text-gray-300 cursor-not-allowed"
           }`}
           style={activeTab === "cuestionario" ? { background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" } : {}}
-          disabled={!quizStarted}
+          disabled={!quizStarted || activeTab === "lectura"}
           data-testid="tab-cuestionario"
         >
           CUESTIONARIO
