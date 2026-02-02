@@ -30,7 +30,7 @@ export default function AceleracionExercisePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const animationRef = useRef<number | null>(null);
 
-  const { data } = useQuery({
+  const { data, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["/api/aceleracion", itemId],
     queryFn: async () => {
       const res = await fetch(`/api/aceleracion/${itemId}`);
@@ -104,8 +104,7 @@ export default function AceleracionExercisePage() {
   }, []);
 
   useEffect(() => {
-    if (isPlaying && modo === "golpe") {
-      const interval = 60000 / velocidadPPM;
+    if (isPlaying) {
       const step = 100 / (velocidadPPM / 60);
       
       const animate = () => {
@@ -127,7 +126,7 @@ export default function AceleracionExercisePage() {
         }
       };
     }
-  }, [isPlaying, modo, velocidadPPM]);
+  }, [isPlaying, velocidadPPM]);
 
   const modeTitle = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
   const modeIcon = modo === "golpe" ? "👁️" : "📖";
@@ -173,6 +172,17 @@ export default function AceleracionExercisePage() {
       </div>
 
       <main className="flex-1 px-4 py-6">
+        {isLoadingConfig && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: `${modeColor}`, borderTopColor: 'transparent' }} />
+              <p className="text-gray-500 text-sm">Cargando configuración...</p>
+            </div>
+          </div>
+        )}
+
+        {!isLoadingConfig && (
+        <>
         <AnimatePresence mode="wait">
           {!selectedPdf ? (
             <motion.div
@@ -268,48 +278,71 @@ export default function AceleracionExercisePage() {
               className="flex-1"
             >
               <div className="relative w-full h-[60vh] bg-gray-100 rounded-xl overflow-hidden">
+                <object
+                  data={selectedPdf.data}
+                  type="application/pdf"
+                  className="w-full h-full"
+                >
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-gray-500 text-center px-4">
+                      No se puede mostrar el PDF directamente.
+                      <br />
+                      <span className="text-sm">{selectedPdf.name}</span>
+                    </p>
+                  </div>
+                </object>
+
                 {modo === "golpe" && (
-                  <div className="absolute inset-0">
+                  <div className="absolute inset-0 pointer-events-none">
                     <div 
-                      className="absolute inset-0 bg-black/80 transition-all duration-100"
+                      className="absolute inset-0 bg-black/85"
                       style={{
-                        clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%)`
+                        clipPath: `polygon(
+                          0 0, 100% 0, 100% ${currentPosition}%,
+                          ${(100 - modoGolpePorcentaje) / 2}% ${currentPosition}%,
+                          ${(100 - modoGolpePorcentaje) / 2}% ${Math.min(currentPosition + 15, 100)}%,
+                          ${50 + modoGolpePorcentaje / 2}% ${Math.min(currentPosition + 15, 100)}%,
+                          ${50 + modoGolpePorcentaje / 2}% ${currentPosition}%,
+                          100% ${currentPosition}%, 100% 100%, 0 100%
+                        )`
                       }}
                     />
                     <div
-                      className="absolute bg-transparent border-4 rounded-lg transition-all duration-100"
+                      className="absolute border-4 rounded-lg"
                       style={{
                         borderColor: modeColor,
                         width: `${modoGolpePorcentaje}%`,
-                        height: "20%",
+                        height: "15%",
                         left: `${(100 - modoGolpePorcentaje) / 2}%`,
                         top: `${currentPosition}%`,
-                        boxShadow: `0 0 20px ${modeColor}50`
+                        boxShadow: `0 0 20px ${modeColor}, inset 0 0 20px ${modeColor}30`
                       }}
                     />
                   </div>
                 )}
 
                 {modo === "desplazamiento" && (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 pointer-events-none">
                     <div
-                      className="w-full h-1 absolute transition-all duration-100"
+                      className="absolute w-full h-1"
                       style={{
                         backgroundColor: modeColor,
                         top: `${currentPosition}%`,
-                        boxShadow: `0 0 10px ${modeColor}`
+                        boxShadow: `0 0 15px ${modeColor}, 0 0 30px ${modeColor}50`
+                      }}
+                    />
+                    <div
+                      className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        left: "50%",
+                        top: `${currentPosition}%`,
+                        backgroundColor: modeColor,
+                        borderRadius: "50%",
+                        boxShadow: `0 0 15px ${modeColor}`
                       }}
                     />
                   </div>
                 )}
-
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <p className="text-gray-400 text-center px-4">
-                    PDF: {selectedPdf.name}
-                    <br />
-                    <span className="text-sm">(Vista previa del ejercicio)</span>
-                  </p>
-                </div>
               </div>
 
               <div className="flex items-center justify-center gap-4 mt-6">
@@ -364,6 +397,8 @@ export default function AceleracionExercisePage() {
             </motion.div>
           )}
         </AnimatePresence>
+        </>
+        )}
       </main>
 
       <AnimatePresence>
