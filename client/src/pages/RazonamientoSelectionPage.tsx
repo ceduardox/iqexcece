@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { ArrowLeft, Brain } from "lucide-react";
+import { Brain } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -79,133 +79,137 @@ export default function RazonamientoSelectionPage() {
   const categoryLabel = categoryLabels[categoria] || "Niño";
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col bg-white"
-    >
-      {/* Hero Section with gradient background */}
-      <div 
-        className="relative w-full overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #6366F1 100%)",
-          minHeight: "280px"
-        }}
-      >
-        {/* Back Button */}
-        <div className="absolute top-4 left-4 z-20">
-          <motion.button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-white font-semibold text-lg"
-            whileTap={{ scale: 0.95 }}
-            data-testid="button-back-razonamiento"
-          >
-            <ArrowLeft className="w-6 h-6" />
-            <span>Test Razonamiento</span>
-          </motion.button>
-        </div>
-
-        {/* Hero Image from reference */}
-        <div className="absolute inset-0 flex items-center justify-center pt-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="relative w-full max-w-xs h-48 flex items-center justify-center"
-          >
-            <img 
-              src="/razonamiento-hero.jpeg"
-              alt="Test Razonamiento"
-              className="w-full h-full object-contain"
-            />
-          </motion.div>
-        </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      {/* Content Section */}
-      <div className="flex-1 px-4 py-6 -mt-4 bg-white rounded-t-3xl relative z-10">
-        {/* Category Label */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-cyan-500 font-semibold text-sm mb-1"
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          {categoryLabel}
-        </motion.p>
-
-        {/* Title */}
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-2xl font-bold text-gray-800 mb-6"
-        >
-          Elige un test
-        </motion.h2>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full"
-            />
-          </div>
-        ) : themes.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <Brain className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg mb-2">No hay tests disponibles</p>
-            <p className="text-gray-400 text-sm">
-              Los tests de razonamiento para esta categoría aún no han sido creados.
-            </p>
-          </motion.div>
-        ) : (
-          <div className="space-y-3">
-            {themes.map((theme, index) => (
+          <div className="relative px-5 pt-6 pb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm font-semibold mb-1"
+                  style={{ color: "#8a3ffc" }}
+                >
+                  {categoryLabel}
+                </motion.p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="text-2xl font-black leading-tight mb-2"
+                  style={{ color: "#1f2937" }}
+                >
+                  Test Razonamiento
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-xs leading-relaxed"
+                  style={{ color: "#6b7280" }}
+                >
+                  Selecciona un test para evaluar tu capacidad de razonamiento.
+                </motion.p>
+              </div>
+              
               <motion.div
-                key={theme.temaNumero}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                onClick={() => handleTestSelect(theme.temaNumero, theme.title)}
-                className="w-full bg-white border-2 border-gray-200 rounded-2xl p-4 flex items-center gap-4 cursor-pointer card-touch"
-                data-testid={`button-razonamiento-test-${theme.temaNumero}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15 }}
+                className="flex-shrink-0"
               >
-                {/* Number */}
-                <span 
-                  className="text-3xl font-light"
-                  style={{ color: "#14B8A6" }}
+                <div 
+                  className="w-24 h-24 rounded-2xl flex items-center justify-center shadow-lg"
+                  style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
                 >
-                  {String(theme.temaNumero).padStart(2, '0')}
-                </span>
-                
-                {/* Test Title */}
-                <span className="text-lg font-bold text-gray-800 tracking-wide flex-1">
-                  {theme.title || `Razonamiento ${theme.temaNumero}`}
-                </span>
-                
-                {/* Arrow */}
-                <svg 
-                  className="w-6 h-6 text-gray-400" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                  <Brain className="w-12 h-12 text-white" />
+                </div>
               </motion.div>
-            ))}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+
+        <div className="px-5 py-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg font-bold text-gray-800 mb-4"
+          >
+            Elige un test
+          </motion.h2>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full"
+              />
+            </div>
+          ) : themes.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <Brain className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg mb-2">No hay tests disponibles</p>
+              <p className="text-gray-400 text-sm">
+                Los tests de razonamiento para esta categoría aún no han sido creados.
+              </p>
+            </motion.div>
+          ) : (
+            <div className="space-y-3">
+              {themes.map((theme, index) => (
+                <motion.div
+                  key={theme.temaNumero}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  onClick={() => handleTestSelect(theme.temaNumero, theme.title)}
+                  className="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 flex items-center gap-4 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+                  data-testid={`button-razonamiento-test-${theme.temaNumero}`}
+                >
+                  <span 
+                    className="text-3xl font-light"
+                    style={{ color: "#00d9ff" }}
+                  >
+                    {String(theme.temaNumero).padStart(2, '0')}
+                  </span>
+                  
+                  <span className="text-lg font-bold text-gray-800 tracking-wide flex-1">
+                    {theme.title || `Razonamiento ${theme.temaNumero}`}
+                  </span>
+                  
+                  <svg 
+                    className="w-6 h-6 text-gray-400" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
       
       <BottomNavBar />
-    </motion.div>
+    </div>
   );
 }

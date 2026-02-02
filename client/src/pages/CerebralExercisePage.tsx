@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const playButtonSound = () => {
+  const audio = new Audio('/iphone.mp3');
+  audio.volume = 0.6;
+  audio.play().catch(() => {});
+};
 
 interface AnswerOption {
   id: string;
@@ -686,159 +694,152 @@ export default function CerebralExercisePage() {
     );
   }
 
+  const handleBack = () => {
+    playButtonSound();
+    setLocation(`/cerebral/seleccion`);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
-      <div className="max-w-md mx-auto">
-        {/* Styled Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
+
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          {/* Back Button - Modern Design */}
-          <Button
-            onClick={() => setLocation(`/cerebral/seleccion`)}
-            variant="ghost"
-            className="mb-4 text-white/70"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
-          </Button>
-          
-          {/* TEST CEREBRAL Header */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600/40 to-cyan-600/40 p-4 border border-white/10">
-            {/* Background X Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-white">
-                X
-              </div>
-            </div>
-            
-            <div className="relative flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-                    TEST CEREBRAL
-                  </h1>
-                  <p className="text-white/60 text-xs mt-0.5">{content.title}</p>
-                </div>
+          <div className="relative px-5 pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm font-semibold"
+                  style={{ color: "#8a3ffc" }}
+                >
+                  Test Cerebral
+                </motion.p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="text-xl font-bold"
+                  style={{ color: "#1f2937" }}
+                >
+                  {content.title}
+                </motion.h1>
               </div>
               {timeLeft !== null && (
-                <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${timeLeft <= 10 ? 'bg-red-500/30 text-red-300' : 'bg-white/10 text-white/80'}`}>
+                <div className={`flex items-center gap-1 px-3 py-2 rounded-full ${timeLeft <= 10 ? 'bg-red-100 text-red-600' : 'bg-purple-100 text-purple-600'}`}>
                   <Clock className="w-4 h-4" />
                   <span className="font-mono font-bold">{timeLeft}s</span>
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Progress Bar - Visible countdown */}
+        {/* Progress Bar */}
         {timeLeft !== null && content?.exerciseData?.timerEnabled && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-4"
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`} />
-              <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                <motion.div 
-                  className={`h-full ${timeLeft <= 10 ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-cyan-400'}`}
-                  initial={{ width: '100%' }}
-                  animate={{ width: `${(timeLeft / (content?.exerciseData?.timerSeconds || 30)) * 100}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
+          <div className="px-5 mb-4">
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <motion.div 
+                className={`h-full ${timeLeft <= 10 ? 'bg-red-500' : 'bg-gradient-to-r from-purple-500 to-cyan-400'}`}
+                initial={{ width: '100%' }}
+                animate={{ width: `${(timeLeft / (content?.exerciseData?.timerSeconds || 30)) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Exercise Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-black/40 rounded-xl p-6 border border-purple-500/30"
-        >
-          {content.exerciseType === "bailarina" && renderBailarinaExercise()}
-          {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
-          {content.exerciseType === "memoria" && renderMemoriaExercise()}
-          {content.exerciseType === "patron" && renderPatronExercise()}
-          {content.exerciseType === "stroop" && renderStroopExercise()}
-          {content.exerciseType === "preferencia" && renderPreferenciaExercise()}
-          {content.exerciseType === "lateralidad" && renderLateralidadExercise()}
+        <div className="px-5">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 rounded-2xl p-6 shadow-lg"
+          >
+            {content.exerciseType === "bailarina" && renderBailarinaExercise()}
+            {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
+            {content.exerciseType === "memoria" && renderMemoriaExercise()}
+            {content.exerciseType === "patron" && renderPatronExercise()}
+            {content.exerciseType === "stroop" && renderStroopExercise()}
+            {content.exerciseType === "preferencia" && renderPreferenciaExercise()}
+            {content.exerciseType === "lateralidad" && renderLateralidadExercise()}
 
-          {/* Hide correct/incorrect for preferencia and lateralidad (projective tests) */}
-          {content.exerciseType !== "preferencia" && content.exerciseType !== "lateralidad" && (
-          <AnimatePresence>
-            {submitted && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className={`mt-6 p-4 rounded-lg flex items-center gap-3 ${
-                  isCorrect ? "bg-green-600/20 border border-green-500/30" : "bg-red-600/20 border border-red-500/30"
-                }`}
-              >
-                {isCorrect ? (
-                  <CheckCircle className="w-6 h-6 text-green-400" />
-                ) : (
-                  <XCircle className="w-6 h-6 text-red-400" />
-                )}
-                <div>
-                  <p className={`font-semibold ${isCorrect ? "text-green-400" : "text-red-400"}`}>
-                    {isCorrect ? "¡Correcto!" : "Incorrecto"}
-                  </p>
-                  {!isCorrect && (
-                    <p className="text-white/60 text-sm">
-                      La respuesta correcta era: {content.exerciseData.correctAnswer}
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          )}
-
-          {/* Hide buttons for lateralidad and preferencia (auto-advance) */}
-          {content.exerciseType !== "lateralidad" && content.exerciseType !== "preferencia" && (
-            <div className="mt-6 flex gap-3">
-              {!submitted ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!userAnswer.trim()}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
-                  data-testid="button-submit"
+            {content.exerciseType !== "preferencia" && content.exerciseType !== "lateralidad" && (
+            <AnimatePresence>
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`mt-6 p-4 rounded-xl flex items-center gap-3 ${
+                    isCorrect ? "bg-green-500/20 border border-green-400/30" : "bg-red-500/20 border border-red-400/30"
+                  }`}
                 >
-                  Verificar respuesta
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => setLocation(`/cerebral/seleccion`)}
-                    variant="outline"
-                    className="flex-1"
-                    data-testid="button-more-exercises"
-                  >
-                    Más ejercicios
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 border border-purple-500"
-                    data-testid="button-next"
-                  >
-                    Siguiente
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </>
+                  {isCorrect ? (
+                    <CheckCircle className="w-6 h-6 text-green-300" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-red-300" />
+                  )}
+                  <div>
+                    <p className={`font-semibold ${isCorrect ? "text-green-300" : "text-red-300"}`}>
+                      {isCorrect ? "¡Correcto!" : "Incorrecto"}
+                    </p>
+                    {!isCorrect && (
+                      <p className="text-white/70 text-sm">
+                        La respuesta correcta era: {content.exerciseData.correctAnswer}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
               )}
-            </div>
-          )}
-        </motion.div>
-      </div>
+            </AnimatePresence>
+            )}
+
+            {content.exerciseType !== "lateralidad" && content.exerciseType !== "preferencia" && (
+              <div className="mt-6 flex gap-3">
+                {!submitted ? (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!userAnswer.trim()}
+                    className="flex-1 bg-white text-purple-600 font-bold hover:bg-gray-100"
+                    data-testid="button-submit"
+                  >
+                    Verificar respuesta
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => setLocation(`/cerebral/seleccion`)}
+                      variant="outline"
+                      className="flex-1 border-white/30 text-white hover:bg-white/10"
+                      data-testid="button-more-exercises"
+                    >
+                      Más ejercicios
+                    </Button>
+                    <Button
+                      onClick={handleNext}
+                      className="flex-1 bg-white text-purple-600 font-bold hover:bg-gray-100"
+                      data-testid="button-next"
+                    >
+                      Siguiente
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </main>
       
       <BottomNavBar />
     </div>

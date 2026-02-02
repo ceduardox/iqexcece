@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare } from "lucide-react";
+import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface Question {
   question: string;
@@ -331,77 +332,98 @@ export default function RazonamientoQuizPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex flex-col"
-    >
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between">
-        <motion.button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-white font-semibold"
-          whileTap={{ scale: 0.95 }}
-          data-testid="button-back-quiz"
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
+
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          <ArrowLeft className="w-6 h-6" />
-        </motion.button>
-        <div className="text-white text-right">
-          <p className="text-xs opacity-80">{categoryLabel}</p>
-          <p className="font-bold">{title}</p>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div className="px-4 mb-4">
-        <div className="flex items-center justify-between text-white text-sm mb-2">
-          <span>Pregunta {currentQuestion + 1} de {questions.length}</span>
-          <span>{Math.floor(quizTime / 60)}:{String(quizTime % 60).padStart(2, '0')}</span>
-        </div>
-        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-            className="h-full bg-white rounded-full"
-          />
-        </div>
-      </div>
-
-      {/* Question */}
-      <div className="flex-1 px-4 pb-8 overflow-y-auto">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestion}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            className="space-y-4"
-          >
-            {/* Test Title */}
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white uppercase tracking-wide" data-testid="text-razonamiento-title">
-                {title}
-              </h2>
-            </div>
-
-            {/* Image if present */}
-            {imageUrl && (
-              <div className="flex justify-center">
-                <img 
-                  src={imageUrl} 
-                  alt={title}
-                  style={{ width: `${imageSize}%`, maxWidth: '300px' }}
-                  className="rounded-lg shadow-lg"
-                  data-testid="img-razonamiento"
-                />
+          <div className="relative px-5 pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm font-semibold"
+                  style={{ color: "#8a3ffc" }}
+                >
+                  {categoryLabel}
+                </motion.p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="text-xl font-bold"
+                  style={{ color: "#1f2937" }}
+                >
+                  Test Razonamiento
+                </motion.h1>
               </div>
-            )}
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-white leading-relaxed">
-                {currentQ?.question}
-              </h3>
+              <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-purple-100 text-purple-600">
+                <Clock className="w-4 h-4" />
+                <span className="font-mono font-bold text-sm">{Math.floor(quizTime / 60)}:{String(quizTime % 60).padStart(2, '0')}</span>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="px-5 mb-4">
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-gray-600">Pregunta {currentQuestion + 1} de {questions.length}</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full"
+            />
+          </div>
+        </div>
+
+        {/* Question */}
+        <div className="px-5 pb-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestion}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              className="space-y-4"
+            >
+              {/* Test Title */}
+              <div className="text-center">
+                <h2 className="text-lg font-bold uppercase tracking-wide" style={{ color: "#8a3ffc" }} data-testid="text-razonamiento-title">
+                  {title}
+                </h2>
+              </div>
+
+              {/* Image if present */}
+              {imageUrl && (
+                <div className="flex justify-center">
+                  <img 
+                    src={imageUrl} 
+                    alt={title}
+                    style={{ width: `${imageSize}%`, maxWidth: '300px' }}
+                    className="rounded-2xl shadow-lg"
+                    data-testid="img-razonamiento"
+                  />
+                </div>
+              )}
+
+              <div className="bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 rounded-2xl p-5 shadow-lg">
+                <h3 className="text-lg font-bold text-white leading-relaxed">
+                  {currentQ?.question}
+                </h3>
+              </div>
 
             <div className="space-y-3">
               {currentQ?.options.map((option, index) => {
@@ -440,9 +462,10 @@ export default function RazonamientoQuizPage() {
             </div>
           </motion.div>
         </AnimatePresence>
-      </div>
+        </div>
+      </main>
       
       <BottomNavBar />
-    </motion.div>
+    </div>
   );
 }

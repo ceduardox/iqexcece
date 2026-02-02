@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brain, User, Mail, MapPin, Phone, MessageSquare, Sparkles } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { CurvedHeader } from "@/components/CurvedHeader";
+import menuCurveImg from "@assets/menu_1769957804819.png";
+
+const playButtonSound = () => {
+  const audio = new Audio('/iphone.mp3');
+  audio.volume = 0.6;
+  audio.play().catch(() => {});
+};
 
 export default function CerebralFormPage() {
   const [, setLocation] = useLocation();
@@ -18,6 +26,11 @@ export default function CerebralFormPage() {
     telefono: "",
     comentario: "",
   });
+
+  const handleBack = () => {
+    playButtonSound();
+    window.history.back();
+  };
 
   const handleSubmit = async () => {
     if (!formData.nombre.trim()) return;
@@ -33,7 +46,6 @@ export default function CerebralFormPage() {
       const latAnswers: string[] = lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [];
       const prefAnswers: { meaning: string }[] = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
       
-      // Calculate brain dominance
       const leftCount = latAnswers.filter(a => a.toLowerCase().includes('izquierda')).length;
       const rightCount = latAnswers.filter(a => a.toLowerCase().includes('derecha')).length;
       const total = leftCount + rightCount || 1;
@@ -78,146 +90,136 @@ export default function CerebralFormPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-purple-500/20 rounded-full"
-            initial={{ 
-              x: Math.random() * 400, 
-              y: Math.random() * 800 + 200,
-              scale: Math.random() * 0.5 + 0.5
-            }}
-            animate={{ 
-              y: [null, -200],
-              opacity: [0.2, 0]
-            }}
-            transition={{ 
-              duration: 4 + Math.random() * 3,
-              repeat: Infinity,
-              delay: Math.random() * 3
-            }}
-          />
-        ))}
+    <div className="min-h-screen bg-white flex flex-col">
+      <CurvedHeader showBack onBack={handleBack} />
+      
+      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <div className="max-w-md mx-auto relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-6"
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div 
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
+          }}
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", bounce: 0.5 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30"
-          >
-            <Brain className="w-8 h-8 text-white" />
-          </motion.div>
-          <p className="text-purple-300 text-xs uppercase tracking-widest font-medium mb-2">✦ Un paso más ✦</p>
-          <h1 className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-            ¡Test Completado!
-          </h1>
-          <p className="text-white/60 mt-2 text-sm">Ingresa tus datos para ver tus resultados</p>
-        </motion.div>
+          <div className="px-5 pt-4 pb-2 text-center">
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm font-semibold"
+              style={{ color: "#8a3ffc" }}
+            >
+              Test Cerebral
+            </motion.p>
+            <motion.h1 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="text-xl font-bold"
+              style={{ color: "#1f2937" }}
+            >
+              Completa tus datos
+            </motion.h1>
+          </div>
+        </div>
 
-        {/* Form Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, type: "spring" }}
-          className="bg-gradient-to-br from-white/95 to-white/90 rounded-3xl p-6 shadow-2xl shadow-purple-500/20 backdrop-blur-sm border border-white/50"
-        >
-          <div className="space-y-4">
-            {formFields.map(({ key, type, placeholder, icon: Icon, required, inputMode }, idx) => (
+        <div className="px-5 py-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+          >
+            <div className="text-center mb-5">
               <motion.div 
-                key={key}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", delay: 0.2 }}
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+              >
+                <Brain className="w-8 h-8 text-white" />
+              </motion.div>
+              <p className="text-gray-500 text-sm">
+                Ingresa tu información para ver tus resultados
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {formFields.map(({ key, type, placeholder, icon: Icon, inputMode }, index) => (
+                <motion.div 
+                  key={key}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + index * 0.05 }}
+                  className="relative"
+                >
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#00d9ff" }} />
+                  <Input
+                    type={type}
+                    inputMode={inputMode}
+                    placeholder={placeholder}
+                    value={formData[key as keyof typeof formData]}
+                    onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
+                    className="pl-10 py-5 bg-gray-50 border-gray-200 rounded-xl"
+                    data-testid={`input-${key}`}
+                  />
+                </motion.div>
+              ))}
+
+              <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + idx * 0.05 }}
-                className="relative group"
+                transition={{ delay: 0.4 }}
+                className="relative"
               >
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center group-focus-within:from-purple-200 group-focus-within:to-purple-100 transition-all">
-                  <Icon className="w-5 h-5 text-purple-600" />
-                </div>
-                <Input
-                  type={type}
-                  inputMode={inputMode}
-                  placeholder={placeholder}
-                  value={formData[key as keyof typeof formData]}
-                  onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                  className="pl-16 pr-4 border-2 border-purple-100 focus:border-purple-400 bg-white hover:bg-purple-50/30 rounded-2xl h-14 transition-all text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:shadow-md focus:shadow-purple-200/50"
-                  required={required}
-                  data-testid={`input-${key}`}
+                <MessageSquare className="absolute left-3 top-4 w-5 h-5" style={{ color: "#00d9ff" }} />
+                <textarea
+                  placeholder="Comentario (opcional)"
+                  value={formData.comentario}
+                  onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
+                  className="w-full pl-10 py-3 pr-4 bg-gray-50 border border-gray-200 rounded-xl resize-none h-20 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  data-testid="input-comentario"
                 />
               </motion.div>
-            ))}
-            
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-              className="relative group"
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-5"
             >
-              <div className="absolute left-4 top-4 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center group-focus-within:from-purple-200 group-focus-within:to-purple-100 transition-all">
-                <MessageSquare className="w-5 h-5 text-purple-600" />
-              </div>
-              <textarea
-                placeholder="Comentario (opcional)"
-                value={formData.comentario}
-                onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
-                rows={3}
-                className="w-full pl-16 pr-4 py-4 rounded-2xl border-2 border-purple-100 focus:border-purple-400 bg-white hover:bg-purple-50/30 resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:shadow-md focus:shadow-purple-200/50"
-                data-testid="input-comentario"
-              />
+              <Button
+                onClick={handleSubmit}
+                disabled={!formData.nombre.trim() || submitting}
+                className="w-full py-6 text-lg font-bold rounded-xl"
+                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+                data-testid="button-submit"
+              >
+                {submitting ? (
+                  <motion.span
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
+                    Enviando...
+                  </motion.span>
+                ) : (
+                  <span className="flex items-center gap-2 justify-center">
+                    <Sparkles className="w-5 h-5" />
+                    Ver mis resultados
+                  </span>
+                )}
+              </Button>
             </motion.div>
-          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || !formData.nombre.trim()}
-              className="w-full mt-6 py-6 text-lg font-bold rounded-2xl bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 text-white shadow-xl shadow-purple-500/30 border-0 disabled:opacity-50"
-              data-testid="button-submit-results"
-            >
-              {submitting ? (
-                <motion.span
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Procesando...
-                </motion.span>
-              ) : (
-                <span className="flex items-center gap-2 justify-center">
-                  <Sparkles className="w-5 h-5" />
-                  Ver mis resultados
-                </span>
-              )}
-            </Button>
+            <p className="text-center text-gray-400 text-xs mt-3">
+              * Campo obligatorio
+            </p>
           </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-center text-gray-400 text-xs mt-4"
-          >
-            * Campo obligatorio
-          </motion.p>
-        </motion.div>
-      </div>
+        </div>
+      </main>
       
       <BottomNavBar />
     </div>
