@@ -85,6 +85,7 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
   
   const cardStyle = styles[cardId];
   const iconSize = styles[iconId]?.iconSize || 48;
+  const hasCardBg = cardStyle?.background || cardStyle?.imageUrl;
 
   return (
     <motion.div
@@ -96,12 +97,15 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className={`relative overflow-hidden rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
+        className={`relative overflow-hidden rounded-2xl p-4 flex flex-col items-center gap-3 border-2 transition-all ${
           isSelected 
-            ? "border-purple-500 bg-purple-50/50 shadow-lg shadow-purple-100" 
-            : "border-gray-100 bg-white hover:border-purple-200 hover:shadow-md"
+            ? "border-purple-500 shadow-lg shadow-purple-100" 
+            : "border-gray-100 hover:border-purple-200 hover:shadow-md"
         }`}
         style={{ 
+          background: cardStyle?.imageUrl 
+            ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+            : cardStyle?.background || (isSelected ? "rgba(139, 92, 246, 0.05)" : "white"),
           borderRadius: cardStyle?.borderRadius || 16,
           boxShadow: cardStyle?.shadowBlur 
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.1)"}` 
@@ -110,6 +114,23 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
+        <div className="absolute top-3 right-3">
+          <div 
+            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)} ${
+              isSelected 
+                ? "bg-purple-600 border-purple-600" 
+                : "border-gray-300 bg-white"
+            }`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
+            style={{
+              backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "white",
+              borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "#d1d5db"
+            }}
+          >
+            {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+          </div>
+        </div>
+
         <div 
           className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
@@ -137,50 +158,37 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
           )}
         </div>
         
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0 text-center">
+          <div className="flex items-center justify-center gap-2">
             <h3 
-              className={`text-base font-bold text-gray-800 ${getEditableClass(titleId)}`}
+              className={`text-base font-bold ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{
                 fontSize: styles[titleId]?.fontSize || 16,
-                color: styles[titleId]?.textColor || "#1f2937"
+                color: styles[titleId]?.textColor || "#1f2937",
+                fontWeight: styles[titleId]?.fontWeight || 700
               }}
             >
               {styles[titleId]?.buttonText || category.label}
             </h3>
             <span 
-              className="text-sm font-semibold text-purple-600"
-              style={{ color: styles[titleId]?.textColor ? styles[titleId].textColor : "#7c3aed" }}
+              className="text-sm font-semibold"
+              style={{ color: styles[titleId]?.textColor || "#7c3aed" }}
             >
               ({category.ageRange})
             </span>
           </div>
           <p 
-            className={`text-sm text-gray-500 mt-0.5 ${getEditableClass(descId)}`}
+            className={`text-sm mt-1 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
               fontSize: styles[descId]?.fontSize || 13,
-              color: styles[descId]?.textColor || "#6b7280"
+              color: styles[descId]?.textColor || "#6b7280",
+              fontWeight: styles[descId]?.fontWeight || 400
             }}
           >
             {styles[descId]?.buttonText || category.description}
           </p>
-        </div>
-        
-        <div 
-          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)} ${
-            isSelected 
-              ? "bg-purple-600 border-purple-600" 
-              : "border-gray-300 bg-white"
-          }`}
-          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
-          style={{
-            backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "white",
-            borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "#d1d5db"
-          }}
-        >
-          {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
         </div>
       </motion.div>
     </motion.div>
