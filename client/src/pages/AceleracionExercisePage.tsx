@@ -419,22 +419,22 @@ export default function AceleracionExercisePage() {
             <img 
               src="https://iqexponencial.app/api/images/35716163-d151-4abc-935a-1fff14929bce" 
               alt="IQEXPONENCIAL" 
-              className="h-10 object-contain"
+              className="h-20 object-contain"
             />
           </motion.div>
 
-          {/* Brain icon */}
+          {/* Check icon */}
           <motion.div 
-            className="mx-auto mb-4"
+            className="mx-auto mb-3"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
           >
             <div 
-              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
               style={{ background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)" }}
             >
-              <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
