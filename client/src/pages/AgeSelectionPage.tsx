@@ -84,111 +84,87 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
   const descId = `desc-${category.id}`;
   
   const cardStyle = styles[cardId];
-  const iconSize = styles[iconId]?.iconSize || 48;
-  const hasCardBg = cardStyle?.background || cardStyle?.imageUrl;
+  const iconSize = styles[iconId]?.iconSize || 40;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
+      transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
       className={`cursor-pointer ${getEditableClass(cardId)}`}
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className={`relative overflow-hidden rounded-2xl p-4 flex flex-col items-center gap-3 border-2 transition-all ${
+        className={`relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all ${
           isSelected 
-            ? "border-purple-500 shadow-lg shadow-purple-100" 
-            : "border-gray-100 hover:border-purple-200 hover:shadow-md"
+            ? "bg-white" 
+            : "bg-white hover:shadow-md"
         }`}
         style={{ 
           background: cardStyle?.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
-            : cardStyle?.background || (isSelected ? "rgba(139, 92, 246, 0.05)" : "white"),
+            : cardStyle?.background || "white",
           borderRadius: cardStyle?.borderRadius || 16,
-          boxShadow: cardStyle?.shadowBlur 
-            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.1)"}` 
-            : isSelected ? undefined : "0 2px 8px rgba(0,0,0,0.04)"
+          boxShadow: isSelected 
+            ? "0 0 0 2px #8b5cf6, 0 4px 20px rgba(139, 92, 246, 0.25), 0 0 30px rgba(139, 92, 246, 0.15)"
+            : cardStyle?.shadowBlur 
+              ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
+              : "0 1px 4px rgba(0,0,0,0.06)"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
-        <div className="absolute top-3 right-3">
-          <div 
-            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)} ${
-              isSelected 
-                ? "bg-purple-600 border-purple-600" 
-                : "border-gray-300 bg-white"
-            }`}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
-            style={{
-              backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "white",
-              borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "#d1d5db"
-            }}
-          >
-            {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
-          </div>
-        </div>
-
         <div 
           className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
           style={{ 
-            width: iconSize + 12, 
-            height: iconSize + 12,
+            width: iconSize + 8, 
+            height: iconSize + 8,
             background: styles[iconId]?.background || category.iconBg,
-            padding: 8
+            padding: 6
           }}
         >
-          {styles[iconId]?.imageUrl ? (
-            <img 
-              src={styles[iconId].imageUrl} 
-              alt="" 
-              className="drop-shadow-sm"
-              style={{ width: iconSize - 8, height: iconSize - 8, objectFit: "contain" }} 
-            />
-          ) : (
-            <img 
-              src={category.iconUrl} 
-              alt="" 
-              className="drop-shadow-sm"
-              style={{ width: iconSize - 8, height: iconSize - 8, objectFit: "contain" }} 
-            />
-          )}
+          <img 
+            src={styles[iconId]?.imageUrl || category.iconUrl} 
+            alt="" 
+            className="drop-shadow-sm"
+            style={{ width: iconSize - 6, height: iconSize - 6, objectFit: "contain" }} 
+          />
         </div>
         
-        <div className="flex-1 min-w-0 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <h3 
-              className={`text-base font-bold ${getEditableClass(titleId)}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
-              style={{
-                fontSize: styles[titleId]?.fontSize || 16,
-                color: styles[titleId]?.textColor || "#1f2937",
-                fontWeight: styles[titleId]?.fontWeight || 700
-              }}
-            >
-              {styles[titleId]?.buttonText || category.label}
-            </h3>
-            <span 
-              className="text-sm font-semibold"
-              style={{ color: styles[titleId]?.textColor || "#7c3aed" }}
-            >
-              ({category.ageRange})
-            </span>
-          </div>
+        <div className="flex-1 min-w-0">
+          <h3 
+            className={`font-semibold leading-tight ${getEditableClass(titleId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
+            style={{
+              fontSize: styles[titleId]?.fontSize || 14,
+              color: styles[titleId]?.textColor || "#1f2937"
+            }}
+          >
+            {styles[titleId]?.buttonText || category.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({category.ageRange})</span>
+          </h3>
           <p 
-            className={`text-sm mt-1 ${getEditableClass(descId)}`}
+            className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
-              fontSize: styles[descId]?.fontSize || 13,
-              color: styles[descId]?.textColor || "#6b7280",
-              fontWeight: styles[descId]?.fontWeight || 400
+              fontSize: styles[descId]?.fontSize || 12,
+              color: styles[descId]?.textColor || "#9ca3af"
             }}
           >
             {styles[descId]?.buttonText || category.description}
           </p>
+        </div>
+
+        <div 
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
+          style={{
+            backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#8b5cf6") : "white",
+            borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#8b5cf6") : "#d1d5db"
+          }}
+        >
+          {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
         </div>
       </motion.div>
     </motion.div>
@@ -419,37 +395,35 @@ export default function AgeSelectionPage() {
           }}
         >
           <motion.div
-            className="px-6 pt-4 pb-6 text-center"
-            initial={{ opacity: 0, y: 20 }}
+            className="px-5 pt-2 pb-4"
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
+            transition={{ delay: 0.05, duration: 0.25 }}
           >
             <h1 
-              className={`text-2xl font-black mb-2 ${getEditableClass("main-title")}`}
+              className={`font-bold mb-1 ${getEditableClass("main-title")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{
-                fontSize: styles["main-title"]?.fontSize || 26,
-                background: styles["main-title"]?.textColor ? styles["main-title"].textColor : "linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text"
+                fontSize: styles["main-title"]?.fontSize || 22,
+                color: styles["main-title"]?.textColor || "#5b21b6",
+                fontWeight: 700
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Selecciona tu edad"}</span>
+              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Selecciona tu etapa"}</span>
             </h1>
             <p 
-              className={`text-gray-500 text-sm leading-relaxed ${getEditableClass("main-subtitle")}`}
+              className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{
-                fontSize: styles["main-subtitle"]?.fontSize || 14,
-                color: styles["main-subtitle"]?.textColor || "#6b7280"
+                fontSize: styles["main-subtitle"]?.fontSize || 13,
+                color: styles["main-subtitle"]?.textColor || "#9ca3af"
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Personaliza tu experiencia de aprendizaje"}</span>
+              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}</span>
             </p>
           </motion.div>
 
-          <div className="px-4 pb-6 space-y-3">
+          <div className="px-4 pb-4 space-y-2">
             {ageCategories.map((category, index) => (
               <AgeCard
                 key={category.id}
