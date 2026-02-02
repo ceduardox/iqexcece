@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Brain, User, Mail, MapPin, Phone, MessageSquare, Sparkles } from "lucide-react";
-import { BottomNavBar } from "@/components/BottomNavBar";
-import { CurvedHeader } from "@/components/CurvedHeader";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -17,14 +11,16 @@ const playButtonSound = () => {
 export default function CerebralFormPage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria: string }>();
+  const categoria = params.categoria || "adolescentes";
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
     edad: "",
     ciudad: "",
-    telefono: "",
+    telefono: "+591 ",
     comentario: "",
+    grado: "",
   });
 
   const handleBack = () => {
@@ -81,147 +77,183 @@ export default function CerebralFormPage() {
     setLocation(`/cerebral/resultado/${params.categoria}`);
   };
 
-  const formFields = [
-    { key: "nombre", type: "text", placeholder: "Tu nombre *", icon: User, required: true, inputMode: "text" as const },
-    { key: "email", type: "email", placeholder: "Email (opcional)", icon: Mail, inputMode: "email" as const },
-    { key: "edad", type: "text", placeholder: "Edad (opcional)", icon: User, inputMode: "numeric" as const },
-    { key: "ciudad", type: "text", placeholder: "Ciudad (opcional)", icon: MapPin, inputMode: "text" as const },
-    { key: "telefono", type: "tel", placeholder: "Teléfono (opcional)", icon: Phone, inputMode: "tel" as const },
-  ];
+  const isNinos = categoria === "ninos" || categoria === "preescolar";
+  const isAdolescentes = categoria === "adolescentes";
+  
+  const gradosPrimaria = ["1ero Primaria", "2do Primaria", "3ero Primaria", "4to Primaria", "5to Primaria", "6to Primaria"];
+  const gradosSecundaria = ["1ero Secundaria", "2do Secundaria", "3ero Secundaria", "4to Secundaria", "5to Secundaria", "6to Secundaria", "Universitario"];
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(p => ({ ...p, [field]: value }));
+  };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={handleBack} />
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{ background: "linear-gradient(180deg, #e8def8 0%, #f3e8ff 50%, #ffffff 100%)" }}
+    >
+      <main className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="flex flex-col items-center mb-6">
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+            style={{ background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)" }}
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M12 2a9 9 0 0 1 9 9c0 3.5-2 6.5-5 8v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2c-3-1.5-5-4.5-5-8a9 9 0 0 1 9-9z"/>
+              <path d="M9 22h6"/>
+              <path d="M12 6v4"/>
+              <path d="M8 10h8"/>
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-gray-800 mb-1">Test Cerebral</h1>
+          <p className="text-sm text-gray-500 text-center">Completa tus datos para ver tu resultado y recomendaciones.</p>
+        </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
         <div 
-          className="w-full"
-          style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
-          }}
+          className="rounded-2xl p-5 space-y-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
         >
-          <div className="px-5 pt-4 pb-2 text-center">
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm font-semibold"
-              style={{ color: "#8a3ffc" }}
-            >
-              Test Cerebral
-            </motion.p>
-            <motion.h1 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="text-xl font-bold"
-              style={{ color: "#1f2937" }}
-            >
-              Completa tus datos
-            </motion.h1>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Juan Pérez"
+              value={formData.nombre}
+              onChange={(e) => handleFormChange("nombre", e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              style={{ backgroundColor: "#f8f5ff" }}
+              data-testid="input-nombre"
+            />
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <input
+              type="email"
+              placeholder="nombre@email.com"
+              value={formData.email}
+              onChange={(e) => handleFormChange("email", e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              style={{ backgroundColor: "#f8f5ff" }}
+              data-testid="input-email"
+            />
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <span className="text-base">🇧🇴</span>
+            </div>
+            <input
+              type="tel"
+              placeholder="+591 Ej: 71234567"
+              value={formData.telefono}
+              onChange={(e) => handleFormChange("telefono", e.target.value)}
+              className="w-full pl-10 pr-10 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              style={{ backgroundColor: "#f8f5ff" }}
+              data-testid="input-telefono"
+            />
+            {formData.telefono.length > 5 && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <input
+              type="number"
+              placeholder="Ej: 15"
+              value={formData.edad}
+              onChange={(e) => handleFormChange("edad", e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              style={{ backgroundColor: "#f8f5ff" }}
+              data-testid="input-edad"
+            />
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Ej: La Paz"
+              value={formData.ciudad}
+              onChange={(e) => handleFormChange("ciudad", e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              style={{ backgroundColor: "#f8f5ff" }}
+              data-testid="input-ciudad"
+            />
           </div>
         </div>
 
-        <div className="px-5 py-4">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+        {(isNinos || isAdolescentes) && (
+          <div 
+            className="rounded-2xl p-5 mt-4 space-y-3"
+            style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
           >
-            <div className="text-center mb-5">
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", delay: 0.2 }}
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
-              >
-                <Brain className="w-8 h-8 text-white" />
-              </motion.div>
-              <p className="text-gray-500 text-sm">
-                Ingresa tu información para ver tus resultados
-              </p>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 mb-1">Perfil educativo</p>
+              <p className="text-xs text-gray-500 mb-3">Ajusta la dificultad del test</p>
             </div>
-
-            <div className="space-y-3">
-              {formFields.map(({ key, type, placeholder, icon: Icon, inputMode }, index) => (
-                <motion.div 
-                  key={key}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + index * 0.05 }}
-                  className="relative"
-                >
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#00d9ff" }} />
-                  <Input
-                    type={type}
-                    inputMode={inputMode}
-                    placeholder={placeholder}
-                    value={formData[key as keyof typeof formData]}
-                    onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                    className="pl-10 py-5 bg-gray-50 border-gray-200 rounded-xl"
-                    data-testid={`input-${key}`}
-                  />
-                </motion.div>
-              ))}
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="relative"
-              >
-                <MessageSquare className="absolute left-3 top-4 w-5 h-5" style={{ color: "#00d9ff" }} />
-                <textarea
-                  placeholder="Comentario (opcional)"
-                  value={formData.comentario}
-                  onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
-                  className="w-full pl-10 py-3 pr-4 bg-gray-50 border border-gray-200 rounded-xl resize-none h-20 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  data-testid="input-comentario"
-                />
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mt-5"
+            
+            <select
+              value={formData.grado}
+              onChange={(e) => handleFormChange("grado", e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none bg-no-repeat"
+              style={{ 
+                backgroundColor: "#f8f5ff",
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                backgroundPosition: "right 12px center",
+                backgroundSize: "20px"
+              }}
+              data-testid="select-grado"
             >
-              <Button
-                onClick={handleSubmit}
-                disabled={!formData.nombre.trim() || submitting}
-                className="w-full py-6 text-lg font-bold rounded-xl"
-                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
-                data-testid="button-submit"
-              >
-                {submitting ? (
-                  <motion.span
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  >
-                    Enviando...
-                  </motion.span>
-                ) : (
-                  <span className="flex items-center gap-2 justify-center">
-                    <Sparkles className="w-5 h-5" />
-                    Ver mis resultados
-                  </span>
-                )}
-              </Button>
-            </motion.div>
+              <option value="">Selecciona grado</option>
+              {(isNinos ? gradosPrimaria : gradosSecundaria).map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
-            <p className="text-center text-gray-400 text-xs mt-3">
-              * Campo obligatorio
-            </p>
-          </motion.div>
+        <div 
+          className="rounded-2xl p-5 mt-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
+        >
+          <p className="text-sm text-gray-700 mb-2">Comentario <span className="text-gray-400">(opcional)</span></p>
+          <textarea
+            placeholder="Mensaje adicional..."
+            value={formData.comentario}
+            onChange={(e) => handleFormChange("comentario", e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+            style={{ backgroundColor: "#f8f5ff", minHeight: "60px" }}
+            data-testid="input-comentario"
+          />
         </div>
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleSubmit}
+          disabled={submitting || !formData.nombre.trim()}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-full text-white font-bold shadow-lg disabled:opacity-50 mt-6"
+          style={{ background: "linear-gradient(90deg, #a78bfa 0%, #7c3aed 50%, #06b6d4 100%)" }}
+          data-testid="button-submit"
+        >
+          {submitting ? "Enviando..." : "Ver mis resultados"}
+        </motion.button>
+        
+        <p className="text-xs text-gray-400 text-center mt-3">
+          Tus datos se usan solo para mostrar resultados y recomendaciones.
+        </p>
       </main>
-      
-      <BottomNavBar />
     </div>
   );
 }

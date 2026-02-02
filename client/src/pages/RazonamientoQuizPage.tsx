@@ -55,9 +55,10 @@ export default function RazonamientoQuizPage() {
     email: "",
     edad: "",
     ciudad: "",
-    telefono: "",
+    telefono: "+591 ",
     comentario: "",
     nivelEducativo: "",
+    grado: "",
   });
 
   useEffect(() => {
@@ -200,177 +201,180 @@ export default function RazonamientoQuizPage() {
   }
 
   if (showForm) {
+    const isNinos = categoria === "ninos" || categoria === "preescolar";
+    const isAdolescentes = categoria === "adolescentes";
+    
+    const gradosPrimaria = ["1ero Primaria", "2do Primaria", "3ero Primaria", "4to Primaria", "5to Primaria", "6to Primaria"];
+    const gradosSecundaria = ["1ero Secundaria", "2do Secundaria", "3ero Secundaria", "4to Secundaria", "5to Secundaria", "6to Secundaria", "Universitario"];
+    
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen bg-white flex flex-col"
+      <div 
+        className="min-h-screen flex flex-col"
+        style={{ background: "linear-gradient(180deg, #e8def8 0%, #f3e8ff 50%, #ffffff 100%)" }}
       >
-        <CurvedHeader showBack onBack={handleBack} />
-        
-        <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-          <img src={menuCurveImg} alt="" className="w-full h-auto" />
-        </div>
-
-        <div 
-          className="flex-1 flex flex-col items-center justify-start px-4 pb-8 pt-6"
-          style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
-          }}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-md rounded-2xl p-6 border border-purple-100/50"
-            style={{
-              background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(248,245,255,0.95) 100%)",
-              boxShadow: "0 8px 32px rgba(138, 63, 252, 0.1), 0 2px 8px rgba(0,0,0,0.04)"
-            }}
-          >
-            <div className="text-center mb-6">
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", delay: 0.2 }}
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ 
-                  background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
-                  boxShadow: "0 4px 16px rgba(138, 63, 252, 0.3)"
-                }}
-              >
-                <Brain className="w-8 h-8 text-white" />
-              </motion.div>
-              <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-xl font-bold"
-                style={{ color: "#1f2937" }}
-              >
-                {title}
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-sm mt-2"
-                style={{ color: "#6b7280" }}
-              >
-                Completa tus datos para ver tus resultados
-              </motion.p>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                { icon: User, placeholder: "Tu nombre *", key: "nombre", type: "text", delay: 0.1 },
-                { icon: Mail, placeholder: "Correo electrónico", key: "email", type: "email", delay: 0.15 },
-                { icon: Calendar, placeholder: "Edad", key: "edad", type: "text", delay: 0.2 },
-                { icon: MapPin, placeholder: "Ciudad", key: "ciudad", type: "text", delay: 0.25 },
-                { icon: Phone, placeholder: "Teléfono", key: "telefono", type: "tel", delay: 0.3 },
-              ].map(({ icon: Icon, placeholder, key, type, delay }) => (
-                <motion.div 
-                  key={key}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay }}
-                  className="relative"
-                >
-                  <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#8a3ffc" }} />
-                  <Input
-                    type={type}
-                    placeholder={placeholder}
-                    value={formData[key as keyof typeof formData]}
-                    onChange={(e) => setFormData(p => ({ ...p, [key]: e.target.value }))}
-                    className="pl-12 h-12 rounded-xl transition-all text-gray-800 placeholder:text-gray-400"
-                    style={{
-                      background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
-                      border: "2px solid rgba(138, 63, 252, 0.15)",
-                      boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
-                    }}
-                    data-testid={`input-${key}`}
-                  />
-                </motion.div>
-              ))}
-              {/* Campo nivel educativo solo para adolescentes (universitarios) */}
-              {categoria === "universitarios" && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 }}
-                  className="relative"
-                >
-                  <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#8a3ffc" }} />
-                  <select
-                    value={formData.nivelEducativo}
-                    onChange={(e) => setFormData(p => ({ ...p, nivelEducativo: e.target.value }))}
-                    className="w-full pl-12 h-12 rounded-xl transition-all outline-none text-gray-800 appearance-none cursor-pointer"
-                    style={{
-                      background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
-                      border: "2px solid rgba(138, 63, 252, 0.15)",
-                      boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
-                    }}
-                    data-testid="select-nivel-educativo"
-                  >
-                    <option value="">Selecciona tu nivel educativo</option>
-                    <option value="secundaria">1ero a 6to de Secundaria</option>
-                    <option value="universidad">Universidad</option>
-                  </select>
-                </motion.div>
-              )}
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: categoria === "universitarios" ? 0.4 : 0.35 }}
-                className="relative"
-              >
-                <MessageSquare className="absolute left-4 top-4 w-5 h-5" style={{ color: "#8a3ffc" }} />
-                <textarea
-                  placeholder="Comentario (opcional)"
-                  value={formData.comentario}
-                  onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
-                  rows={2}
-                  className="w-full pl-12 p-3 rounded-xl resize-none text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400"
-                  style={{
-                    background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
-                    border: "2px solid rgba(138, 63, 252, 0.15)",
-                    boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
-                  }}
-                  data-testid="input-comentario"
-                />
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+        <main className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="flex flex-col items-center mb-6">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+              style={{ background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)" }}
             >
-              <Button
-                onClick={handleSubmit}
-                disabled={submitting || !formData.nombre.trim()}
-                size="lg"
-                className="w-full mt-5 text-white font-bold transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)",
-                  boxShadow: "0 4px 16px rgba(138, 63, 252, 0.3)"
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M12 2a9 9 0 0 1 9 9c0 3.5-2 6.5-5 8v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2c-3-1.5-5-4.5-5-8a9 9 0 0 1 9-9z"/>
+                <path d="M9 22h6"/>
+                <path d="M12 6v4"/>
+                <path d="M8 10h8"/>
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-gray-800 mb-1">{title}</h1>
+            <p className="text-sm text-gray-500 text-center">Completa tus datos para ver tu resultado y recomendaciones.</p>
+          </div>
+
+          <div 
+            className="rounded-2xl p-5 space-y-4"
+            style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
+          >
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Juan Pérez"
+                value={formData.nombre}
+                onChange={(e) => setFormData(p => ({ ...p, nombre: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ backgroundColor: "#f8f5ff" }}
+                data-testid="input-nombre"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              </div>
+              <input
+                type="email"
+                placeholder="nombre@email.com"
+                value={formData.email}
+                onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ backgroundColor: "#f8f5ff" }}
+                data-testid="input-email"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <span className="text-base">🇧🇴</span>
+              </div>
+              <input
+                type="tel"
+                placeholder="+591 Ej: 71234567"
+                value={formData.telefono}
+                onChange={(e) => setFormData(p => ({ ...p, telefono: e.target.value }))}
+                className="w-full pl-10 pr-10 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ backgroundColor: "#f8f5ff" }}
+                data-testid="input-telefono"
+              />
+              {formData.telefono.length > 5 && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </div>
+              <input
+                type="number"
+                placeholder="Ej: 15"
+                value={formData.edad}
+                onChange={(e) => setFormData(p => ({ ...p, edad: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ backgroundColor: "#f8f5ff" }}
+                data-testid="input-edad"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Ej: La Paz"
+                value={formData.ciudad}
+                onChange={(e) => setFormData(p => ({ ...p, ciudad: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ backgroundColor: "#f8f5ff" }}
+                data-testid="input-ciudad"
+              />
+            </div>
+          </div>
+
+          {(isNinos || isAdolescentes) && (
+            <div 
+              className="rounded-2xl p-5 mt-4 space-y-3"
+              style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
+            >
+              <div>
+                <p className="text-sm font-semibold text-gray-800 mb-1">Perfil educativo</p>
+                <p className="text-xs text-gray-500 mb-3">Ajusta la dificultad del test</p>
+              </div>
+              
+              <select
+                value={formData.grado}
+                onChange={(e) => setFormData(p => ({ ...p, grado: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none bg-no-repeat"
+                style={{ 
+                  backgroundColor: "#f8f5ff",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                  backgroundPosition: "right 12px center",
+                  backgroundSize: "20px"
                 }}
-                data-testid="button-submit-results"
+                data-testid="select-grado"
               >
-                {submitting ? (
-                  <motion.span
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  >
-                    Enviando...
-                  </motion.span>
-                ) : (
-                  "Ver mis resultados"
-                )}
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.div>
+                <option value="">Selecciona grado</option>
+                {(isNinos ? gradosPrimaria : gradosSecundaria).map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div 
+            className="rounded-2xl p-5 mt-4"
+            style={{ backgroundColor: "rgba(255,255,255,0.7)", boxShadow: "0 4px 20px rgba(139, 92, 246, 0.1)" }}
+          >
+            <p className="text-sm text-gray-700 mb-2">Comentario <span className="text-gray-400">(opcional)</span></p>
+            <textarea
+              placeholder="Mensaje adicional..."
+              value={formData.comentario}
+              onChange={(e) => setFormData(p => ({ ...p, comentario: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+              style={{ backgroundColor: "#f8f5ff", minHeight: "60px" }}
+              data-testid="input-comentario"
+            />
+          </div>
+
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSubmit}
+            disabled={submitting || !formData.nombre.trim()}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-full text-white font-bold shadow-lg disabled:opacity-50 mt-6"
+            style={{ background: "linear-gradient(90deg, #a78bfa 0%, #7c3aed 50%, #06b6d4 100%)" }}
+            data-testid="button-submit-results"
+          >
+            {submitting ? "Enviando..." : "Ver mis resultados"}
+          </motion.button>
+          
+          <p className="text-xs text-gray-400 text-center mt-3">
+            Tus datos se usan solo para mostrar resultados y recomendaciones.
+          </p>
+        </main>
+      </div>
     );
   }
 
