@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Grid3X3 } from "lucide-react";
 import { CurvedHeader } from "@/components/CurvedHeader";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -123,10 +122,6 @@ export default function VelocidadPatronPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation(`/entrenamiento-edad/${itemId}`); }} />
-      
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 

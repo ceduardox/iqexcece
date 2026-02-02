@@ -339,8 +339,11 @@ export default function VelocidadExercisePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
-        <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
+      <div className="min-h-screen bg-white flex flex-col">
+        <header 
+          className="px-4 py-3 flex items-center justify-between"
+          style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+        >
           <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
           <button
             onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
@@ -350,7 +353,7 @@ export default function VelocidadExercisePage() {
           </button>
         </header>
         <main className="flex-1 flex items-center justify-center">
-          <div className="w-64 h-64 bg-white/10 rounded-2xl animate-pulse" />
+          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </main>
       </div>
     );
@@ -358,11 +361,11 @@ export default function VelocidadExercisePage() {
 
   if (ejercicios.length === 0 || !ejercicio) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-700 to-pink-500 flex flex-col items-center justify-center p-4">
-        <p className="text-white text-xl mb-4">No hay ejercicios configurados</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <p className="text-gray-800 text-xl mb-4">No hay ejercicios configurados</p>
         <button
           onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
-          className="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-semibold"
+          className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold"
         >
           Volver
         </button>
@@ -374,8 +377,11 @@ export default function VelocidadExercisePage() {
   const totalPos = getTotalPositions(ejercicio.patron);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-700 via-purple-600 to-pink-500 flex flex-col">
-      <header className="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header 
+        className="px-4 py-3 flex items-center justify-between"
+        style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
+      >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
         <button
           onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
@@ -386,32 +392,30 @@ export default function VelocidadExercisePage() {
         </button>
       </header>
 
-      <div className="bg-purple-900/60 px-4 py-3 flex items-center justify-between">
+      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="text-center">
-          <span className="text-purple-300 text-xs block">NIVEL</span>
-          <span className="text-white text-2xl font-bold">{getNivelFromPatron(ejercicio.patron)}</span>
+          <span className="text-gray-500 text-xs block">NIVEL</span>
+          <span className="text-gray-800 text-2xl font-bold">{getNivelFromPatron(ejercicio.patron)}</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <span className="text-purple-300 text-xs block">CORRECTOS</span>
+            <span className="text-gray-500 text-xs block">CORRECTOS</span>
             <div className="flex items-center justify-center gap-1">
-              <span className="text-xl">😊</span>
-              <span className="text-white text-2xl font-bold">{correctos}</span>
+              <span className="text-green-500 text-2xl font-bold">{correctos}</span>
             </div>
           </div>
           <div className="text-center">
-            <span className="text-purple-300 text-xs block">INCORRECTOS</span>
+            <span className="text-gray-500 text-xs block">INCORRECTOS</span>
             <div className="flex items-center justify-center gap-1">
-              <span className="text-xl">😔</span>
-              <span className="text-white text-2xl font-bold">{incorrectos}</span>
+              <span className="text-red-500 text-2xl font-bold">{incorrectos}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center px-6 py-6">
+      <main className="flex-1 flex flex-col items-center px-6 py-6 bg-gradient-to-b from-purple-50 to-white">
         <div className="text-center mb-6">
-          <span className="text-white text-lg font-bold">
+          <span className="text-purple-600 text-lg font-bold">
             {ejercicio.velocidad} palabras /min.
           </span>
         </div>
@@ -459,7 +463,7 @@ export default function VelocidadExercisePage() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.1 }}
-                        className="text-white font-bold text-xl"
+                        className="text-purple-700 font-bold text-xl"
                       >
                         {shownWords[idx]}
                       </motion.span>
@@ -468,7 +472,7 @@ export default function VelocidadExercisePage() {
                   <motion.div 
                     className="w-full h-1 rounded-full"
                     animate={{ 
-                      backgroundColor: currentPosition === idx ? "#c084fc" : "#6b21a8",
+                      backgroundColor: currentPosition === idx ? "#8a3ffc" : "#e9d5ff",
                       scaleY: currentPosition === idx ? 2 : 1
                     }}
                     transition={{ duration: 0.1 }}
@@ -488,7 +492,8 @@ export default function VelocidadExercisePage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={iniciarEjercicio}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-14 py-5 rounded-full font-bold text-xl shadow-xl flex items-center gap-3"
+              className="text-white px-14 py-4 rounded-lg font-bold text-xl shadow-lg flex items-center gap-3"
+              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
               data-testid="button-iniciar"
             >
               Iniciar
@@ -506,7 +511,7 @@ export default function VelocidadExercisePage() {
               className="w-full max-w-md"
             >
               <motion.p 
-                className="text-white text-xl font-medium mb-6 text-center"
+                className="text-gray-800 text-xl font-medium mb-6 text-center"
               >
                 {preguntaActual}
               </motion.p>
@@ -517,10 +522,10 @@ export default function VelocidadExercisePage() {
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: idx * 0.05, type: "spring", stiffness: 200 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => handleRespuesta(opcion)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white py-4 px-4 rounded-xl font-semibold text-lg shadow-lg transition-colors"
+                    className="bg-white border border-gray-200 hover:border-purple-400 text-gray-800 py-4 px-4 rounded-lg font-semibold text-base shadow-sm hover:shadow-md transition-all"
                     data-testid={`button-opcion-${idx}`}
                   >
                     {opcion}
@@ -542,13 +547,13 @@ export default function VelocidadExercisePage() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className={`w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center text-3xl ${
+                className={`w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center text-3xl text-white font-bold ${
                   ultimaRespuesta === "correcta" ? "bg-green-500" : "bg-red-500"
                 }`}
               >
-                {ultimaRespuesta === "correcta" ? "😊" : "😔"}
+                {ultimaRespuesta === "correcta" ? "✓" : "✗"}
               </motion.div>
-              <p className="text-white text-lg font-bold">
+              <p className="text-gray-800 text-lg font-bold">
                 {ultimaRespuesta === "correcta" ? "¡CORRECTO!" : "INCORRECTO"}
               </p>
             </motion.div>
@@ -566,32 +571,37 @@ export default function VelocidadExercisePage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-5xl"
+                className="w-20 h-20 mx-auto mb-6 rounded-lg flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
               >
-                🏆
+                <span className="text-white text-4xl">✓</span>
               </motion.div>
               
-              <h3 className="text-white text-2xl font-bold mb-2">
+              <h3 className="text-gray-800 text-2xl font-bold mb-2">
                 ¡Completado!
               </h3>
               
-              <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6">
-                <p className="text-white/80 mb-4">Resultados:</p>
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
+                <p className="text-gray-500 mb-4">Resultados:</p>
                 <div className="flex justify-center gap-8">
                   <div className="text-center">
-                    <span className="text-4xl">😊</span>
-                    <p className="text-white text-2xl font-bold">{correctos}</p>
-                    <p className="text-green-400 text-sm font-bold">CORRECTOS</p>
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <span className="text-green-600 font-bold text-xl">✓</span>
+                    </div>
+                    <p className="text-gray-800 text-2xl font-bold">{correctos}</p>
+                    <p className="text-green-600 text-sm font-medium">CORRECTOS</p>
                   </div>
                   <div className="text-center">
-                    <span className="text-4xl">😔</span>
-                    <p className="text-white text-2xl font-bold">{incorrectos}</p>
-                    <p className="text-red-400 text-sm font-bold">INCORRECTOS</p>
+                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <span className="text-red-600 font-bold text-xl">✗</span>
+                    </div>
+                    <p className="text-gray-800 text-2xl font-bold">{incorrectos}</p>
+                    <p className="text-red-600 text-sm font-medium">INCORRECTOS</p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/20">
-                  <p className="text-white/60 text-sm">Precisión</p>
-                  <p className="text-white text-3xl font-bold">
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-gray-500 text-sm">Precisión</p>
+                  <p className="text-purple-600 text-3xl font-bold">
                     {ejercicios.length > 0 ? Math.round((correctos / ejercicios.length) * 100) : 0}%
                   </p>
                 </div>
@@ -599,8 +609,8 @@ export default function VelocidadExercisePage() {
 
               <div className="flex flex-col gap-3">
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setEjercicioActual(0);
                     setCorrectos(0);
@@ -609,20 +619,21 @@ export default function VelocidadExercisePage() {
                     setEsSegundoEjercicioEnAdelante(false);
                     setGameState("ready");
                   }}
-                  className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg"
+                  className="text-white px-8 py-3 rounded-lg font-semibold text-base shadow-md"
+                  style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
                   data-testid="button-repetir-todo"
                 >
                   Repetir Todo
                 </motion.button>
                 
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
-                  className="bg-white/20 backdrop-blur text-white px-8 py-4 rounded-full font-bold text-lg"
+                  className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold text-base"
                   data-testid="button-volver"
                 >
-                  Volver a Entrenamiento
+                  Volver
                 </motion.button>
               </div>
             </motion.div>
