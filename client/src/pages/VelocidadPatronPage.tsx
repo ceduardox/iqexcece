@@ -123,14 +123,14 @@ export default function VelocidadPatronPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation(`/entrenamiento-edad/${itemId}`); }} />
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-24 -mt-2">
         <div 
           className="w-full"
           style={{
             background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
           }}
         >
-          <div className="px-5 pt-4 pb-6">
+          <div className="px-5 pt-6 pb-6">
             {imagen && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
