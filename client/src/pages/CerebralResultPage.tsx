@@ -1,11 +1,13 @@
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Home, Share2, MessageCircle, Brain, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import html2canvas from "html2canvas";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -21,6 +23,8 @@ const playButtonSound = () => {
 
 export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isSharing, setIsSharing] = useState(false);
   
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
@@ -40,6 +44,64 @@ export default function CerebralResultPage() {
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
 
+  const handleShare = async () => {
+    if (isSharing || !resultsRef.current) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    try {
+      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
+      if (logoImg) {
+        try {
+          const response = await fetch(logoImg.src);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          logoImg.src = base64;
+          await new Promise(r => setTimeout(r, 100));
+        } catch (e) {}
+      }
+      
+      const canvas = await html2canvas(resultsRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed'));
+        }, 'image/png', 1.0);
+      });
+      
+      const file = new File([blob], 'resultado-cerebral.png', { type: 'image/png' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Test Cerebral - IQEXPONENCIAL',
+          text: `Mi resultado en Test Cerebral\n\nEntrena tu cerebro en: https://iqexponencial.app`,
+          files: [file]
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado-cerebral.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (e) {}
+    setIsSharing(false);
+  };
+
   const handleNewTest = () => {
     playButtonSound();
     sessionStorage.removeItem('lateralidadAnswers');
@@ -48,7 +110,7 @@ export default function CerebralResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full"
         style={{
@@ -264,12 +326,14 @@ export default function CerebralResultPage() {
               <span className="text-[10px]">Nuevo Test</span>
             </Button>
             <Button
+              onClick={handleShare}
+              disabled={isSharing}
               className="flex flex-col items-center gap-1 py-4"
               style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891B2 100%)" }}
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              <span className="text-[10px]">Compartir</span>
+              <span className="text-[10px]">{isSharing ? '...' : 'Compartir'}</span>
             </Button>
             <Button
               className="flex flex-col items-center gap-1 py-4"

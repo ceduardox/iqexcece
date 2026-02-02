@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { RotateCcw, Share2, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import html2canvas from "html2canvas";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
 
 export default function NumerosResultPage() {
   const [, navigate] = useLocation();
@@ -29,25 +30,71 @@ export default function NumerosResultPage() {
     }
   }, []);
 
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isSharing, setIsSharing] = useState(false);
+
   const handleShare = async () => {
-    const appUrl = "https://iqexponencial.app";
-    const exerciseName = "Identifica rápidamente Números y Letras";
-    const text = `🧠 ${exerciseName}\n\n¡He completado el ejercicio de ${results.nivel}!\n✅ Correctas: ${results.correctas}\n❌ Incorrectas: ${results.incorrectas}\n⏱️ Tiempo: ${results.tiempo}s\n\n🚀 Prueba tú también: ${appUrl}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Mi resultado - IQ Exponencial", text, url: appUrl });
-      } catch (e) {}
-    } else {
-      navigator.clipboard.writeText(text);
-      alert("Resultado copiado al portapapeles");
-    }
+    if (isSharing || !resultsRef.current) return;
+    setIsSharing(true);
+    
+    try {
+      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
+      if (logoImg) {
+        try {
+          const response = await fetch(logoImg.src);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          logoImg.src = base64;
+          await new Promise(r => setTimeout(r, 100));
+        } catch (e) {}
+      }
+      
+      const canvas = await html2canvas(resultsRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed'));
+        }, 'image/png', 1.0);
+      });
+      
+      const file = new File([blob], 'resultado-numeros.png', { type: 'image/png' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Números y Letras - IQEXPONENCIAL',
+          text: `Mi resultado en Números y Letras\n\nEntrena tu cerebro en: https://iqexponencial.app`,
+          files: [file]
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado-numeros.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (e) {}
+    setIsSharing(false);
   };
 
   const total = results.correctas + results.incorrectas + results.sinResponder || 1;
   const percentage = Math.round((results.correctas / total) * 100);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full bg-white"
         style={{
