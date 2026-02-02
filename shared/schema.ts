@@ -50,6 +50,7 @@ export const quizResults = pgTable("quiz_results", {
   comentario: text("comentario"),
   categoria: text("categoria").default("preescolar"),
   nivelEducativo: text("nivel_educativo"),
+  grado: text("grado"),
   tiempoLectura: integer("tiempo_lectura"),
   tiempoCuestionario: integer("tiempo_cuestionario"),
   isPwa: boolean("is_pwa").default(false),
@@ -124,6 +125,7 @@ export const cerebralResults = pgTable("cerebral_results", {
   telefono: text("telefono"),
   comentario: text("comentario"),
   categoria: text("categoria").notNull(),
+  grado: text("grado"),
   lateralidadData: text("lateralidad_data"), // JSON string of answers
   preferenciaData: text("preferencia_data"), // JSON string of answers
   leftPercent: integer("left_percent"),

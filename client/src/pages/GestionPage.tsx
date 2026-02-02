@@ -1552,7 +1552,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <th className="pb-3 px-2">Edad</th>
                       <th className="pb-3 px-2">Ciudad</th>
                       <th className="pb-3 px-2">Teléfono</th>
-                      <th className="pb-3 px-2">Nivel</th>
+                      <th className="pb-3 px-2">Grado</th>
                       <th className="pb-3 px-2">T. Lectura</th>
                       <th className="pb-3 px-2">T. Test</th>
                       <th className="pb-3 px-2">Tipo</th>
@@ -1567,7 +1567,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <td className="py-3 px-2 text-white/80">{r.edad || "-"}</td>
                         <td className="py-3 px-2 text-white/80">{r.ciudad || "-"}</td>
                         <td className="py-3 px-2 text-white/80">{r.telefono || "-"}</td>
-                        <td className="py-3 px-2 text-yellow-400">{(r as any).nivelEducativo === "secundaria" ? "Secundaria" : (r as any).nivelEducativo === "universidad" ? "Universidad" : "-"}</td>
+                        <td className="py-3 px-2 text-yellow-400">{(r as any).grado || "-"}</td>
                         <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
                         <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
                         <td className="py-3 px-2">
@@ -1613,7 +1613,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
                         <p className="text-white/60">Ciudad: <span className="text-white/80">{r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
-                        <p className="text-white/60">Nivel Educativo: <span className="text-yellow-400">{(r as any).nivelEducativo === "secundaria" ? "Secundaria" : (r as any).nivelEducativo === "universidad" ? "Universidad" : "-"}</span></p>
+                        <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">T. Lectura: <span className="text-cyan-400">{formatTime(r.tiempoLectura)}</span></p>
                         <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
                         <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
@@ -1682,6 +1682,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               {r.email && <span>📧 {r.email}</span>}
                               {r.edad && <span>🎂 {r.edad} años</span>}
                               {r.ciudad && <span>📍 {r.ciudad}</span>}
+                              {(r as any).grado && <span className="text-yellow-400">🎓 {(r as any).grado}</span>}
                             </div>
                             <span className="text-white/40 text-xs ml-auto">
                               {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
@@ -1697,6 +1698,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 {r.edad && <p>🎂 {r.edad} años</p>}
                                 {r.ciudad && <p>📍 {r.ciudad}</p>}
                                 {r.telefono && <p>📱 {r.telefono}</p>}
+                                {(r as any).grado && <p className="text-yellow-400">🎓 {(r as any).grado}</p>}
                               </div>
                               
                               <div>
