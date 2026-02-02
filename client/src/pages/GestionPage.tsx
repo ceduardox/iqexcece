@@ -190,6 +190,7 @@ export default function GestionPage() {
     { value: "stroop", label: "Test Stroop (color vs palabra)" },
     { value: "preferencia", label: "Preferencia visual (proyectivo)" },
     { value: "lateralidad", label: "Lateralidad (izquierda/derecha)" },
+    { value: "aceleracion_lectura", label: "Aceleración de Lectura (PDF)" },
   ];
   
   const defaultPreescolar = {
