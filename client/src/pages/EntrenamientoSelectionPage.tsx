@@ -149,9 +149,16 @@ export default function EntrenamientoSelectionPage() {
   const getElementStyle = useCallback((elementId: string, defaultBg?: string) => {
     const s = styles[elementId];
     const result: React.CSSProperties = {};
-    if (s?.background) result.background = s.background;
-    else if (s?.imageUrl) result.background = `url(${s.imageUrl}) center/cover no-repeat`;
-    else if (defaultBg) result.background = defaultBg;
+    if (s?.imageUrl) {
+      result.background = `url(${s.imageUrl}) center/cover no-repeat`;
+      if (s?.imageSize) {
+        result.backgroundSize = `${s.imageSize}%`;
+      }
+    } else if (s?.background) {
+      result.background = s.background;
+    } else if (defaultBg) {
+      result.background = defaultBg;
+    }
     return result;
   }, [styles]);
 
