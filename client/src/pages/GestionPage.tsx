@@ -3194,9 +3194,78 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Sync Section */}
+              {/* Sync Styles Section */}
+              <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg mb-3">
+                <p className="text-purple-400 text-sm mb-2 font-medium">Sincronizar ESTILOS (page_styles) entre Dev y Prod:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-purple-500/30 text-purple-400 hover:bg-purple-500/20"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/admin/page-styles/export", {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `styles_export_${new Date().toISOString().split("T")[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        alert(`Exportados ${data.styles?.length || 0} estilos de página`);
+                      } catch (e) {
+                        alert("Error al exportar estilos");
+                      }
+                    }}
+                    data-testid="button-export-styles"
+                  >
+                    Exportar Estilos (JSON)
+                  </Button>
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    id="import-styles"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        const res = await fetch("/api/admin/page-styles/import", {
+                          method: "POST",
+                          headers: { 
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}` 
+                          },
+                          body: JSON.stringify({ styles: data.styles })
+                        });
+                        const result = await res.json();
+                        alert(`Estilos importados: ${result.imported}`);
+                      } catch (err) {
+                        alert("Error al importar estilos: " + (err as Error).message);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-green-500/30 text-green-400 hover:bg-green-500/20"
+                    onClick={() => document.getElementById("import-styles")?.click()}
+                    data-testid="button-import-styles"
+                  >
+                    Importar Estilos (JSON)
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Sync Images Section */}
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-yellow-400 text-sm mb-2 font-medium">Sincronizar imágenes entre Dev y Prod:</p>
+                <p className="text-yellow-400 text-sm mb-2 font-medium">Sincronizar IMÁGENES entre Dev y Prod:</p>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"

@@ -837,6 +837,10 @@ export class DatabaseStorage implements IStorage {
       return created;
     }
   }
+
+  async getAllPageStyles(): Promise<PageStyle[]> {
+    return db.select().from(pageStyles);
+  }
 }
 
 export const storage = new DatabaseStorage();

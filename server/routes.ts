@@ -529,6 +529,40 @@ export async function registerRoutes(
     res.json({ success: true, imported, skipped });
   });
 
+  // Export all page styles for sync between environments
+  app.get("/api/admin/page-styles/export", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const styles = await storage.getAllPageStyles();
+    res.json({ styles, exportedAt: new Date().toISOString() });
+  });
+
+  // Import page styles from another environment
+  app.post("/api/admin/page-styles/import", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const { styles } = req.body;
+    if (!styles || !Array.isArray(styles)) {
+      return res.status(400).json({ error: "Invalid styles data" });
+    }
+    let imported = 0;
+    for (const style of styles) {
+      try {
+        await storage.savePageStyle(style.pageName, style.styles);
+        imported++;
+      } catch (e) {
+        console.error("Error importing style:", e);
+      }
+    }
+    res.json({ success: true, imported });
+  });
+
   // ===========================================
   // ENTRENAMIENTO ENDPOINTS
   // ===========================================
