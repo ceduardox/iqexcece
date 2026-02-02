@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare, Clock } from "lucide-react";
+import { ArrowLeft, Brain, CheckCircle2, XCircle, User, Mail, Calendar, MapPin, Phone, MessageSquare, Clock, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BottomNavBar } from "@/components/BottomNavBar";
@@ -25,7 +25,7 @@ const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niños",
   adolescentes: "Adolescentes",
-  universitarios: "Universitarios",
+  universitarios: "Adolescentes",
   profesionales: "Profesionales",
   adulto_mayor: "Adulto Mayor",
 };
@@ -57,6 +57,7 @@ export default function RazonamientoQuizPage() {
     ciudad: "",
     telefono: "",
     comentario: "",
+    nivelEducativo: "",
   });
 
   useEffect(() => {
@@ -137,6 +138,7 @@ export default function RazonamientoQuizPage() {
           telefono: formData.telefono || null,
           comentario: formData.comentario || null,
           categoria: categoria,
+          nivelEducativo: formData.nivelEducativo || null,
           tiempoLectura: null,
           tiempoCuestionario: quizTime,
           isPwa: isPwa,
@@ -289,10 +291,36 @@ export default function RazonamientoQuizPage() {
                   />
                 </motion.div>
               ))}
+              {/* Campo nivel educativo solo para adolescentes (universitarios) */}
+              {categoria === "universitarios" && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="relative"
+                >
+                  <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#8a3ffc" }} />
+                  <select
+                    value={formData.nivelEducativo}
+                    onChange={(e) => setFormData(p => ({ ...p, nivelEducativo: e.target.value }))}
+                    className="w-full pl-12 h-12 rounded-xl transition-all outline-none text-gray-800 appearance-none cursor-pointer"
+                    style={{
+                      background: "linear-gradient(145deg, #ffffff 0%, #fafafa 100%)",
+                      border: "2px solid rgba(138, 63, 252, 0.15)",
+                      boxShadow: "0 2px 8px rgba(138, 63, 252, 0.04)"
+                    }}
+                    data-testid="select-nivel-educativo"
+                  >
+                    <option value="">Selecciona tu nivel educativo</option>
+                    <option value="secundaria">1ero a 6to de Secundaria</option>
+                    <option value="universidad">Universidad</option>
+                  </select>
+                </motion.div>
+              )}
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 }}
+                transition={{ delay: categoria === "universitarios" ? 0.4 : 0.35 }}
                 className="relative"
               >
                 <MessageSquare className="absolute left-4 top-4 w-5 h-5" style={{ color: "#8a3ffc" }} />

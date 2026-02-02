@@ -38,7 +38,7 @@ const ageGradients: Record<string, string> = {
 const ageCategories = [
   { id: "preescolar", label: "Pre-escolar", ageRange: "3-5 años", ageGroup: "preescolar" },
   { id: "ninos", label: "Niños", ageRange: "6-12 años", ageGroup: "ninos" },
-  { id: "universitarios", label: "Universitarios", ageRange: "18-25 años", ageGroup: "universitarios" },
+  { id: "universitarios", label: "Adolescentes", ageRange: "12-18 años", ageGroup: "universitarios" },
   { id: "profesionales", label: "Profesionales", ageRange: "26-55 años", ageGroup: "profesionales" },
   { id: "adulto_mayor", label: "Adulto Mayor", ageRange: "55+ años", ageGroup: "adulto_mayor" },
 ];

@@ -17,7 +17,7 @@ const categoryLabels: Record<string, string> = {
   preescolar: "Pre escolar",
   ninos: "Niños",
   adolescentes: "Adolescentes",
-  universitarios: "Universitarios",
+  universitarios: "Adolescentes",
   profesionales: "Profesionales",
   adulto_mayor: "Adulto Mayor",
 };

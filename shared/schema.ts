@@ -49,6 +49,7 @@ export const quizResults = pgTable("quiz_results", {
   telefono: text("telefono"),
   comentario: text("comentario"),
   categoria: text("categoria").default("preescolar"),
+  nivelEducativo: text("nivel_educativo"),
   tiempoLectura: integer("tiempo_lectura"),
   tiempoCuestionario: integer("tiempo_cuestionario"),
   isPwa: boolean("is_pwa").default(false),

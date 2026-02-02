@@ -1021,7 +1021,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     const labels: Record<string, string> = {
       ninos: "Niños",
       adolescentes: "Adolescentes",
-      universitarios: "Universitarios",
+      universitarios: "Adolescentes",
       profesionales: "Profesionales",
       adulto_mayor: "Adulto Mayor",
     };
@@ -1552,6 +1552,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <th className="pb-3 px-2">Edad</th>
                       <th className="pb-3 px-2">Ciudad</th>
                       <th className="pb-3 px-2">Teléfono</th>
+                      <th className="pb-3 px-2">Nivel</th>
                       <th className="pb-3 px-2">T. Lectura</th>
                       <th className="pb-3 px-2">T. Test</th>
                       <th className="pb-3 px-2">Tipo</th>
@@ -1566,6 +1567,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <td className="py-3 px-2 text-white/80">{r.edad || "-"}</td>
                         <td className="py-3 px-2 text-white/80">{r.ciudad || "-"}</td>
                         <td className="py-3 px-2 text-white/80">{r.telefono || "-"}</td>
+                        <td className="py-3 px-2 text-yellow-400">{(r as any).nivelEducativo === "secundaria" ? "Secundaria" : (r as any).nivelEducativo === "universidad" ? "Universidad" : "-"}</td>
                         <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
                         <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
                         <td className="py-3 px-2">
@@ -1611,6 +1613,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
                         <p className="text-white/60">Ciudad: <span className="text-white/80">{r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
+                        <p className="text-white/60">Nivel Educativo: <span className="text-yellow-400">{(r as any).nivelEducativo === "secundaria" ? "Secundaria" : (r as any).nivelEducativo === "universidad" ? "Universidad" : "-"}</span></p>
                         <p className="text-white/60">T. Lectura: <span className="text-cyan-400">{formatTime(r.tiempoLectura)}</span></p>
                         <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
                         <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
@@ -1851,7 +1854,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   className={contentCategory === "universitarios" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
                   data-testid="button-content-universitarios"
                 >
-                  Universitarios
+                  Adolescentes
                 </Button>
                 <Button
                   onClick={() => { setContentCategory("profesionales"); setSelectedTema(1); }}
@@ -2133,7 +2136,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "universitarios" ? "Adolescentes" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -2366,7 +2369,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "universitarios" ? "Adolescentes" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -3171,7 +3174,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   contentCategory === "preescolar" ? "Pre-escolar" : 
                   contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
-                  contentCategory === "universitarios" ? "Universitarios" :
+                  contentCategory === "universitarios" ? "Adolescentes" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
                 }`}
               </Button>
@@ -3354,7 +3357,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     size="sm"
                     className={entrenamientoCategory === cat ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
                   >
-                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
+                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Adolescentes" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
                   </Button>
                 ))}
               </div>
