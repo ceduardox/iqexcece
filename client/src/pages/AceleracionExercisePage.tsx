@@ -417,7 +417,7 @@ export default function AceleracionExercisePage() {
             transition={{ duration: 0.5 }}
           >
             <img 
-              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+              src="https://iqexponencial.app/api/images/35716163-d151-4abc-935a-1fff14929bce" 
               alt="IQEXPONENCIAL" 
               className="h-10 object-contain"
             />
@@ -595,21 +595,21 @@ export default function AceleracionExercisePage() {
           >
             <button
               onClick={handleRestartExercise}
-              className="w-full py-4 rounded-full text-white font-semibold text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl text-white font-semibold text-base shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%)" }}
               data-testid="button-restart"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Intentar otro test
             </button>
             <button
               onClick={handleBackToSelection}
-              className="w-full py-4 rounded-full border-2 border-gray-200 text-gray-500 font-semibold text-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold text-base transition-all hover:bg-gray-50 flex items-center justify-center gap-2"
               data-testid="button-back-selection"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
               Volver al inicio
             </button>
           </motion.div>
