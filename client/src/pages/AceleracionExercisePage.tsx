@@ -417,7 +417,7 @@ export default function AceleracionExercisePage() {
             transition={{ duration: 0.5 }}
           >
             <img 
-              src="https://iqexponencial.app/api/images/35716163-d151-4abc-935a-1fff14929bce" 
+              src="https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3" 
               alt="IQEXPONENCIAL" 
               className="h-20 object-contain"
             />
