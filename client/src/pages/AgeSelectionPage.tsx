@@ -169,11 +169,16 @@ function AgeCard({ category, index, isSelected, onClick, editorMode, styles, onE
         </div>
         
         <div 
-          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${getEditableClass(`check-${category.id}`)} ${
             isSelected 
               ? "bg-purple-600 border-purple-600" 
               : "border-gray-300 bg-white"
           }`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(`check-${category.id}`, e); }}}
+          style={{
+            backgroundColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "white",
+            borderColor: isSelected ? (styles[`check-${category.id}`]?.background || "#7c3aed") : "#d1d5db"
+          }}
         >
           {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
         </div>
@@ -456,22 +461,34 @@ export default function AgeSelectionPage() {
 
       <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 bg-gradient-to-t from-white via-white to-transparent pt-6 z-40">
         <motion.button
-          onClick={handleContinue}
-          disabled={!selectedCategory}
-          className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${
-            selectedCategory
+          onClick={(e) => {
+            if (editorMode) {
+              e.stopPropagation();
+              handleElementClick("btn-continue", e);
+            } else {
+              handleContinue();
+            }
+          }}
+          disabled={!selectedCategory && !editorMode}
+          className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${getEditableClass("btn-continue")} ${
+            selectedCategory || editorMode
               ? "text-white shadow-lg"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
           style={{
-            background: selectedCategory 
+            background: styles["btn-continue"]?.background || (selectedCategory || editorMode
               ? "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" 
-              : undefined
+              : undefined),
+            color: styles["btn-continue"]?.textColor || "white",
+            fontSize: styles["btn-continue"]?.fontSize || 18,
+            marginTop: styles["btn-continue"]?.marginTop || 0,
+            marginBottom: styles["btn-continue"]?.marginBottom || 0,
+            borderRadius: styles["btn-continue"]?.borderRadius || 16
           }}
           whileTap={selectedCategory ? { scale: 0.98 } : undefined}
           data-testid="button-continue"
         >
-          Continuar
+          {styles["btn-continue"]?.buttonText || "Continuar"}
         </motion.button>
       </div>
 
