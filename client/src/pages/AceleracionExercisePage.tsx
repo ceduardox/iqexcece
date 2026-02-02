@@ -397,7 +397,7 @@ export default function AceleracionExercisePage() {
     const strokeDashoffset = circumference - (performancePercent / 100) * circumference;
     
     return (
-      <div ref={resultsRef} className="min-h-screen bg-white flex flex-col relative overflow-hidden">
+      <div ref={resultsRef} className="min-h-[100dvh] bg-white flex flex-col relative overflow-hidden">
         {/* Decorative gradient bar at top */}
         <div 
           className="absolute top-0 left-0 right-0 h-2"
@@ -631,16 +631,13 @@ export default function AceleracionExercisePage() {
           />
           
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <img 
-              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
-              alt="IQEXPONENCIAL" 
-              className="h-7 sm:h-8 object-contain"
-            />
-            <div className="text-center flex-1 px-2">
-              <p className="text-cyan-400 text-[10px] sm:text-xs font-medium tracking-widest uppercase">
-                {modeTitle}
+            <div>
+              <p className="text-cyan-400 text-[10px] sm:text-xs font-medium tracking-widest uppercase mb-0.5">
+                Entrenamiento Visual
               </p>
+              <h1 className="text-white font-bold text-lg sm:text-xl tracking-tight">
+                {modeTitle}
+              </h1>
             </div>
             <button
               onClick={handleClose}
