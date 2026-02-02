@@ -303,12 +303,12 @@ export default function AceleracionExercisePage() {
   // Results view - Styled like reference image with charts and animations
   if (showResults && selectedPdf) {
     const readingTimeFormatted = formatTime(totalReadingTime);
-    const averageSpeed = totalReadingTime > 0 
-      ? Math.round((wordsRead / (totalReadingTime / 60000)))
-      : localSpeed;
+    
+    // Use the speed the user configured, not calculated average
+    const displaySpeed = localSpeed;
     
     // Calculate performance percentage (based on speed vs target 920 PPM max)
-    const performancePercent = Math.min(100, Math.round((averageSpeed / 920) * 100));
+    const performancePercent = Math.min(100, Math.round((displaySpeed / 920) * 100));
     
     // Calculate stars (1-5) based on performance
     const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
@@ -446,7 +446,7 @@ export default function AceleracionExercisePage() {
             
             {/* Speed card */}
             <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
-              <p className="text-2xl font-bold text-gray-800">{averageSpeed}</p>
+              <p className="text-2xl font-bold text-gray-800">{displaySpeed}</p>
               <p className="text-gray-400 text-xs mt-1">PPM</p>
             </div>
             
