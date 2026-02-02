@@ -172,6 +172,16 @@ export default function GestionPage() {
     imagenCabecera: string;
   } | null>(null);
   
+  // Configuración de Aceleración de Lectura
+  const [aceleracionData, setAceleracionData] = useState<{
+    id?: string;
+    entrenamientoItemId: string;
+    imagenCabecera: string;
+    titulo: string;
+    velocidadPPM: number;
+    modoGolpePorcentaje: number;
+  } | null>(null);
+  
   const EXERCISE_TYPES = [
     { value: "bailarina", label: "Bailarina (dirección visual)" },
     { value: "secuencia", label: "Secuencia numérica" },
@@ -3960,6 +3970,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               >
                                 <option value="velocidad" className="bg-gray-700 text-white">Velocidad de lectura</option>
                                 <option value="numeros" className="bg-gray-700 text-white">Identifica Números y Letras</option>
+                                <option value="aceleracion_lectura" className="bg-gray-700 text-white">Aceleración de Lectura</option>
                                 <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
@@ -4133,8 +4144,175 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                         )}
 
+                        {/* Sección específica para tipo aceleracion_lectura */}
+                        {item.tipoEjercicio === "aceleracion_lectura" && (
+                          <div className="mt-4 pt-4 border-t border-white/10">
+                            <div className="mb-4">
+                              <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                                <span className="text-lg">⚡</span>
+                                Configuración de Aceleración
+                                <span className="text-white/40 text-xs font-normal">(Golpe de Vista / Desplazamiento)</span>
+                              </h4>
+                              <div className="grid md:grid-cols-2 gap-4 bg-cyan-900/30 p-4 rounded-xl border border-cyan-500/30">
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Imagen de cabecera</label>
+                                    <div className="flex gap-2">
+                                      <Input
+                                        value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.imagenCabecera || "") : ""}
+                                        onChange={(e) => {
+                                          setAceleracionData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: prev?.titulo || "Acelera al máximo tu Lectura",
+                                            velocidadPPM: prev?.velocidadPPM || 200,
+                                            modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                            imagenCabecera: e.target.value
+                                          }));
+                                        }}
+                                        className="bg-white/10 border-cyan-500/30 text-white text-sm"
+                                        placeholder="URL de imagen..."
+                                      />
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-cyan-500/30 text-cyan-400 px-2"
+                                        onClick={() => {
+                                          setImagePickerCallback(() => (url: string) => {
+                                            setAceleracionData(prev => ({
+                                              ...prev,
+                                              entrenamientoItemId: item.id,
+                                              titulo: prev?.titulo || "Acelera al máximo tu Lectura",
+                                              velocidadPPM: prev?.velocidadPPM || 200,
+                                              modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                              imagenCabecera: url
+                                            }));
+                                            setShowImagePicker(false);
+                                          });
+                                          setShowImagePicker(true);
+                                        }}
+                                      >
+                                        <ImageIcon className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    {(aceleracionData?.entrenamientoItemId === item.id && aceleracionData?.imagenCabecera) && (
+                                      <img src={aceleracionData.imagenCabecera} alt="" className="w-20 h-20 object-contain mt-2 rounded bg-white/10" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Título</label>
+                                    <Input
+                                      value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "") : "Acelera al máximo tu Lectura"}
+                                      onChange={(e) => {
+                                        setAceleracionData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: e.target.value,
+                                          velocidadPPM: prev?.velocidadPPM || 200,
+                                          modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="bg-white/10 border-cyan-500/30 text-white text-sm"
+                                      placeholder="Acelera al máximo tu Lectura"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Velocidad PPM (palabras por minuto)</label>
+                                    <Input
+                                      type="number"
+                                      value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.velocidadPPM || 200) : 200}
+                                      onChange={(e) => {
+                                        setAceleracionData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: prev?.titulo || "Acelera al máximo tu Lectura",
+                                          velocidadPPM: parseInt(e.target.value) || 200,
+                                          modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="bg-white/10 border-cyan-500/30 text-white text-sm"
+                                      min={50}
+                                      max={1000}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-white/60 text-xs mb-1 block">Modo Golpe % (porcentaje visible)</label>
+                                    <Input
+                                      type="number"
+                                      value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.modoGolpePorcentaje || 50) : 50}
+                                      onChange={(e) => {
+                                        setAceleracionData(prev => ({
+                                          ...prev,
+                                          entrenamientoItemId: item.id,
+                                          titulo: prev?.titulo || "Acelera al máximo tu Lectura",
+                                          velocidadPPM: prev?.velocidadPPM || 200,
+                                          modoGolpePorcentaje: parseInt(e.target.value) || 50,
+                                          imagenCabecera: prev?.imagenCabecera || ""
+                                        }));
+                                      }}
+                                      className="bg-white/10 border-cyan-500/30 text-white text-sm"
+                                      min={10}
+                                      max={100}
+                                    />
+                                  </div>
+                                  <div className="flex justify-end pt-2">
+                                    <Button
+                                      onClick={async () => {
+                                        if (!aceleracionData || aceleracionData.entrenamientoItemId !== item.id) return;
+                                        try {
+                                          const existing = await fetch(`/api/aceleracion/${item.id}`);
+                                          const existingData = await existing.json();
+                                          
+                                          if (existingData.ejercicio?.id) {
+                                            await fetch(`/api/admin/aceleracion/${existingData.ejercicio.id}`, {
+                                              method: "PUT",
+                                              headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: `Bearer ${token}`
+                                              },
+                                              body: JSON.stringify({
+                                                titulo: aceleracionData.titulo,
+                                                imagenCabecera: aceleracionData.imagenCabecera,
+                                                velocidadPPM: aceleracionData.velocidadPPM,
+                                                modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
+                                              })
+                                            });
+                                          } else {
+                                            await fetch("/api/admin/aceleracion", {
+                                              method: "POST",
+                                              headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: `Bearer ${token}`
+                                              },
+                                              body: JSON.stringify({
+                                                entrenamientoItemId: item.id,
+                                                titulo: aceleracionData.titulo,
+                                                imagenCabecera: aceleracionData.imagenCabecera,
+                                                velocidadPPM: aceleracionData.velocidadPPM,
+                                                modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
+                                              })
+                                            });
+                                          }
+                                          alert("Configuración guardada correctamente");
+                                        } catch (e) { console.error(e); }
+                                      }}
+                                      className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                                    >
+                                      Guardar Configuración
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Sección Página de Preparación (para otros tipos) */}
-                        {item.tipoEjercicio !== "numeros" && (
+                        {item.tipoEjercicio !== "numeros" && item.tipoEjercicio !== "aceleracion_lectura" && (
                         <div className="mt-4 pt-4 border-t border-white/10">
                           <div className="mb-4">
                             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
