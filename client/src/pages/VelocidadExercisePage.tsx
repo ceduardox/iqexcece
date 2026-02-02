@@ -521,19 +521,14 @@ export default function VelocidadExercisePage() {
               </motion.p>
               <div className="grid grid-cols-3 gap-3">
                 {opcionesRonda.map((opcion, idx) => (
-                  <motion.button
+                  <button
                     key={idx}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     onClick={() => handleRespuesta(opcion)}
-                    className="bg-white border border-gray-200 hover:border-purple-400 text-gray-800 py-4 px-4 rounded-lg font-semibold text-base shadow-sm hover:shadow-md transition-all"
+                    className="bg-white border border-gray-200 hover:border-purple-400 active:scale-95 text-gray-800 py-4 px-4 rounded-lg font-semibold text-base shadow-sm hover:shadow-md transition-all"
                     data-testid={`button-opcion-${idx}`}
                   >
                     {opcion}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </motion.div>
