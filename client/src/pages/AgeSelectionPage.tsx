@@ -38,10 +38,10 @@ const ageCategories = [
     iconBg: "linear-gradient(135deg, #CE93D8 0%, #9C27B0 100%)"
   },
   { 
-    id: "universitarios", 
+    id: "adolescentes", 
     label: "Adolescentes", 
     ageRange: "12-17", 
-    ageGroup: "universitarios",
+    ageGroup: "adolescentes",
     description: "Velocidad, enfoque y memoria.",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
     iconBg: "linear-gradient(135deg, #B39DDB 0%, #7E57C2 100%)"
