@@ -144,7 +144,7 @@ export default function NumerosIntroPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={() => setLocation(`/entrenamiento/${categoria}`)} />
+      <CurvedHeader showBack onBack={() => setLocation(`/entrenamiento-edad/${itemId}`)} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-24 -mt-2">
         <div 
