@@ -414,34 +414,143 @@ export default function ReadingContentPage() {
     
     return (
       <div 
-        className="min-h-screen flex flex-col"
-        style={{ background: "linear-gradient(180deg, #c4b5fd 0%, #ddd6fe 40%, #f5f3ff 100%)" }}
+        className="min-h-screen flex flex-col overflow-hidden relative"
+        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)" }}
       >
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="flex flex-col items-center mb-6">
-            <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)" }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M12 2a9 9 0 0 1 9 9c0 3.5-2 6.5-5 8v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2c-3-1.5-5-4.5-5-8a9 9 0 0 1 9-9z"/>
-                <path d="M9 22h6"/>
-                <path d="M12 6v4"/>
-                <path d="M8 10h8"/>
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-gray-800 mb-1">Test de Lectura</h1>
-            <p className="text-sm text-gray-600 text-center">Completa tus datos para ver tu resultado.</p>
-          </div>
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 rounded-full"
+              style={{
+                background: i % 2 === 0 ? "#a78bfa" : "#06b6d4",
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -30, 0],
+                opacity: [0.3, 0.8, 0.3],
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            />
+          ))}
+        </div>
 
-          <div 
-            className="rounded-2xl p-5 space-y-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.85)", boxShadow: "0 4px 20px rgba(124, 58, 237, 0.15)" }}
+        <main className="flex-1 overflow-y-auto px-4 py-6 relative z-10">
+          {/* Animated Pencil Icon */}
+          <motion.div 
+            className="flex flex-col items-center mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <div>
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Nombre completo</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#7c3aed" }}>
+            <motion.div 
+              className="relative w-20 h-20 mb-4"
+              animate={{ rotate: [-5, 5, -5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              {/* Glowing ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{ 
+                  background: "conic-gradient(from 0deg, #7c3aed, #06b6d4, #7c3aed)",
+                  padding: "3px"
+                }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              >
+                <div className="w-full h-full rounded-full bg-slate-900" />
+              </motion.div>
+              
+              {/* Pencil SVG */}
+              <motion.svg 
+                className="absolute inset-0 m-auto w-10 h-10"
+                viewBox="0 0 24 24" 
+                fill="none"
+                animate={{ 
+                  y: [0, -2, 0],
+                  rotate: [0, 10, 0]
+                }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <path 
+                  d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" 
+                  stroke="#a78bfa" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+                <motion.path 
+                  d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" 
+                  stroke="#06b6d4" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.svg>
+              
+              {/* Writing sparkles */}
+              <motion.div
+                className="absolute -bottom-1 -right-1 w-3 h-3"
+                animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+                transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
+              >
+                <svg viewBox="0 0 24 24" fill="#fbbf24">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+              </motion.div>
+            </motion.div>
+            
+            <motion.h1 
+              className="text-2xl font-bold text-white mb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              Test de Lectura
+            </motion.h1>
+            <motion.p 
+              className="text-sm text-purple-200 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              Completa tus datos para ver tu resultado
+            </motion.p>
+          </motion.div>
+
+          {/* Form Card with glass effect */}
+          <motion.div 
+            className="rounded-3xl p-6 space-y-5 backdrop-blur-xl border border-white/10"
+            style={{ 
+              background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)"
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            {/* Nombre */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                Nombre completo
+              </label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 transition-colors group-focus-within:text-cyan-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
                 <input
@@ -449,17 +558,25 @@ export default function ReadingContentPage() {
                   placeholder="Juan Pérez"
                   value={formData.nombre}
                   onChange={(e) => handleFormChange("nombre", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  style={{ backgroundColor: "#ede9fe" }}
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+                  style={{ background: "rgba(30, 27, 75, 0.8)" }}
                   data-testid="input-nombre"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Email</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#7c3aed" }}>
+            {/* Email */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.55 }}
+            >
+              <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                Email
+              </label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 transition-colors group-focus-within:text-cyan-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 </div>
                 <input
@@ -467,129 +584,207 @@ export default function ReadingContentPage() {
                   placeholder="nombre@email.com"
                   value={formData.email}
                   onChange={(e) => handleFormChange("email", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  style={{ backgroundColor: "#ede9fe" }}
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+                  style={{ background: "rgba(30, 27, 75, 0.8)" }}
                   data-testid="input-email"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Teléfono (Bolivia)</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-700 font-medium text-sm">
-                  <span>BO +591</span>
+            {/* Teléfono */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                Teléfono (Bolivia)
+              </label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-cyan-400 font-medium text-sm">
+                  <span>+591</span>
                 </div>
                 <input
                   type="tel"
                   placeholder="71234567"
                   value={formData.telefono}
                   onChange={(e) => handleFormChange("telefono", e.target.value)}
-                  className="w-full pl-20 pr-10 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  style={{ backgroundColor: "#ede9fe" }}
+                  className="w-full pl-16 pr-12 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+                  style={{ background: "rgba(30, 27, 75, 0.8)" }}
                   data-testid="input-telefono"
                 />
                 {formData.telefono.length > 5 && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
+                  <motion.div 
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring" }}
+                  >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                  </div>
+                  </motion.div>
                 )}
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Edad</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#0891b2" }}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            {/* Edad y Ciudad en grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.65 }}
+              >
+                <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                  Edad
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+                  <input
+                    type="number"
+                    placeholder="15"
+                    value={formData.edad}
+                    onChange={(e) => handleFormChange("edad", e.target.value)}
+                    className="w-full pl-11 pr-3 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 transition-all"
+                    style={{ background: "rgba(30, 27, 75, 0.8)" }}
+                    data-testid="input-edad"
+                  />
                 </div>
-                <input
-                  type="number"
-                  placeholder="Ej: 15"
-                  value={formData.edad}
-                  onChange={(e) => handleFormChange("edad", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  style={{ backgroundColor: "#ede9fe" }}
-                  data-testid="input-edad"
-                />
-              </div>
-            </div>
+              </motion.div>
 
-            <div>
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Ciudad</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#0891b2" }}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                  Ciudad
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="La Paz"
+                    value={formData.ciudad}
+                    onChange={(e) => handleFormChange("ciudad", e.target.value)}
+                    className="w-full pl-11 pr-3 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all"
+                    style={{ background: "rgba(30, 27, 75, 0.8)" }}
+                    data-testid="input-ciudad"
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Ej: La Paz"
-                  value={formData.ciudad}
-                  onChange={(e) => handleFormChange("ciudad", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  style={{ backgroundColor: "#ede9fe" }}
-                  data-testid="input-ciudad"
-                />
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
+          {/* Perfil educativo */}
           {(isNinos || isAdolescentes) && (
-            <div 
-              className="rounded-2xl p-5 mt-4 space-y-3"
-              style={{ backgroundColor: "rgba(255,255,255,0.85)", boxShadow: "0 4px 20px rgba(124, 58, 237, 0.15)" }}
+            <motion.div 
+              className="rounded-3xl p-5 mt-4 backdrop-blur-xl border border-white/10"
+              style={{ 
+                background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)"
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75 }}
             >
-              <label className="text-xs font-semibold text-purple-700 block">Perfil educativo</label>
+              <label className="text-xs font-semibold text-purple-300 mb-3 block flex items-center gap-2">
+                <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Perfil educativo
+              </label>
               
               <select
                 value={formData.grado}
                 onChange={(e) => handleFormChange("grado", e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none bg-no-repeat"
+                className="w-full px-4 py-4 rounded-2xl border border-white/10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/50 appearance-none bg-no-repeat cursor-pointer"
                 style={{ 
-                  backgroundColor: "#e5e7eb",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                  backgroundPosition: "right 12px center",
+                  background: "rgba(30, 27, 75, 0.8)",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2306b6d4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                  backgroundPosition: "right 16px center",
                   backgroundSize: "20px"
                 }}
                 data-testid="select-grado"
               >
-                <option value="">Selecciona grado</option>
+                <option value="" className="bg-slate-900">Selecciona grado</option>
                 {(isNinos ? gradosPrimaria : gradosSecundaria).map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                  <option key={g} value={g} className="bg-slate-900">{g}</option>
                 ))}
               </select>
-            </div>
+            </motion.div>
           )}
 
-          <div 
-            className="rounded-2xl p-5 mt-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.85)", boxShadow: "0 4px 20px rgba(124, 58, 237, 0.15)" }}
+          {/* Comentario */}
+          <motion.div 
+            className="rounded-3xl p-5 mt-4 backdrop-blur-xl border border-white/10"
+            style={{ 
+              background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)"
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
           >
-            <label className="text-xs font-semibold text-purple-700 mb-1 block">Comentario (opcional)</label>
+            <label className="text-xs font-semibold text-purple-300 mb-2 block flex items-center gap-2">
+              <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+              Comentario (opcional)
+            </label>
             <textarea
               placeholder="Mensaje adicional..."
               value={formData.comentario}
               onChange={(e) => handleFormChange("comentario", e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-              style={{ backgroundColor: "#ede9fe", minHeight: "60px" }}
+              className="w-full px-4 py-4 rounded-2xl border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 resize-none transition-all"
+              style={{ background: "rgba(30, 27, 75, 0.8)", minHeight: "80px" }}
               data-testid="input-comentario"
             />
-          </div>
+          </motion.div>
 
+          {/* Submit button with glow effect */}
           <motion.button
+            whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(6, 182, 212, 0.5)" }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmitForm}
             disabled={submitting || !formData.nombre}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-lg text-white font-bold shadow-lg disabled:opacity-50 mt-6"
-            style={{ background: "linear-gradient(90deg, #7c3aed 0%, #5b21b6 50%, #0891b2 100%)" }}
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-white font-bold shadow-lg disabled:opacity-50 mt-6 relative overflow-hidden group"
+            style={{ 
+              background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)",
+              boxShadow: "0 4px 20px rgba(124, 58, 237, 0.4)"
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.85 }}
             data-testid="button-submit-form"
           >
-            {submitting ? "Enviando..." : "Ver mis resultados"}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+            />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {submitting ? "Procesando..." : "Ver mis resultados"}
           </motion.button>
           
-          <p className="text-xs text-gray-400 text-center mt-3">
-            Tus datos se usan solo para mostrar resultados y recomendaciones.
-          </p>
+          <motion.p 
+            className="text-xs text-purple-300/60 text-center mt-4 flex items-center justify-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Tus datos están seguros y protegidos
+          </motion.p>
         </main>
       </div>
     );
