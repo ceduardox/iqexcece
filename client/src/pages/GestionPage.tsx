@@ -53,7 +53,9 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "resultados-entrenamiento" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
+  const [trainingResults, setTrainingResults] = useState<any[]>([]);
+  const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [cerebralResults, setCerebralResults] = useState<any[]>([]);
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
@@ -377,8 +379,32 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         const cerebralData = await cerebralRes.json();
         setCerebralResults(cerebralData);
       }
+      
+      // Also fetch training results
+      const trainingRes = await fetch("/api/training-results", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (trainingRes.ok) {
+        const { results } = await trainingRes.json();
+        setTrainingResults(results || []);
+      }
+    } catch (err) {
+      console.error("Error fetching results:", err);
+    }
+  };
+
+  const fetchTrainingResultsOnly = async () => {
+    if (!token) return;
+    try {
+      const trainingRes = await fetch("/api/training-results", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (trainingRes.ok) {
+        const { results } = await trainingRes.json();
+        setTrainingResults(results || []);
+      }
     } catch {
-      console.error("Error fetching quiz results");
+      console.error("Error fetching training results");
     }
   };
 
@@ -1167,6 +1193,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             Resultados Cerebral
           </button>
           <button
+            onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "resultados-entrenamiento" ? "bg-rose-600 text-white" : "text-rose-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-resultados-entrenamiento"
+          >
+            <Zap className="w-5 h-5" />
+            Resultados Entrenamiento
+          </button>
+          <button
             onClick={() => setActiveTab("contenido")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
               activeTab === "contenido" ? "bg-orange-600 text-white" : "text-orange-400 hover:bg-white/10"
@@ -1293,6 +1329,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Brain className="w-4 h-4 mr-1" />
             Cerebral
+          </Button>
+          <Button
+            onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
+            variant={activeTab === "resultados-entrenamiento" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "resultados-entrenamiento" ? "bg-rose-600" : "border-rose-500/30 text-rose-400"}
+            data-testid="mobile-tab-resultados-entrenamiento"
+          >
+            <Zap className="w-4 h-4 mr-1" />
+            Entrena
           </Button>
           <Button
             onClick={() => setActiveTab("contenido")}
@@ -1806,6 +1852,115 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <div className="flex justify-between items-center pt-2 border-t border-white/10">
                               <span className="text-white/40 text-xs">ID: {r.id}</span>
                               <span className="text-white/40 text-xs">PWA: {r.isPwa ? 'Sí' : 'No'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "resultados-entrenamiento" && (
+          <Card className="bg-black/40 border-rose-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-rose-400" />
+                Resultados de Entrenamiento ({trainingResults.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {trainingResults.length === 0 ? (
+                <p className="text-white/60 text-center py-8">No hay resultados de entrenamiento aún</p>
+              ) : (
+                <div className="space-y-3">
+                  {trainingResults.map((r: any) => {
+                    const isExpanded = expandedTrainingResult === r.id;
+                    const datosExtra = r.datosExtra ? JSON.parse(r.datosExtra) : {};
+                    const tipoLabels: Record<string, string> = {
+                      velocidad: "Velocidad",
+                      numeros: "Números y Letras",
+                      aceleracion_golpe: "Golpe de Vista",
+                      aceleracion_desplazamiento: "Desplazamiento",
+                      reconocimiento_visual: "Reconocimiento Visual"
+                    };
+                    const categoriaLabels: Record<string, string> = {
+                      preescolar: "Pre-escolar",
+                      ninos: "Niños",
+                      adolescentes: "Adolescentes",
+                      universitarios: "Universitarios",
+                      profesionales: "Profesionales",
+                      adulto_mayor: "Adulto Mayor",
+                      adultos: "Adultos"
+                    };
+                    
+                    return (
+                      <div 
+                        key={r.id} 
+                        className={`bg-white/5 rounded-lg border transition-all cursor-pointer ${isExpanded ? 'border-rose-400' : 'border-rose-500/20 hover:border-rose-500/40'}`}
+                        onClick={() => setExpandedTrainingResult(isExpanded ? null : r.id)}
+                      >
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="px-2 py-1 rounded text-xs bg-rose-500/20 text-rose-300">
+                                {tipoLabels[r.tipoEjercicio] || r.tipoEjercicio}
+                              </span>
+                              <span className="px-2 py-1 rounded text-xs bg-cyan-500/20 text-cyan-300">
+                                {categoriaLabels[r.categoria] || r.categoria}
+                              </span>
+                              {r.ejercicioTitulo && (
+                                <span className="text-white font-medium text-sm">{r.ejercicioTitulo}</span>
+                              )}
+                            </div>
+                            <ChevronDown className={`w-5 h-5 text-rose-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-4 md:gap-8 items-center text-sm">
+                            <div className="flex gap-4">
+                              <div className="text-center">
+                                <span className="text-green-400 font-bold text-xl">{r.puntaje || 0}%</span>
+                                <p className="text-white/40 text-xs">Puntaje</p>
+                              </div>
+                              {r.respuestasCorrectas !== null && (
+                                <div className="text-center">
+                                  <span className="text-cyan-400 font-bold text-xl">{r.respuestasCorrectas}/{r.respuestasTotales || 0}</span>
+                                  <p className="text-white/40 text-xs">Respuestas</p>
+                                </div>
+                              )}
+                              {r.palabrasPorMinuto && (
+                                <div className="text-center">
+                                  <span className="text-purple-400 font-bold text-xl">{r.palabrasPorMinuto}</span>
+                                  <p className="text-white/40 text-xs">PPM</p>
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-white/40 text-xs ml-auto">
+                              {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "-"}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {isExpanded && (
+                          <div className="border-t border-rose-500/20 p-4 space-y-2" onClick={(e) => e.stopPropagation()}>
+                            <div className="grid md:grid-cols-2 gap-4 text-sm">
+                              <div className="space-y-1">
+                                <p className="text-white/60">Session ID: <span className="text-white/80 font-mono text-xs">{r.sessionId || 'N/A'}</span></p>
+                                <p className="text-white/60">Nivel: <span className="text-cyan-400 font-bold">{r.nivelAlcanzado || 1}</span></p>
+                                <p className="text-white/60">Tiempo: <span className="text-purple-400">{r.tiempoSegundos || 0}s</span></p>
+                                <p className="text-white/60">PWA: <span className={r.isPwa ? "text-green-400" : "text-red-400"}>{r.isPwa ? "Sí" : "No"}</span></p>
+                              </div>
+                              {Object.keys(datosExtra).length > 0 && (
+                                <div className="space-y-1">
+                                  <p className="text-rose-400 font-semibold">Datos Extra:</p>
+                                  {Object.entries(datosExtra).map(([key, value]) => (
+                                    <p key={key} className="text-white/60">{key}: <span className="text-white/80">{String(value)}</span></p>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
