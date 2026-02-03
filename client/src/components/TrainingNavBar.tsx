@@ -47,11 +47,11 @@ export function TrainingNavBar({ activePage, categoria = "ninos" }: TrainingNavB
                 <div 
                   className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
                   style={{ 
-                    background: "linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%)",
-                    boxShadow: "0 4px 12px rgba(167, 139, 250, 0.3)"
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                    boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
                   }}
                 >
-                  <Icon className="w-5 h-5 text-purple-600" />
+                  <Icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-[10px] font-medium mt-1">{item.label}</span>
               </motion.button>
