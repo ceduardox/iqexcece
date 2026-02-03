@@ -13,7 +13,7 @@ function AnimatedNumberIcon() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentNum(prev => prev >= 9 ? 1 : prev + 1);
-    }, 600);
+    }, 1200);
     return () => clearInterval(interval);
   }, []);
 
@@ -45,7 +45,7 @@ function AnimatedLetterIcon() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIdx(prev => (prev + 1) % letters.length);
-    }, 600);
+    }, 1200);
     return () => clearInterval(interval);
   }, []);
 
@@ -77,7 +77,7 @@ function AnimatedRomanIcon() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIdx(prev => (prev + 1) % romans.length);
-    }, 700);
+    }, 1400);
     return () => clearInterval(interval);
   }, []);
 
