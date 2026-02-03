@@ -22,11 +22,15 @@ function LetterCircle({ letters, count }: { letters: string[]; count: number }) 
     return () => clearInterval(interval);
   }, [letters, count]);
 
-  const angleStep = (2 * Math.PI) / count;
-  const radius = 28;
+  const size = 96;
+  const radius = 30;
+  const center = size / 2;
 
   return (
-    <div className="relative w-24 h-24 flex items-center justify-center">
+    <div 
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <div 
         className="absolute inset-0 rounded-full"
         style={{ 
@@ -34,33 +38,38 @@ function LetterCircle({ letters, count }: { letters: string[]; count: number }) 
         }}
       />
       
-      {currentLetters.map((letter, i) => {
-        const angle = angleStep * i - Math.PI / 2;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
+      <svg 
+        width={size} 
+        height={size} 
+        className="absolute inset-0"
+      >
+        {currentLetters.map((letter, i) => {
+          const angle = (360 / count) * i - 90;
+          const radian = (angle * Math.PI) / 180;
+          const x = center + radius * Math.cos(radian);
+          const y = center + radius * Math.sin(radian);
+          
+          return (
+            <motion.text
+              key={`${i}-${letter}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              x={x}
+              y={y}
+              fill="white"
+              fontSize="14"
+              fontWeight="bold"
+              textAnchor="middle"
+              dominantBaseline="central"
+            >
+              {letter}
+            </motion.text>
+          );
+        })}
         
-        return (
-          <motion.span
-            key={`${i}-${letter}`}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="absolute text-white font-bold text-sm"
-            style={{ 
-              left: `calc(50% + ${x}px)`,
-              top: `calc(50% + ${y}px)`,
-              transform: "translate(-50%, -50%)"
-            }}
-          >
-            {letter}
-          </motion.span>
-        );
-      })}
-      
-      <div 
-        className="absolute w-2.5 h-2.5 rounded-full bg-amber-400"
-        style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
-      />
+        <circle cx={center} cy={center} r={5} fill="#fbbf24" />
+      </svg>
     </div>
   );
 }
