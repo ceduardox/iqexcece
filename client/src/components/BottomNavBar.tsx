@@ -12,7 +12,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: "inicio", icon: Home, label: "Inicio", path: "/" },
-  { id: "tests", icon: Brain, label: "Tests", path: "/tests" },
+  { id: "tests", icon: Brain, label: "Diagnóstico", path: "/tests" },
   { id: "entrena", icon: Dumbbell, label: "Entrena", path: "/entrenamiento" },
   { id: "perfil", icon: User, label: "Perfil", path: "/perfil" },
 ];

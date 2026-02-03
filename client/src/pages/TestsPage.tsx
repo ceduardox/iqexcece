@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, Stethoscope } from "lucide-react";
+import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
@@ -525,7 +525,7 @@ export default function TestsPage() {
                 boxShadow: styles["nav-diagnostico"]?.boxShadow || "0 4px 15px rgba(124, 58, 237, 0.4)"
               }}
             >
-              <Stethoscope className="w-5 h-5 text-white" />
+              <Brain className="w-5 h-5 text-white" />
             </div>
             <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-diagnostico"]?.textColor || "#7c3aed" }}>Diagnóstico</span>
           </button>
