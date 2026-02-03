@@ -33,6 +33,7 @@ import AgeSelectionPage from "@/pages/AgeSelectionPage";
 import AceleracionSelectionPage from "@/pages/AceleracionSelectionPage";
 import AceleracionExercisePage from "@/pages/AceleracionExercisePage";
 import ReconocimientoSelectionPage from "@/pages/ReconocimientoSelectionPage";
+import ReconocimientoExercisePage from "@/pages/ReconocimientoExercisePage";
 import ProgresoPage from "@/pages/ProgresoPage";
 import NotFound from "@/pages/not-found";
 
@@ -70,6 +71,7 @@ function Router() {
       <Route path="/aceleracion/:categoria/:itemId" component={AceleracionSelectionPage}/>
       <Route path="/aceleracion/:categoria/:itemId/:modo" component={AceleracionExercisePage}/>
       <Route path="/reconocimiento/:categoria/:itemId" component={ReconocimientoSelectionPage}/>
+      <Route path="/reconocimiento/:categoria/:itemId/ejercicio/:nivel" component={ReconocimientoExercisePage}/>
       <Route path="/progreso" component={ProgresoPage}/>
       <Route path="/progreso/:categoria" component={ProgresoPage}/>
       <Route component={NotFound} />

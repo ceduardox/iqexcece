@@ -1,0 +1,124 @@
+un mini-juego web (HTML/CSS/JS) llamado “Reconocimiento Visual”. Responsive para móvil. Debe recrear el ejercicio y además, al terminar el segundero/timer, debe pasar a otra “página” (pantalla) de resultados dentro del mismo proyecto (puede ser SPA con secciones y display:none, o navegación real a otro HTML, como prefieras).
+
+A) Juego: reglas y UI
+1) Grilla
+
+Grilla fija 7×9.
+
+Punto rojo fijo en el centro: (fila 4, col 5) 0-based: r=3, c=4.
+
+Solo cambian 4 posiciones objetivo (fijas):
+
+(0,4)
+
+(3,0)
+
+(3,8)
+
+(6,4)
+
+El resto de letras en la grilla:
+
+Se generan una sola vez al iniciar la partida y se quedan fijas.
+
+2) Combo por segundo (cada 1000 ms)
+
+Cada segundo se genera un combo de 4 letras para esas posiciones objetivo:
+
+Puede ser 4 iguales (B B B B)
+
+O 3 iguales + 1 diferente (U U U A)
+
+En 3+1, la letra diferente va en posición aleatoria dentro de las 4.
+
+3) Igual / No igual
+
+El usuario compara el combo actual con el combo del segundo anterior:
+
+Sí, son iguales si es idéntico por posición (misma letra en cada una de las 4 posiciones).
+
+No son iguales si cambió cualquier cosa.
+
+4) Timing y respuesta
+
+Duración total: 50 segundos.
+
+Cada segundo se actualiza el combo.
+
+Botones:
+
+Verde: “Sí, son iguales”
+
+Rojo: “No son iguales”
+
+Solo 1 respuesta por segundo: si ya respondió en ese tick, ignorar otros clicks hasta el próximo tick.
+
+Si el usuario no responde en ese segundo: cuenta como “sin responder” (no como incorrecto).
+
+Debes llevar un contador skipped o noResponse.
+
+5) Probabilidad de repetición
+
+Necesito que a veces el combo se repita exactamente para que exista “igual”:
+
+Constante: MATCH_PROB = 0.25
+
+Si no repite, genera un combo nuevo asegurando que no sea idéntico por casualidad.
+
+B) Estilos obligatorios (detalle del gris/morado)
+
+Antes de iniciar: la grilla debe estar gris.
+
+Durante el juego: la grilla pasa a morado claro.
+
+Al finalizar: puede volver a gris (si se regresa o reinicia).
+
+Implementar con clases:
+
+.board { background: #d1d5db; } (gris)
+
+.board.running { background: #d8b4fe; } (morado)
+JS:
+
+startGame(): board.classList.add("running")
+
+endGame(): board.classList.remove("running")
+
+C) Pantalla de resultados (otra página/pantalla)
+
+Cuando el timer llegue a 0:
+
+Debes terminar el juego (clear intervals, deshabilitar botones, etc.)
+
+Debes mostrar la pantalla de resultados (otra vista/página)
+
+La pantalla de resultados debe incluir:
+
+Título del ejercicio (ej. “Reconocimiento Visual” o “Título del ejercicio”)
+
+Nivel alcanzado
+
+Correctas
+
+Incorrectas
+
+Sin responder
+
+Tiempo total (50s) y si quieres también el tiempo transcurrido (opcional)
+
+Botones:
+
+Compartir
+
+Usar navigator.share si está disponible (móvil).
+
+Si no existe, copiar al portapapeles un texto resumen (clipboard) y mostrar “Copiado”.
+
+Texto para compartir ejemplo:
+"Ejercicio: Reconocimiento Visual | Nivel: X | Correctas: Y | Incorrectas: Z | Sin responder: W | Tiempo: 50s"
+
+Practicar de nuevo
+
+Vuelve a la pantalla del juego
+
+Resetea todo: contadores, combos, timer, estado gris inicial y espera a “Iniciar” (o si prefieres, inicia de inmediato; pero ideal volver al estado inicial).
