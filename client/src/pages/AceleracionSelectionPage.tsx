@@ -55,9 +55,9 @@ export default function AceleracionSelectionPage() {
       {/* Hero image - smaller */}
       <div className="px-4 mb-4 flex justify-center">
         <motion.img 
-          src="https://iqexponencial.app/api/images/c4b16288-7262-4c77-849b-65acfb47d363"
+          src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
           alt="Aceleración de Lectura"
-          className="w-1/2 h-auto rounded-2xl object-cover"
+          className="w-1/2 h-auto rounded-2xl object-cover shadow-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         />
@@ -120,10 +120,10 @@ export default function AceleracionSelectionPage() {
                   
                   {/* Text */}
                   <div className="relative text-center">
-                    <h3 className="text-purple-600 font-bold text-base mb-1">
+                    <h3 className="text-gray-800 font-bold text-sm sm:text-base mb-1">
                       Golpe de Vista
                     </h3>
-                    <p className="text-gray-500 text-xs leading-tight">
+                    <p className="text-gray-500 text-[10px] sm:text-xs leading-tight">
                       Entrena tu campo visual
                     </p>
                   </div>
@@ -163,10 +163,10 @@ export default function AceleracionSelectionPage() {
                   
                   {/* Text */}
                   <div className="relative text-center">
-                    <h3 className="text-cyan-600 font-bold text-base mb-1">
+                    <h3 className="text-gray-800 font-bold text-sm sm:text-base mb-1">
                       Desplazamiento
                     </h3>
-                    <p className="text-gray-500 text-xs leading-tight">
+                    <p className="text-gray-500 text-[10px] sm:text-xs leading-tight">
                       Practica lectura continua
                     </p>
                   </div>
