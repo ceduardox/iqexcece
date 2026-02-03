@@ -17,26 +17,26 @@ function GolpeAnimation() {
   }, []);
 
   return (
-    <div className="relative w-16 h-16 flex items-center justify-center">
+    <div className="relative w-24 h-24 flex items-center justify-center">
       {/* Outer circle */}
       <div 
         className="absolute inset-0 rounded-full"
         style={{ 
           background: "conic-gradient(from 0deg, #7c3aed 0%, #06b6d4 50%, #7c3aed 100%)",
-          padding: "2px"
+          padding: "3px"
         }}
       >
         <div className="w-full h-full rounded-full bg-white" />
       </div>
       {/* Inner circle */}
-      <div className="absolute inset-2 rounded-full border border-purple-100" />
+      <div className="absolute inset-3 rounded-full border-2 border-purple-100" />
       {/* Animated word */}
       <motion.span
         key={currentWord}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.5 }}
-        className="absolute text-purple-600 font-bold text-[10px]"
+        className="absolute text-purple-600 font-bold text-sm"
       >
         {words[currentWord]}
       </motion.span>
@@ -48,29 +48,29 @@ function DesplazamientoAnimation() {
   const words = ["Lectura", "Rápida", "Visual", "Mental"];
   
   return (
-    <div className="relative w-16 h-16 overflow-hidden rounded-xl bg-gradient-to-b from-purple-50/50 to-white border border-purple-100/50">
+    <div className="relative w-24 h-24 overflow-hidden rounded-xl bg-gradient-to-b from-purple-50/50 to-white border-2 border-purple-100/50">
       {/* Scrolling text container */}
       <motion.div
-        className="flex flex-col items-center gap-1.5 py-1"
-        animate={{ y: [0, -48, 0] }}
+        className="flex flex-col items-center gap-2 py-2"
+        animate={{ y: [0, -72, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
       >
         {[...words, ...words].map((word, i) => (
           <span 
             key={i} 
-            className="text-[9px] font-medium text-purple-600 whitespace-nowrap"
+            className="text-sm font-medium text-purple-600 whitespace-nowrap"
           >
             {word}
           </span>
         ))}
       </motion.div>
       {/* Top fade */}
-      <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-b from-purple-50/80 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-5 bg-gradient-to-b from-purple-50/80 to-transparent pointer-events-none" />
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-white to-transparent pointer-events-none" />
       {/* Reading line indicator */}
       <div 
-        className="absolute top-1/2 left-1 right-1 h-0.5 -translate-y-1/2 rounded-full"
+        className="absolute top-1/2 left-2 right-2 h-0.5 -translate-y-1/2 rounded-full"
         style={{ background: "linear-gradient(90deg, #7c3aed, #06b6d4)" }}
       />
     </div>
@@ -158,16 +158,28 @@ export default function AceleracionSelectionPage() {
           </div>
         ) : (
           <div className="max-w-md mx-auto">
-            {/* Title */}
+            {/* Main title from ejercicio */}
             <motion.div 
-              className="mb-8 text-center"
+              className="mb-4 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+            >
+              <h1 className="text-lg sm:text-xl font-bold text-purple-600">
+                {ejercicio?.titulo || "Acelera al máximo tu Lectura"}
+              </h1>
+            </motion.div>
+            
+            {/* Subtitle */}
+            <motion.div 
+              className="mb-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
                 Selecciona el Modo
-              </h1>
+              </h2>
               <p className="text-gray-400 text-xs sm:text-sm">
                 Elige cómo quieres practicar
               </p>

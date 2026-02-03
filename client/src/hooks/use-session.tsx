@@ -7,11 +7,14 @@ function generateSessionId(): string {
 }
 
 function getSessionId(): string {
-  let sessionId = sessionStorage.getItem(SESSION_KEY);
+  // Check localStorage first (persists across sessions), then sessionStorage
+  let sessionId = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
   if (!sessionId) {
     sessionId = generateSessionId();
-    sessionStorage.setItem(SESSION_KEY, sessionId);
   }
+  // Store in both for compatibility
+  localStorage.setItem(SESSION_KEY, sessionId);
+  sessionStorage.setItem(SESSION_KEY, sessionId);
   return sessionId;
 }
 

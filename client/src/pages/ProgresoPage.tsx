@@ -100,7 +100,8 @@ export default function ProgresoPage() {
       if (categoria) params.append("categoria", categoria);
       const res = await fetch(`/api/training-results/stats?${params}`);
       return res.json();
-    }
+    },
+    enabled: !!sessionId
   });
 
   const stats = statsData?.stats;
