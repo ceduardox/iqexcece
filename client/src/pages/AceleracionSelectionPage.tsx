@@ -6,6 +6,74 @@ import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 
+// Hero animated eye with scanning text lines
+function HeroAnimation() {
+  const [scanLine, setScanLine] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setScanLine(prev => (prev + 1) % 5);
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative w-28 h-28 flex items-center justify-center">
+      {/* Rotating gradient border */}
+      <motion.div 
+        className="absolute inset-0 rounded-2xl"
+        style={{ 
+          background: "conic-gradient(from 0deg, #7c3aed, #06b6d4, #7c3aed)",
+          padding: "3px"
+        }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="w-full h-full rounded-2xl bg-white" />
+      </motion.div>
+      
+      {/* Eye icon */}
+      <div className="relative z-10 flex flex-col items-center gap-1">
+        <motion.svg 
+          className="w-10 h-10 text-purple-600"
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="1.5"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+          <motion.circle 
+            cx="12" 
+            cy="12" 
+            r="3" 
+            fill="#7c3aed"
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </motion.svg>
+        
+        {/* Animated text lines */}
+        <div className="flex gap-0.5 mt-1">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <motion.div
+              key={i}
+              className="h-1 rounded-full"
+              style={{ 
+                width: i === 2 ? 12 : 8,
+                background: scanLine === i ? "#06b6d4" : "#e9d5ff"
+              }}
+              animate={scanLine === i ? { scaleX: [1, 1.5, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function GolpeAnimation() {
   const words = ["LEER", "VER", "OJO", "LUZ", "SOL"];
   const [currentWord, setCurrentWord] = useState(0);
@@ -128,19 +196,14 @@ export default function AceleracionSelectionPage() {
         <div className="w-10" />
       </header>
 
-      {/* Hero image */}
+      {/* Hero animated icon */}
       <div className="relative px-6 mb-6 flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <img 
-            src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
-            alt="Aceleración de Lectura"
-            className="w-28 sm:w-32 h-auto rounded-2xl object-cover"
-            style={{ boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)" }}
-          />
+          <HeroAnimation />
         </motion.div>
       </div>
 
@@ -154,30 +217,18 @@ export default function AceleracionSelectionPage() {
           </div>
         ) : (
           <div className="max-w-md mx-auto">
-            {/* Main title from ejercicio */}
-            <motion.div 
-              className="mb-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-            >
-              <h1 className="text-lg sm:text-xl font-bold text-purple-600">
-                {ejercicio?.titulo || "Acelera al máximo tu Lectura"}
-              </h1>
-            </motion.div>
-            
-            {/* Subtitle */}
+            {/* Title */}
             <motion.div 
               className="mb-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
                 Selecciona el Modo
-              </h2>
+              </h1>
               <p className="text-gray-400 text-xs sm:text-sm">
-                Elige cómo quieres practicar
+                Elige cómo quieres practicar tu lectura rápida
               </p>
             </motion.div>
 

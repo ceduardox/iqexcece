@@ -241,19 +241,22 @@ export default function AceleracionExercisePage() {
   };
 
   const handleRestartExercise = () => {
+    // "Intentar otro test" - goes back to PDF selection
     playSound("iphone");
     setShowResults(false);
+    setShowExercise(false);
+    setSelectedPdf(null);
+    setWords([]);
     setCurrentWordIndex(0);
-    setStartTime(Date.now());
-    setTotalReadingTime(0);
+    setScrollPosition(0);
+    scrollPositionRef.current = 0;
+    setResultSaved(false);
   };
 
   const handleBackToSelection = () => {
+    // "Volver al inicio" - goes back to game mode selection (Golpe/Desplazamiento)
     playSound("iphone");
-    setShowExercise(false);
-    setShowResults(false);
-    setSelectedPdf(null);
-    setWords([]);
+    navigate(`/aceleracion/${categoria}/${itemId}`);
   };
 
   const formatTime = (ms: number) => {
