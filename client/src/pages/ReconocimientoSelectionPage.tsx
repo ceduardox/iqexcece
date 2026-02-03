@@ -1,90 +1,117 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 
 const letrasNivel1 = ["A", "B", "C", "D"];
 const letrasNivel2 = ["M", "N", "O", "P", "Q", "R"];
-const letrasNivel3 = ["X", "Y", "Z", "W", "V", "U", "T", "S"];
 
-function LetterAnimation({ letters, positions }: { letters: string[]; positions: { x: number; y: number }[] }) {
+function LetterCircle({ letters, count }: { letters: string[]; count: number }) {
   const [currentLetters, setCurrentLetters] = useState<string[]>(
-    positions.map((_, i) => letters[i % letters.length])
+    Array(count).fill(null).map((_, i) => letters[i % letters.length])
   );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentLetters(prev => 
-        prev.map(() => letters[Math.floor(Math.random() * letters.length)])
+      setCurrentLetters(
+        Array(count).fill(null).map(() => letters[Math.floor(Math.random() * letters.length)])
       );
     }, 1000);
     return () => clearInterval(interval);
-  }, [letters]);
+  }, [letters, count]);
+
+  const angleStep = (2 * Math.PI) / count;
+  const radius = 28;
 
   return (
     <div className="relative w-24 h-24 flex items-center justify-center">
       <div 
         className="absolute inset-0 rounded-full"
         style={{ 
-          background: "conic-gradient(from 0deg, #7c3aed 0%, #06b6d4 50%, #7c3aed 100%)",
-          padding: "2px"
+          background: "linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)"
         }}
-      >
-        <div className="w-full h-full rounded-full bg-white" />
-      </div>
-      {positions.map((pos, i) => (
-        <motion.span
-          key={`${i}-${currentLetters[i]}`}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="absolute text-purple-600 font-bold text-sm"
-          style={{ 
-            left: `${50 + pos.x * 32}%`, 
-            top: `${50 + pos.y * 32}%`,
-            transform: "translate(-50%, -50%)"
-          }}
-        >
-          {currentLetters[i]}
-        </motion.span>
-      ))}
-      <div className="absolute w-2 h-2 rounded-full bg-amber-400" style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />
+      />
+      
+      {currentLetters.map((letter, i) => {
+        const angle = angleStep * i - Math.PI / 2;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        
+        return (
+          <motion.span
+            key={`${i}-${letter}`}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="absolute text-white font-bold text-sm"
+            style={{ 
+              left: `calc(50% + ${x}px)`,
+              top: `calc(50% + ${y}px)`,
+              transform: "translate(-50%, -50%)"
+            }}
+          >
+            {letter}
+          </motion.span>
+        );
+      })}
+      
+      <div 
+        className="absolute w-2.5 h-2.5 rounded-full bg-amber-400"
+        style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
+      />
     </div>
   );
 }
 
-const nivel1Positions = [
-  { x: 0, y: -1 },
-  { x: 1, y: 0 },
-  { x: 0, y: 1 },
-  { x: -1, y: 0 },
-];
+function AnimatedEye() {
+  const [isBlinking, setIsBlinking] = useState(false);
 
-const nivel2Positions = [
-  { x: 0, y: -1 },
-  { x: 0.87, y: -0.5 },
-  { x: 0.87, y: 0.5 },
-  { x: 0, y: 1 },
-  { x: -0.87, y: 0.5 },
-  { x: -0.87, y: -0.5 },
-];
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true);
+      setTimeout(() => setIsBlinking(false), 200);
+    }, 3000);
+    return () => clearInterval(blinkInterval);
+  }, []);
 
-const nivel3Positions = [
-  { x: 0, y: -1 },
-  { x: 0.71, y: -0.71 },
-  { x: 1, y: 0 },
-  { x: 0.71, y: 0.71 },
-  { x: 0, y: 1 },
-  { x: -0.71, y: 0.71 },
-  { x: -1, y: 0 },
-  { x: -0.71, y: -0.71 },
-];
+  return (
+    <motion.div
+      className="relative w-20 h-20 flex items-center justify-center"
+      animate={{ scale: isBlinking ? 0.95 : 1 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div 
+        className="w-full h-full rounded-full flex items-center justify-center"
+        style={{ 
+          background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #06b6d4 100%)",
+          boxShadow: "0 8px 24px rgba(124, 58, 237, 0.3)"
+        }}
+      >
+        <motion.div
+          animate={{ 
+            scaleY: isBlinking ? 0.1 : 1,
+            opacity: isBlinking ? 0.5 : 1
+          }}
+          transition={{ duration: 0.15 }}
+        >
+          <Eye className="w-10 h-10 text-white" strokeWidth={1.5} />
+        </motion.div>
+      </div>
+      
+      <motion.div
+        className="absolute inset-0 rounded-full border-2 border-purple-300/50"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
+  );
+}
 
 const niveles = [
-  { id: 1, nombre: "Nivel 1", letras: letrasNivel1, positions: nivel1Positions },
-  { id: 2, nombre: "Nivel 2", letras: letrasNivel2, positions: nivel2Positions },
-  { id: 3, nombre: "Nivel 3", letras: letrasNivel3, positions: nivel3Positions },
+  { id: 1, nombre: "Nivel 1", letras: letrasNivel1, count: 4 },
+  { id: 2, nombre: "Nivel 2", letras: letrasNivel2, count: 6 },
 ];
 
 export default function ReconocimientoSelectionPage() {
@@ -130,12 +157,7 @@ export default function ReconocimientoSelectionPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <img 
-            src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
-            alt="Reconocimiento Visual"
-            className="w-28 sm:w-32 h-auto rounded-2xl object-cover"
-            style={{ boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)" }}
-          />
+          <AnimatedEye />
         </motion.div>
       </div>
 
@@ -174,17 +196,17 @@ export default function ReconocimientoSelectionPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + index * 0.1 }}
                 onClick={() => handleNivelSelect(nivel.id)}
-                className="cursor-pointer aspect-square"
+                className="cursor-pointer"
                 data-testid={`card-nivel-${nivel.id}`}
               >
                 <motion.div 
-                  className="relative bg-white rounded-3xl p-3 sm:p-4 h-full flex flex-col items-center justify-center"
+                  className="relative bg-white rounded-3xl p-4 sm:p-5 flex flex-col items-center justify-center"
                   style={{ boxShadow: "0 4px 20px rgba(124, 58, 237, 0.08)" }}
                   whileHover={{ y: -4, boxShadow: "0 8px 30px rgba(124, 58, 237, 0.15)" }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className="mb-3">
-                    <LetterAnimation letters={nivel.letras} positions={nivel.positions} />
+                    <LetterCircle letters={nivel.letras} count={nivel.count} />
                   </div>
                   
                   <div className="text-center">
