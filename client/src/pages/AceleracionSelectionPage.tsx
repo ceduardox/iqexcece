@@ -17,31 +17,31 @@ function GolpeAnimation() {
   }, []);
 
   return (
-    <div className="relative w-20 h-20 flex items-center justify-center">
+    <div className="relative w-16 h-16 flex items-center justify-center">
       {/* Outer circle */}
-      <div className="absolute inset-0 rounded-full border-2 border-purple-300" />
+      <div 
+        className="absolute inset-0 rounded-full"
+        style={{ 
+          background: "conic-gradient(from 0deg, #7c3aed 0%, #06b6d4 50%, #7c3aed 100%)",
+          padding: "2px"
+        }}
+      >
+        <div className="w-full h-full rounded-full bg-white" />
+      </div>
       {/* Inner circle */}
-      <div className="absolute inset-2 rounded-full border border-purple-200" />
+      <div className="absolute inset-2 rounded-full border border-purple-100" />
       {/* Center dot */}
-      <div className="absolute w-2 h-2 bg-purple-500 rounded-full" />
+      <div className="absolute w-1.5 h-1.5 bg-purple-500 rounded-full" />
       {/* Animated word */}
       <motion.span
         key={currentWord}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.5 }}
-        className="absolute text-purple-600 font-bold text-xs"
-        style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+        className="absolute text-purple-600 font-bold text-[10px]"
       >
         {words[currentWord]}
       </motion.span>
-      {/* Orbiting elements */}
-      <motion.div
-        className="absolute w-1.5 h-1.5 bg-purple-400 rounded-full"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        style={{ top: 0, left: "50%", marginLeft: "-3px" }}
-      />
     </div>
   );
 }
@@ -50,28 +50,31 @@ function DesplazamientoAnimation() {
   const words = ["Lectura", "Rápida", "Visual", "Mental"];
   
   return (
-    <div className="relative w-20 h-20 overflow-hidden rounded-lg bg-gradient-to-b from-cyan-50 to-white border border-cyan-100">
+    <div className="relative w-16 h-16 overflow-hidden rounded-xl bg-gradient-to-b from-purple-50/50 to-white border border-purple-100/50">
       {/* Scrolling text container */}
       <motion.div
-        className="flex flex-col items-center gap-2 py-2"
-        animate={{ y: [0, -60, 0] }}
+        className="flex flex-col items-center gap-1.5 py-1"
+        animate={{ y: [0, -48, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
       >
         {[...words, ...words].map((word, i) => (
           <span 
             key={i} 
-            className="text-[10px] font-medium text-cyan-600 whitespace-nowrap"
+            className="text-[9px] font-medium text-purple-600 whitespace-nowrap"
           >
             {word}
           </span>
         ))}
       </motion.div>
       {/* Top fade */}
-      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-cyan-50 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-b from-purple-50/80 to-transparent pointer-events-none" />
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-white to-transparent pointer-events-none" />
       {/* Reading line indicator */}
-      <div className="absolute top-1/2 left-1 right-1 h-0.5 bg-cyan-300/50 -translate-y-1/2" />
+      <div 
+        className="absolute top-1/2 left-1 right-1 h-0.5 -translate-y-1/2 rounded-full"
+        style={{ background: "linear-gradient(90deg, #7c3aed, #06b6d4)" }}
+      />
     </div>
   );
 }
@@ -111,20 +114,22 @@ export default function AceleracionSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-white to-purple-50/30">
-      {/* Subtle decorative shapes */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-purple-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-32 left-0 w-48 h-48 bg-cyan-100/40 rounded-full blur-3xl -translate-x-1/2" />
-
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{ 
+        background: "linear-gradient(180deg, #f5f3ff 0%, #ffffff 30%, #ffffff 70%, #f0fdff 100%)"
+      }}
+    >
       {/* Header */}
       <header className="relative px-4 py-4 flex items-center justify-between">
         <motion.button
           onClick={handleBack}
-          className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+          style={{ boxShadow: "0 2px 8px rgba(124, 58, 237, 0.1)" }}
           whileTap={{ scale: 0.95 }}
           data-testid="button-back"
         >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
+          <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
         <div className="w-10" />
       </header>
@@ -139,7 +144,8 @@ export default function AceleracionSelectionPage() {
           <img 
             src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
             alt="Aceleración de Lectura"
-            className="w-32 h-auto rounded-2xl object-cover shadow-lg"
+            className="w-28 sm:w-32 h-auto rounded-2xl object-cover"
+            style={{ boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)" }}
           />
         </motion.div>
       </div>
@@ -148,7 +154,9 @@ export default function AceleracionSelectionPage() {
       <main className="flex-1 px-5 pb-28 relative">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-500 rounded-full animate-spin" />
+            <div 
+              className="w-8 h-8 rounded-full border-3 border-purple-100 border-t-purple-500 animate-spin"
+            />
           </div>
         ) : (
           <div className="max-w-md mx-auto">
@@ -162,44 +170,48 @@ export default function AceleracionSelectionPage() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
                 Selecciona el Modo
               </h1>
-              <p className="text-gray-500 text-xs sm:text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 Elige cómo quieres practicar
               </p>
             </motion.div>
 
-            {/* Cards grid */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Cards grid - square cards */}
+            <div className="grid grid-cols-2 gap-4 px-2">
               {/* Golpe de Vista Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 onClick={() => handleModeSelect("golpe")}
-                className="cursor-pointer"
+                className="cursor-pointer aspect-square"
                 data-testid="card-mode-golpe"
               >
                 <motion.div 
-                  className="relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300"
-                  whileHover={{ y: -4 }}
+                  className="relative bg-white rounded-3xl p-3 sm:p-4 h-full flex flex-col items-center justify-center"
+                  style={{ boxShadow: "0 4px 20px rgba(124, 58, 237, 0.08)" }}
+                  whileHover={{ y: -4, boxShadow: "0 8px 30px rgba(124, 58, 237, 0.15)" }}
                   whileTap={{ scale: 0.98 }}
                 >
                   {/* Animation preview */}
-                  <div className="flex justify-center mb-3">
+                  <div className="mb-3">
                     <GolpeAnimation />
                   </div>
                   
                   {/* Text */}
                   <div className="text-center">
-                    <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-0.5">
+                    <h3 className="text-gray-800 font-semibold text-xs sm:text-sm mb-0.5">
                       Golpe de Vista
                     </h3>
-                    <p className="text-gray-400 text-[10px] sm:text-xs">
-                      Entrena tu campo visual
+                    <p className="text-gray-400 text-[9px] sm:text-[10px]">
+                      Campo visual
                     </p>
                   </div>
                   
-                  {/* Accent dot */}
-                  <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-purple-400" />
+                  {/* Bottom gradient line */}
+                  <div 
+                    className="absolute bottom-0 left-4 right-4 h-1 rounded-full"
+                    style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7)" }}
+                  />
                 </motion.div>
               </motion.div>
 
@@ -209,31 +221,35 @@ export default function AceleracionSelectionPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 onClick={() => handleModeSelect("desplazamiento")}
-                className="cursor-pointer"
+                className="cursor-pointer aspect-square"
                 data-testid="card-mode-desplazamiento"
               >
                 <motion.div 
-                  className="relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-cyan-200 transition-all duration-300"
-                  whileHover={{ y: -4 }}
+                  className="relative bg-white rounded-3xl p-3 sm:p-4 h-full flex flex-col items-center justify-center"
+                  style={{ boxShadow: "0 4px 20px rgba(6, 182, 212, 0.08)" }}
+                  whileHover={{ y: -4, boxShadow: "0 8px 30px rgba(6, 182, 212, 0.15)" }}
                   whileTap={{ scale: 0.98 }}
                 >
                   {/* Animation preview */}
-                  <div className="flex justify-center mb-3">
+                  <div className="mb-3">
                     <DesplazamientoAnimation />
                   </div>
                   
                   {/* Text */}
                   <div className="text-center">
-                    <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-0.5">
+                    <h3 className="text-gray-800 font-semibold text-xs sm:text-sm mb-0.5">
                       Desplazamiento
                     </h3>
-                    <p className="text-gray-400 text-[10px] sm:text-xs">
+                    <p className="text-gray-400 text-[9px] sm:text-[10px]">
                       Lectura continua
                     </p>
                   </div>
                   
-                  {/* Accent dot */}
-                  <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-cyan-400" />
+                  {/* Bottom gradient line */}
+                  <div 
+                    className="absolute bottom-0 left-4 right-4 h-1 rounded-full"
+                    style={{ background: "linear-gradient(90deg, #06b6d4, #22d3ee)" }}
+                  />
                 </motion.div>
               </motion.div>
             </div>
@@ -246,7 +262,10 @@ export default function AceleracionSelectionPage() {
                 transition={{ delay: 0.4 }}
                 className="mt-6 text-center"
               >
-                <span className="inline-block px-3 py-1.5 bg-gray-50 rounded-full text-xs text-gray-500 border border-gray-100">
+                <span 
+                  className="inline-block px-4 py-2 rounded-full text-xs text-purple-600 font-medium"
+                  style={{ background: "rgba(124, 58, 237, 0.08)" }}
+                >
                   {ejercicio.titulo}
                 </span>
               </motion.div>
@@ -256,7 +275,9 @@ export default function AceleracionSelectionPage() {
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-4 py-2 z-50">
+      <nav 
+        className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-50 px-4 py-2 z-50"
+      >
         <div className="max-w-md mx-auto flex justify-around items-center">
           <motion.button
             onClick={() => handleNavClick("/")}
@@ -282,10 +303,16 @@ export default function AceleracionSelectionPage() {
             whileTap={{ scale: 0.9 }}
             data-testid="nav-entrenar"
           >
-            <div className="w-10 h-10 -mt-5 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+            <div 
+              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
+              }}
+            >
               <Dumbbell className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-medium">Entrenar</span>
+            <span className="text-[10px] font-medium mt-1">Entrenar</span>
           </motion.button>
           <motion.button
             onClick={() => handleNavClick(`/progreso`)}
