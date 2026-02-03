@@ -586,14 +586,14 @@ export default function ReconocimientoExercisePage() {
           <span className="text-purple-600 font-bold">{timeLeft}s</span>
         </div>
         <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 rounded-xl shadow-sm border border-green-200">
-          <span className="text-lg">✓</span>
+          <span className="text-lg">😊</span>
           <div className="flex flex-col items-center">
             <span className="text-green-600 font-bold text-sm">{correctCount}</span>
             <span className="text-green-600 text-[10px]">Correcto</span>
           </div>
         </div>
         <div className="flex items-center gap-1 px-3 py-1.5 bg-red-50 rounded-xl shadow-sm border border-red-200">
-          <span className="text-lg">✗</span>
+          <span className="text-lg">😟</span>
           <div className="flex flex-col items-center">
             <span className="text-red-500 font-bold text-sm">{incorrectCount}</span>
             <span className="text-red-500 text-[10px]">Incorrecto</span>
