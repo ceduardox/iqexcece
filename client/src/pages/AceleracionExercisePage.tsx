@@ -40,7 +40,7 @@ export default function AceleracionExercisePage() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [words, setWords] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
-  const [localSpeed, setLocalSpeed] = useState(200);
+  const [localSpeed, setLocalSpeed] = useState(600);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [totalReadingTime, setTotalReadingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +49,14 @@ export default function AceleracionExercisePage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [resultSaved, setResultSaved] = useState(false);
+  
+  // Desplazamiento mode specific states
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const scrollPositionRef = useRef(0);
+  const [totalScrollDistance, setTotalScrollDistance] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   // Get session info
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
@@ -223,9 +231,13 @@ export default function AceleracionExercisePage() {
     setShowExercise(true);
     setShowResults(false);
     setCurrentWordIndex(0);
-    setResultSaved(false); // Reset to allow saving new result
+    setResultSaved(false);
     setStartTime(Date.now());
     setTotalReadingTime(0);
+    // Reset scroll for desplazamiento mode
+    setScrollPosition(0);
+    scrollPositionRef.current = 0;
+    setTotalScrollDistance(0);
   };
 
   const handleRestartExercise = () => {
@@ -257,12 +269,20 @@ export default function AceleracionExercisePage() {
 
   const handleSpeedDecrease = () => {
     playSound("iphone");
-    setLocalSpeed(prev => Math.max(50, prev - 10));
+    if (modo === "desplazamiento") {
+      setLocalSpeed(prev => Math.max(200, prev - 50));
+    } else {
+      setLocalSpeed(prev => Math.max(50, prev - 10));
+    }
   };
 
   const handleSpeedIncrease = () => {
     playSound("iphone");
-    setLocalSpeed(prev => Math.min(920, prev + 10));
+    if (modo === "desplazamiento") {
+      setLocalSpeed(prev => Math.min(1200, prev + 50));
+    } else {
+      setLocalSpeed(prev => Math.min(920, prev + 10));
+    }
   };
 
   // Share functionality - capture screen as image and share
@@ -393,10 +413,67 @@ export default function AceleracionExercisePage() {
     }
   }, [startTime, resultSaved, modo, localSpeed, sessionId, categoria, saveResultMutation, words.length, isPwa]);
 
-  // Word animation effect using requestAnimationFrame for high speeds
+  // Calculate scroll distance when text container is rendered (for desplazamiento mode)
   useEffect(() => {
-    if (!isPlaying || words.length === 0) {
+    if (modo === "desplazamiento" && showExercise && textContainerRef.current && viewportRef.current) {
+      const textHeight = textContainerRef.current.scrollHeight;
+      const vpHeight = viewportRef.current.clientHeight;
+      setViewportHeight(vpHeight);
+      // Total distance = text height + viewport height (so text scrolls completely out)
+      setTotalScrollDistance(textHeight + vpHeight);
+    }
+  }, [modo, showExercise, words]);
+
+  // Desplazamiento mode scroll animation
+  useEffect(() => {
+    if (modo !== "desplazamiento" || !isPlaying || words.length === 0 || totalScrollDistance === 0) {
+      if (animationRef.current && modo === "desplazamiento") {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
+
+    // Calculate duration based on WPM
+    // durationSeconds = (wordCount / wpm) * 60
+    const durationMs = (words.length / localSpeed) * 60 * 1000;
+    // Pixels per millisecond
+    const pixelsPerMs = totalScrollDistance / durationMs;
+    
+    lastUpdateRef.current = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - lastUpdateRef.current;
+      lastUpdateRef.current = currentTime;
+      
+      const newPosition = scrollPositionRef.current + (pixelsPerMs * elapsed);
+      
+      if (newPosition >= totalScrollDistance) {
+        scrollPositionRef.current = totalScrollDistance;
+        setScrollPosition(totalScrollDistance);
+        handleExerciseComplete();
+        return;
+      }
+      
+      scrollPositionRef.current = newPosition;
+      setScrollPosition(newPosition);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
       if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [modo, isPlaying, localSpeed, words.length, totalScrollDistance, handleExerciseComplete]);
+
+  // Word animation effect for Golpe de Vista mode
+  useEffect(() => {
+    if (modo === "desplazamiento" || !isPlaying || words.length === 0) {
+      if (animationRef.current && modo !== "desplazamiento") {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
       }
@@ -432,7 +509,7 @@ export default function AceleracionExercisePage() {
         animationRef.current = null;
       }
     };
-  }, [isPlaying, localSpeed, words.length, handleExerciseComplete]);
+  }, [modo, isPlaying, localSpeed, words.length, handleExerciseComplete]);
 
   const modeTitle = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
   const progress = words.length > 0 ? Math.round((currentWordIndex / words.length) * 100) : 0;
@@ -442,11 +519,12 @@ export default function AceleracionExercisePage() {
   if (showResults && selectedPdf) {
     const readingTimeFormatted = formatTime(totalReadingTime);
     
-    // Use the speed the user configured, not calculated average
+    // Use the speed the user configured
     const displaySpeed = localSpeed;
     
-    // Calculate performance percentage (based on speed vs target 920 PPM max)
-    const performancePercent = Math.min(100, Math.round((displaySpeed / 920) * 100));
+    // Calculate performance percentage (based on speed - max 1200 for desplazamiento, 920 for golpe)
+    const maxSpeed = modo === "desplazamiento" ? 1200 : 920;
+    const performancePercent = Math.min(100, Math.round((displaySpeed / maxSpeed) * 100));
     
     // Calculate stars (1-5) based on performance
     const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
@@ -673,6 +751,140 @@ export default function AceleracionExercisePage() {
             </button>
           </motion.div>
         </main>
+      </div>
+    );
+  }
+
+  // Exercise view - DESPLAZAMIENTO mode (continuous scroll)
+  if (showExercise && selectedPdf && modo === "desplazamiento") {
+    const fullText = words.join(" ");
+    const scrollProgress = totalScrollDistance > 0 ? Math.round((scrollPosition / totalScrollDistance) * 100) : 0;
+    
+    return (
+      <div className="h-[100dvh] flex flex-col overflow-hidden bg-white">
+        {/* Header - pill style with gradient */}
+        <header className="px-4 py-3 flex-shrink-0">
+          <div 
+            className="flex items-center justify-between px-4 py-2 rounded-full"
+            style={{ background: "linear-gradient(90deg, #06B6D4 0%, #2563EB 100%)" }}
+          >
+            <span className="text-white font-semibold text-sm">
+              Acelera al máximo tu Lectura
+            </span>
+            <button
+              onClick={handleClose}
+              className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all"
+              data-testid="button-close-exercise"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        </header>
+
+        {/* Center info */}
+        <div className="text-center py-4 flex-shrink-0">
+          <p className="text-cyan-600 text-xs font-medium tracking-widest uppercase mb-1">
+            JUEGO
+          </p>
+          <h1 className="text-gray-800 font-bold text-2xl mb-2">
+            Desplazamiento
+          </h1>
+          <p className="text-gray-800 font-bold text-2xl">
+            {localSpeed} palabras /min.
+          </p>
+        </div>
+
+        {/* Viewport - fixed height area where text scrolls */}
+        <div 
+          ref={viewportRef}
+          className="flex-1 mx-4 mb-4 rounded-2xl overflow-hidden relative"
+          style={{ 
+            background: "linear-gradient(180deg, #1E3A5F 0%, #0D1F33 100%)"
+          }}
+        >
+          {/* Scrolling text container */}
+          <div 
+            ref={textContainerRef}
+            className="absolute left-0 right-0 px-6 py-8"
+            style={{ 
+              transform: `translateY(${viewportHeight - scrollPosition}px)`,
+              willChange: 'transform'
+            }}
+          >
+            <p className="text-white text-lg leading-relaxed text-center">
+              {fullText}
+            </p>
+          </div>
+          
+          {/* Reading line indicator */}
+          <div 
+            className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-0.5 opacity-30"
+            style={{ background: "linear-gradient(90deg, transparent 0%, #06B6D4 50%, transparent 100%)" }}
+          />
+        </div>
+
+        {/* Bottom controls - 3 orange buttons */}
+        <div className="px-4 pb-6 flex-shrink-0">
+          {/* Progress bar */}
+          <div className="mb-4">
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all"
+                style={{ 
+                  width: `${scrollProgress}%`,
+                  background: "linear-gradient(90deg, #F97316 0%, #EA580C 100%)"
+                }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-gray-400 text-xs">{words.length} palabras</span>
+              <span className="text-orange-500 text-xs font-medium">{scrollProgress}%</span>
+            </div>
+          </div>
+
+          {/* Control buttons */}
+          <div className="flex items-center justify-center gap-3">
+            {/* Decrease speed button */}
+            <button
+              onClick={handleSpeedDecrease}
+              className="w-14 h-14 rounded-xl flex items-center justify-center transition-all active:scale-95"
+              style={{ background: "#F97316" }}
+              data-testid="button-speed-decrease"
+            >
+              <ChevronsLeft className="w-6 h-6 text-white" />
+            </button>
+
+            {/* Play/Pause button */}
+            <button
+              onClick={togglePlay}
+              className="flex-1 max-w-[180px] py-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95"
+              style={{ background: "#F97316" }}
+              data-testid="button-play-pause"
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="w-5 h-5" />
+                  <span>Pausa</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5" />
+                  <span>Reanudar</span>
+                </>
+              )}
+            </button>
+
+            {/* Increase speed button */}
+            <button
+              onClick={handleSpeedIncrease}
+              className="w-14 h-14 rounded-xl flex items-center justify-center transition-all active:scale-95"
+              style={{ background: "#F97316" }}
+              data-testid="button-speed-increase"
+            >
+              <ChevronsRight className="w-6 h-6 text-white" />
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
