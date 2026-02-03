@@ -9,24 +9,50 @@ import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const ROWS = 7;
-const COLS = 9;
-const CENTER_ROW = 3;
-const CENTER_COL = 4;
-const TARGET_POSITIONS = [
-  { row: 0, col: 4 },
-  { row: 3, col: 0 },
-  { row: 3, col: 8 },
-  { row: 6, col: 4 },
-];
 const GAME_DURATION = 50;
 const MATCH_PROB = 0.25;
+
+// Level 1 config: 7x9 grid with 4 target positions
+const LEVEL1_CONFIG = {
+  rows: 7,
+  cols: 9,
+  centerRow: 3,
+  centerCol: 4,
+  targetPositions: [
+    { row: 0, col: 4 },
+    { row: 3, col: 0 },
+    { row: 3, col: 8 },
+    { row: 6, col: 4 },
+  ]
+};
+
+// Level 2 config: 7x7 grid with 8 target positions (corners and mid-edges)
+const LEVEL2_CONFIG = {
+  rows: 7,
+  cols: 7,
+  centerRow: 3,
+  centerCol: 3,
+  targetPositions: [
+    { row: 0, col: 0 },   // Top-left corner
+    { row: 0, col: 3 },   // Top-center
+    { row: 0, col: 6 },   // Top-right corner
+    { row: 3, col: 0 },   // Middle-left
+    { row: 3, col: 6 },   // Middle-right
+    { row: 6, col: 0 },   // Bottom-left corner
+    { row: 6, col: 3 },   // Bottom-center
+    { row: 6, col: 6 },   // Bottom-right corner
+  ]
+};
 
 function generateRandomLetter(): string {
   return ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
 }
 
-function generateCombo(forceMatch: boolean, prevCombo: string[] | null): string[] {
+function getLevelConfig(nivel: number) {
+  return nivel === 2 ? LEVEL2_CONFIG : LEVEL1_CONFIG;
+}
+
+function generateCombo(forceMatch: boolean, prevCombo: string[] | null, targetCount: number): string[] {
   if (forceMatch && prevCombo) {
     return [...prevCombo];
   }
@@ -36,30 +62,37 @@ function generateCombo(forceMatch: boolean, prevCombo: string[] | null): string[
 
   if (isAllSame) {
     const letter = generateRandomLetter();
-    combo = [letter, letter, letter, letter];
+    combo = Array(targetCount).fill(letter);
   } else {
     const mainLetter = generateRandomLetter();
     let diffLetter = generateRandomLetter();
     while (diffLetter === mainLetter) {
       diffLetter = generateRandomLetter();
     }
-    combo = [mainLetter, mainLetter, mainLetter, mainLetter];
-    const diffPos = Math.floor(Math.random() * 4);
-    combo[diffPos] = diffLetter;
+    combo = Array(targetCount).fill(mainLetter);
+    // For level 2, change multiple random positions
+    const numDiff = targetCount === 8 ? Math.floor(Math.random() * 3) + 1 : 1; // 1-3 different for level 2
+    const diffPositions = new Set<number>();
+    while (diffPositions.size < numDiff) {
+      diffPositions.add(Math.floor(Math.random() * targetCount));
+    }
+    diffPositions.forEach(pos => {
+      combo[pos] = diffLetter;
+    });
   }
 
   if (prevCombo && combo.every((l, i) => l === prevCombo[i])) {
-    return generateCombo(false, prevCombo);
+    return generateCombo(false, prevCombo, targetCount);
   }
 
   return combo;
 }
 
-function generateBaseGrid(): string[][] {
+function generateBaseGrid(rows: number, cols: number): string[][] {
   const grid: string[][] = [];
-  for (let r = 0; r < ROWS; r++) {
+  for (let r = 0; r < rows; r++) {
     const row: string[] = [];
-    for (let c = 0; c < COLS; c++) {
+    for (let c = 0; c < cols; c++) {
       row.push(generateRandomLetter());
     }
     grid.push(row);
@@ -77,10 +110,13 @@ export default function ReconocimientoExercisePage() {
   const nivel = parseInt(params.nivel || "1");
   const { playSound } = useSounds();
 
+  const levelConfig = getLevelConfig(nivel);
+  const { rows, cols, centerRow, centerCol, targetPositions } = levelConfig;
+
   const [gameState, setGameState] = useState<GameState>("idle");
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
-  const [baseGrid, setBaseGrid] = useState<string[][]>(() => generateBaseGrid());
-  const [currentCombo, setCurrentCombo] = useState<string[]>(() => generateCombo(false, null));
+  const [baseGrid, setBaseGrid] = useState<string[][]>(() => generateBaseGrid(rows, cols));
+  const [currentCombo, setCurrentCombo] = useState<string[]>(() => generateCombo(false, null, targetPositions.length));
   const [prevCombo, setPrevCombo] = useState<string[] | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
@@ -126,8 +162,8 @@ export default function ReconocimientoExercisePage() {
     setCorrectCount(0);
     setIncorrectCount(0);
     setSkippedCount(0);
-    setBaseGrid(generateBaseGrid());
-    const initialCombo = generateCombo(false, null);
+    setBaseGrid(generateBaseGrid(rows, cols));
+    const initialCombo = generateCombo(false, null, targetPositions.length);
     setCurrentCombo(initialCombo);
     setPrevCombo(null);
     setHasAnswered(false);
@@ -154,9 +190,9 @@ export default function ReconocimientoExercisePage() {
 
       setPrevCombo(currentCombo);
       const shouldMatch = Math.random() < MATCH_PROB;
-      setCurrentCombo(prev => generateCombo(shouldMatch, prev));
+      setCurrentCombo(prev => generateCombo(shouldMatch, prev, targetPositions.length));
     }, 1000);
-  }, [playSound, currentCombo]);
+  }, [playSound, currentCombo, targetPositions.length]);
 
   useEffect(() => {
     return () => {
@@ -296,8 +332,8 @@ export default function ReconocimientoExercisePage() {
     playSound("card");
     setGameState("idle");
     setTimeLeft(GAME_DURATION);
-    setBaseGrid(generateBaseGrid());
-    setCurrentCombo(generateCombo(false, null));
+    setBaseGrid(generateBaseGrid(rows, cols));
+    setCurrentCombo(generateCombo(false, null, targetPositions.length));
     setPrevCombo(null);
     setCorrectCount(0);
     setIncorrectCount(0);
@@ -308,14 +344,14 @@ export default function ReconocimientoExercisePage() {
 
   const getGridWithCombo = () => {
     const grid = baseGrid.map(row => [...row]);
-    TARGET_POSITIONS.forEach((pos, i) => {
+    targetPositions.forEach((pos, i) => {
       grid[pos.row][pos.col] = currentCombo[i];
     });
     return grid;
   };
 
   const isTargetPosition = (row: number, col: number) => {
-    return TARGET_POSITIONS.some(p => p.row === row && p.col === col);
+    return targetPositions.some(p => p.row === row && p.col === col);
   };
 
   const gridData = getGridWithCombo();
@@ -565,7 +601,10 @@ export default function ReconocimientoExercisePage() {
             ¡Descubre los símbolos que cambian y decide si son iguales!
           </h2>
           <p className="text-gray-400 text-xs">
-            Cada 1s cambia el "combo" de 4 letras. Sale 4 iguales o 3 iguales + 1 distinta (posición aleatoria).
+            {nivel === 1 
+              ? "Cada 1s cambia el combo de 4 letras. Sale 4 iguales o 3 iguales + 1 distinta."
+              : "Cada 1s cambian 8 letras en las esquinas y bordes. Algunas son iguales y otras diferentes."
+            }
           </p>
         </div>
 
@@ -576,10 +615,10 @@ export default function ReconocimientoExercisePage() {
             border: "1px solid #e5e7eb"
           }}
         >
-          <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}>
+          <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
             {gridData.map((row, r) => 
               row.map((letter, c) => {
-                const isCenter = r === CENTER_ROW && c === CENTER_COL;
+                const isCenter = r === centerRow && c === centerCol;
                 
                 return (
                   <div
