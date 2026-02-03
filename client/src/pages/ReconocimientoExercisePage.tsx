@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Play, ThumbsUp, ThumbsDown, Share2, RotateCcw, X } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
+import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -86,10 +88,22 @@ export default function ReconocimientoExercisePage() {
   const [hasAnswered, setHasAnswered] = useState(false);
   const [showFeedback, setShowFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [resultSaved, setResultSaved] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const comboRef = useRef<NodeJS.Timeout | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
+  const isPwa = typeof window !== "undefined" 
+    ? window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+    : false;
+
+  const saveResultMutation = useMutation({
+    mutationFn: async (resultData: any) => {
+      return apiRequest("POST", "/api/training-results", resultData);
+    }
+  });
 
   const handleBack = () => {
     playSound("iphone");
@@ -150,6 +164,29 @@ export default function ReconocimientoExercisePage() {
       if (comboRef.current) clearInterval(comboRef.current);
     };
   }, []);
+
+  // Save result when game finishes
+  useEffect(() => {
+    if (gameState === "finished" && !resultSaved) {
+      const totalAnswers = correctCount + incorrectCount;
+      const accuracy = totalAnswers > 0 ? Math.round((correctCount / totalAnswers) * 100) : 0;
+      
+      saveResultMutation.mutate({
+        sessionId: sessionId || null,
+        categoria,
+        tipoEjercicio: "reconocimiento_visual",
+        ejercicioTitulo: `Reconocimiento Visual - Nivel ${nivel}`,
+        puntaje: accuracy,
+        nivelAlcanzado: nivel,
+        tiempoSegundos: GAME_DURATION,
+        respuestasCorrectas: correctCount,
+        respuestasTotales: totalAnswers,
+        datosExtra: JSON.stringify({ skippedCount, nivel }),
+        isPwa
+      });
+      setResultSaved(true);
+    }
+  }, [gameState, resultSaved, correctCount, incorrectCount, skippedCount, nivel, categoria, sessionId, isPwa, saveResultMutation]);
 
   const handleAnswer = (isEqual: boolean) => {
     if (gameState !== "running" || hasAnswered || !prevCombo) return;
@@ -266,6 +303,7 @@ export default function ReconocimientoExercisePage() {
     setIncorrectCount(0);
     setSkippedCount(0);
     setHasAnswered(false);
+    setResultSaved(false);
   };
 
   const getGridWithCombo = () => {

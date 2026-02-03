@@ -30,7 +30,8 @@ const exerciseTypeLabels: Record<string, string> = {
   velocidad: "Velocidad",
   numeros: "Números y Letras",
   aceleracion_golpe: "Golpe de Vista",
-  aceleracion_desplazamiento: "Desplazamiento"
+  aceleracion_desplazamiento: "Desplazamiento",
+  reconocimiento_visual: "Reconocimiento Visual"
 };
 
 const categoriaLabels: Record<string, string> = {
@@ -46,7 +47,8 @@ const exerciseTypeColors: Record<string, string> = {
   velocidad: "#7c3aed",
   numeros: "#06b6d4",
   aceleracion_golpe: "#a855f7",
-  aceleracion_desplazamiento: "#0891b2"
+  aceleracion_desplazamiento: "#0891b2",
+  reconocimiento_visual: "#ec4899"
 };
 
 function formatDate(dateStr: string | null): string {
