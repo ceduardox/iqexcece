@@ -32,6 +32,15 @@ const exerciseTypeLabels: Record<string, string> = {
   aceleracion_desplazamiento: "Desplazamiento"
 };
 
+const categoriaLabels: Record<string, string> = {
+  preescolar: "Pre-escolar",
+  ninos: "Niños",
+  adolescentes: "Adolescentes",
+  universitarios: "Universitarios",
+  profesionales: "Profesionales",
+  adulto_mayor: "Adulto Mayor"
+};
+
 const exerciseTypeColors: Record<string, string> = {
   velocidad: "#7c3aed",
   numeros: "#06b6d4",
@@ -146,6 +155,30 @@ export default function ProgresoPage() {
           </div>
         ) : (
           <div className="max-w-md mx-auto space-y-4">
+            {/* Category badge */}
+            <motion.div
+              className="flex justify-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div 
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{ 
+                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%)",
+                  border: "1px solid rgba(124, 58, 237, 0.2)"
+                }}
+              >
+                <span className="text-xs text-gray-500">Categoría:</span>
+                <span 
+                  className="text-sm font-semibold"
+                  style={{ color: "#7c3aed" }}
+                  data-testid="text-categoria"
+                >
+                  {categoriaLabels[categoria] || categoria}
+                </span>
+              </div>
+            </motion.div>
+
             {/* Summary cards */}
             <motion.div 
               className="grid grid-cols-2 gap-3"
