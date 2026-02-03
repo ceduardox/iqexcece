@@ -1,8 +1,80 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, Home, Brain, BarChart3, Dumbbell, Sparkles, Zap } from "lucide-react";
+import { ChevronLeft, Home, Brain, BarChart3, Dumbbell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
+import { useState, useEffect } from "react";
+
+function GolpeAnimation() {
+  const words = ["LEER", "VER", "OJO", "LUZ", "SOL"];
+  const [currentWord, setCurrentWord] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWord(prev => (prev + 1) % words.length);
+    }, 800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative w-20 h-20 flex items-center justify-center">
+      {/* Outer circle */}
+      <div className="absolute inset-0 rounded-full border-2 border-purple-300" />
+      {/* Inner circle */}
+      <div className="absolute inset-2 rounded-full border border-purple-200" />
+      {/* Center dot */}
+      <div className="absolute w-2 h-2 bg-purple-500 rounded-full" />
+      {/* Animated word */}
+      <motion.span
+        key={currentWord}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1.5 }}
+        className="absolute text-purple-600 font-bold text-xs"
+        style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+      >
+        {words[currentWord]}
+      </motion.span>
+      {/* Orbiting elements */}
+      <motion.div
+        className="absolute w-1.5 h-1.5 bg-purple-400 rounded-full"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        style={{ top: 0, left: "50%", marginLeft: "-3px" }}
+      />
+    </div>
+  );
+}
+
+function DesplazamientoAnimation() {
+  const words = ["Lectura", "Rápida", "Visual", "Mental"];
+  
+  return (
+    <div className="relative w-20 h-20 overflow-hidden rounded-lg bg-gradient-to-b from-cyan-50 to-white border border-cyan-100">
+      {/* Scrolling text container */}
+      <motion.div
+        className="flex flex-col items-center gap-2 py-2"
+        animate={{ y: [0, -60, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      >
+        {[...words, ...words].map((word, i) => (
+          <span 
+            key={i} 
+            className="text-[10px] font-medium text-cyan-600 whitespace-nowrap"
+          >
+            {word}
+          </span>
+        ))}
+      </motion.div>
+      {/* Top fade */}
+      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-cyan-50 to-transparent pointer-events-none" />
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+      {/* Reading line indicator */}
+      <div className="absolute top-1/2 left-1 right-1 h-0.5 bg-cyan-300/50 -translate-y-1/2" />
+    </div>
+  );
+}
 
 export default function AceleracionSelectionPage() {
   const [, navigate] = useLocation();
@@ -39,84 +111,36 @@ export default function AceleracionSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Animated background with mesh gradient */}
-      <div 
-        className="absolute inset-0 -z-10"
-        style={{ 
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)",
-          backgroundSize: "400% 400%",
-          animation: "gradientShift 15s ease infinite"
-        }}
-      />
-      
-      {/* Floating decorative elements */}
-      <motion.div 
-        className="absolute top-20 left-4 w-20 h-20 rounded-full opacity-20"
-        style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
-        animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div 
-        className="absolute top-40 right-8 w-32 h-32 rounded-full opacity-15"
-        style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
-        animate={{ y: [0, 20, 0], scale: [1, 0.9, 1] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-      />
-      <motion.div 
-        className="absolute bottom-40 left-10 w-16 h-16 rounded-full opacity-25"
-        style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
-        animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-      />
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-white to-purple-50/30">
+      {/* Subtle decorative shapes */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-purple-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-32 left-0 w-48 h-48 bg-cyan-100/40 rounded-full blur-3xl -translate-x-1/2" />
 
-      {/* Glass overlay */}
-      <div className="absolute inset-0 -z-5 backdrop-blur-[100px]" />
-
-      {/* Header with glassmorphism */}
+      {/* Header */}
       <header className="relative px-4 py-4 flex items-center justify-between">
         <motion.button
           onClick={handleBack}
-          className="w-11 h-11 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/30 shadow-lg"
-          style={{ background: "rgba(255,255,255,0.25)" }}
-          whileHover={{ scale: 1.05 }}
+          className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
           whileTap={{ scale: 0.95 }}
           data-testid="button-back"
         >
-          <ChevronLeft className="w-5 h-5 text-white" />
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
         </motion.button>
-        
-        {/* Sparkle decoration */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-          <Sparkles className="w-6 h-6 text-white/60" />
-        </motion.div>
+        <div className="w-10" />
       </header>
 
-      {/* Hero section with floating image */}
-      <div className="relative px-6 mb-2">
-        <motion.div 
-          className="flex justify-center"
-          initial={{ opacity: 0, y: 30, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+      {/* Hero image */}
+      <div className="relative px-6 mb-6 flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <div className="relative">
-            {/* Glow effect behind image */}
-            <div 
-              className="absolute inset-0 blur-2xl opacity-60 scale-110"
-              style={{ background: "radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)" }}
-            />
-            <motion.img 
-              src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
-              alt="Aceleración de Lectura"
-              className="relative w-36 h-auto rounded-3xl object-cover shadow-2xl border-2 border-white/30"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </div>
+          <img 
+            src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
+            alt="Aceleración de Lectura"
+            className="w-32 h-auto rounded-2xl object-cover shadow-lg"
+          />
         </motion.div>
       </div>
 
@@ -124,241 +148,156 @@ export default function AceleracionSelectionPage() {
       <main className="flex-1 px-5 pb-28 relative">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <motion.div 
-              className="w-12 h-12 rounded-full border-4 border-white/30 border-t-white"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            />
+            <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-500 rounded-full animate-spin" />
           </div>
         ) : (
           <div className="max-w-md mx-auto">
-            {/* Title with glass card */}
+            {/* Title */}
             <motion.div 
-              className="mb-6 text-center p-4 rounded-3xl backdrop-blur-xl border border-white/20"
-              style={{ background: "rgba(255,255,255,0.15)" }}
+              className="mb-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.1 }}
             >
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Zap className="w-5 h-5 text-yellow-300" />
-                <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
-                  Selecciona el Modo
-                </h1>
-                <Zap className="w-5 h-5 text-yellow-300" />
-              </div>
-              <p className="text-white/80 text-xs sm:text-sm">
-                Elige cómo quieres practicar la lectura rápida
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
+                Selecciona el Modo
+              </h1>
+              <p className="text-gray-500 text-xs sm:text-sm">
+                Elige cómo quieres practicar
               </p>
             </motion.div>
 
-            {/* Two column cards with glassmorphism */}
+            {/* Cards grid */}
             <div className="grid grid-cols-2 gap-4">
               {/* Golpe de Vista Card */}
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
                 onClick={() => handleModeSelect("golpe")}
                 className="cursor-pointer"
                 data-testid="card-mode-golpe"
               >
                 <motion.div 
-                  className="relative rounded-3xl p-4 h-full overflow-hidden backdrop-blur-xl border border-white/30 shadow-xl"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
-                  whileHover={{ scale: 1.03, y: -5 }}
+                  className="relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300"
+                  whileHover={{ y: -4 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {/* Shimmer effect */}
-                  <div 
-                    className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                      background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)",
-                      backgroundSize: "200% 100%",
-                      animation: "shimmer 2s infinite"
-                    }}
-                  />
-                  
-                  {/* Icon with glow */}
-                  <div className="relative flex justify-center mb-3">
-                    <div className="relative">
-                      <div 
-                        className="absolute inset-0 blur-xl opacity-50"
-                        style={{ background: "radial-gradient(circle, #a855f7 0%, transparent 70%)" }}
-                      />
-                      <img 
-                        src="https://iqexponencial.app/api/images/4c4e3c88-df96-43fa-aa54-2e8d1fb97634" 
-                        alt="Golpe de Vista" 
-                        className="relative w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
-                      />
-                    </div>
+                  {/* Animation preview */}
+                  <div className="flex justify-center mb-3">
+                    <GolpeAnimation />
                   </div>
                   
                   {/* Text */}
-                  <div className="relative text-center">
-                    <h3 className="text-white font-bold text-sm sm:text-base mb-1 drop-shadow-md">
+                  <div className="text-center">
+                    <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-0.5">
                       Golpe de Vista
                     </h3>
-                    <p className="text-white/70 text-[10px] sm:text-xs leading-tight">
+                    <p className="text-gray-400 text-[10px] sm:text-xs">
                       Entrena tu campo visual
                     </p>
                   </div>
                   
-                  {/* Bottom accent line */}
-                  <div 
-                    className="absolute bottom-0 left-4 right-4 h-1 rounded-full"
-                    style={{ background: "linear-gradient(90deg, #a855f7, #7c3aed)" }}
-                  />
+                  {/* Accent dot */}
+                  <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-purple-400" />
                 </motion.div>
               </motion.div>
 
               {/* Desplazamiento Card */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
                 onClick={() => handleModeSelect("desplazamiento")}
                 className="cursor-pointer"
                 data-testid="card-mode-desplazamiento"
               >
                 <motion.div 
-                  className="relative rounded-3xl p-4 h-full overflow-hidden backdrop-blur-xl border border-white/30 shadow-xl"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
-                  whileHover={{ scale: 1.03, y: -5 }}
+                  className="relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-cyan-200 transition-all duration-300"
+                  whileHover={{ y: -4 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {/* Shimmer effect */}
-                  <div 
-                    className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                      background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)",
-                      backgroundSize: "200% 100%",
-                      animation: "shimmer 2s infinite"
-                    }}
-                  />
-                  
-                  {/* Icon with glow */}
-                  <div className="relative flex justify-center mb-3">
-                    <div className="relative">
-                      <div 
-                        className="absolute inset-0 blur-xl opacity-50"
-                        style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }}
-                      />
-                      <img 
-                        src="https://iqexponencial.app/api/images/9c5d7335-73c7-41cc-a920-d59ae93a78b0" 
-                        alt="Desplazamiento" 
-                        className="relative w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
-                      />
-                    </div>
+                  {/* Animation preview */}
+                  <div className="flex justify-center mb-3">
+                    <DesplazamientoAnimation />
                   </div>
                   
                   {/* Text */}
-                  <div className="relative text-center">
-                    <h3 className="text-white font-bold text-sm sm:text-base mb-1 drop-shadow-md">
+                  <div className="text-center">
+                    <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-0.5">
                       Desplazamiento
                     </h3>
-                    <p className="text-white/70 text-[10px] sm:text-xs leading-tight">
-                      Practica lectura continua
+                    <p className="text-gray-400 text-[10px] sm:text-xs">
+                      Lectura continua
                     </p>
                   </div>
                   
-                  {/* Bottom accent line */}
-                  <div 
-                    className="absolute bottom-0 left-4 right-4 h-1 rounded-full"
-                    style={{ background: "linear-gradient(90deg, #06b6d4, #0891b2)" }}
-                  />
+                  {/* Accent dot */}
+                  <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-cyan-400" />
                 </motion.div>
               </motion.div>
             </div>
 
-            {/* Exercise info badge */}
+            {/* Exercise info */}
             {ejercicio?.titulo && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="mt-6 flex justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-6 text-center"
               >
-                <div 
-                  className="px-4 py-2 rounded-full backdrop-blur-xl border border-white/20 shadow-lg"
-                  style={{ background: "rgba(255,255,255,0.15)" }}
-                >
-                  <p className="text-white/80 text-xs">
-                    <span className="text-white font-medium">{ejercicio.titulo}</span>
-                  </p>
-                </div>
+                <span className="inline-block px-3 py-1.5 bg-gray-50 rounded-full text-xs text-gray-500 border border-gray-100">
+                  {ejercicio.titulo}
+                </span>
               </motion.div>
             )}
           </div>
         )}
       </main>
 
-      {/* Bottom navigation bar with glassmorphism */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t border-white/20 px-4 py-3 z-50"
-        style={{ background: "rgba(255,255,255,0.15)" }}
-      >
+      {/* Bottom navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-4 py-2 z-50">
         <div className="max-w-md mx-auto flex justify-around items-center">
           <motion.button
             onClick={() => handleNavClick("/")}
-            className="flex flex-col items-center gap-1 p-2 text-white/60 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
+            whileTap={{ scale: 0.9 }}
             data-testid="nav-home"
           >
             <Home className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Inicio</span>
+            <span className="text-[10px]">Inicio</span>
           </motion.button>
           <motion.button
             onClick={() => handleNavClick(`/tests/${categoria}`)}
-            className="flex flex-col items-center gap-1 p-2 text-white/60 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
+            whileTap={{ scale: 0.9 }}
             data-testid="nav-diagnostico"
           >
             <Brain className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Diagnóstico</span>
+            <span className="text-[10px]">Diagnóstico</span>
           </motion.button>
           <motion.button
             onClick={() => handleNavClick(`/entrenamiento/${categoria}`)}
-            className="flex flex-col items-center gap-1 p-2 text-white relative"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center gap-0.5 p-2 text-purple-600"
+            whileTap={{ scale: 0.9 }}
             data-testid="nav-entrenar"
           >
-            <div 
-              className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center shadow-lg border border-white/30"
-              style={{ background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)" }}
-            >
-              <Dumbbell className="w-5 h-5" />
+            <div className="w-10 h-10 -mt-5 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+              <Dumbbell className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-medium mt-6">Entrenar</span>
+            <span className="text-[10px] font-medium">Entrenar</span>
           </motion.button>
           <motion.button
             onClick={() => handleNavClick(`/progreso`)}
-            className="flex flex-col items-center gap-1 p-2 text-white/60 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
+            whileTap={{ scale: 0.9 }}
             data-testid="nav-progreso"
           >
             <BarChart3 className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Progreso</span>
+            <span className="text-[10px]">Progreso</span>
           </motion.button>
         </div>
       </nav>
-
-      {/* CSS animations */}
-      <style>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
     </div>
   );
 }
