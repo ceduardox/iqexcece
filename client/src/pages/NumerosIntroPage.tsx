@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CurvedHeader } from "@/components/CurvedHeader";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import cerebroNumerosImg from "@assets/image_1769698514762.png";
 
 interface IntroData {
   id: string;
@@ -11,6 +10,101 @@ interface IntroData {
   descripcion: string;
   subtitulo: string;
   imagenCabecera: string | null;
+}
+
+function NumerosPreviewAnimation() {
+  const [board] = useState(() => {
+    const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
+    const shuffled = [...numbers];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  });
+  
+  const [currentTarget, setCurrentTarget] = useState(1);
+  const [flashingIndex, setFlashingIndex] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  const findAndFlash = useCallback(() => {
+    if (!isAnimating) return;
+    
+    const targetIdx = board.findIndex(n => n === currentTarget);
+    if (targetIdx !== -1) {
+      setFlashingIndex(targetIdx);
+      
+      setTimeout(() => {
+        setFlashingIndex(null);
+        if (currentTarget < 5) {
+          setCurrentTarget(prev => prev + 1);
+        } else {
+          setTimeout(() => {
+            setCurrentTarget(1);
+          }, 500);
+        }
+      }, 400);
+    }
+  }, [board, currentTarget, isAnimating]);
+
+  useEffect(() => {
+    const timer = setTimeout(findAndFlash, 800);
+    return () => clearTimeout(timer);
+  }, [findAndFlash]);
+
+  return (
+    <div className="relative">
+      <div className="flex flex-col items-center">
+        <motion.div
+          className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 shadow-lg"
+          style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 0.3, repeat: Infinity, repeatDelay: 0.5 }}
+        >
+          <span className="text-white text-xl font-bold">{currentTarget}</span>
+        </motion.div>
+        
+        <div className="grid grid-cols-5 gap-1">
+          {board.map((value, index) => {
+            const isFlashing = flashingIndex === index;
+            const isFound = value < currentTarget;
+            
+            return (
+              <motion.div
+                key={index}
+                className={`
+                  w-7 h-7 rounded text-xs font-bold flex items-center justify-center
+                  transition-colors duration-150 shadow-sm border
+                  ${isFlashing ? "bg-green-500 text-white border-green-500" : ""}
+                  ${isFound && !isFlashing ? "bg-green-100 text-green-600 border-green-200" : ""}
+                  ${!isFlashing && !isFound ? "bg-white text-gray-700 border-gray-200" : ""}
+                `}
+                animate={isFlashing ? { scale: [1, 1.15, 1] } : {}}
+                transition={{ duration: 0.2 }}
+              >
+                {value}
+              </motion.div>
+            );
+          })}
+        </div>
+        
+        <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-1">
+            <span className="text-sm">😊</span>
+            <span className="text-xs font-bold text-green-500">{Math.max(0, currentTarget - 1)}</span>
+          </div>
+          <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full rounded-full"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #06b6d4)" }}
+              animate={{ width: `${((currentTarget - 1) / 5) * 100}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function NumerosIntroPage() {
@@ -47,7 +141,6 @@ export default function NumerosIntroPage() {
   const titulo = introData?.titulo || "Identifica rápidamente\nNúmeros y Letras";
   const descripcion = introData?.descripcion || "¡Haz más fuerte tu vista jugando!";
   const subtitulo = introData?.subtitulo || "Identifica el número o letra para ver el mundo más grande";
-  const imagen = introData?.imagenCabecera || cerebroNumerosImg;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -66,13 +159,9 @@ export default function NumerosIntroPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
               className="mb-6"
+              data-testid="animation-numeros-preview"
             >
-              <img 
-                src={imagen} 
-                alt="Cerebro con números y letras" 
-                className="w-48 h-48 object-contain"
-                data-testid="img-numeros-intro"
-              />
+              <NumerosPreviewAnimation />
             </motion.div>
 
             <motion.div
