@@ -325,16 +325,8 @@ export default function ProgresoPage() {
             whileTap={{ scale: 0.9 }}
             data-testid="nav-entrenar"
           >
-            <div 
-              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
-              }}
-            >
-              <Dumbbell className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-[10px] font-medium mt-1">Entrenar</span>
+            <Dumbbell className="w-5 h-5" />
+            <span className="text-[10px]">Entrenar</span>
           </motion.button>
           <motion.button
             onClick={() => handleNavClick(`/progreso/${categoria}`)}
@@ -342,8 +334,16 @@ export default function ProgresoPage() {
             whileTap={{ scale: 0.9 }}
             data-testid="nav-progreso"
           >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Progreso</span>
+            <div 
+              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
+              }}
+            >
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[10px] font-medium mt-1">Progreso</span>
           </motion.button>
         </div>
       </nav>

@@ -3,8 +3,9 @@ import { useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Upload, Play, Pause, X, FileText, Trash2, ChevronRight, ChevronsLeft, ChevronsRight, Eye, Type, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
+import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 
 // PDF.js will be loaded from CDN
@@ -47,6 +48,20 @@ export default function AceleracionExercisePage() {
   const lastUpdateRef = useRef<number>(0);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [resultSaved, setResultSaved] = useState(false);
+
+  // Get session info
+  const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
+  const isPwa = typeof window !== "undefined" 
+    ? window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+    : false;
+
+  // Mutation to save training results
+  const saveResultMutation = useMutation({
+    mutationFn: async (resultData: any) => {
+      return apiRequest("POST", "/api/training-results", resultData);
+    }
+  });
 
   const { data, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["/api/aceleracion", itemId],
@@ -208,6 +223,7 @@ export default function AceleracionExercisePage() {
     setShowExercise(true);
     setShowResults(false);
     setCurrentWordIndex(0);
+    setResultSaved(false); // Reset to allow saving new result
     setStartTime(Date.now());
     setTotalReadingTime(0);
   };
@@ -347,11 +363,35 @@ export default function AceleracionExercisePage() {
   // Handle exercise completion
   const handleExerciseComplete = useCallback(() => {
     setIsPlaying(false);
+    let readingTime = 0;
     if (startTime) {
-      setTotalReadingTime(Date.now() - startTime);
+      readingTime = Date.now() - startTime;
+      setTotalReadingTime(readingTime);
     }
     setShowResults(true);
-  }, [startTime]);
+    
+    // Save result to database
+    if (!resultSaved) {
+      const tipoEjercicio = modo === "golpe" ? "aceleracion_golpe" : "aceleracion_desplazamiento";
+      const ejercicioTitulo = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
+      const performancePercent = Math.min(100, Math.round((localSpeed / 920) * 100));
+      
+      saveResultMutation.mutate({
+        sessionId: sessionId || null,
+        categoria,
+        tipoEjercicio,
+        ejercicioTitulo,
+        puntaje: performancePercent,
+        nivelAlcanzado: Math.max(1, Math.min(5, Math.ceil(performancePercent / 20))),
+        tiempoSegundos: Math.round(readingTime / 1000),
+        palabrasPorMinuto: localSpeed,
+        respuestasCorrectas: words.length,
+        respuestasTotales: words.length,
+        isPwa
+      });
+      setResultSaved(true);
+    }
+  }, [startTime, resultSaved, modo, localSpeed, sessionId, categoria, saveResultMutation, words.length, isPwa]);
 
   // Word animation effect using requestAnimationFrame for high speeds
   useEffect(() => {
