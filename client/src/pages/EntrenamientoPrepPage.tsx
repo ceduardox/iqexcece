@@ -79,6 +79,8 @@ export default function EntrenamientoPrepPage() {
       setLocation(`/memoria/${categoria}/${itemId}`);
     } else if (tipo === "aceleracion_lectura") {
       setLocation(`/aceleracion/${categoria}/${itemId}`);
+    } else if (tipo === "reconocimiento_visual") {
+      setLocation(`/reconocimiento/${categoria}/${itemId}`);
     } else {
       setLocation(`/velocidad/${categoria}/${itemId}`);
     }

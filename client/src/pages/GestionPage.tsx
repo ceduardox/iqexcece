@@ -4001,6 +4001,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <option value="aceleracion_lectura" className="bg-gray-700 text-white">Aceleración de Lectura</option>
                                 <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
+                                <option value="reconocimiento_visual" className="bg-gray-700 text-white">Reconocimiento Visual</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
                               </select>
                             </div>
