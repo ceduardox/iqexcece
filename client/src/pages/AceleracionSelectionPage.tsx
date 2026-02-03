@@ -1,7 +1,6 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 
@@ -35,125 +34,161 @@ export default function AceleracionSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header sticky */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-[#8a3ffc] to-[#06b6d4] px-4 py-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleBack}
-            className="text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-            data-testid="button-back"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <div className="flex items-center gap-3">
-            {ejercicio?.imagenCabecera && (
-              <img 
-                src={ejercicio.imagenCabecera} 
-                alt="" 
-                className="w-10 h-10 object-contain rounded-lg bg-white/10" 
-              />
-            )}
-            <h1 className="text-white font-bold text-lg">
-              {ejercicio?.titulo || "Aceleración de Lectura"}
-            </h1>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #f8f4ff 0%, #e8f4ff 50%, #ffffff 100%)" }}>
+      {/* Header */}
+      <header className="px-4 py-4">
+        <button
+          onClick={handleBack}
+          className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+          data-testid="button-back"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </button>
       </header>
 
-      {/* Curva decorativa */}
-      <div className="sticky z-40" style={{ top: "56px" }}>
-        <svg viewBox="0 0 400 30" className="w-full h-8 -mb-1">
-          <path
-            d="M0,0 C100,30 300,30 400,0 L400,30 L0,30 Z"
-            fill="white"
-          />
-        </svg>
-      </div>
-
-      {/* Contenido */}
-      <main className="flex-1 px-6 py-8">
+      {/* Main content */}
+      <main className="flex-1 px-5 pb-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-[#06b6d4] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="max-w-md mx-auto space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <div className="max-w-md mx-auto">
+            {/* Title */}
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h1 className="text-2xl font-bold text-gray-800">
                 Selecciona el Modo
-              </h2>
-              <p className="text-gray-500">
+              </h1>
+              <p className="text-gray-500 text-sm mt-1">
                 Elige cómo quieres practicar la lectura rápida
               </p>
-            </div>
+            </motion.div>
 
-            {/* Tarjeta Golpe de Vista */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              onClick={() => handleModeSelect("golpe")}
-              className="cursor-pointer"
-              data-testid="card-mode-golpe"
-            >
-              <div className="bg-gradient-to-br from-[#8a3ffc] to-[#6b2ed9] rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                    <span className="text-3xl">👁️</span>
+            {/* Two column cards */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Golpe de Vista Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                onClick={() => handleModeSelect("golpe")}
+                className="cursor-pointer group"
+                data-testid="card-mode-golpe"
+              >
+                <div 
+                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6366f1 100%)"
+                  }}
+                >
+                  {/* Decorative overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 50%)"
+                    }}
+                  />
+                  
+                  {/* Icon container */}
+                  <div className="relative flex justify-center mb-3">
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
+                      <img 
+                        src="https://iqexponencial.app/api/images/4c4e3c88-df96-43fa-aa54-2e8d1fb97634" 
+                        alt="Golpe de Vista" 
+                        className="w-16 h-16 object-contain"
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold text-xl mb-1">
+                  
+                  {/* Text */}
+                  <div className="relative text-center">
+                    <h3 className="text-white font-bold text-base mb-1">
                       Golpe de Vista
                     </h3>
-                    <p className="text-white/80 text-sm">
-                      Entrena tu campo visual para capturar más palabras de un vistazo
+                    <p className="text-white/80 text-xs leading-tight">
+                      Entrena tu campo visual
                     </p>
                   </div>
-                  <ChevronLeft className="w-6 h-6 text-white/60 rotate-180" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Tarjeta Desplazamiento */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => handleModeSelect("desplazamiento")}
-              className="cursor-pointer"
-              data-testid="card-mode-desplazamiento"
-            >
-              <div className="bg-gradient-to-br from-[#06b6d4] to-[#0891b2] rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                    <span className="text-3xl">📖</span>
+                  
+                  {/* Arrow indicator */}
+                  <div className="relative flex justify-center mt-3">
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <ChevronRight className="w-4 h-4 text-white" />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold text-xl mb-1">
+                </div>
+              </motion.div>
+
+              {/* Desplazamiento Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => handleModeSelect("desplazamiento")}
+                className="cursor-pointer group"
+                data-testid="card-mode-desplazamiento"
+              >
+                <div 
+                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%)"
+                  }}
+                >
+                  {/* Decorative overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      background: "radial-gradient(circle at 70% 20%, rgba(255,255,255,0.4) 0%, transparent 50%)"
+                    }}
+                  />
+                  
+                  {/* Icon container */}
+                  <div className="relative flex justify-center mb-3">
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
+                      <img 
+                        src="https://iqexponencial.app/api/images/9c5d7335-73c7-41cc-a920-d59ae93a78b0" 
+                        alt="Desplazamiento" 
+                        className="w-16 h-16 object-contain"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Text */}
+                  <div className="relative text-center">
+                    <h3 className="text-white font-bold text-base mb-1">
                       Desplazamiento
                     </h3>
-                    <p className="text-white/80 text-sm">
-                      Practica la lectura continua siguiendo el ritmo marcado
+                    <p className="text-white/80 text-xs leading-tight">
+                      Practica lectura continua
                     </p>
                   </div>
-                  <ChevronLeft className="w-6 h-6 text-white/60 rotate-180" />
+                  
+                  {/* Arrow indicator */}
+                  <div className="relative flex justify-center mt-3">
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <ChevronRight className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
 
-            {/* Info de velocidad */}
-            {ejercicio && (
-              <div className="bg-gray-50 rounded-xl p-4 mt-6">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Velocidad configurada:</span>
-                  <span className="font-bold text-[#8a3ffc]">{ejercicio.velocidadPPM} PPM</span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-2">
-                  <span className="text-gray-600">Modo Golpe:</span>
-                  <span className="font-bold text-[#06b6d4]">{ejercicio.modoGolpePorcentaje}% visible</span>
-                </div>
-              </div>
+            {/* Exercise title info */}
+            {ejercicio?.titulo && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6 text-center"
+              >
+                <p className="text-gray-400 text-xs">
+                  Ejercicio: <span className="text-gray-600 font-medium">{ejercicio.titulo}</span>
+                </p>
+              </motion.div>
             )}
           </div>
         )}
