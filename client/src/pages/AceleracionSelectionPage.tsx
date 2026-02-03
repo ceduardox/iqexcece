@@ -1,6 +1,6 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, Home, Brain, BarChart3, Dumbbell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 
@@ -33,10 +33,15 @@ export default function AceleracionSelectionPage() {
     navigate(`/aceleracion/${categoria}/${itemId}/${mode}`);
   };
 
+  const handleNavClick = (path: string) => {
+    playSound("iphone");
+    navigate(path);
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #f8f4ff 0%, #e8f4ff 50%, #ffffff 100%)" }}>
-      {/* Header */}
-      <header className="px-4 py-4">
+      {/* Header with back button */}
+      <header className="px-4 py-3 flex items-center justify-between">
         <button
           onClick={handleBack}
           className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
@@ -44,10 +49,22 @@ export default function AceleracionSelectionPage() {
         >
           <ChevronLeft className="w-5 h-5 text-gray-600" />
         </button>
+        <div className="w-10" />
       </header>
 
+      {/* Hero image */}
+      <div className="px-4 mb-4">
+        <motion.img 
+          src="https://iqexponencial.app/api/images/c4b16288-7262-4c77-849b-65acfb47d363"
+          alt="Aceleración de Lectura"
+          className="w-full h-auto rounded-2xl object-cover"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        />
+      </div>
+
       {/* Main content */}
-      <main className="flex-1 px-5 pb-8">
+      <main className="flex-1 px-5 pb-24">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -56,7 +73,7 @@ export default function AceleracionSelectionPage() {
           <div className="max-w-md mx-auto">
             {/* Title */}
             <motion.div 
-              className="mb-6"
+              className="mb-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -76,7 +93,7 @@ export default function AceleracionSelectionPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 onClick={() => handleModeSelect("golpe")}
-                className="cursor-pointer group"
+                className="cursor-pointer"
                 data-testid="card-mode-golpe"
               >
                 <div 
@@ -93,15 +110,13 @@ export default function AceleracionSelectionPage() {
                     }}
                   />
                   
-                  {/* Icon container */}
+                  {/* Icon - larger, no background box */}
                   <div className="relative flex justify-center mb-3">
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                      <img 
-                        src="https://iqexponencial.app/api/images/4c4e3c88-df96-43fa-aa54-2e8d1fb97634" 
-                        alt="Golpe de Vista" 
-                        className="w-16 h-16 object-contain"
-                      />
-                    </div>
+                    <img 
+                      src="https://iqexponencial.app/api/images/4c4e3c88-df96-43fa-aa54-2e8d1fb97634" 
+                      alt="Golpe de Vista" 
+                      className="w-24 h-24 object-contain"
+                    />
                   </div>
                   
                   {/* Text */}
@@ -113,13 +128,6 @@ export default function AceleracionSelectionPage() {
                       Entrena tu campo visual
                     </p>
                   </div>
-                  
-                  {/* Arrow indicator */}
-                  <div className="relative flex justify-center mt-3">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                      <ChevronRight className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
                 </div>
               </motion.div>
 
@@ -129,7 +137,7 @@ export default function AceleracionSelectionPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 onClick={() => handleModeSelect("desplazamiento")}
-                className="cursor-pointer group"
+                className="cursor-pointer"
                 data-testid="card-mode-desplazamiento"
               >
                 <div 
@@ -146,15 +154,13 @@ export default function AceleracionSelectionPage() {
                     }}
                   />
                   
-                  {/* Icon container */}
+                  {/* Icon - larger, no background box */}
                   <div className="relative flex justify-center mb-3">
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                      <img 
-                        src="https://iqexponencial.app/api/images/9c5d7335-73c7-41cc-a920-d59ae93a78b0" 
-                        alt="Desplazamiento" 
-                        className="w-16 h-16 object-contain"
-                      />
-                    </div>
+                    <img 
+                      src="https://iqexponencial.app/api/images/9c5d7335-73c7-41cc-a920-d59ae93a78b0" 
+                      alt="Desplazamiento" 
+                      className="w-24 h-24 object-contain"
+                    />
                   </div>
                   
                   {/* Text */}
@@ -166,33 +172,50 @@ export default function AceleracionSelectionPage() {
                       Practica lectura continua
                     </p>
                   </div>
-                  
-                  {/* Arrow indicator */}
-                  <div className="relative flex justify-center mt-3">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                      <ChevronRight className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             </div>
-
-            {/* Exercise title info */}
-            {ejercicio?.titulo && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mt-6 text-center"
-              >
-                <p className="text-gray-400 text-xs">
-                  Ejercicio: <span className="text-gray-600 font-medium">{ejercicio.titulo}</span>
-                </p>
-              </motion.div>
-            )}
           </div>
         )}
       </main>
+
+      {/* Bottom navigation bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg px-4 py-2 z-50">
+        <div className="max-w-md mx-auto flex justify-around items-center">
+          <button
+            onClick={() => handleNavClick("/")}
+            className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-purple-600 transition-colors"
+            data-testid="nav-home"
+          >
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Inicio</span>
+          </button>
+          <button
+            onClick={() => handleNavClick(`/tests/${categoria}`)}
+            className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-purple-600 transition-colors"
+            data-testid="nav-diagnostico"
+          >
+            <Brain className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Diagnóstico</span>
+          </button>
+          <button
+            onClick={() => handleNavClick(`/entrenamiento/${categoria}`)}
+            className="flex flex-col items-center gap-1 p-2 text-purple-600"
+            data-testid="nav-entrenar"
+          >
+            <Dumbbell className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Entrenar</span>
+          </button>
+          <button
+            onClick={() => handleNavClick(`/progreso`)}
+            className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-purple-600 transition-colors"
+            data-testid="nav-progreso"
+          >
+            <BarChart3 className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Progreso</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
