@@ -501,52 +501,60 @@ export default function TestsPage() {
         </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-2 z-50 shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-50 px-4 py-2 z-50 safe-area-inset-bottom">
         <div className="flex items-center justify-around max-w-md mx-auto">
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-inicio", e); else handleNavHome(); }}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-inicio")}`}
+            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-inicio")}`}
             style={getElementStyle("nav-inicio")}
             data-testid="nav-inicio"
           >
-            <Home className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] text-gray-400">Inicio</span>
+            <Home className="w-5 h-5" style={{ color: styles["nav-inicio"]?.textColor || "#9ca3af" }} />
+            <span className="text-[10px]" style={{ color: styles["nav-inicio"]?.textColor || "#9ca3af" }}>Inicio</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-diagnostico", e); }}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-diagnostico")}`}
+            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-diagnostico")}`}
             style={getElementStyle("nav-diagnostico")}
             data-testid="nav-diagnostico"
           >
-            <Stethoscope className="w-5 h-5 text-purple-600" />
-            <span className="text-[10px] text-purple-600 font-medium">Diagnóstico</span>
+            <div 
+              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: styles["nav-diagnostico"]?.background || "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                boxShadow: styles["nav-diagnostico"]?.boxShadow || "0 4px 15px rgba(124, 58, 237, 0.4)"
+              }}
+            >
+              <Stethoscope className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-diagnostico"]?.textColor || "#7c3aed" }}>Diagnóstico</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); else setLocation("/entrenamiento"); }}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-entrenar")}`}
+            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-entrenar")}`}
             style={getElementStyle("nav-entrenar")}
             data-testid="nav-entrenar"
           >
-            <Dumbbell className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] text-gray-400">Entrenar</span>
+            <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
+            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>Entrenar</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-progreso")}`}
+            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-progreso")}`}
             style={getElementStyle("nav-progreso")}
             data-testid="nav-progreso"
           >
-            <BarChart3 className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] text-gray-400">Progreso</span>
+            <BarChart3 className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
+            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${getEditableClass("nav-mas")}`}
+            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-mas")}`}
             style={getElementStyle("nav-mas")}
             data-testid="nav-mas"
           >
-            <MoreHorizontal className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] text-gray-400">Más</span>
+            <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
+            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
           </button>
         </div>
       </nav>
