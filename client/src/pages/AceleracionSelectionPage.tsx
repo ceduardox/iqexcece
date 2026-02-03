@@ -52,12 +52,12 @@ export default function AceleracionSelectionPage() {
         <div className="w-10" />
       </header>
 
-      {/* Hero image */}
-      <div className="px-4 mb-4">
+      {/* Hero image - smaller */}
+      <div className="px-4 mb-4 flex justify-center">
         <motion.img 
           src="https://iqexponencial.app/api/images/c4b16288-7262-4c77-849b-65acfb47d363"
           alt="Aceleración de Lectura"
-          className="w-full h-auto rounded-2xl object-cover"
+          className="w-1/2 h-auto rounded-2xl object-cover"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         />
@@ -97,16 +97,15 @@ export default function AceleracionSelectionPage() {
                 data-testid="card-mode-golpe"
               >
                 <div 
-                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                  style={{
-                    background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6366f1 100%)"
-                  }}
+                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white"
                 >
-                  {/* Decorative overlay */}
+                  {/* Gradient only on bottom corners */}
                   <div 
-                    className="absolute inset-0 opacity-30"
+                    className="absolute bottom-0 left-0 right-0 h-1/3 opacity-80"
                     style={{
-                      background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 50%)"
+                      background: "linear-gradient(180deg, transparent 0%, rgba(168, 85, 247, 0.15) 50%, rgba(124, 58, 237, 0.25) 100%)",
+                      borderBottomLeftRadius: "1rem",
+                      borderBottomRightRadius: "1rem"
                     }}
                   />
                   
@@ -121,10 +120,10 @@ export default function AceleracionSelectionPage() {
                   
                   {/* Text */}
                   <div className="relative text-center">
-                    <h3 className="text-white font-bold text-base mb-1">
+                    <h3 className="text-purple-600 font-bold text-base mb-1">
                       Golpe de Vista
                     </h3>
-                    <p className="text-white/80 text-xs leading-tight">
+                    <p className="text-gray-500 text-xs leading-tight">
                       Entrena tu campo visual
                     </p>
                   </div>
@@ -141,16 +140,15 @@ export default function AceleracionSelectionPage() {
                 data-testid="card-mode-desplazamiento"
               >
                 <div 
-                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                  style={{
-                    background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%)"
-                  }}
+                  className="relative rounded-2xl p-4 h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white"
                 >
-                  {/* Decorative overlay */}
+                  {/* Gradient only on bottom corners */}
                   <div 
-                    className="absolute inset-0 opacity-30"
+                    className="absolute bottom-0 left-0 right-0 h-1/3 opacity-80"
                     style={{
-                      background: "radial-gradient(circle at 70% 20%, rgba(255,255,255,0.4) 0%, transparent 50%)"
+                      background: "linear-gradient(180deg, transparent 0%, rgba(6, 182, 212, 0.15) 50%, rgba(8, 145, 178, 0.25) 100%)",
+                      borderBottomLeftRadius: "1rem",
+                      borderBottomRightRadius: "1rem"
                     }}
                   />
                   
@@ -165,10 +163,10 @@ export default function AceleracionSelectionPage() {
                   
                   {/* Text */}
                   <div className="relative text-center">
-                    <h3 className="text-white font-bold text-base mb-1">
+                    <h3 className="text-cyan-600 font-bold text-base mb-1">
                       Desplazamiento
                     </h3>
-                    <p className="text-white/80 text-xs leading-tight">
+                    <p className="text-gray-500 text-xs leading-tight">
                       Practica lectura continua
                     </p>
                   </div>
