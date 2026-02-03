@@ -1,11 +1,115 @@
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+
+function AnimatedNumberIcon() {
+  const [currentNum, setCurrentNum] = useState(1);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentNum(prev => prev >= 9 ? 1 : prev + 1);
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div 
+      className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={currentNum}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -20, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-white text-2xl font-bold"
+        >
+          {currentNum}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function AnimatedLetterIcon() {
+  const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  const [currentIdx, setCurrentIdx] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIdx(prev => (prev + 1) % letters.length);
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div 
+      className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={currentIdx}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 1.5, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-white text-2xl font-bold"
+        >
+          {letters[currentIdx]}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function AnimatedRomanIcon() {
+  const romans = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  const [currentIdx, setCurrentIdx] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIdx(prev => (prev + 1) % romans.length);
+    }, 700);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div 
+      className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={currentIdx}
+          initial={{ rotateX: 90, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          exit={{ rotateX: -90, opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="text-white text-xl font-bold"
+        >
+          {romans[currentIdx]}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function getAnimatedIcon(nivelId: string) {
+  switch (nivelId) {
+    case "numeros": return <AnimatedNumberIcon />;
+    case "letras": return <AnimatedLetterIcon />;
+    case "romanos": return <AnimatedRomanIcon />;
+    default: return <AnimatedNumberIcon />;
+  }
+}
 
 interface NivelConfig {
   id: string;
@@ -134,18 +238,13 @@ export default function NumerosNivelesPage() {
                 transition={{ delay: idx * 0.1 }}
                 data-testid={`button-nivel-${nivel.id}`}
               >
-                {nivel.icono ? (
-                  <img src={nivel.icono} alt={nivel.nombre} className="w-16 h-16 object-contain mb-3" />
-                ) : (
-                  <div 
-                    className="w-16 h-16 rounded-lg flex items-center justify-center mb-3"
-                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
-                  >
-                    <span className="text-white text-xl font-bold">
-                      {nivel.id === "numeros" ? "123" : nivel.id === "letras" ? "ABC" : "XII"}
-                    </span>
-                  </div>
-                )}
+                <div className="mb-3">
+                  {nivel.icono ? (
+                    <img src={nivel.icono} alt={nivel.nombre} className="w-16 h-16 object-contain" />
+                  ) : (
+                    getAnimatedIcon(nivel.id)
+                  )}
+                </div>
                 <span className="text-gray-800 font-semibold text-base">{nivel.nombre}</span>
               </motion.button>
             ))}
@@ -161,16 +260,13 @@ export default function NumerosNivelesPage() {
                 transition={{ delay: 0.2 }}
                 data-testid={`button-nivel-${activeNiveles[2].id}`}
               >
-                {activeNiveles[2].icono ? (
-                  <img src={activeNiveles[2].icono} alt={activeNiveles[2].nombre} className="w-16 h-16 object-contain mb-3" />
-                ) : (
-                  <div 
-                    className="w-16 h-16 rounded-lg flex items-center justify-center mb-3"
-                    style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
-                  >
-                    <span className="text-white text-xl font-bold">XII</span>
-                  </div>
-                )}
+                <div className="mb-3">
+                  {activeNiveles[2].icono ? (
+                    <img src={activeNiveles[2].icono} alt={activeNiveles[2].nombre} className="w-16 h-16 object-contain" />
+                  ) : (
+                    getAnimatedIcon(activeNiveles[2].id)
+                  )}
+                </div>
                 <span className="text-gray-800 font-semibold text-base">{activeNiveles[2].nombre}</span>
               </motion.button>
             </div>
