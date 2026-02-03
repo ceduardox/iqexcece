@@ -263,6 +263,26 @@ export const aceleracionEjercicios = pgTable("aceleracion_ejercicios", {
 
 export const insertAceleracionEjercicioSchema = createInsertSchema(aceleracionEjercicios).omit({ id: true, createdAt: true, updatedAt: true });
 
+// Training results table (for tracking progress)
+export const trainingResults = pgTable("training_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: text("session_id"),
+  categoria: text("categoria").notNull(),
+  tipoEjercicio: text("tipo_ejercicio").notNull(), // "velocidad", "numeros", "aceleracion_golpe", "aceleracion_desplazamiento"
+  ejercicioTitulo: text("ejercicio_titulo"),
+  puntaje: integer("puntaje").default(0),
+  nivelAlcanzado: integer("nivel_alcanzado").default(1),
+  tiempoSegundos: integer("tiempo_segundos").default(0),
+  palabrasPorMinuto: integer("palabras_por_minuto"),
+  respuestasCorrectas: integer("respuestas_correctas").default(0),
+  respuestasTotales: integer("respuestas_totales").default(0),
+  datosExtra: text("datos_extra"), // JSON string with extra data
+  isPwa: boolean("is_pwa").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTrainingResultSchema = createInsertSchema(trainingResults).omit({ id: true, createdAt: true });
+
 // Page styles for visual editor
 export const pageStyles = pgTable("page_styles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -303,3 +323,5 @@ export type AceleracionEjercicio = typeof aceleracionEjercicios.$inferSelect;
 export type InsertAceleracionEjercicio = z.infer<typeof insertAceleracionEjercicioSchema>;
 export type PageStyle = typeof pageStyles.$inferSelect;
 export type InsertPageStyle = z.infer<typeof insertPageStyleSchema>;
+export type TrainingResult = typeof trainingResults.$inferSelect;
+export type InsertTrainingResult = z.infer<typeof insertTrainingResultSchema>;

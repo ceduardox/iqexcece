@@ -845,6 +845,26 @@ export async function registerRoutes(
     res.json({ ejercicio });
   });
 
+  // Training results endpoints
+  app.post("/api/training-results", async (req, res) => {
+    const result = await storage.saveTrainingResult(req.body);
+    res.json({ result });
+  });
+
+  app.get("/api/training-results", async (req, res) => {
+    const sessionId = req.query.sessionId as string;
+    const categoria = req.query.categoria as string;
+    const results = await storage.getTrainingResults(sessionId, categoria);
+    res.json({ results });
+  });
+
+  app.get("/api/training-results/stats", async (req, res) => {
+    const sessionId = req.query.sessionId as string;
+    const categoria = req.query.categoria as string;
+    const stats = await storage.getTrainingStats(sessionId, categoria);
+    res.json({ stats });
+  });
+
   // Page styles for visual editor
   app.get("/api/page-styles/:pageName", async (req, res) => {
     const style = await storage.getPageStyle(req.params.pageName);

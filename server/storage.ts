@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, type TrainingResult, type InsertTrainingResult, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles, trainingResults } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -86,6 +86,11 @@ export interface IStorage {
   getPageStyle(pageName: string): Promise<PageStyle | null>;
   savePageStyle(pageName: string, styles: string): Promise<PageStyle>;
   getAllPageStyles(): Promise<PageStyle[]>;
+  
+  // Training results
+  saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult>;
+  getTrainingResults(sessionId?: string, categoria?: string): Promise<TrainingResult[]>;
+  getTrainingStats(sessionId?: string, categoria?: string): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -184,6 +189,8 @@ export class MemStorage implements IStorage {
       telefono: insertResult.telefono || null,
       comentario: insertResult.comentario || null,
       categoria: insertResult.categoria || "preescolar",
+      nivelEducativo: insertResult.nivelEducativo || null,
+      grado: insertResult.grado || null,
       tiempoLectura: insertResult.tiempoLectura || null,
       tiempoCuestionario: insertResult.tiempoCuestionario || null,
       isPwa: insertResult.isPwa || false,
@@ -368,6 +375,13 @@ export class MemStorage implements IStorage {
     return { id: randomUUID(), pageName, styles, updatedAt: new Date() } as PageStyle;
   }
   async getAllPageStyles(): Promise<PageStyle[]> { return []; }
+  
+  // Training results stubs
+  async saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult> {
+    return { id: randomUUID(), ...result, createdAt: new Date() } as TrainingResult;
+  }
+  async getTrainingResults(_sessionId?: string, _categoria?: string): Promise<TrainingResult[]> { return []; }
+  async getTrainingStats(_sessionId?: string, _categoria?: string): Promise<any> { return { totalSessions: 0, byType: {}, recentActivity: [], dailyActivity: {} }; }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -874,6 +888,66 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPageStyles(): Promise<PageStyle[]> {
     return db.select().from(pageStyles);
+  }
+
+  // Training results
+  async saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult> {
+    const [created] = await db.insert(trainingResults).values(result).returning();
+    return created;
+  }
+
+  async getTrainingResults(sessionId?: string, categoria?: string): Promise<TrainingResult[]> {
+    let query = db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
+    
+    if (sessionId && categoria) {
+      return db.select().from(trainingResults)
+        .where(and(eq(trainingResults.sessionId, sessionId), eq(trainingResults.categoria, categoria)))
+        .orderBy(desc(trainingResults.createdAt));
+    } else if (sessionId) {
+      return db.select().from(trainingResults)
+        .where(eq(trainingResults.sessionId, sessionId))
+        .orderBy(desc(trainingResults.createdAt));
+    } else if (categoria) {
+      return db.select().from(trainingResults)
+        .where(eq(trainingResults.categoria, categoria))
+        .orderBy(desc(trainingResults.createdAt));
+    }
+    
+    return db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
+  }
+
+  async getTrainingStats(sessionId?: string, categoria?: string): Promise<any> {
+    const results = await this.getTrainingResults(sessionId, categoria);
+    
+    const stats = {
+      totalSessions: results.length,
+      byType: {} as Record<string, { count: number; avgScore: number; bestScore: number }>,
+      recentActivity: results.slice(0, 10),
+      dailyActivity: {} as Record<string, number>
+    };
+    
+    for (const r of results) {
+      const type = r.tipoEjercicio;
+      if (!stats.byType[type]) {
+        stats.byType[type] = { count: 0, avgScore: 0, bestScore: 0 };
+      }
+      stats.byType[type].count++;
+      stats.byType[type].avgScore += r.puntaje || 0;
+      stats.byType[type].bestScore = Math.max(stats.byType[type].bestScore, r.puntaje || 0);
+      
+      // Daily activity
+      if (r.createdAt) {
+        const day = new Date(r.createdAt).toISOString().split('T')[0];
+        stats.dailyActivity[day] = (stats.dailyActivity[day] || 0) + 1;
+      }
+    }
+    
+    // Calculate averages
+    for (const type of Object.keys(stats.byType)) {
+      stats.byType[type].avgScore = Math.round(stats.byType[type].avgScore / stats.byType[type].count);
+    }
+    
+    return stats;
   }
 }
 

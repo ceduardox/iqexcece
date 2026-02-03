@@ -30,8 +30,6 @@ function GolpeAnimation() {
       </div>
       {/* Inner circle */}
       <div className="absolute inset-2 rounded-full border border-purple-100" />
-      {/* Center dot */}
-      <div className="absolute w-1.5 h-1.5 bg-purple-500 rounded-full" />
       {/* Animated word */}
       <motion.span
         key={currentWord}
@@ -289,7 +287,7 @@ export default function AceleracionSelectionPage() {
             <span className="text-[10px]">Inicio</span>
           </motion.button>
           <motion.button
-            onClick={() => handleNavClick(`/tests/${categoria}`)}
+            onClick={() => handleNavClick(`/reading-selection/${categoria}`)}
             className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
             whileTap={{ scale: 0.9 }}
             data-testid="nav-diagnostico"
