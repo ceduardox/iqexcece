@@ -10,7 +10,7 @@ import html2canvas from "html2canvas";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const GAME_DURATION = 50;
-const MATCH_PROB = 0.25;
+const MATCH_PROB = 0.35; // 35% probability that combo equals previous (good balance)
 
 // Level 1 config: 7x9 grid with 4 target positions
 const LEVEL1_CONFIG = {
