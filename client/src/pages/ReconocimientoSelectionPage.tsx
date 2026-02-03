@@ -24,7 +24,7 @@ function LetterAnimation({ letters, positions }: { letters: string[]; positions:
   }, [letters]);
 
   return (
-    <div className="relative w-20 h-20 flex items-center justify-center">
+    <div className="relative w-24 h-24 flex items-center justify-center">
       <div 
         className="absolute inset-0 rounded-full"
         style={{ 
@@ -34,23 +34,22 @@ function LetterAnimation({ letters, positions }: { letters: string[]; positions:
       >
         <div className="w-full h-full rounded-full bg-white" />
       </div>
-      <div className="absolute inset-2 rounded-full border border-purple-100" />
       {positions.map((pos, i) => (
         <motion.span
           key={`${i}-${currentLetters[i]}`}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="absolute text-purple-600 font-bold text-xs"
+          className="absolute text-purple-600 font-bold text-sm"
           style={{ 
-            left: `${50 + pos.x * 28}%`, 
-            top: `${50 + pos.y * 28}%`,
+            left: `${50 + pos.x * 32}%`, 
+            top: `${50 + pos.y * 32}%`,
             transform: "translate(-50%, -50%)"
           }}
         >
           {currentLetters[i]}
         </motion.span>
       ))}
-      <div className="absolute w-1.5 h-1.5 rounded-full bg-amber-400" style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />
+      <div className="absolute w-2 h-2 rounded-full bg-amber-400" style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />
     </div>
   );
 }
@@ -109,22 +108,23 @@ export default function ReconocimientoSelectionPage() {
     <div 
       className="min-h-screen flex flex-col"
       style={{ 
-        background: "linear-gradient(180deg, #a855f7 0%, #7c3aed 40%, #6366f1 100%)"
+        background: "linear-gradient(180deg, #f5f3ff 0%, #ffffff 30%, #ffffff 70%, #f0fdff 100%)"
       }}
     >
-      <header className="relative px-4 py-4 flex items-center">
+      <header className="relative px-4 py-4 flex items-center justify-between">
         <motion.button
           onClick={handleBack}
-          className="flex items-center gap-1 text-white"
+          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+          style={{ boxShadow: "0 2px 8px rgba(124, 58, 237, 0.1)" }}
           whileTap={{ scale: 0.95 }}
           data-testid="button-back"
         >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="font-medium">Volver</span>
+          <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
+        <div className="w-10" />
       </header>
 
-      <div className="relative px-6 mb-4 flex justify-center">
+      <div className="relative px-6 mb-6 flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -133,51 +133,52 @@ export default function ReconocimientoSelectionPage() {
           <img 
             src="https://iqexponencial.app/api/images/855a8501-7a45-48c1-be95-a678a94836b5"
             alt="Reconocimiento Visual"
-            className="w-32 sm:w-36 h-auto"
+            className="w-28 sm:w-32 h-auto rounded-2xl object-cover"
+            style={{ boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)" }}
           />
         </motion.div>
       </div>
 
-      <main 
-        className="flex-1 px-5 pb-28 pt-6 rounded-t-[2rem]"
-        style={{ background: "white" }}
-      >
+      <main className="flex-1 px-5 pb-28 relative">
         <div className="max-w-md mx-auto">
           <motion.div 
-            className="mb-6 text-center"
+            className="mb-4 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
           >
-            <h1 className="text-xl font-bold text-gray-800">
+            <h1 className="text-lg sm:text-xl font-bold text-purple-600">
               Amplía tu Reconocimiento Visual
             </h1>
           </motion.div>
           
           <motion.div 
-            className="mb-6"
+            className="mb-6 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <p className="text-gray-500 text-sm">
-              Elige un nivel:
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
+              Selecciona el Nivel
+            </h2>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Elige la dificultad del ejercicio
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 px-2">
             {niveles.map((nivel, index) => (
               <motion.div
                 key={nivel.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + index * 0.1 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
                 onClick={() => handleNivelSelect(nivel.id)}
-                className="cursor-pointer"
+                className="cursor-pointer aspect-square"
                 data-testid={`card-nivel-${nivel.id}`}
               >
                 <motion.div 
-                  className="relative bg-white rounded-2xl p-4 flex flex-col items-center justify-center border border-purple-100"
+                  className="relative bg-white rounded-3xl p-3 sm:p-4 h-full flex flex-col items-center justify-center"
                   style={{ boxShadow: "0 4px 20px rgba(124, 58, 237, 0.08)" }}
                   whileHover={{ y: -4, boxShadow: "0 8px 30px rgba(124, 58, 237, 0.15)" }}
                   whileTap={{ scale: 0.98 }}
@@ -187,10 +188,15 @@ export default function ReconocimientoSelectionPage() {
                   </div>
                   
                   <div className="text-center">
-                    <h3 className="text-gray-800 font-semibold text-sm">
+                    <h3 className="text-gray-800 font-semibold text-xs sm:text-sm">
                       {nivel.nombre}
                     </h3>
                   </div>
+                  
+                  <div 
+                    className="absolute bottom-0 left-4 right-4 h-1 rounded-full"
+                    style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7)" }}
+                  />
                 </motion.div>
               </motion.div>
             ))}
