@@ -321,7 +321,7 @@ export default function ProgresoPage() {
             <span className="text-[10px]">Diagnóstico</span>
           </motion.button>
           <motion.button
-            onClick={() => handleNavClick(`/entrenamiento/${categoria}`)}
+            onClick={() => handleNavClick(`/entrenamiento`)}
             className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
             whileTap={{ scale: 0.9 }}
             data-testid="nav-entrenar"
