@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Target, Home, Brain, Dumbbell, BarChart3 } from "lucide-react";
-
-const playButtonSound = () => {
-  const audio = new Audio('/iphone.mp3');
-  audio.volume = 0.5;
-  audio.play().catch(() => {});
-};
+import { ArrowLeft, Target } from "lucide-react";
+import { TrainingNavBar } from "@/components/TrainingNavBar";
+import { useSounds } from "@/hooks/use-sounds";
 
 interface PrepData {
   imagen: string;
@@ -25,6 +21,7 @@ export default function EntrenamientoPrepPage() {
   const [, setLocation] = useLocation();
   const [prepData, setPrepData] = useState<PrepData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { playSound } = useSounds();
 
   useEffect(() => {
     const loadPrepData = async () => {
@@ -70,7 +67,7 @@ export default function EntrenamientoPrepPage() {
   }, [categoria, itemId, setLocation]);
 
   const handleStart = () => {
-    playButtonSound();
+    playSound("iphone");
     const tipo = prepData?.tipoEjercicio || "velocidad";
     if (tipo === "velocidad") {
       setLocation(`/velocidad/${categoria}/${itemId}`);
@@ -88,7 +85,7 @@ export default function EntrenamientoPrepPage() {
   };
 
   const handleBack = () => {
-    playButtonSound();
+    playSound("iphone");
     window.history.back();
   };
 
@@ -209,59 +206,7 @@ export default function EntrenamientoPrepPage() {
         )}
       </main>
 
-      {/* Bottom navigation with active Entrenar button */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-50 px-4 py-2 z-50"
-      >
-        <div className="max-w-md mx-auto flex justify-around items-center">
-          <motion.button
-            onClick={() => { playButtonSound(); setLocation("/"); }}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-home"
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-[10px]">Inicio</span>
-          </motion.button>
-          <motion.button
-            onClick={() => { playButtonSound(); setLocation(`/reading-selection/${categoria}`); }}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-diagnostico"
-          >
-            <Brain className="w-5 h-5" />
-            <span className="text-[10px]">Diagnóstico</span>
-          </motion.button>
-          <motion.button
-            onClick={() => { playButtonSound(); setLocation(`/entrenamiento`); }}
-            className="flex flex-col items-center gap-0.5 p-2 text-purple-600"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-entrenar"
-          >
-            <div 
-              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
-              }}
-            >
-              <Dumbbell className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-[10px] font-medium mt-1">Entrenar</span>
-          </motion.button>
-          <motion.button
-            onClick={() => { playButtonSound(); setLocation(`/progreso/${categoria}`); }}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-progreso"
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-[10px]">Progreso</span>
-          </motion.button>
-        </div>
-      </nav>
-      {/* Spacer for nav bar */}
-      <div className="h-20" />
+      <TrainingNavBar activePage="entrenar" categoria={categoria} />
     </div>
   );
 }

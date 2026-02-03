@@ -1,8 +1,9 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, Home, Brain, BarChart3, Dumbbell, Calendar, Clock, Trophy, TrendingUp, Zap } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
+import { TrainingNavBar } from "@/components/TrainingNavBar";
 
 interface TrainingResult {
   id: string;
@@ -118,11 +119,6 @@ export default function ProgresoPage() {
   const handleBack = () => {
     playSound("iphone");
     window.history.back();
-  };
-
-  const handleNavClick = (path: string) => {
-    playSound("iphone");
-    navigate(path);
   };
 
   return (
@@ -330,57 +326,7 @@ export default function ProgresoPage() {
         )}
       </main>
 
-      {/* Bottom navigation */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-50 px-4 py-2 z-50"
-      >
-        <div className="max-w-md mx-auto flex justify-around items-center">
-          <motion.button
-            onClick={() => handleNavClick("/")}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-home"
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-[10px]">Inicio</span>
-          </motion.button>
-          <motion.button
-            onClick={() => handleNavClick(`/reading-selection/${categoria}`)}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-diagnostico"
-          >
-            <Brain className="w-5 h-5" />
-            <span className="text-[10px]">Diagnóstico</span>
-          </motion.button>
-          <motion.button
-            onClick={() => handleNavClick(`/entrenamiento`)}
-            className="flex flex-col items-center gap-0.5 p-2 text-gray-400"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-entrenar"
-          >
-            <Dumbbell className="w-5 h-5" />
-            <span className="text-[10px]">Entrenar</span>
-          </motion.button>
-          <motion.button
-            onClick={() => handleNavClick(`/progreso/${categoria}`)}
-            className="flex flex-col items-center gap-0.5 p-2 text-purple-600"
-            whileTap={{ scale: 0.9 }}
-            data-testid="nav-progreso"
-          >
-            <div 
-              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                boxShadow: "0 4px 15px rgba(124, 58, 237, 0.4)"
-              }}
-            >
-              <BarChart3 className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-[10px] font-medium mt-1">Progreso</span>
-          </motion.button>
-        </div>
-      </nav>
+      <TrainingNavBar activePage="progreso" categoria={categoria} />
     </div>
   );
 }
