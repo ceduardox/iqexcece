@@ -224,14 +224,20 @@ export default function ReconocimientoExercisePage() {
     }
   }, [gameState, resultSaved, correctCount, incorrectCount, skippedCount, nivel, categoria, sessionId, isPwa, saveResultMutation]);
 
-  const handleAnswer = (isEqual: boolean) => {
-    if (gameState !== "running" || hasAnswered || !prevCombo) return;
+  const handleAnswer = (userSaysEqual: boolean) => {
+    if (gameState !== "running" || hasAnswered) return;
     
     playSound("iphone");
     setHasAnswered(true);
 
-    const actuallyEqual = currentCombo.every((l, i) => l === prevCombo[i]);
-    const isCorrect = isEqual === actuallyEqual;
+    // Check if ALL letters in current combo are the same
+    const firstLetter = currentCombo[0];
+    const allLettersEqual = currentCombo.every(letter => letter === firstLetter);
+    
+    // User is correct if:
+    // - They pressed "Sí, son iguales" AND all letters ARE equal
+    // - They pressed "No son iguales" AND letters are NOT all equal
+    const isCorrect = userSaysEqual === allLettersEqual;
 
     if (isCorrect) {
       setCorrectCount(c => c + 1);
@@ -574,42 +580,38 @@ export default function ReconocimientoExercisePage() {
       </header>
 
       <div 
-        className="flex justify-center gap-2 px-4 py-3 border-b border-gray-100"
+        className="flex flex-wrap justify-center gap-2 px-2 py-3 border-b border-gray-100"
         style={{ background: "#f9fafb" }}
       >
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl shadow-sm">
-          <span className="text-gray-500 text-xs uppercase">Nivel</span>
-          <span className="text-purple-600 font-bold">{nivel}</span>
+        <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
+          <span className="text-gray-500 text-[10px] uppercase">Nivel</span>
+          <span className="text-purple-600 font-bold text-sm">{nivel}</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl shadow-sm">
-          <span className="text-gray-500 text-xs uppercase">Tiempo</span>
-          <span className="text-purple-600 font-bold">{timeLeft}s</span>
+        <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
+          <span className="text-gray-500 text-[10px] uppercase">Tiempo</span>
+          <span className="text-purple-600 font-bold text-sm">{timeLeft}s</span>
         </div>
-        <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 rounded-xl shadow-sm border border-green-200">
-          <span className="text-lg">😊</span>
-          <div className="flex flex-col items-center">
-            <span className="text-green-600 font-bold text-sm">{correctCount}</span>
-            <span className="text-green-600 text-[10px]">Correcto</span>
-          </div>
+        <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-lg shadow-sm border border-green-200">
+          <span className="text-base">😊</span>
+          <span className="text-green-600 font-bold text-sm">{correctCount}</span>
+          <span className="text-green-600 text-[10px]">Correcto</span>
         </div>
-        <div className="flex items-center gap-1 px-3 py-1.5 bg-red-50 rounded-xl shadow-sm border border-red-200">
-          <span className="text-lg">😟</span>
-          <div className="flex flex-col items-center">
-            <span className="text-red-500 font-bold text-sm">{incorrectCount}</span>
-            <span className="text-red-500 text-[10px]">Incorrecto</span>
-          </div>
+        <div className="flex items-center gap-1 px-2 py-1 bg-red-50 rounded-lg shadow-sm border border-red-200">
+          <span className="text-base">😟</span>
+          <span className="text-red-500 font-bold text-sm">{incorrectCount}</span>
+          <span className="text-red-500 text-[10px]">Incorrecto</span>
         </div>
       </div>
 
       <main className="flex-1 px-4 pb-28 flex flex-col">
         <div className="text-center py-4">
           <h2 className="text-gray-800 font-bold text-base mb-1">
-            ¡Descubre los símbolos que cambian y decide si son iguales!
+            ¿Todas las letras marcadas son iguales?
           </h2>
           <p className="text-gray-400 text-xs">
             {nivel === 1 
-              ? "Cada 1s cambia el combo de 4 letras. Sale 4 iguales o 3 iguales + 1 distinta."
-              : "Cada 1s cambian 8 letras en las esquinas y bordes. Algunas son iguales y otras diferentes."
+              ? "Observa las 4 letras que cambian. ¿Son todas iguales o hay alguna diferente?"
+              : "Observa las 8 letras en esquinas y bordes. ¿Son todas iguales o hay alguna diferente?"
             }
           </p>
         </div>
@@ -652,7 +654,7 @@ export default function ReconocimientoExercisePage() {
         <div className="flex gap-4 justify-center mt-6">
           <motion.button
             onClick={() => handleAnswer(false)}
-            disabled={gameState !== "running" || hasAnswered || !prevCombo}
+            disabled={gameState !== "running" || hasAnswered}
             className="flex-1 max-w-[140px] py-4 rounded-2xl flex flex-col items-center justify-center gap-2 disabled:opacity-50"
             style={{ background: "#fef2f2", border: "1px solid #fecaca" }}
             whileTap={{ scale: 0.95 }}
@@ -664,7 +666,7 @@ export default function ReconocimientoExercisePage() {
 
           <motion.button
             onClick={() => handleAnswer(true)}
-            disabled={gameState !== "running" || hasAnswered || !prevCombo}
+            disabled={gameState !== "running" || hasAnswered}
             className="flex-1 max-w-[140px] py-4 rounded-2xl flex flex-col items-center justify-center gap-2 disabled:opacity-50"
             style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}
             whileTap={{ scale: 0.95 }}
