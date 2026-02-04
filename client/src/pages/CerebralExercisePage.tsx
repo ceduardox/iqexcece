@@ -860,10 +860,9 @@ export default function CerebralExercisePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl p-6 shadow-xl border border-purple-100"
+            className="rounded-3xl p-6 bg-white border border-gray-100"
             style={{
-              background: "linear-gradient(180deg, rgba(237, 233, 254, 0.6) 0%, rgba(255, 255, 255, 0.95) 100%)",
-              boxShadow: "0 8px 32px rgba(124, 58, 237, 0.15)"
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)"
             }}
           >
             {content.exerciseType === "bailarina" && renderBailarinaExercise()}
