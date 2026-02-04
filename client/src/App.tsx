@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import Home from "@/pages/Home";
 import TestsPage from "@/pages/TestsPage";
 import ReadingSelectionPage from "@/pages/ReadingSelectionPage";
@@ -88,6 +89,7 @@ function App() {
         <UserProvider>
           <Toaster />
           <Router />
+          <PWAInstallPrompt />
         </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>
