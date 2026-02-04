@@ -18,7 +18,7 @@ export default function CerebralFormPage() {
     email: "",
     edad: "",
     ciudad: "",
-    telefono: "+591 ",
+    telefono: "",
     comentario: "",
     grado: "",
   });

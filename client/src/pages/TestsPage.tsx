@@ -311,12 +311,7 @@ export default function TestsPage() {
   const handleTestClick = useCallback((testId: string) => {
     playCardSound();
     updateUserData({ selectedTest: testId });
-    // Test Cerebral goes directly to selection page (no age selection needed)
-    if (testId === "cerebral") {
-      setLocation("/cerebral/seleccion");
-    } else {
-      setLocation(`/age-selection/${testId}`);
-    }
+    setLocation(`/age-selection/${testId}`);
   }, [updateUserData, setLocation]);
 
   const handleNavHome = useCallback(() => {

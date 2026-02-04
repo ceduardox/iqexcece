@@ -247,9 +247,9 @@ export default function CerebralExercisePage() {
     const options = content?.exerciseData?.sequenceOptions || [];
     return (
       <div className="space-y-3">
-        <p className="text-white/80 text-center text-sm">Completa la secuencia:</p>
+        <p className="text-gray-600 text-center text-sm">Completa la secuencia:</p>
         <div className="text-center">
-          <p className="text-xl font-bold text-white mb-2">{content?.exerciseData.sequence}</p>
+          <p className="text-xl font-bold text-gray-800 mb-2">{content?.exerciseData.sequence}</p>
         </div>
         {content?.imageUrl && (
           <div className="flex justify-center">
@@ -272,7 +272,7 @@ export default function CerebralExercisePage() {
                   className={`p-2 rounded-lg text-sm font-bold transition-colors ${
                     userAnswer === opt 
                       ? 'bg-purple-600 text-white border-2 border-purple-400' 
-                      : 'bg-white/10 text-white border border-white/20 hover-elevate'
+                      : 'bg-purple-50 text-gray-700 border border-purple-200 hover-elevate'
                   } ${submitted ? 'opacity-60' : ''}`}
                   data-testid={`button-sequence-option-${idx}`}
                 >
@@ -285,7 +285,7 @@ export default function CerebralExercisePage() {
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Tu respuesta..."
-              className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              className="text-center text-xl bg-purple-50 border-purple-200 text-gray-800 placeholder:text-gray-400"
               disabled={submitted}
               data-testid="input-sequence-answer"
             />
@@ -319,11 +319,11 @@ export default function CerebralExercisePage() {
     if (memoriaPhase === 'memorize') {
       return (
         <div className="space-y-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-yellow-400">
+          <div className="flex items-center justify-center gap-2 text-amber-600">
             <Clock className="w-5 h-5" />
             <span className="font-bold text-lg">Memoriza: {memoriaTimer}s</span>
           </div>
-          <p className="text-white/60 text-sm">Recuerda estos elementos</p>
+          <p className="text-gray-500 text-sm">Recuerda estos elementos</p>
           <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
             {items.map((item: string, idx: number) => (
               <motion.div
@@ -331,7 +331,7 @@ export default function CerebralExercisePage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: idx * 0.1 }}
-                className="aspect-square bg-gradient-to-br from-purple-500/30 to-cyan-500/30 rounded-xl flex items-center justify-center text-2xl border border-white/20"
+                className="aspect-square bg-purple-50 rounded-xl flex items-center justify-center text-2xl border border-purple-200 text-gray-800"
               >
                 {item}
               </motion.div>
@@ -343,7 +343,7 @@ export default function CerebralExercisePage() {
 
     return (
       <div className="space-y-3 text-center">
-        <p className="text-white/80 text-sm">¿Cuáles viste? Selecciona:</p>
+        <p className="text-gray-600 text-sm">¿Cuáles viste? Selecciona:</p>
         <div className="grid grid-cols-4 gap-2 max-w-xs mx-auto">
           {allOptions.map((item: string, idx: number) => {
             const isSelected = selectedItems.includes(item);
@@ -363,8 +363,8 @@ export default function CerebralExercisePage() {
                 disabled={submitted}
                 className={`aspect-square rounded-lg text-xl flex items-center justify-center transition-colors ${
                   isSelected 
-                    ? 'bg-purple-600 border-2 border-purple-400' 
-                    : 'bg-white/10 border border-white/20 hover-elevate'
+                    ? 'bg-purple-600 text-white border-2 border-purple-400' 
+                    : 'bg-purple-50 text-gray-700 border border-purple-200 hover-elevate'
                 } ${submitted ? 'opacity-60' : ''}`}
               >
                 {item}
@@ -382,7 +382,7 @@ export default function CerebralExercisePage() {
     
     return (
       <div className="space-y-4">
-        <p className="text-white/80 text-center text-sm">¿Qué sigue en el patrón?</p>
+        <p className="text-gray-600 text-center text-sm">¿Qué sigue en el patrón?</p>
         
         {/* Pattern sequence display */}
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -394,8 +394,8 @@ export default function CerebralExercisePage() {
               transition={{ delay: idx * 0.1 }}
               className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${
                 item === '?' 
-                  ? 'bg-purple-600/50 border-2 border-dashed border-purple-400 text-purple-300' 
-                  : 'bg-white/10 border border-white/20'
+                  ? 'bg-purple-100 border-2 border-dashed border-purple-400 text-purple-600' 
+                  : 'bg-purple-50 border border-purple-200 text-gray-800'
               }`}
             >
               {item}
@@ -426,8 +426,8 @@ export default function CerebralExercisePage() {
                   disabled={submitted}
                   className={`p-3 rounded-lg text-xl flex items-center justify-center transition-colors ${
                     userAnswer === opt 
-                      ? 'bg-purple-600 border-2 border-purple-400' 
-                      : 'bg-white/10 border border-white/20 hover-elevate'
+                      ? 'bg-purple-600 text-white border-2 border-purple-400' 
+                      : 'bg-purple-50 text-gray-700 border border-purple-200 hover-elevate'
                   } ${submitted ? 'opacity-60' : ''}`}
                 >
                   {opt}
@@ -439,7 +439,7 @@ export default function CerebralExercisePage() {
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Tu respuesta..."
-              className="text-center text-xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              className="text-center text-xl bg-purple-50 border-purple-200 text-gray-800 placeholder:text-gray-400"
               disabled={submitted}
             />
           )}
@@ -456,8 +456,8 @@ export default function CerebralExercisePage() {
     return (
       <div className="space-y-6">
         {/* Instruction */}
-        <p className="text-white/80 text-center text-sm">
-          Escoge el <span className="text-cyan-400 font-bold">COLOR</span>, no la palabra.
+        <p className="text-gray-600 text-center text-sm">
+          Escoge el <span className="text-cyan-600 font-bold">COLOR</span>, no la palabra.
         </p>
 
         {/* Word display with color */}
@@ -508,8 +508,8 @@ export default function CerebralExercisePage() {
       <div className="space-y-6">
         {/* Instruction - editable from admin */}
         <div className="text-center space-y-1">
-          <p className="text-white/80 text-lg">{title1}</p>
-          <p className="text-white font-semibold text-xl">{title2}</p>
+          <p className="text-gray-600 text-lg">{title1}</p>
+          <p className="text-gray-800 font-semibold text-xl">{title2}</p>
         </div>
 
         {/* Main header image if provided */}
@@ -586,12 +586,12 @@ export default function CerebralExercisePage() {
       <div className="space-y-8">
         {/* Instruction */}
         <div className="text-center">
-          <p className="text-white/80 text-lg">{instruction}</p>
+          <p className="text-gray-600 text-lg">{instruction}</p>
         </div>
 
         {/* Question */}
         <div className="text-center">
-          <p className="text-white font-bold text-xl">{question}</p>
+          <p className="text-gray-800 font-bold text-xl">{question}</p>
         </div>
 
         {/* Options */}
@@ -614,11 +614,12 @@ export default function CerebralExercisePage() {
               }
             }}
             disabled={!!selectedLat}
-            className={`px-10 py-4 rounded-xl border-2 text-lg font-semibold transition-all ${
+            className={`px-10 py-4 rounded-2xl border-2 text-lg font-semibold transition-all ${
               selectedLat === leftOption
-                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 border-purple-400 text-white shadow-lg shadow-purple-500/30'
-                : 'bg-white/10 border-white/30 text-white hover-elevate backdrop-blur-sm'
+                ? 'border-purple-400 text-white shadow-lg shadow-purple-500/30'
+                : 'border-purple-200 text-gray-700 hover-elevate'
             } ${selectedLat && selectedLat !== leftOption ? 'opacity-30' : ''}`}
+            style={selectedLat === leftOption ? { background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" } : { background: "rgba(245, 243, 255, 1)" }}
           >
             {leftOption}
           </motion.button>
@@ -641,11 +642,12 @@ export default function CerebralExercisePage() {
               }
             }}
             disabled={!!selectedLat}
-            className={`px-10 py-4 rounded-xl border-2 text-lg font-semibold transition-all ${
+            className={`px-10 py-4 rounded-2xl border-2 text-lg font-semibold transition-all ${
               selectedLat === rightOption
-                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 border-purple-400 text-white shadow-lg shadow-purple-500/30'
-                : 'bg-white/10 border-white/30 text-white hover-elevate backdrop-blur-sm'
+                ? 'border-cyan-400 text-white shadow-lg shadow-cyan-500/30'
+                : 'border-cyan-200 text-gray-700 hover-elevate'
             } ${selectedLat && selectedLat !== rightOption ? 'opacity-30' : ''}`}
+            style={selectedLat === rightOption ? { background: "linear-gradient(135deg, #06b6d4 0%, #7c3aed 100%)" } : { background: "rgba(236, 254, 255, 1)" }}
           >
             {rightOption}
           </motion.button>
@@ -656,10 +658,10 @@ export default function CerebralExercisePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
+      <div className="min-h-screen bg-white p-4">
         <div className="max-w-md mx-auto space-y-4">
-          <Skeleton className="h-16 w-full bg-white/10" />
-          <Skeleton className="h-64 w-full rounded-xl bg-white/10" />
+          <Skeleton className="h-16 w-full bg-purple-100" />
+          <Skeleton className="h-64 w-full rounded-xl bg-purple-50" />
         </div>
       </div>
     );
@@ -667,10 +669,10 @@ export default function CerebralExercisePage() {
 
   if (shouldRedirectToResults) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-white p-4 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-white/60">Calculando resultados...</p>
+          <p className="text-gray-500">Calculando resultados...</p>
         </div>
       </div>
     );
@@ -792,7 +794,11 @@ export default function CerebralExercisePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 rounded-2xl p-6 shadow-lg"
+            className="rounded-3xl p-6 shadow-xl border border-purple-100"
+            style={{
+              background: "linear-gradient(180deg, rgba(237, 233, 254, 0.6) 0%, rgba(255, 255, 255, 0.95) 100%)",
+              boxShadow: "0 8px 32px rgba(124, 58, 237, 0.15)"
+            }}
           >
             {content.exerciseType === "bailarina" && renderBailarinaExercise()}
             {content.exerciseType === "secuencia" && renderSecuenciaExercise()}
@@ -809,20 +815,20 @@ export default function CerebralExercisePage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className={`mt-6 p-4 rounded-xl flex items-center gap-3 ${
-                    isCorrect ? "bg-green-500/20 border border-green-400/30" : "bg-red-500/20 border border-red-400/30"
+                    isCorrect ? "bg-green-50 border border-green-300" : "bg-red-50 border border-red-300"
                   }`}
                 >
                   {isCorrect ? (
-                    <CheckCircle className="w-6 h-6 text-green-300" />
+                    <CheckCircle className="w-6 h-6 text-green-600" />
                   ) : (
-                    <XCircle className="w-6 h-6 text-red-300" />
+                    <XCircle className="w-6 h-6 text-red-600" />
                   )}
                   <div>
-                    <p className={`font-semibold ${isCorrect ? "text-green-300" : "text-red-300"}`}>
+                    <p className={`font-semibold ${isCorrect ? "text-green-700" : "text-red-700"}`}>
                       {isCorrect ? "¡Correcto!" : "Incorrecto"}
                     </p>
                     {!isCorrect && (
-                      <p className="text-white/70 text-sm">
+                      <p className="text-gray-600 text-sm">
                         La respuesta correcta era: {content.exerciseData.correctAnswer}
                       </p>
                     )}
@@ -838,7 +844,8 @@ export default function CerebralExercisePage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={!userAnswer.trim()}
-                    className="flex-1 bg-white text-purple-600 font-bold hover:bg-gray-100"
+                    className="flex-1 text-white font-bold"
+                    style={{ background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" }}
                     data-testid="button-submit"
                   >
                     Verificar respuesta
@@ -848,14 +855,15 @@ export default function CerebralExercisePage() {
                     <Button
                       onClick={() => setLocation(`/cerebral/seleccion`)}
                       variant="outline"
-                      className="flex-1 border-white/30 text-white hover:bg-white/10"
+                      className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50"
                       data-testid="button-more-exercises"
                     >
                       Más ejercicios
                     </Button>
                     <Button
                       onClick={handleNext}
-                      className="flex-1 bg-white text-purple-600 font-bold hover:bg-gray-100"
+                      className="flex-1 text-white font-bold"
+                      style={{ background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" }}
                       data-testid="button-next"
                     >
                       Siguiente
