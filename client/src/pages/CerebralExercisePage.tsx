@@ -267,7 +267,16 @@ export default function CerebralExercisePage() {
               {options.map((opt: string, idx: number) => (
                 <button
                   key={idx}
-                  onClick={() => !submitted && setUserAnswer(opt)}
+                  onClick={() => {
+                    if (submitted) return;
+                    setUserAnswer(opt);
+                    // Save and auto-advance
+                    const stored = sessionStorage.getItem('cerebralAnswers');
+                    const answers = stored ? JSON.parse(stored) : [];
+                    answers.push({ tema: params.tema, type: 'secuencia', answer: opt, correct: content?.exerciseData?.correctAnswer });
+                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    setTimeout(() => handleNext(), 500);
+                  }}
                   disabled={submitted}
                   className={`p-2 rounded-lg text-sm font-bold transition-colors ${
                     userAnswer === opt 
@@ -281,14 +290,25 @@ export default function CerebralExercisePage() {
               ))}
             </div>
           ) : (
-            <Input
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
-              placeholder="Tu respuesta..."
-              className="text-center text-xl bg-purple-50 border-purple-200 text-gray-800 placeholder:text-gray-400"
-              disabled={submitted}
-              data-testid="input-sequence-answer"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                placeholder="Tu respuesta..."
+                className="text-center text-xl bg-purple-50 border-purple-200 text-gray-800 placeholder:text-gray-400"
+                disabled={submitted}
+                data-testid="input-sequence-answer"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && userAnswer.trim()) {
+                    const stored = sessionStorage.getItem('cerebralAnswers');
+                    const answers = stored ? JSON.parse(stored) : [];
+                    answers.push({ tema: params.tema, type: 'secuencia', answer: userAnswer, correct: content?.exerciseData?.correctAnswer });
+                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    setTimeout(() => handleNext(), 500);
+                  }
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -343,7 +363,7 @@ export default function CerebralExercisePage() {
 
     return (
       <div className="space-y-3 text-center">
-        <p className="text-gray-600 text-sm">¿Cuáles viste? Selecciona:</p>
+        <p className="text-gray-600 text-sm">¿Cuáles viste? Selecciona y confirma:</p>
         <div className="grid grid-cols-4 gap-2 max-w-xs mx-auto">
           {allOptions.map((item: string, idx: number) => {
             const isSelected = selectedItems.includes(item);
@@ -352,13 +372,11 @@ export default function CerebralExercisePage() {
                 key={idx}
                 onClick={() => {
                   if (submitted) return;
-                  setSelectedItems(prev => 
-                    isSelected ? prev.filter(i => i !== item) : [...prev, item]
-                  );
-                  setUserAnswer(isSelected 
-                    ? selectedItems.filter(i => i !== item).join(',')
-                    : [...selectedItems, item].join(',')
-                  );
+                  const newSelected = isSelected 
+                    ? selectedItems.filter(i => i !== item) 
+                    : [...selectedItems, item];
+                  setSelectedItems(newSelected);
+                  setUserAnswer(newSelected.join(','));
                 }}
                 disabled={submitted}
                 className={`aspect-square rounded-lg text-xl flex items-center justify-center transition-colors ${
@@ -372,6 +390,27 @@ export default function CerebralExercisePage() {
             );
           })}
         </div>
+        {selectedItems.length > 0 && (
+          <button
+            onClick={() => {
+              const stored = sessionStorage.getItem('cerebralAnswers');
+              const answers = stored ? JSON.parse(stored) : [];
+              const correctItems = content?.exerciseData?.memoriaItems || [];
+              answers.push({ 
+                tema: params.tema, 
+                type: 'memoria', 
+                answer: selectedItems.join(','), 
+                correct: correctItems.join(',') 
+              });
+              sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+              setTimeout(() => handleNext(), 500);
+            }}
+            className="mt-4 px-8 py-3 rounded-xl text-white font-bold"
+            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" }}
+          >
+            Continuar
+          </button>
+        )}
       </div>
     );
   };
@@ -422,7 +461,16 @@ export default function CerebralExercisePage() {
               {options.map((opt: string, idx: number) => (
                 <button
                   key={idx}
-                  onClick={() => !submitted && setUserAnswer(opt)}
+                  onClick={() => {
+                    if (submitted) return;
+                    setUserAnswer(opt);
+                    // Save and auto-advance
+                    const stored = sessionStorage.getItem('cerebralAnswers');
+                    const answers = stored ? JSON.parse(stored) : [];
+                    answers.push({ tema: params.tema, type: 'patron', answer: opt, correct: content?.exerciseData?.correctAnswer });
+                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    setTimeout(() => handleNext(), 500);
+                  }}
                   disabled={submitted}
                   className={`p-3 rounded-lg text-xl flex items-center justify-center transition-colors ${
                     userAnswer === opt 
@@ -441,6 +489,15 @@ export default function CerebralExercisePage() {
               placeholder="Tu respuesta..."
               className="text-center text-xl bg-purple-50 border-purple-200 text-gray-800 placeholder:text-gray-400"
               disabled={submitted}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && userAnswer.trim()) {
+                  const stored = sessionStorage.getItem('cerebralAnswers');
+                  const answers = stored ? JSON.parse(stored) : [];
+                  answers.push({ tema: params.tema, type: 'patron', answer: userAnswer, correct: content?.exerciseData?.correctAnswer });
+                  sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                  setTimeout(() => handleNext(), 500);
+                }
+              }}
             />
           )}
         </div>
@@ -482,7 +539,16 @@ export default function CerebralExercisePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => !submitted && setUserAnswer(opt)}
+              onClick={() => {
+                if (submitted) return;
+                setUserAnswer(opt);
+                // Save and auto-advance
+                const stored = sessionStorage.getItem('cerebralAnswers');
+                const answers = stored ? JSON.parse(stored) : [];
+                answers.push({ tema: params.tema, type: 'stroop', answer: opt, correct: content?.exerciseData?.correctAnswer });
+                sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                setTimeout(() => handleNext(), 500);
+              }}
               disabled={submitted}
               className={`py-4 px-6 rounded-xl text-lg font-semibold border-2 transition-colors ${
                 userAnswer === opt 
@@ -808,71 +874,7 @@ export default function CerebralExercisePage() {
             {content.exerciseType === "preferencia" && renderPreferenciaExercise()}
             {content.exerciseType === "lateralidad" && renderLateralidadExercise()}
 
-            {content.exerciseType !== "preferencia" && content.exerciseType !== "lateralidad" && (
-            <AnimatePresence>
-              {submitted && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center gap-3 ${
-                    isCorrect ? "bg-green-50 border border-green-300" : "bg-red-50 border border-red-300"
-                  }`}
-                >
-                  {isCorrect ? (
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                  ) : (
-                    <XCircle className="w-6 h-6 text-red-600" />
-                  )}
-                  <div>
-                    <p className={`font-semibold ${isCorrect ? "text-green-700" : "text-red-700"}`}>
-                      {isCorrect ? "¡Correcto!" : "Incorrecto"}
-                    </p>
-                    {!isCorrect && (
-                      <p className="text-gray-600 text-sm">
-                        La respuesta correcta era: {content.exerciseData.correctAnswer}
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            )}
-
-            {content.exerciseType !== "lateralidad" && content.exerciseType !== "preferencia" && (
-              <div className="mt-6 flex gap-3">
-                {!submitted ? (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!userAnswer.trim()}
-                    className="flex-1 text-white font-bold"
-                    style={{ background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" }}
-                    data-testid="button-submit"
-                  >
-                    Verificar respuesta
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      onClick={() => setLocation(`/cerebral/seleccion`)}
-                      variant="outline"
-                      className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50"
-                      data-testid="button-more-exercises"
-                    >
-                      Más ejercicios
-                    </Button>
-                    <Button
-                      onClick={handleNext}
-                      className="flex-1 text-white font-bold"
-                      style={{ background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" }}
-                      data-testid="button-next"
-                    >
-                      Siguiente
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </>
-                )}
-              </div>
-            )}
+            {/* No verification feedback - answers saved and shown only in final results */}
           </motion.div>
         </div>
       </main>
