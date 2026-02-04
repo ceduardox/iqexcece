@@ -28,8 +28,14 @@ export default function CerebralResultPage() {
   
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
+  const storedCerebral = sessionStorage.getItem('cerebralAnswers');
   const lateralidadAnswers: string[] = storedLateralidad ? JSON.parse(storedLateralidad) : [];
   const preferenciaAnswers: PreferenciaAnswer[] = storedPreferencia ? JSON.parse(storedPreferencia) : [];
+  const cerebralAnswers: { tema: string; type: string; answer: string; correct: string }[] = storedCerebral ? JSON.parse(storedCerebral) : [];
+  
+  // Calculate correct answers for other exercises
+  const correctCount = cerebralAnswers.filter(a => a.answer === a.correct).length;
+  const totalExercises = cerebralAnswers.length;
   
   const leftCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('izquierda') || a.toLowerCase() === 'izquierda').length;
   const rightCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('derecha') || a.toLowerCase() === 'derecha').length;
@@ -106,6 +112,7 @@ export default function CerebralResultPage() {
     playButtonSound();
     sessionStorage.removeItem('lateralidadAnswers');
     sessionStorage.removeItem('preferenciaAnswers');
+    sessionStorage.removeItem('cerebralAnswers');
     setLocation('/cerebral/seleccion');
   };
 
@@ -304,6 +311,41 @@ export default function CerebralResultPage() {
                     >
                       {trait}
                     </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Exercise Results Section */}
+            {totalExercises > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 }}
+                className="pt-4 mt-4 border-t border-dashed border-gray-200"
+              >
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <span className="text-2xl font-black" style={{ color: "#8a3ffc" }}>{correctCount}/{totalExercises}</span>
+                  <span className="text-sm text-gray-600">respuestas correctas</span>
+                </div>
+                <div className="space-y-2">
+                  {cerebralAnswers.map((ans, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`flex items-center justify-between p-2 rounded-lg text-xs ${
+                        ans.answer === ans.correct ? 'bg-green-50' : 'bg-red-50'
+                      }`}
+                    >
+                      <span className="text-gray-600 capitalize">{ans.type}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={ans.answer === ans.correct ? 'text-green-600' : 'text-red-600'}>
+                          {ans.answer}
+                        </span>
+                        {ans.answer !== ans.correct && (
+                          <span className="text-green-600">({ans.correct})</span>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </motion.div>

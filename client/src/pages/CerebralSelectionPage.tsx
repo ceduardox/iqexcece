@@ -64,6 +64,7 @@ export default function CerebralSelectionPage() {
     playButtonSound();
     sessionStorage.removeItem('lateralidadAnswers');
     sessionStorage.removeItem('preferenciaAnswers');
+    sessionStorage.removeItem('cerebralAnswers');
     if (themes.length > 0) {
       setLocation(`/cerebral/ejercicio/${categoria}/${themes[0].temaNumero}`);
     }
