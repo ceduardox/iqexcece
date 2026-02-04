@@ -64,20 +64,12 @@ const getThemeStatus = (
   progress: ReadingProgress,
   totalThemes: number
 ): { status: "completed" | "in_progress" | "available" | "locked"; score?: number; requiredLevel?: number } => {
+  // Check if completed (to show checkmark)
   if (progress.completed.includes(temaNumero)) {
     return { status: "completed", score: progress.scores[temaNumero] || 100 };
   }
-  if (progress.inProgress === temaNumero) {
-    return { status: "in_progress" };
-  }
-  if (index === 0) {
-    return { status: "available" };
-  }
-  const prevCompleted = progress.completed.length;
-  if (index <= prevCompleted) {
-    return { status: "available" };
-  }
-  return { status: "locked", requiredLevel: index };
+  // All themes are now freely available (no lock system)
+  return { status: "available" };
 };
 
 export default function ReadingSelectionPage() {
