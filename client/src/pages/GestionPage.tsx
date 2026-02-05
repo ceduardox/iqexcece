@@ -1769,6 +1769,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <th className="pb-3 px-2">Nombre</th>
                       <th className="pb-3 px-2">Email</th>
                       <th className="pb-3 px-2">Categoría</th>
+                      <th className="pb-3 px-2">Resultado</th>
                       <th className="pb-3 px-2">País</th>
                       <th className="pb-3 px-2">Estado</th>
                       <th className="pb-3 px-2">T. Lectura</th>
@@ -1793,6 +1794,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           <td className="py-3 px-2 text-white">{r.nombre}</td>
                           <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
                           <td className="py-3 px-2 text-purple-400">{r.categoria || "-"}</td>
+                          <td className="py-3 px-2">
+                            {(r as any).respuestasCorrectas !== null && (r as any).respuestasTotales ? (
+                              <span className="text-green-400 font-bold">{(r as any).respuestasCorrectas}/{(r as any).respuestasTotales}</span>
+                            ) : "-"}
+                          </td>
                           <td className="py-3 px-2 text-cyan-400">{(r as any).pais || "-"}</td>
                           <td className="py-3 px-2 text-cyan-400">{(r as any).estado || r.ciudad || "-"}</td>
                           <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
@@ -1806,7 +1812,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </tr>
                         {expandedResult === r.id && (
                           <tr key={`${r.id}-details`} className="bg-white/5">
-                            <td colSpan={10} className="px-6 py-4">
+                            <td colSpan={11} className="px-6 py-4">
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                 <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
                                 <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
@@ -1860,6 +1866,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
                         <p className="text-white/60">País: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
+                        <p className="text-white/60">Resultado: <span className="text-green-400 font-bold">{(r as any).respuestasCorrectas !== null && (r as any).respuestasTotales ? `${(r as any).respuestasCorrectas}/${(r as any).respuestasTotales}` : "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
                         {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}

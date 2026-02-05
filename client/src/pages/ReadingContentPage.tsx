@@ -220,6 +220,8 @@ export default function ReadingContentPage() {
           testType: "lectura",
           tiempoLectura: readingTime,
           tiempoCuestionario: questionTime,
+          respuestasCorrectas: correct,
+          respuestasTotales: content.questions.length,
           isPwa,
         }),
       });
