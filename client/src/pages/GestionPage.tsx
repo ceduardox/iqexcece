@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
 import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil } from "lucide-react";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -58,7 +58,7 @@ export default function GestionPage() {
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [cerebralResults, setCerebralResults] = useState<any[]>([]);
-  const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos">("preescolar");
+  const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("all");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
   const [selectedTema, setSelectedTema] = useState(1);
   const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
@@ -1599,6 +1599,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <CardContent>
               <div className="flex gap-2 mb-4 flex-wrap">
                 <Button
+                  onClick={() => setResultFilter("all")}
+                  variant={resultFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "all" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                  data-testid="button-filter-all"
+                >
+                  Todos
+                </Button>
+                <Button
                   onClick={() => setResultFilter("preescolar")}
                   variant={resultFilter === "preescolar" ? "default" : "outline"}
                   size="sm"
@@ -1617,13 +1626,40 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   Niños
                 </Button>
                 <Button
-                  onClick={() => setResultFilter("all")}
-                  variant={resultFilter === "all" ? "default" : "outline"}
+                  onClick={() => setResultFilter("adolescentes")}
+                  variant={resultFilter === "adolescentes" ? "default" : "outline"}
                   size="sm"
-                  className={resultFilter === "all" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
-                  data-testid="button-filter-all"
+                  className={resultFilter === "adolescentes" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                  data-testid="button-filter-adolescentes"
                 >
-                  Todos
+                  Adolescentes
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("universitarios")}
+                  variant={resultFilter === "universitarios" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "universitarios" ? "bg-green-600" : "border-green-500/30 text-green-400"}
+                  data-testid="button-filter-universitarios"
+                >
+                  Universitarios
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("profesionales")}
+                  variant={resultFilter === "profesionales" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "profesionales" ? "bg-amber-600" : "border-amber-500/30 text-amber-400"}
+                  data-testid="button-filter-profesionales"
+                >
+                  Profesionales
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("adulto_mayor")}
+                  variant={resultFilter === "adulto_mayor" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "adulto_mayor" ? "bg-rose-600" : "border-rose-500/30 text-rose-400"}
+                  data-testid="button-filter-adulto-mayor"
+                >
+                  Adulto Mayor
                 </Button>
               </div>
 
@@ -1631,12 +1667,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-white/60 border-b border-white/10">
+                      <th className="pb-3 px-2"></th>
                       <th className="pb-3 px-2">Nombre</th>
                       <th className="pb-3 px-2">Email</th>
-                      <th className="pb-3 px-2">Edad</th>
-                      <th className="pb-3 px-2">Ciudad</th>
-                      <th className="pb-3 px-2">Teléfono</th>
-                      <th className="pb-3 px-2">Grado</th>
+                      <th className="pb-3 px-2">Categoría</th>
+                      <th className="pb-3 px-2">País</th>
+                      <th className="pb-3 px-2">Estado</th>
                       <th className="pb-3 px-2">T. Lectura</th>
                       <th className="pb-3 px-2">T. Test</th>
                       <th className="pb-3 px-2">Tipo</th>
@@ -1645,26 +1681,54 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </thead>
                   <tbody>
                     {filteredResults.map((r) => (
-                      <tr key={r.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-3 px-2 text-white">{r.nombre}</td>
-                        <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
-                        <td className="py-3 px-2 text-white/80">{r.edad || "-"}</td>
-                        <td className="py-3 px-2 text-white/80">{r.ciudad || "-"}</td>
-                        <td className="py-3 px-2 text-white/80">{r.telefono || "-"}</td>
-                        <td className="py-3 px-2 text-yellow-400">{(r as any).grado || "-"}</td>
-                        <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
-                        <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
-                        <td className="py-3 px-2">
-                          <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
-                            {r.isPwa ? "PWA" : "Web"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>
-                      </tr>
+                      <Fragment key={r.id}>
+                        <tr 
+                          onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                          className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                          data-testid={`row-result-${r.id}`}
+                        >
+                          <td className="py-3 px-2">
+                            <svg className={`w-4 h-4 text-white/60 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </td>
+                          <td className="py-3 px-2 text-white">{r.nombre}</td>
+                          <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
+                          <td className="py-3 px-2 text-purple-400">{r.categoria || "-"}</td>
+                          <td className="py-3 px-2 text-cyan-400">{(r as any).pais || "-"}</td>
+                          <td className="py-3 px-2 text-cyan-400">{(r as any).estado || r.ciudad || "-"}</td>
+                          <td className="py-3 px-2 text-cyan-400">{formatTime(r.tiempoLectura)}</td>
+                          <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
+                          <td className="py-3 px-2">
+                            <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                              {r.isPwa ? "PWA" : "Web"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>
+                        </tr>
+                        {expandedResult === r.id && (
+                          <tr key={`${r.id}-details`} className="bg-white/5">
+                            <td colSpan={10} className="px-6 py-4">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
+                                <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
+                                <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
+                                <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
+                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Tipo Estudiante:</span> <span className="text-purple-400">{(r as any).tipoEstudiante}</span></div>}
+                                {(r as any).semestre && <div><span className="text-white/60">Semestre:</span> <span className="text-purple-400">{(r as any).semestre}</span></div>}
+                                {(r as any).profesion && <div><span className="text-white/60">Profesión:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
+                                {(r as any).ocupacion && <div><span className="text-white/60">Ocupación:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
+                                {(r as any).lugarTrabajo && <div><span className="text-white/60">Lugar Trabajo:</span> <span className="text-green-400">{(r as any).lugarTrabajo}</span></div>}
+                                {(r as any).comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/60">Comentario:</span> <span className="text-white/80">{(r as any).comentario}</span></div>}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     ))}
                     {filteredResults.length === 0 && (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-white/40">
+                        <td colSpan={10} className="py-8 text-center text-white/40">
                           No hay resultados registrados
                         </td>
                       </tr>
