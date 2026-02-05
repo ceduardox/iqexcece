@@ -177,7 +177,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             />
           </div>
 
-          {(isNino || isAdolescente) && (
+          {isNino && (
             <>
               <div className="relative">
                 <GraduationCap className={iconClass} />
@@ -188,7 +188,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   data-testid="select-grado"
                 >
                   <option value="">Perfil educativo</option>
-                  {(isNino ? gradosPrimaria : gradosSecundaria).map(g => (
+                  {gradosPrimaria.map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
@@ -228,22 +228,65 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   Universitario
                 </button>
               </div>
+              {formData.tipoEstudiante === "estudiante" && (
+                <>
+                  <div className="relative">
+                    <GraduationCap className={iconClass} />
+                    <select
+                      value={formData.grado}
+                      onChange={(e) => handleChange("grado", e.target.value)}
+                      className={selectClass}
+                      data-testid="select-grado"
+                    >
+                      <option value="">Selecciona tu curso</option>
+                      {gradosSecundaria.map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                  <div className="relative">
+                    <Building className={iconClass} />
+                    <input
+                      type="text"
+                      placeholder="Colegio"
+                      value={formData.institucion}
+                      onChange={(e) => handleChange("institucion", e.target.value)}
+                      className={inputClass}
+                      data-testid="input-institucion-colegio"
+                    />
+                  </div>
+                </>
+              )}
               {formData.tipoEstudiante === "universitario" && (
-                <div className="relative">
-                  <GraduationCap className={iconClass} />
-                  <select
-                    value={formData.semestre}
-                    onChange={(e) => handleChange("semestre", e.target.value)}
-                    className={selectClass}
-                    data-testid="select-semestre"
-                  >
-                    <option value="">Selecciona semestre</option>
-                    {semestres.map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
+                <>
+                  <div className="relative">
+                    <GraduationCap className={iconClass} />
+                    <select
+                      value={formData.semestre}
+                      onChange={(e) => handleChange("semestre", e.target.value)}
+                      className={selectClass}
+                      data-testid="select-semestre"
+                    >
+                      <option value="">Selecciona semestre</option>
+                      {semestres.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                  <div className="relative">
+                    <Building className={iconClass} />
+                    <input
+                      type="text"
+                      placeholder="Universidad"
+                      value={formData.institucion}
+                      onChange={(e) => handleChange("institucion", e.target.value)}
+                      className={inputClass}
+                      data-testid="input-institucion-universidad"
+                    />
+                  </div>
+                </>
               )}
             </>
           )}
@@ -366,7 +409,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               <select
                 value={formData.pais}
                 onChange={(e) => handleChange("pais", e.target.value)}
-                className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-100 text-sm bg-white appearance-none cursor-pointer"
+                className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-200 text-sm bg-purple-50 text-gray-800 appearance-none cursor-pointer"
                 data-testid="select-pais"
               >
                 {COUNTRIES.map(c => (
