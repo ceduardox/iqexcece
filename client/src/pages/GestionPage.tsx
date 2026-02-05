@@ -4645,12 +4645,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                           const existingData = await existing.json();
                                           
                                           if (existingData.intro?.id) {
-                                            await fetch(`/api/admin/numeros-intro/${existingData.intro.id}`, {
+                                            const res = await adminFetch(`/api/admin/numeros-intro/${existingData.intro.id}`, {
                                               method: "PUT",
-                                              headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${token}`
-                                              },
+                                              headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 titulo: numerosIntroData.titulo,
                                                 descripcion: numerosIntroData.descripcion,
@@ -4658,13 +4655,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 imagenCabecera: numerosIntroData.imagenCabecera
                                               })
                                             });
+                                            if (res.ok) {
+                                              alert("Página guardada correctamente");
+                                            } else {
+                                              alert("Error al guardar");
+                                            }
                                           } else {
-                                            await fetch("/api/admin/numeros-intro", {
+                                            const res = await adminFetch("/api/admin/numeros-intro", {
                                               method: "POST",
-                                              headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${token}`
-                                              },
+                                              headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 entrenamientoItemId: item.id,
                                                 titulo: numerosIntroData.titulo,
@@ -4674,9 +4673,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 niveles: "[]"
                                               })
                                             });
+                                            if (res.ok) {
+                                              alert("Página guardada correctamente");
+                                            } else {
+                                              alert("Error al guardar");
+                                            }
                                           }
-                                          alert("Página guardada correctamente");
-                                        } catch (e) { console.error(e); }
+                                        } catch (e) { console.error(e); alert("Error al guardar"); }
                                       }}
                                       className="bg-teal-600 hover:bg-teal-700 text-white"
                                     >
@@ -4813,12 +4816,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                           const existingData = await existing.json();
                                           
                                           if (existingData.ejercicio?.id) {
-                                            await fetch(`/api/admin/aceleracion/${existingData.ejercicio.id}`, {
+                                            const res = await adminFetch(`/api/admin/aceleracion/${existingData.ejercicio.id}`, {
                                               method: "PUT",
-                                              headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${token}`
-                                              },
+                                              headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 titulo: aceleracionData.titulo,
                                                 imagenCabecera: aceleracionData.imagenCabecera,
@@ -4826,14 +4826,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
                                               })
                                             });
-                                            setAceleracionData(prev => prev ? { ...prev, id: existingData.ejercicio.id } : prev);
+                                            if (res.ok) {
+                                              setAceleracionData(prev => prev ? { ...prev, id: existingData.ejercicio.id } : prev);
+                                              alert("Configuración guardada correctamente");
+                                            } else {
+                                              alert("Error al guardar");
+                                            }
                                           } else {
-                                            const res = await fetch("/api/admin/aceleracion", {
+                                            const res = await adminFetch("/api/admin/aceleracion", {
                                               method: "POST",
-                                              headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${token}`
-                                              },
+                                              headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 entrenamientoItemId: item.id,
                                                 titulo: aceleracionData.titulo,
@@ -4842,13 +4844,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                                 modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
                                               })
                                             });
-                                            const newData = await res.json();
-                                            if (newData.ejercicio?.id) {
-                                              setAceleracionData(prev => prev ? { ...prev, id: newData.ejercicio.id } : prev);
+                                            if (res.ok) {
+                                              const newData = await res.json();
+                                              if (newData.ejercicio?.id) {
+                                                setAceleracionData(prev => prev ? { ...prev, id: newData.ejercicio.id } : prev);
+                                              }
+                                              alert("Configuración guardada correctamente");
+                                            } else {
+                                              alert("Error al guardar");
                                             }
                                           }
-                                          alert("Configuración guardada correctamente");
-                                        } catch (e) { console.error(e); }
+                                        } catch (e) { console.error(e); alert("Error al guardar"); }
                                       }}
                                       className="bg-cyan-600 hover:bg-cyan-700 text-white"
                                     >
