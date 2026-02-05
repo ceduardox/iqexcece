@@ -204,6 +204,8 @@ export class MemStorage implements IStorage {
       estado: insertResult.estado || null,
       tiempoLectura: insertResult.tiempoLectura || null,
       tiempoCuestionario: insertResult.tiempoCuestionario || null,
+      respuestasCorrectas: insertResult.respuestasCorrectas ?? null,
+      respuestasTotales: insertResult.respuestasTotales ?? null,
       isPwa: insertResult.isPwa || false,
       createdAt: new Date(),
     };
@@ -479,6 +481,8 @@ export class DatabaseStorage implements IStorage {
       estado: insertResult.estado || null,
       tiempoLectura: insertResult.tiempoLectura || null,
       tiempoCuestionario: insertResult.tiempoCuestionario || null,
+      respuestasCorrectas: insertResult.respuestasCorrectas ?? null,
+      respuestasTotales: insertResult.respuestasTotales ?? null,
       isPwa: insertResult.isPwa || false,
     }).returning();
     return result;
