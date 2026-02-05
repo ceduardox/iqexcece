@@ -82,7 +82,7 @@ export default function EntrenamientoEdadPage() {
     
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/age-selection")
+    fetch("/api/page-styles/entrenamiento-edad")
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
