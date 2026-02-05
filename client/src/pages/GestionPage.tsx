@@ -4649,6 +4649,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               imagenCabecera: ""
                                             };
                                         try {
+                                          // Primero guardar el item con el tipo de ejercicio actualizado
+                                          await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                            method: "PUT",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ ...item, tipoEjercicio: "numeros" })
+                                          });
+                                          
                                           const existing = await fetch(`/api/numeros-intro/${item.id}`);
                                           const existingData = await existing.json();
                                           
@@ -4828,6 +4835,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               modoGolpePorcentaje: 50
                                             };
                                         try {
+                                          // Primero guardar el item con el tipo de ejercicio actualizado
+                                          await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                            method: "PUT",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ ...item, tipoEjercicio: "aceleracion_lectura" })
+                                          });
+                                          
                                           const existing = await fetch(`/api/aceleracion/${item.id}`);
                                           const existingData = await existing.json();
                                           
