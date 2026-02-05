@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Phone, MessageSquare, GraduationCap, Building, Briefcase, MapPin, ChevronDown } from "lucide-react";
+import { User, Mail, Phone, MessageSquare, GraduationCap, Building, Briefcase, MapPin, ChevronDown, AlertCircle } from "lucide-react";
 
 const COUNTRY_DATA: Record<string, { flag: string; code: string; states: string[] }> = {
   BO: { flag: "🇧🇴", code: "+591", states: ["La Paz", "Santa Cruz", "Cochabamba", "Oruro", "Potosí", "Chuquisaca", "Tarija", "Beni", "Pando"] },
@@ -72,6 +72,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
     codigoPais: "+591",
     estado: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -119,7 +120,28 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
   };
 
   const handleSubmit = () => {
-    if (!formData.nombre.trim()) return;
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = "Campo requerido";
+    }
+    
+    if (isAdultoConOpciones) {
+      if (formData.tipoEstudiante === "universitario" && !isAdultoMayor) {
+        if (!formData.semestre) newErrors.semestre = "Selecciona un semestre";
+        if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
+      }
+      if (formData.tipoEstudiante === "profesional") {
+        if (!formData.profesion.trim()) newErrors.profesion = "Campo requerido";
+      }
+      if (formData.tipoEstudiante === "ocupacion") {
+        if (!formData.ocupacion.trim()) newErrors.ocupacion = "Campo requerido";
+      }
+    }
+    
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+    
     onSubmit(formData);
   };
 
@@ -193,10 +215,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               type="text"
               placeholder="Nombre completo"
               value={formData.nombre}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              className={inputClass}
+              onChange={(e) => { handleChange("nombre", e.target.value); setErrors(prev => ({ ...prev, nombre: "" })); }}
+              className={`${inputClass} ${errors.nombre ? "border-red-400 ring-1 ring-red-400" : ""}`}
               data-testid="input-nombre"
             />
+            {errors.nombre && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                <AlertCircle className="w-3 h-3" />
+                {errors.nombre}
+              </div>
+            )}
           </div>
 
           {isNino && (
@@ -263,6 +291,14 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
 
           {isAdultoConOpciones && (
             <>
+              <motion.div 
+                className="flex items-center gap-2 text-sm text-purple-600 font-medium"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-500" />
+                Selecciona tu perfil
+              </motion.div>
               <div className="bg-gray-100 p-1 rounded-2xl">
                 <div className="flex relative">
                   {(isAdultoMayor ? ["profesional", "ocupacion"] : ["universitario", "profesional", "ocupacion"]).map((opt, idx, arr) => (
@@ -302,8 +338,8 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                     <GraduationCap className={iconClass} />
                     <select
                       value={formData.semestre}
-                      onChange={(e) => handleChange("semestre", e.target.value)}
-                      className={selectClass}
+                      onChange={(e) => { handleChange("semestre", e.target.value); setErrors(prev => ({ ...prev, semestre: "" })); }}
+                      className={`${selectClass} ${errors.semestre ? "border-red-400 ring-1 ring-red-400" : ""}`}
                       data-testid="select-semestre"
                     >
                       <option value="">Selecciona semestre</option>
@@ -312,6 +348,12 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                       ))}
                     </select>
                     <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    {errors.semestre && (
+                      <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.semestre}
+                      </div>
+                    )}
                   </div>
                   <div className="relative">
                     <Building className={iconClass} />
@@ -319,10 +361,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                       type="text"
                       placeholder="Universidad"
                       value={formData.institucion}
-                      onChange={(e) => handleChange("institucion", e.target.value)}
-                      className={inputClass}
+                      onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                      className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
                       data-testid="input-institucion-universidad"
                     />
+                    {errors.institucion && (
+                      <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.institucion}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -335,10 +383,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                       type="text"
                       placeholder="¿Cuál es tu profesión?"
                       value={formData.profesion}
-                      onChange={(e) => handleChange("profesion", e.target.value)}
-                      className={inputClass}
+                      onChange={(e) => { handleChange("profesion", e.target.value); setErrors(prev => ({ ...prev, profesion: "" })); }}
+                      className={`${inputClass} ${errors.profesion ? "border-red-400 ring-1 ring-red-400" : ""}`}
                       data-testid="input-profesion"
                     />
+                    {errors.profesion && (
+                      <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.profesion}
+                      </div>
+                    )}
                   </div>
                   <div className="relative">
                     <Building className={iconClass} />
@@ -361,10 +415,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                     type="text"
                     placeholder="¿Cuál es tu ocupación?"
                     value={formData.ocupacion}
-                    onChange={(e) => handleChange("ocupacion", e.target.value)}
-                    className={inputClass}
+                    onChange={(e) => { handleChange("ocupacion", e.target.value); setErrors(prev => ({ ...prev, ocupacion: "" })); }}
+                    className={`${inputClass} ${errors.ocupacion ? "border-red-400 ring-1 ring-red-400" : ""}`}
                     data-testid="input-ocupacion"
                   />
+                  {errors.ocupacion && (
+                    <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.ocupacion}
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -451,7 +511,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
-            disabled={submitting || !formData.nombre.trim()}
+            disabled={submitting}
             className="w-full py-4 rounded-2xl text-white font-bold shadow-lg disabled:opacity-50 mt-2"
             style={{ background: "linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)" }}
             data-testid="button-submit"
