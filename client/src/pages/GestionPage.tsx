@@ -4639,7 +4639,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   <div className="flex justify-end pt-2">
                                     <Button
                                       onClick={async () => {
-                                        if (!numerosIntroData || numerosIntroData.entrenamientoItemId !== item.id) return;
+                                        const dataToSave = (numerosIntroData && numerosIntroData.entrenamientoItemId === item.id) 
+                                          ? numerosIntroData 
+                                          : {
+                                              entrenamientoItemId: item.id,
+                                              titulo: "Identifica rápidamente\nNúmeros y Letras",
+                                              descripcion: "¡Haz más fuerte tu vista jugando!",
+                                              subtitulo: "Identifica el número o letra para ver el mundo más grande",
+                                              imagenCabecera: ""
+                                            };
                                         try {
                                           const existing = await fetch(`/api/numeros-intro/${item.id}`);
                                           const existingData = await existing.json();
@@ -4649,10 +4657,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               method: "PUT",
                                               headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
-                                                titulo: numerosIntroData.titulo,
-                                                descripcion: numerosIntroData.descripcion,
-                                                subtitulo: numerosIntroData.subtitulo,
-                                                imagenCabecera: numerosIntroData.imagenCabecera
+                                                titulo: dataToSave.titulo,
+                                                descripcion: dataToSave.descripcion,
+                                                subtitulo: dataToSave.subtitulo,
+                                                imagenCabecera: dataToSave.imagenCabecera
                                               })
                                             });
                                             if (res.ok) {
@@ -4666,10 +4674,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 entrenamientoItemId: item.id,
-                                                titulo: numerosIntroData.titulo,
-                                                descripcion: numerosIntroData.descripcion,
-                                                subtitulo: numerosIntroData.subtitulo,
-                                                imagenCabecera: numerosIntroData.imagenCabecera,
+                                                titulo: dataToSave.titulo,
+                                                descripcion: dataToSave.descripcion,
+                                                subtitulo: dataToSave.subtitulo,
+                                                imagenCabecera: dataToSave.imagenCabecera,
                                                 niveles: "[]"
                                               })
                                             });
@@ -4810,7 +4818,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   <div className="flex justify-end pt-2">
                                     <Button
                                       onClick={async () => {
-                                        if (!aceleracionData || aceleracionData.entrenamientoItemId !== item.id) return;
+                                        const dataToSave = (aceleracionData && aceleracionData.entrenamientoItemId === item.id) 
+                                          ? aceleracionData 
+                                          : {
+                                              entrenamientoItemId: item.id,
+                                              titulo: "Acelera tu Lectura",
+                                              imagenCabecera: "",
+                                              velocidadPPM: 200,
+                                              modoGolpePorcentaje: 50
+                                            };
                                         try {
                                           const existing = await fetch(`/api/aceleracion/${item.id}`);
                                           const existingData = await existing.json();
@@ -4820,10 +4836,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               method: "PUT",
                                               headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
-                                                titulo: aceleracionData.titulo,
-                                                imagenCabecera: aceleracionData.imagenCabecera,
-                                                velocidadPPM: aceleracionData.velocidadPPM,
-                                                modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
+                                                titulo: dataToSave.titulo,
+                                                imagenCabecera: dataToSave.imagenCabecera,
+                                                velocidadPPM: dataToSave.velocidadPPM,
+                                                modoGolpePorcentaje: dataToSave.modoGolpePorcentaje
                                               })
                                             });
                                             if (res.ok) {
@@ -4838,10 +4854,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                               headers: { "Content-Type": "application/json" },
                                               body: JSON.stringify({
                                                 entrenamientoItemId: item.id,
-                                                titulo: aceleracionData.titulo,
-                                                imagenCabecera: aceleracionData.imagenCabecera,
-                                                velocidadPPM: aceleracionData.velocidadPPM,
-                                                modoGolpePorcentaje: aceleracionData.modoGolpePorcentaje
+                                                titulo: dataToSave.titulo,
+                                                imagenCabecera: dataToSave.imagenCabecera,
+                                                velocidadPPM: dataToSave.velocidadPPM,
+                                                modoGolpePorcentaje: dataToSave.modoGolpePorcentaje
                                               })
                                             });
                                             if (res.ok) {
