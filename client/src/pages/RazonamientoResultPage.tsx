@@ -2,10 +2,8 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
-import { Brain, Home, RotateCcw, Trophy, Star, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Home, RotateCcw, Share2 } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 import html2canvas from "html2canvas";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
@@ -104,7 +102,13 @@ export default function RazonamientoResultPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) {}
+    } catch (e) { 
+      console.error("Share error:", e);
+      const text = `Mi resultado en Razonamiento - ${percentage}%\n\nEntrena tu cerebro en: https://iqexponencial.app`;
+      if (navigator.share) {
+        await navigator.share({ title: "Resultado Razonamiento", text });
+      }
+    }
     setIsSharing(false);
   };
 
@@ -122,188 +126,121 @@ export default function RazonamientoResultPage() {
 
   return (
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
-      <header 
-        className="sticky top-0 z-50 w-full"
-        style={{
-          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
-        }}
-      >
-        <div className="relative pt-3 pb-2 px-5">
-          <div className="flex items-center justify-center">
-            <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
-          </div>
-        </div>
+      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+        <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
       </header>
 
-      <div
-        className="w-full sticky z-40"
-        style={{
-          top: 56,
-          marginTop: -4,
-          marginBottom: -20,
-        }}
-      >
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
-
       <main className="flex-1 overflow-y-auto pb-24">
-        <div 
-          className="w-full"
-          style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, rgba(255, 255, 255, 1) 100%)"
-          }}
-        >
-          <div className="px-5 pt-4 pb-2 text-center">
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm font-semibold"
-              style={{ color: "#8a3ffc" }}
-            >
-              {categoryLabel}
-            </motion.p>
-            <motion.h1 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="text-xl font-bold"
-              style={{ color: "#1f2937" }}
-            >
-              Resultados
-            </motion.h1>
-          </div>
+        <div className="px-5 pt-8 pb-6 text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-2xl font-black mb-2"
+            style={{ color: "#1f2937" }}
+          >
+            {message}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-sm"
+            style={{ color: "#6b7280" }}
+          >
+            Has completado el test de razonamiento
+          </motion.p>
         </div>
 
-        <div className="px-5 py-4">
+        <div className="px-5 space-y-4">
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, type: "spring" }}
+            className="flex justify-center py-4"
           >
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.2, type: "spring", bounce: 0.6 }}
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
-            >
-              {percentage >= 60 ? (
-                <Trophy className="w-10 h-10 text-white" />
-              ) : (
-                <Brain className="w-10 h-10 text-white" />
-              )}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-center mb-4"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-1">{message}</h2>
-              {results.title && (
-                <p className="text-sm font-medium" style={{ color: "#8a3ffc" }}>{results.title}</p>
-              )}
-            </motion.div>
-
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.4, type: "spring" }}
-              className="relative w-32 h-32 mx-auto mb-4"
-            >
+            <div className="relative w-40 h-40">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#E5E7EB" strokeWidth="8" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" strokeWidth="10" />
                 <motion.circle
-                  cx="50" cy="50" r="45" fill="none"
-                  stroke="url(#resultGradient)" strokeWidth="8" strokeLinecap="round"
+                  cx="50" cy="50" r="42" fill="none"
+                  stroke="url(#razonamientoGradient)" strokeWidth="10" strokeLinecap="round"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: percentage / 100 }}
-                  transition={{ delay: 0.5, duration: 1.5, ease: "easeOut" }}
+                  transition={{ delay: 0.3, duration: 1.5, ease: "easeOut" }}
                 />
                 <defs>
-                  <linearGradient id="resultGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient id="razonamientoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#8a3ffc" />
-                    <stop offset="100%" stopColor="#00d9ff" />
+                    <stop offset="100%" stopColor="#06b6d4" />
                   </linearGradient>
                 </defs>
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-gray-800">{percentage}%</span>
-                <span className="text-gray-500 text-xs">Aciertos</span>
+                <span className="text-4xl font-bold" style={{ color: "#06b6d4" }}>{percentage}%</span>
+                <span className="text-gray-500 text-sm">Comprensión</span>
               </div>
-            </motion.div>
+            </div>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="grid grid-cols-3 gap-3 mb-4"
-            >
-              <div className="bg-purple-50 rounded-xl p-3 text-center">
-                <p className="text-xl font-bold" style={{ color: "#8a3ffc" }}>{results.correct}</p>
-                <p className="text-xs text-gray-500">Correctas</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-gray-50 rounded-2xl p-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Respuestas</p>
+                <p className="text-2xl font-bold" style={{ color: "#1f2937" }}>{results.correct}/{results.total}</p>
+                <p className="text-xs" style={{ color: "#9ca3af" }}>correctas</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-3 text-center">
-                <p className="text-xl font-bold text-gray-600">{results.total}</p>
-                <p className="text-xs text-gray-500">Total</p>
+              <div className="text-center">
+                <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Tiempo</p>
+                <p className="text-2xl font-bold" style={{ color: "#06b6d4" }}>{formatTime(results.time)}</p>
+                <p className="text-xs" style={{ color: "#9ca3af" }}>minutos</p>
               </div>
-              <div className="bg-cyan-50 rounded-xl p-3 text-center">
-                <p className="text-xl font-bold" style={{ color: "#00d9ff" }}>{formatTime(results.time)}</p>
-                <p className="text-xs text-gray-500">Tiempo</p>
-              </div>
-            </motion.div>
+            </div>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="flex justify-center gap-1 mb-5"
-            >
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-6 h-6 ${
-                    i < Math.ceil(percentage / 20) 
-                      ? "text-yellow-400 fill-yellow-400" 
-                      : "text-gray-200"
-                  }`}
-                />
-              ))}
-            </motion.div>
-
-            <button
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3 pt-4"
+          >
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={handleShare}
               disabled={isSharing}
-              className="mx-auto mb-4 flex items-center gap-2 px-5 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md disabled:opacity-50"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
               data-testid="button-share"
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-5 h-5" />
               {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
-            </button>
-
-            <div className="space-y-3">
-              <Button
-                onClick={handleRetry}
-                size="lg"
-                className="w-full font-bold"
-                style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #00d9ff 100%)" }}
-                data-testid="button-retry"
-              >
-                <RotateCcw className="w-5 h-5 mr-2" />
-                Intentar otro test
-              </Button>
-              <Button
-                onClick={handleHome}
-                variant="outline"
-                size="lg"
-                className="w-full font-bold"
-                data-testid="button-home"
-              >
-                <Home className="w-5 h-5 mr-2" />
-                Volver al inicio
-              </Button>
-            </div>
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleRetry}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2"
+              style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
+              data-testid="button-retry"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Nuevo test
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleHome}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
+              style={{ color: "#6b7280" }}
+              data-testid="button-home"
+            >
+              <Home className="w-5 h-5" />
+              Volver al inicio
+            </motion.button>
           </motion.div>
         </div>
       </main>

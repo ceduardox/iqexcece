@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw } from "lucide-react";
 import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
+import html2canvas from "html2canvas";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -66,6 +67,8 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 
 export default function ReadingContentPage() {
   const { userData } = useUserData();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [activeTab, setActiveTab] = useState<"lectura" | "cuestionario">("lectura");
   const [quizStarted, setQuizStarted] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
@@ -223,14 +226,71 @@ export default function ReadingContentPage() {
     setSubmitting(false);
   };
 
-  const handleShare = () => {
-    const text = `¡Completé el Test de Lectura en IQxponencial! Mi comprensión fue de ${Math.round((correctAnswers / content.questions.length) * 100)}% y mi velocidad de ${wordsPerMinute.toLocaleString()} palabras por minuto.`;
-    if (navigator.share) {
-      navigator.share({ title: "Resultado Test Lectura", text });
-    } else {
-      navigator.clipboard.writeText(text);
-      alert("Resultado copiado al portapapeles");
+  const handleShare = async () => {
+    if (isSharing || !resultsRef.current) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    try {
+      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
+      if (logoImg) {
+        try {
+          const response = await fetch(logoImg.src);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          logoImg.src = base64;
+          await new Promise(r => setTimeout(r, 100));
+        } catch (e) { console.error("Logo conversion error:", e); }
+      }
+      
+      const canvas = await html2canvas(resultsRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png', 1.0);
+      });
+      
+      const file = new File([blob], 'resultado-lectura.png', { type: 'image/png' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Resultado Test Lectura - IQEXPONENCIAL',
+          text: `Mi resultado en Test de Lectura\n\nEntrena tu cerebro en: https://iqexponencial.app`,
+          files: [file]
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado-lectura.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (e) { 
+      console.error("Share error:", e);
+      const text = `¡Completé el Test de Lectura en IQxponencial! Mi comprensión fue de ${Math.round((correctAnswers / content.questions.length) * 100)}% y mi velocidad de ${wordsPerMinute.toLocaleString()} palabras por minuto.`;
+      if (navigator.share) {
+        navigator.share({ title: "Resultado Test Lectura", text });
+      } else {
+        navigator.clipboard.writeText(text);
+        alert("Resultado copiado al portapapeles");
+      }
     }
+    setIsSharing(false);
   };
 
   const handleWhatsApp = () => {
@@ -245,7 +305,7 @@ export default function ReadingContentPage() {
   if (showResults) {
     const percentage = Math.round((correctAnswers / content.questions.length) * 100);
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
         <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
           <div className="flex items-center justify-center" data-testid="header-logo">
             <img 
@@ -387,12 +447,13 @@ export default function ReadingContentPage() {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={handleShare}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md"
+                disabled={isSharing}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md disabled:opacity-50"
                 style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
                 data-testid="button-share"
               >
                 <Share2 className="w-5 h-5" />
-                Compartir resultado
+                {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
               </motion.button>
               
               <motion.button

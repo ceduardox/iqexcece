@@ -104,7 +104,13 @@ export default function CerebralResultPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) {}
+    } catch (e) { 
+      console.error("Share error:", e);
+      const text = `Mi resultado en Test Cerebral\n\nEntrena tu cerebro en: https://iqexponencial.app`;
+      if (navigator.share) {
+        await navigator.share({ title: "Resultado Test Cerebral", text });
+      }
+    }
     setIsSharing(false);
   };
 
