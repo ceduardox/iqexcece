@@ -111,13 +111,13 @@ export default function EntrenamientoEdadPage() {
     }
     
     try {
-      await fetch("/api/page-styles/entrenamiento-edad", {
+      await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`
         },
-        body: JSON.stringify({ styles: JSON.stringify(newStyles) })
+        body: JSON.stringify({ pageName: "entrenamiento-edad", styles: JSON.stringify(newStyles) })
       });
     } catch (error) {
       console.error("Error saving styles:", error);
