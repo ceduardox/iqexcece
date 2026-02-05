@@ -209,6 +209,7 @@ export default function ReadingContentPage() {
           codigoPais: formDataUnified.codigoPais || null,
           estado: formDataUnified.estado || null,
           categoria: userData.childCategory || "preescolar",
+          testType: "lectura",
           tiempoLectura: readingTime,
           tiempoCuestionario: questionTime,
           isPwa,

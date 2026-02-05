@@ -140,6 +140,7 @@ export default function RazonamientoQuizPage() {
           codigoPais: formData.codigoPais || null,
           estado: formData.estado || null,
           categoria: categoria,
+          testType: "razonamiento",
           tiempoLectura: null,
           tiempoCuestionario: quizTime,
           isPwa: isPwa,

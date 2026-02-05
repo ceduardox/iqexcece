@@ -53,7 +53,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-cerebral" | "resultados-entrenamiento" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -602,9 +602,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
   };
   
-  const filteredResults = quizResults.filter(r => {
-    if (resultFilter === "all") return true;
-    return r.categoria === resultFilter;
+  const filteredLecturaResults = quizResults.filter(r => {
+    const isLectura = (r as any).testType === "lectura" || !(r as any).testType;
+    if (resultFilter === "all") return isLectura;
+    return r.categoria === resultFilter && isLectura;
+  });
+
+  const filteredRazonamientoResults = quizResults.filter(r => {
+    const isRazonamiento = (r as any).testType === "razonamiento";
+    if (resultFilter === "all") return isRazonamiento;
+    return r.categoria === resultFilter && isRazonamiento;
   });
 
   const handleLogout = () => {
@@ -1183,6 +1190,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             Resultados Lectura
           </button>
           <button
+            onClick={() => setActiveTab("resultados-razonamiento")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "resultados-razonamiento" ? "bg-blue-600 text-white" : "text-blue-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-resultados-razonamiento"
+          >
+            <Brain className="w-5 h-5" />
+            Resultados Razonamiento
+          </button>
+          <button
             onClick={() => setActiveTab("resultados-cerebral")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
               activeTab === "resultados-cerebral" ? "bg-purple-600 text-white" : "text-purple-400 hover:bg-white/10"
@@ -1319,6 +1336,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <FileText className="w-4 h-4 mr-1" />
             Lectura
+          </Button>
+          <Button
+            onClick={() => setActiveTab("resultados-razonamiento")}
+            variant={activeTab === "resultados-razonamiento" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "resultados-razonamiento" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+            data-testid="mobile-tab-resultados-razonamiento"
+          >
+            <Brain className="w-4 h-4 mr-1" />
+            Razonamiento
           </Button>
           <Button
             onClick={() => setActiveTab("resultados-cerebral")}
@@ -1593,7 +1620,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2 flex-wrap">
                 <FileText className="w-5 h-5 text-green-400" />
-                Resultados de Tests ({filteredResults.length})
+                Resultados de Tests ({filteredLecturaResults.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1680,7 +1707,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredResults.map((r) => (
+                    {filteredLecturaResults.map((r) => (
                       <Fragment key={r.id}>
                         <tr 
                           onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
@@ -1726,7 +1753,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         )}
                       </Fragment>
                     ))}
-                    {filteredResults.length === 0 && (
+                    {filteredLecturaResults.length === 0 && (
                       <tr>
                         <td colSpan={10} className="py-8 text-center text-white/40">
                           No hay resultados registrados
@@ -1738,7 +1765,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
 
               <div className="md:hidden space-y-2">
-                {filteredResults.map((r) => (
+                {filteredLecturaResults.map((r) => (
                   <div key={r.id} className="bg-white/5 rounded-lg overflow-hidden">
                     <button
                       onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
@@ -1777,9 +1804,196 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     )}
                   </div>
                 ))}
-                {filteredResults.length === 0 && (
+                {filteredLecturaResults.length === 0 && (
                   <div className="py-8 text-center text-white/40">
                     No hay resultados registrados
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "resultados-razonamiento" && (
+          <Card className="bg-black/40 border-blue-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2 flex-wrap">
+                <Brain className="w-5 h-5 text-blue-400" />
+                Resultados de Razonamiento ({filteredRazonamientoResults.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <Button
+                  onClick={() => setResultFilter("all")}
+                  variant={resultFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "all" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+                >
+                  Todos
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("preescolar")}
+                  variant={resultFilter === "preescolar" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "preescolar" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+                >
+                  Pre-escolar
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("ninos")}
+                  variant={resultFilter === "ninos" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
+                >
+                  Niños
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("adolescentes")}
+                  variant={resultFilter === "adolescentes" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "adolescentes" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                >
+                  Adolescentes
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("universitarios")}
+                  variant={resultFilter === "universitarios" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "universitarios" ? "bg-green-600" : "border-green-500/30 text-green-400"}
+                >
+                  Universitarios
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("profesionales")}
+                  variant={resultFilter === "profesionales" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "profesionales" ? "bg-amber-600" : "border-amber-500/30 text-amber-400"}
+                >
+                  Profesionales
+                </Button>
+                <Button
+                  onClick={() => setResultFilter("adulto_mayor")}
+                  variant={resultFilter === "adulto_mayor" ? "default" : "outline"}
+                  size="sm"
+                  className={resultFilter === "adulto_mayor" ? "bg-rose-600" : "border-rose-500/30 text-rose-400"}
+                >
+                  Adulto Mayor
+                </Button>
+              </div>
+
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-white/60 border-b border-white/10">
+                      <th className="pb-3 px-2"></th>
+                      <th className="pb-3 px-2">Nombre</th>
+                      <th className="pb-3 px-2">Email</th>
+                      <th className="pb-3 px-2">Categoría</th>
+                      <th className="pb-3 px-2">País</th>
+                      <th className="pb-3 px-2">Estado</th>
+                      <th className="pb-3 px-2">T. Test</th>
+                      <th className="pb-3 px-2">Tipo</th>
+                      <th className="pb-3 px-2">Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRazonamientoResults.map((r) => (
+                      <Fragment key={r.id}>
+                        <tr 
+                          onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                          className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                        >
+                          <td className="py-3 px-2">
+                            <svg className={`w-4 h-4 text-white/60 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </td>
+                          <td className="py-3 px-2 text-white">{r.nombre}</td>
+                          <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
+                          <td className="py-3 px-2 text-blue-400">{r.categoria || "-"}</td>
+                          <td className="py-3 px-2 text-cyan-400">{(r as any).pais || "-"}</td>
+                          <td className="py-3 px-2 text-cyan-400">{(r as any).estado || r.ciudad || "-"}</td>
+                          <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
+                          <td className="py-3 px-2">
+                            <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                              {r.isPwa ? "PWA" : "Web"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>
+                        </tr>
+                        {expandedResult === r.id && (
+                          <tr className="bg-white/5">
+                            <td colSpan={9} className="px-6 py-4">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
+                                <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
+                                <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
+                                <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
+                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Tipo Estudiante:</span> <span className="text-purple-400">{(r as any).tipoEstudiante}</span></div>}
+                                {(r as any).semestre && <div><span className="text-white/60">Semestre:</span> <span className="text-purple-400">{(r as any).semestre}</span></div>}
+                                {(r as any).profesion && <div><span className="text-white/60">Profesión:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
+                                {(r as any).ocupacion && <div><span className="text-white/60">Ocupación:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
+                                {(r as any).lugarTrabajo && <div><span className="text-white/60">Lugar Trabajo:</span> <span className="text-green-400">{(r as any).lugarTrabajo}</span></div>}
+                                {(r as any).comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/60">Comentario:</span> <span className="text-white/80">{(r as any).comentario}</span></div>}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                    {filteredRazonamientoResults.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="py-8 text-center text-white/40">
+                          No hay resultados de Razonamiento registrados
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-2">
+                {filteredRazonamientoResults.map((r) => (
+                  <div key={r.id} className="bg-white/5 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                      className="w-full p-3 flex items-center justify-between text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-medium">{r.nombre}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                          {r.isPwa ? "PWA" : "Web"}
+                        </span>
+                      </div>
+                      <svg className={`w-5 h-5 text-white/60 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {expandedResult === r.id && (
+                      <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
+                        <p className="text-white/60 pt-2">Email: <span className="text-white/80">{r.email || "-"}</span></p>
+                        <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
+                        <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
+                        <p className="text-white/60">País: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
+                        <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
+                        <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
+                        <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
+                        {(r as any).tipoEstudiante && <p className="text-white/60">Tipo: <span className="text-purple-400">{(r as any).tipoEstudiante}</span></p>}
+                        {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
+                        {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
+                        {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
+                        {(r as any).lugarTrabajo && <p className="text-white/60">Lugar trabajo: <span className="text-green-400">{(r as any).lugarTrabajo}</span></p>}
+                        <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
+                        {(r as any).comentario && <p className="text-white/60">Comentario: <span className="text-white/80">{(r as any).comentario}</span></p>}
+                        <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {filteredRazonamientoResults.length === 0 && (
+                  <div className="py-8 text-center text-white/40">
+                    No hay resultados de Razonamiento registrados
                   </div>
                 )}
               </div>

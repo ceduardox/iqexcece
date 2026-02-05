@@ -49,6 +49,7 @@ export const quizResults = pgTable("quiz_results", {
   telefono: text("telefono"),
   comentario: text("comentario"),
   categoria: text("categoria").default("preescolar"),
+  testType: text("test_type").default("lectura"),
   nivelEducativo: text("nivel_educativo"),
   grado: text("grado"),
   institucion: text("institucion"),
