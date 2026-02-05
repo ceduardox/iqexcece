@@ -88,8 +88,28 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (categoria === "universitarios") {
+      setFormData(prev => ({ ...prev, tipoEstudiante: "universitario" }));
+    } else if (categoria === "profesionales") {
+      setFormData(prev => ({ ...prev, tipoEstudiante: "profesional" }));
+    } else if (categoria === "adulto_mayor") {
+      setFormData(prev => ({ ...prev, tipoEstudiante: "profesional" }));
+    }
+  }, [categoria]);
+
   const handleChange = (field: keyof FormDataType, value: string | boolean | null) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === "tipoEstudiante") {
+        newData.semestre = "";
+        newData.institucion = "";
+        newData.profesion = "";
+        newData.ocupacion = "";
+        newData.lugarTrabajo = "";
+      }
+      return newData;
+    });
     if (field === "pais" && typeof value === "string") {
       const countryData = COUNTRY_DATA[value];
       if (countryData) {
