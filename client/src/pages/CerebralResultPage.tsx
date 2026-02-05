@@ -1,13 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Share2, MessageCircle, Brain, ArrowLeft } from "lucide-react";
+import { Home, Share2, MessageCircle, Brain, ArrowLeft, RotateCcw } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import menuCurveImg from "@assets/menu_1769957804819.png";
 import html2canvas from "html2canvas";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
+const LOGO_BASE64_KEY = "iqx_logo_base64";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -24,7 +25,9 @@ const playButtonSound = () => {
 export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string>("");
   
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
@@ -49,51 +52,95 @@ export default function CerebralResultPage() {
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
+  
+  useEffect(() => {
+    const cached = sessionStorage.getItem(LOGO_BASE64_KEY);
+    if (cached) {
+      setLogoBase64(cached);
+    } else {
+      fetch(LOGO_URL)
+        .then(r => r.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const b64 = reader.result as string;
+            sessionStorage.setItem(LOGO_BASE64_KEY, b64);
+            setLogoBase64(b64);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => setLogoBase64(LOGO_URL));
+    }
+  }, []);
 
-  const handleShare = async () => {
-    if (isSharing || !resultsRef.current) return;
-    setIsSharing(true);
-    playButtonSound();
+  const captureAndShare = async (): Promise<Blob | null> => {
+    if (!captureRef.current) return null;
     
     try {
-      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
-      if (logoImg) {
-        try {
-          const response = await fetch(logoImg.src);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          const base64 = await new Promise<string>((resolve) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          logoImg.src = base64;
-          await new Promise(r => setTimeout(r, 100));
-        } catch (e) {}
-      }
-      
-      const canvas = await html2canvas(resultsRef.current, {
+      const canvas = await html2canvas(captureRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
-        logging: false
+        logging: false,
+        width: 360,
+        height: 480,
       });
       
-      const blob = await new Promise<Blob>((resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => {
           if (b) resolve(b);
-          else reject(new Error('Failed'));
-        }, 'image/png', 1.0);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png', 0.95);
       });
-      
+    } catch (e) {
+      console.error("Capture error:", e);
+      return null;
+    }
+  };
+  
+  const handleWhatsAppShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const blob = await captureAndShare();
+    const dominance = isDominantLeft ? "Hemisferio Izquierdo" : "Hemisferio Derecho";
+    
+    if (blob && navigator.share && navigator.canShare) {
       const file = new File([blob], 'resultado-cerebral.png', { type: 'image/png' });
-      
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Mi resultado - IQEXPONENCIAL',
+            text: `¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
+          });
+        } catch (e) {
+          console.error("Share cancelled:", e);
+        }
+        setIsSharing(false);
+        return;
+      }
+    }
+    
+    const text = encodeURIComponent(`¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    setIsSharing(false);
+  };
+  
+  const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const blob = await captureAndShare();
+    
+    if (blob) {
+      const file = new File([blob], 'resultado-cerebral.png', { type: 'image/png' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'Test Cerebral - IQEXPONENCIAL',
-          text: `Mi resultado en Test Cerebral\n\nEntrena tu cerebro en: https://iqexponencial.app`,
-          files: [file]
-        });
+        try {
+          await navigator.share({ files: [file], title: 'Resultado Cerebral' });
+        } catch (e) {}
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -104,11 +151,11 @@ export default function CerebralResultPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) { 
-      console.error("Share error:", e);
-      const text = `Mi resultado en Test Cerebral\n\nEntrena tu cerebro en: https://iqexponencial.app`;
+    } else {
+      const dominance = isDominantLeft ? "Hemisferio Izquierdo" : "Hemisferio Derecho";
+      const text = `Mi dominancia: ${dominance}\n\nhttps://iqexponencial.app`;
       if (navigator.share) {
-        await navigator.share({ title: "Resultado Test Cerebral", text });
+        await navigator.share({ title: "Resultado", text });
       }
     }
     setIsSharing(false);
@@ -124,38 +171,50 @@ export default function CerebralResultPage() {
 
   return (
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
-      <header 
-        className="sticky top-0 z-50 w-full"
-        style={{
-          background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
-        }}
+      {/* Hidden capture div - optimized for WhatsApp sharing */}
+      <div 
+        ref={captureRef} 
+        className="fixed -left-[9999px] bg-white"
+        style={{ width: 360, height: 480, padding: 20 }}
       >
-        <div className="relative pt-3 pb-2 px-5">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setLocation("/")}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{
-                background: "rgba(255, 255, 255, 0.9)",
-                boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
-              }}
-              data-testid="button-back"
-            >
-              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
-            </button>
-            
-            <div className="flex items-center justify-center">
-              <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
-            </div>
-            
-            <div className="w-10" />
+        <div className="flex flex-col items-center h-full justify-between">
+          <img 
+            src={logoBase64 || LOGO_URL} 
+            alt="iQx" 
+            className="h-10 object-contain"
+            crossOrigin="anonymous"
+          />
+          <div className="text-center">
+            <p className="text-xl font-black" style={{ color: "#1f2937" }}>Test Cerebral</p>
+            <p className="text-sm text-gray-500">Dominancia Cerebral</p>
           </div>
+          <div className="flex items-center gap-6 w-full justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: isDominantLeft ? "#8a3ffc" : "#e5e7eb" }}>
+                <span className="text-white font-bold text-lg">{leftPercent}%</span>
+              </div>
+              <p className="text-xs font-bold" style={{ color: "#8a3ffc" }}>Izquierdo</p>
+            </div>
+            <Brain className="w-10 h-10 text-gray-300" />
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: !isDominantLeft ? "#06b6d4" : "#e5e7eb" }}>
+                <span className="text-white font-bold text-lg">{rightPercent}%</span>
+              </div>
+              <p className="text-xs font-bold" style={{ color: "#06b6d4" }}>Derecho</p>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-3 w-full text-center">
+            <p className="text-sm font-bold" style={{ color: isDominantLeft ? "#8a3ffc" : "#06b6d4" }}>
+              Dominante: {isDominantLeft ? "Hemisferio Izquierdo" : "Hemisferio Derecho"}
+            </p>
+          </div>
+          <p className="text-xs text-gray-400">iqexponencial.app</p>
         </div>
-      </header>
-      
-      <div className="w-full sticky z-40" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
+
+      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+        <img src={logoBase64 || LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+      </header>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
@@ -362,35 +421,54 @@ export default function CerebralResultPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
-            className="mt-4 grid grid-cols-3 gap-3"
+            className="mt-4 space-y-3"
           >
-            <Button
-              onClick={handleNewTest}
-              className="flex flex-col items-center gap-1 py-4"
-              style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #6D28D9 100%)" }}
-              data-testid="button-new-test"
+            {/* WhatsApp - Primary button on mobile */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleWhatsAppShare}
+              disabled={isSharing}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-white font-bold shadow-lg disabled:opacity-50"
+              style={{ background: "#25D366" }}
+              data-testid="button-whatsapp-share"
             >
-              <Home className="w-5 h-5" />
-              <span className="text-[10px]">Nuevo Test</span>
-            </Button>
-            <Button
+              <SiWhatsapp className="w-5 h-5" />
+              {isSharing ? 'Compartiendo...' : 'Compartir en WhatsApp'}
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={handleShare}
               disabled={isSharing}
-              className="flex flex-col items-center gap-1 py-4"
-              style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0891B2 100%)" }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2 disabled:opacity-50"
+              style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              <span className="text-[10px]">{isSharing ? '...' : 'Compartir'}</span>
-            </Button>
-            <Button
-              className="flex flex-col items-center gap-1 py-4"
-              style={{ background: "linear-gradient(135deg, #EC4899 0%, #DB2777 100%)" }}
-              data-testid="button-contact"
+              Más opciones
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleNewTest}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)", color: "white" }}
+              data-testid="button-new-test"
             >
-              <MessageCircle className="w-5 h-5" />
-              <span className="text-[10px]">Escríbenos</span>
-            </Button>
+              <RotateCcw className="w-5 h-5" />
+              Nuevo test
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setLocation("/")}
+              className="w-full flex items-center justify-center gap-2 py-2 font-medium"
+              style={{ color: "#6b7280" }}
+              data-testid="button-home"
+            >
+              <Home className="w-4 h-4" />
+              Volver al inicio
+            </motion.button>
           </motion.div>
         </div>
       </main>

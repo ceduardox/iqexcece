@@ -1,10 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw } from "lucide-react";
+import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw, Home } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 import html2canvas from "html2canvas";
+
+const LOGO_URL = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const LOGO_BASE64_KEY = "iqx_logo_base64";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -69,6 +73,8 @@ export default function ReadingContentPage() {
   const { userData } = useUserData();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string>("");
+  const captureRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<"lectura" | "cuestionario">("lectura");
   const [quizStarted, setQuizStarted] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
@@ -129,6 +135,26 @@ export default function ReadingContentPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [activeTab, quizFinished]);
+  
+  useEffect(() => {
+    const cached = sessionStorage.getItem(LOGO_BASE64_KEY);
+    if (cached) {
+      setLogoBase64(cached);
+    } else {
+      fetch(LOGO_URL)
+        .then(r => r.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const b64 = reader.result as string;
+            sessionStorage.setItem(LOGO_BASE64_KEY, b64);
+            setLogoBase64(b64);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => setLogoBase64(LOGO_URL));
+    }
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -226,50 +252,74 @@ export default function ReadingContentPage() {
     setSubmitting(false);
   };
 
-  const handleShare = async () => {
-    if (isSharing || !resultsRef.current) return;
-    setIsSharing(true);
-    playButtonSound();
+  const captureAndShare = async (): Promise<Blob | null> => {
+    if (!captureRef.current) return null;
     
     try {
-      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
-      if (logoImg) {
-        try {
-          const response = await fetch(logoImg.src);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          const base64 = await new Promise<string>((resolve) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          logoImg.src = base64;
-          await new Promise(r => setTimeout(r, 100));
-        } catch (e) { console.error("Logo conversion error:", e); }
-      }
-      
-      const canvas = await html2canvas(resultsRef.current, {
+      const canvas = await html2canvas(captureRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
-        logging: false
+        logging: false,
+        width: 360,
+        height: 480,
       });
       
-      const blob = await new Promise<Blob>((resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => {
           if (b) resolve(b);
           else reject(new Error('Failed to create blob'));
-        }, 'image/png', 1.0);
+        }, 'image/png', 0.95);
       });
-      
+    } catch (e) {
+      console.error("Capture error:", e);
+      return null;
+    }
+  };
+  
+  const handleWhatsAppShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const percentage = Math.round((correctAnswers / content.questions.length) * 100);
+    const blob = await captureAndShare();
+    
+    if (blob && navigator.share && navigator.canShare) {
       const file = new File([blob], 'resultado-lectura.png', { type: 'image/png' });
-      
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Mi resultado - IQEXPONENCIAL',
+            text: `¡Obtuve ${percentage}% en el Test de Lectura! Velocidad: ${wordsPerMinute} ppm. https://iqexponencial.app`
+          });
+        } catch (e) {
+          console.error("Share cancelled:", e);
+        }
+        setIsSharing(false);
+        return;
+      }
+    }
+    
+    const text = encodeURIComponent(`¡Obtuve ${percentage}% en el Test de Lectura! Velocidad: ${wordsPerMinute} ppm.\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    setIsSharing(false);
+  };
+  
+  const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const blob = await captureAndShare();
+    
+    if (blob) {
+      const file = new File([blob], 'resultado-lectura.png', { type: 'image/png' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'Resultado Test Lectura - IQEXPONENCIAL',
-          text: `Mi resultado en Test de Lectura\n\nEntrena tu cerebro en: https://iqexponencial.app`,
-          files: [file]
-        });
+        try {
+          await navigator.share({ files: [file], title: 'Resultado Lectura' });
+        } catch (e) {}
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -280,14 +330,11 @@ export default function ReadingContentPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) { 
-      console.error("Share error:", e);
-      const text = `¡Completé el Test de Lectura en IQxponencial! Mi comprensión fue de ${Math.round((correctAnswers / content.questions.length) * 100)}% y mi velocidad de ${wordsPerMinute.toLocaleString()} palabras por minuto.`;
+    } else {
+      const percentage = Math.round((correctAnswers / content.questions.length) * 100);
+      const text = `¡${percentage}% en Lectura! ${wordsPerMinute} ppm.\n\nhttps://iqexponencial.app`;
       if (navigator.share) {
-        navigator.share({ title: "Resultado Test Lectura", text });
-      } else {
-        navigator.clipboard.writeText(text);
-        alert("Resultado copiado al portapapeles");
+        await navigator.share({ title: "Resultado", text });
       }
     }
     setIsSharing(false);
@@ -306,10 +353,56 @@ export default function ReadingContentPage() {
     const percentage = Math.round((correctAnswers / content.questions.length) * 100);
     return (
       <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
+        {/* Hidden capture div - optimized for WhatsApp sharing */}
+        <div 
+          ref={captureRef} 
+          className="fixed -left-[9999px] bg-white"
+          style={{ width: 360, height: 480, padding: 20 }}
+        >
+          <div className="flex flex-col items-center h-full justify-between">
+            <img 
+              src={logoBase64 || LOGO_URL} 
+              alt="iQx" 
+              className="h-10 object-contain"
+              crossOrigin="anonymous"
+            />
+            <div className="text-center">
+              <p className="text-xl font-black" style={{ color: "#1f2937" }}>¡Excelente!</p>
+              <p className="text-sm text-gray-500">Test de Lectura</p>
+            </div>
+            <div className="relative w-32 h-32">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" strokeWidth="10" />
+                <circle 
+                  cx="50" cy="50" r="42" fill="none"
+                  stroke="#8a3ffc" strokeWidth="10" strokeLinecap="round"
+                  strokeDasharray={`${(percentage / 100) * 264} 264`}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-bold" style={{ color: "#8a3ffc" }}>{percentage}%</span>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3 w-full">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="text-lg font-bold">{correctAnswers}/{content.questions.length}</p>
+                  <p className="text-xs text-gray-500">Correctas</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
+                  <p className="text-xs text-gray-500">ppm</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400">iqexponencial.app</p>
+          </div>
+        </div>
+
         <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
           <div className="flex items-center justify-center" data-testid="header-logo">
             <img 
-              src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+              src={logoBase64 || LOGO_URL} 
               alt="iQx" 
               className="h-10 w-auto object-contain" 
             />
@@ -442,40 +535,53 @@ export default function ReadingContentPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="space-y-3"
+              className="space-y-3 pb-6"
             >
+              {/* WhatsApp - Primary button on mobile */}
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                onClick={handleShare}
+                onClick={handleWhatsAppShare}
                 disabled={isSharing}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md disabled:opacity-50"
-                style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
-                data-testid="button-share"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-white font-bold shadow-lg disabled:opacity-50"
+                style={{ background: "#25D366" }}
+                data-testid="button-whatsapp-share"
               >
-                <Share2 className="w-5 h-5" />
-                {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
+                <SiWhatsapp className="w-5 h-5" />
+                {isSharing ? 'Compartiendo...' : 'Compartir en WhatsApp'}
               </motion.button>
               
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                onClick={handleWhatsApp}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2"
+                onClick={handleShare}
+                disabled={isSharing}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2 disabled:opacity-50"
                 style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
-                data-testid="button-whatsapp"
+                data-testid="button-share"
               >
-                <MessageCircle className="w-5 h-5" />
-                Más información
+                <Share2 className="w-5 h-5" />
+                Más opciones
               </motion.button>
               
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={handleNewTest}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
-                style={{ color: "#6b7280" }}
+                style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)", color: "white" }}
                 data-testid="button-new-test"
               >
                 <RotateCcw className="w-5 h-5" />
                 Nuevo test
+              </motion.button>
+              
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-2 font-medium"
+                style={{ color: "#6b7280" }}
+                data-testid="button-whatsapp-info"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Más información
               </motion.button>
             </motion.div>
           </div>

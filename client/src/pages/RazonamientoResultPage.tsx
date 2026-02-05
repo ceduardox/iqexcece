@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { Home, RotateCcw, Share2 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import html2canvas from "html2canvas";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
+const LOGO_BASE64_KEY = "iqx_logo_base64";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -27,11 +29,33 @@ export default function RazonamientoResultPage() {
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string>("");
   
   const results = userData.razonamientoResults || { correct: 0, total: 0, time: 0, categoria: "ninos", title: "" };
   const percentage = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
   const categoryLabel = categoryLabels[results.categoria] || "Niños";
+  
+  useEffect(() => {
+    const cached = sessionStorage.getItem(LOGO_BASE64_KEY);
+    if (cached) {
+      setLogoBase64(cached);
+    } else {
+      fetch(LOGO_URL)
+        .then(r => r.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const b64 = reader.result as string;
+            sessionStorage.setItem(LOGO_BASE64_KEY, b64);
+            setLogoBase64(b64);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => setLogoBase64(LOGO_URL));
+    }
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -48,50 +72,73 @@ export default function RazonamientoResultPage() {
 
   const message = getMessage();
 
-  const handleShare = async () => {
-    if (isSharing || !resultsRef.current) return;
-    setIsSharing(true);
-    playButtonSound();
+  const captureAndShare = async (): Promise<Blob | null> => {
+    if (!captureRef.current) return null;
     
     try {
-      const logoImg = resultsRef.current.querySelector('img[alt="iQx"]') as HTMLImageElement;
-      if (logoImg) {
-        try {
-          const response = await fetch(logoImg.src);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          const base64 = await new Promise<string>((resolve) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          logoImg.src = base64;
-          await new Promise(r => setTimeout(r, 100));
-        } catch (e) {}
-      }
-      
-      const canvas = await html2canvas(resultsRef.current, {
+      const canvas = await html2canvas(captureRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
-        logging: false
+        logging: false,
+        width: 360,
+        height: 480,
       });
       
-      const blob = await new Promise<Blob>((resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => {
           if (b) resolve(b);
-          else reject(new Error('Failed'));
-        }, 'image/png', 1.0);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png', 0.95);
       });
-      
+    } catch (e) {
+      console.error("Capture error:", e);
+      return null;
+    }
+  };
+  
+  const handleWhatsAppShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const blob = await captureAndShare();
+    
+    if (blob && navigator.share && navigator.canShare) {
       const file = new File([blob], 'resultado-razonamiento.png', { type: 'image/png' });
-      
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Mi resultado - IQEXPONENCIAL',
+            text: `¡Obtuve ${percentage}% en Razonamiento! Entrena tu cerebro: https://iqexponencial.app`
+          });
+        } catch (e) {
+          console.error("Share cancelled or failed:", e);
+        }
+        setIsSharing(false);
+        return;
+      }
+    }
+    
+    const text = encodeURIComponent(`¡Obtuve ${percentage}% en el test de Razonamiento!\n\nEntrena tu cerebro en: https://iqexponencial.app`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    setIsSharing(false);
+  };
+  
+  const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    playButtonSound();
+    
+    const blob = await captureAndShare();
+    
+    if (blob) {
+      const file = new File([blob], 'resultado-razonamiento.png', { type: 'image/png' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'Resultado Razonamiento - IQEXPONENCIAL',
-          text: `Mi resultado en Razonamiento - ${percentage}%\n\nEntrena tu cerebro en: https://iqexponencial.app`,
-          files: [file]
-        });
+        try {
+          await navigator.share({ files: [file], title: 'Resultado Razonamiento' });
+        } catch (e) {}
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -102,11 +149,10 @@ export default function RazonamientoResultPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) { 
-      console.error("Share error:", e);
-      const text = `Mi resultado en Razonamiento - ${percentage}%\n\nEntrena tu cerebro en: https://iqexponencial.app`;
+    } else {
+      const text = `Mi resultado en Razonamiento - ${percentage}%\n\nhttps://iqexponencial.app`;
       if (navigator.share) {
-        await navigator.share({ title: "Resultado Razonamiento", text });
+        await navigator.share({ title: "Resultado", text });
       }
     }
     setIsSharing(false);
@@ -126,8 +172,54 @@ export default function RazonamientoResultPage() {
 
   return (
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
+      {/* Hidden capture div - optimized for sharing */}
+      <div 
+        ref={captureRef} 
+        className="fixed -left-[9999px] bg-white"
+        style={{ width: 360, height: 480, padding: 20 }}
+      >
+        <div className="flex flex-col items-center h-full justify-between">
+          <img 
+            src={logoBase64 || LOGO_URL} 
+            alt="iQx" 
+            className="h-10 object-contain"
+            crossOrigin="anonymous"
+          />
+          <div className="text-center">
+            <p className="text-xl font-black" style={{ color: "#1f2937" }}>{message}</p>
+            <p className="text-sm text-gray-500">Test de Razonamiento</p>
+          </div>
+          <div className="relative w-32 h-32">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" strokeWidth="10" />
+              <circle 
+                cx="50" cy="50" r="42" fill="none"
+                stroke="#06b6d4" strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={`${(percentage / 100) * 264} 264`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-bold" style={{ color: "#06b6d4" }}>{percentage}%</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-3 w-full">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-lg font-bold">{results.correct}/{results.total}</p>
+                <p className="text-xs text-gray-500">Correctas</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold" style={{ color: "#06b6d4" }}>{formatTime(results.time)}</p>
+                <p className="text-xs text-gray-500">Tiempo</p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400">iqexponencial.app</p>
+        </div>
+      </div>
+
       <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
-        <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+        <img src={logoBase64 || LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24">
@@ -208,23 +300,36 @@ export default function RazonamientoResultPage() {
             transition={{ delay: 0.5 }}
             className="space-y-3 pt-4"
           >
+            {/* WhatsApp - Primary button on mobile */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleWhatsAppShare}
+              disabled={isSharing}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-white font-bold shadow-lg disabled:opacity-50"
+              style={{ background: "#25D366" }}
+              data-testid="button-whatsapp-share"
+            >
+              <SiWhatsapp className="w-5 h-5" />
+              {isSharing ? 'Compartiendo...' : 'Compartir en WhatsApp'}
+            </motion.button>
+            
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleShare}
               disabled={isSharing}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-bold shadow-md disabled:opacity-50"
-              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)" }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2 disabled:opacity-50"
+              style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
+              Más opciones
             </motion.button>
             
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleRetry}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold border-2"
-              style={{ borderColor: "#8a3ffc", color: "#8a3ffc" }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
+              style={{ background: "linear-gradient(90deg, #8a3ffc, #6b21a8)", color: "white" }}
               data-testid="button-retry"
             >
               <RotateCcw className="w-5 h-5" />
@@ -234,11 +339,11 @@ export default function RazonamientoResultPage() {
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleHome}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-bold"
+              className="w-full flex items-center justify-center gap-2 py-2 font-medium"
               style={{ color: "#6b7280" }}
               data-testid="button-home"
             >
-              <Home className="w-5 h-5" />
+              <Home className="w-4 h-4" />
               Volver al inicio
             </motion.button>
           </motion.div>
