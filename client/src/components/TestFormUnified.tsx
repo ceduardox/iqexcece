@@ -89,15 +89,6 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (categoria === "universitarios") {
-      setFormData(prev => ({ ...prev, tipoEstudiante: "universitario" }));
-    } else if (categoria === "profesionales") {
-      setFormData(prev => ({ ...prev, tipoEstudiante: "profesional" }));
-    } else if (categoria === "adulto_mayor") {
-      setFormData(prev => ({ ...prev, tipoEstudiante: "profesional" }));
-    }
-  }, [categoria]);
 
   const handleChange = (field: keyof FormDataType, value: string | boolean | null) => {
     setFormData(prev => {
@@ -127,14 +118,14 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
     }
     
     if (isAdultoConOpciones) {
-      if (formData.tipoEstudiante === "universitario" && !isAdultoMayor) {
+      if (!formData.tipoEstudiante) {
+        newErrors.tipoEstudiante = "Selecciona tu perfil";
+      } else if (formData.tipoEstudiante === "universitario" && !isAdultoMayor) {
         if (!formData.semestre) newErrors.semestre = "Selecciona un semestre";
         if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
-      }
-      if (formData.tipoEstudiante === "profesional") {
+      } else if (formData.tipoEstudiante === "profesional") {
         if (!formData.profesion.trim()) newErrors.profesion = "Campo requerido";
-      }
-      if (formData.tipoEstudiante === "ocupacion") {
+      } else if (formData.tipoEstudiante === "ocupacion") {
         if (!formData.ocupacion.trim()) newErrors.ocupacion = "Campo requerido";
       }
     }
@@ -291,45 +282,26 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
 
           {isAdultoConOpciones && (
             <>
-              <motion.div 
-                className="flex items-center gap-2 text-sm text-purple-600 font-medium"
-                animate={{ opacity: [0.6, 1, 0.6] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
-                Selecciona tu perfil
-              </motion.div>
-              <div className="bg-gray-100 p-1 rounded-2xl">
-                <div className="flex relative">
-                  {(isAdultoMayor ? ["profesional", "ocupacion"] : ["universitario", "profesional", "ocupacion"]).map((opt, idx, arr) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => handleChange("tipoEstudiante", opt)}
-                      className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all relative z-10 ${
-                        formData.tipoEstudiante === opt 
-                          ? "text-white" 
-                          : "text-gray-600"
-                      }`}
-                      data-testid={`btn-tipo-${opt}`}
-                    >
-                      {opt === "universitario" ? "Universitario" : opt === "profesional" ? "Profesional" : "Ocupación"}
-                    </button>
-                  ))}
-                  <motion.div
-                    className="absolute top-0 bottom-0 rounded-xl"
-                    style={{ 
-                      background: "linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)",
-                      width: isAdultoMayor ? "50%" : "33.33%"
-                    }}
-                    animate={{
-                      x: isAdultoMayor 
-                        ? (formData.tipoEstudiante === "profesional" ? "0%" : "100%")
-                        : (formData.tipoEstudiante === "universitario" ? "0%" : formData.tipoEstudiante === "profesional" ? "100%" : "200%")
-                    }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                </div>
+              <div className="relative">
+                <User className={iconClass} />
+                <select
+                  value={formData.tipoEstudiante}
+                  onChange={(e) => { handleChange("tipoEstudiante", e.target.value); setErrors(prev => ({ ...prev, tipoEstudiante: "" })); }}
+                  className={`${selectClass} ${errors.tipoEstudiante ? "border-red-400 ring-1 ring-red-400" : ""}`}
+                  data-testid="select-tipo-estudiante"
+                >
+                  <option value="">Selecciona tu perfil</option>
+                  {!isAdultoMayor && <option value="universitario">Universitario</option>}
+                  <option value="profesional">Profesional</option>
+                  <option value="ocupacion">Ocupación</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                {errors.tipoEstudiante && (
+                  <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.tipoEstudiante}
+                  </div>
+                )}
               </div>
 
               {formData.tipoEstudiante === "universitario" && !isAdultoMayor && (
