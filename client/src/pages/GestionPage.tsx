@@ -1091,6 +1091,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return `${mins}:${String(secs).padStart(2, '0')}`;
   };
 
+  const formatTipoEstudiante = (tipo: string | null) => {
+    if (!tipo) return "-";
+    const map: Record<string, string> = {
+      "universitario": "Universitario",
+      "profesional": "Profesional",
+      "ocupacion": "Ocupación",
+      "estudiante": "Estudiante"
+    };
+    return map[tipo] || tipo;
+  };
+
   // Load entrenamiento data when tab is activated
   useEffect(() => {
     if (isLoggedIn && activeTab === "entrenamiento") {
@@ -1801,7 +1812,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
                                 <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
                                 <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
-                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Tipo Estudiante:</span> <span className="text-purple-400">{(r as any).tipoEstudiante}</span></div>}
+                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Perfil:</span> <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></div>}
                                 {(r as any).semestre && <div><span className="text-white/60">Semestre:</span> <span className="text-purple-400">{(r as any).semestre}</span></div>}
                                 {(r as any).profesion && <div><span className="text-white/60">Profesión:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
                                 {(r as any).ocupacion && <div><span className="text-white/60">Ocupación:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
@@ -1851,7 +1862,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
-                        {(r as any).tipoEstudiante && <p className="text-white/60">Tipo: <span className="text-purple-400">{(r as any).tipoEstudiante}</span></p>}
+                        {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}
                         {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
                         {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
                         {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
@@ -1990,7 +2001,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
                                 <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
                                 <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
-                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Tipo Estudiante:</span> <span className="text-purple-400">{(r as any).tipoEstudiante}</span></div>}
+                                {(r as any).tipoEstudiante && <div><span className="text-white/60">Perfil:</span> <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></div>}
                                 {(r as any).semestre && <div><span className="text-white/60">Semestre:</span> <span className="text-purple-400">{(r as any).semestre}</span></div>}
                                 {(r as any).profesion && <div><span className="text-white/60">Profesión:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
                                 {(r as any).ocupacion && <div><span className="text-white/60">Ocupación:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
@@ -2039,7 +2050,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
-                        {(r as any).tipoEstudiante && <p className="text-white/60">Tipo: <span className="text-purple-400">{(r as any).tipoEstudiante}</span></p>}
+                        {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}
                         {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
                         {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
                         {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
