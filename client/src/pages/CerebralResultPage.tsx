@@ -26,7 +26,7 @@ const playButtonSound = () => {
 export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
-  const captureRef = useRef<HTMLDivElement>(null);
+  const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [logoBase64, setLogoBase64] = useState<string>("");
   
@@ -75,20 +75,47 @@ export default function CerebralResultPage() {
   }, []);
 
   const captureAndShare = async (): Promise<Blob | null> => {
-    if (!captureRef.current) return null;
+    if (!captureAreaRef.current) return null;
     
     try {
-      const canvas = await html2canvas(captureRef.current, {
+      const capturedCanvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
         logging: false,
-        width: 360,
-        height: 540,
+        allowTaint: true,
       });
       
+      const logoHeight = 80;
+      const padding = 20;
+      const finalWidth = capturedCanvas.width;
+      const finalHeight = capturedCanvas.height + logoHeight + padding;
+      
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = finalWidth;
+      finalCanvas.height = finalHeight;
+      const ctx = finalCanvas.getContext('2d');
+      if (!ctx) return null;
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, finalWidth, finalHeight);
+      
+      if (logoBase64) {
+        const logoImg = new Image();
+        logoImg.src = logoBase64;
+        await new Promise((resolve) => {
+          logoImg.onload = resolve;
+          logoImg.onerror = resolve;
+        });
+        const logoWidth = Math.min(200, finalWidth * 0.4);
+        const logoX = (finalWidth - logoWidth) / 2;
+        ctx.drawImage(logoImg, logoX, padding / 2, logoWidth, logoHeight - padding);
+      }
+      
+      ctx.drawImage(capturedCanvas, 0, logoHeight);
+      
       return new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((b) => {
+        finalCanvas.toBlob((b) => {
           if (b) resolve(b);
           else reject(new Error('Failed to create blob'));
         }, 'image/png', 0.95);
@@ -172,49 +199,11 @@ export default function CerebralResultPage() {
 
   return (
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
-      {/* Hidden capture div - optimized for WhatsApp sharing */}
-      <div 
-        ref={captureRef} 
-        className="fixed -left-[9999px] bg-white"
-        style={{ width: 360, height: 540, padding: 24 }}
-      >
-        <div className="flex flex-col items-center h-full">
-          <img 
-            src={logoBase64 || CAPTURE_LOGO} 
-            alt="iQx" 
-            className="h-12 object-contain mb-4"
-            crossOrigin="anonymous"
-          />
-          <p className="text-2xl font-black mb-1" style={{ color: "#1f2937" }}>Test Cerebral</p>
-          <p className="text-sm text-gray-500 mb-5">Dominancia Cerebral</p>
-          <div className="flex items-center gap-5 w-full justify-center mb-5">
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: isDominantLeft ? "#8a3ffc" : "#e5e7eb" }}>
-                <span className="text-white font-black text-xl">{leftPercent}%</span>
-              </div>
-              <p className="text-sm font-bold" style={{ color: "#8a3ffc" }}>Izquierdo</p>
-            </div>
-            <Brain className="w-12 h-12 text-gray-300" />
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: !isDominantLeft ? "#06b6d4" : "#e5e7eb" }}>
-                <span className="text-white font-black text-xl">{rightPercent}%</span>
-              </div>
-              <p className="text-sm font-bold" style={{ color: "#06b6d4" }}>Derecho</p>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-4 w-full text-center">
-            <p className="text-base font-bold" style={{ color: isDominantLeft ? "#8a3ffc" : "#06b6d4" }}>
-              Dominante: {isDominantLeft ? "Hemisferio Izquierdo" : "Hemisferio Derecho"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
-        <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
-      </header>
-
-      <main className="flex-1 overflow-y-auto pb-24">
+      {/* Capture area - contains header and content, excludes buttons */}
+      <div ref={captureAreaRef} className="bg-white">
+        <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
+          <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
+        </header>
         <div 
           className="w-full"
           style={{
@@ -414,14 +403,19 @@ export default function CerebralResultPage() {
               </motion.div>
             )}
           </motion.div>
+        </div>
+      </div>
+      {/* End capture area */}
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-            className="mt-4 space-y-3"
-          >
-            {/* WhatsApp - Primary button on mobile */}
+      {/* Buttons section - excluded from capture */}
+      <div className="px-4 pb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="space-y-3"
+        >
+          {/* WhatsApp - Primary button on mobile */}
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleWhatsAppShare}
@@ -467,9 +461,8 @@ export default function CerebralResultPage() {
               <Home className="w-4 h-4" />
               Volver al inicio
             </motion.button>
-          </motion.div>
-        </div>
-      </main>
+        </motion.div>
+      </div>
       
       <BottomNavBar />
     </div>

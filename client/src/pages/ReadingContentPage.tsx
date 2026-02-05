@@ -73,9 +73,9 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 export default function ReadingContentPage() {
   const { userData } = useUserData();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [logoBase64, setLogoBase64] = useState<string>("");
-  const captureRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<"lectura" | "cuestionario">("lectura");
   const [quizStarted, setQuizStarted] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
@@ -254,20 +254,47 @@ export default function ReadingContentPage() {
   };
 
   const captureAndShare = async (): Promise<Blob | null> => {
-    if (!captureRef.current) return null;
+    if (!captureAreaRef.current) return null;
     
     try {
-      const canvas = await html2canvas(captureRef.current, {
+      const capturedCanvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
         logging: false,
-        width: 360,
-        height: 540,
+        allowTaint: true,
       });
       
+      const logoHeight = 80;
+      const padding = 20;
+      const finalWidth = capturedCanvas.width;
+      const finalHeight = capturedCanvas.height + logoHeight + padding;
+      
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = finalWidth;
+      finalCanvas.height = finalHeight;
+      const ctx = finalCanvas.getContext('2d');
+      if (!ctx) return null;
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, finalWidth, finalHeight);
+      
+      if (logoBase64) {
+        const logoImg = new Image();
+        logoImg.src = logoBase64;
+        await new Promise((resolve) => {
+          logoImg.onload = resolve;
+          logoImg.onerror = resolve;
+        });
+        const logoWidth = Math.min(200, finalWidth * 0.4);
+        const logoX = (finalWidth - logoWidth) / 2;
+        ctx.drawImage(logoImg, logoX, padding / 2, logoWidth, logoHeight - padding);
+      }
+      
+      ctx.drawImage(capturedCanvas, 0, logoHeight);
+      
       return new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((b) => {
+        finalCanvas.toBlob((b) => {
           if (b) resolve(b);
           else reject(new Error('Failed to create blob'));
         }, 'image/png', 0.95);
@@ -354,61 +381,17 @@ export default function ReadingContentPage() {
     const percentage = Math.round((correctAnswers / content.questions.length) * 100);
     return (
       <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
-        {/* Hidden capture div - optimized for WhatsApp sharing */}
-        <div 
-          ref={captureRef} 
-          className="fixed -left-[9999px] bg-white"
-          style={{ width: 360, height: 540, padding: 24 }}
-        >
-          <div className="flex flex-col items-center h-full">
-            <img 
-              src={logoBase64 || CAPTURE_LOGO} 
-              alt="iQx" 
-              className="h-12 object-contain mb-4"
-              crossOrigin="anonymous"
-            />
-            <p className="text-2xl font-black mb-1" style={{ color: "#1f2937" }}>{percentage >= 80 ? "¡Excelente!" : percentage >= 60 ? "¡Muy bien!" : percentage >= 40 ? "¡Buen esfuerzo!" : "¡Sigue practicando!"}</p>
-            <p className="text-sm text-gray-500 mb-4">Test de Lectura</p>
-            <div className="relative w-36 h-36 mb-4">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" strokeWidth="10" />
-                <circle 
-                  cx="50" cy="50" r="42" fill="none"
-                  stroke="#8a3ffc" strokeWidth="10" strokeLinecap="round"
-                  strokeDasharray={`${(percentage / 100) * 264} 264`}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black" style={{ color: "#8a3ffc" }}>{percentage}%</span>
-              </div>
+        {/* Capture area - contains header and content, excludes buttons */}
+        <div ref={captureAreaRef} className="bg-white">
+          <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
+            <div className="flex items-center justify-center" data-testid="header-logo">
+              <img 
+                src={HEADER_LOGO} 
+                alt="iQx" 
+                className="h-10 w-auto object-contain" 
+              />
             </div>
-            <div className="bg-gray-50 rounded-xl p-4 w-full mb-3">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-xl font-bold" style={{ color: "#1f2937" }}>{correctAnswers}/{content.questions.length}</p>
-                  <p className="text-xs text-gray-500">Correctas</p>
-                </div>
-                <div>
-                  <p className="text-xl font-bold" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
-                  <p className="text-xs text-gray-500">ppm</p>
-                </div>
-              </div>
-            </div>
-            <p className="text-sm font-medium text-gray-500">{categoryLabels[categoria] || 'Niños'}</p>
-          </div>
-        </div>
-
-        <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
-          <div className="flex items-center justify-center" data-testid="header-logo">
-            <img 
-              src={HEADER_LOGO} 
-              alt="iQx" 
-              className="h-10 w-auto object-contain" 
-            />
-          </div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto">
+          </header>
           <div 
             className="w-full"
             style={{
@@ -529,14 +512,19 @@ export default function ReadingContentPage() {
                 </div>
               </div>
             </motion.div>
+          </div>
+        </div>
+        {/* End capture area */}
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-3 pb-6"
-            >
-              {/* WhatsApp - Primary button on mobile */}
+        {/* Buttons section - excluded from capture */}
+        <div className="px-5 pb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-3"
+          >
+            {/* WhatsApp - Primary button on mobile */}
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={handleWhatsAppShare}
@@ -582,9 +570,8 @@ export default function ReadingContentPage() {
                 <MessageCircle className="w-4 h-4" />
                 Más información
               </motion.button>
-            </motion.div>
-          </div>
-        </main>
+          </motion.div>
+        </div>
       </div>
     );
   }
