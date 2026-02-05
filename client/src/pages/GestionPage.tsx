@@ -2014,12 +2014,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <tr className="text-left text-white/60 border-b border-white/10">
                       <th className="pb-3 px-2"></th>
                       <th className="pb-3 px-2">Nombre</th>
-                      <th className="pb-3 px-2">Email</th>
                       <th className="pb-3 px-2">Categoría</th>
-                      <th className="pb-3 px-2">Resultado</th>
-                      <th className="pb-3 px-2">País</th>
-                      <th className="pb-3 px-2">Estado</th>
-                      <th className="pb-3 px-2">T. Test</th>
+                      <th className="pb-3 px-2">Comprensión</th>
+                      <th className="pb-3 px-2">Correctas</th>
                       <th className="pb-3 px-2">Tipo</th>
                       <th className="pb-3 px-2">Fecha</th>
                     </tr>
@@ -2037,16 +2034,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             </svg>
                           </td>
                           <td className="py-3 px-2 text-white">{r.nombre}</td>
-                          <td className="py-3 px-2 text-white/80">{r.email || "-"}</td>
                           <td className="py-3 px-2 text-blue-400">{r.categoria || "-"}</td>
+                          <td className="py-3 px-2">
+                            {(r as any).comprension !== null ? (
+                              <span className="text-cyan-400 font-bold">{(r as any).comprension}%</span>
+                            ) : "-"}
+                          </td>
                           <td className="py-3 px-2">
                             {(r as any).respuestasCorrectas !== null && (r as any).respuestasTotales ? (
                               <span className="text-green-400 font-bold">{(r as any).respuestasCorrectas}/{(r as any).respuestasTotales}</span>
                             ) : "-"}
                           </td>
-                          <td className="py-3 px-2 text-cyan-400">{(r as any).pais || "-"}</td>
-                          <td className="py-3 px-2 text-cyan-400">{(r as any).estado || r.ciudad || "-"}</td>
-                          <td className="py-3 px-2 text-purple-400">{formatTime(r.tiempoCuestionario)}</td>
                           <td className="py-3 px-2">
                             <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
                               {r.isPwa ? "PWA" : "Web"}
@@ -2056,10 +2054,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </tr>
                         {expandedResult === r.id && (
                           <tr className="bg-white/5">
-                            <td colSpan={10} className="px-6 py-4">
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <td colSpan={7} className="px-4 py-4">
+                              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-4 mb-4 border border-blue-500/20">
+                                <h4 className="text-blue-400 font-bold mb-3 text-sm">📊 Resultados del Test</h4>
+                                <div className="grid grid-cols-3 gap-3 text-center">
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-cyan-400 font-bold text-lg">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
+                                    <div className="text-white/50 text-xs">Comprensión</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-green-400 font-bold text-lg">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
+                                    <div className="text-white/50 text-xs">Correctas</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-purple-400 font-bold text-lg">{formatTime(r.tiempoCuestionario)}</div>
+                                    <div className="text-white/50 text-xs">Tiempo</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                <div><span className="text-white/60">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                                 <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
                                 <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
+                                <div><span className="text-white/60">País:</span> <span className="text-cyan-400">{(r as any).pais || "-"}</span></div>
+                                <div><span className="text-white/60">Estado:</span> <span className="text-cyan-400">{(r as any).estado || r.ciudad || "-"}</span></div>
                                 <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
                                 <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
                                 {(r as any).tipoEstudiante && <div><span className="text-white/60">Perfil:</span> <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></div>}
@@ -2076,7 +2094,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     ))}
                     {filteredRazonamientoResults.length === 0 && (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-white/40">
+                        <td colSpan={7} className="py-8 text-center text-white/40">
                           No hay resultados de Razonamiento registrados
                         </td>
                       </tr>
@@ -2103,13 +2121,29 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       </svg>
                     </button>
                     {expandedResult === r.id && (
-                      <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
-                        <p className="text-white/60 pt-2">Email: <span className="text-white/80">{r.email || "-"}</span></p>
+                      <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10">
+                        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 mt-2 border border-blue-500/20">
+                          <h4 className="text-blue-400 font-bold mb-2 text-xs">📊 Resultados del Test</h4>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="bg-black/30 rounded p-2">
+                              <div className="text-cyan-400 font-bold">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
+                              <div className="text-white/50 text-xs">Comprensión</div>
+                            </div>
+                            <div className="bg-black/30 rounded p-2">
+                              <div className="text-green-400 font-bold">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
+                              <div className="text-white/50 text-xs">Correctas</div>
+                            </div>
+                            <div className="bg-black/30 rounded p-2">
+                              <div className="text-purple-400 font-bold">{formatTime(r.tiempoCuestionario)}</div>
+                              <div className="text-white/50 text-xs">Tiempo</div>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-white/60 pt-1">Email: <span className="text-white/80">{r.email || "-"}</span></p>
                         <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
                         <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
                         <p className="text-white/60">País: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
-                        <p className="text-white/60">Resultado: <span className="text-green-400 font-bold">{(r as any).respuestasCorrectas !== null && (r as any).respuestasTotales ? `${(r as any).respuestasCorrectas}/${(r as any).respuestasTotales}` : "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
                         {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}
@@ -2117,7 +2151,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
                         {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
                         {(r as any).lugarTrabajo && <p className="text-white/60">Lugar trabajo: <span className="text-green-400">{(r as any).lugarTrabajo}</span></p>}
-                        <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
                         {(r as any).comentario && <p className="text-white/60">Comentario: <span className="text-white/80">{(r as any).comentario}</span></p>}
                         <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
                       </div>

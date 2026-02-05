@@ -145,6 +145,7 @@ export default function RazonamientoQuizPage() {
           tiempoCuestionario: quizTime,
           respuestasCorrectas: correctAnswers,
           respuestasTotales: questions.length,
+          comprension: Math.round((correctAnswers / questions.length) * 100),
           isPwa: isPwa,
         }),
       });
