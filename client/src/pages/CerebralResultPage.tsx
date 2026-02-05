@@ -85,9 +85,11 @@ export default function CerebralResultPage() {
           logoImg.onload = resolve;
           logoImg.onerror = resolve;
         });
-        const logoWidth = Math.min(200, finalWidth * 0.4);
-        const logoX = (finalWidth - logoWidth) / 2;
-        ctx.drawImage(logoImg, logoX, padding / 2, logoWidth, logoHeight - padding);
+        const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
+        const drawHeight = logoHeight - padding;
+        const drawWidth = drawHeight * aspectRatio;
+        const logoX = (finalWidth - drawWidth) / 2;
+        ctx.drawImage(logoImg, logoX, padding / 2, drawWidth, drawHeight);
       }
       
       ctx.drawImage(capturedCanvas, 0, logoHeight);
