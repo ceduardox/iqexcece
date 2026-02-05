@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw } from "lucide-react";
 import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -171,7 +172,7 @@ export default function ReadingContentPage() {
   const wordCount = content.text.split(/\s+/).length;
   const wordsPerMinute = readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0;
 
-  const handleSubmitForm = async () => {
+  const handleUnifiedFormSubmit = async (formDataUnified: FormDataType) => {
     playButtonSound();
     setSubmitting(true);
     try {
@@ -184,13 +185,29 @@ export default function ReadingContentPage() {
       setCorrectAnswers(correct);
       
       const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
-        (window.navigator as any).standalone === true;
+        (window.navigator as unknown as { standalone?: boolean }).standalone === true;
       
       await fetch("/api/quiz/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          nombre: formDataUnified.nombre,
+          email: formDataUnified.email || null,
+          edad: formDataUnified.edad || null,
+          ciudad: formDataUnified.estado || null,
+          telefono: formDataUnified.telefono ? `${formDataUnified.codigoPais} ${formDataUnified.telefono}` : null,
+          comentario: formDataUnified.comentario || null,
+          grado: formDataUnified.grado || null,
+          institucion: formDataUnified.institucion || null,
+          tipoEstudiante: formDataUnified.tipoEstudiante || null,
+          semestre: formDataUnified.semestre || null,
+          esProfesional: formDataUnified.esProfesional,
+          profesion: formDataUnified.profesion || null,
+          ocupacion: formDataUnified.ocupacion || null,
+          lugarTrabajo: formDataUnified.lugarTrabajo || null,
+          pais: formDataUnified.pais || null,
+          codigoPais: formDataUnified.codigoPais || null,
+          estado: formDataUnified.estado || null,
           categoria: userData.childCategory || "preescolar",
           tiempoLectura: readingTime,
           tiempoCuestionario: questionTime,
@@ -406,355 +423,15 @@ export default function ReadingContentPage() {
   }
 
   if (showForm) {
-    const isNinos = categoria === "ninos" || categoria === "preescolar";
-    const isAdolescentes = categoria === "adolescentes";
-    
-    const gradosPrimaria = ["1ero Primaria", "2do Primaria", "3ero Primaria", "4to Primaria", "5to Primaria", "6to Primaria"];
-    const gradosSecundaria = ["1ero Secundaria", "2do Secundaria", "3ero Secundaria", "4to Secundaria", "5to Secundaria", "6to Secundaria", "Universitario"];
-    
     return (
-      <div 
-        className="min-h-screen flex flex-col overflow-hidden relative"
-        style={{ background: "linear-gradient(180deg, #c4b5fd 0%, #e0e7ff 30%, #f5f3ff 60%, #ffffff 100%)" }}
-      >
-        {/* Animated background particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full"
-              style={{
-                background: i % 2 === 0 ? "rgba(124, 58, 237, 0.3)" : "rgba(6, 182, 212, 0.3)",
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.2, 0.5, 0.2],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 4 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-
-        <main className="flex-1 overflow-y-auto px-4 py-6 relative z-10">
-          {/* Animated Pencil Icon */}
-          <motion.div 
-            className="flex flex-col items-center mb-6"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div 
-              className="relative w-16 h-16 mb-4"
-              animate={{ rotate: [-3, 3, -3] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              {/* Glowing ring */}
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{ 
-                  background: "conic-gradient(from 0deg, #7c3aed, #06b6d4, #7c3aed)",
-                  padding: "3px"
-                }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              >
-                <div className="w-full h-full rounded-full bg-white" />
-              </motion.div>
-              
-              {/* Pencil SVG */}
-              <motion.svg 
-                className="absolute inset-0 m-auto w-8 h-8"
-                viewBox="0 0 24 24" 
-                fill="none"
-                animate={{ 
-                  y: [0, -2, 0],
-                  rotate: [0, 8, 0]
-                }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <path 
-                  d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" 
-                  stroke="#7c3aed" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                <motion.path 
-                  d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" 
-                  stroke="#06b6d4" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </motion.svg>
-              
-              {/* Writing sparkles */}
-              <motion.div
-                className="absolute -bottom-1 -right-1 w-3 h-3"
-                animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
-              >
-                <svg viewBox="0 0 24 24" fill="#fbbf24">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                </svg>
-              </motion.div>
-            </motion.div>
-            
-            <motion.h1 
-              className="text-xl font-bold text-gray-800 mb-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              Test de Lectura
-            </motion.h1>
-            <motion.p 
-              className="text-sm text-gray-500 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              Completa tus datos para ver tu resultado
-            </motion.p>
-          </motion.div>
-
-          {/* Form Card with light glass effect */}
-          <motion.div 
-            className="rounded-2xl p-5 space-y-4"
-            style={{ 
-              background: "rgba(255, 255, 255, 0.9)",
-              boxShadow: "0 4px 24px rgba(124, 58, 237, 0.12)"
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {/* Nombre */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Nombre completo</label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Juan Pérez"
-                  value={formData.nombre}
-                  onChange={(e) => handleFormChange("nombre", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  style={{ background: "#ede9fe" }}
-                  data-testid="input-nombre"
-                />
-              </div>
-            </motion.div>
-
-            {/* Email */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.55 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Email</label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                </div>
-                <input
-                  type="email"
-                  placeholder="nombre@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleFormChange("email", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  style={{ background: "#ede9fe" }}
-                  data-testid="input-email"
-                />
-              </div>
-            </motion.div>
-
-            {/* Teléfono */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Teléfono (Bolivia)</label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-700 font-medium text-sm">
-                  <span>BO +591</span>
-                </div>
-                <input
-                  type="tel"
-                  placeholder="71234567"
-                  value={formData.telefono}
-                  onChange={(e) => handleFormChange("telefono", e.target.value)}
-                  className="w-full pl-20 pr-10 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  style={{ background: "#ede9fe" }}
-                  data-testid="input-telefono"
-                />
-                {formData.telefono.length > 0 && (
-                  <motion.div 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring" }}
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Edad */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.65 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Edad</label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                </div>
-                <input
-                  type="number"
-                  placeholder="Ej: 15"
-                  value={formData.edad}
-                  onChange={(e) => handleFormChange("edad", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  style={{ background: "#ede9fe" }}
-                  data-testid="input-edad"
-                />
-              </div>
-            </motion.div>
-
-            {/* Ciudad */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-1 block">Ciudad</label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Ej: La Paz"
-                  value={formData.ciudad}
-                  onChange={(e) => handleFormChange("ciudad", e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  style={{ background: "#ede9fe" }}
-                  data-testid="input-ciudad"
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Perfil educativo */}
-          {(isNinos || isAdolescentes) && (
-            <motion.div 
-              className="rounded-2xl p-5 mt-4"
-              style={{ 
-                background: "rgba(255, 255, 255, 0.9)",
-                boxShadow: "0 4px 24px rgba(124, 58, 237, 0.12)"
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75 }}
-            >
-              <label className="text-xs font-semibold text-purple-700 mb-2 block">Perfil educativo</label>
-              
-              <select
-                value={formData.grado}
-                onChange={(e) => handleFormChange("grado", e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-0 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none bg-no-repeat cursor-pointer"
-                style={{ 
-                  background: "#e5e7eb",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                  backgroundPosition: "right 12px center",
-                  backgroundSize: "20px"
-                }}
-                data-testid="select-grado"
-              >
-                <option value="">Selecciona grado</option>
-                {(isNinos ? gradosPrimaria : gradosSecundaria).map((g) => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
-              </select>
-            </motion.div>
-          )}
-
-          {/* Comentario */}
-          <motion.div 
-            className="rounded-2xl p-5 mt-4"
-            style={{ 
-              background: "rgba(255, 255, 255, 0.9)",
-              boxShadow: "0 4px 24px rgba(124, 58, 237, 0.12)"
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <label className="text-xs font-semibold text-purple-700 mb-1 block">Comentario (opcional)</label>
-            <textarea
-              placeholder="Mensaje adicional..."
-              value={formData.comentario}
-              onChange={(e) => handleFormChange("comentario", e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none transition-all"
-              style={{ background: "#ede9fe", minHeight: "60px" }}
-              data-testid="input-comentario"
-            />
-          </motion.div>
-
-          {/* Submit button with glow effect */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSubmitForm}
-            disabled={submitting || !formData.nombre}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-white font-bold shadow-lg disabled:opacity-50 mt-6 relative overflow-hidden"
-            style={{ 
-              background: "linear-gradient(90deg, #7c3aed 0%, #5b21b6 50%, #0891b2 100%)",
-              boxShadow: "0 4px 16px rgba(124, 58, 237, 0.3)"
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.85 }}
-            data-testid="button-submit-form"
-          >
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              animate={{ x: ["-100%", "100%"] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-            />
-            {submitting ? "Enviando..." : "Ver mis resultados"}
-          </motion.button>
-          
-          <motion.p 
-            className="text-xs text-gray-400 text-center mt-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
-          >
-            Tus datos se usan solo para mostrar resultados y recomendaciones.
-          </motion.p>
-        </main>
-      </div>
+      <TestFormUnified
+        categoria={categoria}
+        onSubmit={handleUnifiedFormSubmit}
+        submitting={submitting}
+        title="Test de Lectura"
+        subtitle="Completa tus datos para ver tu resultado"
+        buttonText="Ver mis resultados"
+      />
     );
   }
 
