@@ -7,8 +7,9 @@ import { BottomNavBar } from "@/components/BottomNavBar";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 import html2canvas from "html2canvas";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
-const LOGO_BASE64_KEY = "iqx_logo_base64";
+const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const CAPTURE_LOGO = "https://iqexponencial.app/api/images/43c8a96f-020d-482e-83c7-3de342d11d48";
+const LOGO_BASE64_KEY = "iqx_capture_logo_43c8";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -141,7 +142,7 @@ export default function ReadingContentPage() {
     if (cached) {
       setLogoBase64(cached);
     } else {
-      fetch(LOGO_URL)
+      fetch(CAPTURE_LOGO)
         .then(r => r.blob())
         .then(blob => {
           const reader = new FileReader();
@@ -152,7 +153,7 @@ export default function ReadingContentPage() {
           };
           reader.readAsDataURL(blob);
         })
-        .catch(() => setLogoBase64(LOGO_URL));
+        .catch(() => setLogoBase64(CAPTURE_LOGO));
     }
   }, []);
 
@@ -262,7 +263,7 @@ export default function ReadingContentPage() {
         useCORS: true,
         logging: false,
         width: 360,
-        height: 480,
+        height: 540,
       });
       
       return new Promise<Blob>((resolve, reject) => {
@@ -357,20 +358,18 @@ export default function ReadingContentPage() {
         <div 
           ref={captureRef} 
           className="fixed -left-[9999px] bg-white"
-          style={{ width: 360, height: 480, padding: 20 }}
+          style={{ width: 360, height: 540, padding: 24 }}
         >
-          <div className="flex flex-col items-center h-full justify-between">
+          <div className="flex flex-col items-center h-full">
             <img 
-              src={logoBase64 || LOGO_URL} 
+              src={logoBase64 || CAPTURE_LOGO} 
               alt="iQx" 
-              className="h-10 object-contain"
+              className="h-12 object-contain mb-4"
               crossOrigin="anonymous"
             />
-            <div className="text-center">
-              <p className="text-xl font-black" style={{ color: "#1f2937" }}>¡Excelente!</p>
-              <p className="text-sm text-gray-500">Test de Lectura</p>
-            </div>
-            <div className="relative w-32 h-32">
+            <p className="text-2xl font-black mb-1" style={{ color: "#1f2937" }}>{percentage >= 80 ? "¡Excelente!" : percentage >= 60 ? "¡Muy bien!" : percentage >= 40 ? "¡Buen esfuerzo!" : "¡Sigue practicando!"}</p>
+            <p className="text-sm text-gray-500 mb-4">Test de Lectura</p>
+            <div className="relative w-36 h-36 mb-4">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" strokeWidth="10" />
                 <circle 
@@ -380,29 +379,29 @@ export default function ReadingContentPage() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold" style={{ color: "#8a3ffc" }}>{percentage}%</span>
+                <span className="text-4xl font-black" style={{ color: "#8a3ffc" }}>{percentage}%</span>
               </div>
             </div>
-            <div className="bg-gray-50 rounded-xl p-3 w-full">
+            <div className="bg-gray-50 rounded-xl p-4 w-full mb-3">
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-lg font-bold">{correctAnswers}/{content.questions.length}</p>
+                  <p className="text-xl font-bold" style={{ color: "#1f2937" }}>{correctAnswers}/{content.questions.length}</p>
                   <p className="text-xs text-gray-500">Correctas</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
+                  <p className="text-xl font-bold" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
                   <p className="text-xs text-gray-500">ppm</p>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-gray-400">iqexponencial.app</p>
+            <p className="text-sm font-medium text-gray-500">{categoryLabels[categoria] || 'Niños'}</p>
           </div>
         </div>
 
         <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
           <div className="flex items-center justify-center" data-testid="header-logo">
             <img 
-              src={logoBase64 || LOGO_URL} 
+              src={HEADER_LOGO} 
               alt="iQx" 
               className="h-10 w-auto object-contain" 
             />

@@ -7,8 +7,9 @@ import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import html2canvas from "html2canvas";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
-const LOGO_BASE64_KEY = "iqx_logo_base64";
+const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const CAPTURE_LOGO = "https://iqexponencial.app/api/images/43c8a96f-020d-482e-83c7-3de342d11d48";
+const LOGO_BASE64_KEY = "iqx_capture_logo_43c8";
 
 interface PreferenciaAnswer {
   tema: string;
@@ -58,7 +59,7 @@ export default function CerebralResultPage() {
     if (cached) {
       setLogoBase64(cached);
     } else {
-      fetch(LOGO_URL)
+      fetch(CAPTURE_LOGO)
         .then(r => r.blob())
         .then(blob => {
           const reader = new FileReader();
@@ -69,7 +70,7 @@ export default function CerebralResultPage() {
           };
           reader.readAsDataURL(blob);
         })
-        .catch(() => setLogoBase64(LOGO_URL));
+        .catch(() => setLogoBase64(CAPTURE_LOGO));
     }
   }, []);
 
@@ -83,7 +84,7 @@ export default function CerebralResultPage() {
         useCORS: true,
         logging: false,
         width: 360,
-        height: 480,
+        height: 540,
       });
       
       return new Promise<Blob>((resolve, reject) => {
@@ -175,45 +176,42 @@ export default function CerebralResultPage() {
       <div 
         ref={captureRef} 
         className="fixed -left-[9999px] bg-white"
-        style={{ width: 360, height: 480, padding: 20 }}
+        style={{ width: 360, height: 540, padding: 24 }}
       >
-        <div className="flex flex-col items-center h-full justify-between">
+        <div className="flex flex-col items-center h-full">
           <img 
-            src={logoBase64 || LOGO_URL} 
+            src={logoBase64 || CAPTURE_LOGO} 
             alt="iQx" 
-            className="h-10 object-contain"
+            className="h-12 object-contain mb-4"
             crossOrigin="anonymous"
           />
-          <div className="text-center">
-            <p className="text-xl font-black" style={{ color: "#1f2937" }}>Test Cerebral</p>
-            <p className="text-sm text-gray-500">Dominancia Cerebral</p>
-          </div>
-          <div className="flex items-center gap-6 w-full justify-center">
+          <p className="text-2xl font-black mb-1" style={{ color: "#1f2937" }}>Test Cerebral</p>
+          <p className="text-sm text-gray-500 mb-5">Dominancia Cerebral</p>
+          <div className="flex items-center gap-5 w-full justify-center mb-5">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: isDominantLeft ? "#8a3ffc" : "#e5e7eb" }}>
-                <span className="text-white font-bold text-lg">{leftPercent}%</span>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: isDominantLeft ? "#8a3ffc" : "#e5e7eb" }}>
+                <span className="text-white font-black text-xl">{leftPercent}%</span>
               </div>
-              <p className="text-xs font-bold" style={{ color: "#8a3ffc" }}>Izquierdo</p>
+              <p className="text-sm font-bold" style={{ color: "#8a3ffc" }}>Izquierdo</p>
             </div>
-            <Brain className="w-10 h-10 text-gray-300" />
+            <Brain className="w-12 h-12 text-gray-300" />
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: !isDominantLeft ? "#06b6d4" : "#e5e7eb" }}>
-                <span className="text-white font-bold text-lg">{rightPercent}%</span>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: !isDominantLeft ? "#06b6d4" : "#e5e7eb" }}>
+                <span className="text-white font-black text-xl">{rightPercent}%</span>
               </div>
-              <p className="text-xs font-bold" style={{ color: "#06b6d4" }}>Derecho</p>
+              <p className="text-sm font-bold" style={{ color: "#06b6d4" }}>Derecho</p>
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 w-full text-center">
-            <p className="text-sm font-bold" style={{ color: isDominantLeft ? "#8a3ffc" : "#06b6d4" }}>
+          <div className="bg-gray-50 rounded-xl p-4 w-full text-center">
+            <p className="text-base font-bold" style={{ color: isDominantLeft ? "#8a3ffc" : "#06b6d4" }}>
               Dominante: {isDominantLeft ? "Hemisferio Izquierdo" : "Hemisferio Derecho"}
             </p>
           </div>
-          <p className="text-xs text-gray-400">iqexponencial.app</p>
         </div>
       </div>
 
       <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
-        <img src={logoBase64 || LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+        <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24">
