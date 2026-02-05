@@ -64,7 +64,7 @@ export default function CerebralResultPage() {
         allowTaint: true,
       });
       
-      const logoHeight = 80;
+      const logoHeight = 240;
       const padding = 20;
       const finalWidth = capturedCanvas.width;
       const finalHeight = capturedCanvas.height + logoHeight + padding;
