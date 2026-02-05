@@ -105,8 +105,10 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
 
   const isNino = categoria === "ninos" || categoria === "preescolar";
   const isAdolescente = categoria === "adolescentes";
-  const isProfesional = categoria === "profesionales" || categoria === "adulto_mayor";
+  const isAdultoMayor = categoria === "adulto_mayor";
+  const isProfesional = categoria === "profesionales";
   const isUniversitario = categoria === "universitarios";
+  const isAdultoConOpciones = isUniversitario || isProfesional || isAdultoMayor;
 
   const gradosPrimaria = ["1ero Primaria", "2do Primaria", "3ero Primaria", "4to Primaria", "5to Primaria", "6to Primaria"];
   const gradosSecundaria = ["1ero Secundaria", "2do Secundaria", "3ero Secundaria", "4to Secundaria", "5to Secundaria", "6to Secundaria"];
@@ -210,55 +212,71 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
 
           {isAdolescente && (
             <>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleChange("tipoEstudiante", "estudiante")}
-                  className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${formData.tipoEstudiante === "estudiante" ? "bg-purple-500 text-white" : "bg-gray-100 text-gray-600"}`}
-                  data-testid="btn-estudiante"
+              <div className="relative">
+                <GraduationCap className={iconClass} />
+                <select
+                  value={formData.grado}
+                  onChange={(e) => handleChange("grado", e.target.value)}
+                  className={selectClass}
+                  data-testid="select-grado"
                 >
-                  Estudiante
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleChange("tipoEstudiante", "universitario")}
-                  className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${formData.tipoEstudiante === "universitario" ? "bg-purple-500 text-white" : "bg-gray-100 text-gray-600"}`}
-                  data-testid="btn-universitario"
-                >
-                  Universitario
-                </button>
+                  <option value="">Selecciona tu curso</option>
+                  {gradosSecundaria.map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
-              {formData.tipoEstudiante === "estudiante" && (
-                <>
-                  <div className="relative">
-                    <GraduationCap className={iconClass} />
-                    <select
-                      value={formData.grado}
-                      onChange={(e) => handleChange("grado", e.target.value)}
-                      className={selectClass}
-                      data-testid="select-grado"
+              <div className="relative">
+                <Building className={iconClass} />
+                <input
+                  type="text"
+                  placeholder="Colegio"
+                  value={formData.institucion}
+                  onChange={(e) => handleChange("institucion", e.target.value)}
+                  className={inputClass}
+                  data-testid="input-institucion-colegio"
+                />
+              </div>
+            </>
+          )}
+
+          {isAdultoConOpciones && (
+            <>
+              <div className="bg-gray-100 p-1 rounded-2xl">
+                <div className="flex relative">
+                  {(isAdultoMayor ? ["profesional", "ocupacion"] : ["universitario", "profesional", "ocupacion"]).map((opt, idx, arr) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => handleChange("tipoEstudiante", opt)}
+                      className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all relative z-10 ${
+                        formData.tipoEstudiante === opt 
+                          ? "text-white" 
+                          : "text-gray-600"
+                      }`}
+                      data-testid={`btn-tipo-${opt}`}
                     >
-                      <option value="">Selecciona tu curso</option>
-                      {gradosSecundaria.map(g => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                  </div>
-                  <div className="relative">
-                    <Building className={iconClass} />
-                    <input
-                      type="text"
-                      placeholder="Colegio"
-                      value={formData.institucion}
-                      onChange={(e) => handleChange("institucion", e.target.value)}
-                      className={inputClass}
-                      data-testid="input-institucion-colegio"
-                    />
-                  </div>
-                </>
-              )}
-              {formData.tipoEstudiante === "universitario" && (
+                      {opt === "universitario" ? "Universitario" : opt === "profesional" ? "Profesional" : "Ocupación"}
+                    </button>
+                  ))}
+                  <motion.div
+                    className="absolute top-0 bottom-0 rounded-xl"
+                    style={{ 
+                      background: "linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)",
+                      width: isAdultoMayor ? "50%" : "33.33%"
+                    }}
+                    animate={{
+                      x: isAdultoMayor 
+                        ? (formData.tipoEstudiante === "profesional" ? "0%" : "100%")
+                        : (formData.tipoEstudiante === "universitario" ? "0%" : formData.tipoEstudiante === "profesional" ? "100%" : "200%")
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                </div>
+              </div>
+
+              {formData.tipoEstudiante === "universitario" && !isAdultoMayor && (
                 <>
                   <div className="relative">
                     <GraduationCap className={iconClass} />
@@ -288,66 +306,40 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   </div>
                 </>
               )}
-            </>
-          )}
 
-          {isUniversitario && (
-            <div className="relative">
-              <GraduationCap className={iconClass} />
-              <select
-                value={formData.semestre}
-                onChange={(e) => handleChange("semestre", e.target.value)}
-                className={selectClass}
-                data-testid="select-semestre-uni"
-              >
-                <option value="">Selecciona semestre</option>
-                {semestres.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-            </div>
-          )}
-
-          {isProfesional && (
-            <>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleChange("esProfesional", true)}
-                  className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${formData.esProfesional === true ? "bg-purple-500 text-white" : "bg-gray-100 text-gray-600"}`}
-                  data-testid="btn-es-profesional"
-                >
-                  Soy Profesional
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleChange("esProfesional", false)}
-                  className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${formData.esProfesional === false ? "bg-purple-500 text-white" : "bg-gray-100 text-gray-600"}`}
-                  data-testid="btn-no-profesional"
-                >
-                  No soy Profesional
-                </button>
-              </div>
-              {formData.esProfesional === true && (
-                <div className="relative">
-                  <Briefcase className={iconClass} />
-                  <input
-                    type="text"
-                    placeholder="Tu profesión"
-                    value={formData.profesion}
-                    onChange={(e) => handleChange("profesion", e.target.value)}
-                    className={inputClass}
-                    data-testid="input-profesion"
-                  />
-                </div>
+              {formData.tipoEstudiante === "profesional" && (
+                <>
+                  <div className="relative">
+                    <Briefcase className={iconClass} />
+                    <input
+                      type="text"
+                      placeholder="¿Cuál es tu profesión?"
+                      value={formData.profesion}
+                      onChange={(e) => handleChange("profesion", e.target.value)}
+                      className={inputClass}
+                      data-testid="input-profesion"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Building className={iconClass} />
+                    <input
+                      type="text"
+                      placeholder="Institución / Lugar de trabajo"
+                      value={formData.lugarTrabajo}
+                      onChange={(e) => handleChange("lugarTrabajo", e.target.value)}
+                      className={inputClass}
+                      data-testid="input-lugar-trabajo"
+                    />
+                  </div>
+                </>
               )}
-              {formData.esProfesional === false && (
+
+              {formData.tipoEstudiante === "ocupacion" && (
                 <div className="relative">
                   <Briefcase className={iconClass} />
                   <input
                     type="text"
-                    placeholder="Tu ocupación"
+                    placeholder="¿Cuál es tu ocupación?"
                     value={formData.ocupacion}
                     onChange={(e) => handleChange("ocupacion", e.target.value)}
                     className={inputClass}
@@ -355,17 +347,6 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   />
                 </div>
               )}
-              <div className="relative">
-                <Building className={iconClass} />
-                <input
-                  type="text"
-                  placeholder="Institución / Lugar de trabajo"
-                  value={formData.lugarTrabajo}
-                  onChange={(e) => handleChange("lugarTrabajo", e.target.value)}
-                  className={inputClass}
-                  data-testid="input-lugar-trabajo"
-                />
-              </div>
             </>
           )}
 
