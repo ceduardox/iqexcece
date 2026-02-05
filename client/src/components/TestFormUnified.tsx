@@ -113,8 +113,20 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
   const handleSubmit = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "Campo requerido";
+    if (!formData.nombre.trim()) newErrors.nombre = "Campo requerido";
+    if (!formData.edad.trim()) newErrors.edad = "Campo requerido";
+    if (!formData.email.trim()) newErrors.email = "Campo requerido";
+    if (!formData.telefono.trim()) newErrors.telefono = "Campo requerido";
+    if (!formData.estado) newErrors.estado = "Selecciona tu estado";
+    
+    if (isNino) {
+      if (!formData.grado) newErrors.grado = "Selecciona tu grado";
+      if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
+    }
+    
+    if (isAdolescente) {
+      if (!formData.grado) newErrors.grado = "Selecciona tu curso";
+      if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
     }
     
     if (isAdultoConOpciones) {
@@ -224,8 +236,8 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                 <GraduationCap className={iconClass} />
                 <select
                   value={formData.grado}
-                  onChange={(e) => handleChange("grado", e.target.value)}
-                  className={selectClass}
+                  onChange={(e) => { handleChange("grado", e.target.value); setErrors(prev => ({ ...prev, grado: "" })); }}
+                  className={`${selectClass} ${errors.grado ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="select-grado"
                 >
                   <option value="">Perfil educativo</option>
@@ -234,6 +246,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                {errors.grado && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.grado}</div>}
               </div>
               <div className="relative">
                 <Building className={iconClass} />
@@ -241,10 +254,11 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   type="text"
                   placeholder="Institución (colegio)"
                   value={formData.institucion}
-                  onChange={(e) => handleChange("institucion", e.target.value)}
-                  className={inputClass}
+                  onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                  className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="input-institucion"
                 />
+                {errors.institucion && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.institucion}</div>}
               </div>
             </>
           )}
@@ -255,8 +269,8 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                 <GraduationCap className={iconClass} />
                 <select
                   value={formData.grado}
-                  onChange={(e) => handleChange("grado", e.target.value)}
-                  className={selectClass}
+                  onChange={(e) => { handleChange("grado", e.target.value); setErrors(prev => ({ ...prev, grado: "" })); }}
+                  className={`${selectClass} ${errors.grado ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="select-grado"
                 >
                   <option value="">Selecciona tu curso</option>
@@ -265,6 +279,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                {errors.grado && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.grado}</div>}
               </div>
               <div className="relative">
                 <Building className={iconClass} />
@@ -272,10 +287,11 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   type="text"
                   placeholder="Colegio"
                   value={formData.institucion}
-                  onChange={(e) => handleChange("institucion", e.target.value)}
-                  className={inputClass}
+                  onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                  className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="input-institucion-colegio"
                 />
+                {errors.institucion && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.institucion}</div>}
               </div>
             </>
           )}
@@ -407,11 +423,12 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               type="number"
               placeholder="Edad"
               value={formData.edad}
-              onChange={(e) => handleChange("edad", e.target.value)}
-              className={`${inputClass} pl-11`}
+              onChange={(e) => { handleChange("edad", e.target.value); setErrors(prev => ({ ...prev, edad: "" })); }}
+              className={`${inputClass} pl-11 ${errors.edad ? "border-red-400 ring-1 ring-red-400" : ""}`}
               data-testid="input-edad"
             />
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lg">🎂</span>
+            {errors.edad && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.edad}</div>}
           </div>
 
           <div className="relative">
@@ -420,45 +437,49 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               type="email"
               placeholder="Email"
               value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className={inputClass}
+              onChange={(e) => { handleChange("email", e.target.value); setErrors(prev => ({ ...prev, email: "" })); }}
+              className={`${inputClass} ${errors.email ? "border-red-400 ring-1 ring-red-400" : ""}`}
               data-testid="input-email"
             />
+            {errors.email && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.email}</div>}
           </div>
 
-          <div className="flex gap-2">
-            <div className="relative w-28">
-              <select
-                value={formData.pais}
-                onChange={(e) => handleChange("pais", e.target.value)}
-                className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-200 text-sm bg-purple-50 text-gray-800 appearance-none cursor-pointer"
-                data-testid="select-pais"
-              >
-                {COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.phoneCode}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <div>
+            <div className="flex gap-2">
+              <div className="relative w-28">
+                <select
+                  value={formData.pais}
+                  onChange={(e) => handleChange("pais", e.target.value)}
+                  className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-200 text-sm bg-purple-50 text-gray-800 appearance-none cursor-pointer"
+                  data-testid="select-pais"
+                >
+                  {COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.phoneCode}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="relative flex-1">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
+                <input
+                  type="tel"
+                  placeholder="Número de teléfono"
+                  value={formData.telefono}
+                  onChange={(e) => { handleChange("telefono", e.target.value); setErrors(prev => ({ ...prev, telefono: "" })); }}
+                  className={`${inputClass} ${errors.telefono ? "border-red-400 ring-1 ring-red-400" : ""}`}
+                  data-testid="input-telefono"
+                />
+              </div>
             </div>
-            <div className="relative flex-1">
-              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
-              <input
-                type="tel"
-                placeholder="Número de teléfono"
-                value={formData.telefono}
-                onChange={(e) => handleChange("telefono", e.target.value)}
-                className={inputClass}
-                data-testid="input-telefono"
-              />
-            </div>
+            {errors.telefono && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.telefono}</div>}
           </div>
 
           <div className="relative">
             <MapPin className={iconClass} />
             <select
               value={formData.estado}
-              onChange={(e) => handleChange("estado", e.target.value)}
-              className={selectClass}
+              onChange={(e) => { handleChange("estado", e.target.value); setErrors(prev => ({ ...prev, estado: "" })); }}
+              className={`${selectClass} ${errors.estado ? "border-red-400 ring-1 ring-red-400" : ""}`}
               data-testid="select-estado"
             >
               <option value="">Estado / Departamento / Provincia</option>
@@ -467,6 +488,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               ))}
             </select>
             <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+            {errors.estado && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.estado}</div>}
           </div>
 
           <div className="relative">
