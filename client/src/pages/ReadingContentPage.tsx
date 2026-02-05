@@ -222,6 +222,8 @@ export default function ReadingContentPage() {
           tiempoCuestionario: questionTime,
           respuestasCorrectas: correct,
           respuestasTotales: content.questions.length,
+          comprension: Math.round((correct / content.questions.length) * 100),
+          velocidadLectura: readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0,
           isPwa,
         }),
       });

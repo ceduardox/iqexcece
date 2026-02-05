@@ -66,6 +66,8 @@ export const quizResults = pgTable("quiz_results", {
   tiempoCuestionario: integer("tiempo_cuestionario"),
   respuestasCorrectas: integer("respuestas_correctas"),
   respuestasTotales: integer("respuestas_totales"),
+  comprension: integer("comprension"),
+  velocidadLectura: integer("velocidad_lectura"),
   isPwa: boolean("is_pwa").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
