@@ -143,6 +143,8 @@ export default function RazonamientoQuizPage() {
           testType: "razonamiento",
           tiempoLectura: null,
           tiempoCuestionario: quizTime,
+          respuestasCorrectas: correctAnswers,
+          respuestasTotales: questions.length,
           isPwa: isPwa,
         }),
       });
