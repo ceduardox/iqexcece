@@ -382,17 +382,6 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
           </div>
 
           <div className="relative">
-            <MessageSquare className={iconClass} />
-            <textarea
-              placeholder="Comentario (opcional)"
-              value={formData.comentario}
-              onChange={(e) => handleChange("comentario", e.target.value)}
-              className={`${inputClass} pl-11 resize-none min-h-[60px]`}
-              data-testid="input-comentario"
-            />
-          </div>
-
-          <div className="relative">
             <Mail className={iconClass} />
             <input
               type="email"
@@ -445,6 +434,17 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               ))}
             </select>
             <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <MessageSquare className={iconClass} />
+            <textarea
+              placeholder="Comentario (opcional)"
+              value={formData.comentario}
+              onChange={(e) => handleChange("comentario", e.target.value)}
+              className={`${inputClass} pl-11 resize-none min-h-[60px]`}
+              data-testid="input-comentario"
+            />
           </div>
 
           <motion.button

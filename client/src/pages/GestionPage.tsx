@@ -1695,11 +1695,19 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <div className="px-3 pb-3 space-y-1 text-sm border-t border-white/10">
                         <p className="text-white/60 pt-2">Email: <span className="text-white/80">{r.email || "-"}</span></p>
                         <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
-                        <p className="text-white/60">Ciudad: <span className="text-white/80">{r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
+                        <p className="text-white/60">País: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
+                        <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
+                        <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
+                        {(r as any).tipoEstudiante && <p className="text-white/60">Tipo: <span className="text-purple-400">{(r as any).tipoEstudiante}</span></p>}
+                        {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
+                        {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
+                        {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
+                        {(r as any).lugarTrabajo && <p className="text-white/60">Lugar trabajo: <span className="text-green-400">{(r as any).lugarTrabajo}</span></p>}
                         <p className="text-white/60">T. Lectura: <span className="text-cyan-400">{formatTime(r.tiempoLectura)}</span></p>
                         <p className="text-white/60">T. Test: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
+                        {(r as any).comentario && <p className="text-white/60">Comentario: <span className="text-white/80">{(r as any).comentario}</span></p>}
                         <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
                       </div>
                     )}

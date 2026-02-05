@@ -118,7 +118,7 @@ export default function RazonamientoQuizPage() {
       const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
                     (window.navigator as unknown as { standalone?: boolean }).standalone === true;
       
-      await fetch("/api/quiz-result", {
+      await fetch("/api/quiz/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
