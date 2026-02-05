@@ -340,6 +340,55 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
   };
 
+  const handleUnauthorized = async () => {
+    const savedUser = localStorage.getItem("adminUser");
+    const savedPass = localStorage.getItem("adminPass");
+    if (savedUser && savedPass) {
+      try {
+        const res = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: savedUser, password: savedPass }),
+        });
+        const data = await res.json();
+        if (data.token) {
+          setToken(data.token);
+          localStorage.setItem("adminToken", data.token);
+          return data.token;
+        }
+      } catch {}
+    }
+    setIsLoggedIn(false);
+    setToken("");
+    localStorage.removeItem("adminToken");
+    return null;
+  };
+
+  const getValidToken = async (): Promise<string | null> => {
+    if (token) {
+      const testRes = await fetch("/api/admin/sessions", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (testRes.ok) return token;
+    }
+    return await handleUnauthorized();
+  };
+
+  const adminFetch = async (url: string, options: RequestInit = {}) => {
+    let currentToken = token;
+    const headers = { ...options.headers, Authorization: `Bearer ${currentToken}` };
+    let res = await fetch(url, { ...options, headers });
+    
+    if (res.status === 401) {
+      currentToken = await handleUnauthorized();
+      if (currentToken) {
+        headers.Authorization = `Bearer ${currentToken}`;
+        res = await fetch(url, { ...options, headers });
+      }
+    }
+    return res;
+  };
+
   const fetchSessions = async () => {
     if (!token) return;
     setLoading(true);
@@ -349,7 +398,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      if (res.ok) {
+      if (res.status === 401) {
+        const newToken = await handleUnauthorized();
+        if (newToken) {
+          const retryRes = await fetch("/api/admin/sessions", {
+            headers: { Authorization: `Bearer ${newToken}` },
+          });
+          if (retryRes.ok) {
+            const data = await retryRes.json();
+            setData(data);
+          }
+        }
+      } else if (res.ok) {
         const data = await res.json();
         setData(data);
       }
@@ -4211,12 +4271,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   <Button
                     onClick={async () => {
                       try {
-                        await fetch("/api/admin/entrenamiento/card", {
+                        const res = await adminFetch("/api/admin/entrenamiento/card", {
                           method: "POST",
-                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory })
                         });
-                        alert("Card guardado");
+                        if (res.ok) {
+                          alert("Card guardado");
+                        } else {
+                          alert("Error: Token inválido o sesión expirada");
+                        }
                       } catch (e) { alert("Error al guardar"); }
                     }}
                     className="w-full bg-teal-600"
@@ -4256,12 +4320,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   <Button
                     onClick={async () => {
                       try {
-                        await fetch("/api/admin/entrenamiento/page", {
+                        const res = await adminFetch("/api/admin/entrenamiento/page", {
                           method: "POST",
-                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory })
                         });
-                        alert("Página guardada");
+                        if (res.ok) {
+                          alert("Página guardada");
+                        } else {
+                          alert("Error: Token inválido o sesión expirada");
+                        }
                       } catch (e) { alert("Error al guardar"); }
                     }}
                     className="w-full bg-teal-600"
@@ -4281,9 +4349,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   <Button
                     onClick={async () => {
                       try {
-                        const res = await fetch("/api/admin/entrenamiento/item", {
+                        const res = await adminFetch("/api/admin/entrenamiento/item", {
                           method: "POST",
-                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
                             categoria: entrenamientoCategory,
                             title: "Nueva Sección",
@@ -4294,8 +4362,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             isActive: true
                           })
                         });
-                        const data = await res.json();
-                        setEntrenamientoItems([...entrenamientoItems, data.item]);
+                        if (res.ok) {
+                          const data = await res.json();
+                          setEntrenamientoItems([...entrenamientoItems, data.item]);
+                        } else {
+                          alert("Error: Token inválido o sesión expirada");
+                        }
                       } catch (e) { alert("Error al crear"); }
                     }}
                     className="bg-gradient-to-r from-teal-500 to-cyan-500"
@@ -4350,11 +4422,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               className="border-red-500/50 text-red-400"
                               onClick={async () => {
                                 if (confirm("¿Eliminar esta sección?")) {
-                                  await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                                    method: "DELETE",
-                                    headers: { Authorization: `Bearer ${token}` }
+                                  const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                    method: "DELETE"
                                   });
-                                  setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
+                                  if (res.ok) {
+                                    setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
+                                  } else {
+                                    alert("Error: Token inválido o sesión expirada");
+                                  }
                                 }
                               }}
                             >
@@ -4943,12 +5018,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <Button
                               onClick={async () => {
                                 try {
-                                  await fetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                  const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
                                     method: "PUT",
-                                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                    headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify(item)
                                   });
-                                  alert("Sección guardada correctamente");
+                                  if (res.ok) {
+                                    alert("Sección guardada correctamente");
+                                  } else {
+                                    alert("Error: Token inválido o sesión expirada");
+                                  }
                                 } catch (e) { alert("Error al guardar"); }
                               }}
                               className="bg-gradient-to-r from-teal-500 to-cyan-500"
