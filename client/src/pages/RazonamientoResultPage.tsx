@@ -6,10 +6,9 @@ import { Home, RotateCcw, Share2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import html2canvas from "html2canvas";
+import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
 const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
-const CAPTURE_LOGO = "https://iqexponencial.app/api/images/43c8a96f-020d-482e-83c7-3de342d11d48";
-const LOGO_BASE64_KEY = "iqx_capture_logo_43c8";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -32,31 +31,10 @@ export default function RazonamientoResultPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
-  const [logoBase64, setLogoBase64] = useState<string>("");
   
   const results = userData.razonamientoResults || { correct: 0, total: 0, time: 0, categoria: "ninos", title: "" };
   const percentage = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
   const categoryLabel = categoryLabels[results.categoria] || "Niños";
-  
-  useEffect(() => {
-    const cached = sessionStorage.getItem(LOGO_BASE64_KEY);
-    if (cached) {
-      setLogoBase64(cached);
-    } else {
-      fetch(CAPTURE_LOGO)
-        .then(r => r.blob())
-        .then(blob => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const b64 = reader.result as string;
-            sessionStorage.setItem(LOGO_BASE64_KEY, b64);
-            setLogoBase64(b64);
-          };
-          reader.readAsDataURL(blob);
-        })
-        .catch(() => setLogoBase64(CAPTURE_LOGO));
-    }
-  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -99,9 +77,9 @@ export default function RazonamientoResultPage() {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, finalWidth, finalHeight);
       
-      if (logoBase64) {
+      if (localCaptureLogo) {
         const logoImg = new Image();
-        logoImg.src = logoBase64;
+        logoImg.src = localCaptureLogo;
         await new Promise((resolve) => {
           logoImg.onload = resolve;
           logoImg.onerror = resolve;
