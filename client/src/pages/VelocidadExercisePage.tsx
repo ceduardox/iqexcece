@@ -559,40 +559,29 @@ export default function VelocidadExercisePage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="w-20 h-20 mx-auto mb-6 rounded-lg flex items-center justify-center"
+                className="w-14 h-14 mx-auto mb-2 rounded-lg flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               >
-                <span className="text-white text-4xl">✓</span>
+                <span className="text-white text-3xl">✓</span>
               </motion.div>
               
-              <h3 className="text-gray-800 text-2xl font-bold mb-2">
+              <h3 className="text-gray-800 text-xl font-bold mb-2">
                 ¡Completado!
               </h3>
               
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="relative w-32 h-32">
-                    <svg className="w-32 h-32 transform -rotate-90">
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="#e5e7eb"
-                        strokeWidth="12"
-                        fill="none"
-                      />
+              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm">
+                <div className="flex items-center justify-center gap-6 mb-3">
+                  <div className="relative w-24 h-24">
+                    <svg className="w-24 h-24 transform -rotate-90">
+                      <circle cx="48" cy="48" r="40" stroke="#e5e7eb" strokeWidth="10" fill="none" />
                       <motion.circle
-                        cx="64"
-                        cy="64"
-                        r="56"
+                        cx="48" cy="48" r="40"
                         stroke="url(#gradient)"
-                        strokeWidth="12"
+                        strokeWidth="10"
                         fill="none"
                         strokeLinecap="round"
-                        initial={{ strokeDasharray: "0 352" }}
-                        animate={{ 
-                          strokeDasharray: `${(correctos + incorrectos) > 0 ? (correctos / (correctos + incorrectos)) * 352 : 0} 352` 
-                        }}
+                        initial={{ strokeDasharray: "0 251" }}
+                        animate={{ strokeDasharray: `${(correctos + incorrectos) > 0 ? (correctos / (correctos + incorrectos)) * 251 : 0} 251` }}
                         transition={{ duration: 1, ease: "easeOut" }}
                       />
                       <defs>
@@ -603,42 +592,35 @@ export default function VelocidadExercisePage() {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-gray-800 text-3xl font-bold">
+                      <span className="text-gray-800 text-2xl font-bold">
                         {(correctos + incorrectos) > 0 ? Math.round((correctos / (correctos + incorrectos)) * 100) : 0}%
                       </span>
-                      <span className="text-gray-400 text-xs">Precisión</span>
+                      <span className="text-gray-400 text-[10px]">Precisión</span>
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-purple-100 to-cyan-100 rounded-lg p-4 mb-4 text-center">
-                  <div className="text-purple-700 text-3xl font-bold">{velocidadMaxAlcanzada}</div>
-                  <div className="text-purple-500 text-sm font-medium">Velocidad Máxima (p/m)</div>
+                  <div className="bg-gradient-to-b from-purple-100 to-cyan-100 rounded-lg p-3 text-center">
+                    <div className="text-purple-700 text-2xl font-bold">{velocidadMaxAlcanzada}</div>
+                    <div className="text-purple-500 text-xs font-medium">Vel. Máxima (p/m)</div>
+                  </div>
                 </div>
 
                 <div className="flex justify-center gap-8">
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-green-500 text-2xl font-bold">{correctos}</span>
-                    </div>
-                    <p className="text-gray-500 text-xs">CORRECTOS</p>
+                    <span className="text-green-500 text-xl font-bold">{correctos}</span>
+                    <p className="text-gray-500 text-[10px]">CORRECTOS</p>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-red-500 text-2xl font-bold">{incorrectos}</span>
-                    </div>
-                    <p className="text-gray-500 text-xs">INCORRECTOS</p>
+                    <span className="text-red-500 text-xl font-bold">{incorrectos}</span>
+                    <p className="text-gray-500 text-[10px]">INCORRECTOS</p>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-purple-500 text-2xl font-bold">{intentosTotales}</span>
-                    </div>
-                    <p className="text-gray-500 text-xs">INTENTOS</p>
+                    <span className="text-purple-500 text-xl font-bold">{intentosTotales}</span>
+                    <p className="text-gray-500 text-[10px]">INTENTOS</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
