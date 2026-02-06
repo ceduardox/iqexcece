@@ -178,9 +178,9 @@ export default function CerebralResultPage() {
   };
 
   return (
-    <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
+    <div ref={resultsRef} className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
       {/* Capture area - contains header and content, excludes buttons */}
-      <div ref={captureAreaRef} className="bg-white">
+      <div ref={captureAreaRef} className="bg-white flex-1 overflow-auto">
         <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
           <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
         </header>
