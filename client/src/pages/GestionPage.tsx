@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search } from "lucide-react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones">("sesiones");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -1336,6 +1336,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Zap className="w-5 h-5" />
             Entrenamiento
           </button>
+          <button
+            onClick={() => setActiveTab("instituciones")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "instituciones" ? "bg-amber-600 text-white" : "text-amber-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-instituciones"
+          >
+            <Building2 className="w-5 h-5" />
+            Instituciones
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1493,6 +1503,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Zap className="w-4 h-4 mr-1" />
             Entrena
+          </Button>
+          <Button
+            onClick={() => setActiveTab("instituciones")}
+            variant={activeTab === "instituciones" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "instituciones" ? "bg-amber-600" : "border-amber-500/30 text-amber-400"}
+            data-testid="mobile-tab-instituciones"
+          >
+            <Building2 className="w-4 h-4 mr-1" />
+            Instituc.
           </Button>
         </div>
 
@@ -5713,8 +5733,187 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
             </div>
           )}
+
+        {activeTab === "instituciones" && (
+          <InstitutionsPanel token={token} />
+        )}
         </div>
       </div>
     </div>
+  );
+}
+
+function InstitutionsPanel({ token }: { token: string }) {
+  const COUNTRY_DATA: Record<string, { flag: string; name: string; states: string[] }> = {
+    BO: { flag: "BO", name: "Bolivia", states: ["La Paz", "Santa Cruz", "Cochabamba", "Oruro", "Potosí", "Chuquisaca", "Tarija", "Beni", "Pando"] },
+    AR: { flag: "AR", name: "Argentina", states: ["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes"] },
+    PE: { flag: "PE", name: "Perú", states: ["Lima", "Arequipa", "La Libertad", "Piura", "Cusco", "Junín", "Lambayeque", "Cajamarca", "Puno", "Áncash"] },
+    CO: { flag: "CO", name: "Colombia", states: ["Bogotá", "Antioquia", "Valle del Cauca", "Cundinamarca", "Atlántico", "Santander", "Bolívar", "Nariño"] },
+    EC: { flag: "EC", name: "Ecuador", states: ["Pichincha", "Guayas", "Azuay", "Manabí", "El Oro", "Tungurahua", "Los Ríos", "Loja"] },
+    CL: { flag: "CL", name: "Chile", states: ["Santiago", "Valparaíso", "Biobío", "Maule", "La Araucanía", "O'Higgins", "Coquimbo", "Antofagasta"] },
+    MX: { flag: "MX", name: "México", states: ["Ciudad de México", "Estado de México", "Jalisco", "Veracruz", "Puebla", "Guanajuato", "Nuevo León"] },
+    ES: { flag: "ES", name: "España", states: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia"] },
+    US: { flag: "US", name: "Estados Unidos", states: ["California", "Texas", "Florida", "New York", "Pennsylvania", "Illinois"] },
+    BR: { flag: "BR", name: "Brasil", states: ["São Paulo", "Rio de Janeiro", "Minas Gerais", "Bahia", "Paraná", "Rio Grande do Sul"] },
+    VE: { flag: "VE", name: "Venezuela", states: ["Distrito Capital", "Miranda", "Zulia", "Carabobo", "Lara", "Aragua", "Bolívar"] },
+    PY: { flag: "PY", name: "Paraguay", states: ["Asunción", "Central", "Alto Paraná", "Itapúa", "Caaguazú", "San Pedro"] },
+    UY: { flag: "UY", name: "Uruguay", states: ["Montevideo", "Canelones", "Maldonado", "Salto", "Colonia", "Paysandú"] },
+  };
+
+  const [pais, setPais] = useState("BO");
+  const [estado, setEstado] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [instituciones, setInstituciones] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filterPais, setFilterPais] = useState("BO");
+  const [filterEstado, setFilterEstado] = useState("");
+
+  const fetchInstituciones = useCallback(async () => {
+    setLoading(true);
+    try {
+      let url = `/api/instituciones?pais=${filterPais}`;
+      if (filterEstado) url += `&estado=${encodeURIComponent(filterEstado)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setInstituciones(data.instituciones || []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }, [filterPais, filterEstado]);
+
+  useEffect(() => { fetchInstituciones(); }, [fetchInstituciones]);
+
+  const handleAdd = async () => {
+    if (!nombre.trim() || !estado) return;
+    try {
+      await fetch("/api/admin/instituciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nombre: nombre.trim(), pais, estado })
+      });
+      setNombre("");
+      fetchInstituciones();
+    } catch (e) { alert("Error al guardar"); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar esta institución?")) return;
+    try {
+      await fetch(`/api/admin/instituciones/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchInstituciones();
+    } catch (e) { alert("Error al eliminar"); }
+  };
+
+  const currentStates = COUNTRY_DATA[pais]?.states || [];
+  const filterStates = COUNTRY_DATA[filterPais]?.states || [];
+
+  return (
+    <Card className="bg-black/40 border-amber-500/30">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-amber-400" />
+          Gestión de Instituciones
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="bg-white/5 rounded-lg p-4 border border-amber-500/20">
+          <h3 className="text-amber-400 font-bold mb-3 text-sm">Agregar Institución</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <select
+              value={pais}
+              onChange={(e) => { setPais(e.target.value); setEstado(""); }}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+              data-testid="select-inst-pais"
+            >
+              {Object.entries(COUNTRY_DATA).map(([code, d]) => (
+                <option key={code} value={code}>{d.name}</option>
+              ))}
+            </select>
+            <select
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+              data-testid="select-inst-estado"
+            >
+              <option value="">Seleccionar estado...</option>
+              {currentStates.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Nombre del colegio o universidad"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30"
+              data-testid="input-inst-nombre"
+            />
+            <Button
+              onClick={handleAdd}
+              disabled={!nombre.trim() || !estado}
+              className="bg-amber-600 hover:bg-amber-700"
+              data-testid="button-add-inst"
+            >
+              <Plus className="w-4 h-4 mr-1" /> Agregar
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <h3 className="text-white font-bold mb-3 text-sm">Instituciones Registradas</h3>
+          <div className="flex flex-wrap gap-3 mb-4">
+            <select
+              value={filterPais}
+              onChange={(e) => { setFilterPais(e.target.value); setFilterEstado(""); }}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+              data-testid="select-filter-pais"
+            >
+              {Object.entries(COUNTRY_DATA).map(([code, d]) => (
+                <option key={code} value={code}>{d.name}</option>
+              ))}
+            </select>
+            <select
+              value={filterEstado}
+              onChange={(e) => setFilterEstado(e.target.value)}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+              data-testid="select-filter-estado"
+            >
+              <option value="">Todos los estados</option>
+              {filterStates.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <span className="text-white/50 text-sm self-center">{instituciones.length} institución(es)</span>
+          </div>
+
+          {loading ? (
+            <div className="text-white/50 text-center py-4">Cargando...</div>
+          ) : instituciones.length === 0 ? (
+            <div className="text-white/40 text-center py-6">No hay instituciones registradas para este filtro</div>
+          ) : (
+            <div className="space-y-1 max-h-96 overflow-y-auto">
+              {instituciones.map((inst: any) => (
+                <div key={inst.id} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-2">
+                  <div>
+                    <span className="text-white text-sm font-medium">{inst.nombre}</span>
+                    <span className="text-white/40 text-xs ml-2">{inst.estado}, {inst.pais}</span>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(inst.id)}
+                    className="text-red-400 hover:text-red-300 p-1"
+                    data-testid={`button-delete-inst-${inst.id}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

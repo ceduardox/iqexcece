@@ -352,3 +352,14 @@ export type PageStyle = typeof pageStyles.$inferSelect;
 export type InsertPageStyle = z.infer<typeof insertPageStyleSchema>;
 export type TrainingResult = typeof trainingResults.$inferSelect;
 export type InsertTrainingResult = z.infer<typeof insertTrainingResultSchema>;
+
+export const instituciones = pgTable("instituciones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nombre: text("nombre").notNull(),
+  pais: text("pais").notNull(),
+  estado: text("estado").notNull(),
+});
+
+export const insertInstitucionSchema = createInsertSchema(instituciones).omit({ id: true });
+export type Institucion = typeof instituciones.$inferSelect;
+export type InsertInstitucion = z.infer<typeof insertInstitucionSchema>;

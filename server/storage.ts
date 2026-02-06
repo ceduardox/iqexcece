@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, type TrainingResult, type InsertTrainingResult, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles, trainingResults } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, type TrainingResult, type InsertTrainingResult, type Institucion, type InsertInstitucion, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles, trainingResults, instituciones } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
@@ -91,6 +91,11 @@ export interface IStorage {
   saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult>;
   getTrainingResults(sessionId?: string, categoria?: string): Promise<TrainingResult[]>;
   getTrainingStats(sessionId?: string, categoria?: string): Promise<any>;
+
+  // Instituciones
+  getInstituciones(pais?: string, estado?: string): Promise<Institucion[]>;
+  saveInstitucion(inst: InsertInstitucion): Promise<Institucion>;
+  deleteInstitucion(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -399,6 +404,9 @@ export class MemStorage implements IStorage {
   }
   async getTrainingResults(_sessionId?: string, _categoria?: string): Promise<TrainingResult[]> { return []; }
   async getTrainingStats(_sessionId?: string, _categoria?: string): Promise<any> { return { totalSessions: 0, byType: {}, recentActivity: [], dailyActivity: {} }; }
+  async getInstituciones(_pais?: string, _estado?: string): Promise<Institucion[]> { return []; }
+  async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> { return { id: randomUUID(), ...inst } as Institucion; }
+  async deleteInstitucion(_id: string): Promise<void> {}
 }
 
 export class DatabaseStorage implements IStorage {
@@ -983,6 +991,25 @@ export class DatabaseStorage implements IStorage {
     }
     
     return stats;
+  }
+
+  async getInstituciones(pais?: string, estado?: string): Promise<Institucion[]> {
+    let query = db.select().from(instituciones);
+    if (pais && estado) {
+      return query.where(and(eq(instituciones.pais, pais), eq(instituciones.estado, estado)));
+    } else if (pais) {
+      return query.where(eq(instituciones.pais, pais));
+    }
+    return query;
+  }
+
+  async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> {
+    const [result] = await db.insert(instituciones).values(inst).returning();
+    return result;
+  }
+
+  async deleteInstitucion(id: string): Promise<void> {
+    await db.delete(instituciones).where(eq(instituciones.id, id));
   }
 }
 

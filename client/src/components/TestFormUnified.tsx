@@ -1,6 +1,95 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Phone, MessageSquare, GraduationCap, Building, Briefcase, MapPin, ChevronDown, AlertCircle } from "lucide-react";
+
+function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, error, testId, pais, estado }: {
+  value: string; onChange: (v: string) => void; placeholder: string; inputClass: string; error?: string; testId: string; pais: string; estado: string;
+}) {
+  const [showList, setShowList] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
+  const [allInst, setAllInst] = useState<string[]>([]);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!pais || !estado) { setAllInst([]); return; }
+    fetch(`/api/instituciones?pais=${pais}&estado=${encodeURIComponent(estado)}`)
+      .then(r => r.json())
+      .then(d => setAllInst((d.instituciones || []).map((i: any) => i.nombre)))
+      .catch(() => setAllInst([]));
+  }, [pais, estado]);
+
+  useEffect(() => { setManualMode(false); }, [pais, estado]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setShowList(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  if (allInst.length === 0 || manualMode) {
+    return (
+      <div>
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${inputClass} ${error ? "border-red-400 ring-1 ring-red-400" : ""}`}
+          data-testid={testId}
+        />
+        {manualMode && allInst.length > 0 && (
+          <button type="button" onClick={() => { setManualMode(false); onChange(""); }} className="text-purple-400 text-xs mt-1 underline">
+            Volver a buscar en la lista
+          </button>
+        )}
+        {error && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{error}</div>}
+      </div>
+    );
+  }
+
+  const filtered = value.length > 0 ? allInst.filter(n => n.toLowerCase().includes(value.toLowerCase())) : allInst;
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        placeholder={`Buscar ${placeholder.toLowerCase()}...`}
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setShowList(true); }}
+        onFocus={() => setShowList(true)}
+        className={`${inputClass} ${error ? "border-red-400 ring-1 ring-red-400" : ""}`}
+        data-testid={testId}
+      />
+      {showList && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
+          {filtered.map((n, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => { onChange(n); setShowList(false); }}
+              className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-purple-50 border-b border-gray-100 last:border-0"
+            >
+              {n}
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div className="px-3 py-2 text-sm text-gray-400">No se encontró</div>
+          )}
+          <button
+            type="button"
+            onClick={() => { setManualMode(true); onChange(""); setShowList(false); }}
+            className="w-full text-left px-3 py-2 text-sm text-purple-600 font-medium hover:bg-purple-50 border-t border-gray-200"
+          >
+            Mi institución no está en la lista
+          </button>
+        </div>
+      )}
+      {error && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{error}</div>}
+    </div>
+  );
+}
 
 const COUNTRY_DATA: Record<string, { flag: string; code: string; states: string[] }> = {
   BO: { flag: "🇧🇴", code: "+591", states: ["La Paz", "Santa Cruz", "Cochabamba", "Oruro", "Potosí", "Chuquisaca", "Tarija", "Beni", "Pando"] },
@@ -250,15 +339,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               </div>
               <div className="relative">
                 <Building className={iconClass} />
-                <input
-                  type="text"
-                  placeholder="Institución (colegio)"
+                <InstitucionAutocomplete
                   value={formData.institucion}
-                  onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                  className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
-                  data-testid="input-institucion"
+                  onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                  placeholder="Institución (colegio)"
+                  inputClass={inputClass}
+                  error={errors.institucion}
+                  testId="input-institucion"
+                  pais={formData.pais}
+                  estado={formData.estado}
                 />
-                {errors.institucion && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.institucion}</div>}
               </div>
             </>
           )}
@@ -283,15 +373,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               </div>
               <div className="relative">
                 <Building className={iconClass} />
-                <input
-                  type="text"
-                  placeholder="Colegio"
+                <InstitucionAutocomplete
                   value={formData.institucion}
-                  onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                  className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
-                  data-testid="input-institucion-colegio"
+                  onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                  placeholder="Colegio"
+                  inputClass={inputClass}
+                  error={errors.institucion}
+                  testId="input-institucion-colegio"
+                  pais={formData.pais}
+                  estado={formData.estado}
                 />
-                {errors.institucion && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.institucion}</div>}
               </div>
             </>
           )}
@@ -345,20 +436,16 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   </div>
                   <div className="relative">
                     <Building className={iconClass} />
-                    <input
-                      type="text"
-                      placeholder="Universidad"
+                    <InstitucionAutocomplete
                       value={formData.institucion}
-                      onChange={(e) => { handleChange("institucion", e.target.value); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                      className={`${inputClass} ${errors.institucion ? "border-red-400 ring-1 ring-red-400" : ""}`}
-                      data-testid="input-institucion-universidad"
+                      onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
+                      placeholder="Universidad"
+                      inputClass={inputClass}
+                      error={errors.institucion}
+                      testId="input-institucion-universidad"
+                      pais={formData.pais}
+                      estado={formData.estado}
                     />
-                    {errors.institucion && (
-                      <div className="flex items-center gap-1 mt-1 text-red-500 text-xs">
-                        <AlertCircle className="w-3 h-3" />
-                        {errors.institucion}
-                      </div>
-                    )}
                   </div>
                 </>
               )}

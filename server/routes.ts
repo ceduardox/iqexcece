@@ -301,6 +301,48 @@ export async function registerRoutes(
     res.json({ results });
   });
 
+  // Instituciones - public endpoint for form autocomplete
+  app.get("/api/instituciones", async (req, res) => {
+    const pais = req.query.pais as string | undefined;
+    const estado = req.query.estado as string | undefined;
+    const results = await storage.getInstituciones(pais, estado);
+    res.json({ instituciones: results });
+  });
+
+  // Instituciones - admin create
+  app.post("/api/admin/instituciones", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const { nombre, pais, estado } = req.body;
+      if (!nombre || !pais || !estado) {
+        return res.status(400).json({ error: "nombre, pais, estado required" });
+      }
+      const result = await storage.saveInstitucion({ nombre, pais, estado });
+      res.json({ success: true, institucion: result });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save" });
+    }
+  });
+
+  // Instituciones - admin delete
+  app.delete("/api/admin/instituciones/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      await storage.deleteInstitucion(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete" });
+    }
+  });
+
   // Get reading content
   app.get("/api/reading/:categoria", async (req, res) => {
     const categoria = req.params.categoria;
