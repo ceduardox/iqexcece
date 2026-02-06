@@ -209,6 +209,7 @@ export class MemStorage implements IStorage {
       comprension: insertResult.comprension ?? null,
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
+      categoriaLector: insertResult.categoriaLector || null,
       isPwa: insertResult.isPwa || false,
       createdAt: new Date(),
     };
@@ -489,6 +490,7 @@ export class DatabaseStorage implements IStorage {
       comprension: insertResult.comprension ?? null,
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
+      categoriaLector: insertResult.categoriaLector || null,
       isPwa: insertResult.isPwa || false,
     }).returning();
     return result;
