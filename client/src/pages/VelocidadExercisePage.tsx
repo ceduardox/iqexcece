@@ -422,8 +422,8 @@ export default function VelocidadExercisePage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="grid gap-6 mb-8 w-full max-w-md"
-              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+              className="grid mb-8 w-full max-w-md"
+              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, rowGap: "1.8rem" }}
             >
               {Array.from({ length: totalPos }).map((_, idx) => (
                 <div 
