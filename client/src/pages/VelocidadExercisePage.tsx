@@ -423,7 +423,7 @@ export default function VelocidadExercisePage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="grid mb-4 w-full max-w-md"
-              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, rowGap: "1.8rem", columnGap: "1.5rem" }}
+              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, rowGap: "2.16rem", columnGap: "1.5rem" }}
             >
               {Array.from({ length: totalPos }).map((_, idx) => (
                 <div 
