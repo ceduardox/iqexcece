@@ -53,7 +53,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento">("sesiones");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -674,6 +674,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return r.categoria === resultFilter && isRazonamiento;
   });
 
+  const filteredVelocidadResults = quizResults.filter(r => {
+    const isVelocidad = (r as any).testType === "velocidad";
+    if (resultFilter === "all") return isVelocidad;
+    return r.categoria === resultFilter && isVelocidad;
+  });
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     setToken("");
@@ -1291,6 +1297,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             Resultados Entrenamiento
           </button>
           <button
+            onClick={() => setActiveTab("resultados-velocidad")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "resultados-velocidad" ? "bg-cyan-600 text-white" : "text-cyan-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-resultados-velocidad"
+          >
+            <Zap className="w-5 h-5" />
+            Resultados Velocidad
+          </button>
+          <button
             onClick={() => setActiveTab("contenido")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
               activeTab === "contenido" ? "bg-orange-600 text-white" : "text-orange-400 hover:bg-white/10"
@@ -1437,6 +1453,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Zap className="w-4 h-4 mr-1" />
             Entrena
+          </Button>
+          <Button
+            onClick={() => setActiveTab("resultados-velocidad")}
+            variant={activeTab === "resultados-velocidad" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "resultados-velocidad" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+            data-testid="mobile-tab-resultados-velocidad"
+          >
+            <Zap className="w-4 h-4 mr-1" />
+            Velocidad
           </Button>
           <Button
             onClick={() => setActiveTab("contenido")}
@@ -2420,6 +2446,168 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     );
                   })}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "resultados-velocidad" && (
+          <Card className="bg-black/40 border-cyan-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-cyan-400" />
+                Resultados Velocidad de Lectura ({filteredVelocidadResults.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {filteredVelocidadResults.length === 0 ? (
+                <p className="text-white/60 text-center py-8">No hay resultados de velocidad registrados</p>
+              ) : (
+                <>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-sm" data-testid="table-velocidad-results">
+                      <thead>
+                        <tr className="text-left text-white/60 border-b border-white/10">
+                          <th className="pb-3 px-2"></th>
+                          <th className="pb-3 px-2">Nombre</th>
+                          <th className="pb-3 px-2">Categoria</th>
+                          <th className="pb-3 px-2">Comprension</th>
+                          <th className="pb-3 px-2">Vel. Maxima</th>
+                          <th className="pb-3 px-2">Correctas</th>
+                          <th className="pb-3 px-2">Modo</th>
+                          <th className="pb-3 px-2">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredVelocidadResults.map((r) => (
+                          <Fragment key={r.id}>
+                            <tr
+                              onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                              className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                              data-testid={`row-velocidad-${r.id}`}
+                            >
+                              <td className="py-3 px-2">
+                                <svg className={`w-4 h-4 text-white/60 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </td>
+                              <td className="py-3 px-2 text-white">{r.nombre}</td>
+                              <td className="py-3 px-2 text-purple-400">{r.categoria || "-"}</td>
+                              <td className="py-3 px-2">
+                                {(r as any).comprension !== null ? (
+                                  <span className="text-cyan-400 font-bold">{(r as any).comprension}%</span>
+                                ) : "-"}
+                              </td>
+                              <td className="py-3 px-2">
+                                {(r as any).velocidadMaxima ? (
+                                  <span className="text-green-400 font-bold">{(r as any).velocidadMaxima} p/m</span>
+                                ) : "-"}
+                              </td>
+                              <td className="py-3 px-2">
+                                <span className="text-cyan-400">{(r as any).respuestasCorrectas ?? 0}/{(r as any).respuestasTotales ?? 0}</span>
+                              </td>
+                              <td className="py-3 px-2">
+                                <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                                  {r.isPwa ? "PWA" : "Web"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>
+                            </tr>
+                            {expandedResult === r.id && (
+                              <tr key={`${r.id}-details`} className="bg-white/5">
+                                <td colSpan={8} className="px-4 py-4">
+                                  <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg p-4 border border-cyan-500/20">
+                                    <h4 className="text-cyan-400 font-bold mb-3 text-sm">Detalles de Velocidad</h4>
+                                    <div className="grid grid-cols-4 gap-3 text-center">
+                                      <div className="bg-black/30 rounded-lg p-2">
+                                        <div className="text-green-400 font-bold text-lg">{(r as any).velocidadMaxima ?? "-"}</div>
+                                        <div className="text-white/50 text-xs">Vel. Maxima (p/m)</div>
+                                      </div>
+                                      <div className="bg-black/30 rounded-lg p-2">
+                                        <div className="text-cyan-400 font-bold text-lg">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
+                                        <div className="text-white/50 text-xs">Comprension</div>
+                                      </div>
+                                      <div className="bg-black/30 rounded-lg p-2">
+                                        <div className="text-green-400 font-bold text-lg">{(r as any).respuestasCorrectas ?? 0}</div>
+                                        <div className="text-white/50 text-xs">Correctas</div>
+                                      </div>
+                                      <div className="bg-black/30 rounded-lg p-2">
+                                        <div className="text-red-400 font-bold text-lg">{((r as any).respuestasTotales ?? 0) - ((r as any).respuestasCorrectas ?? 0)}</div>
+                                        <div className="text-white/50 text-xs">Incorrectas</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="md:hidden space-y-3">
+                    {filteredVelocidadResults.map((r) => (
+                      <div
+                        key={r.id}
+                        className={`bg-white/5 rounded-lg border transition-all cursor-pointer ${expandedResult === r.id ? 'border-cyan-400' : 'border-cyan-500/20 hover:border-cyan-500/40'}`}
+                        onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                        data-testid={`card-velocidad-${r.id}`}
+                      >
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2 py-1 rounded text-xs bg-cyan-500/20 text-cyan-300">Velocidad</span>
+                              <span className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-300">{r.categoria || "-"}</span>
+                              <span className="text-white font-medium text-sm">{r.nombre}</span>
+                            </div>
+                            <ChevronDown className={`w-5 h-5 text-cyan-400 transition-transform ${expandedResult === r.id ? 'rotate-180' : ''}`} />
+                          </div>
+                          <div className="flex flex-wrap gap-4 items-center text-sm">
+                            <div className="text-center">
+                              <span className="text-green-400 font-bold text-xl">{(r as any).velocidadMaxima ?? "-"}</span>
+                              <p className="text-white/40 text-xs">Vel. Max (p/m)</p>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-cyan-400 font-bold text-xl">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</span>
+                              <p className="text-white/40 text-xs">Comprension</p>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-purple-400 font-bold text-xl">{(r as any).respuestasCorrectas ?? 0}/{(r as any).respuestasTotales ?? 0}</span>
+                              <p className="text-white/40 text-xs">Correctas</p>
+                            </div>
+                            <span className="text-white/40 text-xs ml-auto">{formatDate(r.createdAt)}</span>
+                          </div>
+                        </div>
+                        {expandedResult === r.id && (
+                          <div className="border-t border-cyan-500/20 p-4" onClick={(e) => e.stopPropagation()}>
+                            <div className="grid grid-cols-4 gap-2 text-center">
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-green-400 font-bold">{(r as any).velocidadMaxima ?? "-"}</div>
+                                <div className="text-white/50 text-xs">Vel. Max</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-cyan-400 font-bold">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
+                                <div className="text-white/50 text-xs">Comprension</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-green-400 font-bold">{(r as any).respuestasCorrectas ?? 0}</div>
+                                <div className="text-white/50 text-xs">Correctas</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-red-400 font-bold">{((r as any).respuestasTotales ?? 0) - ((r as any).respuestasCorrectas ?? 0)}</div>
+                                <div className="text-white/50 text-xs">Incorrectas</div>
+                              </div>
+                            </div>
+                            <div className="mt-2 flex justify-between items-center text-xs text-white/40">
+                              <span>ID: {r.id}</span>
+                              <span>{r.isPwa ? "PWA" : "Web"}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>

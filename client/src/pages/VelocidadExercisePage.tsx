@@ -27,6 +27,9 @@ export default function VelocidadExercisePage() {
   const [incorrectos, setIncorrectos] = useState(0);
   const [ultimaRespuesta, setUltimaRespuesta] = useState<"correcta" | "incorrecta" | null>(null);
   const [esSegundoEjercicioEnAdelante, setEsSegundoEjercicioEnAdelante] = useState(false);
+  const [velocidadMaxAlcanzada, setVelocidadMaxAlcanzada] = useState(0);
+  const [intentosTotales, setIntentosTotales] = useState(0);
+  const maxIntentos = 20;
   
   const [currentPosition, setCurrentPosition] = useState(-1);
   const [shownWords, setShownWords] = useState<string[]>([]);
@@ -73,6 +76,7 @@ export default function VelocidadExercisePage() {
           const nivelesFiltrados = patronDecoded 
             ? todosNiveles.filter(n => n.patron === patronDecoded)
             : todosNiveles;
+          nivelesFiltrados.sort((a, b) => a.velocidad - b.velocidad);
           setEjercicios(nivelesFiltrados);
           setTitulo(velocidadData.ejercicio.titulo || itemData.item?.title || "Velocidad Lectora");
           
@@ -131,44 +135,39 @@ export default function VelocidadExercisePage() {
     return palabras[0];
   };
 
-  const iniciarEjercicio = useCallback(() => {
-    if (!ejercicio) return;
-    
-    const todasPalabras = ejercicio.palabras.split(",").map(p => p.trim()).filter(p => p);
-    const todasOpciones = ejercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
-    
+  const prepararEjercicio = useCallback((ej: Ejercicio) => {
+    const todasPalabras = ej.palabras.split(",").map(p => p.trim()).filter(p => p);
+    const todasOpciones = ej.opciones.split(",").map(o => o.trim()).filter(o => o);
     const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
-    
-    const respuestaCorrectaCalculada = getRespuestaCorrecta(ejercicio.tipoPregunta, shuffled);
-    
+    const respuestaCorrectaCalculada = getRespuestaCorrecta(ej.tipoPregunta, shuffled);
     let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
-    const respuestaExiste = opcionesMezcladas.some(
-      op => op.toLowerCase() === respuestaCorrectaCalculada.toLowerCase()
-    );
-    
-    if (!respuestaExiste) {
-      const posicionAleatoria = Math.floor(Math.random() * opcionesMezcladas.length);
-      opcionesMezcladas[posicionAleatoria] = respuestaCorrectaCalculada;
+    if (!opcionesMezcladas.some(op => op.toLowerCase() === respuestaCorrectaCalculada.toLowerCase())) {
+      opcionesMezcladas[Math.floor(Math.random() * opcionesMezcladas.length)] = respuestaCorrectaCalculada;
     }
-    
-    const totalPos = getTotalPositions(ejercicio.patron);
+    const totalPos = getTotalPositions(ej.patron);
     setPalabrasRonda(shuffled);
     setOpcionesRonda(opcionesMezcladas);
     setShownWords(Array(totalPos).fill(""));
     setCurrentPosition(-1);
-    setPreguntaActual(getPreguntaTexto(ejercicio.tipoPregunta));
+    setPreguntaActual(getPreguntaTexto(ej.tipoPregunta));
     setRespuestaCorrecta(respuestaCorrectaCalculada);
     setUltimaRespuesta(null);
-    setVelocidadActual(ejercicio.velocidad);
-    setPatronActual(ejercicio.patron);
+    setVelocidadActual(ej.velocidad);
+    setPatronActual(ej.patron);
     setPlayingKey(k => k + 1);
+  }, []);
+
+  const iniciarEjercicio = useCallback(() => {
+    if (!ejercicio) return;
+    prepararEjercicio(ejercicio);
+    setVelocidadMaxAlcanzada(ejercicio.velocidad);
     
     if (esSegundoEjercicioEnAdelante) {
       setGameState("playing");
     } else {
       setGameState("animacion_inicial");
     }
-  }, [ejercicio, esSegundoEjercicioEnAdelante]);
+  }, [ejercicio, esSegundoEjercicioEnAdelante, prepararEjercicio]);
 
   useEffect(() => {
     if (gameState !== "animacion_inicial" || !ejercicio) return;
@@ -261,81 +260,69 @@ export default function VelocidadExercisePage() {
     };
   }, [gameState, playingKey]);
 
+  const [resultSubmitted, setResultSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (gameState !== "final" || resultSubmitted) return;
+    setResultSubmitted(true);
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
+                  (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    const totalResp = correctos + incorrectos;
+    fetch("/api/quiz/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nombre: "Entrenamiento Velocidad",
+        categoria: categoria || "general",
+        testType: "velocidad",
+        respuestasCorrectas: correctos,
+        respuestasTotales: totalResp,
+        comprension: totalResp > 0 ? Math.round((correctos / totalResp) * 100) : 0,
+        velocidadMaxima: velocidadMaxAlcanzada,
+        isPwa: isPwa,
+      }),
+    }).catch(e => console.error("Error saving result:", e));
+  }, [gameState, resultSubmitted, correctos, incorrectos, velocidadMaxAlcanzada, categoria]);
+
   const handleRespuesta = (opcion: string) => {
     const esCorrecta = opcion.toLowerCase() === respuestaCorrecta.toLowerCase();
+    const newIntentos = intentosTotales + 1;
+    setIntentosTotales(newIntentos);
+
     if (esCorrecta) {
       setCorrectos(c => c + 1);
       setUltimaRespuesta("correcta");
-    } else {
-      setIncorrectos(i => i + 1);
-      setUltimaRespuesta("incorrecta");
-    }
-    
-    if (ejercicioActual < ejercicios.length - 1) {
+      const newMax = Math.max(velocidadMaxAlcanzada, ejercicio.velocidad);
+      setVelocidadMaxAlcanzada(newMax);
+
+      if (ejercicioActual >= ejercicios.length - 1 || newIntentos >= maxIntentos) {
+        setGameState("final");
+        return;
+      }
       setEsSegundoEjercicioEnAdelante(true);
       setTimeout(() => {
-        const nextEjercicio = ejercicios[ejercicioActual + 1];
-        if (!nextEjercicio) return;
-        
-        const todasPalabras = nextEjercicio.palabras.split(",").map(p => p.trim()).filter(p => p);
-        const todasOpciones = nextEjercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
-        const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
-        const respuestaCorrectaCalc = getRespuestaCorrecta(nextEjercicio.tipoPregunta, shuffled);
-        
-        let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
-        if (!opcionesMezcladas.some(op => op.toLowerCase() === respuestaCorrectaCalc.toLowerCase())) {
-          opcionesMezcladas[Math.floor(Math.random() * opcionesMezcladas.length)] = respuestaCorrectaCalc;
-        }
-        
-        const totalPos = getTotalPositions(nextEjercicio.patron);
-        setEjercicioActual(e => e + 1);
-        setPalabrasRonda(shuffled);
-        setOpcionesRonda(opcionesMezcladas);
-        setShownWords(Array(totalPos).fill(""));
-        setCurrentPosition(-1);
-        setPreguntaActual(getPreguntaTexto(nextEjercicio.tipoPregunta));
-        setRespuestaCorrecta(respuestaCorrectaCalc);
-        setUltimaRespuesta(null);
-        setVelocidadActual(nextEjercicio.velocidad);
-        setPatronActual(nextEjercicio.patron);
-        setPlayingKey(k => k + 1);
+        const nextIdx = ejercicioActual + 1;
+        setEjercicioActual(nextIdx);
+        prepararEjercicio(ejercicios[nextIdx]);
         setGameState("preparando");
       }, 500);
     } else {
-      setGameState("final");
+      setIncorrectos(i => i + 1);
+      setUltimaRespuesta("incorrecta");
+
+      if (newIntentos >= maxIntentos) {
+        setGameState("final");
+        return;
+      }
+      setEsSegundoEjercicioEnAdelante(true);
+      setTimeout(() => {
+        const prevIdx = Math.max(0, ejercicioActual - 1);
+        setEjercicioActual(prevIdx);
+        prepararEjercicio(ejercicios[prevIdx]);
+        setGameState("preparando");
+      }, 500);
     }
   };
-
-  const iniciarEjercicioSiguiente = useCallback(() => {
-    const nextEjercicio = ejercicios[ejercicioActual + 1];
-    if (!nextEjercicio) return;
-    
-    const todasPalabras = nextEjercicio.palabras.split(",").map(p => p.trim()).filter(p => p);
-    const todasOpciones = nextEjercicio.opciones.split(",").map(o => o.trim()).filter(o => o);
-    
-    const shuffled = [...todasPalabras].sort(() => Math.random() - 0.5);
-    const respuestaCorrectaCalculada = getRespuestaCorrecta(nextEjercicio.tipoPregunta, shuffled);
-    
-    let opcionesMezcladas = [...todasOpciones].sort(() => Math.random() - 0.5);
-    const respuestaExiste = opcionesMezcladas.some(
-      op => op.toLowerCase() === respuestaCorrectaCalculada.toLowerCase()
-    );
-    
-    if (!respuestaExiste) {
-      const posicionAleatoria = Math.floor(Math.random() * opcionesMezcladas.length);
-      opcionesMezcladas[posicionAleatoria] = respuestaCorrectaCalculada;
-    }
-    
-    const totalPos = getTotalPositions(nextEjercicio.patron);
-    setPalabrasRonda(shuffled);
-    setOpcionesRonda(opcionesMezcladas);
-    setShownWords(Array(totalPos).fill(""));
-    setCurrentPosition(-1);
-    setPreguntaActual(getPreguntaTexto(nextEjercicio.tipoPregunta));
-    setRespuestaCorrecta(respuestaCorrectaCalculada);
-    setUltimaRespuesta(null);
-    setGameState("playing");
-  }, [ejercicios, ejercicioActual]);
 
   if (loading) {
     return (
@@ -420,8 +407,11 @@ export default function VelocidadExercisePage() {
       <main className="flex-1 flex flex-col items-center px-6 py-6 bg-gradient-to-b from-purple-50/50 to-white">
         <div className="text-center mb-6">
           <span className="text-purple-600 text-lg font-bold">
-            {ejercicio.velocidad} palabras /min.
+            {velocidadActual} palabras /min.
           </span>
+          {velocidadMaxAlcanzada > 0 && gameState !== "ready" && (
+            <div className="text-gray-400 text-xs mt-1">Max alcanzado: {velocidadMaxAlcanzada} p/m</div>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
@@ -601,7 +591,7 @@ export default function VelocidadExercisePage() {
                         strokeLinecap="round"
                         initial={{ strokeDasharray: "0 352" }}
                         animate={{ 
-                          strokeDasharray: `${ejercicios.length > 0 ? (correctos / ejercicios.length) * 352 : 0} 352` 
+                          strokeDasharray: `${(correctos + incorrectos) > 0 ? (correctos / (correctos + incorrectos)) * 352 : 0} 352` 
                         }}
                         transition={{ duration: 1, ease: "easeOut" }}
                       />
@@ -614,26 +604,36 @@ export default function VelocidadExercisePage() {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-gray-800 text-3xl font-bold">
-                        {ejercicios.length > 0 ? Math.round((correctos / ejercicios.length) * 100) : 0}%
+                        {(correctos + incorrectos) > 0 ? Math.round((correctos / (correctos + incorrectos)) * 100) : 0}%
                       </span>
                       <span className="text-gray-400 text-xs">Precisión</span>
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-gradient-to-r from-purple-100 to-cyan-100 rounded-lg p-4 mb-4 text-center">
+                  <div className="text-purple-700 text-3xl font-bold">{velocidadMaxAlcanzada}</div>
+                  <div className="text-purple-500 text-sm font-medium">Velocidad Máxima (p/m)</div>
+                </div>
+
                 <div className="flex justify-center gap-8">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-2xl">😊</span>
                       <span className="text-green-500 text-2xl font-bold">{correctos}</span>
                     </div>
                     <p className="text-gray-500 text-xs">CORRECTOS</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-2xl">😢</span>
                       <span className="text-red-500 text-2xl font-bold">{incorrectos}</span>
                     </div>
                     <p className="text-gray-500 text-xs">INCORRECTOS</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="text-purple-500 text-2xl font-bold">{intentosTotales}</span>
+                    </div>
+                    <p className="text-gray-500 text-xs">INTENTOS</p>
                   </div>
                 </div>
               </div>
@@ -648,6 +648,9 @@ export default function VelocidadExercisePage() {
                     setIncorrectos(0);
                     setUltimaRespuesta(null);
                     setEsSegundoEjercicioEnAdelante(false);
+                    setVelocidadMaxAlcanzada(0);
+                    setIntentosTotales(0);
+                    setResultSubmitted(false);
                     setGameState("ready");
                   }}
                   className="text-white px-8 py-3 rounded-lg font-semibold text-base shadow-md"
