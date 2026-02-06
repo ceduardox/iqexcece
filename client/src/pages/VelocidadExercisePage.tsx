@@ -326,7 +326,7 @@ export default function VelocidadExercisePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
         <header 
           className="px-4 py-3 flex items-center justify-between"
           style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
@@ -348,7 +348,7 @@ export default function VelocidadExercisePage() {
 
   if (ejercicios.length === 0 || !ejercicio) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <div className="bg-white flex flex-col items-center justify-center p-4" style={{ height: "100dvh", overflow: "hidden" }}>
         <p className="text-gray-800 text-xl mb-4">No hay ejercicios configurados</p>
         <button
           onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
@@ -364,7 +364,7 @@ export default function VelocidadExercisePage() {
   const totalPos = getTotalPositions(ejercicio.patron);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
       <header 
         className="px-4 py-3 flex items-center justify-between"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
@@ -404,8 +404,8 @@ export default function VelocidadExercisePage() {
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center px-6 py-6 bg-gradient-to-b from-purple-50/50 to-white">
-        <div className="text-center mb-6">
+      <main className="flex-1 flex flex-col items-center px-6 py-4 bg-gradient-to-b from-purple-50/50 to-white overflow-auto">
+        <div className="text-center mb-3">
           <span className="text-purple-600 text-lg font-bold">
             {velocidadActual} palabras /min.
           </span>
@@ -422,7 +422,7 @@ export default function VelocidadExercisePage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="grid mb-8 w-full max-w-md"
+              className="grid mb-4 w-full max-w-md"
               style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, rowGap: "1.8rem" }}
             >
               {Array.from({ length: totalPos }).map((_, idx) => (
