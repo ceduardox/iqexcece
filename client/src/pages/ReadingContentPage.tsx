@@ -364,9 +364,9 @@ export default function ReadingContentPage() {
   if (showResults) {
     const percentage = Math.round((correctAnswers / content.questions.length) * 100);
     return (
-      <div ref={resultsRef} className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
+      <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
         {/* Capture area - contains header and content, excludes buttons */}
-        <div ref={captureAreaRef} className="bg-white flex-1 overflow-auto">
+        <div ref={captureAreaRef} className="bg-white">
           <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
             <div className="flex items-center justify-center" data-testid="header-logo">
               <img 
