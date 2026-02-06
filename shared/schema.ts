@@ -69,6 +69,7 @@ export const quizResults = pgTable("quiz_results", {
   comprension: integer("comprension"),
   velocidadLectura: integer("velocidad_lectura"),
   velocidadMaxima: integer("velocidad_maxima"),
+  categoriaLector: text("categoria_lector"),
   isPwa: boolean("is_pwa").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });

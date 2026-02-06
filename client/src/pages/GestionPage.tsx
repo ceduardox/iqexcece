@@ -1837,7 +1837,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <td colSpan={7} className="px-4 py-4">
                               <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg p-4 mb-4 border border-cyan-500/20">
                                 <h4 className="text-cyan-400 font-bold mb-3 text-sm">📊 Resultados del Test</h4>
-                                <div className="grid grid-cols-5 gap-3 text-center">
+                                <div className="grid grid-cols-6 gap-3 text-center">
                                   <div className="bg-black/30 rounded-lg p-2">
                                     <div className="text-cyan-400 font-bold text-lg">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
                                     <div className="text-white/50 text-xs">Comprensión</div>
@@ -1857,6 +1857,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   <div className="bg-black/30 rounded-lg p-2">
                                     <div className="text-purple-400 font-bold text-lg">{formatTime(r.tiempoCuestionario)}</div>
                                     <div className="text-white/50 text-xs">T. Preguntas</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2 border border-yellow-500/30">
+                                    <div className={`font-bold text-xs leading-tight ${(r as any).categoriaLector?.includes("COMPETENTE") ? "text-green-400" : (r as any).categoriaLector?.includes("REGULAR") ? "text-yellow-400" : (r as any).categoriaLector?.includes("SEVERA") ? "text-red-400" : "text-orange-400"}`}>{(r as any).categoriaLector || "-"}</div>
+                                    <div className="text-white/50 text-[10px] mt-1">Categoría</div>
                                   </div>
                                 </div>
                               </div>
@@ -1915,27 +1919,31 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           <h4 className="text-cyan-400 font-bold mb-2 text-xs">📊 Resultados del Test</h4>
                           <div className="grid grid-cols-3 gap-2 text-center mb-2">
                             <div className="bg-black/30 rounded p-2">
-                              <div className="text-cyan-400 font-bold">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
-                              <div className="text-white/50 text-xs">Comprensión</div>
+                              <div className="text-cyan-400 font-bold text-sm">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
+                              <div className="text-white/50 text-[10px]">Comprensión</div>
                             </div>
                             <div className="bg-black/30 rounded p-2">
-                              <div className="text-green-400 font-bold">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
-                              <div className="text-white/50 text-xs">Correctas</div>
+                              <div className="text-green-400 font-bold text-sm">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
+                              <div className="text-white/50 text-[10px]">Correctas</div>
                             </div>
                             <div className="bg-black/30 rounded p-2">
-                              <div className="text-purple-400 font-bold">{(r as any).velocidadLectura ?? "-"}</div>
-                              <div className="text-white/50 text-xs">Palabras/min</div>
+                              <div className="text-purple-400 font-bold text-sm">{(r as any).velocidadLectura ?? "-"}</div>
+                              <div className="text-white/50 text-[10px]">Palabras/min</div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 text-center">
+                          <div className="grid grid-cols-2 gap-2 text-center mb-2">
                             <div className="bg-black/30 rounded p-2">
-                              <div className="text-cyan-400 font-bold">{formatTime(r.tiempoLectura)}</div>
-                              <div className="text-white/50 text-xs">T. Lectura</div>
+                              <div className="text-cyan-400 font-bold text-sm">{formatTime(r.tiempoLectura)}</div>
+                              <div className="text-white/50 text-[10px]">T. Lectura</div>
                             </div>
                             <div className="bg-black/30 rounded p-2">
-                              <div className="text-purple-400 font-bold">{formatTime(r.tiempoCuestionario)}</div>
-                              <div className="text-white/50 text-xs">T. Preguntas</div>
+                              <div className="text-purple-400 font-bold text-sm">{formatTime(r.tiempoCuestionario)}</div>
+                              <div className="text-white/50 text-[10px]">T. Preguntas</div>
                             </div>
+                          </div>
+                          <div className="bg-black/30 rounded p-2 text-center border border-yellow-500/30">
+                            <div className={`font-bold text-xs leading-tight ${(r as any).categoriaLector?.includes("COMPETENTE") ? "text-green-400" : (r as any).categoriaLector?.includes("REGULAR") ? "text-yellow-400" : (r as any).categoriaLector?.includes("SEVERA") ? "text-red-400" : "text-orange-400"}`}>{(r as any).categoriaLector || "-"}</div>
+                            <div className="text-white/50 text-[10px] mt-1">Categoría Lector</div>
                           </div>
                         </div>
                         <p className="text-white/60 pt-1">Email: <span className="text-white/80">{r.email || "-"}</span></p>

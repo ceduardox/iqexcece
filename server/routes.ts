@@ -249,7 +249,41 @@ export async function registerRoutes(
   // Save quiz result
   app.post("/api/quiz/submit", async (req, res) => {
     try {
-      const result = await storage.saveQuizResult(req.body);
+      const data = { ...req.body };
+      if (data.testType === "lectura" || !data.testType) {
+        const comprensionPct = data.comprension ?? 0;
+        const wpm = data.velocidadLectura ?? 0;
+        const tiempoLecturaSeg = data.tiempoLectura ?? 0;
+        const tiempoPreguntasSeg = data.tiempoCuestionario ?? 0;
+        const lecturaValida = tiempoLecturaSeg >= 10 && wpm <= 600;
+
+        let cat = "LECTOR CON DIFICULTAD";
+        if (
+          comprensionPct < 50 ||
+          (!lecturaValida && comprensionPct < 70) ||
+          (wpm < 140 && tiempoPreguntasSeg > 90 && comprensionPct < 70)
+        ) {
+          cat = "LECTOR CON DIFICULTAD SEVERA";
+        } else if (
+          (comprensionPct >= 50 && comprensionPct < 70) ||
+          (comprensionPct >= 70 && (wpm < 140 || tiempoPreguntasSeg > 90))
+        ) {
+          cat = "LECTOR CON DIFICULTAD";
+        } else if (
+          lecturaValida && comprensionPct >= 85 && wpm >= 180 && tiempoPreguntasSeg <= 90
+        ) {
+          cat = "LECTOR COMPETENTE";
+        } else if (
+          lecturaValida && comprensionPct >= 70 && comprensionPct < 85 && wpm >= 140 && wpm < 200
+        ) {
+          cat = "LECTOR REGULAR";
+        } else if (lecturaValida && comprensionPct >= 70) {
+          cat = "LECTOR REGULAR";
+        }
+
+        data.categoriaLector = cat;
+      }
+      const result = await storage.saveQuizResult(data);
       res.json({ success: true, result });
     } catch (error) {
       res.status(500).json({ error: "Failed to save result" });
