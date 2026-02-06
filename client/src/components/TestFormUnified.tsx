@@ -301,6 +301,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl p-5 shadow-lg border border-purple-50 space-y-4"
         >
+          {/* 1. Nombre */}
           <div className="relative">
             <User className={iconClass} />
             <input
@@ -319,6 +320,56 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             )}
           </div>
 
+          {/* 2. Pais + Telefono */}
+          <div>
+            <div className="flex gap-2">
+              <div className="relative w-28">
+                <select
+                  value={formData.pais}
+                  onChange={(e) => handleChange("pais", e.target.value)}
+                  className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-200 text-sm bg-purple-50 text-gray-800 appearance-none cursor-pointer"
+                  data-testid="select-pais"
+                >
+                  {COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.phoneCode}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="relative flex-1">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
+                <input
+                  type="tel"
+                  placeholder="Número de teléfono"
+                  value={formData.telefono}
+                  onChange={(e) => { handleChange("telefono", e.target.value); setErrors(prev => ({ ...prev, telefono: "" })); }}
+                  className={`${inputClass} ${errors.telefono ? "border-red-400 ring-1 ring-red-400" : ""}`}
+                  data-testid="input-telefono"
+                />
+              </div>
+            </div>
+            {errors.telefono && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.telefono}</div>}
+          </div>
+
+          {/* 3. Estado / Departamento */}
+          <div className="relative">
+            <MapPin className={iconClass} />
+            <select
+              value={formData.estado}
+              onChange={(e) => { handleChange("estado", e.target.value); setErrors(prev => ({ ...prev, estado: "" })); }}
+              className={`${selectClass} ${errors.estado ? "border-red-400 ring-1 ring-red-400" : ""}`}
+              data-testid="select-estado"
+            >
+              <option value="">Estado / Departamento / Provincia</option>
+              {states.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+            {errors.estado && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.estado}</div>}
+          </div>
+
+          {/* 4. Campos especificos por categoria */}
           {isNino && (
             <>
               <div className="relative">
@@ -505,6 +556,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             </>
           )}
 
+          {/* 5. Edad */}
           <div className="relative">
             <input
               type="number"
@@ -518,6 +570,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             {errors.edad && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.edad}</div>}
           </div>
 
+          {/* 6. Email */}
           <div className="relative">
             <Mail className={iconClass} />
             <input
@@ -531,53 +584,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             {errors.email && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.email}</div>}
           </div>
 
-          <div>
-            <div className="flex gap-2">
-              <div className="relative w-28">
-                <select
-                  value={formData.pais}
-                  onChange={(e) => handleChange("pais", e.target.value)}
-                  className="w-full py-3.5 pl-3 pr-6 rounded-xl border border-purple-200 text-sm bg-purple-50 text-gray-800 appearance-none cursor-pointer"
-                  data-testid="select-pais"
-                >
-                  {COUNTRIES.map(c => (
-                    <option key={c.code} value={c.code}>{c.flag} {c.phoneCode}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              <div className="relative flex-1">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
-                <input
-                  type="tel"
-                  placeholder="Número de teléfono"
-                  value={formData.telefono}
-                  onChange={(e) => { handleChange("telefono", e.target.value); setErrors(prev => ({ ...prev, telefono: "" })); }}
-                  className={`${inputClass} ${errors.telefono ? "border-red-400 ring-1 ring-red-400" : ""}`}
-                  data-testid="input-telefono"
-                />
-              </div>
-            </div>
-            {errors.telefono && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.telefono}</div>}
-          </div>
-
-          <div className="relative">
-            <MapPin className={iconClass} />
-            <select
-              value={formData.estado}
-              onChange={(e) => { handleChange("estado", e.target.value); setErrors(prev => ({ ...prev, estado: "" })); }}
-              className={`${selectClass} ${errors.estado ? "border-red-400 ring-1 ring-red-400" : ""}`}
-              data-testid="select-estado"
-            >
-              <option value="">Estado / Departamento / Provincia</option>
-              {states.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-            {errors.estado && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{errors.estado}</div>}
-          </div>
-
+          {/* 7. Comentario */}
           <div className="relative">
             <MessageSquare className={iconClass} />
             <textarea
