@@ -20,6 +20,7 @@
     "trainingDesc": "Mejora tus habilidades",
     "whatsapp": "WhatsApp",
     "email": "Correo",
+    "emailAction": "Envíanos un email",
     "heroTitle1": "Activa la",
     "heroTitle2": "Inteligencia",
     "heroSubtitle1": "Un método científico de",
@@ -48,6 +49,8 @@
     "razonamientoDesc": "Pon a prueba tu lógica y pensamiento analítico",
     "cerebral": "Test Cerebral",
     "cerebralDesc": "Ejercicios para evaluar tus capacidades cognitivas",
+    "heroSubtitle1": "Un método científico de",
+    "heroSubtitle2": "evaluación cognitiva",
     "heroDesc": "Selecciona un test para comenzar tu diagnóstico y descubre cómo potenciar tu mente con ejercicios personalizados.",
     "start": "Comenzar",
     "continue": "Continuar",
@@ -60,7 +63,37 @@
     "next": "Siguiente",
     "previous": "Anterior",
     "submit": "Enviar",
-    "finish": "Finalizar"
+    "finish": "Finalizar",
+    "comprension": "Comprensión",
+    "velocidad": "Velocidad",
+    "seeResults": "Ver mis resultados",
+    "completeData": "Completa tus datos para ver tu resultado",
+    "shareResult": "Compartir resultado",
+    "sharing": "Compartiendo..."
+  },
+  "age": {
+    "title": "Selecciona tu grupo",
+    "selectStage": "Selecciona tu etapa",
+    "adjustDesc": "Así ajustamos ejercicios y dificultad.",
+    "preescolar": "Pre-escolar",
+    "preescolarDesc": "Juegos cortos, visuales y guiados.",
+    "ninos": "Niños",
+    "ninosDesc": "Atención, lectura y lógica básica.",
+    "adolescentes": "Adolescentes",
+    "adolescentesDesc": "Velocidad, enfoque y memoria.",
+    "adultos": "Adultos",
+    "adultosDesc": "Productividad, lectura y claridad mental.",
+    "adultoMayor": "Adulto mayor",
+    "adultoMayorDesc": "Memoria, agilidad y prevención cognitiva.",
+    "preescolarShort": "Pre escolar",
+    "ninoShort": "Niño",
+    "adolescenteShort": "Adolescente",
+    "universitarioShort": "Universitario",
+    "profesionalShort": "Profesional",
+    "adultoMayorShort": "Adulto Mayor",
+    "ninosShort": "Niños",
+    "adolescentesShort": "Adolescentes",
+    "profesionalesShort": "Profesionales"
   },
   "training": {
     "title": "Entrenamiento",
@@ -68,7 +101,11 @@
     "heroSubtitle1": "Ejercicios diseñados para",
     "heroSubtitle2": "potenciar tu mente",
     "heroDesc": "Selecciona un entrenamiento para comenzar y fortalece tus habilidades cognitivas con ejercicios personalizados.",
-    "noItems": "No hay entrenamientos disponibles"
+    "noItems": "No hay entrenamientos disponibles",
+    "defaultTitle": "Entrenamientos",
+    "defaultDesc": "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas",
+    "preparation": "Preparación",
+    "startSession": "Iniciar sesión"
   },
   "progress": {
     "title": "Mi Progreso",
@@ -133,6 +170,17 @@
     "obj5Title": "Celebrar el Éxito Académico",
     "obj5Desc": "Reconocemos y premiamos la excelencia en la lectura, destacando los logros de los estudiantes en un evento especial que inspira a toda la comunidad educativa."
   },
+  "exercises": {
+    "empezar": "Empezar",
+    "numeros": "Números",
+    "letras": "Letras",
+    "romanos": "Romanos",
+    "golpeVistaDesc": "Entrena tu campo visual para capturar más palabras",
+    "desplazamientoDesc": "Practica la lectura continua siguiendo el ritmo",
+    "adolescenteSubtitle": "Adolescente",
+    "adolescenteDesc": "Comprensión y análisis de textos",
+    "loginRequired": "Debes iniciar sesión como administrador"
+  },
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -142,7 +190,10 @@
     "edit": "Editar",
     "close": "Cerrar",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "notFound": "404 Página no encontrada",
+    "notFoundDesc": "La página que buscas no existe.",
+    "goHome": "Ir al inicio"
   },
   "lang": {
     "es": "Español",

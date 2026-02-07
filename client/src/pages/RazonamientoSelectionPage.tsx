@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { Brain, Check, Lock, Star, ChevronRight, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
@@ -29,15 +30,6 @@ const playCardSound = () => {
   const audio = new Audio('/card.mp3');
   audio.volume = 0.5;
   audio.play().catch(() => {});
-};
-
-const categoryLabels: Record<string, string> = {
-  preescolar: "Pre escolar",
-  ninos: "Niño",
-  adolescentes: "Adolescente",
-  universitarios: "Universitario",
-  profesionales: "Profesional",
-  adulto_mayor: "Adulto Mayor",
 };
 
 const testTypes = ["Memoria", "Lógica", "Problemas", "Pruebas"];
@@ -73,12 +65,22 @@ const getThemeStatus = (
 };
 
 export default function RazonamientoSelectionPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string }>();
   const { userData, setUserData } = useUserData();
   const [themes, setThemes] = useState<RazonamientoTheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<RazonamientoProgress>({ completed: [], inProgress: null, scores: {} });
+
+  const categoryLabels: Record<string, string> = {
+    preescolar: t("age.preescolarShort"),
+    ninos: t("age.ninoShort"),
+    adolescentes: t("age.adolescenteShort"),
+    universitarios: t("age.universitarioShort"),
+    profesionales: t("age.profesionalShort"),
+    adulto_mayor: t("age.adultoMayorShort"),
+  };
   
   const categoria = params.category || userData.childCategory || "ninos";
 

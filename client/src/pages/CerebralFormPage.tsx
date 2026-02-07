@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
+import { useTranslation } from "react-i18next";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 
 export default function CerebralFormPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "adolescentes";
@@ -73,8 +75,8 @@ export default function CerebralFormPage() {
       onSubmit={handleSubmit}
       submitting={submitting}
       title="Test Cerebral"
-      subtitle="Completa tus datos para ver tu resultado."
-      buttonText="Ver mis resultados"
+      subtitle={t("tests.completeData")}
+      buttonText={t("tests.seeResults")}
     />
   );
 }

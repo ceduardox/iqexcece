@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { Brain, Clock, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const playButtonSound = () => {
 };
 
 export default function CerebralSelectionPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria?: string }>();
   const { userData } = useUserData();
@@ -50,7 +52,7 @@ export default function CerebralSelectionPage() {
     title: "¿Cuál lado de tu cerebro es más dominante?",
     subtitle: "El test tiene una duración de 30 segundos.",
     duration: "30",
-    buttonText: "Empezar"
+    buttonText: t("exercises.empezar")
   };
 
   const isLoading = themesLoading || introLoading;

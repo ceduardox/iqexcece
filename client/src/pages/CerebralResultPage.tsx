@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Home, Share2, MessageCircle, Brain, ArrowLeft, RotateCcw } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
@@ -23,6 +24,7 @@ const playButtonSound = () => {
 };
 
 export default function CerebralResultPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);

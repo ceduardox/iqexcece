@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
+import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -72,6 +73,7 @@ function TestCard({
   onElementClick,
   getEditableClass
 }: TestCardProps) {
+  const { t } = useTranslation();
   const cardId = `card-${testId}`;
   const titleId = `title-${testId}`;
   const descId = `desc-${testId}`;
@@ -174,7 +176,7 @@ function TestCard({
               } 
             }}
           >
-            {styles[`btn-${testId}`]?.buttonText || "Iniciar"}
+            {styles[`btn-${testId}`]?.buttonText || t("tests.start")}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -385,13 +387,16 @@ export default function TestsPage() {
           )}
         </div>
         
-        <button 
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-          data-testid="button-menu"
-        >
-          <Menu className="w-6 h-6" strokeWidth={1.5} />
-        </button>
+        <div className="absolute right-5 flex items-center gap-1">
+          <LanguageButton />
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            data-testid="button-menu"
+          >
+            <Menu className="w-6 h-6" strokeWidth={1.5} />
+          </button>
+        </div>
       </header>
 
       <div
@@ -434,11 +439,11 @@ export default function TestsPage() {
                 style={getElementStyle("hero-title")}
               >
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Diagnóstico"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[0] || t("tests.title").split(' ')[0]}
                 </span>
                 <br />
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Cognitivo"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || t("tests.title").split(' ')[1]}
                 </span>
                 <br />
                 <span style={{ 
@@ -458,7 +463,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                 style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
-                {styles["hero-subtitle"]?.buttonText || "Un método científico de"}
+                {styles["hero-subtitle"]?.buttonText || t("tests.heroSubtitle1")}
               </motion.p>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -468,7 +473,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                 style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
-                {styles["hero-subtitle2"]?.buttonText || "evaluación cognitiva"}
+                {styles["hero-subtitle2"]?.buttonText || t("tests.heroSubtitle2")}
               </motion.p>
               
               <motion.p 

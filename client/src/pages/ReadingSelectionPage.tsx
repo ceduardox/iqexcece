@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { Check, Lock, Star, ChevronDown, BookOpen, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
@@ -30,15 +31,6 @@ const playCardSound = () => {
   const audio = new Audio('/card.mp3');
   audio.volume = 0.5;
   audio.play().catch(() => {});
-};
-
-const categoryLabels: Record<string, string> = {
-  preescolar: "Pre escolar",
-  ninos: "Niño",
-  adolescentes: "Adolescente",
-  universitarios: "Universitario",
-  profesionales: "Profesional",
-  adulto_mayor: "Adulto Mayor",
 };
 
 const defaultImages: Record<string, string> = {
@@ -73,11 +65,21 @@ const getThemeStatus = (
 };
 
 export default function ReadingSelectionPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string }>();
   const { userData, setUserData } = useUserData();
   const [themes, setThemes] = useState<ReadingTheme[]>([]);
   const [progress, setProgress] = useState<ReadingProgress>({ completed: [], inProgress: null, scores: {} });
+
+  const categoryLabels: Record<string, string> = {
+    preescolar: t("age.preescolarShort"),
+    ninos: t("age.ninoShort"),
+    adolescentes: t("age.adolescenteShort"),
+    universitarios: t("age.universitarioShort"),
+    profesionales: t("age.profesionalShort"),
+    adulto_mayor: t("age.adultoMayorShort"),
+  };
   
   const categoria = params.category || userData.childCategory || "preescolar";
 
@@ -325,7 +327,7 @@ export default function ReadingSelectionPage() {
                         </h3>
                         <p className="text-[10px]" style={{ color: "#9ca3af" }}>
                           {index === 0 ? "5 min · Fácil" : index === 1 ? "3-5 min · Medio" : "4 min · Difícil"} · <span style={{ color: "#8a3ffc" }}>
-                            {index % 2 === 0 ? "Comprensión" : "Velocidad"}
+                            {index % 2 === 0 ? t("tests.comprension") : t("tests.velocidad")}
                           </span>
                         </p>
                       </div>

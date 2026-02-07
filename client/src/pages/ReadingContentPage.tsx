@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Clock, BookOpen, HelpCircle, CheckCircle, Share2, MessageCircle, RotateCcw, Home } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
@@ -14,15 +15,6 @@ const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
   audio.volume = 0.6;
   audio.play().catch(() => {});
-};
-
-const categoryLabels: Record<string, string> = {
-  preescolar: "Pre escolar",
-  ninos: "Niño",
-  adolescentes: "Adolescente",
-  universitarios: "Universitario",
-  profesionales: "Profesional",
-  adulto_mayor: "Adulto Mayor",
 };
 
 interface Question {
@@ -70,7 +62,17 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 };
 
 export default function ReadingContentPage() {
+  const { t } = useTranslation();
   const { userData } = useUserData();
+
+  const categoryLabels: Record<string, string> = {
+    preescolar: t("age.preescolarShort"),
+    ninos: t("age.ninoShort"),
+    adolescentes: t("age.adolescenteShort"),
+    universitarios: t("age.universitarioShort"),
+    profesionales: t("age.profesionalShort"),
+    adulto_mayor: t("age.adultoMayorShort"),
+  };
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
@@ -461,7 +463,7 @@ export default function ReadingContentPage() {
                   >
                     {percentage}%
                   </motion.span>
-                  <span className="text-xs font-medium" style={{ color: "#6b7280" }}>Comprensión</span>
+                  <span className="text-xs font-medium" style={{ color: "#6b7280" }}>{t("tests.comprension")}</span>
                 </div>
               </div>
             </motion.div>
@@ -567,8 +569,8 @@ export default function ReadingContentPage() {
         onSubmit={handleUnifiedFormSubmit}
         submitting={submitting}
         title="Test de Lectura"
-        subtitle="Completa tus datos para ver tu resultado"
-        buttonText="Ver mis resultados"
+        subtitle={t("tests.completeData")}
+        buttonText={t("tests.seeResults")}
       />
     );
   }

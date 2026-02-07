@@ -2,6 +2,8 @@ import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
+import { useTranslation } from "react-i18next";
+import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -21,46 +23,46 @@ const playCardSound = () => {
 const ageCategories = [
   { 
     id: "preescolar", 
-    label: "Pre-escolar", 
+    labelKey: "age.preescolar",
     ageRange: "3-5", 
     ageGroup: "preescolar",
-    description: "Juegos cortos, visuales y guiados.",
+    descKey: "age.preescolarDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588294.png",
     iconBg: "linear-gradient(135deg, #FFE082 0%, #FFB300 100%)"
   },
   { 
     id: "ninos", 
-    label: "Niños", 
+    labelKey: "age.ninos",
     ageRange: "6-11", 
     ageGroup: "ninos",
-    description: "Atención, lectura y lógica básica.",
+    descKey: "age.ninosDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/2232/2232688.png",
     iconBg: "linear-gradient(135deg, #CE93D8 0%, #9C27B0 100%)"
   },
   { 
     id: "adolescentes", 
-    label: "Adolescentes", 
+    labelKey: "age.adolescentes",
     ageRange: "12-17", 
     ageGroup: "adolescentes",
-    description: "Velocidad, enfoque y memoria.",
+    descKey: "age.adolescentesDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
     iconBg: "linear-gradient(135deg, #B39DDB 0%, #7E57C2 100%)"
   },
   { 
     id: "profesionales", 
-    label: "Adultos", 
+    labelKey: "age.adultos",
     ageRange: "18-59", 
     ageGroup: "profesionales",
-    description: "Productividad, lectura y claridad mental.",
+    descKey: "age.adultosDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png",
     iconBg: "linear-gradient(135deg, #90CAF9 0%, #1976D2 100%)"
   },
   { 
     id: "adulto_mayor", 
-    label: "Adulto mayor", 
+    labelKey: "age.adultoMayor",
     ageRange: "60+", 
     ageGroup: "adulto_mayor",
-    description: "Memoria, agilidad y prevención cognitiva.",
+    descKey: "age.adultoMayorDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png",
     iconBg: "linear-gradient(135deg, #CE93D8 0%, #8E24AA 100%)"
   },
@@ -77,6 +79,7 @@ interface AgeCardProps {
 }
 
 function AgeCard({ category, index, onClick, editorMode, styles, onElementClick, getEditableClass }: AgeCardProps) {
+  const { t } = useTranslation();
   const cardId = `card-${category.id}`;
   const iconId = `icon-${category.id}`;
   const titleId = `title-${category.id}`;
@@ -135,7 +138,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, onElementClick,
               color: styles[titleId]?.textColor || "#1f2937"
             }}
           >
-            {styles[titleId]?.buttonText || category.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({category.ageRange})</span>
+            {styles[titleId]?.buttonText || t(category.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({category.ageRange})</span>
           </h3>
           <p 
             className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
@@ -145,7 +148,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, onElementClick,
               color: styles[descId]?.textColor || "#9ca3af"
             }}
           >
-            {styles[descId]?.buttonText || category.description}
+            {styles[descId]?.buttonText || t(category.descKey)}
           </p>
         </div>
 
@@ -156,6 +159,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, onElementClick,
 }
 
 export default function AgeSelectionPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ testId: string }>();
   const testId = params.testId || "lectura";
@@ -197,7 +201,7 @@ export default function AgeSelectionPage() {
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const authToken = localStorage.getItem("adminToken");
     if (!authToken) {
-      alert("Debes iniciar sesión como administrador");
+      alert(t("exercises.loginRequired"));
       return;
     }
     try {
@@ -259,7 +263,7 @@ export default function AgeSelectionPage() {
     
     updateUserData({ 
       ageGroup: category.ageGroup, 
-      ageLabel: category.label 
+      ageLabel: t(category.labelKey) 
     });
     
     if (testId === "lectura") {
@@ -271,7 +275,7 @@ export default function AgeSelectionPage() {
     } else {
       setLocation(`/quiz/${category.ageGroup}/${testId}`);
     }
-  }, [testId, setLocation, updateUserData]);
+  }, [testId, setLocation, updateUserData, t]);
 
   const handleNavHome = useCallback(() => {
     playButtonSound();
@@ -336,13 +340,16 @@ export default function AgeSelectionPage() {
           )}
         </div>
         
-        <button 
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-          data-testid="button-menu"
-        >
-          <Menu className="w-6 h-6" strokeWidth={1.5} />
-        </button>
+        <div className="absolute right-5 flex items-center gap-1">
+          <LanguageButton />
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            data-testid="button-menu"
+          >
+            <Menu className="w-6 h-6" strokeWidth={1.5} />
+          </button>
+        </div>
       </header>
 
       <div
@@ -386,7 +393,7 @@ export default function AgeSelectionPage() {
                 fontWeight: 700
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "Selecciona tu etapa"}</span>
+              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || t("age.selectStage")}</span>
             </h1>
             <p 
               className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
@@ -396,7 +403,7 @@ export default function AgeSelectionPage() {
                 color: styles["main-subtitle"]?.textColor || "#9ca3af"
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}</span>
+              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || t("age.adjustDesc")}</span>
             </p>
           </motion.div>
 
@@ -438,7 +445,7 @@ export default function AgeSelectionPage() {
             >
               <Home className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>Inicio</span>
+            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>{t("nav.inicio")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); }}
@@ -447,7 +454,7 @@ export default function AgeSelectionPage() {
             data-testid="nav-entrenar"
           >
             <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>Entrenar</span>
+            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
@@ -456,7 +463,7 @@ export default function AgeSelectionPage() {
             data-testid="nav-progreso"
           >
             <BarChart3 className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
+            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>{t("nav.progreso")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
@@ -465,7 +472,7 @@ export default function AgeSelectionPage() {
             data-testid="nav-mas"
           >
             <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
+            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
           </button>
         </div>
       </nav>

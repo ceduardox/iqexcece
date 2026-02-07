@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { ArrowLeft, Brain, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,19 +23,20 @@ const playButtonSound = () => {
   audio.play().catch(() => {});
 };
 
-const categoryLabels: Record<string, string> = {
-  preescolar: "Pre escolar",
-  ninos: "Niños",
-  adolescentes: "Adolescentes",
-  universitarios: "Adolescentes",
-  profesionales: "Profesionales",
-  adulto_mayor: "Adulto Mayor",
-};
-
 export default function RazonamientoQuizPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string; tema?: string }>();
   const { userData, setUserData } = useUserData();
+
+  const categoryLabels: Record<string, string> = {
+    preescolar: t("age.preescolarShort"),
+    ninos: t("age.ninosShort"),
+    adolescentes: t("age.adolescentesShort"),
+    universitarios: t("age.adolescentesShort"),
+    profesionales: t("age.profesionalesShort"),
+    adulto_mayor: t("age.adultoMayorShort"),
+  };
   
   const categoria = params.category || userData.childCategory || "ninos";
   const tema = parseInt(params.tema || "1");
@@ -167,7 +169,7 @@ export default function RazonamientoQuizPage() {
     setLocation(`/razonamiento-result/${categoria}`);
   };
 
-  const categoryLabel = categoryLabels[categoria] || "Niños";
+  const categoryLabel = categoryLabels[categoria] || t("age.ninosShort");
   const currentQ = questions[currentQuestion];
 
   if (loading) {
@@ -210,9 +212,9 @@ export default function RazonamientoQuizPage() {
         categoria={categoria}
         onSubmit={handleFormSubmit}
         submitting={submitting}
-        title={title || "Razonamiento"}
-        subtitle="Completa tus datos para ver tu resultado."
-        buttonText="Ver mis resultados"
+        title={title || t("tests.razonamiento")}
+        subtitle={t("tests.completeData")}
+        buttonText={t("tests.seeResults")}
       />
     );
   }

@@ -646,7 +646,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                   )}
                 </span>
-                <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || "Email"}</span>
+                <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || t("home.email")}</span>
               </button>
             </div>
           </motion.div>

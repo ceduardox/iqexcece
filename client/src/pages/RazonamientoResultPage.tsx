@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { Home, RotateCcw, Share2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
@@ -16,25 +17,26 @@ const playButtonSound = () => {
   audio.play().catch(() => {});
 };
 
-const categoryLabels: Record<string, string> = {
-  preescolar: "Pre escolar",
-  ninos: "Niños",
-  adolescentes: "Adolescentes",
-  universitarios: "Adolescentes",
-  profesionales: "Profesionales",
-  adulto_mayor: "Adulto Mayor",
-};
-
 export default function RazonamientoResultPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+
+  const categoryLabels: Record<string, string> = {
+    preescolar: t("age.preescolarShort"),
+    ninos: t("age.ninosShort"),
+    adolescentes: t("age.adolescentesShort"),
+    universitarios: t("age.adolescentesShort"),
+    profesionales: t("age.profesionalesShort"),
+    adulto_mayor: t("age.adultoMayorShort"),
+  };
   
   const results = userData.razonamientoResults || { correct: 0, total: 0, time: 0, categoria: "ninos", title: "" };
   const percentage = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
-  const categoryLabel = categoryLabels[results.categoria] || "Niños";
+  const categoryLabel = categoryLabels[results.categoria] || t("age.ninosShort");
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

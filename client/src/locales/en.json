@@ -20,6 +20,7 @@
     "trainingDesc": "Improve your skills",
     "whatsapp": "WhatsApp",
     "email": "Email",
+    "emailAction": "Send us an email",
     "heroTitle1": "Activate",
     "heroTitle2": "Intelligence",
     "heroSubtitle1": "A scientific method of",
@@ -48,6 +49,8 @@
     "razonamientoDesc": "Test your logic and analytical thinking",
     "cerebral": "Brain Test",
     "cerebralDesc": "Exercises to evaluate your cognitive abilities",
+    "heroSubtitle1": "A scientific method of",
+    "heroSubtitle2": "cognitive assessment",
     "heroDesc": "Select a test to begin your diagnosis and discover how to boost your mind with personalized exercises.",
     "start": "Start",
     "continue": "Continue",
@@ -60,7 +63,37 @@
     "next": "Next",
     "previous": "Previous",
     "submit": "Submit",
-    "finish": "Finish"
+    "finish": "Finish",
+    "comprension": "Comprehension",
+    "velocidad": "Speed",
+    "seeResults": "See my results",
+    "completeData": "Complete your details to see your result",
+    "shareResult": "Share result",
+    "sharing": "Sharing..."
+  },
+  "age": {
+    "title": "Select your group",
+    "selectStage": "Select your stage",
+    "adjustDesc": "This way we adjust exercises and difficulty.",
+    "preescolar": "Preschool",
+    "preescolarDesc": "Short, visual and guided games.",
+    "ninos": "Children",
+    "ninosDesc": "Attention, reading and basic logic.",
+    "adolescentes": "Teenagers",
+    "adolescentesDesc": "Speed, focus and memory.",
+    "adultos": "Adults",
+    "adultosDesc": "Productivity, reading and mental clarity.",
+    "adultoMayor": "Elderly",
+    "adultoMayorDesc": "Memory, agility and cognitive prevention.",
+    "preescolarShort": "Preschool",
+    "ninoShort": "Child",
+    "adolescenteShort": "Teenager",
+    "universitarioShort": "University",
+    "profesionalShort": "Professional",
+    "adultoMayorShort": "Elderly",
+    "ninosShort": "Children",
+    "adolescentesShort": "Teenagers",
+    "profesionalesShort": "Professionals"
   },
   "training": {
     "title": "Training",
@@ -68,7 +101,11 @@
     "heroSubtitle1": "Exercises designed to",
     "heroSubtitle2": "boost your mind",
     "heroDesc": "Select a training program to begin and strengthen your cognitive skills with personalized exercises.",
-    "noItems": "No training programs available"
+    "noItems": "No training programs available",
+    "defaultTitle": "Training Programs",
+    "defaultDesc": "Improve your visual perception speed and strengthen your cognitive skills",
+    "preparation": "Preparation",
+    "startSession": "Start session"
   },
   "progress": {
     "title": "My Progress",
@@ -133,6 +170,17 @@
     "obj5Title": "Celebrating Academic Success",
     "obj5Desc": "We recognize and reward excellence in reading, highlighting student achievements in a special event that inspires the entire educational community."
   },
+  "exercises": {
+    "empezar": "Start",
+    "numeros": "Numbers",
+    "letras": "Letters",
+    "romanos": "Roman",
+    "golpeVistaDesc": "Train your visual field to capture more words",
+    "desplazamientoDesc": "Practice continuous reading following the rhythm",
+    "adolescenteSubtitle": "Teenager",
+    "adolescenteDesc": "Text comprehension and analysis",
+    "loginRequired": "You must log in as administrator"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -142,7 +190,10 @@
     "edit": "Edit",
     "close": "Close",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "notFound": "404 Page Not Found",
+    "notFoundDesc": "The page you're looking for doesn't exist.",
+    "goHome": "Go to Home"
   },
   "lang": {
     "es": "Español",
