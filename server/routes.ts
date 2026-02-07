@@ -305,7 +305,8 @@ export async function registerRoutes(
   app.get("/api/instituciones", async (req, res) => {
     const pais = req.query.pais as string | undefined;
     const estado = req.query.estado as string | undefined;
-    const results = await storage.getInstituciones(pais, estado);
+    const tipo = req.query.tipo as string | undefined;
+    const results = await storage.getInstituciones(pais, estado, tipo);
     res.json({ instituciones: results });
   });
 
@@ -317,11 +318,11 @@ export async function registerRoutes(
       return res.status(401).json({ error: "Unauthorized" });
     }
     try {
-      const { nombre, pais, estado } = req.body;
+      const { nombre, pais, estado, tipo } = req.body;
       if (!nombre || !pais || !estado) {
         return res.status(400).json({ error: "nombre, pais, estado required" });
       }
-      const result = await storage.saveInstitucion({ nombre, pais, estado });
+      const result = await storage.saveInstitucion({ nombre, pais, estado, tipo: tipo || "colegio" });
       res.json({ success: true, institucion: result });
     } catch (error) {
       res.status(500).json({ error: "Failed to save" });

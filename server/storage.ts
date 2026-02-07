@@ -93,7 +93,7 @@ export interface IStorage {
   getTrainingStats(sessionId?: string, categoria?: string): Promise<any>;
 
   // Instituciones
-  getInstituciones(pais?: string, estado?: string): Promise<Institucion[]>;
+  getInstituciones(pais?: string, estado?: string, tipo?: string): Promise<Institucion[]>;
   saveInstitucion(inst: InsertInstitucion): Promise<Institucion>;
   deleteInstitucion(id: string): Promise<void>;
 }
@@ -404,7 +404,7 @@ export class MemStorage implements IStorage {
   }
   async getTrainingResults(_sessionId?: string, _categoria?: string): Promise<TrainingResult[]> { return []; }
   async getTrainingStats(_sessionId?: string, _categoria?: string): Promise<any> { return { totalSessions: 0, byType: {}, recentActivity: [], dailyActivity: {} }; }
-  async getInstituciones(_pais?: string, _estado?: string): Promise<Institucion[]> { return []; }
+  async getInstituciones(_pais?: string, _estado?: string, _tipo?: string): Promise<Institucion[]> { return []; }
   async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> { return { id: randomUUID(), ...inst } as Institucion; }
   async deleteInstitucion(_id: string): Promise<void> {}
 }
@@ -993,14 +993,15 @@ export class DatabaseStorage implements IStorage {
     return stats;
   }
 
-  async getInstituciones(pais?: string, estado?: string): Promise<Institucion[]> {
-    let query = db.select().from(instituciones);
-    if (pais && estado) {
-      return query.where(and(eq(instituciones.pais, pais), eq(instituciones.estado, estado)));
-    } else if (pais) {
-      return query.where(eq(instituciones.pais, pais));
+  async getInstituciones(pais?: string, estado?: string, tipo?: string): Promise<Institucion[]> {
+    const conditions = [];
+    if (pais) conditions.push(eq(instituciones.pais, pais));
+    if (estado) conditions.push(eq(instituciones.estado, estado));
+    if (tipo) conditions.push(eq(instituciones.tipo, tipo));
+    if (conditions.length > 0) {
+      return db.select().from(instituciones).where(and(...conditions));
     }
-    return query;
+    return db.select().from(instituciones);
   }
 
   async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> {

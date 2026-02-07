@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Phone, MessageSquare, GraduationCap, Building, Briefcase, MapPin, ChevronDown, AlertCircle } from "lucide-react";
 
-function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, error, testId, pais, estado }: {
-  value: string; onChange: (v: string) => void; placeholder: string; inputClass: string; error?: string; testId: string; pais: string; estado: string;
+function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, error, testId, pais, estado, tipo }: {
+  value: string; onChange: (v: string) => void; placeholder: string; inputClass: string; error?: string; testId: string; pais: string; estado: string; tipo?: string;
 }) {
   const [showList, setShowList] = useState(false);
   const [manualMode, setManualMode] = useState(false);
@@ -12,11 +12,13 @@ function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, err
 
   useEffect(() => {
     if (!pais || !estado) { setAllInst([]); return; }
-    fetch(`/api/instituciones?pais=${pais}&estado=${encodeURIComponent(estado)}`)
+    let url = `/api/instituciones?pais=${pais}&estado=${encodeURIComponent(estado)}`;
+    if (tipo) url += `&tipo=${tipo}`;
+    fetch(url)
       .then(r => r.json())
       .then(d => setAllInst((d.instituciones || []).map((i: any) => i.nombre)))
       .catch(() => setAllInst([]));
-  }, [pais, estado]);
+  }, [pais, estado, tipo]);
 
   useEffect(() => { setManualMode(false); }, [pais, estado]);
 
@@ -399,6 +401,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   testId="input-institucion"
                   pais={formData.pais}
                   estado={formData.estado}
+                  tipo="colegio"
                 />
               </div>
             </>
@@ -433,6 +436,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   testId="input-institucion-colegio"
                   pais={formData.pais}
                   estado={formData.estado}
+                  tipo="colegio"
                 />
               </div>
             </>
@@ -496,6 +500,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                       testId="input-institucion-universidad"
                       pais={formData.pais}
                       estado={formData.estado}
+                      tipo="universidad"
                     />
                   </div>
                 </>

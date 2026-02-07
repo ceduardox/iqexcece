@@ -5506,6 +5506,7 @@ function InstitutionsPanel({ token }: { token: string }) {
   const [pais, setPais] = useState("BO");
   const [estado, setEstado] = useState("");
   const [nombre, setNombre] = useState("");
+  const [tipo, setTipo] = useState("colegio");
   const [instituciones, setInstituciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterPais, setFilterPais] = useState("BO");
@@ -5531,7 +5532,7 @@ function InstitutionsPanel({ token }: { token: string }) {
       await fetch("/api/admin/instituciones", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nombre: nombre.trim(), pais, estado })
+        body: JSON.stringify({ nombre: nombre.trim(), pais, estado, tipo })
       });
       setNombre("");
       fetchInstituciones();
@@ -5563,7 +5564,7 @@ function InstitutionsPanel({ token }: { token: string }) {
       <CardContent className="space-y-6">
         <div className="bg-white/5 rounded-lg p-4 border border-amber-500/20">
           <h3 className="text-amber-400 font-bold mb-3 text-sm">Agregar Institución</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <select
               value={pais}
               onChange={(e) => { setPais(e.target.value); setEstado(""); }}
@@ -5585,9 +5586,18 @@ function InstitutionsPanel({ token }: { token: string }) {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              className="bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
+              data-testid="select-inst-tipo"
+            >
+              <option value="colegio">Colegio</option>
+              <option value="universidad">Universidad</option>
+            </select>
             <input
               type="text"
-              placeholder="Nombre del colegio o universidad"
+              placeholder={tipo === "universidad" ? "Nombre de la universidad" : "Nombre del colegio"}
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
@@ -5640,9 +5650,12 @@ function InstitutionsPanel({ token }: { token: string }) {
             <div className="space-y-1 max-h-96 overflow-y-auto">
               {instituciones.map((inst: any) => (
                 <div key={inst.id} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-2">
-                  <div>
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-white text-sm font-medium">{inst.nombre}</span>
-                    <span className="text-white/40 text-xs ml-2">{inst.estado}, {inst.pais}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${inst.tipo === "universidad" ? "bg-purple-500/30 text-purple-300" : "bg-cyan-500/30 text-cyan-300"}`}>
+                      {inst.tipo === "universidad" ? "Universidad" : "Colegio"}
+                    </span>
+                    <span className="text-white/40 text-xs">{inst.estado}, {inst.pais}</span>
                   </div>
                   <button
                     onClick={() => handleDelete(inst.id)}

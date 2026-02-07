@@ -358,6 +358,7 @@ export const instituciones = pgTable("instituciones", {
   nombre: text("nombre").notNull(),
   pais: text("pais").notNull(),
   estado: text("estado").notNull(),
+  tipo: text("tipo").default("colegio"),
 });
 
 export const insertInstitucionSchema = createInsertSchema(instituciones).omit({ id: true });
