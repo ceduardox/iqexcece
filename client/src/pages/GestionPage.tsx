@@ -4277,40 +4277,72 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       </div>
                       <div>
                         <label className="text-white/60 text-xs">Título</label>
-                        <Input
-                          value={editingPrepPage.titulo || ""}
-                          onChange={(e) => setEditingPrepPage({...editingPrepPage, titulo: e.target.value})}
-                          className="bg-white/10 border-purple-500/30 text-white"
-                          placeholder="Ej: Mejora tu Velocidad de Lectura"
-                        />
+                        <div className="flex gap-1">
+                          <Input
+                            value={editingPrepPage.titulo || ""}
+                            onChange={(e) => setEditingPrepPage({...editingPrepPage, titulo: e.target.value})}
+                            className="bg-white/10 border-purple-500/30 text-white flex-1"
+                            placeholder="Ej: Mejora tu Velocidad de Lectura"
+                          />
+                          {adminEntLang !== 'es' && editingPrepPage.titulo && (
+                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-titulo'}
+                              onClick={() => translateField(editingPrepPage.titulo || "", adminEntLang, 'prep-titulo', (t) => setEditingPrepPage({...editingPrepPage!, titulo: t}))}>
+                              {translatingField === 'prep-titulo' ? '...' : 'IA'}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="text-white/60 text-xs">Subtítulo</label>
-                        <Input
-                          value={editingPrepPage.subtitulo || ""}
-                          onChange={(e) => setEditingPrepPage({...editingPrepPage, subtitulo: e.target.value})}
-                          className="bg-white/10 border-purple-500/30 text-white"
-                          placeholder="Ej: ¡Mejora tu lectura rápidamente!"
-                        />
+                        <div className="flex gap-1">
+                          <Input
+                            value={editingPrepPage.subtitulo || ""}
+                            onChange={(e) => setEditingPrepPage({...editingPrepPage, subtitulo: e.target.value})}
+                            className="bg-white/10 border-purple-500/30 text-white flex-1"
+                            placeholder="Ej: ¡Mejora tu lectura rápidamente!"
+                          />
+                          {adminEntLang !== 'es' && editingPrepPage.subtitulo && (
+                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-subtitulo'}
+                              onClick={() => translateField(editingPrepPage.subtitulo || "", adminEntLang, 'prep-subtitulo', (t) => setEditingPrepPage({...editingPrepPage!, subtitulo: t}))}>
+                              {translatingField === 'prep-subtitulo' ? '...' : 'IA'}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div className="md:col-span-2">
                         <label className="text-white/60 text-xs">Instrucciones</label>
-                        <textarea
-                          value={editingPrepPage.instrucciones || ""}
-                          onChange={(e) => setEditingPrepPage({...editingPrepPage, instrucciones: e.target.value})}
-                          className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2"
-                          placeholder="Ej: Observa las palabras sin leer en voz alta..."
-                          rows={2}
-                        />
+                        <div className="flex gap-1">
+                          <textarea
+                            value={editingPrepPage.instrucciones || ""}
+                            onChange={(e) => setEditingPrepPage({...editingPrepPage, instrucciones: e.target.value})}
+                            className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 flex-1"
+                            placeholder="Ej: Observa las palabras sin leer en voz alta..."
+                            rows={2}
+                          />
+                          {adminEntLang !== 'es' && editingPrepPage.instrucciones && (
+                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'prep-instrucciones'}
+                              onClick={() => translateField(editingPrepPage.instrucciones || "", adminEntLang, 'prep-instrucciones', (t) => setEditingPrepPage({...editingPrepPage!, instrucciones: t}))}>
+                              {translatingField === 'prep-instrucciones' ? '...' : 'IA'}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="text-white/60 text-xs">Texto del Botón</label>
-                        <Input
-                          value={editingPrepPage.textoBoton || ""}
-                          onChange={(e) => setEditingPrepPage({...editingPrepPage, textoBoton: e.target.value})}
-                          className="bg-white/10 border-purple-500/30 text-white"
-                          placeholder="Empezar"
-                        />
+                        <div className="flex gap-1">
+                          <Input
+                            value={editingPrepPage.textoBoton || ""}
+                            onChange={(e) => setEditingPrepPage({...editingPrepPage, textoBoton: e.target.value})}
+                            className="bg-white/10 border-purple-500/30 text-white flex-1"
+                            placeholder="Empezar"
+                          />
+                          {adminEntLang !== 'es' && editingPrepPage.textoBoton && (
+                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-textoBoton'}
+                              onClick={() => translateField(editingPrepPage.textoBoton || "", adminEntLang, 'prep-textoBoton', (t) => setEditingPrepPage({...editingPrepPage!, textoBoton: t}))}>
+                              {translatingField === 'prep-textoBoton' ? '...' : 'IA'}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
@@ -4790,60 +4822,99 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   </div>
                                   <div>
                                     <label className="text-white/60 text-xs mb-1 block">Título principal</label>
-                                    <textarea
-                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "") : "Identifica rápidamente\nNúmeros y Letras"}
-                                      onChange={(e) => {
-                                        setNumerosIntroData(prev => ({
-                                          ...prev,
-                                          entrenamientoItemId: item.id,
-                                          titulo: e.target.value,
-                                          descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
-                                          subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
-                                          imagenCabecera: prev?.imagenCabecera || ""
-                                        }));
-                                      }}
-                                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
-                                      placeholder="Ej: Identifica rápidamente\nNúmeros y Letras"
-                                      rows={2}
-                                    />
+                                    <div className="flex gap-1">
+                                      <textarea
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "") : "Identifica rápidamente\nNúmeros y Letras"}
+                                        onChange={(e) => {
+                                          setNumerosIntroData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: e.target.value,
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                            imagenCabecera: prev?.imagenCabecera || ""
+                                          }));
+                                        }}
+                                        className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm flex-1"
+                                        placeholder="Ej: Identifica rápidamente\nNúmeros y Letras"
+                                        rows={2}
+                                      />
+                                      {adminEntLang !== 'es' && (
+                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0 self-start" disabled={translatingField === `numIntro-titulo-${idx}`}
+                                          onClick={() => {
+                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "Identifica rápidamente\nNúmeros y Letras") : "Identifica rápidamente\nNúmeros y Letras";
+                                            translateField(src, adminEntLang, `numIntro-titulo-${idx}`, (t) => {
+                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: t, descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!", subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande", imagenCabecera: prev?.imagenCabecera || "" }));
+                                            });
+                                          }}>
+                                          {translatingField === `numIntro-titulo-${idx}` ? '...' : 'IA'}
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
-                                    <Input
-                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "") : "¡Haz más fuerte tu vista jugando!"}
-                                      onChange={(e) => {
-                                        setNumerosIntroData(prev => ({
-                                          ...prev,
-                                          entrenamientoItemId: item.id,
-                                          titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
-                                          descripcion: e.target.value,
-                                          subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
-                                          imagenCabecera: prev?.imagenCabecera || ""
-                                        }));
-                                      }}
-                                      className="bg-white/10 border-teal-500/30 text-white"
-                                      placeholder="Ej: ¡Haz más fuerte tu vista jugando!"
-                                    />
+                                    <div className="flex gap-1">
+                                      <Input
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "") : "¡Haz más fuerte tu vista jugando!"}
+                                        onChange={(e) => {
+                                          setNumerosIntroData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                            descripcion: e.target.value,
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
+                                            imagenCabecera: prev?.imagenCabecera || ""
+                                          }));
+                                        }}
+                                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                                        placeholder="Ej: ¡Haz más fuerte tu vista jugando!"
+                                      />
+                                      {adminEntLang !== 'es' && (
+                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0" disabled={translatingField === `numIntro-desc-${idx}`}
+                                          onClick={() => {
+                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "¡Haz más fuerte tu vista jugando!") : "¡Haz más fuerte tu vista jugando!";
+                                            translateField(src, adminEntLang, `numIntro-desc-${idx}`, (t) => {
+                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras", descripcion: t, subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande", imagenCabecera: prev?.imagenCabecera || "" }));
+                                            });
+                                          }}>
+                                          {translatingField === `numIntro-desc-${idx}` ? '...' : 'IA'}
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                   <div>
                                     <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
-                                    <Input
-                                      value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "") : "Identifica el número o letra para ver el mundo más grande"}
-                                      onChange={(e) => {
-                                        setNumerosIntroData(prev => ({
-                                          ...prev,
-                                          entrenamientoItemId: item.id,
-                                          titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
-                                          descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
-                                          subtitulo: e.target.value,
-                                          imagenCabecera: prev?.imagenCabecera || ""
-                                        }));
-                                      }}
-                                      className="bg-white/10 border-teal-500/30 text-white"
-                                      placeholder="Ej: Identifica el número o letra..."
-                                    />
+                                    <div className="flex gap-1">
+                                      <Input
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "") : "Identifica el número o letra para ver el mundo más grande"}
+                                        onChange={(e) => {
+                                          setNumerosIntroData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                            subtitulo: e.target.value,
+                                            imagenCabecera: prev?.imagenCabecera || ""
+                                          }));
+                                        }}
+                                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                                        placeholder="Ej: Identifica el número o letra..."
+                                      />
+                                      {adminEntLang !== 'es' && (
+                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0" disabled={translatingField === `numIntro-sub-${idx}`}
+                                          onClick={() => {
+                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "Identifica el número o letra para ver el mundo más grande") : "Identifica el número o letra para ver el mundo más grande";
+                                            translateField(src, adminEntLang, `numIntro-sub-${idx}`, (t) => {
+                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras", descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!", subtitulo: t, imagenCabecera: prev?.imagenCabecera || "" }));
+                                            });
+                                          }}>
+                                          {translatingField === `numIntro-sub-${idx}` ? '...' : 'IA'}
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="flex justify-end pt-2">
                                     <Button
@@ -4973,21 +5044,38 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   </div>
                                   <div>
                                     <label className="text-white/60 text-xs mb-1 block">Título</label>
-                                    <Input
-                                      value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "") : "Acelera al máximo tu Lectura"}
-                                      onChange={(e) => {
-                                        setAceleracionData(prev => ({
-                                          ...prev,
-                                          entrenamientoItemId: item.id,
-                                          titulo: e.target.value,
-                                          velocidadPPM: prev?.velocidadPPM || 200,
-                                          modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
-                                          imagenCabecera: prev?.imagenCabecera || ""
-                                        }));
-                                      }}
-                                      className="bg-white/10 border-cyan-500/30 text-white text-sm"
-                                      placeholder="Acelera al máximo tu Lectura"
-                                    />
+                                    <div className="flex gap-1">
+                                      <Input
+                                        value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "") : "Acelera al máximo tu Lectura"}
+                                        onChange={(e) => {
+                                          setAceleracionData(prev => ({
+                                            ...prev,
+                                            entrenamientoItemId: item.id,
+                                            titulo: e.target.value,
+                                            velocidadPPM: prev?.velocidadPPM || 200,
+                                            modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                            imagenCabecera: prev?.imagenCabecera || ""
+                                          }));
+                                        }}
+                                        className="bg-white/10 border-cyan-500/30 text-white text-sm flex-1"
+                                        placeholder="Acelera al máximo tu Lectura"
+                                      />
+                                      {adminEntLang !== 'es' && (
+                                        <Button size="sm" variant="outline" className="border-cyan-500/50 text-cyan-300 shrink-0" disabled={translatingField === `acel-titulo-${idx}`}
+                                          onClick={() => translateField(aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "Acelera al máximo tu Lectura") : "Acelera al máximo tu Lectura", adminEntLang, `acel-titulo-${idx}`, (t) => {
+                                            setAceleracionData(prev => ({
+                                              ...prev,
+                                              entrenamientoItemId: item.id,
+                                              titulo: t,
+                                              velocidadPPM: prev?.velocidadPPM || 200,
+                                              modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
+                                              imagenCabecera: prev?.imagenCabecera || ""
+                                            }));
+                                          })}>
+                                          {translatingField === `acel-titulo-${idx}` ? '...' : 'IA'}
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="space-y-3">
