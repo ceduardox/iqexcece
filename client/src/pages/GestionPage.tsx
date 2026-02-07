@@ -146,6 +146,7 @@ export default function GestionPage() {
   });
   const [esCardRef, setEsCardRef] = useState({ title: "", description: "", buttonText: "" });
   const [esPageRef, setEsPageRef] = useState({ bannerText: "", pageTitle: "", pageDescription: "" });
+  const [esItemsRef, setEsItemsRef] = useState<any[]>([]);
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
@@ -1170,6 +1171,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             const esItems = await results[7].json();
             setEsCardRef({ title: esCard.card?.title || "", description: esCard.card?.description || "", buttonText: esCard.card?.buttonText || "" });
             setEsPageRef({ bannerText: esPage.page?.bannerText || "", pageTitle: esPage.page?.pageTitle || "", pageDescription: esPage.page?.pageDescription || "" });
+            setEsItemsRef(esItems.items || []);
             const hasLangCard = cardData.card?.lang === langParam;
             const hasLangPage = pageData.card?.lang === langParam;
             setEntrenamientoCard(hasLangCard ? cardData.card : { categoria: cat, title: "", description: "", buttonText: "", imageUrl: esCard.card?.imageUrl || "" });
@@ -1178,6 +1180,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           } else {
             setEsCardRef({ title: "", description: "", buttonText: "" });
             setEsPageRef({ bannerText: "", pageTitle: "", pageDescription: "" });
+            setEsItemsRef([]);
             if (cardData.card) setEntrenamientoCard(cardData.card);
             if (pageData.page) setEntrenamientoPage(pageData.page);
             setEntrenamientoItems(itemsData.items || []);
@@ -4666,30 +4669,46 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
                           <div className="flex-1 space-y-3">
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Título de la sección</label>
-                              <Input
-                                value={item.title}
-                                onChange={(e) => {
-                                  const updated = [...entrenamientoItems];
-                                  updated[idx].title = e.target.value;
-                                  setEntrenamientoItems(updated);
-                                }}
-                                className="bg-white/10 border-teal-500/30 text-white font-semibold"
-                                placeholder="Ej: Mejora tu Velocidad de Lectura"
-                              />
+                              <label className="text-white/60 text-xs mb-1 block">Título de la sección {adminEntLang !== 'es' && esItemsRef[idx]?.title && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].title})</span>}</label>
+                              <div className="flex gap-1">
+                                <Input
+                                  value={item.title}
+                                  onChange={(e) => {
+                                    const updated = [...entrenamientoItems];
+                                    updated[idx].title = e.target.value;
+                                    setEntrenamientoItems(updated);
+                                  }}
+                                  className="bg-white/10 border-teal-500/30 text-white font-semibold flex-1"
+                                  placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.title ? esItemsRef[idx].title : "Ej: Mejora tu Velocidad de Lectura"}
+                                />
+                                {adminEntLang !== 'es' && esItemsRef[idx]?.title && (
+                                  <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-title-${idx}`}
+                                    onClick={() => translateField(esItemsRef[idx].title, adminEntLang, `item-title-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].title = t; setEntrenamientoItems(updated); })}>
+                                    {translatingField === `item-title-${idx}` ? '...' : 'IA'}
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Descripción breve</label>
-                              <Input
-                                value={item.description || ""}
-                                onChange={(e) => {
-                                  const updated = [...entrenamientoItems];
-                                  updated[idx].description = e.target.value;
-                                  setEntrenamientoItems(updated);
-                                }}
-                                className="bg-white/10 border-teal-500/30 text-white/80"
-                                placeholder="Ej: Para procesar palabras rápidamente"
-                              />
+                              <label className="text-white/60 text-xs mb-1 block">Descripción breve {adminEntLang !== 'es' && esItemsRef[idx]?.description && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].description.substring(0, 40)}...)</span>}</label>
+                              <div className="flex gap-1">
+                                <Input
+                                  value={item.description || ""}
+                                  onChange={(e) => {
+                                    const updated = [...entrenamientoItems];
+                                    updated[idx].description = e.target.value;
+                                    setEntrenamientoItems(updated);
+                                  }}
+                                  className="bg-white/10 border-teal-500/30 text-white/80 flex-1"
+                                  placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.description ? esItemsRef[idx].description : "Ej: Para procesar palabras rápidamente"}
+                                />
+                                {adminEntLang !== 'es' && esItemsRef[idx]?.description && (
+                                  <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-desc-${idx}`}
+                                    onClick={() => translateField(esItemsRef[idx].description, adminEntLang, `item-desc-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].description = t; setEntrenamientoItems(updated); })}>
+                                    {translatingField === `item-desc-${idx}` ? '...' : 'IA'}
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                             <div>
                               <label className="text-white/60 text-xs mb-1 block">Tipo de ejercicio</label>
@@ -5133,59 +5152,91 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   )}
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Título</label>
-                                  <Input
-                                    value={item.prepTitle || ""}
-                                    onChange={(e) => {
-                                      const updated = [...entrenamientoItems];
-                                      updated[idx].prepTitle = e.target.value;
-                                      setEntrenamientoItems(updated);
-                                    }}
-                                    className="bg-white/10 border-purple-500/30 text-white"
-                                    placeholder="Ej: Mejora tu Velocidad de Lectura"
-                                  />
+                                  <label className="text-white/60 text-xs mb-1 block">Título {adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepTitle})</span>}</label>
+                                  <div className="flex gap-1">
+                                    <Input
+                                      value={item.prepTitle || ""}
+                                      onChange={(e) => {
+                                        const updated = [...entrenamientoItems];
+                                        updated[idx].prepTitle = e.target.value;
+                                        setEntrenamientoItems(updated);
+                                      }}
+                                      className="bg-white/10 border-purple-500/30 text-white flex-1"
+                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle ? esItemsRef[idx].prepTitle : "Ej: Mejora tu Velocidad de Lectura"}
+                                    />
+                                    {adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle && (
+                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepTitle-${idx}`}
+                                        onClick={() => translateField(esItemsRef[idx].prepTitle, adminEntLang, `item-prepTitle-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepTitle = t; setEntrenamientoItems(updated); })}>
+                                        {translatingField === `item-prepTitle-${idx}` ? '...' : 'IA'}
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
-                                  <Input
-                                    value={item.prepSubtitle || ""}
-                                    onChange={(e) => {
-                                      const updated = [...entrenamientoItems];
-                                      updated[idx].prepSubtitle = e.target.value;
-                                      setEntrenamientoItems(updated);
-                                    }}
-                                    className="bg-white/10 border-purple-500/30 text-white"
-                                    placeholder="Ej: ¡Mejora tu lectura rápidamente!"
-                                  />
+                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado {adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepSubtitle})</span>}</label>
+                                  <div className="flex gap-1">
+                                    <Input
+                                      value={item.prepSubtitle || ""}
+                                      onChange={(e) => {
+                                        const updated = [...entrenamientoItems];
+                                        updated[idx].prepSubtitle = e.target.value;
+                                        setEntrenamientoItems(updated);
+                                      }}
+                                      className="bg-white/10 border-purple-500/30 text-white flex-1"
+                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle ? esItemsRef[idx].prepSubtitle : "Ej: ¡Mejora tu lectura rápidamente!"}
+                                    />
+                                    {adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle && (
+                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepSub-${idx}`}
+                                        onClick={() => translateField(esItemsRef[idx].prepSubtitle, adminEntLang, `item-prepSub-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepSubtitle = t; setEntrenamientoItems(updated); })}>
+                                        {translatingField === `item-prepSub-${idx}` ? '...' : 'IA'}
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
-                                  <textarea
-                                    value={item.prepInstructions || ""}
-                                    onChange={(e) => {
-                                      const updated = [...entrenamientoItems];
-                                      updated[idx].prepInstructions = e.target.value;
-                                      setEntrenamientoItems(updated);
-                                    }}
-                                    className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
-                                    placeholder="Ej: Observa las palabras sin leer en voz alta..."
-                                    rows={2}
-                                  />
+                                  <label className="text-white/60 text-xs mb-1 block">Instrucciones {adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepInstructions.substring(0, 30)}...)</span>}</label>
+                                  <div className="flex gap-1">
+                                    <textarea
+                                      value={item.prepInstructions || ""}
+                                      onChange={(e) => {
+                                        const updated = [...entrenamientoItems];
+                                        updated[idx].prepInstructions = e.target.value;
+                                        setEntrenamientoItems(updated);
+                                      }}
+                                      className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm flex-1"
+                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions ? esItemsRef[idx].prepInstructions : "Ej: Observa las palabras sin leer en voz alta..."}
+                                      rows={2}
+                                    />
+                                    {adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions && (
+                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === `item-prepInst-${idx}`}
+                                        onClick={() => translateField(esItemsRef[idx].prepInstructions, adminEntLang, `item-prepInst-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepInstructions = t; setEntrenamientoItems(updated); })}>
+                                        {translatingField === `item-prepInst-${idx}` ? '...' : 'IA'}
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón</label>
-                                  <Input
-                                    value={item.prepButtonText || ""}
-                                    onChange={(e) => {
-                                      const updated = [...entrenamientoItems];
-                                      updated[idx].prepButtonText = e.target.value;
-                                      setEntrenamientoItems(updated);
-                                    }}
-                                    className="bg-white/10 border-purple-500/30 text-white"
-                                    placeholder="Empezar"
-                                  />
+                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón {adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepButtonText})</span>}</label>
+                                  <div className="flex gap-1">
+                                    <Input
+                                      value={item.prepButtonText || ""}
+                                      onChange={(e) => {
+                                        const updated = [...entrenamientoItems];
+                                        updated[idx].prepButtonText = e.target.value;
+                                        setEntrenamientoItems(updated);
+                                      }}
+                                      className="bg-white/10 border-purple-500/30 text-white flex-1"
+                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText ? esItemsRef[idx].prepButtonText : "Empezar"}
+                                    />
+                                    {adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText && (
+                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepBtn-${idx}`}
+                                        onClick={() => translateField(esItemsRef[idx].prepButtonText, adminEntLang, `item-prepBtn-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepButtonText = t; setEntrenamientoItems(updated); })}>
+                                        {translatingField === `item-prepBtn-${idx}` ? '...' : 'IA'}
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
