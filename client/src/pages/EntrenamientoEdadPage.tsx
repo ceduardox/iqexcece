@@ -67,6 +67,8 @@ const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-6
 
 export default function EntrenamientoEdadPage() {
   const [, setLocation] = useLocation();
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const params = useParams<{ itemId: string }>();
   const itemId = params.itemId;
   
@@ -84,7 +86,7 @@ export default function EntrenamientoEdadPage() {
     
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/entrenamiento-edad")
+    fetch(`/api/page-styles/entrenamiento-edad?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -103,7 +105,7 @@ export default function EntrenamientoEdadPage() {
       });
     
     return () => clearTimeout(timeout);
-  }, []);
+  }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const authToken = localStorage.getItem("adminToken");
@@ -119,7 +121,7 @@ export default function EntrenamientoEdadPage() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`
         },
-        body: JSON.stringify({ pageName: "entrenamiento-edad", styles: JSON.stringify(newStyles) })
+        body: JSON.stringify({ pageName: "entrenamiento-edad", styles: JSON.stringify(newStyles), lang })
       });
     } catch (error) {
       console.error("Error saving styles:", error);

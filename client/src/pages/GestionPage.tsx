@@ -132,6 +132,7 @@ export default function GestionPage() {
   
   // Entrenamiento state
   const [entrenamientoCategory, setEntrenamientoCategory] = useState<"ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("ninos");
+  const [adminEntLang, setAdminEntLang] = useState<string>("es");
   const [entrenamientoCard, setEntrenamientoCard] = useState({
     imageUrl: "",
     title: "Entrenamiento",
@@ -1116,11 +1117,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       const loadEntrenamientoData = async () => {
         const token = localStorage.getItem("admin_token") || "";
         const cat = entrenamientoCategory;
+        const langParam = adminEntLang;
         try {
           const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
-            fetch(`/api/entrenamiento/${cat}/card`),
-            fetch(`/api/entrenamiento/${cat}/page`),
-            fetch(`/api/entrenamiento/${cat}/items`),
+            fetch(`/api/entrenamiento/${cat}/card?lang=${langParam}`),
+            fetch(`/api/entrenamiento/${cat}/page?lang=${langParam}`),
+            fetch(`/api/entrenamiento/${cat}/items?lang=${langParam}`),
             fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
             fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
           ]);
@@ -1165,7 +1167,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadEntrenamientoData();
     }
-  }, [isLoggedIn, activeTab, entrenamientoCategory]);
+  }, [isLoggedIn, activeTab, entrenamientoCategory, adminEntLang]);
 
   const getAgeLabel = (age: string | null) => {
     const labels: Record<string, string> = {
@@ -4091,9 +4093,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       setEntrenamientoCategory(cat);
                       try {
                         const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
-                          fetch(`/api/entrenamiento/${cat}/card`),
-                          fetch(`/api/entrenamiento/${cat}/page`),
-                          fetch(`/api/entrenamiento/${cat}/items`),
+                          fetch(`/api/entrenamiento/${cat}/card?lang=${adminEntLang}`),
+                          fetch(`/api/entrenamiento/${cat}/page?lang=${adminEntLang}`),
+                          fetch(`/api/entrenamiento/${cat}/items?lang=${adminEntLang}`),
                           fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
                           fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
                         ]);
@@ -4114,6 +4116,21 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     className={entrenamientoCategory === cat ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
                   >
                     {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-white/60 text-sm">Idioma:</span>
+                {["es", "en", "pt"].map((l) => (
+                  <Button
+                    key={l}
+                    onClick={() => setAdminEntLang(l)}
+                    variant={adminEntLang === l ? "default" : "outline"}
+                    size="sm"
+                    className={adminEntLang === l ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                  >
+                    {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
                   </Button>
                 ))}
               </div>
@@ -4360,7 +4377,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         const res = await adminFetch("/api/admin/entrenamiento/card", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory })
+                          body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory, lang: adminEntLang })
                         });
                         if (res.ok) {
                           alert("Card guardado");
@@ -4409,7 +4426,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         const res = await adminFetch("/api/admin/entrenamiento/page", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory })
+                          body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory, lang: adminEntLang })
                         });
                         if (res.ok) {
                           alert("Página guardada");
@@ -4440,6 +4457,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
                             categoria: entrenamientoCategory,
+                            lang: adminEntLang,
                             title: "Nueva Sección",
                             description: "Descripción de la sección",
                             imageUrl: "",

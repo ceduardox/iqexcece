@@ -188,7 +188,8 @@ function TestCard({
 }
 
 export default function TestsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const [, setLocation] = useLocation();
   const { updateUserData } = useUserData();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
@@ -212,7 +213,7 @@ export default function TestsPage() {
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/tests-page")
+    fetch(`/api/page-styles/tests-page?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -231,7 +232,7 @@ export default function TestsPage() {
       });
     
     return () => clearTimeout(timeout);
-  }, []);
+  }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -246,13 +247,14 @@ export default function TestsPage() {
         },
         body: JSON.stringify({
           pageName: "tests-page",
-          styles: JSON.stringify(newStyles)
+          styles: JSON.stringify(newStyles),
+          lang
         })
       });
     } catch (error) {
       console.error("Error saving styles:", error);
     }
-  }, []);
+  }, [lang]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;

@@ -159,7 +159,8 @@ function AgeCard({ category, index, onClick, editorMode, styles, onElementClick,
 }
 
 export default function AgeSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const [, setLocation] = useLocation();
   const params = useParams<{ testId: string }>();
   const testId = params.testId || "lectura";
@@ -177,7 +178,7 @@ export default function AgeSelectionPage() {
     
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/age-selection")
+    fetch(`/api/page-styles/age-selection?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -196,7 +197,7 @@ export default function AgeSelectionPage() {
       });
     
     return () => clearTimeout(timeout);
-  }, []);
+  }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const authToken = localStorage.getItem("adminToken");
@@ -211,7 +212,7 @@ export default function AgeSelectionPage() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`
         },
-        body: JSON.stringify({ pageName: "age-selection", styles: JSON.stringify(newStyles) })
+        body: JSON.stringify({ pageName: "age-selection", styles: JSON.stringify(newStyles), lang })
       });
     } catch (e) {
       console.error("Error saving styles:", e);
