@@ -648,12 +648,23 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                     data={chartPieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
+                    innerRadius={40}
+                    outerRadius={70}
                     paddingAngle={3}
                     dataKey="value"
                     nameKey="name"
-                    label={({ name, value }) => `${name}: ${value}`}
+                    label={({ name, value, cx, cy, midAngle, outerRadius: oR }) => {
+                      const RADIAN = Math.PI / 180;
+                      const radius = oR + 18;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      const short = name.length > 12 ? name.slice(0, 10) + ".." : name;
+                      return (
+                        <text x={x} y={y} fill="#ffffffcc" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={9}>
+                          {`${short}: ${value}`}
+                        </text>
+                      );
+                    }}
                   >
                     {chartPieData.map((_entry, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -669,34 +680,34 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
             </div>
 
             <div className="md:col-span-2 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl p-4 border border-cyan-500/20">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                <div className="bg-black/30 rounded-lg p-3">
-                  <div className="text-cyan-400 font-bold text-2xl">
+              <div className="grid grid-cols-4 gap-2 md:gap-3 text-center">
+                <div className="bg-black/30 rounded-lg p-2 md:p-3">
+                  <div className="text-cyan-400 font-bold text-lg md:text-2xl">
                     {filteredResults.length > 0
                       ? Math.round(filteredResults.reduce((s, r) => s + (r.comprension || 0), 0) / filteredResults.filter(r => r.comprension !== null).length || 0)
                       : 0}%
                   </div>
-                  <div className="text-white/50 text-xs">Comprensión Prom.</div>
+                  <div className="text-white/50 text-[10px] md:text-xs">Comprensión</div>
                 </div>
-                <div className="bg-black/30 rounded-lg p-3">
-                  <div className="text-purple-400 font-bold text-2xl">
+                <div className="bg-black/30 rounded-lg p-2 md:p-3">
+                  <div className="text-purple-400 font-bold text-lg md:text-2xl">
                     {filteredResults.length > 0
                       ? Math.round(filteredResults.reduce((s, r) => s + (r.velocidadLectura || 0), 0) / filteredResults.filter(r => r.velocidadLectura !== null).length || 0)
                       : 0}
                   </div>
-                  <div className="text-white/50 text-xs">Velocidad Prom. (p/m)</div>
+                  <div className="text-white/50 text-[10px] md:text-xs">Velocidad</div>
                 </div>
-                <div className="bg-black/30 rounded-lg p-3">
-                  <div className="text-green-400 font-bold text-2xl">
+                <div className="bg-black/30 rounded-lg p-2 md:p-3">
+                  <div className="text-green-400 font-bold text-lg md:text-2xl">
                     {filteredResults.filter(r => r.categoriaLector?.includes("COMPETENTE")).length}
                   </div>
-                  <div className="text-white/50 text-xs">Competentes</div>
+                  <div className="text-white/50 text-[10px] md:text-xs">Competentes</div>
                 </div>
-                <div className="bg-black/30 rounded-lg p-3">
-                  <div className="text-red-400 font-bold text-2xl">
+                <div className="bg-black/30 rounded-lg p-2 md:p-3">
+                  <div className="text-red-400 font-bold text-lg md:text-2xl">
                     {filteredResults.filter(r => r.categoriaLector?.includes("SEVERA")).length}
                   </div>
-                  <div className="text-white/50 text-xs">Dificultad Severa</div>
+                  <div className="text-white/50 text-[10px] md:text-xs">Dif. Severa</div>
                 </div>
               </div>
             </div>
