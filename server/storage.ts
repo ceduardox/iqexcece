@@ -23,8 +23,8 @@ export interface IStorage {
   getAllQuizResults(): Promise<QuizResult[]>;
   
   // Reading content
-  getReadingContent(categoria: string, temaNumero?: number): Promise<ReadingContent | undefined>;
-  getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]>;
+  getReadingContent(categoria: string, temaNumero?: number, lang?: string): Promise<ReadingContent | undefined>;
+  getReadingContentsByCategory(categoria: string, lang?: string): Promise<ReadingContent[]>;
   saveReadingContent(content: InsertReadingContent): Promise<ReadingContent>;
   
   // Razonamiento content
@@ -242,25 +242,27 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async getReadingContent(categoria: string, temaNumero: number = 1): Promise<ReadingContent | undefined> {
-    const key = `${categoria}_${temaNumero}`;
+  async getReadingContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<ReadingContent | undefined> {
+    const key = `${categoria}_${temaNumero}_${lang}`;
     return this.readingContents.get(key);
   }
 
-  async getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]> {
+  async getReadingContentsByCategory(categoria: string, lang: string = "es"): Promise<ReadingContent[]> {
     return Array.from(this.readingContents.values())
-      .filter(c => c.categoria === categoria)
+      .filter(c => c.categoria === categoria && (c as any).lang === lang)
       .sort((a, b) => (a.temaNumero || 1) - (b.temaNumero || 1));
   }
 
   async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
     const temaNumero = insertContent.temaNumero || 1;
-    const key = `${insertContent.categoria}_${temaNumero}`;
+    const lang = (insertContent as any).lang || "es";
+    const key = `${insertContent.categoria}_${temaNumero}_${lang}`;
     const existing = this.readingContents.get(key);
     const content: ReadingContent = {
       id: existing?.id || randomUUID(),
       categoria: insertContent.categoria,
       temaNumero: temaNumero,
+      lang: lang,
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,
@@ -540,24 +542,29 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
   }
 
-  async getReadingContent(categoria: string, temaNumero: number = 1): Promise<ReadingContent | undefined> {
+  async getReadingContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<ReadingContent | undefined> {
     const [content] = await db.select().from(readingContents)
       .where(and(
         eq(readingContents.categoria, categoria),
-        eq(readingContents.temaNumero, temaNumero)
+        eq(readingContents.temaNumero, temaNumero),
+        eq(readingContents.lang, lang)
       ));
     return content;
   }
 
-  async getReadingContentsByCategory(categoria: string): Promise<ReadingContent[]> {
+  async getReadingContentsByCategory(categoria: string, lang: string = "es"): Promise<ReadingContent[]> {
     return db.select().from(readingContents)
-      .where(eq(readingContents.categoria, categoria))
+      .where(and(
+        eq(readingContents.categoria, categoria),
+        eq(readingContents.lang, lang)
+      ))
       .orderBy(readingContents.temaNumero);
   }
 
   async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
     const temaNumero = insertContent.temaNumero || 1;
-    const existing = await this.getReadingContent(insertContent.categoria, temaNumero);
+    const lang = (insertContent as any).lang || "es";
+    const existing = await this.getReadingContent(insertContent.categoria, temaNumero, lang);
     
     if (existing) {
       const [updated] = await db.update(readingContents)
@@ -573,7 +580,8 @@ export class DatabaseStorage implements IStorage {
         })
         .where(and(
           eq(readingContents.categoria, insertContent.categoria),
-          eq(readingContents.temaNumero, temaNumero)
+          eq(readingContents.temaNumero, temaNumero),
+          eq(readingContents.lang, lang)
         ))
         .returning();
       return updated;
@@ -582,6 +590,7 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db.insert(readingContents).values({
       categoria: insertContent.categoria,
       temaNumero: temaNumero,
+      lang: lang,
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,

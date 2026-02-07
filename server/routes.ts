@@ -348,7 +348,11 @@ export async function registerRoutes(
   app.get("/api/reading/:categoria", async (req, res) => {
     const categoria = req.params.categoria;
     const temaNumero = parseInt(req.query.tema as string) || 1;
-    const savedContent = await storage.getReadingContent(categoria, temaNumero);
+    const lang = (req.query.lang as string) || "es";
+    let savedContent = await storage.getReadingContent(categoria, temaNumero, lang);
+    if (!savedContent && lang !== "es") {
+      savedContent = await storage.getReadingContent(categoria, temaNumero, "es");
+    }
     const defaultContent = defaultReadingContent[categoria]?.[temaNumero] || null;
     const content = savedContent || defaultContent;
     if (!content) {

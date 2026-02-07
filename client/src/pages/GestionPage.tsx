@@ -68,6 +68,7 @@ export default function GestionPage() {
   const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
+  const [contentLang, setContentLang] = useState<string>("es");
   const [sessionPage, setSessionPage] = useState(1);
   const SESSIONS_PER_PAGE = 20;
   
@@ -557,6 +558,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         body: JSON.stringify({
           categoria: contentCategory,
           temaNumero: selectedTema,
+          lang: contentLang,
           title: currentEditContent.title,
           content: currentEditContent.content,
           imageUrl: currentEditContent.imageUrl,
@@ -689,7 +691,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
   };
 
-  const loadContentForTema = async (categoria: string, tema: number) => {
+  const loadContentForTema = async (categoria: string, tema: number, lang: string = "es") => {
     const emptyContent = {
       title: "",
       content: "",
@@ -712,7 +714,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     };
     
     try {
-      const res = await fetch(`/api/reading/${categoria}?tema=${tema}`);
+      const res = await fetch(`/api/reading/${categoria}?tema=${tema}&lang=${lang}`);
       if (!res.ok) {
         setContentByCategory(emptyContent);
         return;
@@ -814,9 +816,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   useEffect(() => {
     if (isLoggedIn && contentType === "lectura") {
-      loadContentForTema(contentCategory, selectedTema);
+      loadContentForTema(contentCategory, selectedTema, contentLang);
     }
-  }, [isLoggedIn, contentCategory, selectedTema, contentType]);
+  }, [isLoggedIn, contentCategory, selectedTema, contentType, contentLang]);
 
   // Load razonamiento themes
   useEffect(() => {
@@ -2550,6 +2552,27 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   Test Cerebral
                 </Button>
               </div>
+
+              {contentType === "lectura" && (
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+                  <span className="text-white/60 text-sm">Idioma:</span>
+                  {["es", "en", "pt"].map((l) => (
+                    <Button
+                      key={l}
+                      onClick={() => setContentLang(l)}
+                      variant={contentLang === l ? "default" : "outline"}
+                      size="sm"
+                      className={contentLang === l ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                      data-testid={`button-content-lang-${l}`}
+                    >
+                      {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
+                    </Button>
+                  ))}
+                  {contentLang !== 'es' && (
+                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
+                  )}
+                </div>
+              )}
               
               <div className="flex flex-wrap gap-2 mb-4">
                 <Button
@@ -2853,15 +2876,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 ))}
               </div>
 
-              {adminEntLang !== 'es' && (
+              {contentLang !== 'es' && (
                 <Button
-                  onClick={() => translateLecturaBulk(adminEntLang)}
+                  onClick={() => translateLecturaBulk(contentLang)}
                   disabled={bulkTranslating}
                   className="w-full bg-gradient-to-r from-blue-500 to-cyan-600"
                   data-testid="button-translate-all-lectura"
                 >
                   <Globe className="w-4 h-4 mr-2" />
-                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${adminEntLang === 'en' ? 'Inglés' : 'Portugués'}`}
+                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
                 </Button>
               )}
 

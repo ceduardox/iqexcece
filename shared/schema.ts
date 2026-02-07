@@ -79,6 +79,7 @@ export const readingContents = pgTable("reading_contents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   categoria: text("categoria").notNull(),
   temaNumero: integer("tema_numero").default(1),
+  lang: text("lang").notNull().default("es"),
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
