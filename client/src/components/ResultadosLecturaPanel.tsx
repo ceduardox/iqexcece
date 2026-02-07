@@ -121,6 +121,112 @@ function getLectorClass(cat: string | null): string {
   return "text-white/40";
 }
 
+const LECTOR_ORDER = ["LECTOR COMPETENTE", "LECTOR REGULAR", "LECTOR CON DIFICULTAD", "LECTOR CON DIFICULTAD SEVERA"];
+const LECTOR_TEXT_COLORS: Record<string, string> = {
+  "LECTOR COMPETENTE": "text-green-400",
+  "LECTOR REGULAR": "text-yellow-400",
+  "LECTOR CON DIFICULTAD": "text-orange-400",
+  "LECTOR CON DIFICULTAD SEVERA": "text-red-400",
+};
+
+function GradoLectorReport({ filteredResults }: { filteredResults: QuizResult[] }) {
+  const [expandedGrados, setExpandedGrados] = useState<Set<string>>(new Set());
+
+  const { gradoData, totals, grandTotal } = useMemo(() => {
+    const byGrado: Record<string, Record<string, number>> = {};
+    const tots: Record<string, number> = {};
+    let total = 0;
+
+    filteredResults.forEach(r => {
+      const grado = r.grado || "Sin grado";
+      const cat = r.categoriaLector || "Sin clasificar";
+      if (!byGrado[grado]) byGrado[grado] = {};
+      byGrado[grado][cat] = (byGrado[grado][cat] || 0) + 1;
+      tots[cat] = (tots[cat] || 0) + 1;
+      total++;
+    });
+
+    const sorted = Object.entries(byGrado)
+      .map(([grado, cats]) => ({
+        grado,
+        total: Object.values(cats).reduce((a, b) => a + b, 0),
+        categories: cats,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    return { gradoData: sorted, totals: tots, grandTotal: total };
+  }, [filteredResults]);
+
+  const toggleGrado = (grado: string) => {
+    setExpandedGrados(prev => {
+      const next = new Set(prev);
+      if (next.has(grado)) next.delete(grado); else next.add(grado);
+      return next;
+    });
+  };
+
+  if (filteredResults.length === 0) return null;
+
+  return (
+    <div className="md:col-span-2 bg-black/30 rounded-xl p-4 border border-white/10" data-testid="panel-grado-lector-report">
+      <h4 className="text-white font-bold text-sm mb-3">Reporte por Grado / Categoría Lector</h4>
+      <div className="space-y-1 max-h-80 overflow-y-auto">
+        {gradoData.map(({ grado, total, categories }) => (
+          <div key={grado}>
+            <button
+              onClick={() => toggleGrado(grado)}
+              className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2 transition-colors"
+              data-testid={`button-toggle-grado-${grado}`}
+            >
+              <div className="flex items-center gap-2">
+                <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-transform ${expandedGrados.has(grado) ? "rotate-0" : "-rotate-90"}`} />
+                <span className="text-white text-xs font-bold">{grado}</span>
+              </div>
+              <span className="text-cyan-400 font-bold text-xs">{total}</span>
+            </button>
+            {expandedGrados.has(grado) && (
+              <div className="ml-6 mt-0.5 space-y-0.5">
+                {LECTOR_ORDER.filter(cat => categories[cat]).map(cat => (
+                  <div key={cat} className="flex justify-between px-3 py-1 rounded bg-black/20">
+                    <span className={`text-[11px] ${LECTOR_TEXT_COLORS[cat] || "text-white/60"}`}>{cat.replace("LECTOR ", "")}</span>
+                    <span className={`text-[11px] font-bold ${LECTOR_TEXT_COLORS[cat] || "text-white/60"}`}>{categories[cat]}</span>
+                  </div>
+                ))}
+                {categories["Sin clasificar"] && (
+                  <div className="flex justify-between px-3 py-1 rounded bg-black/20">
+                    <span className="text-[11px] text-white/40">Sin clasificar</span>
+                    <span className="text-[11px] font-bold text-white/40">{categories["Sin clasificar"]}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <div className="flex justify-between px-3 py-1.5 bg-cyan-500/10 rounded-lg mb-1">
+          <span className="text-white font-bold text-xs">Total general</span>
+          <span className="text-cyan-400 font-bold text-xs">{grandTotal}</span>
+        </div>
+        <div className="space-y-0.5">
+          {LECTOR_ORDER.filter(cat => totals[cat]).map(cat => (
+            <div key={cat} className="flex justify-between px-3 py-1">
+              <span className={`text-[11px] ${LECTOR_TEXT_COLORS[cat]}`}>{cat.replace("LECTOR ", "")}</span>
+              <span className={`text-[11px] font-bold ${LECTOR_TEXT_COLORS[cat]}`}>{totals[cat]}</span>
+            </div>
+          ))}
+          {totals["Sin clasificar"] && (
+            <div className="flex justify-between px-3 py-1">
+              <span className="text-[11px] text-white/40">Sin clasificar</span>
+              <span className="text-[11px] font-bold text-white/40">{totals["Sin clasificar"]}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ResultadosLecturaPanel({ quizResults }: Props) {
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -722,6 +828,8 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 </div>
               </div>
             </div>
+
+            <GradoLectorReport filteredResults={filteredResults} />
           </div>
         )}
 
