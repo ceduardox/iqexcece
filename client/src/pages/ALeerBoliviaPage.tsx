@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { BookOpen, Lightbulb, Users, Award, Star, Sparkles, Target, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import menuCurveImg from "@assets/Menu-Curvo.png";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const objectives = [
   {
