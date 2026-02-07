@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -185,6 +186,7 @@ function TestCard({
 }
 
 export default function TestsPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { updateUserData } = useUserData();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
@@ -320,9 +322,9 @@ export default function TestsPage() {
   }, [setLocation]);
 
   const genericTestCategories = [
-    { id: "lectura", title: "Lectura", description: "Evalúa tu velocidad y comprensión lectora" },
-    { id: "razonamiento", title: "Razonamiento", description: "Pon a prueba tu lógica y pensamiento analítico" },
-    { id: "cerebral", title: "Test Cerebral", description: "Ejercicios para evaluar tus capacidades cognitivas" },
+    { id: "lectura", title: t("tests.lectura"), description: t("tests.lecturaDesc") },
+    { id: "razonamiento", title: t("tests.razonamiento"), description: t("tests.razonamientoDesc") },
+    { id: "cerebral", title: t("tests.cerebral"), description: t("tests.cerebralDesc") },
   ];
 
   if (!stylesLoaded) {
@@ -477,7 +479,7 @@ export default function TestsPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                 style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
-                {styles["hero-desc"]?.buttonText || "Selecciona un test para comenzar tu diagnóstico y descubre cómo potenciar tu mente con ejercicios personalizados."}
+                {styles["hero-desc"]?.buttonText || t("tests.heroDesc")}
               </motion.p>
             </div>
           </div>
@@ -510,7 +512,7 @@ export default function TestsPage() {
             data-testid="nav-inicio"
           >
             <Home className="w-5 h-5" style={{ color: styles["nav-inicio"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-inicio"]?.textColor || "#9ca3af" }}>Inicio</span>
+            <span className="text-[10px]" style={{ color: styles["nav-inicio"]?.textColor || "#9ca3af" }}>{t("nav.inicio")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-diagnostico", e); }}
@@ -527,7 +529,7 @@ export default function TestsPage() {
             >
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-diagnostico"]?.textColor || "#7c3aed" }}>Diagnóstico</span>
+            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-diagnostico"]?.textColor || "#7c3aed" }}>{t("nav.diagnostico")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); else setLocation("/entrenamiento"); }}
@@ -536,7 +538,7 @@ export default function TestsPage() {
             data-testid="nav-entrenar"
           >
             <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>Entrenar</span>
+            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
@@ -545,7 +547,7 @@ export default function TestsPage() {
             data-testid="nav-progreso"
           >
             <BarChart3 className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
+            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>{t("nav.progreso")}</span>
           </button>
           <button 
             onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
@@ -554,7 +556,7 @@ export default function TestsPage() {
             data-testid="nav-mas"
           >
             <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
+            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
           </button>
         </div>
       </nav>

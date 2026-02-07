@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Dumbbell, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { CurvedHeader } from "@/components/CurvedHeader";
@@ -47,6 +48,7 @@ const defaultIcons = [
 ];
 
 export default function EntrenamientoSelectionPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -229,7 +231,7 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                 style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
-                {styles["hero-subtitle"]?.buttonText || "Ejercicios diseñados para"}
+                {styles["hero-subtitle"]?.buttonText || t("training.heroSubtitle1")}
               </motion.p>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -239,7 +241,7 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                 style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
-                {styles["hero-subtitle2"]?.buttonText || "potenciar tu mente"}
+                {styles["hero-subtitle2"]?.buttonText || t("training.heroSubtitle2")}
               </motion.p>
               
               <motion.p 
@@ -250,7 +252,7 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                 style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
-                {styles["hero-desc"]?.buttonText || "Selecciona un entrenamiento para comenzar y fortalece tus habilidades cognitivas con ejercicios personalizados."}
+                {styles["hero-desc"]?.buttonText || t("training.heroDesc")}
               </motion.p>
             </div>
           </div>
@@ -260,7 +262,7 @@ export default function EntrenamientoSelectionPage() {
           {items.length === 0 ? (
             <div className="text-center py-8">
               <Dumbbell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No hay entrenamientos disponibles</p>
+              <p className="text-gray-500">{t("training.noItems")}</p>
             </div>
           ) : (
             items.map((item, index) => {

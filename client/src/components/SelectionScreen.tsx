@@ -245,13 +245,21 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
           
           <div className="absolute right-5" ref={menuRef}>
-            <button 
+            <motion.button 
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="relative p-2 rounded-full"
+              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.08))" }}
+              whileTap={{ scale: 0.9 }}
               data-testid="button-lang"
             >
-              <Globe className="w-5 h-5" strokeWidth={1.5} />
-            </button>
+              <motion.div
+                animate={{ rotate: menuOpen ? 180 : 0 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <Globe className="w-5 h-5" strokeWidth={1.8} style={{ color: "#7c3aed" }} />
+              </motion.div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)" }} />
+            </motion.button>
 
             <AnimatePresence>
               {menuOpen && (

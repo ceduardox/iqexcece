@@ -2,6 +2,7 @@ import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
 import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useState } from "react";
@@ -28,12 +29,12 @@ interface Stats {
   dailyActivity: Record<string, number>;
 }
 
-const exerciseTypeLabels: Record<string, string> = {
-  velocidad: "Velocidad Lectora",
-  numeros: "Números y Letras",
-  aceleracion_golpe: "Golpe de Vista",
-  aceleracion_desplazamiento: "Desplazamiento",
-  reconocimiento_visual: "Reconocimiento Visual"
+const exerciseTypeKeys: Record<string, string> = {
+  velocidad: "progress.velocidadLectora",
+  numeros: "progress.numerosLetras",
+  aceleracion_golpe: "progress.golpeVista",
+  aceleracion_desplazamiento: "progress.desplazamiento",
+  reconocimiento_visual: "progress.reconocimientoVisual"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -73,13 +74,14 @@ function formatSeconds(seconds: number | null): string {
 }
 
 function MiniBarChart({ data }: { data: Record<string, number> }) {
+  const { t } = useTranslation();
   const entries = Object.entries(data).slice(-7);
   const maxValue = Math.max(...entries.map(([, v]) => v), 1);
   
   if (entries.length === 0) {
     return (
       <div className="text-center text-gray-400 text-xs py-4">
-        Sin actividad reciente
+        {t("progress.noRecentActivity")}
       </div>
     );
   }
@@ -132,6 +134,7 @@ function StatBox({ value, label, color }: { value: string | number; label: strin
 }
 
 function ResultDetailCard({ result, index }: { result: TrainingResult; index: number }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const color = exerciseTypeColors[result.tipoEjercicio] || "#7c3aed";
   const IconComp = exerciseTypeIcons[result.tipoEjercicio] || Zap;
@@ -144,25 +147,25 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
       case "velocidad":
         return (
           <div className="grid grid-cols-3 gap-2 mt-3">
-            <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
-            <StatBox value={datosExtra.incorrectos ?? ((result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0))} label="Incorrectas" color="#ef4444" />
-            <StatBox value={`${result.palabrasPorMinuto ?? datosExtra.velocidadMax ?? 0}`} label="Vel. Máx (p/m)" color="#7c3aed" />
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("progress.correct")} color="#22c55e" />
+            <StatBox value={datosExtra.incorrectos ?? ((result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0))} label={t("progress.incorrect")} color="#ef4444" />
+            <StatBox value={`${result.palabrasPorMinuto ?? datosExtra.velocidadMax ?? 0}`} label={t("progress.maxSpeed")} color="#7c3aed" />
           </div>
         );
       case "numeros":
         return (
           <div className="space-y-2 mt-3">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-xs font-medium text-gray-500">Nivel:</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{datosExtra.nivel || "Números"}</span>
+              <span className="text-xs font-medium text-gray-500">{t("progress.level")}:</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{datosExtra.nivel || t("progress.numerosLetras")}</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
-              <StatBox value={datosExtra.incorrectas ?? 0} label="Incorrectas" color="#ef4444" />
-              <StatBox value={datosExtra.sinResponder ?? 0} label="Sin resp." color="#9ca3af" />
+              <StatBox value={result.respuestasCorrectas ?? 0} label={t("progress.correct")} color="#22c55e" />
+              <StatBox value={datosExtra.incorrectas ?? 0} label={t("progress.incorrect")} color="#ef4444" />
+              <StatBox value={datosExtra.sinResponder ?? 0} label={t("progress.noAnswer")} color="#9ca3af" />
             </div>
             <div className="grid grid-cols-1 gap-2">
-              <StatBox value={formatSeconds(result.tiempoSegundos)} label="Tiempo" color="#06b6d4" />
+              <StatBox value={formatSeconds(result.tiempoSegundos)} label={t("progress.time")} color="#06b6d4" />
             </div>
           </div>
         );
@@ -171,9 +174,9 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
         return (
           <div className="space-y-2 mt-3">
             <div className="grid grid-cols-3 gap-2">
-              <StatBox value={datosExtra.palabras ?? result.respuestasCorrectas ?? 0} label="Palabras" color="#7c3aed" />
+              <StatBox value={datosExtra.palabras ?? result.respuestasCorrectas ?? 0} label={t("progress.words")} color="#7c3aed" />
               <StatBox value={`${datosExtra.ppm ?? result.palabrasPorMinuto ?? 0}`} label="PPM" color="#0891b2" />
-              <StatBox value={formatSeconds(result.tiempoSegundos)} label="Tiempo" color="#06b6d4" />
+              <StatBox value={formatSeconds(result.tiempoSegundos)} label={t("progress.time")} color="#06b6d4" />
             </div>
             {datosExtra.estrellas && <StarRating stars={datosExtra.estrellas} />}
           </div>
@@ -183,22 +186,22 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
           <div className="space-y-2 mt-3">
             {datosExtra.nivel && (
               <div className="flex items-center justify-center gap-2 mb-1">
-                <span className="text-xs font-medium text-gray-500">Nivel:</span>
+                <span className="text-xs font-medium text-gray-500">{t("progress.level")}:</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{datosExtra.nivel}</span>
               </div>
             )}
             <div className="grid grid-cols-3 gap-2">
-              <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
-              <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label="Incorrectas" color="#ef4444" />
-              <StatBox value={datosExtra.skippedCount ?? 0} label="Sin resp." color="#9ca3af" />
+              <StatBox value={result.respuestasCorrectas ?? 0} label={t("progress.correct")} color="#22c55e" />
+              <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("progress.incorrect")} color="#ef4444" />
+              <StatBox value={datosExtra.skippedCount ?? 0} label={t("progress.noAnswer")} color="#9ca3af" />
             </div>
           </div>
         );
       default:
         return (
           <div className="grid grid-cols-2 gap-2 mt-3">
-            <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
-            <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label="Incorrectas" color="#ef4444" />
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("progress.correct")} color="#22c55e" />
+            <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("progress.incorrect")} color="#ef4444" />
           </div>
         );
     }
@@ -226,7 +229,7 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
         
         <div className="flex-1 text-left min-w-0">
           <p className="text-sm font-semibold text-gray-800 truncate">
-            {result.ejercicioTitulo || exerciseTypeLabels[result.tipoEjercicio] || result.tipoEjercicio}
+            {result.ejercicioTitulo || (exerciseTypeKeys[result.tipoEjercicio] ? t(exerciseTypeKeys[result.tipoEjercicio]) : result.tipoEjercicio)}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
@@ -279,6 +282,7 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
 }
 
 export default function ProgresoPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "ninos";
@@ -321,7 +325,7 @@ export default function ProgresoPage() {
         >
           <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
-        <h1 className="text-lg font-bold text-gray-800">Mi Progreso</h1>
+        <h1 className="text-lg font-bold text-gray-800">{t("progress.title")}</h1>
         <div className="w-10" />
       </header>
 
@@ -349,7 +353,7 @@ export default function ProgresoPage() {
                   style={{ color: "#7c3aed" }}
                   data-testid="text-categoria"
                 >
-                  Todos mis ejercicios
+                  {t("progress.allExercises")}
                 </span>
               </div>
             </motion.div>
@@ -367,7 +371,7 @@ export default function ProgresoPage() {
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(124, 58, 237, 0.1)" }}>
                     <Trophy className="w-4 h-4 text-purple-600" />
                   </div>
-                  <span className="text-xs text-gray-500">Sesiones</span>
+                  <span className="text-xs text-gray-500">{t("progress.sessions")}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-800" data-testid="text-total-sessions">{stats?.totalSessions || 0}</p>
               </div>
@@ -380,7 +384,7 @@ export default function ProgresoPage() {
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(6, 182, 212, 0.1)" }}>
                     <Zap className="w-4 h-4 text-cyan-600" />
                   </div>
-                  <span className="text-xs text-gray-500">Ejercicios</span>
+                  <span className="text-xs text-gray-500">{t("progress.exercises")}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-800" data-testid="text-exercise-types">{Object.keys(stats?.byType || {}).length}</p>
               </div>
@@ -395,7 +399,7 @@ export default function ProgresoPage() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-gray-700">Actividad semanal</span>
+                <span className="text-sm font-medium text-gray-700">{t("progress.weeklyActivity")}</span>
               </div>
               <MiniBarChart data={stats?.dailyActivity || {}} />
             </motion.div>
@@ -408,7 +412,7 @@ export default function ProgresoPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Resumen por ejercicio</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">{t("progress.summaryByExercise")}</h3>
                 <div className="space-y-3">
                   {Object.entries(stats.byType).map(([type, data]) => (
                     <div key={type} className="flex items-center justify-between">
@@ -417,13 +421,13 @@ export default function ProgresoPage() {
                           className="w-2.5 h-2.5 rounded-full"
                           style={{ background: exerciseTypeColors[type] || "#7c3aed" }}
                         />
-                        <span className="text-xs text-gray-600">{exerciseTypeLabels[type] || type}</span>
+                        <span className="text-xs text-gray-600">{exerciseTypeKeys[type] ? t(exerciseTypeKeys[type]) : type}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-[10px] text-gray-400">{data.count}x</span>
-                        <span className="text-[10px] text-gray-400">Prom: {data.avgScore}%</span>
+                        <span className="text-[10px] text-gray-400">{t("progress.average")}: {data.avgScore}%</span>
                         <span className="text-xs font-semibold" style={{ color: exerciseTypeColors[type] || "#7c3aed" }}>
-                          Mejor: {data.bestScore}%
+                          {t("progress.best")}: {data.bestScore}%
                         </span>
                       </div>
                     </div>
@@ -437,7 +441,7 @@ export default function ProgresoPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h3 className="text-sm font-medium text-gray-700 mb-3 px-1">Historial de resultados</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3 px-1">{t("progress.resultHistory")}</h3>
               {stats?.recentActivity && stats.recentActivity.length > 0 ? (
                 <div className="space-y-2">
                   {stats.recentActivity.map((result, index) => (
@@ -449,8 +453,8 @@ export default function ProgresoPage() {
                   <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
                     <Trophy className="w-8 h-8 text-gray-300" />
                   </div>
-                  <p className="text-gray-400 text-sm">Sin resultados aún</p>
-                  <p className="text-gray-300 text-xs mt-1">Completa ejercicios para ver tu progreso</p>
+                  <p className="text-gray-400 text-sm">{t("progress.noData")}</p>
+                  <p className="text-gray-300 text-xs mt-1">{t("progress.noDataDesc")}</p>
                 </div>
               )}
             </motion.div>

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Clock, ChevronRight, ChevronLeft, User, Calendar, X, Sparkles, Tag, Layers, ChevronDown, BookOpen, Newspaper } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
@@ -53,6 +54,7 @@ function getCatPostCount(posts: BlogPost[], catId: string): number {
 }
 
 export default function BlogPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { playSound } = useSounds();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -251,14 +253,14 @@ export default function BlogPage() {
             </span>
           </div>
           <p className="text-[10px] text-gray-400">
-            Mostrando artículos filtrados por esta categoría
+            {t("blog.filterShowing")}
           </p>
           <button
             onClick={() => handleCategoryClick("")}
             className="mt-2 text-[10px] font-semibold text-purple-500 flex items-center gap-1"
             data-testid="button-clear-category"
           >
-            <X className="w-3 h-3" /> Limpiar filtro
+            <X className="w-3 h-3" /> {t("blog.clearFilter")}
           </button>
         </motion.div>
       )}
@@ -288,7 +290,7 @@ export default function BlogPage() {
           data-testid="button-category-all"
         >
           <Sparkles className="w-3 h-3" />
-          Todos
+          {t("blog.allCategories")}
         </motion.button>
         {categories.map((cat, i) => (
           <motion.button
@@ -352,7 +354,7 @@ export default function BlogPage() {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Buscar artículos..."
+                placeholder={t("blog.search")}
                 className="w-full pl-10 pr-10 py-3 rounded-2xl text-sm bg-white border border-purple-100 focus:border-purple-300 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                 style={{ boxShadow: "0 2px 12px rgba(124,58,237,0.06)" }}
                 data-testid="input-search"
@@ -381,7 +383,7 @@ export default function BlogPage() {
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
                 <div className="w-10 h-10 rounded-full border-[3px] border-purple-100 border-t-purple-500 animate-spin" />
-                <p className="text-xs text-gray-400">Cargando artículos...</p>
+                <p className="text-xs text-gray-400">{t("blog.loading")}</p>
               </div>
             ) : posts.length === 0 ? (
               <motion.div
@@ -394,10 +396,10 @@ export default function BlogPage() {
                   <Newspaper className="w-10 h-10 text-purple-300" />
                 </div>
                 <p className="text-gray-600 text-sm font-medium">
-                  {debouncedSearch ? "No se encontraron artículos" : "No hay publicaciones aún"}
+                  {debouncedSearch ? t("blog.noResults") : t("blog.noPosts")}
                 </p>
                 <p className="text-gray-400 text-xs mt-1">
-                  {debouncedSearch ? "Intenta con otras palabras clave" : "Pronto tendremos contenido interesante para ti"}
+                  {debouncedSearch ? t("blog.noResultsHint") : t("blog.noPostsHint")}
                 </p>
               </motion.div>
             ) : (
