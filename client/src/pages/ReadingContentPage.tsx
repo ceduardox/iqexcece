@@ -158,7 +158,7 @@ export default function ReadingContentPage() {
     setSelectedAnswer(null);
   }, []);
 
-  const categoryLabel = categoryLabels[categoria] || "Pre escolar";
+  const categoryLabel = categoryLabels[categoria] || t("age.preescolarShort");
   const currentQ = content.questions[currentQuestion];
 
   const handleSelectAnswer = useCallback((index: number) => {
@@ -307,8 +307,8 @@ export default function ReadingContentPage() {
         try {
           await navigator.share({
             files: [file],
-            title: 'Mi resultado - IQEXPONENCIAL',
-            text: `¡Obtuve ${percentage}% en el Test de Lectura! Velocidad: ${wordsPerMinute} ppm. https://iqexponencial.app`
+            title: t("tests.myResult"),
+            text: `${t("tests.shareText", { percentage, speed: wordsPerMinute })} https://iqexponencial.app`
           });
         } catch (e) {
           console.error("Share cancelled:", e);
@@ -318,7 +318,7 @@ export default function ReadingContentPage() {
       }
     }
     
-    const text = encodeURIComponent(`¡Obtuve ${percentage}% en el Test de Lectura! Velocidad: ${wordsPerMinute} ppm.\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    const text = encodeURIComponent(t("tests.shareTextFull", { percentage, speed: wordsPerMinute }));
     window.open(`https://wa.me/?text=${text}`, '_blank');
     setIsSharing(false);
   };
@@ -334,7 +334,7 @@ export default function ReadingContentPage() {
       const file = new File([blob], 'resultado-lectura.png', { type: 'image/png' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Resultado Lectura' });
+          await navigator.share({ files: [file], title: t("tests.resultTitle") });
         } catch (e) {}
       } else {
         const url = URL.createObjectURL(blob);
@@ -348,16 +348,16 @@ export default function ReadingContentPage() {
       }
     } else {
       const percentage = Math.round((correctAnswers / content.questions.length) * 100);
-      const text = `¡${percentage}% en Lectura! ${wordsPerMinute} ppm.\n\nhttps://iqexponencial.app`;
+      const text = `${t("tests.shareText", { percentage, speed: wordsPerMinute })}\n\nhttps://iqexponencial.app`;
       if (navigator.share) {
-        await navigator.share({ title: "Resultado", text });
+        await navigator.share({ title: t("tests.resultTitle"), text });
       }
     }
     setIsSharing(false);
   };
 
   const handleWhatsApp = () => {
-    const msg = encodeURIComponent("Me interesa saber mas de IQxponencial");
+    const msg = encodeURIComponent(t("tests.whatsAppInquiry"));
     window.open(`https://wa.me/59173600060?text=${msg}`, "_blank");
   };
 
@@ -404,7 +404,7 @@ export default function ReadingContentPage() {
                 className="text-2xl font-black mb-2"
                 style={{ color: "#1f2937" }}
               >
-                ¡Excelente!
+                {t("tests.excellent")}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -413,7 +413,7 @@ export default function ReadingContentPage() {
                 className="text-sm"
                 style={{ color: "#6b7280" }}
               >
-                Has completado el test de lectura
+                {t("tests.completedReadingTest")}
               </motion.p>
             </div>
           </div>
@@ -480,23 +480,23 @@ export default function ReadingContentPage() {
             >
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center">
-                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Respuestas</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.answers")}</p>
                   <p className="text-2xl font-black" style={{ color: "#8a3ffc" }}>{correctAnswers}/{content.questions.length}</p>
-                  <p className="text-xs" style={{ color: "#6b7280" }}>correctas</p>
+                  <p className="text-xs" style={{ color: "#6b7280" }}>{t("tests.correctAnswers")}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Velocidad</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.speed")}</p>
                   <p className="text-2xl font-black" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
-                  <p className="text-xs" style={{ color: "#6b7280" }}>palabras/min</p>
+                  <p className="text-xs" style={{ color: "#6b7280" }}>{t("tests.wordsPerMin")}</p>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-purple-100 grid grid-cols-2 gap-4">
                 <div className="text-center">
-                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Tiempo lectura</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.readingTimeLabel")}</p>
                   <p className="text-lg font-bold" style={{ color: "#1f2937" }}>{formatTime(readingTime)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>Tiempo preguntas</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.questionsTimeLabel")}</p>
                   <p className="text-lg font-bold" style={{ color: "#1f2937" }}>{formatTime(questionTime)}</p>
                 </div>
               </div>
@@ -523,7 +523,7 @@ export default function ReadingContentPage() {
                 data-testid="button-whatsapp-share"
               >
                 <SiWhatsapp className="w-5 h-5" />
-                {isSharing ? 'Compartiendo...' : 'Compartir en WhatsApp'}
+                {isSharing ? t("tests.sharing") : t("tests.shareWhatsApp")}
               </motion.button>
               
               <motion.button
@@ -535,7 +535,7 @@ export default function ReadingContentPage() {
                 data-testid="button-share"
               >
                 <Share2 className="w-5 h-5" />
-                Más opciones
+                {t("tests.moreOptions")}
               </motion.button>
               
               <motion.button
@@ -546,7 +546,7 @@ export default function ReadingContentPage() {
                 data-testid="button-new-test"
               >
                 <RotateCcw className="w-5 h-5" />
-                Nuevo test
+                {t("tests.newTest")}
               </motion.button>
               
               <motion.button
@@ -557,7 +557,7 @@ export default function ReadingContentPage() {
                 data-testid="button-whatsapp-info"
               >
                 <MessageCircle className="w-4 h-4" />
-                Más información
+                {t("tests.moreInfo")}
               </motion.button>
           </motion.div>
         </div>
@@ -571,7 +571,7 @@ export default function ReadingContentPage() {
         categoria={categoria}
         onSubmit={handleUnifiedFormSubmit}
         submitting={submitting}
-        title="Test de Lectura"
+        title={t("tests.readingTestTitle")}
         subtitle={t("tests.completeData")}
         buttonText={t("tests.seeResults")}
       />
@@ -618,7 +618,7 @@ export default function ReadingContentPage() {
           disabled={activeTab === "cuestionario"}
           data-testid="tab-lectura"
         >
-          LECTURA
+          {t("tests.readingTab")}
         </button>
         <button
           onClick={() => {
@@ -638,7 +638,7 @@ export default function ReadingContentPage() {
           disabled={!quizStarted || activeTab === "lectura"}
           data-testid="tab-cuestionario"
         >
-          CUESTIONARIO
+          {t("tests.questionnaireTab")}
         </button>
       </div>
 
@@ -646,19 +646,19 @@ export default function ReadingContentPage() {
         style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)" }}
       >
         <div className="flex-1 py-2.5 text-center">
-          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>CATEGORÍA</p>
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>{t("tests.category")}</p>
           <p className="text-xs font-bold" style={{ color: "#8a3ffc" }}>{categoryLabel}</p>
         </div>
         <div className="flex-1 py-2.5 text-center">
-          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>LECTURA</p>
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>{t("tests.readingTime")}</p>
           <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{formatTime(readingTime)}</p>
         </div>
         <div className="flex-1 py-2.5 text-center">
-          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>PREGUNTAS</p>
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>{t("tests.questions")}</p>
           <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{formatTime(questionTime)}</p>
         </div>
         <div className="flex-1 py-2.5 text-center">
-          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>PROGRESO</p>
+          <p className="text-[9px] font-medium" style={{ color: "#9ca3af" }}>{t("tests.progressLabel")}</p>
           <p className="text-xs font-bold" style={{ color: "#1f2937" }}>{activeTab === "cuestionario" ? currentQuestion + 1 : 0}/{content.questions.length}</p>
         </div>
       </div>
@@ -667,7 +667,7 @@ export default function ReadingContentPage() {
         {activeTab === "lectura" ? (
           <div className="space-y-5">
             <div>
-              <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>LECTURA</p>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>{t("tests.readingLabel")}</p>
               <h2 className="text-lg font-black" style={{ color: "#1f2937" }}>{content.title}</h2>
             </div>
 
@@ -688,14 +688,14 @@ export default function ReadingContentPage() {
               data-testid="button-start-quiz"
             >
               <HelpCircle className="w-5 h-5" />
-              Ir al cuestionario
+              {t("tests.goToQuestionnaire")}
             </motion.button>
           </div>
         ) : (
           <div className="space-y-5">
             <div>
               <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>
-                PREGUNTA {currentQuestion + 1} DE {content.questions.length}
+                {t("tests.questionOf", { current: currentQuestion + 1, total: content.questions.length })}
               </p>
               <h2 className="text-lg font-bold" style={{ color: "#1f2937" }}>{currentQ?.question}</h2>
             </div>
