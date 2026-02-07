@@ -399,17 +399,19 @@ export default function AceleracionExercisePage() {
       const ejercicioTitulo = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
       const performancePercent = Math.min(100, Math.round((localSpeed / 920) * 100));
       
+      const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
       saveResultMutation.mutate({
         sessionId: sessionId || null,
         categoria,
         tipoEjercicio,
         ejercicioTitulo,
         puntaje: performancePercent,
-        nivelAlcanzado: Math.max(1, Math.min(5, Math.ceil(performancePercent / 20))),
+        nivelAlcanzado: stars,
         tiempoSegundos: Math.round(readingTime / 1000),
         palabrasPorMinuto: localSpeed,
         respuestasCorrectas: words.length,
         respuestasTotales: words.length,
+        datosExtra: JSON.stringify({ palabras: words.length, ppm: localSpeed, estrellas: stars, modo }),
         isPwa
       });
       setResultSaved(true);

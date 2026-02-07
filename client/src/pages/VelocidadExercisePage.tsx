@@ -284,6 +284,7 @@ export default function VelocidadExercisePage() {
         isPwa: isPwa,
       }),
     }).catch(e => console.error("Error saving result:", e));
+    const omitidos = totalResp > 0 ? Math.max(0, ejercicios.length - correctos - incorrectos) : 0;
     fetch("/api/training-results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -298,6 +299,7 @@ export default function VelocidadExercisePage() {
         palabrasPorMinuto: velocidadMaxAlcanzada,
         respuestasCorrectas: correctos,
         respuestasTotales: totalResp,
+        datosExtra: JSON.stringify({ incorrectos, omitidos, velocidadMax: velocidadMaxAlcanzada }),
         isPwa,
       }),
     }).catch(e => console.error("Error saving training result:", e));

@@ -1,9 +1,10 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3 } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
+import { useState } from "react";
 
 interface TrainingResult {
   id: string;
@@ -16,6 +17,7 @@ interface TrainingResult {
   palabrasPorMinuto: number | null;
   respuestasCorrectas: number | null;
   respuestasTotales: number | null;
+  datosExtra: string | null;
   createdAt: string | null;
 }
 
@@ -27,20 +29,11 @@ interface Stats {
 }
 
 const exerciseTypeLabels: Record<string, string> = {
-  velocidad: "Velocidad",
+  velocidad: "Velocidad Lectora",
   numeros: "Números y Letras",
   aceleracion_golpe: "Golpe de Vista",
   aceleracion_desplazamiento: "Desplazamiento",
   reconocimiento_visual: "Reconocimiento Visual"
-};
-
-const categoriaLabels: Record<string, string> = {
-  preescolar: "Pre-escolar",
-  ninos: "Niños",
-  adolescentes: "Adolescentes",
-  universitarios: "Universitarios",
-  profesionales: "Profesionales",
-  adulto_mayor: "Adulto Mayor"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -49,6 +42,14 @@ const exerciseTypeColors: Record<string, string> = {
   aceleracion_golpe: "#a855f7",
   aceleracion_desplazamiento: "#0891b2",
   reconocimiento_visual: "#ec4899"
+};
+
+const exerciseTypeIcons: Record<string, typeof Zap> = {
+  velocidad: Zap,
+  numeros: Target,
+  aceleracion_golpe: BookOpen,
+  aceleracion_desplazamiento: BookOpen,
+  reconocimiento_visual: Eye
 };
 
 function formatDate(dateStr: string | null): string {
@@ -63,8 +64,16 @@ function formatTime(dateStr: string | null): string {
   return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
+function formatSeconds(seconds: number | null): string {
+  if (!seconds) return "0s";
+  if (seconds < 60) return `${seconds}s`;
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return sec > 0 ? `${min}m ${sec}s` : `${min}m`;
+}
+
 function MiniBarChart({ data }: { data: Record<string, number> }) {
-  const entries = Object.entries(data).slice(-7); // Last 7 days
+  const entries = Object.entries(data).slice(-7);
   const maxValue = Math.max(...entries.map(([, v]) => v), 1);
   
   if (entries.length === 0) {
@@ -93,6 +102,179 @@ function MiniBarChart({ data }: { data: Record<string, number> }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function StarRating({ stars }: { stars: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <svg
+          key={s}
+          className={`w-3.5 h-3.5 ${s <= stars ? 'text-yellow-400' : 'text-gray-200'}`}
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function StatBox({ value, label, color }: { value: string | number; label: string; color: string }) {
+  return (
+    <div className="flex-1 rounded-xl p-2.5 text-center" style={{ background: `${color}08`, border: `1px solid ${color}20` }}>
+      <p className="text-lg font-bold" style={{ color }}>{value}</p>
+      <p className="text-[10px] text-gray-500 mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function ResultDetailCard({ result, index }: { result: TrainingResult; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const color = exerciseTypeColors[result.tipoEjercicio] || "#7c3aed";
+  const IconComp = exerciseTypeIcons[result.tipoEjercicio] || Zap;
+  let datosExtra: Record<string, any> = {};
+  try { if (result.datosExtra) datosExtra = JSON.parse(result.datosExtra); } catch { /* ignore */ }
+  const puntaje = result.puntaje ?? 0;
+
+  const renderDetails = () => {
+    switch (result.tipoEjercicio) {
+      case "velocidad":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
+            <StatBox value={datosExtra.incorrectos ?? ((result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0))} label="Incorrectas" color="#ef4444" />
+            <StatBox value={`${result.palabrasPorMinuto ?? datosExtra.velocidadMax ?? 0}`} label="Vel. Máx (p/m)" color="#7c3aed" />
+          </div>
+        );
+      case "numeros":
+        return (
+          <div className="space-y-2 mt-3">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="text-xs font-medium text-gray-500">Nivel:</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{datosExtra.nivel || "Números"}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
+              <StatBox value={datosExtra.incorrectas ?? 0} label="Incorrectas" color="#ef4444" />
+              <StatBox value={datosExtra.sinResponder ?? 0} label="Sin resp." color="#9ca3af" />
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              <StatBox value={formatSeconds(result.tiempoSegundos)} label="Tiempo" color="#06b6d4" />
+            </div>
+          </div>
+        );
+      case "aceleracion_golpe":
+      case "aceleracion_desplazamiento":
+        return (
+          <div className="space-y-2 mt-3">
+            <div className="grid grid-cols-3 gap-2">
+              <StatBox value={datosExtra.palabras ?? result.respuestasCorrectas ?? 0} label="Palabras" color="#7c3aed" />
+              <StatBox value={`${datosExtra.ppm ?? result.palabrasPorMinuto ?? 0}`} label="PPM" color="#0891b2" />
+              <StatBox value={formatSeconds(result.tiempoSegundos)} label="Tiempo" color="#06b6d4" />
+            </div>
+            {datosExtra.estrellas && <StarRating stars={datosExtra.estrellas} />}
+          </div>
+        );
+      case "reconocimiento_visual":
+        return (
+          <div className="space-y-2 mt-3">
+            {datosExtra.nivel && (
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="text-xs font-medium text-gray-500">Nivel:</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{datosExtra.nivel}</span>
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-2">
+              <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
+              <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label="Incorrectas" color="#ef4444" />
+              <StatBox value={datosExtra.skippedCount ?? 0} label="Sin resp." color="#9ca3af" />
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            <StatBox value={result.respuestasCorrectas ?? 0} label="Correctas" color="#22c55e" />
+            <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label="Incorrectas" color="#ef4444" />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <motion.div
+      className="bg-white rounded-2xl overflow-hidden shadow-sm"
+      style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.06)" }}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.04 }}
+    >
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full p-4 flex items-center gap-3"
+        data-testid={`button-expand-result-${result.id}`}
+      >
+        <div 
+          className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: `${color}12` }}
+        >
+          <IconComp className="w-5 h-5" style={{ color }} />
+        </div>
+        
+        <div className="flex-1 text-left min-w-0">
+          <p className="text-sm font-semibold text-gray-800 truncate">
+            {result.ejercicioTitulo || exerciseTypeLabels[result.tipoEjercicio] || result.tipoEjercicio}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+              <Calendar className="w-3 h-3" />
+              {formatDate(result.createdAt)}
+            </span>
+            <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+              <Clock className="w-3 h-3" />
+              {formatTime(result.createdAt)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="relative w-11 h-11">
+            <svg className="w-11 h-11 transform -rotate-90" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="18" stroke="#e5e7eb" strokeWidth="3" fill="none" />
+              <circle
+                cx="22" cy="22" r="18"
+                stroke={color}
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={`${(puntaje / 100) * 113} 113`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-gray-700">{puntaje}%</span>
+            </div>
+          </div>
+          <ChevronDown 
+            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} 
+          />
+        </div>
+      </button>
+
+      {expanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="px-4 pb-4 border-t border-gray-100"
+        >
+          {renderDetails()}
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
 
@@ -129,7 +311,6 @@ export default function ProgresoPage() {
         background: "linear-gradient(180deg, #f5f3ff 0%, #ffffff 30%, #ffffff 70%, #f0fdff 100%)"
       }}
     >
-      {/* Header */}
       <header className="relative px-4 py-4 flex items-center justify-between">
         <motion.button
           onClick={handleBack}
@@ -144,7 +325,6 @@ export default function ProgresoPage() {
         <div className="w-10" />
       </header>
 
-      {/* Main content */}
       <main className="flex-1 px-4 pb-28">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
@@ -152,7 +332,6 @@ export default function ProgresoPage() {
           </div>
         ) : (
           <div className="max-w-md mx-auto space-y-4">
-            {/* Category badge */}
             <motion.div
               className="flex justify-center"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -175,13 +354,11 @@ export default function ProgresoPage() {
               </div>
             </motion.div>
 
-            {/* Summary cards */}
             <motion.div 
               className="grid grid-cols-2 gap-3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              {/* Total sessions */}
               <div 
                 className="bg-white rounded-2xl p-4 shadow-sm"
                 style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}
@@ -192,10 +369,9 @@ export default function ProgresoPage() {
                   </div>
                   <span className="text-xs text-gray-500">Sesiones</span>
                 </div>
-                <p className="text-2xl font-bold text-gray-800">{stats?.totalSessions || 0}</p>
+                <p className="text-2xl font-bold text-gray-800" data-testid="text-total-sessions">{stats?.totalSessions || 0}</p>
               </div>
 
-              {/* Types practiced */}
               <div 
                 className="bg-white rounded-2xl p-4 shadow-sm"
                 style={{ boxShadow: "0 2px 12px rgba(6, 182, 212, 0.08)" }}
@@ -206,11 +382,10 @@ export default function ProgresoPage() {
                   </div>
                   <span className="text-xs text-gray-500">Ejercicios</span>
                 </div>
-                <p className="text-2xl font-bold text-gray-800">{Object.keys(stats?.byType || {}).length}</p>
+                <p className="text-2xl font-bold text-gray-800" data-testid="text-exercise-types">{Object.keys(stats?.byType || {}).length}</p>
               </div>
             </motion.div>
 
-            {/* Activity chart */}
             <motion.div 
               className="bg-white rounded-2xl p-4 shadow-sm"
               style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}
@@ -225,7 +400,6 @@ export default function ProgresoPage() {
               <MiniBarChart data={stats?.dailyActivity || {}} />
             </motion.div>
 
-            {/* Stats by type */}
             {stats && Object.keys(stats.byType).length > 0 && (
               <motion.div 
                 className="bg-white rounded-2xl p-4 shadow-sm"
@@ -234,20 +408,23 @@ export default function ProgresoPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Por tipo de ejercicio</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Resumen por ejercicio</h3>
                 <div className="space-y-3">
                   {Object.entries(stats.byType).map(([type, data]) => (
                     <div key={type} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div 
-                          className="w-2 h-2 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full"
                           style={{ background: exerciseTypeColors[type] || "#7c3aed" }}
                         />
                         <span className="text-xs text-gray-600">{exerciseTypeLabels[type] || type}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-gray-400">{data.count} veces</span>
-                        <span className="text-xs font-semibold text-purple-600">Mejor: {data.bestScore}</span>
+                        <span className="text-[10px] text-gray-400">{data.count}x</span>
+                        <span className="text-[10px] text-gray-400">Prom: {data.avgScore}%</span>
+                        <span className="text-xs font-semibold" style={{ color: exerciseTypeColors[type] || "#7c3aed" }}>
+                          Mejor: {data.bestScore}%
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -255,65 +432,20 @@ export default function ProgresoPage() {
               </motion.div>
             )}
 
-            {/* Recent activity */}
             <motion.div 
-              className="bg-white rounded-2xl p-4 shadow-sm"
-              style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Historial reciente</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3 px-1">Historial de resultados</h3>
               {stats?.recentActivity && stats.recentActivity.length > 0 ? (
                 <div className="space-y-2">
                   {stats.recentActivity.map((result, index) => (
-                    <motion.div 
-                      key={result.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.05 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-xl flex items-center justify-center"
-                          style={{ background: `${exerciseTypeColors[result.tipoEjercicio] || "#7c3aed"}15` }}
-                        >
-                          {result.tipoEjercicio.includes("aceleracion") ? (
-                            <BarChart3 className="w-5 h-5" style={{ color: exerciseTypeColors[result.tipoEjercicio] }} />
-                          ) : (
-                            <Zap className="w-5 h-5" style={{ color: exerciseTypeColors[result.tipoEjercicio] }} />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-700">
-                            {exerciseTypeLabels[result.tipoEjercicio] || result.tipoEjercicio}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(result.createdAt)}
-                            </span>
-                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatTime(result.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {result.puntaje !== null && (
-                          <p className="text-sm font-bold text-purple-600">{result.puntaje}</p>
-                        )}
-                        {result.palabrasPorMinuto && (
-                          <p className="text-[10px] text-gray-400">{result.palabrasPorMinuto} PPM</p>
-                        )}
-                      </div>
-                    </motion.div>
+                    <ResultDetailCard key={result.id} result={result} index={index} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
+                <div className="bg-white rounded-2xl p-8 shadow-sm text-center" style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}>
                   <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
                     <Trophy className="w-8 h-8 text-gray-300" />
                   </div>

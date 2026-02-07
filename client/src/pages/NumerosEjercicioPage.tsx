@@ -59,13 +59,14 @@ export default function NumerosEjercicioPage() {
     return "Encuentra el siguiente número en el tablero:";
   };
 
-  const saveTrainingResult = (correctas: number, incorrectas: number, tiempoUsado: number) => {
+  const saveTrainingResult = (correctas: number, incorrectas: number, tiempoUsado: number, sinResponder?: number) => {
     const sessionId = localStorage.getItem("iq_session_id");
     const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
                   (window.navigator as unknown as { standalone?: boolean }).standalone === true;
     const storedPath = sessionStorage.getItem("numerosNivelesPath") || "";
     const cat = storedPath.split("/")[2] || "ninos";
     const total = correctas + incorrectas;
+    const nivelNombre = getNivelNombre();
     fetch("/api/training-results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,12 +74,13 @@ export default function NumerosEjercicioPage() {
         sessionId: sessionId || null,
         categoria: cat,
         tipoEjercicio: "numeros",
-        ejercicioTitulo: `Números - ${getNivelNombre()}`,
+        ejercicioTitulo: `Números - ${nivelNombre}`,
         puntaje: total > 0 ? Math.round((correctas / total) * 100) : 0,
         nivelAlcanzado: correctas,
         tiempoSegundos: tiempoUsado,
         respuestasCorrectas: correctas,
         respuestasTotales: total,
+        datosExtra: JSON.stringify({ nivel: nivelNombre, incorrectas, sinResponder: sinResponder || 0 }),
         isPwa,
       }),
     }).catch(e => console.error("Error saving training result:", e));
@@ -116,7 +118,8 @@ export default function NumerosEjercicioPage() {
         tiempo: 60,
         nivel: getNivelNombre()
       }));
-      saveTrainingResult(correctCount, incorrectCount, 60);
+      const sr = 25 - targetIndex - 1;
+      saveTrainingResult(correctCount, incorrectCount, 60, sr > 0 ? sr : 0);
       navigate("/numeros-resultado");
       return;
     }
@@ -174,7 +177,7 @@ export default function NumerosEjercicioPage() {
           tiempo: 60 - timeLeft,
           nivel: getNivelNombre()
         }));
-        saveTrainingResult(correctCount + 1, incorrectCount, 60 - timeLeft);
+        saveTrainingResult(correctCount + 1, incorrectCount, 60 - timeLeft, 0);
         navigate("/numeros-resultado");
       } else {
         setTargetIndex(t => t + 1);
