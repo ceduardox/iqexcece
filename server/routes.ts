@@ -646,7 +646,8 @@ export async function registerRoutes(
   
   // Get entrenamiento card for category (public)
   app.get("/api/entrenamiento/:categoria/card", async (req, res) => {
-    const card = await storage.getEntrenamientoCard(req.params.categoria);
+    const lang = (req.query.lang as string) || 'es';
+    const card = await storage.getEntrenamientoCard(req.params.categoria, lang);
     res.json({ card: card || {
       categoria: req.params.categoria,
       title: "Entrenamiento",
@@ -658,7 +659,8 @@ export async function registerRoutes(
 
   // Get entrenamiento page config (public)
   app.get("/api/entrenamiento/:categoria/page", async (req, res) => {
-    const page = await storage.getEntrenamientoPage(req.params.categoria);
+    const lang = (req.query.lang as string) || 'es';
+    const page = await storage.getEntrenamientoPage(req.params.categoria, lang);
     res.json({ page: page || {
       categoria: req.params.categoria,
       bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
@@ -669,7 +671,8 @@ export async function registerRoutes(
 
   // Get entrenamiento items (public)
   app.get("/api/entrenamiento/:categoria/items", async (req, res) => {
-    const items = await storage.getEntrenamientoItems(req.params.categoria);
+    const lang = (req.query.lang as string) || 'es';
+    const items = await storage.getEntrenamientoItems(req.params.categoria, lang);
     res.json({ items });
   });
 
@@ -944,7 +947,8 @@ export async function registerRoutes(
 
   // Page styles for visual editor
   app.get("/api/page-styles/:pageName", async (req, res) => {
-    const style = await storage.getPageStyle(req.params.pageName);
+    const lang = (req.query.lang as string) || 'es';
+    const style = await storage.getPageStyle(req.params.pageName, lang);
     res.json({ style });
   });
 
@@ -954,8 +958,8 @@ export async function registerRoutes(
     if (!token || !validAdminTokens.has(token)) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const { pageName, styles } = req.body;
-    const style = await storage.savePageStyle(pageName, styles);
+    const { pageName, styles, lang } = req.body;
+    const style = await storage.savePageStyle(pageName, styles, lang || 'es');
     res.json({ style });
   });
 

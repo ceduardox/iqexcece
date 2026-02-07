@@ -20,7 +20,8 @@ interface SelectionScreenProps {
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const [navMoreOpen, setNavMoreOpen] = useState(false);
@@ -54,7 +55,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/selection-screen")
+    fetch(`/api/page-styles/selection-screen?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -73,7 +74,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       });
     
     return () => clearTimeout(timeout);
-  }, []);
+  }, [lang]);
   
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -99,7 +100,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         },
         body: JSON.stringify({
           pageName: "selection-screen",
-          styles: JSON.stringify(styles)
+          styles: JSON.stringify(styles),
+          lang
         })
       });
       

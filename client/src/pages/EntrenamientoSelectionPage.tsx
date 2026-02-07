@@ -48,7 +48,8 @@ const defaultIcons = [
 ];
 
 export default function EntrenamientoSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const [, setLocation] = useLocation();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -56,9 +57,9 @@ export default function EntrenamientoSelectionPage() {
   const [stylesLoaded, setStylesLoaded] = useState(false);
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
-    queryKey: ["/api/entrenamiento", "ninos", "items"],
+    queryKey: ["/api/entrenamiento", "ninos", "items", lang],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/ninos/items`);
+      const res = await fetch(`/api/entrenamiento/ninos/items?lang=${lang}`);
       return res.json();
     },
   });
@@ -80,7 +81,7 @@ export default function EntrenamientoSelectionPage() {
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch("/api/page-styles/entrenamiento-page")
+    fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -99,7 +100,7 @@ export default function EntrenamientoSelectionPage() {
       });
     
     return () => clearTimeout(timeout);
-  }, []);
+  }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -114,13 +115,14 @@ export default function EntrenamientoSelectionPage() {
         },
         body: JSON.stringify({
           pageName: "entrenamiento-page",
-          styles: JSON.stringify(newStyles)
+          styles: JSON.stringify(newStyles),
+          lang
         })
       });
     } catch (error) {
       console.error("Error saving styles:", error);
     }
-  }, []);
+  }, [lang]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;

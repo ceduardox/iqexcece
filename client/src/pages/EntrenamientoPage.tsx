@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
 
@@ -25,21 +26,23 @@ interface EntrenamientoItem {
 
 export default function EntrenamientoPage() {
   const [, setLocation] = useLocation();
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'es';
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "ninos";
 
   const { data: pageData } = useQuery<{ page: EntrenamientoPage }>({
-    queryKey: ["/api/entrenamiento", categoria, "page"],
+    queryKey: ["/api/entrenamiento", categoria, "page", lang],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/${categoria}/page`);
+      const res = await fetch(`/api/entrenamiento/${categoria}/page?lang=${lang}`);
       return res.json();
     },
   });
 
   const { data: itemsData } = useQuery<{ items: EntrenamientoItem[] }>({
-    queryKey: ["/api/entrenamiento", categoria, "items"],
+    queryKey: ["/api/entrenamiento", categoria, "items", lang],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/${categoria}/items`);
+      const res = await fetch(`/api/entrenamiento/${categoria}/items?lang=${lang}`);
       return res.json();
     },
   });

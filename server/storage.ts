@@ -46,11 +46,11 @@ export interface IStorage {
   getCerebralResults(categoria?: string): Promise<CerebralResult[]>;
   
   // Entrenamiento
-  getEntrenamientoCard(categoria: string): Promise<EntrenamientoCard | null>;
+  getEntrenamientoCard(categoria: string, lang?: string): Promise<EntrenamientoCard | null>;
   saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard>;
-  getEntrenamientoPage(categoria: string): Promise<EntrenamientoPage | null>;
+  getEntrenamientoPage(categoria: string, lang?: string): Promise<EntrenamientoPage | null>;
   saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage>;
-  getEntrenamientoItems(categoria: string): Promise<EntrenamientoItem[]>;
+  getEntrenamientoItems(categoria: string, lang?: string): Promise<EntrenamientoItem[]>;
   getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null>;
   saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem>;
   updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null>;
@@ -83,8 +83,8 @@ export interface IStorage {
   updateAceleracion(id: string, data: Partial<InsertAceleracionEjercicio>): Promise<AceleracionEjercicio | null>;
   
   // Page styles for visual editor
-  getPageStyle(pageName: string): Promise<PageStyle | null>;
-  savePageStyle(pageName: string, styles: string): Promise<PageStyle>;
+  getPageStyle(pageName: string, lang?: string): Promise<PageStyle | null>;
+  savePageStyle(pageName: string, styles: string, lang?: string): Promise<PageStyle>;
   getAllPageStyles(): Promise<PageStyle[]>;
   
   // Training results
@@ -345,19 +345,19 @@ export class MemStorage implements IStorage {
     return [];
   }
   
-  async getEntrenamientoCard(_categoria: string): Promise<EntrenamientoCard | null> {
+  async getEntrenamientoCard(_categoria: string, _lang?: string): Promise<EntrenamientoCard | null> {
     return null;
   }
   async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
-    return { id: randomUUID(), ...card, updatedAt: new Date() } as EntrenamientoCard;
+    return { id: randomUUID(), ...card, lang: card.lang || 'es', updatedAt: new Date() } as EntrenamientoCard;
   }
-  async getEntrenamientoPage(_categoria: string): Promise<EntrenamientoPage | null> {
+  async getEntrenamientoPage(_categoria: string, _lang?: string): Promise<EntrenamientoPage | null> {
     return null;
   }
   async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
-    return { id: randomUUID(), ...page, updatedAt: new Date() } as EntrenamientoPage;
+    return { id: randomUUID(), ...page, lang: page.lang || 'es', updatedAt: new Date() } as EntrenamientoPage;
   }
-  async getEntrenamientoItems(_categoria: string): Promise<EntrenamientoItem[]> {
+  async getEntrenamientoItems(_categoria: string, _lang?: string): Promise<EntrenamientoItem[]> {
     return [];
   }
   async getEntrenamientoItemById(_id: string): Promise<EntrenamientoItem | null> {
@@ -403,9 +403,9 @@ export class MemStorage implements IStorage {
   async updateAceleracion(_id: string, _data: Partial<InsertAceleracionEjercicio>): Promise<AceleracionEjercicio | null> { return null; }
   
   // Page styles stubs
-  async getPageStyle(_pageName: string): Promise<PageStyle | null> { return null; }
-  async savePageStyle(pageName: string, styles: string): Promise<PageStyle> {
-    return { id: randomUUID(), pageName, styles, updatedAt: new Date() } as PageStyle;
+  async getPageStyle(_pageName: string, _lang?: string): Promise<PageStyle | null> { return null; }
+  async savePageStyle(pageName: string, styles: string, lang: string = 'es'): Promise<PageStyle> {
+    return { id: randomUUID(), pageName, styles, lang, updatedAt: new Date() } as PageStyle;
   }
   async getAllPageStyles(): Promise<PageStyle[]> { return []; }
   
@@ -750,48 +750,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Entrenamiento Card
-  async getEntrenamientoCard(categoria: string): Promise<EntrenamientoCard | null> {
-    const [card] = await db.select().from(entrenamientoCards).where(eq(entrenamientoCards.categoria, categoria));
-    return card || null;
+  async getEntrenamientoCard(categoria: string, lang: string = 'es'): Promise<EntrenamientoCard | null> {
+    const [card] = await db.select().from(entrenamientoCards)
+      .where(and(eq(entrenamientoCards.categoria, categoria), eq(entrenamientoCards.lang, lang)));
+    if (card) return card;
+    if (lang !== 'es') {
+      const [fallback] = await db.select().from(entrenamientoCards)
+        .where(and(eq(entrenamientoCards.categoria, categoria), eq(entrenamientoCards.lang, 'es')));
+      return fallback || null;
+    }
+    return null;
   }
 
   async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
-    const existing = await this.getEntrenamientoCard(card.categoria);
+    const cardLang = card.lang || 'es';
+    const [existing] = await db.select().from(entrenamientoCards)
+      .where(and(eq(entrenamientoCards.categoria, card.categoria), eq(entrenamientoCards.lang, cardLang)));
     if (existing) {
       const [updated] = await db.update(entrenamientoCards)
-        .set({ ...card, updatedAt: new Date() })
-        .where(eq(entrenamientoCards.categoria, card.categoria))
+        .set({ ...card, lang: cardLang, updatedAt: new Date() })
+        .where(and(eq(entrenamientoCards.categoria, card.categoria), eq(entrenamientoCards.lang, cardLang)))
         .returning();
       return updated;
     }
-    const [created] = await db.insert(entrenamientoCards).values(card).returning();
+    const [created] = await db.insert(entrenamientoCards).values({ ...card, lang: cardLang }).returning();
     return created;
   }
 
   // Entrenamiento Page
-  async getEntrenamientoPage(categoria: string): Promise<EntrenamientoPage | null> {
-    const [page] = await db.select().from(entrenamientoPages).where(eq(entrenamientoPages.categoria, categoria));
-    return page || null;
+  async getEntrenamientoPage(categoria: string, lang: string = 'es'): Promise<EntrenamientoPage | null> {
+    const [page] = await db.select().from(entrenamientoPages)
+      .where(and(eq(entrenamientoPages.categoria, categoria), eq(entrenamientoPages.lang, lang)));
+    if (page) return page;
+    if (lang !== 'es') {
+      const [fallback] = await db.select().from(entrenamientoPages)
+        .where(and(eq(entrenamientoPages.categoria, categoria), eq(entrenamientoPages.lang, 'es')));
+      return fallback || null;
+    }
+    return null;
   }
 
   async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
-    const existing = await this.getEntrenamientoPage(page.categoria);
+    const pageLang = page.lang || 'es';
+    const [existing] = await db.select().from(entrenamientoPages)
+      .where(and(eq(entrenamientoPages.categoria, page.categoria), eq(entrenamientoPages.lang, pageLang)));
     if (existing) {
       const [updated] = await db.update(entrenamientoPages)
-        .set({ ...page, updatedAt: new Date() })
-        .where(eq(entrenamientoPages.categoria, page.categoria))
+        .set({ ...page, lang: pageLang, updatedAt: new Date() })
+        .where(and(eq(entrenamientoPages.categoria, page.categoria), eq(entrenamientoPages.lang, pageLang)))
         .returning();
       return updated;
     }
-    const [created] = await db.insert(entrenamientoPages).values(page).returning();
+    const [created] = await db.insert(entrenamientoPages).values({ ...page, lang: pageLang }).returning();
     return created;
   }
 
   // Entrenamiento Items
-  async getEntrenamientoItems(categoria: string): Promise<EntrenamientoItem[]> {
-    return db.select().from(entrenamientoItems)
-      .where(eq(entrenamientoItems.categoria, categoria))
+  async getEntrenamientoItems(categoria: string, lang: string = 'es'): Promise<EntrenamientoItem[]> {
+    const items = await db.select().from(entrenamientoItems)
+      .where(and(eq(entrenamientoItems.categoria, categoria), eq(entrenamientoItems.lang, lang)))
       .orderBy(entrenamientoItems.sortOrder);
+    if (items.length > 0) return items;
+    if (lang !== 'es') {
+      return db.select().from(entrenamientoItems)
+        .where(and(eq(entrenamientoItems.categoria, categoria), eq(entrenamientoItems.lang, 'es')))
+        .orderBy(entrenamientoItems.sortOrder);
+    }
+    return items;
   }
 
   async getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null> {
@@ -930,21 +955,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Page styles for visual editor
-  async getPageStyle(pageName: string): Promise<PageStyle | null> {
-    const [style] = await db.select().from(pageStyles).where(eq(pageStyles.pageName, pageName));
-    return style || null;
+  async getPageStyle(pageName: string, lang: string = 'es'): Promise<PageStyle | null> {
+    const [style] = await db.select().from(pageStyles)
+      .where(and(eq(pageStyles.pageName, pageName), eq(pageStyles.lang, lang)));
+    if (style) return style;
+    if (lang !== 'es') {
+      const [fallback] = await db.select().from(pageStyles)
+        .where(and(eq(pageStyles.pageName, pageName), eq(pageStyles.lang, 'es')));
+      return fallback || null;
+    }
+    return null;
   }
 
-  async savePageStyle(pageName: string, styles: string): Promise<PageStyle> {
-    const existing = await this.getPageStyle(pageName);
+  async savePageStyle(pageName: string, styles: string, lang: string = 'es'): Promise<PageStyle> {
+    const [existing] = await db.select().from(pageStyles)
+      .where(and(eq(pageStyles.pageName, pageName), eq(pageStyles.lang, lang)));
     if (existing) {
       const [updated] = await db.update(pageStyles)
         .set({ styles, updatedAt: new Date() })
-        .where(eq(pageStyles.pageName, pageName))
+        .where(and(eq(pageStyles.pageName, pageName), eq(pageStyles.lang, lang)))
         .returning();
       return updated;
     } else {
-      const [created] = await db.insert(pageStyles).values({ pageName, styles }).returning();
+      const [created] = await db.insert(pageStyles).values({ pageName, styles, lang }).returning();
       return created;
     }
   }
