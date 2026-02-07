@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, X } from "lucide-react";
 import { useLocation } from "wouter";
@@ -24,9 +23,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [navMoreOpen, setNavMoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const navMoreBtnRef = useRef<HTMLButtonElement>(null);
-  const navMoreDropdownRef = useRef<HTMLDivElement>(null);
-  const [navMorePos, setNavMorePos] = useState({ bottom: 0, right: 0 });
   const { toast } = useToast();
   const { playClick, playCard } = useSounds();
   
@@ -63,28 +59,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  useEffect(() => {
-    if (navMoreOpen && navMoreBtnRef.current) {
-      const rect = navMoreBtnRef.current.getBoundingClientRect();
-      setNavMorePos({
-        bottom: window.innerHeight - rect.top + 8,
-        right: window.innerWidth - rect.right,
-      });
-    }
-  }, [navMoreOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        navMoreDropdownRef.current && !navMoreDropdownRef.current.contains(e.target as Node) &&
-        navMoreBtnRef.current && !navMoreBtnRef.current.contains(e.target as Node)
-      ) {
-        setNavMoreOpen(false);
-      }
-    };
-    if (navMoreOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [navMoreOpen]);
   
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
@@ -783,24 +757,42 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
             </button>
             
-            <button 
-              onClick={(e) => { 
-                if (editorMode) { handleElementClick("nav-mas", e); } 
-                else { playClick(); setNavMoreOpen(!navMoreOpen); }
-              }}
-              ref={navMoreBtnRef}
-              className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-mas")}`}
-              style={getElementStyle("nav-mas")}
-              data-testid="nav-mas"
-            >
-              <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={(e) => { 
+                  if (editorMode) { handleElementClick("nav-mas", e); } 
+                  else { playClick(); setNavMoreOpen(!navMoreOpen); }
+                }}
+                className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-mas")}`}
+                style={getElementStyle("nav-mas")}
+                data-testid="nav-mas"
+              >
+                <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
+                <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
+              </button>
+              {navMoreOpen && (
+                <div
+                  className="absolute bottom-full right-0 mb-3 w-48 bg-white rounded-2xl z-[9999]"
+                  style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.15), 0 2px 8px rgba(0,0,0,0.06)" }}
+                  data-testid="dropdown-mas"
+                >
+                  <button
+                    onClick={() => { setNavMoreOpen(false); setLocation("/blog"); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:bg-purple-50"
+                    data-testid="dropdown-item-blog"
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
+                      <Newspaper className="w-4 h-4 text-purple-500" />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">Blog</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
       )}
-
-      {navMoreDropdown}
       
       <AnimatePresence>
         {editorMode && (
