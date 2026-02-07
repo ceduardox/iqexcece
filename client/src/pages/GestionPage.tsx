@@ -396,6 +396,54 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   const [translatingField, setTranslatingField] = useState<string | null>(null);
+  const [bulkTranslating, setBulkTranslating] = useState(false);
+
+  const translateLecturaBulk = async (targetLang: string) => {
+    if (bulkTranslating) return;
+    const hasContent = currentEditContent.title || currentEditContent.content || currentEditContent.questions.length > 0;
+    if (!hasContent) { alert("No hay contenido para traducir"); return; }
+    setBulkTranslating(true);
+    try {
+      const dataToTranslate: any = {};
+      if (currentEditContent.title) dataToTranslate.title = currentEditContent.title;
+      if (currentEditContent.content) dataToTranslate.content = currentEditContent.content;
+      if (currentEditContent.questions.length > 0) {
+        dataToTranslate.questions = currentEditContent.questions.map((q: any) => ({
+          question: q.question || "",
+          options: q.options || []
+        }));
+      }
+      const res = await adminFetch("/api/admin/translate-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: dataToTranslate, targetLang })
+      });
+      const result = await res.json();
+      if (result.translated) {
+        const t = result.translated;
+        setCurrentEditContent((p: typeof currentEditContent) => {
+          const updated = { ...p };
+          if (t.title) updated.title = t.title;
+          if (t.content) updated.content = t.content;
+          if (t.questions && Array.isArray(t.questions)) {
+            updated.questions = p.questions.map((q: any, i: number) => ({
+              ...q,
+              question: t.questions[i]?.question || q.question,
+              options: t.questions[i]?.options || q.options
+            }));
+          }
+          return updated;
+        });
+      } else if (result.error) {
+        alert(result.error);
+      }
+    } catch (err) {
+      console.error("Bulk translation error:", err);
+      alert("Error al traducir. Intenta de nuevo.");
+    } finally {
+      setBulkTranslating(false);
+    }
+  };
   const translateField = async (text: string, targetLang: string, fieldKey: string, onResult: (translated: string) => void) => {
     if (!text) return;
     setTranslatingField(fieldKey);
@@ -2804,6 +2852,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                 ))}
               </div>
+
+              {adminEntLang !== 'es' && (
+                <Button
+                  onClick={() => translateLecturaBulk(adminEntLang)}
+                  disabled={bulkTranslating}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600"
+                  data-testid="button-translate-all-lectura"
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${adminEntLang === 'en' ? 'Inglés' : 'Portugués'}`}
+                </Button>
+              )}
 
               <Button
                 onClick={handleSaveContent}
