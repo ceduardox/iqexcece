@@ -144,6 +144,8 @@ export default function GestionPage() {
     pageTitle: "Entrenamientos",
     pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
   });
+  const [esCardRef, setEsCardRef] = useState({ title: "", description: "", buttonText: "" });
+  const [esPageRef, setEsPageRef] = useState({ bannerText: "", pageTitle: "", pageDescription: "" });
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
@@ -1119,23 +1121,44 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         const cat = entrenamientoCategory;
         const langParam = adminEntLang;
         try {
-          const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
+          const fetches: Promise<Response>[] = [
             fetch(`/api/entrenamiento/${cat}/card?lang=${langParam}&fallback=false`),
             fetch(`/api/entrenamiento/${cat}/page?lang=${langParam}&fallback=false`),
             fetch(`/api/entrenamiento/${cat}/items?lang=${langParam}&fallback=false`),
             fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
             fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
-          ]);
-          const cardData = await cardRes.json();
-          const pageData = await pageRes.json();
-          const itemsData = await itemsRes.json();
-          const prepPagesData = await prepPagesRes.json();
-          const catPrepData = await catPrepRes.json();
-          const emptyCard = { categoria: cat, title: "", description: "", buttonText: "", imageUrl: "" };
-          const emptyPage = { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" };
-          setEntrenamientoCard(cardData.card?.lang === langParam ? cardData.card : emptyCard);
-          setEntrenamientoPage(pageData.page?.lang === langParam ? pageData.page : emptyPage);
-          setEntrenamientoItems(itemsData.items || []);
+          ];
+          if (langParam !== 'es') {
+            fetches.push(
+              fetch(`/api/entrenamiento/${cat}/card?lang=es`),
+              fetch(`/api/entrenamiento/${cat}/page?lang=es`),
+              fetch(`/api/entrenamiento/${cat}/items?lang=es`)
+            );
+          }
+          const results = await Promise.all(fetches);
+          const cardData = await results[0].json();
+          const pageData = await results[1].json();
+          const itemsData = await results[2].json();
+          const prepPagesData = await results[3].json();
+          const catPrepData = await results[4].json();
+          if (langParam !== 'es') {
+            const esCard = await results[5].json();
+            const esPage = await results[6].json();
+            const esItems = await results[7].json();
+            setEsCardRef({ title: esCard.card?.title || "", description: esCard.card?.description || "", buttonText: esCard.card?.buttonText || "" });
+            setEsPageRef({ bannerText: esPage.page?.bannerText || "", pageTitle: esPage.page?.pageTitle || "", pageDescription: esPage.page?.pageDescription || "" });
+            const hasLangCard = cardData.card?.lang === langParam;
+            const hasLangPage = pageData.card?.lang === langParam;
+            setEntrenamientoCard(hasLangCard ? cardData.card : { categoria: cat, title: "", description: "", buttonText: "", imageUrl: esCard.card?.imageUrl || "" });
+            setEntrenamientoPage(hasLangPage ? pageData.page : { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" });
+            setEntrenamientoItems((itemsData.items && itemsData.items.length > 0) ? itemsData.items : (esItems.items || []));
+          } else {
+            setEsCardRef({ title: "", description: "", buttonText: "" });
+            setEsPageRef({ bannerText: "", pageTitle: "", pageDescription: "" });
+            if (cardData.card) setEntrenamientoCard(cardData.card);
+            if (pageData.page) setEntrenamientoPage(pageData.page);
+            setEntrenamientoItems(itemsData.items || []);
+          }
           setPrepPages(prepPagesData.pages || []);
           setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
           
@@ -4093,27 +4116,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     key={cat}
                     onClick={async () => {
                       setEntrenamientoCategory(cat);
-                      try {
-                        const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
-                          fetch(`/api/entrenamiento/${cat}/card?lang=${adminEntLang}&fallback=false`),
-                          fetch(`/api/entrenamiento/${cat}/page?lang=${adminEntLang}&fallback=false`),
-                          fetch(`/api/entrenamiento/${cat}/items?lang=${adminEntLang}&fallback=false`),
-                          fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
-                          fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
-                        ]);
-                        const cardData = await cardRes.json();
-                        const pageData = await pageRes.json();
-                        const itemsData = await itemsRes.json();
-                        const prepPagesData = await prepPagesRes.json();
-                        const catPrepData = await catPrepRes.json();
-                        const emptyCard = { categoria: cat, title: "", description: "", buttonText: "", imageUrl: "" };
-                        const emptyPage = { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" };
-                        setEntrenamientoCard(cardData.card?.lang === adminEntLang ? cardData.card : emptyCard);
-                        setEntrenamientoPage(pageData.page?.lang === adminEntLang ? pageData.page : emptyPage);
-                        setEntrenamientoItems(itemsData.items || []);
-                        setPrepPages(prepPagesData.pages || []);
-                        setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
-                      } catch (e) { console.error(e); }
                     }}
                     variant={entrenamientoCategory === cat ? "default" : "outline"}
                     size="sm"
@@ -4137,6 +4139,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
                   </Button>
                 ))}
+                {adminEntLang !== 'es' && (
+                  <span className="text-yellow-400 text-xs ml-2">Editando {adminEntLang === 'en' ? 'Inglés' : 'Portugués'} — campos vacíos usarán el español</span>
+                )}
               </div>
 
               {/* Página de Preparación */}
@@ -4351,27 +4356,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     )}
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Título</label>
+                    <label className="text-white/60 text-sm">Título {adminEntLang !== 'es' && esCardRef.title && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.title})</span>}</label>
                     <Input
                       value={entrenamientoCard.title}
                       onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esCardRef.title : ""}
                       className="bg-white/10 border-teal-500/30 text-white mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Descripción</label>
+                    <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esCardRef.description && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.description.substring(0, 40)}...)</span>}</label>
                     <textarea
                       value={entrenamientoCard.description}
                       onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esCardRef.description : ""}
                       className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
                       rows={2}
                     />
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Texto del Botón</label>
+                    <label className="text-white/60 text-sm">Texto del Botón {adminEntLang !== 'es' && esCardRef.buttonText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.buttonText})</span>}</label>
                     <Input
                       value={entrenamientoCard.buttonText}
                       onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esCardRef.buttonText : ""}
                       className="bg-white/10 border-teal-500/30 text-white mt-1"
                     />
                   </div>
@@ -4400,26 +4408,29 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <div className="space-y-4 p-4 bg-white/5 rounded-xl">
                   <h3 className="text-white font-semibold">Configuración de Página</h3>
                   <div>
-                    <label className="text-white/60 text-sm">Banner (texto superior)</label>
+                    <label className="text-white/60 text-sm">Banner (texto superior) {adminEntLang !== 'es' && esPageRef.bannerText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.bannerText.substring(0, 40)}...)</span>}</label>
                     <Input
                       value={entrenamientoPage.bannerText}
                       onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esPageRef.bannerText : ""}
                       className="bg-white/10 border-teal-500/30 text-white mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Título de Página</label>
+                    <label className="text-white/60 text-sm">Título de Página {adminEntLang !== 'es' && esPageRef.pageTitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageTitle})</span>}</label>
                     <Input
                       value={entrenamientoPage.pageTitle}
                       onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esPageRef.pageTitle : ""}
                       className="bg-white/10 border-teal-500/30 text-white mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Descripción</label>
+                    <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esPageRef.pageDescription && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageDescription.substring(0, 40)}...)</span>}</label>
                     <textarea
                       value={entrenamientoPage.pageDescription}
                       onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
+                      placeholder={adminEntLang !== 'es' ? esPageRef.pageDescription : ""}
                       className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
                       rows={2}
                     />
