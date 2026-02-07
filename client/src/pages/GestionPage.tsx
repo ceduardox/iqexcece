@@ -1120,9 +1120,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         const langParam = adminEntLang;
         try {
           const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
-            fetch(`/api/entrenamiento/${cat}/card?lang=${langParam}`),
-            fetch(`/api/entrenamiento/${cat}/page?lang=${langParam}`),
-            fetch(`/api/entrenamiento/${cat}/items?lang=${langParam}`),
+            fetch(`/api/entrenamiento/${cat}/card?lang=${langParam}&fallback=false`),
+            fetch(`/api/entrenamiento/${cat}/page?lang=${langParam}&fallback=false`),
+            fetch(`/api/entrenamiento/${cat}/items?lang=${langParam}&fallback=false`),
             fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
             fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
           ]);
@@ -1131,8 +1131,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           const itemsData = await itemsRes.json();
           const prepPagesData = await prepPagesRes.json();
           const catPrepData = await catPrepRes.json();
-          if (cardData.card) setEntrenamientoCard(cardData.card);
-          if (pageData.page) setEntrenamientoPage(pageData.page);
+          const emptyCard = { categoria: cat, title: "", description: "", buttonText: "", imageUrl: "" };
+          const emptyPage = { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" };
+          setEntrenamientoCard(cardData.card?.lang === langParam ? cardData.card : emptyCard);
+          setEntrenamientoPage(pageData.page?.lang === langParam ? pageData.page : emptyPage);
           setEntrenamientoItems(itemsData.items || []);
           setPrepPages(prepPagesData.pages || []);
           setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
@@ -4093,9 +4095,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       setEntrenamientoCategory(cat);
                       try {
                         const [cardRes, pageRes, itemsRes, prepPagesRes, catPrepRes] = await Promise.all([
-                          fetch(`/api/entrenamiento/${cat}/card?lang=${adminEntLang}`),
-                          fetch(`/api/entrenamiento/${cat}/page?lang=${adminEntLang}`),
-                          fetch(`/api/entrenamiento/${cat}/items?lang=${adminEntLang}`),
+                          fetch(`/api/entrenamiento/${cat}/card?lang=${adminEntLang}&fallback=false`),
+                          fetch(`/api/entrenamiento/${cat}/page?lang=${adminEntLang}&fallback=false`),
+                          fetch(`/api/entrenamiento/${cat}/items?lang=${adminEntLang}&fallback=false`),
                           fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
                           fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
                         ]);
@@ -4104,8 +4106,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         const itemsData = await itemsRes.json();
                         const prepPagesData = await prepPagesRes.json();
                         const catPrepData = await catPrepRes.json();
-                        if (cardData.card) setEntrenamientoCard(cardData.card);
-                        if (pageData.page) setEntrenamientoPage(pageData.page);
+                        const emptyCard = { categoria: cat, title: "", description: "", buttonText: "", imageUrl: "" };
+                        const emptyPage = { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" };
+                        setEntrenamientoCard(cardData.card?.lang === adminEntLang ? cardData.card : emptyCard);
+                        setEntrenamientoPage(pageData.page?.lang === adminEntLang ? pageData.page : emptyPage);
                         setEntrenamientoItems(itemsData.items || []);
                         setPrepPages(prepPagesData.pages || []);
                         setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);

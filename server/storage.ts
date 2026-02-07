@@ -47,10 +47,13 @@ export interface IStorage {
   
   // Entrenamiento
   getEntrenamientoCard(categoria: string, lang?: string): Promise<EntrenamientoCard | null>;
+  getEntrenamientoCardExact(categoria: string, lang: string): Promise<EntrenamientoCard | null>;
   saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard>;
   getEntrenamientoPage(categoria: string, lang?: string): Promise<EntrenamientoPage | null>;
+  getEntrenamientoPageExact(categoria: string, lang: string): Promise<EntrenamientoPage | null>;
   saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage>;
   getEntrenamientoItems(categoria: string, lang?: string): Promise<EntrenamientoItem[]>;
+  getEntrenamientoItemsExact(categoria: string, lang: string): Promise<EntrenamientoItem[]>;
   getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null>;
   saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem>;
   updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null>;
@@ -348,16 +351,25 @@ export class MemStorage implements IStorage {
   async getEntrenamientoCard(_categoria: string, _lang?: string): Promise<EntrenamientoCard | null> {
     return null;
   }
+  async getEntrenamientoCardExact(_categoria: string, _lang: string): Promise<EntrenamientoCard | null> {
+    return null;
+  }
   async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
     return { id: randomUUID(), ...card, lang: card.lang || 'es', updatedAt: new Date() } as EntrenamientoCard;
   }
   async getEntrenamientoPage(_categoria: string, _lang?: string): Promise<EntrenamientoPage | null> {
     return null;
   }
+  async getEntrenamientoPageExact(_categoria: string, _lang: string): Promise<EntrenamientoPage | null> {
+    return null;
+  }
   async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
     return { id: randomUUID(), ...page, lang: page.lang || 'es', updatedAt: new Date() } as EntrenamientoPage;
   }
   async getEntrenamientoItems(_categoria: string, _lang?: string): Promise<EntrenamientoItem[]> {
+    return [];
+  }
+  async getEntrenamientoItemsExact(_categoria: string, _lang: string): Promise<EntrenamientoItem[]> {
     return [];
   }
   async getEntrenamientoItemById(_id: string): Promise<EntrenamientoItem | null> {
@@ -762,6 +774,12 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
+  async getEntrenamientoCardExact(categoria: string, lang: string): Promise<EntrenamientoCard | null> {
+    const [card] = await db.select().from(entrenamientoCards)
+      .where(and(eq(entrenamientoCards.categoria, categoria), eq(entrenamientoCards.lang, lang)));
+    return card || null;
+  }
+
   async saveEntrenamientoCard(card: InsertEntrenamientoCard): Promise<EntrenamientoCard> {
     const cardLang = card.lang || 'es';
     const [existing] = await db.select().from(entrenamientoCards)
@@ -788,6 +806,12 @@ export class DatabaseStorage implements IStorage {
       return fallback || null;
     }
     return null;
+  }
+
+  async getEntrenamientoPageExact(categoria: string, lang: string): Promise<EntrenamientoPage | null> {
+    const [page] = await db.select().from(entrenamientoPages)
+      .where(and(eq(entrenamientoPages.categoria, categoria), eq(entrenamientoPages.lang, lang)));
+    return page || null;
   }
 
   async saveEntrenamientoPage(page: InsertEntrenamientoPage): Promise<EntrenamientoPage> {
@@ -817,6 +841,12 @@ export class DatabaseStorage implements IStorage {
         .orderBy(entrenamientoItems.sortOrder);
     }
     return items;
+  }
+
+  async getEntrenamientoItemsExact(categoria: string, lang: string): Promise<EntrenamientoItem[]> {
+    return db.select().from(entrenamientoItems)
+      .where(and(eq(entrenamientoItems.categoria, categoria), eq(entrenamientoItems.lang, lang)))
+      .orderBy(entrenamientoItems.sortOrder);
   }
 
   async getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null> {

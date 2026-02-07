@@ -647,7 +647,10 @@ export async function registerRoutes(
   // Get entrenamiento card for category (public)
   app.get("/api/entrenamiento/:categoria/card", async (req, res) => {
     const lang = (req.query.lang as string) || 'es';
-    const card = await storage.getEntrenamientoCard(req.params.categoria, lang);
+    const noFallback = req.query.fallback === 'false';
+    const card = noFallback
+      ? await storage.getEntrenamientoCardExact(req.params.categoria, lang)
+      : await storage.getEntrenamientoCard(req.params.categoria, lang);
     res.json({ card: card || {
       categoria: req.params.categoria,
       title: "Entrenamiento",
@@ -660,7 +663,10 @@ export async function registerRoutes(
   // Get entrenamiento page config (public)
   app.get("/api/entrenamiento/:categoria/page", async (req, res) => {
     const lang = (req.query.lang as string) || 'es';
-    const page = await storage.getEntrenamientoPage(req.params.categoria, lang);
+    const noFallback = req.query.fallback === 'false';
+    const page = noFallback
+      ? await storage.getEntrenamientoPageExact(req.params.categoria, lang)
+      : await storage.getEntrenamientoPage(req.params.categoria, lang);
     res.json({ page: page || {
       categoria: req.params.categoria,
       bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
@@ -672,7 +678,10 @@ export async function registerRoutes(
   // Get entrenamiento items (public)
   app.get("/api/entrenamiento/:categoria/items", async (req, res) => {
     const lang = (req.query.lang as string) || 'es';
-    const items = await storage.getEntrenamientoItems(req.params.categoria, lang);
+    const noFallback = req.query.fallback === 'false';
+    const items = noFallback
+      ? await storage.getEntrenamientoItemsExact(req.params.categoria, lang)
+      : await storage.getEntrenamientoItems(req.params.categoria, lang);
     res.json({ items });
   });
 
