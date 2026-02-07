@@ -1063,5 +1063,37 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  app.post("/api/admin/translate", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const { text, targetLang } = req.body;
+    if (!text || !targetLang) return res.status(400).json({ error: "text and targetLang required" });
+    const langName = targetLang === 'en' ? 'English' : targetLang === 'pt' ? 'Portuguese' : 'Spanish';
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+      let translated = null;
+      for (const model of models) {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Translate the following text from Spanish to ${langName}. Return ONLY the translated text, nothing else. No quotes, no explanations.\n\n${text}` }] }]
+          })
+        });
+        const data = await response.json() as any;
+        if (data?.error?.status === 'RESOURCE_EXHAUSTED') continue;
+        translated = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (translated) break;
+      }
+      if (!translated) return res.status(429).json({ error: "Límite de API alcanzado. Intenta de nuevo en unos segundos." });
+      res.json({ translated });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Translation error" });
+    }
+  });
+
   return httpServer;
 }

@@ -394,6 +394,29 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return res;
   };
 
+  const [translatingField, setTranslatingField] = useState<string | null>(null);
+  const translateField = async (text: string, targetLang: string, fieldKey: string, onResult: (translated: string) => void) => {
+    if (!text) return;
+    setTranslatingField(fieldKey);
+    try {
+      const res = await adminFetch("/api/admin/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, targetLang })
+      });
+      const data = await res.json();
+      if (data.translated) {
+        onResult(data.translated);
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error("Translation error:", err);
+    } finally {
+      setTranslatingField(null);
+    }
+  };
+
   const fetchSessions = async () => {
     if (!token) return;
     setLoading(true);
@@ -4357,31 +4380,55 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                   <div>
                     <label className="text-white/60 text-sm">Título {adminEntLang !== 'es' && esCardRef.title && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.title})</span>}</label>
-                    <Input
-                      value={entrenamientoCard.title}
-                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esCardRef.title : ""}
-                      className="bg-white/10 border-teal-500/30 text-white mt-1"
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <Input
+                        value={entrenamientoCard.title}
+                        onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esCardRef.title : ""}
+                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                      />
+                      {adminEntLang !== 'es' && esCardRef.title && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'card-title'}
+                          onClick={() => translateField(esCardRef.title, adminEntLang, 'card-title', (t) => setEntrenamientoCard(prev => ({...prev, title: t})))}>
+                          {translatingField === 'card-title' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esCardRef.description && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.description.substring(0, 40)}...)</span>}</label>
-                    <textarea
-                      value={entrenamientoCard.description}
-                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esCardRef.description : ""}
-                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
-                      rows={2}
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <textarea
+                        value={entrenamientoCard.description}
+                        onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esCardRef.description : ""}
+                        className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
+                        rows={2}
+                      />
+                      {adminEntLang !== 'es' && esCardRef.description && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'card-desc'}
+                          onClick={() => translateField(esCardRef.description, adminEntLang, 'card-desc', (t) => setEntrenamientoCard(prev => ({...prev, description: t})))}>
+                          {translatingField === 'card-desc' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-white/60 text-sm">Texto del Botón {adminEntLang !== 'es' && esCardRef.buttonText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.buttonText})</span>}</label>
-                    <Input
-                      value={entrenamientoCard.buttonText}
-                      onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esCardRef.buttonText : ""}
-                      className="bg-white/10 border-teal-500/30 text-white mt-1"
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <Input
+                        value={entrenamientoCard.buttonText}
+                        onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esCardRef.buttonText : ""}
+                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                      />
+                      {adminEntLang !== 'es' && esCardRef.buttonText && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'card-btn'}
+                          onClick={() => translateField(esCardRef.buttonText, adminEntLang, 'card-btn', (t) => setEntrenamientoCard(prev => ({...prev, buttonText: t})))}>
+                          {translatingField === 'card-btn' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <Button
                     onClick={async () => {
@@ -4409,31 +4456,55 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   <h3 className="text-white font-semibold">Configuración de Página</h3>
                   <div>
                     <label className="text-white/60 text-sm">Banner (texto superior) {adminEntLang !== 'es' && esPageRef.bannerText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.bannerText.substring(0, 40)}...)</span>}</label>
-                    <Input
-                      value={entrenamientoPage.bannerText}
-                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esPageRef.bannerText : ""}
-                      className="bg-white/10 border-teal-500/30 text-white mt-1"
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <Input
+                        value={entrenamientoPage.bannerText}
+                        onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esPageRef.bannerText : ""}
+                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                      />
+                      {adminEntLang !== 'es' && esPageRef.bannerText && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'page-banner'}
+                          onClick={() => translateField(esPageRef.bannerText, adminEntLang, 'page-banner', (t) => setEntrenamientoPage(prev => ({...prev, bannerText: t})))}>
+                          {translatingField === 'page-banner' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-white/60 text-sm">Título de Página {adminEntLang !== 'es' && esPageRef.pageTitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageTitle})</span>}</label>
-                    <Input
-                      value={entrenamientoPage.pageTitle}
-                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esPageRef.pageTitle : ""}
-                      className="bg-white/10 border-teal-500/30 text-white mt-1"
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <Input
+                        value={entrenamientoPage.pageTitle}
+                        onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esPageRef.pageTitle : ""}
+                        className="bg-white/10 border-teal-500/30 text-white flex-1"
+                      />
+                      {adminEntLang !== 'es' && esPageRef.pageTitle && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'page-title'}
+                          onClick={() => translateField(esPageRef.pageTitle, adminEntLang, 'page-title', (t) => setEntrenamientoPage(prev => ({...prev, pageTitle: t})))}>
+                          {translatingField === 'page-title' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esPageRef.pageDescription && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageDescription.substring(0, 40)}...)</span>}</label>
-                    <textarea
-                      value={entrenamientoPage.pageDescription}
-                      onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
-                      placeholder={adminEntLang !== 'es' ? esPageRef.pageDescription : ""}
-                      className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 mt-1"
-                      rows={2}
-                    />
+                    <div className="flex gap-1 mt-1">
+                      <textarea
+                        value={entrenamientoPage.pageDescription}
+                        onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
+                        placeholder={adminEntLang !== 'es' ? esPageRef.pageDescription : ""}
+                        className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
+                        rows={2}
+                      />
+                      {adminEntLang !== 'es' && esPageRef.pageDescription && (
+                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'page-desc'}
+                          onClick={() => translateField(esPageRef.pageDescription, adminEntLang, 'page-desc', (t) => setEntrenamientoPage(prev => ({...prev, pageDescription: t})))}>
+                          {translatingField === 'page-desc' ? '...' : 'IA'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <Button
                     onClick={async () => {
