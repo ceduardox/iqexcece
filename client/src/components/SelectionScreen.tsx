@@ -19,7 +19,7 @@ interface SelectionScreenProps {
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
-  const { setUserData } = useUserData();
+  const { userData, setUserData } = useUserData();
   const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
   const { playClick, playCard } = useSounds();
@@ -695,7 +695,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </button>
             
             <button 
-              onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
+              onClick={(e) => { if (editorMode) { handleElementClick("nav-progreso", e); } else { setLocation(`/progreso/${userData?.ageGroup || "ninos"}`); } }}
               className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-progreso")}`}
               style={getElementStyle("nav-progreso")}
               data-testid="nav-progreso"
