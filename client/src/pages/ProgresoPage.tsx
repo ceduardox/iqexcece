@@ -105,11 +105,10 @@ export default function ProgresoPage() {
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
 
   const { data: statsData, isLoading } = useQuery<{ stats: Stats }>({
-    queryKey: ["/api/training-results/stats", sessionId, categoria],
+    queryKey: ["/api/training-results/stats", sessionId],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (sessionId) params.append("sessionId", sessionId);
-      if (categoria) params.append("categoria", categoria);
       const res = await fetch(`/api/training-results/stats?${params}`);
       return res.json();
     },
@@ -166,13 +165,12 @@ export default function ProgresoPage() {
                   border: "1px solid rgba(124, 58, 237, 0.2)"
                 }}
               >
-                <span className="text-xs text-gray-500">Categoría:</span>
                 <span 
                   className="text-sm font-semibold"
                   style={{ color: "#7c3aed" }}
                   data-testid="text-categoria"
                 >
-                  {categoriaLabels[categoria] || categoria}
+                  Todos mis ejercicios
                 </span>
               </div>
             </motion.div>
