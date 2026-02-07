@@ -554,12 +554,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getReadingContentsByCategory(categoria: string, lang: string = "es"): Promise<ReadingContent[]> {
-    return db.select().from(readingContents)
+    const results = await db.select().from(readingContents)
       .where(and(
         eq(readingContents.categoria, categoria),
         eq(readingContents.lang, lang)
       ))
       .orderBy(readingContents.temaNumero);
+    if (results.length > 0) return results;
+    if (lang !== 'es') {
+      return db.select().from(readingContents)
+        .where(and(
+          eq(readingContents.categoria, categoria),
+          eq(readingContents.lang, 'es')
+        ))
+        .orderBy(readingContents.temaNumero);
+    }
+    return results;
   }
 
   async saveReadingContent(insertContent: InsertReadingContent): Promise<ReadingContent> {
@@ -614,12 +624,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRazonamientoContentsByCategory(categoria: string, lang: string = "es"): Promise<RazonamientoContent[]> {
-    return db.select().from(razonamientoContents)
+    const results = await db.select().from(razonamientoContents)
       .where(and(
         eq(razonamientoContents.categoria, categoria),
         eq(razonamientoContents.lang, lang)
       ))
       .orderBy(razonamientoContents.temaNumero);
+    if (results.length > 0) return results;
+    if (lang !== 'es') {
+      return db.select().from(razonamientoContents)
+        .where(and(
+          eq(razonamientoContents.categoria, categoria),
+          eq(razonamientoContents.lang, 'es')
+        ))
+        .orderBy(razonamientoContents.temaNumero);
+    }
+    return results;
   }
 
   async saveRazonamientoContent(insertContent: InsertRazonamientoContent): Promise<RazonamientoContent> {

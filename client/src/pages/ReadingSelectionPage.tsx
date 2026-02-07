@@ -66,12 +66,13 @@ const getThemeStatus = (
 };
 
 export default function ReadingSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string }>();
   const { userData, setUserData } = useUserData();
   const [themes, setThemes] = useState<ReadingTheme[]>([]);
   const [progress, setProgress] = useState<ReadingProgress>({ completed: [], inProgress: null, scores: {} });
+  const lang = i18n.language || 'es';
 
   const categoryLabels: Record<string, string> = {
     preescolar: t("age.preescolarShort"),
@@ -87,7 +88,7 @@ export default function ReadingSelectionPage() {
   useEffect(() => {
     setProgress(getProgress(categoria));
     
-    fetch(`/api/reading/${categoria}/themes`)
+    fetch(`/api/reading/${categoria}/themes?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.themes && data.themes.length > 0) {
@@ -106,7 +107,7 @@ export default function ReadingSelectionPage() {
           { temaNumero: 2, title: "LA MEMORIA" },
         ]);
       });
-  }, [categoria]);
+  }, [categoria, lang]);
 
   const handleBack = useCallback(() => {
     playButtonSound();
@@ -188,7 +189,7 @@ export default function ReadingSelectionPage() {
                 className="flex items-center gap-2 px-4 py-2 rounded-full border"
                 style={{ borderColor: "#e5e7eb", backgroundColor: "white" }}
               >
-                <span className="text-sm" style={{ color: "#6b7280" }}>Etapa:</span>
+                <span className="text-sm" style={{ color: "#6b7280" }}>{t("tests.etapa")}:</span>
                 <span className="text-sm font-bold" style={{ color: "#1f2937" }}>{categoryLabel}</span>
                 <ChevronDown className="w-4 h-4" style={{ color: "#9ca3af" }} />
               </div>
@@ -212,13 +213,13 @@ export default function ReadingSelectionPage() {
             </div>
             
             <p className="text-xs mb-4" style={{ color: "#9ca3af" }}>
-              Selecciona una lectura para comenzar tu evaluación cognitiva.
+              {t("tests.selectReading")}
             </p>
 
             {recommendedTheme && (
               <>
                 <h2 className="text-sm font-bold mb-2" style={{ color: "#1f2937" }}>
-                  Recomendado <span style={{ color: "#9ca3af", fontWeight: 400 }}>(5 min)</span>
+                  {t("tests.recommended")} <span style={{ color: "#9ca3af", fontWeight: 400 }}>(5 min)</span>
                 </h2>
                 
                 <motion.div
@@ -243,14 +244,14 @@ export default function ReadingSelectionPage() {
                         {recommendedTheme.title}
                       </h3>
                       <p className="text-xs text-white/70">
-                        5 min · Fácil · <span className="text-cyan-300">Comprensión</span>
+                        5 min · {t("tests.easy")} · <span className="text-cyan-300">{t("tests.comprension")}</span>
                       </p>
                     </div>
                     <button 
                       className="px-4 py-1.5 rounded-full text-xs font-bold"
                       style={{ backgroundColor: "#00d9ff", color: "#1f2937" }}
                     >
-                      Empezar
+                      {t("exercises.empezar")}
                     </button>
                   </div>
                 </motion.div>
@@ -261,7 +262,7 @@ export default function ReadingSelectionPage() {
 
         <div className="px-5 pt-2 pb-6">
           <h2 className="text-base font-bold mb-3" style={{ color: "#1f2937" }}>
-            Lecturas disponibles
+            {t("tests.availableReadings")}
           </h2>
 
           <div className="space-y-2.5">
@@ -318,7 +319,7 @@ export default function ReadingSelectionPage() {
                           className="text-[10px] font-medium block mb-0.5"
                           style={{ color: "#9ca3af" }}
                         >
-                          Lectura {String(temaNum).padStart(2, '0')}
+                          {t("tests.reading")} {String(temaNum).padStart(2, '0')}
                         </span>
                         <h3 
                           className="text-sm font-bold truncate"
@@ -327,7 +328,7 @@ export default function ReadingSelectionPage() {
                           {theme.title}
                         </h3>
                         <p className="text-[10px]" style={{ color: "#9ca3af" }}>
-                          {index === 0 ? "5 min · Fácil" : index === 1 ? "3-5 min · Medio" : "4 min · Difícil"} · <span style={{ color: "#8a3ffc" }}>
+                          {index === 0 ? `5 min · ${t("tests.easy")}` : index === 1 ? `3-5 min · ${t("tests.medium")}` : `4 min · ${t("tests.hard")}`} · <span style={{ color: "#8a3ffc" }}>
                             {index % 2 === 0 ? t("tests.comprension") : t("tests.velocidad")}
                           </span>
                         </p>
@@ -342,7 +343,7 @@ export default function ReadingSelectionPage() {
                             >
                               <Check className="w-4 h-4" style={{ color: "#10b981" }} />
                             </div>
-                            <span className="text-[10px] font-medium" style={{ color: "#10b981" }}>Hecho</span>
+                            <span className="text-[10px] font-medium" style={{ color: "#10b981" }}>{t("tests.done")}</span>
                           </div>
                         )}
                         {isInProgress && (
@@ -353,7 +354,7 @@ export default function ReadingSelectionPage() {
                               boxShadow: "0 2px 8px rgba(138, 63, 252, 0.3)"
                             }}
                           >
-                            Continuar
+                            {t("tests.continue")}
                           </button>
                         )}
                         {themeStatus.status === "available" && !isInProgress && (
@@ -365,7 +366,7 @@ export default function ReadingSelectionPage() {
                               color: "#8a3ffc"
                             }}
                           >
-                            Iniciar
+                            {t("tests.start")}
                           </button>
                         )}
                         {isLocked && (
@@ -377,7 +378,7 @@ export default function ReadingSelectionPage() {
                               <Lock className="w-3.5 h-3.5" style={{ color: "#9ca3af" }} />
                             </div>
                             <span className="text-[9px] text-center leading-tight" style={{ color: "#9ca3af", maxWidth: 60 }}>
-                              Requiere nivel {themeStatus.requiredLevel}
+                              {t("tests.requiresLevel")} {themeStatus.requiredLevel}
                             </span>
                           </div>
                         )}

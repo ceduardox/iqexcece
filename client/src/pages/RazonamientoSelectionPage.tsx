@@ -66,13 +66,14 @@ const getThemeStatus = (
 };
 
 export default function RazonamientoSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string }>();
   const { userData, setUserData } = useUserData();
   const [themes, setThemes] = useState<RazonamientoTheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<RazonamientoProgress>({ completed: [], inProgress: null, scores: {} });
+  const lang = i18n.language || 'es';
 
   const categoryLabels: Record<string, string> = {
     preescolar: t("age.preescolarShort"),
@@ -90,7 +91,7 @@ export default function RazonamientoSelectionPage() {
     
     const fetchThemes = async () => {
       try {
-        const res = await fetch(`/api/razonamiento/${categoria}/themes`);
+        const res = await fetch(`/api/razonamiento/${categoria}/themes?lang=${lang}`);
         const data = await res.json();
         if (data.themes && data.themes.length > 0) {
           setThemes(data.themes);
@@ -110,7 +111,7 @@ export default function RazonamientoSelectionPage() {
       setLoading(false);
     };
     fetchThemes();
-  }, [categoria]);
+  }, [categoria, lang]);
 
   const handleBack = useCallback(() => {
     playButtonSound();

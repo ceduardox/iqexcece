@@ -364,7 +364,8 @@ export async function registerRoutes(
 
   app.get("/api/reading/:categoria/themes", async (req, res) => {
     const categoria = req.params.categoria;
-    const savedContents = await storage.getReadingContentsByCategory(categoria);
+    const lang = (req.query.lang as string) || 'es';
+    const savedContents = await storage.getReadingContentsByCategory(categoria, lang);
     
     const defaultThemes = defaultReadingContent[categoria] 
       ? Object.values(defaultReadingContent[categoria]).map((c: any) => ({
@@ -421,7 +422,8 @@ export async function registerRoutes(
 
   app.get("/api/razonamiento/:categoria/themes", async (req, res) => {
     const categoria = req.params.categoria;
-    const savedContents = await storage.getRazonamientoContentsByCategory(categoria);
+    const lang = (req.query.lang as string) || 'es';
+    const savedContents = await storage.getRazonamientoContentsByCategory(categoria, lang);
     
     const savedThemes = savedContents.map(c => ({
       temaNumero: c.temaNumero,
