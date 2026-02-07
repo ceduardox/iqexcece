@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play } from "lucide-react";
+import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,6 +22,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navMoreOpen, setNavMoreOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const navMoreBtnRef = useRef<HTMLButtonElement>(null);
+  const navMoreDropdownRef = useRef<HTMLDivElement>(null);
+  const [navMorePos, setNavMorePos] = useState({ bottom: 0, right: 0 });
   const { toast } = useToast();
   const { playClick, playCard } = useSounds();
   
@@ -46,6 +52,39 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     const token = localStorage.getItem("adminToken");
     setAdminToken(token);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (navMoreOpen && navMoreBtnRef.current) {
+      const rect = navMoreBtnRef.current.getBoundingClientRect();
+      setNavMorePos({
+        bottom: window.innerHeight - rect.top + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [navMoreOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        navMoreDropdownRef.current && !navMoreDropdownRef.current.contains(e.target as Node) &&
+        navMoreBtnRef.current && !navMoreBtnRef.current.contains(e.target as Node)
+      ) {
+        setNavMoreOpen(false);
+      }
+    };
+    if (navMoreOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [navMoreOpen]);
   
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
@@ -227,13 +266,53 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             )}
           </div>
           
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="absolute right-5 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            data-testid="button-menu"
-          >
-            <Menu className="w-6 h-6" strokeWidth={1.5} />
-          </button>
+          <div className="absolute right-5" ref={menuRef}>
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              data-testid="button-menu"
+            >
+              {menuOpen ? <X className="w-6 h-6" strokeWidth={1.5} /> : <Menu className="w-6 h-6" strokeWidth={1.5} />}
+            </button>
+
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl overflow-hidden z-[100]"
+                  style={{ boxShadow: "0 12px 40px rgba(124,58,237,0.15), 0 4px 12px rgba(0,0,0,0.08)" }}
+                  initial={{ opacity: 0, y: -8, scale: 0.92 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.92 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  data-testid="dropdown-header-menu"
+                >
+                  <div className="px-4 py-2.5 border-b border-purple-50" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.04), rgba(6,182,212,0.03))" }}>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Menú</span>
+                  </div>
+                  <div className="py-1">
+                    <motion.button
+                      onClick={() => { playClick(); setMenuOpen(false); setLocation("/blog"); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 active:bg-gray-50 transition-colors"
+                      whileTap={{ scale: 0.98 }}
+                      data-testid="menu-item-blog"
+                    >
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}
+                      >
+                        <Newspaper className="w-4 h-4 text-purple-500" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className="text-sm font-semibold text-gray-700 block">Blog</span>
+                        <span className="text-[10px] text-gray-400">Artículos y noticias</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </header>
       )}
 
@@ -705,7 +784,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </button>
             
             <button 
-              onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
+              onClick={(e) => { 
+                if (editorMode) { handleElementClick("nav-mas", e); } 
+                else { playClick(); setNavMoreOpen(!navMoreOpen); }
+              }}
+              ref={navMoreBtnRef}
               className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-mas")}`}
               style={getElementStyle("nav-mas")}
               data-testid="nav-mas"
@@ -716,6 +799,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
         </nav>
       )}
+
+      {navMoreDropdown}
       
       <AnimatePresence>
         {editorMode && (
