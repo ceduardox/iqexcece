@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, Fragment } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Search, Download, FileText, ChevronDown, Settings2, Calendar, Filter, X, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -654,111 +654,90 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
           </div>
         )}
 
-        <div className="hidden md:block relative">
-          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent" style={{ maxWidth: "100%" }}>
-            <table className="text-sm min-w-max" data-testid="table-lectura-results">
-              <thead>
-                <tr className="text-left text-white/60 border-b border-white/10">
-                  <th className="pb-3 px-2 w-6 sticky left-0 bg-[#0f0a1e] z-10"></th>
-                  {visibleColumns.map((col, i) => (
-                    <th key={col} className={`pb-3 px-3 text-xs whitespace-nowrap ${i === 0 ? "sticky left-6 bg-[#0f0a1e] z-10" : ""}`}>
-                      {ALL_COLUMNS.find(c => c.key === col)?.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredResults.map(r => (
-                  <Fragment key={r.id}>
-                    <tr
-                      onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
-                      className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
-                      data-testid={`row-result-${r.id}`}
-                    >
-                      <td className="py-3 px-2 sticky left-0 bg-inherit z-10">
-                        <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} />
-                      </td>
-                      {visibleColumns.map((col, i) => (
-                        <td key={col} className={`py-3 px-3 text-xs whitespace-nowrap ${i === 0 ? "sticky left-6 bg-inherit z-10" : ""} ${col === "categoriaLector" ? getLectorClass(r.categoriaLector) : col === "comprension" ? "text-cyan-400 font-bold" : col === "velocidad" ? "text-purple-400 font-bold" : "text-white/80"}`}>
-                          {getCellValue(r, col)}
-                        </td>
-                      ))}
-                    </tr>
-                    {expandedResult === r.id && (
-                      <tr key={`${r.id}-detail`} className="bg-white/5">
-                        <td colSpan={visibleColumns.length + 1} className="px-4 py-4">
-                          {(() => {
-                            const statCards: { value: string; label: string; color: string; border?: boolean }[] = [];
-                            if (!visibleColumns.includes("comprension"))
-                              statCards.push({ value: r.comprension !== null ? `${r.comprension}%` : "-", label: "Comprensión", color: "text-cyan-400" });
-                            if (!visibleColumns.includes("correctas"))
-                              statCards.push({ value: `${r.respuestasCorrectas ?? "-"}/${r.respuestasTotales ?? "-"}`, label: "Correctas", color: "text-green-400" });
-                            if (!visibleColumns.includes("velocidad"))
-                              statCards.push({ value: r.velocidadLectura ? `${r.velocidadLectura}` : "-", label: "Palabras/min", color: "text-purple-400" });
-                            statCards.push({ value: formatTime(r.tiempoLectura), label: "T. Lectura", color: "text-cyan-400" });
-                            statCards.push({ value: formatTime(r.tiempoCuestionario), label: "T. Preguntas", color: "text-purple-400" });
-                            if (!visibleColumns.includes("categoriaLector"))
-                              statCards.push({ value: r.categoriaLector || "-", label: "Categoría", color: getLectorClass(r.categoriaLector), border: true });
-
-                            const detailFields: { label: string; value: string | null; color: string; colKey?: ColumnKey }[] = [
-                              { label: "Email", value: r.email, color: "text-white/80", colKey: "email" },
-                              { label: "Edad", value: r.edad, color: "text-white/80", colKey: "edad" },
-                              { label: "Teléfono", value: r.telefono, color: "text-white/80", colKey: "telefono" },
-                              { label: "País", value: r.pais, color: "text-cyan-400", colKey: "pais" },
-                              { label: "Estado", value: r.estado || r.ciudad, color: "text-cyan-400", colKey: "estado" },
-                              { label: "Grado", value: r.grado, color: "text-yellow-400", colKey: "grado" },
-                              { label: "Institución", value: r.institucion, color: "text-cyan-400", colKey: "institucion" },
-                            ];
-                            const hiddenDetails = detailFields.filter(f => !f.colKey || !visibleColumns.includes(f.colKey));
-
-                            const extraFields: { label: string; value: string | null; color: string }[] = [];
-                            if (r.tipoEstudiante) extraFields.push({ label: "Perfil", value: r.tipoEstudiante, color: "text-purple-400" });
-                            if (r.semestre && !visibleColumns.includes("semestre")) extraFields.push({ label: "Semestre", value: r.semestre, color: "text-purple-400" });
-                            if (r.profesion) extraFields.push({ label: "Profesión", value: r.profesion, color: "text-green-400" });
-                            if (r.ocupacion) extraFields.push({ label: "Ocupación", value: r.ocupacion, color: "text-green-400" });
-                            if (r.lugarTrabajo) extraFields.push({ label: "Lugar Trabajo", value: r.lugarTrabajo, color: "text-green-400" });
-
-                            const allDetails = [...hiddenDetails, ...extraFields];
-
-                            return (
-                              <>
-                                {statCards.length > 0 && (
-                                  <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg p-4 mb-3 border border-cyan-500/20">
-                                    <div className={`grid gap-3 text-center`} style={{ gridTemplateColumns: `repeat(${Math.min(statCards.length, 6)}, 1fr)` }}>
-                                      {statCards.map((card, idx) => (
-                                        <div key={idx} className={`bg-black/30 rounded-lg p-2 ${card.border ? "border border-yellow-500/30" : ""}`}>
-                                          <div className={`font-bold ${card.border ? "text-xs leading-tight" : "text-lg"} ${card.color}`}>{card.value}</div>
-                                          <div className="text-white/50 text-xs mt-1">{card.label}</div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                                {(allDetails.length > 0 || r.comentario) && (
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                    {allDetails.map((f, idx) => (
-                                      <div key={idx}><span className="text-white/50">{f.label}:</span> <span className={f.color}>{f.value || "-"}</span></div>
-                                    ))}
-                                    {r.comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/50">Comentario:</span> <span className="text-white/80">{r.comentario}</span></div>}
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-sm" data-testid="table-lectura-results">
+            <thead>
+              <tr className="text-left text-white/60 border-b border-white/10">
+                <th className="pb-3 px-2 w-6"></th>
+                {visibleColumns.map(col => (
+                  <th key={col} className="pb-3 px-2 text-xs">{ALL_COLUMNS.find(c => c.key === col)?.label}</th>
                 ))}
-                {filteredResults.length === 0 && (
-                  <tr><td colSpan={visibleColumns.length + 1} className="py-8 text-center text-white/40">No hay resultados {hasActiveFilters ? "con los filtros aplicados" : "registrados"}</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          {visibleColumns.length > 8 && (
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#0f0a1e] to-transparent pointer-events-none z-20" />
-          )}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResults.map(r => (
+                <>
+                  <tr
+                    key={r.id}
+                    onClick={() => setExpandedResult(expandedResult === r.id ? null : r.id)}
+                    className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                    data-testid={`row-result-${r.id}`}
+                  >
+                    <td className="py-3 px-2">
+                      <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${expandedResult === r.id ? "rotate-180" : ""}`} />
+                    </td>
+                    {visibleColumns.map(col => (
+                      <td key={col} className={`py-3 px-2 text-xs ${col === "categoriaLector" ? getLectorClass(r.categoriaLector) : col === "comprension" ? "text-cyan-400 font-bold" : col === "velocidad" ? "text-purple-400 font-bold" : "text-white/80"}`}>
+                        {getCellValue(r, col)}
+                      </td>
+                    ))}
+                  </tr>
+                  {expandedResult === r.id && (
+                    <tr key={`${r.id}-detail`} className="bg-white/5">
+                      <td colSpan={visibleColumns.length + 1} className="px-4 py-4">
+                        <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg p-4 mb-3 border border-cyan-500/20">
+                          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 text-center">
+                            <div className="bg-black/30 rounded-lg p-2">
+                              <div className="text-cyan-400 font-bold text-lg">{r.comprension !== null ? `${r.comprension}%` : "-"}</div>
+                              <div className="text-white/50 text-xs">Comprensión</div>
+                            </div>
+                            <div className="bg-black/30 rounded-lg p-2">
+                              <div className="text-green-400 font-bold text-lg">{r.respuestasCorrectas ?? "-"}/{r.respuestasTotales ?? "-"}</div>
+                              <div className="text-white/50 text-xs">Correctas</div>
+                            </div>
+                            <div className="bg-black/30 rounded-lg p-2">
+                              <div className="text-purple-400 font-bold text-lg">{r.velocidadLectura ?? "-"}</div>
+                              <div className="text-white/50 text-xs">Palabras/min</div>
+                            </div>
+                            <div className="bg-black/30 rounded-lg p-2">
+                              <div className="text-cyan-400 font-bold text-lg">{formatTime(r.tiempoLectura)}</div>
+                              <div className="text-white/50 text-xs">T. Lectura</div>
+                            </div>
+                            <div className="bg-black/30 rounded-lg p-2">
+                              <div className="text-purple-400 font-bold text-lg">{formatTime(r.tiempoCuestionario)}</div>
+                              <div className="text-white/50 text-xs">T. Preguntas</div>
+                            </div>
+                            <div className="bg-black/30 rounded-lg p-2 border border-yellow-500/30">
+                              <div className={`font-bold text-xs leading-tight ${getLectorClass(r.categoriaLector)}`}>{r.categoriaLector || "-"}</div>
+                              <div className="text-white/50 text-[10px] mt-1">Categoría</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                          <div><span className="text-white/50">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
+                          <div><span className="text-white/50">Edad:</span> <span className="text-white/80">{r.edad || "-"}</span></div>
+                          <div><span className="text-white/50">Teléfono:</span> <span className="text-white/80">{r.telefono || "-"}</span></div>
+                          <div><span className="text-white/50">País:</span> <span className="text-cyan-400">{r.pais || "-"}</span></div>
+                          <div><span className="text-white/50">Estado:</span> <span className="text-cyan-400">{r.estado || r.ciudad || "-"}</span></div>
+                          <div><span className="text-white/50">Grado:</span> <span className="text-yellow-400">{r.grado || "-"}</span></div>
+                          <div><span className="text-white/50">Institución:</span> <span className="text-cyan-400">{r.institucion || "-"}</span></div>
+                          {r.tipoEstudiante && <div><span className="text-white/50">Perfil:</span> <span className="text-purple-400">{r.tipoEstudiante}</span></div>}
+                          {r.semestre && <div><span className="text-white/50">Semestre:</span> <span className="text-purple-400">{r.semestre}</span></div>}
+                          {r.profesion && <div><span className="text-white/50">Profesión:</span> <span className="text-green-400">{r.profesion}</span></div>}
+                          {r.ocupacion && <div><span className="text-white/50">Ocupación:</span> <span className="text-green-400">{r.ocupacion}</span></div>}
+                          {r.lugarTrabajo && <div><span className="text-white/50">Lugar Trabajo:</span> <span className="text-green-400">{r.lugarTrabajo}</span></div>}
+                          {r.comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/50">Comentario:</span> <span className="text-white/80">{r.comentario}</span></div>}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+              {filteredResults.length === 0 && (
+                <tr><td colSpan={visibleColumns.length + 1} className="py-8 text-center text-white/40">No hay resultados {hasActiveFilters ? "con los filtros aplicados" : "registrados"}</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         <div className="md:hidden space-y-2">
