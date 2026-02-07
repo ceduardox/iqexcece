@@ -658,10 +658,9 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                       const radius = oR + 18;
                       const x = cx + radius * Math.cos(-midAngle * RADIAN);
                       const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                      const short = name.length > 12 ? name.slice(0, 10) + ".." : name;
                       return (
                         <text x={x} y={y} fill="#ffffffcc" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={9}>
-                          {`${short}: ${value}`}
+                          {`${name}: ${value}`}
                         </text>
                       );
                     }}
