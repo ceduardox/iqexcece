@@ -1,9 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen, Check } from "lucide-react";
+import { Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { languages } from "@/lib/i18n";
-import { FlagIcon } from "./FlagIcon";
+import { LanguageButton } from "./LanguageButton";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,12 +20,10 @@ interface SelectionScreenProps {
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [navMoreOpen, setNavMoreOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { playClick, playCard } = useSounds();
   
@@ -52,16 +49,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     const token = localStorage.getItem("adminToken");
     setAdminToken(token);
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [menuOpen]);
 
   
   useEffect(() => {
@@ -244,58 +231,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             )}
           </div>
           
-          <div className="absolute right-5" ref={menuRef}>
-            <motion.button 
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="relative p-2 rounded-full"
-              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.08))" }}
-              whileTap={{ scale: 0.9 }}
-              data-testid="button-lang"
-            >
-              <motion.div
-                animate={{ rotate: menuOpen ? 180 : 0 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
-                <Globe className="w-5 h-5" strokeWidth={1.8} style={{ color: "#7c3aed" }} />
-              </motion.div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)" }} />
-            </motion.button>
-
-            <AnimatePresence>
-              {menuOpen && (
-                <motion.div
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl overflow-hidden z-[100]"
-                  style={{ boxShadow: "0 12px 40px rgba(124,58,237,0.15), 0 4px 12px rgba(0,0,0,0.08)" }}
-                  initial={{ opacity: 0, y: -8, scale: 0.92 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.92 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  data-testid="dropdown-lang"
-                >
-                  <div className="px-4 py-2 border-b border-purple-50" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.04), rgba(6,182,212,0.03))" }}>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t("nav.idioma")}</span>
-                  </div>
-                  <div className="py-1">
-                    {languages.map((lang) => {
-                      const isActive = i18n.language === lang.code || i18n.language.startsWith(lang.code);
-                      return (
-                        <motion.button
-                          key={lang.code}
-                          onClick={() => { if (lang.disabled) return; playClick(); i18n.changeLanguage(lang.code); setMenuOpen(false); }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 active:bg-gray-50 transition-colors ${isActive ? "bg-purple-50/50" : ""} ${lang.disabled ? "opacity-40" : ""}`}
-                          whileTap={lang.disabled ? {} : { scale: 0.98 }}
-                          data-testid={`lang-${lang.code}`}
-                        >
-                          <FlagIcon code={lang.code} size={22} />
-                          <span className={`text-sm flex-1 text-left ${isActive ? "font-bold text-purple-600" : "font-medium text-gray-600"}`}>{lang.label}</span>
-                          {isActive && <Check className="w-4 h-4 text-purple-500" />}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="absolute right-5">
+            <LanguageButton />
           </div>
         </header>
       )}
@@ -342,9 +279,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                     style={getElementStyle("hero-title")}
                   >
-                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Activa la</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
                     <br />
-                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Inteligencia</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
                     <br />
                     <span style={{ 
                       background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -361,7 +298,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                     style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                   >
-                    Un método científico de
+                    {styles["hero-subtitle"]?.buttonText || t("home.heroSubtitle1")}
                   </motion.p>
                   <motion.p 
                     initial={{ opacity: 0, y: 20 }}
@@ -371,7 +308,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                     style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
                   >
-                    entrenamiento cognitivo
+                    {styles["hero-subtitle2"]?.buttonText || t("home.heroSubtitle2")}
                   </motion.p>
                   
                   <motion.p 
@@ -382,7 +319,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                     style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                   >
-                    basado en neuroplasticidad y activación de <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                    {t("home.heroDesc")} <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
                   </motion.p>
                 </div>
               </div>
@@ -409,9 +346,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                   style={getElementStyle("hero-title")}
                 >
-                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Activa la</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
                   <br />
-                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>Inteligencia</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
                   <br />
                   <span style={{ 
                     background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -428,7 +365,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                   style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                 >
-                  Un método científico de
+                  {styles["hero-subtitle"]?.buttonText || t("home.heroSubtitle1")}
                 </motion.p>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
@@ -438,7 +375,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                   style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
                 >
-                  entrenamiento cognitivo
+                  {styles["hero-subtitle2"]?.buttonText || t("home.heroSubtitle2")}
                 </motion.p>
                 
                 <motion.p 
@@ -449,7 +386,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                   style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                 >
-                  basado en neuroplasticidad y activación de <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>ondas gamma</span>, diseñado para optimizar la forma en que el cerebro aprende y procesa información en todas las etapas de la vida.
+                  {t("home.heroDesc")} <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
                 </motion.p>
               </div>
             </div>
@@ -467,7 +404,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               onClick={(e) => { if (editorMode) handleElementClick("section-diagnostico", e); }}
               style={{ color: styles["section-diagnostico"]?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
             >
-              Diagnóstico inicial
+              {t("home.sectionDiagnostico")}
             </h2>
             
             <div 
@@ -496,14 +433,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-tests", e); }}}
                     style={{ color: styles["title-tests"]?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
                   >
-                    Diagnóstico Cognitivo
+                    {t("home.cardTestsTitle")}
                   </h3>
                   <p 
                     className={`text-xs leading-snug ${getEditableClass("desc-tests")}`}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-tests", e); }}}
                     style={{ color: styles["desc-tests"]?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
                   >
-                    Conoce tu punto de partida y cómo funciona tu mente.
+                    {t("home.cardTestsDesc")}
                   </p>
                 </div>
               </div>
@@ -529,7 +466,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || "Iniciar diagnóstico"}</span>
+                  <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || t("home.btnDiagnostico")}</span>
                 </motion.button>
               </div>
             </div>
@@ -566,14 +503,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-training", e); }}}
                     style={{ color: styles["title-training"]?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
                   >
-                    Entrenamiento
+                    {t("home.cardTrainingTitle")}
                   </h3>
                   <p 
                     className={`text-xs leading-snug ${getEditableClass("desc-training")}`}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-training", e); }}}
                     style={{ color: styles["desc-training"]?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
                   >
-                    Ejercicios diseñados para activar, decodificar y estructurar el aprendizaje.
+                    {t("home.cardTrainingDesc")}
                   </p>
                 </div>
               </div>
@@ -599,7 +536,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || "Iniciar entrenamiento"}</span>
+                  <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || t("home.btnEntrenamiento")}</span>
                 </motion.button>
               </div>
             </div>
@@ -619,14 +556,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
                 style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
               >
-                Método X
+                {t("home.metodoX")}
               </h3>
               <p 
                 className={`text-xs ${getEditableClass("desc-metodox")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
                 style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
               >
-                Sistema de Neuro Aceleración Cognitiva
+                {t("home.metodoXDesc")}
               </p>
             </div>
             
@@ -639,7 +576,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               }}
               data-testid="button-conocer-metodo"
             >
-              <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || "Conocer el método"}</span>
+              <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || t("home.btnMetodo")}</span>
               <span 
                 className={getEditableClass("icon-btn-metodo")}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
@@ -664,7 +601,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               onClick={(e) => { if (editorMode) handleElementClick("title-contacto", e); }}
               style={{ color: styles["title-contacto"]?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
             >
-              Contáctanos
+              {t("home.contactanos")}
             </h3>
             
             <div className="flex gap-2">
