@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Home, Brain, Dumbbell, BarChart3 } from "lucide-react";
+import { Home, Brain, Dumbbell, BarChart3, Newspaper } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 
@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { id: "tests", icon: Brain, label: "Diagnóstico", path: "/tests" },
   { id: "entrena", icon: Dumbbell, label: "Entrena", path: "/entrenamiento" },
   { id: "progreso", icon: BarChart3, label: "Progreso", path: "/progreso" },
+  { id: "blog", icon: Newspaper, label: "Blog", path: "/blog" },
 ];
 
 export function BottomNavBar() {
@@ -26,6 +27,7 @@ export function BottomNavBar() {
     if (location.startsWith("/tests")) return "tests";
     if (location.startsWith("/entrenamiento")) return "entrena";
     if (location.startsWith("/progreso")) return "progreso";
+    if (location.startsWith("/blog")) return "blog";
     return "";
   };
 

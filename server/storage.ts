@@ -1,9 +1,9 @@
-import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, type TrainingResult, type InsertTrainingResult, type Institucion, type InsertInstitucion, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles, trainingResults, instituciones } from "@shared/schema";
+import { type User, type InsertUser, type UserSession, type InsertUserSession, type QuizResult, type InsertQuizResult, type ReadingContent, type InsertReadingContent, type RazonamientoContent, type InsertRazonamientoContent, type CerebralContent, type InsertCerebralContent, type CerebralResult, type InsertCerebralResult, type EntrenamientoCard, type InsertEntrenamientoCard, type EntrenamientoPage, type InsertEntrenamientoPage, type EntrenamientoItem, type InsertEntrenamientoItem, type VelocidadEjercicio, type InsertVelocidadEjercicio, type NumerosEjercicio, type InsertNumerosEjercicio, type AceleracionEjercicio, type InsertAceleracionEjercicio, type PageStyle, type InsertPageStyle, type TrainingResult, type InsertTrainingResult, type Institucion, type InsertInstitucion, type BlogCategory, type InsertBlogCategory, type BlogPost, type InsertBlogPost, users, userSessions, quizResults, readingContents, razonamientoContents, cerebralContents, cerebralIntros, cerebralResults, uploadedImages, entrenamientoCards, entrenamientoPages, entrenamientoItems, prepPages, categoriaPrepPage, velocidadEjercicios, numerosEjercicios, aceleracionEjercicios, pageStyles, trainingResults, instituciones, blogCategories, blogPosts } from "@shared/schema";
 
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
 import { randomUUID } from "crypto";
-import { eq, desc, and, gt } from "drizzle-orm";
+import { eq, desc, and, gt, count, sql } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -96,6 +96,17 @@ export interface IStorage {
   getInstituciones(pais?: string, estado?: string, tipo?: string): Promise<Institucion[]>;
   saveInstitucion(inst: InsertInstitucion): Promise<Institucion>;
   deleteInstitucion(id: string): Promise<void>;
+
+  // Blog
+  getBlogCategories(): Promise<BlogCategory[]>;
+  saveBlogCategory(cat: InsertBlogCategory): Promise<BlogCategory>;
+  updateBlogCategory(id: string, data: Partial<InsertBlogCategory>): Promise<BlogCategory | null>;
+  deleteBlogCategory(id: string): Promise<void>;
+  getBlogPosts(categoriaId?: string, estado?: string, page?: number, limit?: number): Promise<{ posts: BlogPost[]; total: number }>;
+  getBlogPost(id: string): Promise<BlogPost | null>;
+  saveBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: string, data: Partial<InsertBlogPost>): Promise<BlogPost | null>;
+  deleteBlogPost(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -407,6 +418,15 @@ export class MemStorage implements IStorage {
   async getInstituciones(_pais?: string, _estado?: string, _tipo?: string): Promise<Institucion[]> { return []; }
   async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> { return { id: randomUUID(), ...inst } as Institucion; }
   async deleteInstitucion(_id: string): Promise<void> {}
+  async getBlogCategories(): Promise<BlogCategory[]> { return []; }
+  async saveBlogCategory(cat: InsertBlogCategory): Promise<BlogCategory> { return { id: randomUUID(), ...cat } as BlogCategory; }
+  async updateBlogCategory(_id: string, _data: Partial<InsertBlogCategory>): Promise<BlogCategory | null> { return null; }
+  async deleteBlogCategory(_id: string): Promise<void> {}
+  async getBlogPosts(): Promise<{ posts: BlogPost[]; total: number }> { return { posts: [], total: 0 }; }
+  async getBlogPost(_id: string): Promise<BlogPost | null> { return null; }
+  async saveBlogPost(post: InsertBlogPost): Promise<BlogPost> { return { id: randomUUID(), ...post, createdAt: new Date(), updatedAt: new Date() } as BlogPost; }
+  async updateBlogPost(_id: string, _data: Partial<InsertBlogPost>): Promise<BlogPost | null> { return null; }
+  async deleteBlogPost(_id: string): Promise<void> {}
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1011,6 +1031,63 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInstitucion(id: string): Promise<void> {
     await db.delete(instituciones).where(eq(instituciones.id, id));
+  }
+
+  async getBlogCategories(): Promise<BlogCategory[]> {
+    return db.select().from(blogCategories).orderBy(blogCategories.orden);
+  }
+
+  async saveBlogCategory(cat: InsertBlogCategory): Promise<BlogCategory> {
+    const [result] = await db.insert(blogCategories).values(cat).returning();
+    return result;
+  }
+
+  async updateBlogCategory(id: string, data: Partial<InsertBlogCategory>): Promise<BlogCategory | null> {
+    const [result] = await db.update(blogCategories).set(data).where(eq(blogCategories.id, id)).returning();
+    return result || null;
+  }
+
+  async deleteBlogCategory(id: string): Promise<void> {
+    await db.delete(blogCategories).where(eq(blogCategories.id, id));
+  }
+
+  async getBlogPosts(categoriaId?: string, estado?: string, page: number = 1, limit: number = 10): Promise<{ posts: BlogPost[]; total: number }> {
+    const conditions = [];
+    if (categoriaId) conditions.push(eq(blogPosts.categoriaId, categoriaId));
+    if (estado) conditions.push(eq(blogPosts.estado, estado));
+    
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    
+    const [countResult] = await db.select({ value: count() }).from(blogPosts).where(whereClause);
+    const total = countResult?.value || 0;
+    
+    const offset = (page - 1) * limit;
+    let posts: BlogPost[];
+    if (whereClause) {
+      posts = await db.select().from(blogPosts).where(whereClause).orderBy(desc(blogPosts.createdAt)).limit(limit).offset(offset);
+    } else {
+      posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).limit(limit).offset(offset);
+    }
+    return { posts, total };
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | null> {
+    const [result] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+    return result || null;
+  }
+
+  async saveBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const [result] = await db.insert(blogPosts).values(post).returning();
+    return result;
+  }
+
+  async updateBlogPost(id: string, data: Partial<InsertBlogPost>): Promise<BlogPost | null> {
+    const [result] = await db.update(blogPosts).set({ ...data, updatedAt: new Date() }).where(eq(blogPosts.id, id)).returning();
+    return result || null;
+  }
+
+  async deleteBlogPost(id: string): Promise<void> {
+    await db.delete(blogPosts).where(eq(blogPosts.id, id));
   }
 }
 

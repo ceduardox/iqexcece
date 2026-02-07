@@ -364,3 +364,32 @@ export const instituciones = pgTable("instituciones", {
 export const insertInstitucionSchema = createInsertSchema(instituciones).omit({ id: true });
 export type Institucion = typeof instituciones.$inferSelect;
 export type InsertInstitucion = z.infer<typeof insertInstitucionSchema>;
+
+export const blogCategories = pgTable("blog_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nombre: text("nombre").notNull(),
+  color: text("color").default("#7c3aed"),
+  orden: integer("orden").default(0),
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertBlogCategorySchema = createInsertSchema(blogCategories).omit({ id: true });
+export type BlogCategory = typeof blogCategories.$inferSelect;
+export type InsertBlogCategory = z.infer<typeof insertBlogCategorySchema>;
+
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  titulo: text("titulo").notNull(),
+  descripcion: text("descripcion"),
+  imagenPortada: text("imagen_portada"),
+  contenido: text("contenido").notNull(),
+  categoriaId: text("categoria_id"),
+  estado: text("estado").default("borrador"),
+  autor: text("autor").default("IQ Exponencial"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;

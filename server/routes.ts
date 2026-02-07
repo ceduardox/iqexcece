@@ -959,5 +959,95 @@ export async function registerRoutes(
     res.json({ style });
   });
 
+  // Blog categories (public)
+  app.get("/api/blog-categories", async (req, res) => {
+    const categories = await storage.getBlogCategories();
+    res.json({ categories: categories.filter(c => c.isActive) });
+  });
+
+  // Blog posts (public - only published)
+  app.get("/api/blog-posts", async (req, res) => {
+    const categoriaId = req.query.categoriaId as string;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const { posts, total } = await storage.getBlogPosts(categoriaId || undefined, "publicado", page, limit);
+    res.json({ posts, total, page, totalPages: Math.ceil(total / limit) });
+  });
+
+  app.get("/api/blog-posts/:id", async (req, res) => {
+    const post = await storage.getBlogPost(req.params.id);
+    if (!post || post.estado !== "publicado") return res.status(404).json({ error: "Post not found" });
+    res.json({ post });
+  });
+
+  // Admin blog categories
+  app.get("/api/admin/blog-categories", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const categories = await storage.getBlogCategories();
+    res.json({ categories });
+  });
+
+  app.post("/api/admin/blog-categories", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const result = await storage.saveBlogCategory(req.body);
+    res.json({ success: true, category: result });
+  });
+
+  app.put("/api/admin/blog-categories/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const result = await storage.updateBlogCategory(req.params.id, req.body);
+    res.json({ success: true, category: result });
+  });
+
+  app.delete("/api/admin/blog-categories/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    await storage.deleteBlogCategory(req.params.id);
+    res.json({ success: true });
+  });
+
+  // Admin blog posts
+  app.get("/api/admin/blog-posts", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const categoriaId = req.query.categoriaId as string;
+    const estado = req.query.estado as string;
+    const page = parseInt(req.query.page as string) || 1;
+    const { posts, total } = await storage.getBlogPosts(categoriaId || undefined, estado || undefined, page, 50);
+    res.json({ posts, total });
+  });
+
+  app.post("/api/admin/blog-posts", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const result = await storage.saveBlogPost(req.body);
+    res.json({ success: true, post: result });
+  });
+
+  app.put("/api/admin/blog-posts/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const result = await storage.updateBlogPost(req.params.id, req.body);
+    res.json({ success: true, post: result });
+  });
+
+  app.delete("/api/admin/blog-posts/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    await storage.deleteBlogPost(req.params.id);
+    res.json({ success: true });
+  });
+
   return httpServer;
 }

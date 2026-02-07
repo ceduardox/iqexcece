@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Home, Brain, Dumbbell, BarChart3, type LucideIcon } from "lucide-react";
+import { Home, Brain, Dumbbell, BarChart3, Newspaper, type LucideIcon } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 
 export interface NavItem {
@@ -22,6 +22,7 @@ const defaultItems = (categoria: string): NavItem[] => [
   { id: "diagnostico", icon: Brain, label: "Diagnóstico", path: `/reading-selection/${categoria}` },
   { id: "entrenar", icon: Dumbbell, label: "Entrenar", path: "/entrenamiento" },
   { id: "progreso", icon: BarChart3, label: "Progreso", path: `/progreso/${categoria}` },
+  { id: "blog", icon: Newspaper, label: "Blog", path: "/blog" },
 ];
 
 export function TrainingNavBar({ 
