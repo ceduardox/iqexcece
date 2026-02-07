@@ -267,7 +267,9 @@ export default function VelocidadExercisePage() {
     setResultSubmitted(true);
     const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
                   (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
     const totalResp = correctos + incorrectos;
+    const puntaje = totalResp > 0 ? Math.round((correctos / totalResp) * 100) : 0;
     fetch("/api/quiz/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -277,12 +279,29 @@ export default function VelocidadExercisePage() {
         testType: "velocidad",
         respuestasCorrectas: correctos,
         respuestasTotales: totalResp,
-        comprension: totalResp > 0 ? Math.round((correctos / totalResp) * 100) : 0,
+        comprension: puntaje,
         velocidadMaxima: velocidadMaxAlcanzada,
         isPwa: isPwa,
       }),
     }).catch(e => console.error("Error saving result:", e));
-  }, [gameState, resultSubmitted, correctos, incorrectos, velocidadMaxAlcanzada, categoria]);
+    fetch("/api/training-results", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId || null,
+        categoria: categoria || "general",
+        tipoEjercicio: "velocidad",
+        ejercicioTitulo: titulo || "Velocidad Lectora",
+        puntaje,
+        nivelAlcanzado: ejercicioActual + 1,
+        tiempoSegundos: 0,
+        palabrasPorMinuto: velocidadMaxAlcanzada,
+        respuestasCorrectas: correctos,
+        respuestasTotales: totalResp,
+        isPwa,
+      }),
+    }).catch(e => console.error("Error saving training result:", e));
+  }, [gameState, resultSubmitted, correctos, incorrectos, velocidadMaxAlcanzada, categoria, ejercicioActual, titulo]);
 
   const handleRespuesta = (opcion: string) => {
     const esCorrecta = opcion.toLowerCase() === respuestaCorrecta.toLowerCase();

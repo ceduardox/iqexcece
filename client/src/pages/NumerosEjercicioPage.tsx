@@ -59,6 +59,31 @@ export default function NumerosEjercicioPage() {
     return "Encuentra el siguiente número en el tablero:";
   };
 
+  const saveTrainingResult = (correctas: number, incorrectas: number, tiempoUsado: number) => {
+    const sessionId = localStorage.getItem("iq_session_id");
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
+                  (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    const storedPath = sessionStorage.getItem("numerosNivelesPath") || "";
+    const cat = storedPath.split("/")[2] || "ninos";
+    const total = correctas + incorrectas;
+    fetch("/api/training-results", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId || null,
+        categoria: cat,
+        tipoEjercicio: "numeros",
+        ejercicioTitulo: `Números - ${getNivelNombre()}`,
+        puntaje: total > 0 ? Math.round((correctas / total) * 100) : 0,
+        nivelAlcanzado: correctas,
+        tiempoSegundos: tiempoUsado,
+        respuestasCorrectas: correctas,
+        respuestasTotales: total,
+        isPwa,
+      }),
+    }).catch(e => console.error("Error saving training result:", e));
+  };
+
   useEffect(() => {
     const storedNivel = sessionStorage.getItem("numerosNivelSeleccionado");
     if (storedNivel === "letras" || storedNivel === "romanos" || storedNivel === "numeros") {
@@ -91,6 +116,7 @@ export default function NumerosEjercicioPage() {
         tiempo: 60,
         nivel: getNivelNombre()
       }));
+      saveTrainingResult(correctCount, incorrectCount, 60);
       navigate("/numeros-resultado");
       return;
     }
@@ -148,6 +174,7 @@ export default function NumerosEjercicioPage() {
           tiempo: 60 - timeLeft,
           nivel: getNivelNombre()
         }));
+        saveTrainingResult(correctCount + 1, incorrectCount, 60 - timeLeft);
         navigate("/numeros-resultado");
       } else {
         setTargetIndex(t => t + 1);
