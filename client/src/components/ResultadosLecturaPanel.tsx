@@ -207,15 +207,16 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
       if (lectorFilter !== "all" && r.categoriaLector !== lectorFilter) return false;
 
       if (dateFrom) {
-        const from = new Date(dateFrom);
         const created = r.createdAt ? new Date(r.createdAt) : null;
-        if (!created || created < from) return false;
+        if (!created) return false;
+        const createdDateStr = `${created.getFullYear()}-${String(created.getMonth()+1).padStart(2,"0")}-${String(created.getDate()).padStart(2,"0")}`;
+        if (createdDateStr < dateFrom) return false;
       }
       if (dateTo) {
-        const to = new Date(dateTo);
-        to.setHours(23, 59, 59, 999);
         const created = r.createdAt ? new Date(r.createdAt) : null;
-        if (!created || created > to) return false;
+        if (!created) return false;
+        const createdDateStr = `${created.getFullYear()}-${String(created.getMonth()+1).padStart(2,"0")}-${String(created.getDate()).padStart(2,"0")}`;
+        if (createdDateStr > dateTo) return false;
       }
 
       if (searchText.trim()) {
