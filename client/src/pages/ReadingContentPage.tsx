@@ -63,7 +63,7 @@ Otros, en cambio, creen que los programas de eutanasia están en contraposición
 };
 
 export default function ReadingContentPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { userData } = useUserData();
 
   const categoryLabels: Record<string, string> = {
@@ -107,7 +107,8 @@ export default function ReadingContentPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const res = await fetch(`/api/reading/${categoria}?tema=${selectedTema}`);
+        const lang = i18n.language || 'es';
+        const res = await fetch(`/api/reading/${categoria}?tema=${selectedTema}&lang=${lang}`);
         const data = await res.json();
         if (data.content) {
           const questions = typeof data.content.questions === 'string' 
@@ -124,7 +125,7 @@ export default function ReadingContentPage() {
       }
     };
     fetchContent();
-  }, [categoria, selectedTema]);
+  }, [categoria, selectedTema, i18n.language]);
 
   useEffect(() => {
     if (quizFinished) return;

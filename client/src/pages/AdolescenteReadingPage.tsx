@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Plus, Circle, Diamond, Star, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -74,10 +75,13 @@ function FloatingElements() {
 
 export default function AdolescenteReadingPage() {
   const [, setLocation] = useLocation();
+  const { i18n } = useTranslation();
   const { userData } = useUserData();
+  const lang = i18n.language || 'es';
 
   const { data: contentData, isLoading } = useQuery<{ content: ReadingContent }>({
-    queryKey: ["/api/reading/adolescentes"],
+    queryKey: ["/api/reading/adolescentes", lang],
+    queryFn: () => fetch(`/api/reading/adolescentes?tema=1&lang=${lang}`).then(r => r.json()),
   });
 
   const handleBack = useCallback(() => {

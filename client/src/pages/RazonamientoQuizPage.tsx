@@ -25,7 +25,7 @@ const playButtonSound = () => {
 };
 
 export default function RazonamientoQuizPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ category?: string; tema?: string }>();
   const { userData, setUserData } = useUserData();
@@ -58,7 +58,8 @@ export default function RazonamientoQuizPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const res = await fetch(`/api/razonamiento/${categoria}?tema=${tema}`);
+        const lang = i18n.language || 'es';
+        const res = await fetch(`/api/razonamiento/${categoria}?tema=${tema}&lang=${lang}`);
         const data = await res.json();
         if (data.content) {
           const parsedQuestions = typeof data.content.questions === 'string' 
@@ -77,7 +78,7 @@ export default function RazonamientoQuizPage() {
       setLoading(false);
     };
     fetchContent();
-  }, [categoria, tema]);
+  }, [categoria, tema, i18n.language]);
 
   useEffect(() => {
     if (!quizFinished && questions.length > 0) {
