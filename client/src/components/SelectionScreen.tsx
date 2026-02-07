@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, X } from "lucide-react";
+import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, X, BookOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -279,6 +279,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <div className="flex-1 text-left">
                         <span className="text-sm font-semibold text-gray-700 block">Blog</span>
                         <span className="text-[10px] text-gray-400">Artículos y noticias</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                    </motion.button>
+                    <motion.button
+                      onClick={() => { playClick(); setMenuOpen(false); setLocation("/a-leer-bolivia"); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 active:bg-gray-50 transition-colors"
+                      whileTap={{ scale: 0.98 }}
+                      data-testid="menu-item-aleer"
+                    >
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}
+                      >
+                        <BookOpen className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className="text-sm font-semibold text-gray-700 block">A Leer Bolivia</span>
+                        <span className="text-[10px] text-gray-400">Iniciativa educativa</span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
                     </motion.button>
@@ -778,13 +796,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 >
                   <button
                     onClick={() => { setNavMoreOpen(false); setLocation("/blog"); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:bg-purple-50"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-t-2xl active:bg-purple-50"
                     data-testid="dropdown-item-blog"
                   >
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
                       <Newspaper className="w-4 h-4 text-purple-500" />
                     </div>
                     <span className="text-sm font-semibold text-gray-700">Blog</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
+                  </button>
+                  <button
+                    onClick={() => { setNavMoreOpen(false); setLocation("/a-leer-bolivia"); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                    data-testid="dropdown-item-aleer"
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
+                      <BookOpen className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">A Leer Bolivia</span>
                     <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                   </button>
                 </div>

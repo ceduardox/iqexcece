@@ -38,6 +38,7 @@ import ReconocimientoExercisePage from "@/pages/ReconocimientoExercisePage";
 import ProgresoPage from "@/pages/ProgresoPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
+import ALeerBoliviaPage from "@/pages/ALeerBoliviaPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -79,6 +80,7 @@ function Router() {
       <Route path="/progreso/:categoria" component={ProgresoPage}/>
       <Route path="/blog" component={BlogPage}/>
       <Route path="/blog/:id" component={BlogPostPage}/>
+      <Route path="/a-leer-bolivia" component={ALeerBoliviaPage}/>
       <Route component={NotFound} />
     </Switch>
   );
