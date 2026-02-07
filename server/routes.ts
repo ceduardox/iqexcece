@@ -968,9 +968,10 @@ export async function registerRoutes(
   // Blog posts (public - only published)
   app.get("/api/blog-posts", async (req, res) => {
     const categoriaId = req.query.categoriaId as string;
+    const search = req.query.search as string;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const { posts, total } = await storage.getBlogPosts(categoriaId || undefined, "publicado", page, limit);
+    const { posts, total } = await storage.getBlogPosts(categoriaId || undefined, "publicado", page, limit, search || undefined);
     res.json({ posts, total, page, totalPages: Math.ceil(total / limit) });
   });
 

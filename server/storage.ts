@@ -3,7 +3,7 @@ import { type User, type InsertUser, type UserSession, type InsertUserSession, t
 type CerebralIntro = typeof cerebralIntros.$inferSelect;
 type InsertCerebralIntro = typeof cerebralIntros.$inferInsert;
 import { randomUUID } from "crypto";
-import { eq, desc, and, gt, count, sql } from "drizzle-orm";
+import { eq, desc, and, gt, count, sql, ilike, or } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -102,7 +102,7 @@ export interface IStorage {
   saveBlogCategory(cat: InsertBlogCategory): Promise<BlogCategory>;
   updateBlogCategory(id: string, data: Partial<InsertBlogCategory>): Promise<BlogCategory | null>;
   deleteBlogCategory(id: string): Promise<void>;
-  getBlogPosts(categoriaId?: string, estado?: string, page?: number, limit?: number): Promise<{ posts: BlogPost[]; total: number }>;
+  getBlogPosts(categoriaId?: string, estado?: string, page?: number, limit?: number, search?: string): Promise<{ posts: BlogPost[]; total: number }>;
   getBlogPost(id: string): Promise<BlogPost | null>;
   saveBlogPost(post: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, data: Partial<InsertBlogPost>): Promise<BlogPost | null>;
@@ -1051,10 +1051,14 @@ export class DatabaseStorage implements IStorage {
     await db.delete(blogCategories).where(eq(blogCategories.id, id));
   }
 
-  async getBlogPosts(categoriaId?: string, estado?: string, page: number = 1, limit: number = 10): Promise<{ posts: BlogPost[]; total: number }> {
+  async getBlogPosts(categoriaId?: string, estado?: string, page: number = 1, limit: number = 10, search?: string): Promise<{ posts: BlogPost[]; total: number }> {
     const conditions = [];
     if (categoriaId) conditions.push(eq(blogPosts.categoriaId, categoriaId));
     if (estado) conditions.push(eq(blogPosts.estado, estado));
+    if (search) {
+      const searchPattern = `%${search}%`;
+      conditions.push(or(ilike(blogPosts.titulo, searchPattern), ilike(blogPosts.descripcion, searchPattern))!);
+    }
     
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     
