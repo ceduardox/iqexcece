@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, integer, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -182,28 +182,35 @@ export const insertUploadedImageSchema = createInsertSchema(uploadedImages).omit
 // Entrenamiento card (for main selection page)
 export const entrenamientoCards = pgTable("entrenamiento_cards", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  categoria: text("categoria").notNull().unique(),
+  categoria: text("categoria").notNull(),
+  lang: text("lang").notNull().default("es"),
   imageUrl: text("image_url"),
   title: text("title").default("Entrenamiento"),
   description: text("description").default("Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"),
   buttonText: text("button_text").default("Comenzar"),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  unique("entrenamiento_cards_cat_lang").on(table.categoria, table.lang),
+]);
 
 // Entrenamiento page config (banner and title)
 export const entrenamientoPages = pgTable("entrenamiento_pages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  categoria: text("categoria").notNull().unique(),
+  categoria: text("categoria").notNull(),
+  lang: text("lang").notNull().default("es"),
   bannerText: text("banner_text").default("¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!"),
   pageTitle: text("page_title").default("Entrenamientos"),
   pageDescription: text("page_description").default("Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  unique("entrenamiento_pages_cat_lang").on(table.categoria, table.lang),
+]);
 
 // Entrenamiento items (list of training options)
 export const entrenamientoItems = pgTable("entrenamiento_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   categoria: text("categoria").notNull(),
+  lang: text("lang").notNull().default("es"),
   imageUrl: text("image_url"),
   title: text("title").notNull(),
   description: text("description"),
@@ -313,10 +320,13 @@ export const insertTrainingResultSchema = createInsertSchema(trainingResults).om
 // Page styles for visual editor
 export const pageStyles = pgTable("page_styles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  pageName: text("page_name").notNull().unique(),
+  pageName: text("page_name").notNull(),
+  lang: text("lang").notNull().default("es"),
   styles: text("styles").notNull(), // JSON string with all element styles
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  unique("page_styles_name_lang").on(table.pageName, table.lang),
+]);
 
 export const insertPageStyleSchema = createInsertSchema(pageStyles).omit({ id: true, updatedAt: true });
 
