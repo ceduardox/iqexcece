@@ -531,26 +531,65 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 </select>
               </div>
 
-              <div>
-                <label className="text-white/50 text-xs mb-1 block">Desde</label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={e => setDateFrom(e.target.value)}
-                  className={selectClass}
-                  data-testid="input-date-from"
-                />
-              </div>
-
-              <div>
-                <label className="text-white/50 text-xs mb-1 block">Hasta</label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={e => setDateTo(e.target.value)}
-                  className={selectClass}
-                  data-testid="input-date-to"
-                />
+              <div className="col-span-2 md:col-span-3">
+                <label className="text-white/50 text-xs mb-1 block">Rango de Fecha</label>
+                <div className="flex gap-1.5 flex-wrap mb-2">
+                  {[
+                    { label: "Hoy", days: 0 },
+                    { label: "7 días", days: 7 },
+                    { label: "30 días", days: 30 },
+                    { label: "90 días", days: 90 },
+                    { label: "Este año", days: -1 },
+                  ].map(opt => {
+                    const isActive = (() => {
+                      if (!dateFrom && !dateTo) return false;
+                      const today = new Date();
+                      const todayStr = today.toISOString().split("T")[0];
+                      if (opt.days === 0) return dateFrom === todayStr && dateTo === todayStr;
+                      if (opt.days === -1) {
+                        const yearStart = `${today.getFullYear()}-01-01`;
+                        return dateFrom === yearStart && dateTo === todayStr;
+                      }
+                      const from = new Date(today);
+                      from.setDate(from.getDate() - opt.days);
+                      return dateFrom === from.toISOString().split("T")[0] && dateTo === todayStr;
+                    })();
+                    return (
+                      <button
+                        key={opt.label}
+                        onClick={() => {
+                          const today = new Date();
+                          const todayStr = today.toISOString().split("T")[0];
+                          if (isActive) { setDateFrom(""); setDateTo(""); return; }
+                          if (opt.days === 0) { setDateFrom(todayStr); setDateTo(todayStr); }
+                          else if (opt.days === -1) { setDateFrom(`${today.getFullYear()}-01-01`); setDateTo(todayStr); }
+                          else { const from = new Date(today); from.setDate(from.getDate() - opt.days); setDateFrom(from.toISOString().split("T")[0]); setDateTo(todayStr); }
+                        }}
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${isActive ? "bg-cyan-600 text-white" : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"}`}
+                        data-testid={`button-date-${opt.days}`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={e => setDateFrom(e.target.value)}
+                    className={`${selectClass} flex-1`}
+                    data-testid="input-date-from"
+                  />
+                  <span className="text-white/30 text-xs">a</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={e => setDateTo(e.target.value)}
+                    className={`${selectClass} flex-1`}
+                    data-testid="input-date-to"
+                  />
+                </div>
               </div>
 
               {hasActiveFilters && (
@@ -580,11 +619,14 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                   <XAxis dataKey="name" tick={{ fill: "#ffffff80", fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "#ffffff80", fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                    contentStyle={{ backgroundColor: "#0e7490", border: "1px solid rgba(6,182,212,0.4)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#fff" }}
                     formatter={(value: number, _name: string, entry: any) => [`${value}%`, entry.payload.fullName]}
                     labelFormatter={() => ""}
+                    cursor={{ fill: "rgba(6,182,212,0.1)" }}
                   />
-                  <Bar dataKey="promedio" radius={[6, 6, 0, 0]} maxBarSize={40}>
+                  <Bar dataKey="promedio" radius={[6, 6, 0, 0]} maxBarSize={40} activeBar={false}>
                     {chartBarData.map((_entry, i) => (
                       <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
@@ -613,7 +655,9 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                    contentStyle={{ backgroundColor: "#0e7490", border: "1px solid rgba(6,182,212,0.4)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#fff" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
