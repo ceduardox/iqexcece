@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Play } from "lucide-react";
+import { LanguageButton } from "@/components/LanguageButton";
 
 interface Ejercicio {
   nivel: number;
@@ -353,12 +354,15 @@ export default function VelocidadExercisePage() {
           style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
         >
           <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
-          <button
-            onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
-            className="w-8 h-8 flex items-center justify-center text-white/80"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageButton />
+            <button
+              onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
+              className="w-8 h-8 flex items-center justify-center text-white/80"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </header>
         <main className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -391,13 +395,16 @@ export default function VelocidadExercisePage() {
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>
-        <button
-          onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
-          className="w-8 h-8 flex items-center justify-center text-white/80"
-          data-testid="button-close"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <LanguageButton />
+          <button
+            onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
+            className="w-8 h-8 flex items-center justify-center text-white/80"
+            data-testid="button-close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       <div className="mx-4 bg-white rounded-xl shadow-lg px-4 py-3 -mt-2 relative z-10">

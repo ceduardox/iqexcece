@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useState } from "react";
+import { LanguageButton } from "@/components/LanguageButton";
 
 interface TrainingResult {
   id: string;
@@ -326,7 +327,7 @@ export default function ProgresoPage() {
           <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
         <h1 className="text-lg font-bold text-gray-800">{t("progress.title")}</h1>
-        <div className="w-10" />
+        <LanguageButton />
       </header>
 
       <main className="flex-1 px-4 pb-28">

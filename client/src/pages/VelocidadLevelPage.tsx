@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { LanguageButton } from "@/components/LanguageButton";
 
 interface Nivel {
   nivel: number;
@@ -100,7 +101,7 @@ export default function VelocidadLevelPage() {
   if (niveles.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-        <header className="p-4">
+        <header className="p-4 flex items-center justify-between">
           <button
             onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
             className="flex items-center gap-2 text-white font-semibold"
@@ -109,6 +110,7 @@ export default function VelocidadLevelPage() {
             <ArrowLeft className="w-6 h-6" />
             Volver
           </button>
+          <LanguageButton />
         </header>
         <main className="flex-1 flex items-center justify-center">
           <p className="text-white text-xl">No hay niveles disponibles</p>
@@ -119,7 +121,7 @@ export default function VelocidadLevelPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-      <header className="p-4">
+      <header className="p-4 flex items-center justify-between">
         <button
           onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
           className="flex items-center gap-2 text-white font-semibold"
@@ -128,6 +130,7 @@ export default function VelocidadLevelPage() {
           <ArrowLeft className="w-6 h-6" />
           Volver
         </button>
+        <LanguageButton />
       </header>
 
       <main className="flex-1 flex flex-col">

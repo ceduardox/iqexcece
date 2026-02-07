@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Target } from "lucide-react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useSounds } from "@/hooks/use-sounds";
+import { LanguageButton } from "@/components/LanguageButton";
 
 interface PrepData {
   imagen: string;
@@ -101,7 +102,7 @@ export default function EntrenamientoPrepPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100">
+      <header className="relative sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100">
         <button
           onClick={handleBack}
           className="absolute left-4 p-2 text-purple-600"
@@ -115,6 +116,7 @@ export default function EntrenamientoPrepPage() {
           alt="IQX" 
           className="h-8"
         />
+        <div className="absolute right-5"><LanguageButton /></div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-28">

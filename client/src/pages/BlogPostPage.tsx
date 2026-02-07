@@ -93,7 +93,7 @@ export default function BlogPostPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-[#fafafe]">
-        <CurvedHeader showBack onBack={() => navigate("/blog")} />
+        <CurvedHeader showBack onBack={() => navigate("/blog")} showLang={false} />
         <div className="flex-1 flex flex-col items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-full border-[3px] border-purple-100 border-t-purple-500 animate-spin" />
           <p className="text-xs text-gray-400">Cargando artículo...</p>
@@ -105,7 +105,7 @@ export default function BlogPostPage() {
   if (!post) {
     return (
       <div className="min-h-screen flex flex-col bg-[#fafafe]">
-        <CurvedHeader showBack onBack={() => navigate("/blog")} />
+        <CurvedHeader showBack onBack={() => navigate("/blog")} showLang={false} />
         <div className="flex-1 flex items-center justify-center">
           <motion.div
             className="text-center p-8"

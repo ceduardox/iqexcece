@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import { LanguageButton } from "@/components/LanguageButton";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
@@ -8,9 +9,10 @@ interface CurvedHeaderProps {
   showBack?: boolean;
   onBack?: () => void;
   rightElement?: React.ReactNode;
+  showLang?: boolean;
 }
 
-export function CurvedHeader({ showBack = false, onBack, rightElement }: CurvedHeaderProps) {
+export function CurvedHeader({ showBack = false, onBack, rightElement, showLang = true }: CurvedHeaderProps) {
   const [, setLocation] = useLocation();
 
   const handleBack = () => {
@@ -57,6 +59,8 @@ export function CurvedHeader({ showBack = false, onBack, rightElement }: CurvedH
           
           {rightElement ? (
             rightElement
+          ) : showLang ? (
+            <LanguageButton />
           ) : (
             <div className="w-10" />
           )}

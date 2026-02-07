@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 
 // Hero animated eye with scanning text lines
 function HeroAnimation() {
@@ -193,7 +194,7 @@ export default function AceleracionSelectionPage() {
         >
           <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
-        <div className="w-10" />
+        <LanguageButton />
       </header>
 
       {/* Hero animated icon */}

@@ -4,6 +4,7 @@ import { ChevronLeft, Eye } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 
 const letrasNivel1 = ["A", "B", "C", "D"];
 const letrasNivel2 = ["M", "N", "O", "P", "Q", "R"];
@@ -157,7 +158,7 @@ export default function ReconocimientoSelectionPage() {
         >
           <ChevronLeft className="w-5 h-5 text-purple-600" />
         </motion.button>
-        <div className="w-10" />
+        <LanguageButton />
       </header>
 
       <div className="relative px-6 mb-6 flex justify-center">

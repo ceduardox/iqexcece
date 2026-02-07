@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import { LanguageButton } from "@/components/LanguageButton";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
@@ -188,7 +189,7 @@ export default function NumerosNivelesPage() {
               <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
             </div>
             
-            <div className="w-10" />
+            <LanguageButton />
           </div>
         </div>
       </header>

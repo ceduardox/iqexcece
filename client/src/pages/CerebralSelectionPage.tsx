@@ -7,6 +7,7 @@ import { Brain, Clock, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
@@ -98,7 +99,7 @@ export default function CerebralSelectionPage() {
               <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
             </div>
             
-            <div className="w-10" />
+            <LanguageButton />
           </div>
         </div>
       </header>
@@ -162,7 +163,7 @@ export default function CerebralSelectionPage() {
               <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
             </div>
             
-            <div className="w-10" />
+            <LanguageButton />
           </div>
         </div>
       </header>

@@ -7,6 +7,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
+import { LanguageButton } from "@/components/LanguageButton";
 
 // PDF.js will be loaded from CDN
 declare global {
@@ -776,13 +777,16 @@ export default function AceleracionExercisePage() {
             <span className="text-white font-semibold text-sm">
               Acelera al máximo tu Lectura
             </span>
-            <button
-              onClick={handleClose}
-              className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all"
-              data-testid="button-close-exercise"
-            >
-              <X className="w-4 h-4 text-white" />
-            </button>
+            <div className="flex items-center gap-2">
+              <LanguageButton />
+              <button
+                onClick={handleClose}
+                className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all"
+                data-testid="button-close-exercise"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -915,13 +919,16 @@ export default function AceleracionExercisePage() {
                 {modeTitle}
               </h1>
             </div>
-            <button
-              onClick={handleClose}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-all"
-              data-testid="button-close-exercise"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </button>
+            <div className="flex items-center gap-2">
+              <LanguageButton />
+              <button
+                onClick={handleClose}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-all"
+                data-testid="button-close-exercise"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -1093,15 +1100,18 @@ export default function AceleracionExercisePage() {
                 </h1>
               </div>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-white hover:bg-white/20"
-              onClick={() => setShowUploader(true)}
-              data-testid="button-upload-header"
-            >
-              <Upload className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <LanguageButton />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+                onClick={() => setShowUploader(true)}
+                data-testid="button-upload-header"
+              >
+                <Upload className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -1199,7 +1209,7 @@ export default function AceleracionExercisePage() {
               e.currentTarget.style.display = 'none';
             }}
           />
-          <div className="w-10" /> {/* Spacer */}
+          <LanguageButton />
         </div>
       </header>
 

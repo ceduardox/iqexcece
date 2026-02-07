@@ -4,6 +4,7 @@ import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -228,7 +229,7 @@ export default function EntrenamientoEdadPage() {
           />
         </div>
         
-        <div className="absolute right-5 w-6" />
+        <div className="absolute right-5"><LanguageButton /></div>
       </header>
 
       <div

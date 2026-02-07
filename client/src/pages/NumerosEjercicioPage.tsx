@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Play } from "lucide-react";
+import { LanguageButton } from "@/components/LanguageButton";
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -200,17 +201,20 @@ export default function NumerosEjercicioPage() {
         className="px-4 py-3"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-white text-base font-bold leading-tight flex-1 text-center">
             Identifica rápidamente Números y Letras
           </h1>
-          <button
-            onClick={() => navigate(nivelesPath)}
-            className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"
-            data-testid="button-close"
-          >
-            <X className="w-4 h-4 text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageButton />
+            <button
+              onClick={() => navigate(nivelesPath)}
+              className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"
+              data-testid="button-close"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
         </div>
       </header>
 

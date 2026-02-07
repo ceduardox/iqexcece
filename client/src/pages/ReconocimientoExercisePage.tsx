@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
+import { LanguageButton } from "@/components/LanguageButton";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const GAME_DURATION = 50;
@@ -565,18 +566,21 @@ export default function ReconocimientoExercisePage() {
           <ChevronLeft className="w-5 h-5 text-white" />
         </motion.button>
         <h1 className="text-white font-semibold text-sm flex-1 text-center">Amplía tu Reconocimiento Visual</h1>
-        {gameState === "running" ? (
-          <motion.button
-            onClick={handleClose}
-            className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center"
-            whileTap={{ scale: 0.95 }}
-            data-testid="button-close"
-          >
-            <X className="w-5 h-5 text-white" />
-          </motion.button>
-        ) : (
-          <div className="w-9" />
-        )}
+        <div className="flex items-center gap-2">
+          <LanguageButton />
+          {gameState === "running" ? (
+            <motion.button
+              onClick={handleClose}
+              className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center"
+              whileTap={{ scale: 0.95 }}
+              data-testid="button-close"
+            >
+              <X className="w-5 h-5 text-white" />
+            </motion.button>
+          ) : (
+            <div className="w-9" />
+          )}
+        </div>
       </header>
 
       <div 

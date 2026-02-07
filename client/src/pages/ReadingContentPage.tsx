@@ -5,6 +5,7 @@ import { SiWhatsapp } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
@@ -377,6 +378,7 @@ export default function ReadingContentPage() {
                 className="h-10 w-auto object-contain" 
               />
             </div>
+            <div className="absolute right-5"><LanguageButton /></div>
           </header>
           <div 
             className="w-full"
@@ -593,6 +595,7 @@ export default function ReadingContentPage() {
             className="h-10 w-auto object-contain" 
           />
         </div>
+        <div className="absolute right-5"><LanguageButton /></div>
       </header>
 
       <div className="flex mx-4 mt-3 rounded-full overflow-hidden border border-gray-200">

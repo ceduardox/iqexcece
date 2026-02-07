@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Home, Share2, MessageCircle, Brain, ArrowLeft, RotateCcw } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
@@ -183,8 +184,9 @@ export default function CerebralResultPage() {
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       {/* Capture area - contains header and content, excludes buttons */}
       <div ref={captureAreaRef} className="bg-white">
-        <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
+        <header className="relative flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
           <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
+          <div className="absolute right-5"><LanguageButton /></div>
         </header>
         <div 
           className="w-full"
