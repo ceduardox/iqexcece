@@ -411,7 +411,11 @@ export async function registerRoutes(
   app.get("/api/razonamiento/:categoria", async (req, res) => {
     const categoria = req.params.categoria;
     const temaNumero = parseInt(req.query.tema as string) || 1;
-    const content = await storage.getRazonamientoContent(categoria, temaNumero);
+    const lang = (req.query.lang as string) || "es";
+    let content = await storage.getRazonamientoContent(categoria, temaNumero, lang);
+    if (!content && lang !== "es") {
+      content = await storage.getRazonamientoContent(categoria, temaNumero, "es");
+    }
     res.json({ content: content || null });
   });
 

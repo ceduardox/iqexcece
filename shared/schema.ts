@@ -95,6 +95,7 @@ export const razonamientoContents = pgTable("razonamiento_contents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   categoria: text("categoria").notNull(),
   temaNumero: integer("tema_numero").default(1),
+  lang: text("lang").notNull().default("es"),
   title: text("title").notNull(),
   imageUrl: text("image_url"),
   imageSize: integer("image_size").default(100),

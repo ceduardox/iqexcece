@@ -445,6 +445,51 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       setBulkTranslating(false);
     }
   };
+  const translateRazonamientoBulk = async (targetLang: string) => {
+    if (bulkTranslating) return;
+    const hasContent = razonamientoContent.title || razonamientoContent.questions.length > 0;
+    if (!hasContent) { alert("No hay contenido para traducir"); return; }
+    setBulkTranslating(true);
+    try {
+      const dataToTranslate: any = {};
+      if (razonamientoContent.title) dataToTranslate.title = razonamientoContent.title;
+      if (razonamientoContent.questions.length > 0) {
+        dataToTranslate.questions = razonamientoContent.questions.map((q: any) => ({
+          question: q.question || "",
+          options: q.options || []
+        }));
+      }
+      const res = await adminFetch("/api/admin/translate-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: dataToTranslate, targetLang })
+      });
+      const result = await res.json();
+      if (result.translated) {
+        const t = result.translated;
+        setRazonamientoContent(p => {
+          const updated = { ...p };
+          if (t.title) updated.title = t.title;
+          if (t.questions && Array.isArray(t.questions)) {
+            updated.questions = p.questions.map((q: any, i: number) => ({
+              ...q,
+              question: t.questions[i]?.question || q.question,
+              options: t.questions[i]?.options || q.options
+            }));
+          }
+          return updated;
+        });
+      } else if (result.error) {
+        alert(result.error);
+      }
+    } catch (err) {
+      console.error("Bulk translation error:", err);
+      alert("Error al traducir. Intenta de nuevo.");
+    } finally {
+      setBulkTranslating(false);
+    }
+  };
+
   const translateField = async (text: string, targetLang: string, fieldKey: string, onResult: (translated: string) => void) => {
     if (!text) return;
     setTranslatingField(fieldKey);
@@ -588,6 +633,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         body: JSON.stringify({
           categoria: contentCategory,
           temaNumero: selectedRazonamientoTema,
+          lang: contentLang,
           title: razonamientoContent.title,
           imageUrl: razonamientoContent.imageUrl || null,
           imageSize: razonamientoContent.imageSize || 100,
@@ -848,7 +894,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     if (isLoggedIn && contentType === "razonamiento") {
       const loadRazonamientoContent = async () => {
         try {
-          const res = await fetch(`/api/razonamiento/${contentCategory}?tema=${selectedRazonamientoTema}`);
+          const res = await fetch(`/api/razonamiento/${contentCategory}?tema=${selectedRazonamientoTema}&lang=${contentLang}`);
           const data = await res.json();
           if (data.content) {
             const questions = typeof data.content.questions === "string" 
@@ -869,7 +915,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadRazonamientoContent();
     }
-  }, [isLoggedIn, contentCategory, selectedRazonamientoTema, contentType]);
+  }, [isLoggedIn, contentCategory, selectedRazonamientoTema, contentType, contentLang]);
 
   // Load cerebral themes and intro
   useEffect(() => {
@@ -2908,6 +2954,26 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
               {contentType === "razonamiento" && (
               <>
+              {contentType === "razonamiento" && (
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+                  <span className="text-white/60 text-sm">Idioma:</span>
+                  {["es", "en", "pt"].map((l) => (
+                    <Button
+                      key={l}
+                      onClick={() => setContentLang(l)}
+                      variant={contentLang === l ? "default" : "outline"}
+                      size="sm"
+                      className={contentLang === l ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                      data-testid={`button-razonamiento-lang-${l}`}
+                    >
+                      {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
+                    </Button>
+                  ))}
+                  {contentLang !== 'es' && (
+                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="text-white/60 text-sm mb-1 block">Tema de razonamiento</label>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -3120,6 +3186,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                 ))}
               </div>
+
+              {contentLang !== 'es' && (
+                <Button
+                  onClick={() => translateRazonamientoBulk(contentLang)}
+                  disabled={bulkTranslating}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600"
+                  data-testid="button-translate-all-razonamiento"
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
+                </Button>
+              )}
 
               <Button
                 onClick={handleSaveRazonamiento}

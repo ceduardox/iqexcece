@@ -28,8 +28,8 @@ export interface IStorage {
   saveReadingContent(content: InsertReadingContent): Promise<ReadingContent>;
   
   // Razonamiento content
-  getRazonamientoContent(categoria: string, temaNumero?: number): Promise<RazonamientoContent | undefined>;
-  getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]>;
+  getRazonamientoContent(categoria: string, temaNumero?: number, lang?: string): Promise<RazonamientoContent | undefined>;
+  getRazonamientoContentsByCategory(categoria: string, lang?: string): Promise<RazonamientoContent[]>;
   saveRazonamientoContent(content: InsertRazonamientoContent): Promise<RazonamientoContent>;
   
   // Cerebral content
@@ -276,11 +276,11 @@ export class MemStorage implements IStorage {
     return content;
   }
 
-  async getRazonamientoContent(categoria: string, temaNumero: number = 1): Promise<RazonamientoContent | undefined> {
+  async getRazonamientoContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<RazonamientoContent | undefined> {
     return undefined;
   }
 
-  async getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]> {
+  async getRazonamientoContentsByCategory(categoria: string, lang: string = "es"): Promise<RazonamientoContent[]> {
     return [];
   }
 
@@ -289,6 +289,7 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       categoria: insertContent.categoria,
       temaNumero: insertContent.temaNumero || 1,
+      lang: (insertContent as any).lang || "es",
       title: insertContent.title,
       imageUrl: insertContent.imageUrl || null,
       imageSize: insertContent.imageSize || 100,
@@ -602,24 +603,29 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async getRazonamientoContent(categoria: string, temaNumero: number = 1): Promise<RazonamientoContent | undefined> {
+  async getRazonamientoContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<RazonamientoContent | undefined> {
     const [content] = await db.select().from(razonamientoContents)
       .where(and(
         eq(razonamientoContents.categoria, categoria),
-        eq(razonamientoContents.temaNumero, temaNumero)
+        eq(razonamientoContents.temaNumero, temaNumero),
+        eq(razonamientoContents.lang, lang)
       ));
     return content;
   }
 
-  async getRazonamientoContentsByCategory(categoria: string): Promise<RazonamientoContent[]> {
+  async getRazonamientoContentsByCategory(categoria: string, lang: string = "es"): Promise<RazonamientoContent[]> {
     return db.select().from(razonamientoContents)
-      .where(eq(razonamientoContents.categoria, categoria))
+      .where(and(
+        eq(razonamientoContents.categoria, categoria),
+        eq(razonamientoContents.lang, lang)
+      ))
       .orderBy(razonamientoContents.temaNumero);
   }
 
   async saveRazonamientoContent(insertContent: InsertRazonamientoContent): Promise<RazonamientoContent> {
     const temaNumero = insertContent.temaNumero || 1;
-    const existing = await this.getRazonamientoContent(insertContent.categoria, temaNumero);
+    const lang = (insertContent as any).lang || "es";
+    const existing = await this.getRazonamientoContent(insertContent.categoria, temaNumero, lang);
     
     if (existing) {
       const [updated] = await db.update(razonamientoContents)
@@ -632,7 +638,8 @@ export class DatabaseStorage implements IStorage {
         })
         .where(and(
           eq(razonamientoContents.categoria, insertContent.categoria),
-          eq(razonamientoContents.temaNumero, temaNumero)
+          eq(razonamientoContents.temaNumero, temaNumero),
+          eq(razonamientoContents.lang, lang)
         ))
         .returning();
       return updated;
@@ -641,6 +648,7 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db.insert(razonamientoContents).values({
       categoria: insertContent.categoria,
       temaNumero: temaNumero,
+      lang: lang,
       title: insertContent.title,
       imageUrl: insertContent.imageUrl || null,
       imageSize: insertContent.imageSize || 100,
