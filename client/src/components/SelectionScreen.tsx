@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, X, BookOpen } from "lucide-react";
+import { Globe, Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { languages } from "@/lib/i18n";
+import { FlagIcon } from "./FlagIcon";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,6 +21,7 @@ interface SelectionScreenProps {
 
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -244,62 +248,42 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             <button 
               onClick={() => setMenuOpen(!menuOpen)}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              data-testid="button-menu"
+              data-testid="button-lang"
             >
-              {menuOpen ? <X className="w-6 h-6" strokeWidth={1.5} /> : <Menu className="w-6 h-6" strokeWidth={1.5} />}
+              <Globe className="w-5 h-5" strokeWidth={1.5} />
             </button>
 
             <AnimatePresence>
               {menuOpen && (
                 <motion.div
-                  className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl overflow-hidden z-[100]"
+                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl overflow-hidden z-[100]"
                   style={{ boxShadow: "0 12px 40px rgba(124,58,237,0.15), 0 4px 12px rgba(0,0,0,0.08)" }}
                   initial={{ opacity: 0, y: -8, scale: 0.92 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.92 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
-                  data-testid="dropdown-header-menu"
+                  data-testid="dropdown-lang"
                 >
-                  <div className="px-4 py-2.5 border-b border-purple-50" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.04), rgba(6,182,212,0.03))" }}>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Menú</span>
+                  <div className="px-4 py-2 border-b border-purple-50" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.04), rgba(6,182,212,0.03))" }}>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t("nav.idioma")}</span>
                   </div>
                   <div className="py-1">
-                    <motion.button
-                      onClick={() => { playClick(); setMenuOpen(false); setLocation("/blog"); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 active:bg-gray-50 transition-colors"
-                      whileTap={{ scale: 0.98 }}
-                      data-testid="menu-item-blog"
-                    >
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}
-                      >
-                        <Newspaper className="w-4 h-4 text-purple-500" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="text-sm font-semibold text-gray-700 block">Blog</span>
-                        <span className="text-[10px] text-gray-400">Artículos y noticias</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-                    </motion.button>
-                    <motion.button
-                      onClick={() => { playClick(); setMenuOpen(false); setLocation("/a-leer-bolivia"); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 active:bg-gray-50 transition-colors"
-                      whileTap={{ scale: 0.98 }}
-                      data-testid="menu-item-aleer"
-                    >
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}
-                      >
-                        <BookOpen className="w-4 h-4 text-emerald-500" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="text-sm font-semibold text-gray-700 block">A Leer Bolivia</span>
-                        <span className="text-[10px] text-gray-400">Iniciativa educativa</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-                    </motion.button>
+                    {languages.map((lang) => {
+                      const isActive = i18n.language === lang.code || i18n.language.startsWith(lang.code);
+                      return (
+                        <motion.button
+                          key={lang.code}
+                          onClick={() => { if (lang.disabled) return; playClick(); i18n.changeLanguage(lang.code); setMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 active:bg-gray-50 transition-colors ${isActive ? "bg-purple-50/50" : ""} ${lang.disabled ? "opacity-40" : ""}`}
+                          whileTap={lang.disabled ? {} : { scale: 0.98 }}
+                          data-testid={`lang-${lang.code}`}
+                        >
+                          <FlagIcon code={lang.code} size={22} />
+                          <span className={`text-sm flex-1 text-left ${isActive ? "font-bold text-purple-600" : "font-medium text-gray-600"}`}>{lang.label}</span>
+                          {isActive && <Check className="w-4 h-4 text-purple-500" />}
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </motion.div>
               )}
@@ -742,7 +726,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               >
                 <Home className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>Inicio</span>
+              <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>{t("nav.inicio")}</span>
             </button>
             
             <button 
@@ -752,7 +736,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="nav-diagnostico"
             >
               <Brain className="w-5 h-5" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }}>Diagnóstico</span>
+              <span className="text-[10px]" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }}>{t("nav.diagnostico")}</span>
             </button>
             
             <button 
@@ -762,7 +746,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="nav-entrenar"
             >
               <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>Entrenar</span>
+              <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
             </button>
             
             <button 
@@ -772,7 +756,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="nav-progreso"
             >
               <TrendingUp className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>Progreso</span>
+              <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>{t("nav.progreso")}</span>
             </button>
             
             <div className="relative">
@@ -786,7 +770,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 data-testid="nav-mas"
               >
                 <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
-                <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>Más</span>
+                <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
               </button>
               {navMoreOpen && (
                 <div
@@ -802,7 +786,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
                       <Newspaper className="w-4 h-4 text-purple-500" />
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">Blog</span>
+                    <span className="text-sm font-semibold text-gray-700">{t("nav.blog")}</span>
                     <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                   </button>
                   <button
@@ -813,7 +797,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                       <BookOpen className="w-4 h-4 text-emerald-500" />
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">A Leer Bolivia</span>
+                    <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
                     <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                   </button>
                 </div>

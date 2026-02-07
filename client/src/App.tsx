@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import "@/lib/i18n";
 import Home from "@/pages/Home";
 import TestsPage from "@/pages/TestsPage";
 import ReadingSelectionPage from "@/pages/ReadingSelectionPage";

@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "inicio": "Home",
+    "diagnostico": "Diagnosis",
+    "entrena": "Train",
+    "entrenar": "Train",
+    "progreso": "Progress",
+    "mas": "More",
+    "blog": "Blog",
+    "blogDesc": "Articles and news",
+    "aleerBolivia": "Read Bolivia",
+    "aleerDesc": "Educational initiative",
+    "menu": "Menu",
+    "idioma": "Language"
+  },
+  "home": {
+    "tests": "Tests",
+    "testsDesc": "Evaluate your cognitive level",
+    "training": "Training",
+    "trainingDesc": "Improve your skills",
+    "whatsapp": "WhatsApp",
+    "email": "Email"
+  },
+  "tests": {
+    "title": "Cognitive Diagnosis",
+    "subtitle": "Choose your assessment",
+    "lectura": "Reading",
+    "lecturaDesc": "Reading comprehension assessment",
+    "razonamiento": "Reasoning",
+    "razonamientoDesc": "Logical reasoning assessment",
+    "cerebral": "Brain Test",
+    "cerebralDesc": "Various cognitive exercises",
+    "start": "Start",
+    "continue": "Continue",
+    "results": "Results",
+    "score": "Score",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "time": "Time",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "finish": "Finish"
+  },
+  "training": {
+    "title": "Training",
+    "subtitle": "Select your program"
+  },
+  "progress": {
+    "title": "My Progress",
+    "subtitle": "Review your performance",
+    "noData": "You don't have results yet",
+    "sessions": "Sessions",
+    "average": "Average"
+  },
+  "blog": {
+    "title": "Blog",
+    "search": "Search articles...",
+    "readMore": "Read more",
+    "allCategories": "All",
+    "noResults": "No articles found",
+    "publishedOn": "Published on",
+    "back": "Back to blog"
+  },
+  "aleer": {
+    "badge": "EDUCATIONAL INITIATIVE",
+    "welcome": "Welcome!",
+    "subtitle1": "At the Dawn of a New Educational Era",
+    "subtitle2": "Transform the Future with Reading!",
+    "description": "Join our revolutionary initiative that seeks to ignite the passion for reading in the hearts of Bolivia's students. Through an inter-school contest, we inspire students to explore worlds of knowledge and creativity. This is your moment to contribute to a significant educational change. Discover how!",
+    "placeholder": "Read Bolivia",
+    "objectivesTitle": "Objectives",
+    "objectivesDesc": "We drive Bolivia's educational future with a reading contest that not only cultivates the love of books among primary school students, but also sharpens their analytical and comprehension skills.",
+    "obj1Title": "Igniting the Spark of Knowledge",
+    "obj1Desc": "We drive the passion for reading and reading comprehension among primary and secondary students, opening doors to worlds of knowledge and adventure.",
+    "obj2Title": "Developing Masters of Interpretation",
+    "obj2Desc": "Our initiative focuses on enriching interpretation and textual analysis skills, preparing students to explore and understand the depths of literature and beyond.",
+    "obj3Title": "Weaving Knowledge Networks",
+    "obj3Desc": "We promote an environment where sharing and trusting become the foundation for a rich learning experience, enriching the educational journey of each student.",
+    "obj4Title": "Discover and Develop Talents",
+    "obj4Desc": "Through our contest, we identify strengths and areas for improvement in each student, guiding them toward their maximum academic potential.",
+    "obj5Title": "Celebrating Academic Success",
+    "obj5Desc": "We recognize and reward excellence in reading, highlighting student achievements in a special event that inspires the entire educational community."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "lang": {
+    "es": "Español",
+    "en": "English",
+    "pt": "Português"
+  }
+}

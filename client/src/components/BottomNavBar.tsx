@@ -3,18 +3,20 @@ import { useLocation } from "wouter";
 import { Home, Brain, Dumbbell, BarChart3, MoreHorizontal, Newspaper, ChevronRight, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
-
-const navItems = [
-  { id: "inicio", icon: Home, label: "Inicio", path: "/" },
-  { id: "tests", icon: Brain, label: "Diagnóstico", path: "/tests" },
-  { id: "entrena", icon: Dumbbell, label: "Entrena", path: "/entrenamiento" },
-  { id: "progreso", icon: BarChart3, label: "Progreso", path: "/progreso" },
-];
+import { useTranslation } from "react-i18next";
 
 export function BottomNavBar() {
+  const { t } = useTranslation();
   const [location, setLocation] = useLocation();
   const { playSound } = useSounds();
   const [moreOpen, setMoreOpen] = useState(false);
+
+  const navItems = [
+    { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },
+    { id: "tests", icon: Brain, label: t("nav.diagnostico"), path: "/tests" },
+    { id: "entrena", icon: Dumbbell, label: t("nav.entrena"), path: "/entrenamiento" },
+    { id: "progreso", icon: BarChart3, label: t("nav.progreso"), path: "/progreso" },
+  ];
 
   const getActiveId = () => {
     if (location === "/") return "inicio";
@@ -75,7 +77,7 @@ export function BottomNavBar() {
               ) : (
                 <MoreHorizontal className="w-5 h-5" />
               )}
-              <span className={`text-[10px] ${activeId === "mas" ? "font-medium mt-1" : ""}`}>Más</span>
+              <span className={`text-[10px] ${activeId === "mas" ? "font-medium mt-1" : ""}`}>{t("nav.mas")}</span>
             </motion.button>
 
             {moreOpen && (
@@ -92,7 +94,7 @@ export function BottomNavBar() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
                     <Newspaper className="w-4 h-4 text-purple-500" />
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">Blog</span>
+                  <span className="text-sm font-semibold text-gray-700">{t("nav.blog")}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                 </button>
                 <button
@@ -103,7 +105,7 @@ export function BottomNavBar() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                     <BookOpen className="w-4 h-4 text-emerald-500" />
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">A Leer Bolivia</span>
+                  <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                 </button>
               </div>

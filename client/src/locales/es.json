@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "inicio": "Inicio",
+    "diagnostico": "Diagnóstico",
+    "entrena": "Entrena",
+    "entrenar": "Entrenar",
+    "progreso": "Progreso",
+    "mas": "Más",
+    "blog": "Blog",
+    "blogDesc": "Artículos y noticias",
+    "aleerBolivia": "A Leer Bolivia",
+    "aleerDesc": "Iniciativa educativa",
+    "menu": "Menú",
+    "idioma": "Idioma"
+  },
+  "home": {
+    "tests": "Tests",
+    "testsDesc": "Evalúa tu nivel cognitivo",
+    "training": "Entrenamiento",
+    "trainingDesc": "Mejora tus habilidades",
+    "whatsapp": "WhatsApp",
+    "email": "Correo"
+  },
+  "tests": {
+    "title": "Diagnóstico Cognitivo",
+    "subtitle": "Elige tu evaluación",
+    "lectura": "Lectura",
+    "lecturaDesc": "Evaluación de comprensión lectora",
+    "razonamiento": "Razonamiento",
+    "razonamientoDesc": "Evaluación de razonamiento lógico",
+    "cerebral": "Test Cerebral",
+    "cerebralDesc": "Ejercicios cognitivos variados",
+    "start": "Comenzar",
+    "continue": "Continuar",
+    "results": "Resultados",
+    "score": "Puntuación",
+    "correct": "Correctas",
+    "incorrect": "Incorrectas",
+    "time": "Tiempo",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "finish": "Finalizar"
+  },
+  "training": {
+    "title": "Entrenamiento",
+    "subtitle": "Selecciona tu programa"
+  },
+  "progress": {
+    "title": "Mi Progreso",
+    "subtitle": "Revisa tu rendimiento",
+    "noData": "Aún no tienes resultados",
+    "sessions": "Sesiones",
+    "average": "Promedio"
+  },
+  "blog": {
+    "title": "Blog",
+    "search": "Buscar artículos...",
+    "readMore": "Leer más",
+    "allCategories": "Todos",
+    "noResults": "No se encontraron artículos",
+    "publishedOn": "Publicado el",
+    "back": "Volver al blog"
+  },
+  "aleer": {
+    "badge": "INICIATIVA EDUCATIVA",
+    "welcome": "¡Bienvenidos!",
+    "subtitle1": "Al Amanecer de una Nueva Era Educativa",
+    "subtitle2": "¡Transforma el Futuro con la Lectura!",
+    "description": "Únete a nuestra revolucionaria iniciativa que busca encender la pasión por la lectura en los corazones de los estudiantes de Bolivia. A través de un concurso intercolegial, inspiramos a los estudiantes a explorar mundos de conocimiento y creatividad. Este es tu momento para contribuir a un cambio educativo significativo. ¡Descubre cómo!",
+    "placeholder": "A Leer Bolivia",
+    "objectivesTitle": "Objetivos",
+    "objectivesDesc": "Impulsamos el futuro educativo de Bolivia con un concurso de lectura que no solo cultiva el amor por los libros entre estudiantes de primaria, sino que también afina sus habilidades analíticas y de comprensión.",
+    "obj1Title": "Encendiendo la Chispa del Conocimiento",
+    "obj1Desc": "Impulsamos la pasión por la lectura y la comprensión lectora entre los estudiantes de primaria y secundaria, abriendo puertas a mundos de conocimiento y aventura.",
+    "obj2Title": "Desarrollando Maestros de la Interpretación",
+    "obj2Desc": "Nuestra iniciativa se centra en enriquecer las habilidades de interpretación y análisis textual, preparando a los estudiantes para explorar y comprender las profundidades de la literatura y más allá.",
+    "obj3Title": "Tejer Redes de Conocimiento",
+    "obj3Desc": "Promovemos un ambiente donde compartir y confiar se convierte en la base para una rica experiencia de aprendizaje, enriqueciendo la jornada educativa de cada estudiante.",
+    "obj4Title": "Descubrir y Desarrollar Talentos",
+    "obj4Desc": "Mediante nuestro concurso, identificamos las fortalezas y áreas de mejora en cada estudiante, guiándolos hacia su máximo potencial académico.",
+    "obj5Title": "Celebrar el Éxito Académico",
+    "obj5Desc": "Reconocemos y premiamos la excelencia en la lectura, destacando los logros de los estudiantes en un evento especial que inspira a toda la comunidad educativa."
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "lang": {
+    "es": "Español",
+    "en": "English",
+    "pt": "Português"
+  }
+}

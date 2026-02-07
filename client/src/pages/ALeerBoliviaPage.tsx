@@ -1,49 +1,21 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Star, Sparkles, Target, ArrowLeft } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { useTranslation } from "react-i18next";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
-const objectives = [
-  {
-    icon: Lightbulb,
-    color: "#f59e0b",
-    bg: "linear-gradient(135deg, #fef3c7, #fde68a)",
-    title: "Encendiendo la Chispa del Conocimiento",
-    desc: "Impulsamos la pasión por la lectura y la comprensión lectora entre los estudiantes de primaria y secundaria, abriendo puertas a mundos de conocimiento y aventura."
-  },
-  {
-    icon: BookOpen,
-    color: "#8b5cf6",
-    bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)",
-    title: "Desarrollando Maestros de la Interpretación",
-    desc: "Nuestra iniciativa se centra en enriquecer las habilidades de interpretación y análisis textual, preparando a los estudiantes para explorar y comprender las profundidades de la literatura y más allá."
-  },
-  {
-    icon: Users,
-    color: "#06b6d4",
-    bg: "linear-gradient(135deg, #cffafe, #a5f3fc)",
-    title: "Tejer Redes de Conocimiento",
-    desc: "Promovemos un ambiente donde compartir y confiar se convierte en la base para una rica experiencia de aprendizaje, enriqueciendo la jornada educativa de cada estudiante."
-  },
-  {
-    icon: Target,
-    color: "#10b981",
-    bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)",
-    title: "Descubrir y Desarrollar Talentos",
-    desc: "Mediante nuestro concurso, identificamos las fortalezas y áreas de mejora en cada estudiante, guiándolos hacia su máximo potencial académico."
-  },
-  {
-    icon: Award,
-    color: "#f43f5e",
-    bg: "linear-gradient(135deg, #ffe4e6, #fecdd3)",
-    title: "Celebrar el Éxito Académico",
-    desc: "Reconocemos y premiamos la excelencia en la lectura, destacando los logros de los estudiantes en un evento especial que inspira a toda la comunidad educativa."
-  },
+const objectivesMeta = [
+  { icon: Lightbulb, color: "#f59e0b", bg: "linear-gradient(135deg, #fef3c7, #fde68a)", titleKey: "obj1Title", descKey: "obj1Desc" },
+  { icon: BookOpen, color: "#8b5cf6", bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", titleKey: "obj2Title", descKey: "obj2Desc" },
+  { icon: Users, color: "#06b6d4", bg: "linear-gradient(135deg, #cffafe, #a5f3fc)", titleKey: "obj3Title", descKey: "obj3Desc" },
+  { icon: Target, color: "#10b981", bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", titleKey: "obj4Title", descKey: "obj4Desc" },
+  { icon: Award, color: "#f43f5e", bg: "linear-gradient(135deg, #ffe4e6, #fecdd3)", titleKey: "obj5Title", descKey: "obj5Desc" },
 ];
 
 export default function ALeerBoliviaPage() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -90,20 +62,20 @@ export default function ALeerBoliviaPage() {
               transition={{ repeat: Infinity, duration: 3 }}
             >
               <Sparkles className="w-4 h-4 text-purple-500" />
-              <span className="text-xs font-bold text-purple-600">INICIATIVA EDUCATIVA</span>
+              <span className="text-xs font-bold text-purple-600">{t("aleer.badge")}</span>
             </motion.div>
 
             <h1 className="text-2xl font-black text-gray-800 mb-2 leading-tight" data-testid="text-welcome-title">
-              ¡Bienvenidos!
+              {t("aleer.welcome")}
             </h1>
             <h2 className="text-lg font-bold mb-1" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Al Amanecer de una Nueva Era Educativa
+              {t("aleer.subtitle1")}
             </h2>
             <h3 className="text-base font-bold text-purple-600 mb-4">
-              ¡Transforma el Futuro con la Lectura!
+              {t("aleer.subtitle2")}
             </h3>
             <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto">
-              Únete a nuestra revolucionaria iniciativa que busca encender la pasión por la lectura en los corazones de los estudiantes de Bolivia. A través de un concurso intercolegial, inspiramos a los estudiantes a explorar mundos de conocimiento y creatividad. Este es tu momento para contribuir a un cambio educativo significativo. ¡Descubre cómo!
+              {t("aleer.description")}
             </p>
           </motion.div>
 
@@ -120,7 +92,7 @@ export default function ALeerBoliviaPage() {
             >
               <div className="text-center">
                 <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
-                <span className="text-sm text-purple-400 font-medium">A Leer Bolivia</span>
+                <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
               </div>
             </div>
           </motion.div>
@@ -133,14 +105,14 @@ export default function ALeerBoliviaPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-xl font-black text-gray-800 mb-2" data-testid="text-objectives-title">Objetivos</h2>
+            <h2 className="text-xl font-black text-gray-800 mb-2" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
             <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
-              Impulsamos el futuro educativo de Bolivia con un concurso de lectura que no solo cultiva el amor por los libros entre estudiantes de primaria, sino que también afina sus habilidades analíticas y de comprensión.
+              {t("aleer.objectivesDesc")}
             </p>
           </motion.div>
 
           <div className="space-y-4">
-            {objectives.map((obj, i) => {
+            {objectivesMeta.map((obj, i) => {
               const Icon = obj.icon;
               return (
                 <motion.div
@@ -165,8 +137,8 @@ export default function ALeerBoliviaPage() {
                     <Icon className="w-6 h-6" style={{ color: obj.color }} />
                   </motion.div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">{obj.title}</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">{obj.desc}</p>
+                    <h3 className="text-sm font-bold text-gray-800 mb-1">{t(`aleer.${obj.titleKey}`)}</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${obj.descKey}`)}</p>
                   </div>
                 </motion.div>
               );

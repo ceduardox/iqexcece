@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Home, Brain, Dumbbell, BarChart3, MoreHorizontal, Newspaper, ChevronRight, BookOpen, type LucideIcon } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
+import { useTranslation } from "react-i18next";
 
 export interface NavItem {
   id: string;
@@ -18,24 +19,26 @@ interface TrainingNavBarProps {
   onNavClick?: (path: string, id: string) => void;
 }
 
-const defaultItems = (categoria: string): NavItem[] => [
-  { id: "inicio", icon: Home, label: "Inicio", path: "/" },
-  { id: "diagnostico", icon: Brain, label: "Diagnóstico", path: `/reading-selection/${categoria}` },
-  { id: "entrenar", icon: Dumbbell, label: "Entrenar", path: "/entrenamiento" },
-  { id: "progreso", icon: BarChart3, label: "Progreso", path: `/progreso/${categoria}` },
-];
-
 export function TrainingNavBar({ 
   activePage, 
   categoria = "ninos",
   items,
   onNavClick
 }: TrainingNavBarProps) {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { playSound } = useSounds();
   const [moreOpen, setMoreOpen] = useState(false);
-  const navItems = items || defaultItems(categoria);
   const isMoreActive = activePage === "blog" || activePage === "mas";
+
+  const defaultItems: NavItem[] = [
+    { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },
+    { id: "diagnostico", icon: Brain, label: t("nav.diagnostico"), path: `/reading-selection/${categoria}` },
+    { id: "entrenar", icon: Dumbbell, label: t("nav.entrenar"), path: "/entrenamiento" },
+    { id: "progreso", icon: BarChart3, label: t("nav.progreso"), path: `/progreso/${categoria}` },
+  ];
+
+  const navItems = items || defaultItems;
 
   const handleNav = (path: string, id: string) => {
     playSound("iphone");
@@ -85,7 +88,7 @@ export function TrainingNavBar({
             ) : (
               <MoreHorizontal className="w-5 h-5" />
             )}
-            <span className={`text-[10px] ${isMoreActive ? "font-medium mt-1" : ""}`}>Más</span>
+            <span className={`text-[10px] ${isMoreActive ? "font-medium mt-1" : ""}`}>{t("nav.mas")}</span>
           </motion.button>
 
           {moreOpen && (
@@ -102,7 +105,7 @@ export function TrainingNavBar({
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
                   <Newspaper className="w-4 h-4 text-purple-500" />
                 </div>
-                <span className="text-sm font-semibold text-gray-700">Blog</span>
+                <span className="text-sm font-semibold text-gray-700">{t("nav.blog")}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
               </button>
               <button
@@ -113,7 +116,7 @@ export function TrainingNavBar({
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                   <BookOpen className="w-4 h-4 text-emerald-500" />
                 </div>
-                <span className="text-sm font-semibold text-gray-700">A Leer Bolivia</span>
+                <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
               </button>
             </div>
