@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Phone, MessageSquare, GraduationCap, Building, Briefcase, MapPin, ChevronDown, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, error, testId, pais, estado, tipo }: {
   value: string; onChange: (v: string) => void; placeholder: string; inputClass: string; error?: string; testId: string; pais: string; estado: string; tipo?: string;
 }) {
+  const { t } = useTranslation();
   const [showList, setShowList] = useState(false);
   const [manualMode, setManualMode] = useState(false);
   const [allInst, setAllInst] = useState<string[]>([]);
@@ -43,7 +45,7 @@ function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, err
         />
         {manualMode && allInst.length > 0 && (
           <button type="button" onClick={() => { setManualMode(false); onChange(""); }} className="text-purple-400 text-xs mt-1 underline">
-            Volver a buscar en la lista
+            {t("form.backToList")}
           </button>
         )}
         {error && <div className="flex items-center gap-1 mt-1 text-red-500 text-xs"><AlertCircle className="w-3 h-3" />{error}</div>}
@@ -57,7 +59,7 @@ function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, err
     <div ref={ref} className="relative">
       <input
         type="text"
-        placeholder={`Buscar ${placeholder.toLowerCase()}...`}
+        placeholder={`${t("form.searchInList")} ${placeholder.toLowerCase()}...`}
         value={value}
         onChange={(e) => { onChange(e.target.value); setShowList(true); }}
         onFocus={() => setShowList(true)}
@@ -77,14 +79,14 @@ function InstitucionAutocomplete({ value, onChange, placeholder, inputClass, err
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="px-3 py-2 text-sm text-gray-400">No se encontró</div>
+            <div className="px-3 py-2 text-sm text-gray-400">{t("form.notFound")}</div>
           )}
           <button
             type="button"
             onClick={() => { setManualMode(true); onChange(""); setShowList(false); }}
             className="w-full text-left px-3 py-2 text-sm text-purple-600 font-medium hover:bg-purple-50 border-t border-gray-200"
           >
-            Mi institución no está en la lista
+            {t("form.notInList")}
           </button>
         </div>
       )}
@@ -144,7 +146,11 @@ interface Props {
   subtitle?: string;
 }
 
-export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = "Ver mis resultados", title = "Complete tus datos", subtitle = "Completa el formulario para continuar" }: Props) {
+export function TestFormUnified({ categoria, onSubmit, submitting, buttonText, title, subtitle }: Props) {
+  const { t } = useTranslation();
+  const resolvedButtonText = buttonText || t("tests.seeResults");
+  const resolvedTitle = title || t("tests.completeData");
+  const resolvedSubtitle = subtitle || t("tests.completeData");
   const [formData, setFormData] = useState<FormDataType>({
     nombre: "",
     email: "",
@@ -204,32 +210,32 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
   const handleSubmit = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.nombre.trim()) newErrors.nombre = "Campo requerido";
-    if (!formData.edad.trim()) newErrors.edad = "Campo requerido";
-    if (!formData.email.trim()) newErrors.email = "Campo requerido";
-    if (!formData.telefono.trim()) newErrors.telefono = "Campo requerido";
-    if (!formData.estado) newErrors.estado = "Selecciona tu estado";
+    if (!formData.nombre.trim()) newErrors.nombre = t("form.requiredField");
+    if (!formData.edad.trim()) newErrors.edad = t("form.requiredField");
+    if (!formData.email.trim()) newErrors.email = t("form.requiredField");
+    if (!formData.telefono.trim()) newErrors.telefono = t("form.requiredField");
+    if (!formData.estado) newErrors.estado = t("form.selectState");
     
     if (isNino) {
-      if (!formData.grado) newErrors.grado = "Selecciona tu grado";
-      if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
+      if (!formData.grado) newErrors.grado = t("form.selectGrade");
+      if (!formData.institucion.trim()) newErrors.institucion = t("form.requiredField");
     }
     
     if (isAdolescente) {
-      if (!formData.grado) newErrors.grado = "Selecciona tu curso";
-      if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
+      if (!formData.grado) newErrors.grado = t("form.selectCourseError");
+      if (!formData.institucion.trim()) newErrors.institucion = t("form.requiredField");
     }
     
     if (isAdultoConOpciones) {
       if (!formData.tipoEstudiante) {
-        newErrors.tipoEstudiante = "Selecciona tu perfil";
+        newErrors.tipoEstudiante = t("form.selectProfileError");
       } else if (formData.tipoEstudiante === "universitario" && !isAdultoMayor) {
-        if (!formData.semestre) newErrors.semestre = "Selecciona un semestre";
-        if (!formData.institucion.trim()) newErrors.institucion = "Campo requerido";
+        if (!formData.semestre) newErrors.semestre = t("form.selectSemesterError");
+        if (!formData.institucion.trim()) newErrors.institucion = t("form.requiredField");
       } else if (formData.tipoEstudiante === "profesional") {
-        if (!formData.profesion.trim()) newErrors.profesion = "Campo requerido";
+        if (!formData.profesion.trim()) newErrors.profesion = t("form.requiredField");
       } else if (formData.tipoEstudiante === "ocupacion") {
-        if (!formData.ocupacion.trim()) newErrors.ocupacion = "Campo requerido";
+        if (!formData.ocupacion.trim()) newErrors.ocupacion = t("form.requiredField");
       }
     }
     
@@ -294,8 +300,8 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               transition={{ duration: 2, repeat: Infinity, delay: 1 }}
             />
           </motion.div>
-          <h1 className="text-xl font-bold text-gray-800">{title}</h1>
-          <p className="text-sm text-gray-500">{subtitle}</p>
+          <h1 className="text-xl font-bold text-gray-800">{resolvedTitle}</h1>
+          <p className="text-sm text-gray-500">{resolvedSubtitle}</p>
         </div>
 
         <motion.div 
@@ -308,7 +314,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             <User className={iconClass} />
             <input
               type="text"
-              placeholder="Nombre completo"
+              placeholder={t("form.fullName")}
               value={formData.nombre}
               onChange={(e) => { handleChange("nombre", e.target.value); setErrors(prev => ({ ...prev, nombre: "" })); }}
               className={`${inputClass} ${errors.nombre ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -342,7 +348,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                 <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
                 <input
                   type="tel"
-                  placeholder="Número de teléfono"
+                  placeholder={t("form.phone")}
                   value={formData.telefono}
                   onChange={(e) => { handleChange("telefono", e.target.value); setErrors(prev => ({ ...prev, telefono: "" })); }}
                   className={`${inputClass} ${errors.telefono ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -362,7 +368,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
               className={`${selectClass} ${errors.estado ? "border-red-400 ring-1 ring-red-400" : ""}`}
               data-testid="select-estado"
             >
-              <option value="">Estado / Departamento / Provincia</option>
+              <option value="">{t("form.stateProvince")}</option>
               {states.map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -382,7 +388,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   className={`${selectClass} ${errors.grado ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="select-grado"
                 >
-                  <option value="">Perfil educativo</option>
+                  <option value="">{t("form.educationalProfile")}</option>
                   {gradosPrimaria.map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
@@ -395,7 +401,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                 <InstitucionAutocomplete
                   value={formData.institucion}
                   onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                  placeholder="Institución (colegio)"
+                  placeholder={t("form.institution")}
                   inputClass={inputClass}
                   error={errors.institucion}
                   testId="input-institucion"
@@ -417,7 +423,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   className={`${selectClass} ${errors.grado ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="select-grado"
                 >
-                  <option value="">Selecciona tu curso</option>
+                  <option value="">{t("form.selectCourse")}</option>
                   {gradosSecundaria.map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
@@ -430,7 +436,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                 <InstitucionAutocomplete
                   value={formData.institucion}
                   onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                  placeholder="Colegio"
+                  placeholder={t("form.school")}
                   inputClass={inputClass}
                   error={errors.institucion}
                   testId="input-institucion-colegio"
@@ -452,10 +458,10 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   className={`${selectClass} ${errors.tipoEstudiante ? "border-red-400 ring-1 ring-red-400" : ""}`}
                   data-testid="select-tipo-estudiante"
                 >
-                  <option value="">Selecciona tu perfil</option>
-                  {!isAdultoMayor && <option value="universitario">Universitario</option>}
-                  <option value="profesional">Profesional</option>
-                  <option value="ocupacion">Ocupación</option>
+                  <option value="">{t("form.selectProfile")}</option>
+                  {!isAdultoMayor && <option value="universitario">{t("form.universityStudent")}</option>}
+                  <option value="profesional">{t("form.professional")}</option>
+                  <option value="ocupacion">{t("form.occupation")}</option>
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 {errors.tipoEstudiante && (
@@ -476,7 +482,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                       className={`${selectClass} ${errors.semestre ? "border-red-400 ring-1 ring-red-400" : ""}`}
                       data-testid="select-semestre"
                     >
-                      <option value="">Selecciona semestre</option>
+                      <option value="">{t("form.selectSemester")}</option>
                       {semestres.map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
@@ -494,7 +500,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                     <InstitucionAutocomplete
                       value={formData.institucion}
                       onChange={(v) => { handleChange("institucion", v); setErrors(prev => ({ ...prev, institucion: "" })); }}
-                      placeholder="Universidad"
+                      placeholder={t("form.university")}
                       inputClass={inputClass}
                       error={errors.institucion}
                       testId="input-institucion-universidad"
@@ -512,7 +518,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                     <Briefcase className={iconClass} />
                     <input
                       type="text"
-                      placeholder="¿Cuál es tu profesión?"
+                      placeholder={t("form.whatProfession")}
                       value={formData.profesion}
                       onChange={(e) => { handleChange("profesion", e.target.value); setErrors(prev => ({ ...prev, profesion: "" })); }}
                       className={`${inputClass} ${errors.profesion ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -529,7 +535,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                     <Building className={iconClass} />
                     <input
                       type="text"
-                      placeholder="Institución / Lugar de trabajo"
+                      placeholder={t("form.workplace")}
                       value={formData.lugarTrabajo}
                       onChange={(e) => handleChange("lugarTrabajo", e.target.value)}
                       className={inputClass}
@@ -544,7 +550,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
                   <Briefcase className={iconClass} />
                   <input
                     type="text"
-                    placeholder="¿Cuál es tu ocupación?"
+                    placeholder={t("form.whatOccupation")}
                     value={formData.ocupacion}
                     onChange={(e) => { handleChange("ocupacion", e.target.value); setErrors(prev => ({ ...prev, ocupacion: "" })); }}
                     className={`${inputClass} ${errors.ocupacion ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -565,7 +571,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
           <div className="relative">
             <input
               type="number"
-              placeholder="Edad"
+              placeholder={t("form.age")}
               value={formData.edad}
               onChange={(e) => { handleChange("edad", e.target.value); setErrors(prev => ({ ...prev, edad: "" })); }}
               className={`${inputClass} pl-11 ${errors.edad ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -580,7 +586,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             <Mail className={iconClass} />
             <input
               type="email"
-              placeholder="Email"
+              placeholder={t("form.email")}
               value={formData.email}
               onChange={(e) => { handleChange("email", e.target.value); setErrors(prev => ({ ...prev, email: "" })); }}
               className={`${inputClass} ${errors.email ? "border-red-400 ring-1 ring-red-400" : ""}`}
@@ -593,7 +599,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
           <div className="relative">
             <MessageSquare className={iconClass} />
             <textarea
-              placeholder="Comentario (opcional)"
+              placeholder={t("form.commentOptional")}
               value={formData.comentario}
               onChange={(e) => handleChange("comentario", e.target.value)}
               className={`${inputClass} pl-11 resize-none min-h-[60px]`}
@@ -609,7 +615,7 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText = 
             style={{ background: "linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)" }}
             data-testid="button-submit"
           >
-            {submitting ? "Enviando..." : buttonText}
+            {submitting ? t("form.sending") : resolvedButtonText}
           </motion.button>
         </motion.div>
       </main>
