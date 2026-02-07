@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Clock, ChevronRight, ChevronLeft, User, Calendar, X, Sparkles } from "lucide-react";
+import { Search, Clock, ChevronRight, ChevronLeft, User, Calendar, X, Sparkles, Tag, Layers, ChevronDown, BookOpen, Newspaper } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
@@ -47,6 +47,11 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function getCatPostCount(posts: BlogPost[], catId: string): number {
+  if (!catId) return posts.length;
+  return posts.filter(p => p.categoriaId === catId).length;
+}
+
 export default function BlogPage() {
   const [, navigate] = useLocation();
   const { playSound } = useSounds();
@@ -55,6 +60,7 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [desktopCatOpen, setDesktopCatOpen] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -92,6 +98,7 @@ export default function BlogPage() {
   const categories = categoriesData?.categories || [];
   const posts = postsData?.posts || [];
   const totalPages = postsData?.totalPages || 1;
+  const totalPosts = postsData?.total || 0;
 
   const handleCategoryClick = (catId: string) => {
     playSound("iphone");
@@ -111,6 +118,202 @@ export default function BlogPage() {
 
   const featuredPost = posts.length > 0 ? posts[0] : null;
   const remainingPosts = posts.length > 1 ? posts.slice(1) : [];
+
+  const desktopCategorySidebar = (
+    <motion.aside
+      className="hidden md:block w-56 shrink-0"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div
+        className="bg-white rounded-2xl overflow-hidden sticky top-4"
+        style={{ boxShadow: "0 4px 20px rgba(124,58,237,0.06)" }}
+      >
+        <button
+          onClick={() => setDesktopCatOpen(!desktopCatOpen)}
+          className="w-full flex items-center justify-between px-4 py-3.5 text-left"
+          style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(6,182,212,0.04) 100%)" }}
+          data-testid="button-desktop-cat-toggle"
+        >
+          <span className="flex items-center gap-2 text-sm font-bold text-gray-700">
+            <Layers className="w-4 h-4 text-purple-500" />
+            Categorías
+          </span>
+          <motion.span
+            animate={{ rotate: desktopCatOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          </motion.span>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {desktopCatOpen && (
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: "auto" }}
+              exit={{ height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden"
+            >
+              <div className="px-2 py-2 space-y-1">
+                <motion.button
+                  onClick={() => handleCategoryClick("")}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                    !selectedCategory
+                      ? "text-white"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  style={!selectedCategory ? {
+                    background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)",
+                    boxShadow: "0 4px 14px rgba(124,58,237,0.25)"
+                  } : {}}
+                  whileTap={{ scale: 0.97 }}
+                  data-testid="button-desktop-category-all"
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={!selectedCategory
+                      ? { background: "rgba(255,255,255,0.2)" }
+                      : { background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}
+                  >
+                    <Sparkles className={`w-4 h-4 ${!selectedCategory ? "text-white" : "text-purple-500"}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold block">Todos</span>
+                    <span className={`text-[10px] ${!selectedCategory ? "text-white/70" : "text-gray-400"}`}>
+                      {totalPosts} artículos
+                    </span>
+                  </div>
+                </motion.button>
+
+                {categories.map((cat, i) => {
+                  const isSelected = selectedCategory === cat.id;
+                  const catColor = cat.color || "#7c3aed";
+                  return (
+                    <motion.button
+                      key={cat.id}
+                      onClick={() => handleCategoryClick(cat.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                        isSelected
+                          ? "text-white"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                      style={isSelected ? {
+                        background: catColor,
+                        boxShadow: `0 4px 14px ${catColor}30`
+                      } : {}}
+                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.04 + 0.1 }}
+                      data-testid={`button-desktop-category-${cat.id}`}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        style={isSelected
+                          ? { background: "rgba(255,255,255,0.2)" }
+                          : { background: catColor + "15" }}
+                      >
+                        <Tag className="w-4 h-4" style={{ color: isSelected ? "white" : catColor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-semibold block truncate">{cat.nombre}</span>
+                        <span className={`text-[10px] ${isSelected ? "text-white/70" : "text-gray-400"}`}>
+                          Ver artículos
+                        </span>
+                      </div>
+                      <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white/60" : "text-gray-300"}`} />
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {selectedCategory && (
+        <motion.div
+          className="mt-3 bg-white rounded-2xl p-4"
+          style={{ boxShadow: "0 2px 12px rgba(124,58,237,0.05)" }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ background: getCategoryColor(selectedCategory) }}
+            />
+            <span className="text-xs font-bold text-gray-700">
+              {getCategoryName(selectedCategory)}
+            </span>
+          </div>
+          <p className="text-[10px] text-gray-400">
+            Mostrando artículos filtrados por esta categoría
+          </p>
+          <button
+            onClick={() => handleCategoryClick("")}
+            className="mt-2 text-[10px] font-semibold text-purple-500 flex items-center gap-1"
+            data-testid="button-clear-category"
+          >
+            <X className="w-3 h-3" /> Limpiar filtro
+          </button>
+        </motion.div>
+      )}
+    </motion.aside>
+  );
+
+  const mobileCategoryPills = (
+    <div className="md:hidden px-4 mb-3">
+      <motion.div
+        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <motion.button
+          onClick={() => handleCategoryClick("")}
+          className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            !selectedCategory
+              ? "text-white"
+              : "bg-white text-gray-600 border border-gray-100"
+          }`}
+          style={!selectedCategory ? {
+            background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)",
+            boxShadow: "0 4px 14px rgba(124,58,237,0.25)"
+          } : { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
+          whileTap={{ scale: 0.93 }}
+          data-testid="button-category-all"
+        >
+          <Sparkles className="w-3 h-3" />
+          Todos
+        </motion.button>
+        {categories.map((cat, i) => (
+          <motion.button
+            key={cat.id}
+            onClick={() => handleCategoryClick(cat.id)}
+            className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+              selectedCategory === cat.id
+                ? "text-white"
+                : "bg-white text-gray-600 border border-gray-100"
+            }`}
+            style={selectedCategory === cat.id
+              ? { background: cat.color || "#7c3aed", boxShadow: `0 4px 14px ${cat.color || "#7c3aed"}30` }
+              : { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
+            whileTap={{ scale: 0.93 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 + 0.1 }}
+            data-testid={`button-category-${cat.id}`}
+          >
+            {cat.nombre}
+          </motion.button>
+        ))}
+      </motion.div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafe]">
@@ -142,7 +345,7 @@ export default function BlogPage() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="relative">
+            <div className="relative max-w-2xl mx-auto">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 ref={searchInputRef}
@@ -168,266 +371,222 @@ export default function BlogPage() {
         )}
       </AnimatePresence>
 
-      {categories.length > 0 && (
-        <div className="px-4 mb-3">
-          <motion.div
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <motion.button
-              onClick={() => handleCategoryClick("")}
-              className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                !selectedCategory
-                  ? "text-white"
-                  : "bg-white text-gray-600 border border-gray-100"
-              }`}
-              style={!selectedCategory ? {
-                background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)",
-                boxShadow: "0 4px 14px rgba(124,58,237,0.25)"
-              } : { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
-              whileTap={{ scale: 0.93 }}
-              data-testid="button-category-all"
-            >
-              <Sparkles className="w-3 h-3" />
-              Todos
-            </motion.button>
-            {categories.map((cat, i) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id)}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                  selectedCategory === cat.id
-                    ? "text-white"
-                    : "bg-white text-gray-600 border border-gray-100"
-                }`}
-                style={selectedCategory === cat.id
-                  ? { background: cat.color || "#7c3aed", boxShadow: `0 4px 14px ${cat.color || "#7c3aed"}30` }
-                  : { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
-                whileTap={{ scale: 0.93 }}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 + 0.1 }}
-                data-testid={`button-category-${cat.id}`}
-              >
-                {cat.nombre}
-              </motion.button>
-            ))}
-          </motion.div>
-        </div>
-      )}
+      {categories.length > 0 && mobileCategoryPills}
 
       <main className="flex-1 px-4 pb-28">
-        <div className="max-w-4xl mx-auto">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <div className="w-10 h-10 rounded-full border-[3px] border-purple-100 border-t-purple-500 animate-spin" />
-              <p className="text-xs text-gray-400">Cargando artículos...</p>
-            </div>
-          ) : posts.length === 0 ? (
-            <motion.div
-              className="bg-white rounded-2xl p-8 text-center"
-              style={{ boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%)" }}>
-                <svg className="w-10 h-10" style={{ color: "#a78bfa" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
-              </div>
-              <p className="text-gray-600 text-sm font-medium">
-                {debouncedSearch ? "No se encontraron artículos" : "No hay publicaciones aún"}
-              </p>
-              <p className="text-gray-400 text-xs mt-1">
-                {debouncedSearch ? "Intenta con otras palabras clave" : "Pronto tendremos contenido interesante para ti"}
-              </p>
-            </motion.div>
-          ) : (
-            <>
-              {featuredPost && !debouncedSearch && page === 1 && (
-                <motion.div
-                  className="mb-5 rounded-2xl overflow-hidden cursor-pointer relative group"
-                  style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.1)" }}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() => { playSound("card"); navigate(`/blog/${featuredPost.id}`); }}
-                  data-testid={`card-featured-${featuredPost.id}`}
-                >
-                  <div className="relative h-52 md:h-64 overflow-hidden bg-gradient-to-br from-purple-400 to-cyan-400">
-                    {featuredPost.imagenPortada ? (
-                      <img
-                        src={featuredPost.imagenPortada}
-                        alt={featuredPost.titulo}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Sparkles className="w-16 h-16 text-white/30" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      {featuredPost.categoriaId && getCategoryName(featuredPost.categoriaId) && (
-                        <motion.span
-                          className="inline-block px-3 py-1 rounded-full text-[10px] font-bold text-white mb-2 backdrop-blur-sm"
-                          style={{ background: getCategoryColor(featuredPost.categoriaId) + "bb" }}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.3 }}
-                        >
-                          {getCategoryName(featuredPost.categoriaId)}
-                        </motion.span>
-                      )}
-                      <h2 className="text-lg md:text-xl font-bold text-white leading-tight mb-1.5 drop-shadow-sm">
-                        {featuredPost.titulo}
-                      </h2>
-                      <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 mb-2">
-                        {getExcerpt(featuredPost.contenido, featuredPost.descripcion)}
-                      </p>
-                      <div className="flex items-center gap-3 text-white/60 text-[10px]">
-                        {featuredPost.autor && (
-                          <span className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            {featuredPost.autor}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(featuredPost.createdAt)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {estimateReadingTime(featuredPost.contenido)} min
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+        <div className="max-w-5xl mx-auto flex gap-6">
+          {categories.length > 0 && desktopCategorySidebar}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(debouncedSearch || page > 1 ? posts : remainingPosts).map((post, index) => (
+          <div className="flex-1 min-w-0">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="w-10 h-10 rounded-full border-[3px] border-purple-100 border-t-purple-500 animate-spin" />
+                <p className="text-xs text-gray-400">Cargando artículos...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <motion.div
+                className="bg-white rounded-2xl p-8 text-center"
+                style={{ boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%)" }}>
+                  <Newspaper className="w-10 h-10 text-purple-300" />
+                </div>
+                <p className="text-gray-600 text-sm font-medium">
+                  {debouncedSearch ? "No se encontraron artículos" : "No hay publicaciones aún"}
+                </p>
+                <p className="text-gray-400 text-xs mt-1">
+                  {debouncedSearch ? "Intenta con otras palabras clave" : "Pronto tendremos contenido interesante para ti"}
+                </p>
+              </motion.div>
+            ) : (
+              <>
+                {featuredPost && !debouncedSearch && page === 1 && (
                   <motion.div
-                    key={post.id}
-                    className="bg-white rounded-2xl overflow-hidden cursor-pointer group"
-                    style={{ boxShadow: "0 2px 16px rgba(124,58,237,0.06)" }}
-                    initial={{ opacity: 0, y: 20 }}
+                    className="mb-5 rounded-2xl overflow-hidden cursor-pointer relative group"
+                    style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.1)" }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.06, duration: 0.4 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => { playSound("card"); navigate(`/blog/${post.id}`); }}
-                    data-testid={`card-post-${post.id}`}
+                    transition={{ duration: 0.5 }}
+                    whileTap={{ scale: 0.985 }}
+                    onClick={() => { playSound("card"); navigate(`/blog/${featuredPost.id}`); }}
+                    data-testid={`card-featured-${featuredPost.id}`}
                   >
-                    {post.imagenPortada && (
-                      <div className="relative h-40 overflow-hidden">
+                    <div className="relative h-52 md:h-64 overflow-hidden bg-gradient-to-br from-purple-400 to-cyan-400">
+                      {featuredPost.imagenPortada ? (
                         <img
-                          src={post.imagenPortada}
-                          alt={post.titulo}
+                          src={featuredPost.imagenPortada}
+                          alt={featuredPost.titulo}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                        {post.categoriaId && getCategoryName(post.categoriaId) && (
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Sparkles className="w-16 h-16 text-white/30" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                        {featuredPost.categoriaId && getCategoryName(featuredPost.categoriaId) && (
+                          <motion.span
+                            className="inline-block px-3 py-1 rounded-full text-[10px] font-bold text-white mb-2 backdrop-blur-sm"
+                            style={{ background: getCategoryColor(featuredPost.categoriaId) + "bb" }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            {getCategoryName(featuredPost.categoriaId)}
+                          </motion.span>
+                        )}
+                        <h2 className="text-lg md:text-xl font-bold text-white leading-tight mb-1.5 drop-shadow-sm">
+                          {featuredPost.titulo}
+                        </h2>
+                        <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 mb-2">
+                          {getExcerpt(featuredPost.contenido, featuredPost.descripcion)}
+                        </p>
+                        <div className="flex items-center gap-3 text-white/60 text-[10px]">
+                          {featuredPost.autor && (
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              {featuredPost.autor}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(featuredPost.createdAt)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {estimateReadingTime(featuredPost.contenido)} min
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(debouncedSearch || page > 1 ? posts : remainingPosts).map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      className="bg-white rounded-2xl overflow-hidden cursor-pointer group"
+                      style={{ boxShadow: "0 2px 16px rgba(124,58,237,0.06)" }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.06, duration: 0.4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => { playSound("card"); navigate(`/blog/${post.id}`); }}
+                      data-testid={`card-post-${post.id}`}
+                    >
+                      {post.imagenPortada && (
+                        <div className="relative h-40 overflow-hidden">
+                          <img
+                            src={post.imagenPortada}
+                            alt={post.titulo}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          {post.categoriaId && getCategoryName(post.categoriaId) && (
+                            <span
+                              className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white backdrop-blur-sm"
+                              style={{ background: getCategoryColor(post.categoriaId) + "cc" }}
+                              data-testid={`badge-category-${post.id}`}
+                            >
+                              {getCategoryName(post.categoriaId)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="p-4">
+                        {!post.imagenPortada && post.categoriaId && getCategoryName(post.categoriaId) && (
                           <span
-                            className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white backdrop-blur-sm"
-                            style={{ background: getCategoryColor(post.categoriaId) + "cc" }}
-                            data-testid={`badge-category-${post.id}`}
+                            className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white mb-2"
+                            style={{ background: getCategoryColor(post.categoriaId) }}
                           >
                             {getCategoryName(post.categoriaId)}
                           </span>
                         )}
-                      </div>
-                    )}
-                    <div className="p-4">
-                      {!post.imagenPortada && post.categoriaId && getCategoryName(post.categoriaId) && (
-                        <span
-                          className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white mb-2"
-                          style={{ background: getCategoryColor(post.categoriaId) }}
-                        >
-                          {getCategoryName(post.categoriaId)}
-                        </span>
-                      )}
-                      <h3 className="text-sm font-bold text-gray-800 leading-snug mb-1.5 line-clamp-2">{post.titulo}</h3>
-                      <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">
-                        {getExcerpt(post.contenido, post.descripcion)}
-                      </p>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 text-gray-400 min-w-0">
-                          {post.autor && (
-                            <span className="flex items-center gap-1 text-[10px] truncate">
-                              <User className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{post.autor}</span>
+                        <h3 className="text-sm font-bold text-gray-800 leading-snug mb-1.5 line-clamp-2">{post.titulo}</h3>
+                        <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">
+                          {getExcerpt(post.contenido, post.descripcion)}
+                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 text-gray-400 min-w-0">
+                            {post.autor && (
+                              <span className="flex items-center gap-1 text-[10px] truncate">
+                                <User className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{post.autor}</span>
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1 text-[10px] shrink-0">
+                              <Clock className="w-3 h-3" />
+                              {estimateReadingTime(post.contenido)} min
                             </span>
-                          )}
-                          <span className="flex items-center gap-1 text-[10px] shrink-0">
-                            <Clock className="w-3 h-3" />
-                            {estimateReadingTime(post.contenido)} min
+                          </div>
+                          <span
+                            className="text-[11px] font-semibold flex items-center gap-0.5 shrink-0 transition-transform group-hover:translate-x-0.5"
+                            style={{ color: getCategoryColor(post.categoriaId) }}
+                            data-testid={`link-read-more-${post.id}`}
+                          >
+                            Leer <ChevronRight className="w-3.5 h-3.5" />
                           </span>
                         </div>
-                        <span
-                          className="text-[11px] font-semibold flex items-center gap-0.5 shrink-0 transition-transform group-hover:translate-x-0.5"
-                          style={{ color: getCategoryColor(post.categoriaId) }}
-                          data-testid={`link-read-more-${post.id}`}
-                        >
-                          Leer <ChevronRight className="w-3.5 h-3.5" />
-                        </span>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </>
-          )}
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
 
-          {totalPages > 1 && (
-            <motion.div
-              className="flex items-center justify-center gap-2 mt-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <button
-                onClick={() => { setPage(Math.max(1, page - 1)); playSound("iphone"); }}
-                disabled={page <= 1}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                  page <= 1 ? "bg-gray-100 text-gray-300" : "bg-white text-purple-600"
-                }`}
-                style={page > 1 ? { boxShadow: "0 2px 8px rgba(124,58,237,0.1)" } : {}}
-                data-testid="button-prev-page"
+            {totalPages > 1 && (
+              <motion.div
+                className="flex items-center justify-center gap-2 mt-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
               >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                 <button
-                  key={p}
-                  onClick={() => { setPage(p); playSound("iphone"); }}
-                  className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
-                    page === p
-                      ? "text-white"
-                      : "bg-white text-gray-600"
+                  onClick={() => { setPage(Math.max(1, page - 1)); playSound("iphone"); }}
+                  disabled={page <= 1}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                    page <= 1 ? "bg-gray-100 text-gray-300" : "bg-white text-purple-600"
                   }`}
-                  style={page === p
-                    ? { background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)", boxShadow: "0 4px 12px rgba(124,58,237,0.25)" }
-                    : { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
-                  data-testid={`button-page-${p}`}
+                  style={page > 1 ? { boxShadow: "0 2px 8px rgba(124,58,237,0.1)" } : {}}
+                  data-testid="button-prev-page"
                 >
-                  {p}
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
-              ))}
-              <button
-                onClick={() => { setPage(Math.min(totalPages, page + 1)); playSound("iphone"); }}
-                disabled={page >= totalPages}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                  page >= totalPages ? "bg-gray-100 text-gray-300" : "bg-white text-purple-600"
-                }`}
-                style={page < totalPages ? { boxShadow: "0 2px 8px rgba(124,58,237,0.1)" } : {}}
-                data-testid="button-next-page"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </motion.div>
-          )}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => { setPage(p); playSound("iphone"); }}
+                    className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
+                      page === p
+                        ? "text-white"
+                        : "bg-white text-gray-600"
+                    }`}
+                    style={page === p
+                      ? { background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)", boxShadow: "0 4px 12px rgba(124,58,237,0.25)" }
+                      : { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
+                    data-testid={`button-page-${p}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => { setPage(Math.min(totalPages, page + 1)); playSound("iphone"); }}
+                  disabled={page >= totalPages}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                    page >= totalPages ? "bg-gray-100 text-gray-300" : "bg-white text-purple-600"
+                  }`}
+                  style={page < totalPages ? { boxShadow: "0 2px 8px rgba(124,58,237,0.1)" } : {}}
+                  data-testid="button-next-page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+          </div>
         </div>
       </main>
 
