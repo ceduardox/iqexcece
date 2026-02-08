@@ -1078,30 +1078,52 @@ export async function registerRoutes(
   });
 
   // ====== AI Agent Endpoints ======
-  const AGENT_ALLOWED_DIR = path.resolve("client/src");
-  const AGENT_SHARED_DIR = path.resolve("shared");
+  const PROJECT_ROOT = path.resolve(".");
 
-  function isPathAllowed(filePath: string): boolean {
+  function isPathSafe(filePath: string): boolean {
     const resolved = path.resolve(filePath);
-    return resolved.startsWith(AGENT_ALLOWED_DIR) || resolved.startsWith(AGENT_SHARED_DIR);
+    return resolved.startsWith(PROJECT_ROOT) && !resolved.includes("node_modules") && !resolved.includes(".git");
+  }
+
+  function getProjectTree(dir: string, prefix = "", depth = 0): string {
+    if (depth > 4) return "";
+    const skip = ["node_modules", ".git", "dist", ".cache", ".local", "attached_assets"];
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => {
+        if (a.isDirectory() && !b.isDirectory()) return -1;
+        if (!a.isDirectory() && b.isDirectory()) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      let tree = "";
+      for (const e of entries) {
+        if (skip.includes(e.name) || e.name.startsWith(".")) continue;
+        const rel = path.relative(PROJECT_ROOT, path.join(dir, e.name));
+        if (e.isDirectory()) {
+          tree += `${prefix}${rel}/\n`;
+          tree += getProjectTree(path.join(dir, e.name), prefix, depth + 1);
+        } else {
+          tree += `${prefix}${rel}\n`;
+        }
+      }
+      return tree;
+    } catch { return ""; }
   }
 
   app.get("/api/admin/agent/files", async (req, res) => {
     const auth = req.headers.authorization;
     const token = auth?.replace("Bearer ", "");
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
-    const dir = (req.query.dir as string) || "client/src";
-    const resolved = path.resolve(dir);
-    if (!resolved.startsWith(AGENT_ALLOWED_DIR) && !resolved.startsWith(AGENT_SHARED_DIR)) {
-      return res.status(403).json({ error: "Access denied" });
-    }
+    const dir = (req.query.dir as string) || ".";
+    if (!isPathSafe(dir)) return res.status(403).json({ error: "Access denied" });
     try {
-      const entries = fs.readdirSync(resolved, { withFileTypes: true });
-      const result = entries.map(e => ({
-        name: e.name,
-        type: e.isDirectory() ? "dir" : "file",
-        path: path.join(dir, e.name),
-      }));
+      const entries = fs.readdirSync(path.resolve(dir), { withFileTypes: true });
+      const result = entries
+        .filter(e => !["node_modules", ".git"].includes(e.name))
+        .map(e => ({
+          name: e.name,
+          type: e.isDirectory() ? "dir" : "file",
+          path: path.join(dir, e.name),
+        }));
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -1113,7 +1135,7 @@ export async function registerRoutes(
     const token = auth?.replace("Bearer ", "");
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
     const filePath = req.query.path as string;
-    if (!filePath || !isPathAllowed(filePath)) return res.status(403).json({ error: "Access denied" });
+    if (!filePath || !isPathSafe(filePath)) return res.status(403).json({ error: "Access denied" });
     try {
       const content = fs.readFileSync(path.resolve(filePath), "utf-8");
       res.json({ content, path: filePath });
@@ -1127,13 +1149,14 @@ export async function registerRoutes(
     const token = auth?.replace("Bearer ", "");
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
     const { filePath, content } = req.body;
-    if (!filePath || content === undefined || !isPathAllowed(filePath)) {
+    if (!filePath || content === undefined || !isPathSafe(filePath)) {
       return res.status(403).json({ error: "Access denied or invalid path" });
     }
     try {
       const dir = path.dirname(path.resolve(filePath));
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.resolve(filePath), content, "utf-8");
+      console.log(`[AGENT AUDIT] File written: ${filePath} (${content.length} bytes) at ${new Date().toISOString()}`);
       res.json({ success: true, path: filePath });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -1153,29 +1176,39 @@ export async function registerRoutes(
       if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
 
       const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
+      const routesContent = fs.readFileSync(path.resolve("server/routes.ts"), "utf-8");
+      const projectTree = getProjectTree(PROJECT_ROOT);
 
-      const systemPrompt = `You are an AI development agent for the IQEXPONENCIAL web application. You can read and modify frontend files (client/src/) and shared schema files (shared/).
+      const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project. You can read, list, and modify ANY file in the project.
+
+COMPLETE PROJECT FILE STRUCTURE:
+${projectTree}
 
 CAPABILITIES:
-- Read files using readFile(path)
-- Write files using writeFile(path, content)
-- List directory contents using listFiles(dir)
+- Read any file: readFile(path)
+- Write any file: writeFile(path, content) 
+- List any directory: listFiles(dir)
+- You have access to ALL project files: server/, client/, shared/, migrations/, scripts, configs, etc.
 
 IMPORTANT RULES:
-1. Only modify files in client/src/ or shared/ directories
+1. You can access and modify ANY file in the project (server, client, shared, configs, etc.)
 2. When writing code, preserve existing patterns and imports
 3. Always explain what you plan to do before making changes
 4. Keep responses concise and focused
-5. If the user asks something you can't do (like modifying server files), explain the limitation
+5. When the user asks you to analyze something, read the relevant files first to understand the code
+6. Respond in the same language the user writes to you (Spanish, English, Portuguese)
 
-DATABASE SCHEMA (read-only reference):
+DATABASE SCHEMA (shared/schema.ts):
 \`\`\`typescript
 ${schemaContent}
 \`\`\`
 
+SERVER ROUTES SUMMARY (server/routes.ts - ${routesContent.length} chars):
+Key API endpoints available in the project. Use readFile to see full details.
+
 When you need to perform a file operation, respond with a JSON block:
 \`\`\`json
-{"action": "readFile", "path": "client/src/pages/Home.tsx"}
+{"action": "readFile", "path": "server/routes.ts"}
 \`\`\`
 or
 \`\`\`json
@@ -1183,7 +1216,7 @@ or
 \`\`\`
 or
 \`\`\`json
-{"action": "listFiles", "dir": "client/src/pages"}
+{"action": "listFiles", "dir": "server"}
 \`\`\`
 
 Always wrap file operations in json code blocks. You may include multiple operations in a single response. After file operations, provide a brief summary of changes made.`;
@@ -1231,14 +1264,14 @@ Always wrap file operations in json code blocks. You may include multiple operat
           const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
           const action = JSON.parse(jsonStr);
 
-          if (action.action === "readFile" && action.path && isPathAllowed(action.path)) {
+          if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
             try {
               const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
-              responseText += `\n\n📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${fileContent.substring(0, 2000)}${fileContent.length > 2000 ? '\n... (truncated)' : ''}\n\`\`\``;
+              responseText += `\n\n📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${fileContent.substring(0, 4000)}${fileContent.length > 4000 ? '\n... (truncated)' : ''}\n\`\`\``;
             } catch (e: any) {
               responseText += `\n\n❌ Error reading ${action.path}: ${e.message}`;
             }
-          } else if (action.action === "writeFile" && action.path && action.content && isPathAllowed(action.path)) {
+          } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
             try {
               const dir = path.dirname(path.resolve(action.path));
               if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -1250,11 +1283,10 @@ Always wrap file operations in json code blocks. You may include multiple operat
               responseText += `\n\n❌ Error writing ${action.path}: ${e.message}`;
             }
           } else if (action.action === "listFiles" && action.dir) {
-            const resolvedDir = path.resolve(action.dir);
-            if (resolvedDir.startsWith(AGENT_ALLOWED_DIR) || resolvedDir.startsWith(AGENT_SHARED_DIR)) {
+            if (isPathSafe(action.dir)) {
               try {
-                const entries = fs.readdirSync(resolvedDir, { withFileTypes: true });
-                const list = entries.map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
+                const entries = fs.readdirSync(path.resolve(action.dir), { withFileTypes: true });
+                const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
                 responseText += `\n\n📁 **${action.dir}**:\n${list}`;
               } catch (e: any) {
                 responseText += `\n\n❌ Error listing ${action.dir}: ${e.message}`;
