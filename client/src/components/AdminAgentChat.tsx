@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertTriangle, Search, FileText, Database, Globe, Undo2, ScrollText, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -125,6 +125,14 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const playNotification = useCallback(() => {
+    try {
+      const audio = new Audio("/iphone.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
   useEffect(() => {
     loadHistory();
   }, []);
@@ -227,6 +235,7 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
         steps: data.steps && data.steps.length > 0 ? data.steps : null,
       };
       setMessages((prev) => [...prev, assistantMsg]);
+      playNotification();
     } catch (err: any) {
       setError(err.message || "Network error");
     } finally {

@@ -1414,8 +1414,13 @@ export async function registerRoutes(
 
       const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
       const projectTree = getProjectTree(PROJECT_ROOT);
+      let replitMd = "";
+      try { replitMd = fs.readFileSync(path.resolve("replit.md"), "utf-8"); } catch {}
 
       const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project. You work autonomously with testing and verification capabilities.
+
+PROJECT KNOWLEDGE BASE (replit.md):
+${replitMd.substring(0, 6000)}
 
 PROJECT FILE STRUCTURE:
 ${projectTree}
@@ -1497,6 +1502,21 @@ WHEN TO USE WHICH ACTION:
 - undoEdit: To REVERT a file to its state before your edit if something went wrong
 - readLogs: To check server logs for errors
 
+CODE CONVENTIONS & FORBIDDEN CHANGES:
+- NEVER modify: vite.config.ts, server/vite.ts, drizzle.config.ts, package.json
+- Use path aliases: @/* for client/src/*, @shared/* for shared/*
+- Use existing UI libraries: shadcn/ui, Radix UI, lucide-react, Framer Motion
+- Before creating a new component, read existing components to copy their style
+- Use Wouter for routing, TanStack Query for data fetching, Drizzle ORM for DB
+- Use editFile (not writeFile) for existing files. writeFile only for NEW files
+- Frontend imports: never import React explicitly (auto-injected by Vite)
+- Environment variables on frontend: use import.meta.env.VITE_* (not process.env)
+
+CLARIFICATION BEHAVIOR:
+- If the user's request is vague (e.g. "mejora esto", "arregla eso"), FIRST ask what specifically they want before making changes
+- If the user asks something unclear, ask ONE clarifying question instead of guessing
+- Only act autonomously when the task is clear and specific
+
 IMPORTANT RULES:
 1. ALWAYS read files before editing them. Never guess content.
 2. Respond in the SAME LANGUAGE the user writes (Spanish/English/Portuguese)
@@ -1507,6 +1527,7 @@ IMPORTANT RULES:
 7. Project stack: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
 8. After making edits, VERIFY they work using httpRequest or dbQuery when applicable.
 9. If verification fails, FIX the issue or undoEdit to revert. Do NOT leave broken code.
+10. Use the PROJECT KNOWLEDGE BASE above to understand architecture, recent changes, and project conventions BEFORE starting work.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
