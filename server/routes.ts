@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { UAParser } from "ua-parser-js";
 import * as fs from "fs";
 import * as path from "path";
+import { execFileSync } from "child_process";
 import { agentMessages } from "@shared/schema";
 import { db } from "./db";
 
@@ -1163,6 +1164,98 @@ export async function registerRoutes(
     }
   });
 
+  // Helper: execute a single action from the agent and return result text
+  function executeAgentAction(action: any): { result: string; fileModified?: string } {
+    if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
+      try {
+        const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
+        const truncated = fileContent.length > 6000 ? fileContent.substring(0, 6000) + '\n... (truncated, use searchFiles to find specific content)' : fileContent;
+        return { result: `📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${truncated}\n\`\`\`` };
+      } catch (e: any) {
+        return { result: `❌ Error reading ${action.path}: ${e.message}` };
+      }
+    } else if (action.action === "searchFiles" && action.pattern) {
+      try {
+        const dir = action.dir && isPathSafe(action.dir) ? action.dir : ".";
+        const args: string[] = ["-rn"];
+        if (action.glob) {
+          args.push("--include", action.glob);
+        } else {
+          args.push("--exclude-dir=node_modules", "--exclude-dir=.git", "--exclude-dir=dist", "--exclude-dir=.cache");
+        }
+        args.push(action.pattern, dir);
+        const output = execFileSync("grep", args, { encoding: "utf-8", timeout: 5000, maxBuffer: 1024 * 100 }).trim();
+        const lines = output.split("\n").slice(0, 30).join("\n");
+        return { result: lines ? `🔍 Search results for "${action.pattern}":\n\`\`\`\n${lines}\n\`\`\`` : `🔍 No results found for "${action.pattern}"` };
+      } catch (e: any) {
+        if (e.status === 1) return { result: `🔍 No results found for "${action.pattern}"` };
+        return { result: `❌ Search error: ${e.message}` };
+      }
+    } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
+      try {
+        const dir = path.dirname(path.resolve(action.path));
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.resolve(action.path), action.content, "utf-8");
+        console.log(`[AGENT AUDIT] File written: ${action.path} (${action.content.length} bytes) at ${new Date().toISOString()}`);
+        return { result: `✅ File written: ${action.path}`, fileModified: action.path };
+      } catch (e: any) {
+        return { result: `❌ Error writing ${action.path}: ${e.message}` };
+      }
+    } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
+      try {
+        const filePath = path.resolve(action.path);
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        const occurrences = fileContent.split(action.oldText).length - 1;
+        if (occurrences === 0) {
+          return { result: `❌ editFile failed: Could not find the specified text in ${action.path}. The text must match EXACTLY. Read the file first to copy the exact text.` };
+        } else if (occurrences > 1 && !action.replaceAll) {
+          return { result: `⚠️ editFile: Found ${occurrences} occurrences in ${action.path}. Provide more context to match exactly one location, or add "replaceAll": true.` };
+        } else {
+          const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
+          fs.writeFileSync(filePath, newContent, "utf-8");
+          console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s), ${action.oldText.length} chars) at ${new Date().toISOString()}`);
+          return { result: `✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})`, fileModified: action.path };
+        }
+      } catch (e: any) {
+        return { result: `❌ Error editing ${action.path}: ${e.message}` };
+      }
+    } else if (action.action === "listFiles" && action.dir) {
+      if (isPathSafe(action.dir)) {
+        try {
+          const entries = fs.readdirSync(path.resolve(action.dir), { withFileTypes: true });
+          const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
+          return { result: `📁 **${action.dir}**:\n${list}` };
+        } catch (e: any) {
+          return { result: `❌ Error listing ${action.dir}: ${e.message}` };
+        }
+      }
+    }
+    return { result: "" };
+  }
+
+  // Helper: call Gemini API with retry across models
+  async function callGemini(apiKey: string, systemPrompt: string, contents: any[]): Promise<string | null> {
+    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+    for (const model of models) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents,
+            generationConfig: { temperature: 0.7, maxOutputTokens: 16384 }
+          })
+        });
+        const data = await response.json() as any;
+        if (data?.error?.status === 'RESOURCE_EXHAUSTED') continue;
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (text) return text;
+      } catch { continue; }
+    }
+    return null;
+  }
+
   app.post("/api/admin/agent/chat", async (req, res) => {
     const auth = req.headers.authorization;
     const token = auth?.replace("Bearer ", "");
@@ -1176,79 +1269,74 @@ export async function registerRoutes(
       if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
 
       const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
-      const routesContent = fs.readFileSync(path.resolve("server/routes.ts"), "utf-8");
       const projectTree = getProjectTree(PROJECT_ROOT);
 
-      const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project. You can read, list, and modify ANY file in the project.
+      const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project.
 
-COMPLETE PROJECT FILE STRUCTURE:
+PROJECT FILE STRUCTURE:
 ${projectTree}
 
-CAPABILITIES:
-- Read any file: readFile(path)
-- Edit part of a file: editFile(path, oldText, newText) - replaces oldText with newText in the file
-- Write entire file: writeFile(path, content) - only for NEW files or small files
-- List any directory: listFiles(dir)
-- You have access to ALL project files: server/, client/, shared/, migrations/, scripts, configs, etc.
-
-REASONING PROCESS - ALWAYS follow these steps:
-1. THINK: Before doing anything, understand what the user wants. If they ask to analyze, read the files first.
-2. READ: Always read the relevant files before making changes. Never guess file contents or paths.
-3. PLAN: Explain to the user what you will do and why, in 2-3 sentences.
-4. ACT: Make the minimum necessary changes. Use editFile for existing files (search & replace specific sections). Only use writeFile for creating new files.
-5. VERIFY: After changes, briefly confirm what was modified.
-
-CODE QUALITY RULES:
-- Make MINIMAL changes. Do NOT rewrite entire files. Use editFile to change only the specific lines needed.
-- Preserve ALL existing imports, patterns, styles, and code conventions.
-- This project uses: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
-- Keep the same code style as the rest of the project (indentation, naming, etc.)
-- If you need to add a new import, add ONLY the import line, don't rewrite the whole file.
-- When the user sends an image, analyze it carefully and describe what you see or use the context to help.
-
-IMPORTANT RULES:
-1. You can access and modify ANY file in the project (server, client, shared, configs, etc.)
-2. Respond in the SAME LANGUAGE the user writes to you (Spanish, English, Portuguese)
-3. Keep responses concise and actionable
-4. If you're unsure about something, read the file first before assuming
-
-DATABASE SCHEMA (shared/schema.ts):
-\`\`\`typescript
-${schemaContent}
-\`\`\`
-
-SERVER ROUTES SUMMARY (server/routes.ts - ${routesContent.length} chars):
-Key API endpoints available in the project. Use readFile to see full details.
-
-FILE OPERATIONS - wrap each in a json code block:
+CAPABILITIES (wrap each in a \`\`\`json code block):
 
 Read a file:
 \`\`\`json
-{"action": "readFile", "path": "server/routes.ts"}
+{"action": "readFile", "path": "client/src/pages/Home.tsx"}
 \`\`\`
 
-Edit part of a file (PREFERRED for existing files):
+Search across files (grep):
 \`\`\`json
-{"action": "editFile", "path": "client/src/pages/Home.tsx", "oldText": "the exact text to find", "newText": "the replacement text"}
+{"action": "searchFiles", "pattern": "className.*hero", "dir": "client/src", "glob": "*.tsx"}
 \`\`\`
 
-Write entire new file (only for NEW or very small files):
+Edit part of a file (PREFERRED for changes):
 \`\`\`json
-{"action": "writeFile", "path": "client/src/components/NewComponent.tsx", "content": "...full content..."}
+{"action": "editFile", "path": "client/src/pages/Home.tsx", "oldText": "exact text to find", "newText": "replacement text"}
+\`\`\`
+
+Write new file:
+\`\`\`json
+{"action": "writeFile", "path": "client/src/components/New.tsx", "content": "..."}
 \`\`\`
 
 List directory:
 \`\`\`json
-{"action": "listFiles", "dir": "server"}
+{"action": "listFiles", "dir": "client/src/pages"}
 \`\`\`
 
-You may include multiple operations in a single response.`;
+AGENTIC WORKFLOW:
+You work in an AUTOMATIC LOOP. When you use readFile, searchFiles, or listFiles, the system executes them and feeds the results back to you automatically. You then get another turn to analyze the results and take further action. This means:
+- In your FIRST response, read/search the files you need. Do NOT guess file contents.
+- The system will show you the file contents, then you get ANOTHER turn.
+- In your NEXT turn, you can make edits based on what you actually read.
+- You can do up to 4 rounds of read→think→act.
 
+WHEN TO USE WHICH ACTION:
+- readFile: When you need to see the full content of a specific file
+- searchFiles: When you need to find WHERE something is used/defined across the project (like grep)
+- editFile: To change specific parts of existing files. The oldText MUST match EXACTLY.
+- writeFile: Only for creating brand NEW files
+
+IMPORTANT RULES:
+1. ALWAYS read files before editing them. Never guess content.
+2. Respond in the SAME LANGUAGE the user writes (Spanish/English/Portuguese)
+3. Make MINIMAL changes. Use editFile, not writeFile, for existing files.
+4. Preserve existing code style, imports, and conventions.
+5. When done with all changes, end with a brief summary of what was changed.
+6. If a readFile or searchFiles returns results, analyze them and decide next steps.
+7. Project stack: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
+
+DATABASE SCHEMA SUMMARY (shared/schema.ts):
+\`\`\`typescript
+${schemaContent.substring(0, 3000)}
+\`\`\``;
+
+      // Build conversation history - include full content from previous messages
       const conversationHistory = (history || []).map((m: any) => ({
         role: m.role === "user" ? "user" : "model",
         parts: [{ text: m.content }]
       }));
 
+      // Add user message with optional image
       const userParts: any[] = [];
       if (message) userParts.push({ text: message });
       if (image) {
@@ -1260,103 +1348,95 @@ You may include multiple operations in a single response.`;
       if (userParts.length === 0) userParts.push({ text: "Analiza esta imagen" });
       conversationHistory.push({ role: "user", parts: userParts });
 
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
-      let responseText = null;
+      // === AGENTIC LOOP: up to 4 iterations ===
+      const MAX_LOOPS = 4;
+      let finalResponse = "";
+      const allFilesModified: string[] = [];
+      let loopCount = 0;
 
-      for (const model of models) {
-        try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemPrompt }] },
-              contents: conversationHistory,
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 16384,
-              }
-            })
-          });
-          const data = await response.json() as any;
-          if (data?.error?.status === 'RESOURCE_EXHAUSTED') continue;
-          responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-          if (responseText) break;
-        } catch {
-          continue;
+      for (let i = 0; i < MAX_LOOPS; i++) {
+        loopCount = i + 1;
+        const responseText = await callGemini(apiKey, systemPrompt, conversationHistory);
+        if (!responseText) {
+          if (i === 0) return res.status(429).json({ error: "API limit reached. Try again shortly." });
+          break;
         }
-      }
 
-      if (!responseText) return res.status(429).json({ error: "API limit reached. Try again shortly." });
+        // Parse and execute all actions in this response
+        const jsonBlocks = responseText.match(/```json\s*\n([\s\S]*?)\n```/g) || [];
+        let hasReadActions = false;
+        let actionResults = "";
 
-      const jsonBlocks = responseText.match(/```json\s*\n([\s\S]*?)\n```/g) || [];
-      const filesModified: string[] = [];
-
-      for (const block of jsonBlocks) {
-        try {
-          const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
-          const action = JSON.parse(jsonStr);
-
-          if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
-            try {
-              const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
-              responseText += `\n\n📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${fileContent.substring(0, 4000)}${fileContent.length > 4000 ? '\n... (truncated)' : ''}\n\`\`\``;
-            } catch (e: any) {
-              responseText += `\n\n❌ Error reading ${action.path}: ${e.message}`;
+        for (const block of jsonBlocks) {
+          try {
+            const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
+            const action = JSON.parse(jsonStr);
+            const { result, fileModified } = executeAgentAction(action);
+            if (result) actionResults += "\n\n" + result;
+            if (fileModified) allFilesModified.push(fileModified);
+            if (action.action === "readFile" || action.action === "searchFiles" || action.action === "listFiles") {
+              hasReadActions = true;
             }
-          } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
-            try {
-              const dir = path.dirname(path.resolve(action.path));
-              if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-              fs.writeFileSync(path.resolve(action.path), action.content, "utf-8");
-              filesModified.push(action.path);
-              console.log(`[AGENT AUDIT] File written: ${action.path} (${action.content.length} bytes) at ${new Date().toISOString()}`);
-              responseText += `\n\n✅ File written: ${action.path}`;
-            } catch (e: any) {
-              responseText += `\n\n❌ Error writing ${action.path}: ${e.message}`;
-            }
-          } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
-            try {
-              const filePath = path.resolve(action.path);
-              const fileContent = fs.readFileSync(filePath, "utf-8");
-              const occurrences = fileContent.split(action.oldText).length - 1;
-              if (occurrences === 0) {
-                responseText += `\n\n❌ editFile failed: Could not find the specified text in ${action.path}. Read the file first to get the exact text.`;
-              } else if (occurrences > 1 && !action.replaceAll) {
-                responseText += `\n\n⚠️ editFile: Found ${occurrences} occurrences of the text in ${action.path}. Provide more unique/longer text to match exactly one location, or add "replaceAll": true to replace all.`;
-              } else {
-                const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
-                fs.writeFileSync(filePath, newContent, "utf-8");
-                filesModified.push(action.path);
-                console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s), ${action.oldText.length} chars) at ${new Date().toISOString()}`);
-                responseText += `\n\n✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})`;
-              }
-            } catch (e: any) {
-              responseText += `\n\n❌ Error editing ${action.path}: ${e.message}`;
-            }
-          } else if (action.action === "listFiles" && action.dir) {
-            if (isPathSafe(action.dir)) {
-              try {
-                const entries = fs.readdirSync(path.resolve(action.dir), { withFileTypes: true });
-                const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
-                responseText += `\n\n📁 **${action.dir}**:\n${list}`;
-              } catch (e: any) {
-                responseText += `\n\n❌ Error listing ${action.dir}: ${e.message}`;
-              }
-            }
+          } catch {
+            // skip invalid json
           }
-        } catch {
-          // skip invalid json blocks
+        }
+
+        // Clean the response text: remove json blocks that were actions
+        let cleanResponse = responseText;
+        for (const block of jsonBlocks) {
+          try {
+            const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.action) {
+              cleanResponse = cleanResponse.replace(block, "");
+            }
+          } catch {}
+        }
+        cleanResponse = cleanResponse.replace(/\n{3,}/g, "\n\n").trim();
+
+        // If there were read/search actions, feed results back and loop again
+        if (hasReadActions && i < MAX_LOOPS - 1) {
+          // Add the agent's response + action results to conversation for next loop
+          conversationHistory.push({
+            role: "model",
+            parts: [{ text: responseText }]
+          });
+          conversationHistory.push({
+            role: "user",
+            parts: [{ text: `[SYSTEM] Action results:\n${actionResults}\n\nNow analyze these results and proceed. If you need to make changes, use editFile. If you have all the info you need, provide your final answer.` }]
+          });
+          // Keep building the final response
+          if (cleanResponse) {
+            finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
+          }
+        } else {
+          // Final iteration or no read actions - this is the final response
+          if (cleanResponse) {
+            finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
+          }
+          if (actionResults) {
+            finalResponse += actionResults;
+          }
+          break;
         }
       }
 
-      await db.insert(agentMessages).values({ role: "user", content: message });
+      if (!finalResponse) finalResponse = "No pude generar una respuesta. Intenta de nuevo.";
+
+      // Add loop count indicator if multiple loops were used
+      if (loopCount > 1) {
+        finalResponse = `🔄 *${loopCount} pasos de razonamiento*\n\n` + finalResponse;
+      }
+
+      await db.insert(agentMessages).values({ role: "user", content: message || "(imagen)" });
       await db.insert(agentMessages).values({
         role: "assistant",
-        content: responseText,
-        filesModified: filesModified.length > 0 ? filesModified : null,
+        content: finalResponse,
+        filesModified: allFilesModified.length > 0 ? allFilesModified : null,
       });
 
-      res.json({ response: responseText, filesModified });
+      res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount });
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Agent error" });
     }

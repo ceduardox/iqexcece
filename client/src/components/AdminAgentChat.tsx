@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image } from "lucide-react";
+import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Message {
@@ -206,10 +206,10 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
             </p>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
               {[
-                "Analiza la estructura completa del proyecto",
-                "Lee y explica como funciona GestionPage.tsx",
-                "Que archivos tiene el servidor?",
-                "Cambia el titulo de la pagina principal",
+                "Analiza la estructura del proyecto",
+                "Busca donde se usa 'adminToken' en el codigo",
+                "Lee GestionPage.tsx y explicame que hace",
+                "Cambia el titulo de la pagina principal a 'Mi App'",
                 "Muestra el schema de la base de datos",
               ].map((suggestion) => (
                 <button
@@ -283,8 +283,9 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
             <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
               <Bot className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="bg-white/5 rounded-lg px-3 py-2">
+            <div className="bg-white/5 rounded-lg px-3 py-2 flex items-center gap-2">
               <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+              <span className="text-xs text-white/40">Analizando y ejecutando...</span>
             </div>
           </div>
         )}

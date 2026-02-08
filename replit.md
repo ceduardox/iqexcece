@@ -75,8 +75,13 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
 - **AI Agent Chat** (Feb 2026):
   - Admin panel "Agente IA" tab with Gemini-powered chat assistant
   - Database table: agent_messages (role, content, filesModified, createdAt)
-  - Agent can read/write frontend files (client/src/) and shared schema
-  - File operations restricted to allowed directories with path validation
+  - Agent can read/write/edit ANY file in the project (full access, not just client/src/)
+  - File operations: readFile, editFile (search & replace), writeFile, listFiles, searchFiles (grep)
+  - **Agentic loop**: Up to 4 Gemini API calls per request - reads files, feeds results back, then acts
+  - **searchFiles**: grep-based search across codebase using execFileSync (no shell injection)
+  - **editFile**: Partial file edits with multi-occurrence protection and replaceAll option
+  - Action results injected back into conversation history for context continuity
+  - Image paste support (Ctrl+V) - sent to Gemini as base64 inlineData
   - Conversation history persisted to database with clear history option
   - Safe text rendering (no dangerouslySetInnerHTML) with code block support
   - File write audit logging on server console
