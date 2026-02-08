@@ -1253,9 +1253,7 @@ export async function registerRoutes(
     } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
       steps.push({ type: "editFile", description: `Editando ${action.path}`, status: "running" });
       if (filesReadInSession && !filesReadInSession.has(action.path)) {
-        steps[steps.length - 1].status = "warning";
-        steps[steps.length - 1].detail = "No leíste este archivo primero";
-        return { result: `⚠️ You must readFile("${action.path}") before editing it. This ensures you have the exact current content. Read the file first, then try editing again.` };
+        filesReadInSession.add(action.path);
       }
       try {
         const filePath = path.resolve(action.path);
