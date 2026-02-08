@@ -87,6 +87,16 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - Autonomous workflow: ANALYZE → PLAN → IMPLEMENT → VERIFY → FIX → CONFIRM
   - Impact analysis: searches imports/usages before editing to avoid breaking existing code
   - Action results injected back into conversation history for context continuity
+  - **SSE Streaming**: Real-time step display during agent execution via Server-Sent Events
+    - Backend streams events: loop, thinking, step, result, error, done
+    - Frontend shows each action appearing live with animation as agent works
+    - Falls back to JSON response if Accept header is not text/event-stream
+  - **Large file support**: readFile with startLine/endLine for partial reads
+    - Files >10000 chars show first 80 + last 30 lines with truncation message
+    - Agent instructed to use searchFiles + readFile(startLine/endLine) for precise editing
+    - Read-before-edit enforcement: blocks editFile if file wasn't read first in session
+  - **Chain-of-thought (PENSAMIENTO)**: Mandatory planning block before every action
+  - **Temperature 0.3**: Lower temperature for precise, consistent code modifications
   - **Steps UI**: Collapsible accordion showing each action with status indicators (success/error/warning)
   - Image paste support (Ctrl+V) - sent to Gemini as base64 inlineData
   - Conversation history persisted to database with clear history option

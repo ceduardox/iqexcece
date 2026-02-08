@@ -1177,14 +1177,29 @@ export async function registerRoutes(
 
   async function executeAgentAction(action: any, steps: AgentStep[], filesReadInSession?: Set<string>): Promise<{ result: string; fileModified?: string }> {
     if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
-      steps.push({ type: "readFile", description: `Leyendo ${action.path}`, status: "running" });
+      const startLine = action.startLine ? Math.max(1, parseInt(action.startLine)) : undefined;
+      const endLine = action.endLine ? parseInt(action.endLine) : undefined;
+      const rangeLabel = startLine ? ` (lines ${startLine}-${endLine || 'end'})` : '';
+      steps.push({ type: "readFile", description: `Leyendo ${action.path}${rangeLabel}`, status: "running" });
       try {
         const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
-        const truncated = fileContent.length > 6000 ? fileContent.substring(0, 6000) + '\n... (truncated)' : fileContent;
+        let output = fileContent;
+        const totalLines = fileContent.split('\n').length;
+        if (startLine) {
+          const lines = fileContent.split('\n');
+          const end = endLine ? Math.min(endLine, lines.length) : lines.length;
+          output = lines.slice(startLine - 1, end).map((l, i) => `${startLine + i}: ${l}`).join('\n');
+        } else if (fileContent.length > 10000) {
+          const lines = fileContent.split('\n');
+          const head = lines.slice(0, 80).join('\n');
+          const tail = lines.slice(-30).join('\n');
+          output = `${head}\n\n... [TRUNCATED: ${totalLines} total lines, ${fileContent.length} chars. Use readFile with startLine/endLine to read specific sections, e.g. {"action":"readFile","path":"${action.path}","startLine":80,"endLine":160}] ...\n\n${tail}`;
+        }
+        const truncated = output.length > 12000 ? output.substring(0, 12000) + '\n... (truncated)' : output;
         steps[steps.length - 1].status = "success";
-        steps[steps.length - 1].detail = `${fileContent.length} caracteres`;
+        steps[steps.length - 1].detail = startLine ? `líneas ${startLine}-${endLine || totalLines}` : `${totalLines} líneas (${fileContent.length} chars)`;
         if (filesReadInSession) filesReadInSession.add(action.path);
-        return { result: `📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${truncated}\n\`\`\`` };
+        return { result: `📄 **${action.path}** (${totalLines} lines, ${fileContent.length} chars)${rangeLabel}:\n\`\`\`\n${truncated}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
@@ -1414,9 +1429,33 @@ export async function registerRoutes(
     const { message, history, image } = req.body;
     if (!message && !image) return res.status(400).json({ error: "message or image required" });
 
+    const useSSE = (req.headers.accept || '').includes('text/event-stream');
+
+    if (useSSE) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      });
+    }
+
+    const sendSSE = (event: string, data: any) => {
+      if (useSSE) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    };
+
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+      if (!apiKey) {
+        if (useSSE) {
+          sendSSE('error', { error: "GEMINI_API_KEY not configured" });
+          res.write('event: done\ndata: {}\n\n');
+          return res.end();
+        }
+        return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+      }
 
       const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
       const projectTree = getProjectTree(PROJECT_ROOT);
@@ -1433,9 +1472,13 @@ ${projectTree}
 
 CAPABILITIES (wrap each in a \`\`\`json code block):
 
-Read a file:
+Read a file (full or by line range):
 \`\`\`json
 {"action": "readFile", "path": "client/src/pages/Home.tsx"}
+\`\`\`
+Read specific lines of a large file (IMPORTANT for files > 200 lines):
+\`\`\`json
+{"action": "readFile", "path": "client/src/pages/GestionPage.tsx", "startLine": 100, "endLine": 200}
 \`\`\`
 
 Search across files (grep):
@@ -1499,9 +1542,9 @@ IMPACT ANALYSIS - Before editing:
 - NEVER make a change that could break existing functionality without checking
 
 WHEN TO USE WHICH ACTION:
-- readFile: When you need to see the full content of a specific file
-- searchFiles: When you need to find WHERE something is used/defined across the project
-- editFile: To change specific parts of existing files. The oldText MUST match EXACTLY.
+- readFile: To see file content. For large files (>200 lines), the system truncates showing first 80 + last 30 lines. Use startLine/endLine to read the specific section you need to edit.
+- searchFiles: When you need to find WHERE something is used/defined across the project. Also use this to find the EXACT line numbers of text before editing.
+- editFile: To change specific parts of existing files. The oldText MUST match EXACTLY character-for-character.
 - writeFile: Only for creating brand NEW files
 - httpRequest: To TEST an endpoint after changes (GET, POST, PUT, DELETE)
 - dbQuery: To VERIFY data in the database (SELECT queries only)
@@ -1544,6 +1587,14 @@ FILE LOCATION MAP (quick reference):
 - Admin panel: client/src/pages/GestionPage.tsx
 - Storage layer: server/storage.ts (DB access methods)
 
+LARGE FILE EDITING STRATEGY (CRITICAL):
+When editing files with >200 lines:
+1. First searchFiles to find the EXACT line where the text you want to change is located
+2. Then readFile with startLine/endLine to read ONLY that section (±20 lines around the target)
+3. Copy the EXACT text from the readFile output for your oldText
+4. Keep oldText SHORT but UNIQUE (2-5 lines max, not whole functions)
+5. If editFile fails with "not found", re-read the file section immediately and try again with exact content
+
 IMPORTANT RULES:
 1. ALWAYS read files before editing them. Never guess content.
 2. Respond in the SAME LANGUAGE the user writes (Spanish/English/Portuguese)
@@ -1555,6 +1606,7 @@ IMPORTANT RULES:
 8. After making edits, VERIFY they work using httpRequest or dbQuery when applicable.
 9. If verification fails, FIX the issue or undoEdit to revert. Do NOT leave broken code.
 10. Use the PROJECT KNOWLEDGE BASE above to understand architecture, recent changes, and project conventions BEFORE starting work.
+11. When editFile fails, ALWAYS re-read the exact section of the file before retrying. Never retry with the same oldText that already failed.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
@@ -1587,11 +1639,21 @@ ${schemaContent.substring(0, 3000)}
       fileBackups.clear();
       const filesReadInSession = new Set<string>();
 
+      sendSSE('loop', { loop: 1, total: MAX_LOOPS });
+
       for (let i = 0; i < MAX_LOOPS; i++) {
         loopCount = i + 1;
+        sendSSE('thinking', { loop: loopCount });
         const responseText = await callGemini(apiKey, systemPrompt, conversationHistory);
         if (!responseText) {
-          if (i === 0) return res.status(429).json({ error: "API limit reached. Try again shortly." });
+          if (i === 0) {
+            if (useSSE) {
+              sendSSE('error', { error: "API limit reached. Try again shortly." });
+              res.write('event: done\ndata: {}\n\n');
+              return res.end();
+            }
+            return res.status(429).json({ error: "API limit reached. Try again shortly." });
+          }
           break;
         }
 
@@ -1603,7 +1665,10 @@ ${schemaContent.substring(0, 3000)}
           try {
             const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
             const action = JSON.parse(jsonStr);
+            const stepIndex = allSteps.length;
             const { result, fileModified } = await executeAgentAction(action, allSteps, filesReadInSession);
+            const newStep = allSteps[stepIndex];
+            if (newStep) sendSSE('step', newStep);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
             const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs"];
@@ -1637,6 +1702,7 @@ ${schemaContent.substring(0, 3000)}
           if (cleanResponse) {
             finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
           }
+          sendSSE('loop', { loop: loopCount + 1, total: MAX_LOOPS });
         } else {
           if (cleanResponse) {
             finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
@@ -1661,8 +1727,18 @@ ${schemaContent.substring(0, 3000)}
         filesModified: allFilesModified.length > 0 ? allFilesModified : null,
       });
 
+      if (useSSE) {
+        sendSSE('result', { response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
+        res.write('event: done\ndata: {}\n\n');
+        return res.end();
+      }
       res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
     } catch (err: any) {
+      if (useSSE) {
+        sendSSE('error', { error: err.message || "Agent error" });
+        res.write('event: done\ndata: {}\n\n');
+        return res.end();
+      }
       res.status(500).json({ error: err.message || "Agent error" });
     }
   });

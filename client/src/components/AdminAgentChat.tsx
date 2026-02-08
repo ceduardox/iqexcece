@@ -218,24 +218,78 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${adminToken}`,
+          Accept: "text/event-stream",
         },
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
       if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Error" }));
         setError(data.error || "Error communicating with agent");
         return;
       }
 
-      const assistantMsg: Message = {
-        role: "assistant",
-        content: data.response,
-        filesModified: data.filesModified,
-        steps: data.steps && data.steps.length > 0 ? data.steps : null,
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
-      playNotification();
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('text/event-stream')) {
+        const data = await res.json();
+        const assistantMsg: Message = {
+          role: "assistant",
+          content: data.response,
+          filesModified: data.filesModified,
+          steps: data.steps && data.steps.length > 0 ? data.steps : null,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+        playNotification();
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) {
+        setError("Streaming not supported");
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      const liveSteps: AgentStep[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            currentEvent = line.slice(7).trim();
+          } else if (line.startsWith('data: ') && currentEvent) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (currentEvent === 'step') {
+                liveSteps.push(data as AgentStep);
+                setLoadingSteps([...liveSteps]);
+              } else if (currentEvent === 'thinking') {
+                setLoadingSteps(prev => [...prev.filter(s => s.type !== '_thinking'), { type: '_thinking', description: `Pensando... (paso ${data.loop})`, status: 'running' }]);
+              } else if (currentEvent === 'result') {
+                const assistantMsg: Message = {
+                  role: "assistant",
+                  content: data.response,
+                  filesModified: data.filesModified,
+                  steps: data.steps && data.steps.length > 0 ? data.steps : null,
+                };
+                setMessages((prev) => [...prev, assistantMsg]);
+                playNotification();
+              } else if (currentEvent === 'error') {
+                setError(data.error || "Agent error");
+              }
+            } catch {}
+            currentEvent = "";
+          }
+        }
+      }
     } catch (err: any) {
       setError(err.message || "Network error");
     } finally {
@@ -400,11 +454,41 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
             <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
               <Bot className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="bg-white/5 rounded-lg px-3 py-2 max-w-[85%]">
+            <div className="bg-white/5 rounded-lg px-3 py-2 max-w-[85%] min-w-[200px]">
               <div className="flex items-center gap-2 mb-1">
                 <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
-                <span className="text-xs text-white/40">Analizando y ejecutando...</span>
+                <span className="text-xs text-white/40">
+                  {loadingSteps.length > 0 ? `Ejecutando... (${loadingSteps.length} acciones)` : "Analizando..."}
+                </span>
               </div>
+              {loadingSteps.length > 0 && (
+                <div className="space-y-1 mt-2 animate-in fade-in duration-300">
+                  {loadingSteps.map((step, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 text-xs animate-in slide-in-from-left duration-200"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                      data-testid={`live-step-${i}`}
+                    >
+                      <StatusBadge status={step.status} />
+                      <span className="text-white/40">
+                        <StepIcon type={step.type} />
+                      </span>
+                      <span className="text-white/60 truncate flex-1">{step.description}</span>
+                      {step.detail && (
+                        <span className={`text-[10px] px-1 py-0.5 rounded ${
+                          step.status === "success" ? "bg-emerald-500/10 text-emerald-400" :
+                          step.status === "error" ? "bg-red-500/10 text-red-400" :
+                          step.status === "warning" ? "bg-yellow-500/10 text-yellow-400" :
+                          "bg-blue-500/10 text-blue-400"
+                        }`}>
+                          {step.detail}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
