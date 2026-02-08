@@ -2,6 +2,10 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { UAParser } from "ua-parser-js";
+import * as fs from "fs";
+import * as path from "path";
+import { agentMessages } from "@shared/schema";
+import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
@@ -1071,6 +1075,232 @@ export async function registerRoutes(
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
     await storage.deleteBlogPost(req.params.id);
     res.json({ success: true });
+  });
+
+  // ====== AI Agent Endpoints ======
+  const AGENT_ALLOWED_DIR = path.resolve("client/src");
+  const AGENT_SHARED_DIR = path.resolve("shared");
+
+  function isPathAllowed(filePath: string): boolean {
+    const resolved = path.resolve(filePath);
+    return resolved.startsWith(AGENT_ALLOWED_DIR) || resolved.startsWith(AGENT_SHARED_DIR);
+  }
+
+  app.get("/api/admin/agent/files", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const dir = (req.query.dir as string) || "client/src";
+    const resolved = path.resolve(dir);
+    if (!resolved.startsWith(AGENT_ALLOWED_DIR) && !resolved.startsWith(AGENT_SHARED_DIR)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    try {
+      const entries = fs.readdirSync(resolved, { withFileTypes: true });
+      const result = entries.map(e => ({
+        name: e.name,
+        type: e.isDirectory() ? "dir" : "file",
+        path: path.join(dir, e.name),
+      }));
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/agent/file", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const filePath = req.query.path as string;
+    if (!filePath || !isPathAllowed(filePath)) return res.status(403).json({ error: "Access denied" });
+    try {
+      const content = fs.readFileSync(path.resolve(filePath), "utf-8");
+      res.json({ content, path: filePath });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/agent/file", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const { filePath, content } = req.body;
+    if (!filePath || content === undefined || !isPathAllowed(filePath)) {
+      return res.status(403).json({ error: "Access denied or invalid path" });
+    }
+    try {
+      const dir = path.dirname(path.resolve(filePath));
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.resolve(filePath), content, "utf-8");
+      res.json({ success: true, path: filePath });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/agent/chat", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+
+    const { message, history } = req.body;
+    if (!message) return res.status(400).json({ error: "message required" });
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+
+      const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
+
+      const systemPrompt = `You are an AI development agent for the IQEXPONENCIAL web application. You can read and modify frontend files (client/src/) and shared schema files (shared/).
+
+CAPABILITIES:
+- Read files using readFile(path)
+- Write files using writeFile(path, content)
+- List directory contents using listFiles(dir)
+
+IMPORTANT RULES:
+1. Only modify files in client/src/ or shared/ directories
+2. When writing code, preserve existing patterns and imports
+3. Always explain what you plan to do before making changes
+4. Keep responses concise and focused
+5. If the user asks something you can't do (like modifying server files), explain the limitation
+
+DATABASE SCHEMA (read-only reference):
+\`\`\`typescript
+${schemaContent}
+\`\`\`
+
+When you need to perform a file operation, respond with a JSON block:
+\`\`\`json
+{"action": "readFile", "path": "client/src/pages/Home.tsx"}
+\`\`\`
+or
+\`\`\`json
+{"action": "writeFile", "path": "client/src/pages/Home.tsx", "content": "...file content..."}
+\`\`\`
+or
+\`\`\`json
+{"action": "listFiles", "dir": "client/src/pages"}
+\`\`\`
+
+Always wrap file operations in json code blocks. You may include multiple operations in a single response. After file operations, provide a brief summary of changes made.`;
+
+      const conversationHistory = (history || []).map((m: any) => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }]
+      }));
+
+      conversationHistory.push({ role: "user", parts: [{ text: message }] });
+
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+      let responseText = null;
+
+      for (const model of models) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents: conversationHistory,
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192,
+              }
+            })
+          });
+          const data = await response.json() as any;
+          if (data?.error?.status === 'RESOURCE_EXHAUSTED') continue;
+          responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (responseText) break;
+        } catch {
+          continue;
+        }
+      }
+
+      if (!responseText) return res.status(429).json({ error: "API limit reached. Try again shortly." });
+
+      const jsonBlocks = responseText.match(/```json\s*\n([\s\S]*?)\n```/g) || [];
+      const filesModified: string[] = [];
+
+      for (const block of jsonBlocks) {
+        try {
+          const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
+          const action = JSON.parse(jsonStr);
+
+          if (action.action === "readFile" && action.path && isPathAllowed(action.path)) {
+            try {
+              const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
+              responseText += `\n\n📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${fileContent.substring(0, 2000)}${fileContent.length > 2000 ? '\n... (truncated)' : ''}\n\`\`\``;
+            } catch (e: any) {
+              responseText += `\n\n❌ Error reading ${action.path}: ${e.message}`;
+            }
+          } else if (action.action === "writeFile" && action.path && action.content && isPathAllowed(action.path)) {
+            try {
+              const dir = path.dirname(path.resolve(action.path));
+              if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+              fs.writeFileSync(path.resolve(action.path), action.content, "utf-8");
+              filesModified.push(action.path);
+              console.log(`[AGENT AUDIT] File written: ${action.path} (${action.content.length} bytes) at ${new Date().toISOString()}`);
+              responseText += `\n\n✅ File written: ${action.path}`;
+            } catch (e: any) {
+              responseText += `\n\n❌ Error writing ${action.path}: ${e.message}`;
+            }
+          } else if (action.action === "listFiles" && action.dir) {
+            const resolvedDir = path.resolve(action.dir);
+            if (resolvedDir.startsWith(AGENT_ALLOWED_DIR) || resolvedDir.startsWith(AGENT_SHARED_DIR)) {
+              try {
+                const entries = fs.readdirSync(resolvedDir, { withFileTypes: true });
+                const list = entries.map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
+                responseText += `\n\n📁 **${action.dir}**:\n${list}`;
+              } catch (e: any) {
+                responseText += `\n\n❌ Error listing ${action.dir}: ${e.message}`;
+              }
+            }
+          }
+        } catch {
+          // skip invalid json blocks
+        }
+      }
+
+      await db.insert(agentMessages).values({ role: "user", content: message });
+      await db.insert(agentMessages).values({
+        role: "assistant",
+        content: responseText,
+        filesModified: filesModified.length > 0 ? filesModified : null,
+      });
+
+      res.json({ response: responseText, filesModified });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Agent error" });
+    }
+  });
+
+  app.get("/api/admin/agent/history", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      const messages = await db.select().from(agentMessages).orderBy(agentMessages.createdAt);
+      res.json(messages);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/admin/agent/history", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      await db.delete(agentMessages);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post("/api/admin/translate-bulk", async (req, res) => {

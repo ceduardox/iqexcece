@@ -72,6 +72,15 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - **Imagen tab**: URL input and size slider (20-200%)
   - **Texto tab**: Color picker, font size slider (10-72px), alignment (left/center/right), weight (normal/bold)
   - Styles persist to PostgreSQL and load automatically on page refresh
+- **AI Agent Chat** (Feb 2026):
+  - Admin panel "Agente IA" tab with Gemini-powered chat assistant
+  - Database table: agent_messages (role, content, filesModified, createdAt)
+  - Agent can read/write frontend files (client/src/) and shared schema
+  - File operations restricted to allowed directories with path validation
+  - Conversation history persisted to database with clear history option
+  - Safe text rendering (no dangerouslySetInnerHTML) with code block support
+  - File write audit logging on server console
+  - API endpoints: /api/admin/agent/chat, /api/admin/agent/history, /api/admin/agent/files, /api/admin/agent/file
 
 ## User Preferences
 

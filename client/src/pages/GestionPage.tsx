@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
+import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente">("sesiones");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -1507,6 +1508,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Newspaper className="w-5 h-5" />
             Blog
           </button>
+          <button
+            onClick={() => setActiveTab("agente")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "agente" ? "bg-emerald-600 text-white" : "text-emerald-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-agente"
+          >
+            <Bot className="w-5 h-5" />
+            Agente IA
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1684,6 +1695,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Newspaper className="w-4 h-4 mr-1" />
             Blog
+          </Button>
+          <Button
+            onClick={() => setActiveTab("agente")}
+            variant={activeTab === "agente" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "agente" ? "bg-emerald-600" : "border-emerald-500/30 text-emerald-400"}
+            data-testid="mobile-tab-agente"
+          >
+            <Bot className="w-4 h-4 mr-1" />
+            Agente
           </Button>
         </div>
 
@@ -5908,6 +5929,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
         {activeTab === "blog" && (
           <AdminBlogPanel token={token} />
+        )}
+        {activeTab === "agente" && (
+          <AdminAgentChat adminToken={token} />
         )}
         </div>
       </div>
