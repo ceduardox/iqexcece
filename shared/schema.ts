@@ -106,7 +106,6 @@ export const razonamientoContents = pgTable("razonamiento_contents", {
 // Cerebral test content table
 export const cerebralContents = pgTable("cerebral_contents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`), 
-  lang: text("lang").notNull().default("es"), 
   lang: text("lang").notNull().default("es"),
   categoria: text("categoria").notNull(),
   temaNumero: integer("tema_numero").default(1),
