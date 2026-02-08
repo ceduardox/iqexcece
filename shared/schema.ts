@@ -120,8 +120,9 @@ export const cerebralContents = pgTable("cerebral_contents", {
 
 // Cerebral intro screen configuration
 export const cerebralIntros = pgTable("cerebral_intros", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  categoria: text("categoria").notNull().unique(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`), 
+  categoria: text("categoria").notNull(),
+  lang: text("lang").notNull().default("es"),
   imageUrl: text("image_url"),
   title: text("title").default("¿Cuál lado de tu cerebro es más dominante?"),
   subtitle: text("subtitle").default("El test tiene una duración de 30 segundos."),
