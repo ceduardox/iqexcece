@@ -120,12 +120,7 @@ export default function GestionPage() {
     isActive: true
   });
   
-  // Cerebral intro content state
-  const [cerebralIntro, setCerebralIntro] = useState({
-    imageUrl: "",
-    title: "¿Cuál lado de tu cerebro es más dominante?",
-    subtitle: "El test tiene una duración de 30 segundos.",
-    buttonText: "Empezar"
+xt: "Empezar"
   });
   
   // Image picker state
