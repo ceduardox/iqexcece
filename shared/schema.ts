@@ -405,3 +405,13 @@ export const blogPosts = pgTable("blog_posts", {
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+
+export const agentMessages = pgTable("agent_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  filesModified: text("files_modified").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AgentMessage = typeof agentMessages.$inferSelect;
