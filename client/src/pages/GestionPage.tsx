@@ -120,9 +120,18 @@ export default function GestionPage() {
     isActive: true
   });
   
-xt: "Empezar"
+  const [cerebralIntro, setCerebralIntro] = useState<{
+    imageUrl: string;
+    title: string;
+    subtitle: string;
+    buttonText: string;
+  }>({
+    imageUrl: "",
+    title: "",
+    subtitle: "",
+    buttonText: "Empezar"
   });
-  
+
   // Image picker state
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [imagePickerCallback, setImagePickerCallback] = useState<((url: string) => void) | null>(null);

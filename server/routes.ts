@@ -5,6 +5,8 @@ import { UAParser } from "ua-parser-js";
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
+import { eq, and } from "drizzle-orm";
+import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, quizResultsNumeros, quizResultsVelocidad, quizResultsReconocimiento, quizResultsAceleracion } from "@shared/schema";
 import { agentMessages } from "@shared/schema";
 import { db } from "./db";
 
@@ -1164,17 +1166,31 @@ export async function registerRoutes(
     }
   });
 
-  // Helper: execute a single action from the agent and return result text
-  function executeAgentAction(action: any): { result: string; fileModified?: string } {
+  const fileBackups = new Map<string, string>();
+
+  interface AgentStep {
+    type: string;
+    description: string;
+    status: "running" | "success" | "error" | "warning";
+    detail?: string;
+  }
+
+  async function executeAgentAction(action: any, steps: AgentStep[]): Promise<{ result: string; fileModified?: string }> {
     if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
+      steps.push({ type: "readFile", description: `Leyendo ${action.path}`, status: "running" });
       try {
         const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
-        const truncated = fileContent.length > 6000 ? fileContent.substring(0, 6000) + '\n... (truncated, use searchFiles to find specific content)' : fileContent;
+        const truncated = fileContent.length > 6000 ? fileContent.substring(0, 6000) + '\n... (truncated)' : fileContent;
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `${fileContent.length} caracteres`;
         return { result: `📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${truncated}\n\`\`\`` };
       } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
         return { result: `❌ Error reading ${action.path}: ${e.message}` };
       }
     } else if (action.action === "searchFiles" && action.pattern) {
+      steps.push({ type: "searchFiles", description: `Buscando "${action.pattern}"`, status: "running" });
       try {
         const dir = action.dir && isPathSafe(action.dir) ? action.dir : ".";
         const args: string[] = ["-rn"];
@@ -1186,48 +1202,176 @@ export async function registerRoutes(
         args.push(action.pattern, dir);
         const output = execFileSync("grep", args, { encoding: "utf-8", timeout: 5000, maxBuffer: 1024 * 100 }).trim();
         const lines = output.split("\n").slice(0, 30).join("\n");
+        const count = lines ? lines.split("\n").length : 0;
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `${count} resultados`;
         return { result: lines ? `🔍 Search results for "${action.pattern}":\n\`\`\`\n${lines}\n\`\`\`` : `🔍 No results found for "${action.pattern}"` };
       } catch (e: any) {
-        if (e.status === 1) return { result: `🔍 No results found for "${action.pattern}"` };
+        if (e.status === 1) {
+          steps[steps.length - 1].status = "warning";
+          steps[steps.length - 1].detail = "Sin resultados";
+          return { result: `🔍 No results found for "${action.pattern}"` };
+        }
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
         return { result: `❌ Search error: ${e.message}` };
       }
     } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
+      steps.push({ type: "writeFile", description: `Creando ${action.path}`, status: "running" });
       try {
+        if (fs.existsSync(path.resolve(action.path))) {
+          fileBackups.set(action.path, fs.readFileSync(path.resolve(action.path), "utf-8"));
+        }
         const dir = path.dirname(path.resolve(action.path));
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         fs.writeFileSync(path.resolve(action.path), action.content, "utf-8");
         console.log(`[AGENT AUDIT] File written: ${action.path} (${action.content.length} bytes) at ${new Date().toISOString()}`);
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `${action.content.length} bytes`;
         return { result: `✅ File written: ${action.path}`, fileModified: action.path };
       } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
         return { result: `❌ Error writing ${action.path}: ${e.message}` };
       }
     } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
+      steps.push({ type: "editFile", description: `Editando ${action.path}`, status: "running" });
       try {
         const filePath = path.resolve(action.path);
         const fileContent = fs.readFileSync(filePath, "utf-8");
+        fileBackups.set(action.path, fileContent);
         const occurrences = fileContent.split(action.oldText).length - 1;
         if (occurrences === 0) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "Texto no encontrado";
           return { result: `❌ editFile failed: Could not find the specified text in ${action.path}. The text must match EXACTLY. Read the file first to copy the exact text.` };
         } else if (occurrences > 1 && !action.replaceAll) {
+          steps[steps.length - 1].status = "warning";
+          steps[steps.length - 1].detail = `${occurrences} ocurrencias`;
           return { result: `⚠️ editFile: Found ${occurrences} occurrences in ${action.path}. Provide more context to match exactly one location, or add "replaceAll": true.` };
         } else {
           const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
           fs.writeFileSync(filePath, newContent, "utf-8");
-          console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s), ${action.oldText.length} chars) at ${new Date().toISOString()}`);
+          console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s)) at ${new Date().toISOString()}`);
+          steps[steps.length - 1].status = "success";
+          steps[steps.length - 1].detail = `${occurrences} cambio(s)`;
           return { result: `✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})`, fileModified: action.path };
         }
       } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
         return { result: `❌ Error editing ${action.path}: ${e.message}` };
       }
     } else if (action.action === "listFiles" && action.dir) {
       if (isPathSafe(action.dir)) {
+        steps.push({ type: "listFiles", description: `Listando ${action.dir}`, status: "running" });
         try {
           const entries = fs.readdirSync(path.resolve(action.dir), { withFileTypes: true });
           const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
+          steps[steps.length - 1].status = "success";
+          steps[steps.length - 1].detail = `${entries.length} items`;
           return { result: `📁 **${action.dir}**:\n${list}` };
         } catch (e: any) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = e.message;
           return { result: `❌ Error listing ${action.dir}: ${e.message}` };
         }
+      }
+    } else if (action.action === "httpRequest" && action.url) {
+      steps.push({ type: "httpRequest", description: `HTTP ${action.method || "GET"} ${action.url}`, status: "running" });
+      try {
+        const method = (action.method || "GET").toUpperCase();
+        if (!action.url.startsWith("/api/")) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "Solo rutas /api/ permitidas";
+          return { result: `❌ httpRequest only allows /api/ paths for safety.` };
+        }
+        const url = `http://localhost:5000${action.url}`;
+        const fetchOpts: any = { method, headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(10000) };
+        if (action.body && method !== "GET") fetchOpts.body = JSON.stringify(action.body);
+        const startTime = Date.now();
+        const resp = await fetch(url, fetchOpts);
+        const elapsed = Date.now() - startTime;
+        const text = await resp.text();
+        const truncBody = text.length > 2000 ? text.substring(0, 2000) + "... (truncated)" : text;
+        steps[steps.length - 1].status = resp.ok ? "success" : "error";
+        steps[steps.length - 1].detail = `${resp.status} (${elapsed}ms)`;
+        return { result: `🌐 HTTP ${method} ${action.url} → ${resp.status} (${elapsed}ms):\n\`\`\`\n${truncBody}\n\`\`\`` };
+      } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
+        return { result: `❌ HTTP error: ${e.message}` };
+      }
+    } else if (action.action === "dbQuery" && action.sql) {
+      steps.push({ type: "dbQuery", description: `DB: ${action.sql.substring(0, 60)}...`, status: "running" });
+      try {
+        const sqlLower = action.sql.trim().toLowerCase().replace(/\s+/g, " ");
+        const forbidden = ["insert", "update", "delete", "drop", "alter", "create", "truncate", "grant", "revoke", "exec", "execute", "into"];
+        const hasForbidden = forbidden.some(kw => {
+          const regex = new RegExp(`\\b${kw}\\b`, "i");
+          return regex.test(sqlLower);
+        });
+        if (!sqlLower.startsWith("select") || hasForbidden) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "Solo SELECT permitido";
+          return { result: `❌ dbQuery only allows safe SELECT queries. No INSERT/UPDATE/DELETE/DROP/ALTER allowed.` };
+        }
+        if (sqlLower.includes(";")) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "Multi-statement no permitido";
+          return { result: `❌ dbQuery does not allow multiple statements (no semicolons except at end).` };
+        }
+        const limitedSql = /\blimit\b/i.test(action.sql) ? action.sql : `${action.sql} LIMIT 50`;
+        const { rows } = await db.execute(limitedSql);
+        const truncRows = JSON.stringify(rows, null, 2);
+        const truncResult = truncRows.length > 3000 ? truncRows.substring(0, 3000) + "... (truncated)" : truncRows;
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `${(rows as any[]).length} filas`;
+        return { result: `🗄️ Query result (${(rows as any[]).length} rows):\n\`\`\`json\n${truncResult}\n\`\`\`` };
+      } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
+        return { result: `❌ DB error: ${e.message}` };
+      }
+    } else if (action.action === "undoEdit" && action.path) {
+      steps.push({ type: "undoEdit", description: `Deshaciendo ${action.path}`, status: "running" });
+      const backup = fileBackups.get(action.path);
+      if (backup) {
+        try {
+          fs.writeFileSync(path.resolve(action.path), backup, "utf-8");
+          fileBackups.delete(action.path);
+          steps[steps.length - 1].status = "success";
+          steps[steps.length - 1].detail = "Restaurado";
+          return { result: `↩️ Reverted ${action.path} to previous version`, fileModified: action.path };
+        } catch (e: any) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = e.message;
+          return { result: `❌ Error reverting ${action.path}: ${e.message}` };
+        }
+      } else {
+        steps[steps.length - 1].status = "warning";
+        steps[steps.length - 1].detail = "Sin backup";
+        return { result: `⚠️ No backup found for ${action.path}. Can only undo edits from this session.` };
+      }
+    } else if (action.action === "readLogs") {
+      steps.push({ type: "readLogs", description: "Leyendo logs del servidor", status: "running" });
+      try {
+        const logPath = path.resolve("/tmp/agent-server.log");
+        if (fs.existsSync(logPath)) {
+          const logContent = fs.readFileSync(logPath, "utf-8");
+          const lastLines = logContent.split("\n").slice(-50).join("\n");
+          steps[steps.length - 1].status = "success";
+          steps[steps.length - 1].detail = "Logs leidos";
+          return { result: `📋 Server logs (last 50 lines):\n\`\`\`\n${lastLines}\n\`\`\`` };
+        } else {
+          steps[steps.length - 1].status = "warning";
+          steps[steps.length - 1].detail = "No hay logs disponibles";
+          return { result: `📋 No server log file found at /tmp/agent-server.log. Server output goes to stdout.` };
+        }
+      } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
+        return { result: `❌ Error reading logs: ${e.message}` };
       }
     }
     return { result: "" };
@@ -1271,7 +1415,7 @@ export async function registerRoutes(
       const schemaContent = fs.readFileSync(path.resolve("shared/schema.ts"), "utf-8");
       const projectTree = getProjectTree(PROJECT_ROOT);
 
-      const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project.
+      const systemPrompt = `You are an expert AI development agent for the IQEXPONENCIAL web application. You have FULL ACCESS to the entire project. You work autonomously with testing and verification capabilities.
 
 PROJECT FILE STRUCTURE:
 ${projectTree}
@@ -1303,18 +1447,55 @@ List directory:
 {"action": "listFiles", "dir": "client/src/pages"}
 \`\`\`
 
+Test an API endpoint (HTTP request):
+\`\`\`json
+{"action": "httpRequest", "url": "/api/some-endpoint", "method": "GET"}
+\`\`\`
+\`\`\`json
+{"action": "httpRequest", "url": "/api/some-endpoint", "method": "POST", "body": {"key": "value"}}
+\`\`\`
+
+Query database (SELECT only):
+\`\`\`json
+{"action": "dbQuery", "sql": "SELECT * FROM users LIMIT 5"}
+\`\`\`
+
+Undo a file edit (revert to version before edit):
+\`\`\`json
+{"action": "undoEdit", "path": "client/src/pages/Home.tsx"}
+\`\`\`
+
+Read server logs:
+\`\`\`json
+{"action": "readLogs"}
+\`\`\`
+
 AGENTIC WORKFLOW:
-You work in an AUTOMATIC LOOP. When you use readFile, searchFiles, or listFiles, the system executes them and feeds the results back to you automatically. You then get another turn to analyze the results and take further action. This means:
-- In your FIRST response, read/search the files you need. Do NOT guess file contents.
-- The system will show you the file contents, then you get ANOTHER turn.
-- In your NEXT turn, you can make edits based on what you actually read.
-- You can do up to 4 rounds of read→think→act.
+You work in an AUTOMATIC LOOP with up to 8 rounds. When you use readFile, searchFiles, listFiles, httpRequest, dbQuery, or readLogs, the system executes them and feeds the results back to you automatically.
+
+WORKFLOW PATTERN - Follow this when making changes:
+1. ANALYZE: Read/search files to understand the codebase and what's affected
+2. PLAN: Identify what files need to change and what might break
+3. IMPLEMENT: Make the edits using editFile
+4. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data, or readFile to confirm changes
+5. FIX: If verification fails, analyze the error and fix. Use undoEdit if needed.
+6. CONFIRM: Do a final verification to ensure everything works
+
+IMPACT ANALYSIS - Before editing:
+- Search for imports/usages of the file you're changing to see what depends on it
+- If changing a function signature, find all callers first
+- If changing a component, check where it's used
+- NEVER make a change that could break existing functionality without checking
 
 WHEN TO USE WHICH ACTION:
 - readFile: When you need to see the full content of a specific file
-- searchFiles: When you need to find WHERE something is used/defined across the project (like grep)
+- searchFiles: When you need to find WHERE something is used/defined across the project
 - editFile: To change specific parts of existing files. The oldText MUST match EXACTLY.
 - writeFile: Only for creating brand NEW files
+- httpRequest: To TEST an endpoint after changes (GET, POST, PUT, DELETE)
+- dbQuery: To VERIFY data in the database (SELECT queries only)
+- undoEdit: To REVERT a file to its state before your edit if something went wrong
+- readLogs: To check server logs for errors
 
 IMPORTANT RULES:
 1. ALWAYS read files before editing them. Never guess content.
@@ -1324,6 +1505,8 @@ IMPORTANT RULES:
 5. When done with all changes, end with a brief summary of what was changed.
 6. If a readFile or searchFiles returns results, analyze them and decide next steps.
 7. Project stack: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
+8. After making edits, VERIFY they work using httpRequest or dbQuery when applicable.
+9. If verification fails, FIX the issue or undoEdit to revert. Do NOT leave broken code.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
@@ -1348,11 +1531,12 @@ ${schemaContent.substring(0, 3000)}
       if (userParts.length === 0) userParts.push({ text: "Analiza esta imagen" });
       conversationHistory.push({ role: "user", parts: userParts });
 
-      // === AGENTIC LOOP: up to 4 iterations ===
-      const MAX_LOOPS = 4;
+      const MAX_LOOPS = 8;
       let finalResponse = "";
       const allFilesModified: string[] = [];
+      const allSteps: AgentStep[] = [];
       let loopCount = 0;
+      fileBackups.clear();
 
       for (let i = 0; i < MAX_LOOPS; i++) {
         loopCount = i + 1;
@@ -1362,27 +1546,24 @@ ${schemaContent.substring(0, 3000)}
           break;
         }
 
-        // Parse and execute all actions in this response
         const jsonBlocks = responseText.match(/```json\s*\n([\s\S]*?)\n```/g) || [];
-        let hasReadActions = false;
+        let hasContinuableActions = false;
         let actionResults = "";
 
         for (const block of jsonBlocks) {
           try {
             const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
             const action = JSON.parse(jsonStr);
-            const { result, fileModified } = executeAgentAction(action);
+            const { result, fileModified } = await executeAgentAction(action, allSteps);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
-            if (action.action === "readFile" || action.action === "searchFiles" || action.action === "listFiles") {
-              hasReadActions = true;
+            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs"];
+            if (continuableActions.includes(action.action)) {
+              hasContinuableActions = true;
             }
-          } catch {
-            // skip invalid json
-          }
+          } catch {}
         }
 
-        // Clean the response text: remove json blocks that were actions
         let cleanResponse = responseText;
         for (const block of jsonBlocks) {
           try {
@@ -1395,23 +1576,19 @@ ${schemaContent.substring(0, 3000)}
         }
         cleanResponse = cleanResponse.replace(/\n{3,}/g, "\n\n").trim();
 
-        // If there were read/search actions, feed results back and loop again
-        if (hasReadActions && i < MAX_LOOPS - 1) {
-          // Add the agent's response + action results to conversation for next loop
+        if (hasContinuableActions && i < MAX_LOOPS - 1) {
           conversationHistory.push({
             role: "model",
             parts: [{ text: responseText }]
           });
           conversationHistory.push({
             role: "user",
-            parts: [{ text: `[SYSTEM] Action results:\n${actionResults}\n\nNow analyze these results and proceed. If you need to make changes, use editFile. If you have all the info you need, provide your final answer.` }]
+            parts: [{ text: `[SYSTEM] Action results:\n${actionResults}\n\nAnalyze these results and proceed. Use editFile to make changes, httpRequest to test endpoints, dbQuery to verify data. When done, provide your final summary.` }]
           });
-          // Keep building the final response
           if (cleanResponse) {
             finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
           }
         } else {
-          // Final iteration or no read actions - this is the final response
           if (cleanResponse) {
             finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
           }
@@ -1424,7 +1601,6 @@ ${schemaContent.substring(0, 3000)}
 
       if (!finalResponse) finalResponse = "No pude generar una respuesta. Intenta de nuevo.";
 
-      // Add loop count indicator if multiple loops were used
       if (loopCount > 1) {
         finalResponse = `🔄 *${loopCount} pasos de razonamiento*\n\n` + finalResponse;
       }
@@ -1436,7 +1612,7 @@ ${schemaContent.substring(0, 3000)}
         filesModified: allFilesModified.length > 0 ? allFilesModified : null,
       });
 
-      res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount });
+      res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Agent error" });
     }

@@ -77,10 +77,17 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - Database table: agent_messages (role, content, filesModified, createdAt)
   - Agent can read/write/edit ANY file in the project (full access, not just client/src/)
   - File operations: readFile, editFile (search & replace), writeFile, listFiles, searchFiles (grep)
-  - **Agentic loop**: Up to 4 Gemini API calls per request - reads files, feeds results back, then acts
+  - **Agentic loop**: Up to 8 Gemini API calls per request with autonomous workflow
   - **searchFiles**: grep-based search across codebase using execFileSync (no shell injection)
   - **editFile**: Partial file edits with multi-occurrence protection and replaceAll option
+  - **httpRequest**: Test API endpoints (restricted to /api/ paths, with timeout)
+  - **dbQuery**: Query database (SELECT-only, forbidden keywords blocked, auto LIMIT 50)
+  - **readLogs**: Read server logs for debugging
+  - **undoEdit**: Revert files to pre-edit state using in-memory backups
+  - Autonomous workflow: ANALYZE → PLAN → IMPLEMENT → VERIFY → FIX → CONFIRM
+  - Impact analysis: searches imports/usages before editing to avoid breaking existing code
   - Action results injected back into conversation history for context continuity
+  - **Steps UI**: Collapsible accordion showing each action with status indicators (success/error/warning)
   - Image paste support (Ctrl+V) - sent to Gemini as base64 inlineData
   - Conversation history persisted to database with clear history option
   - Safe text rendering (no dangerouslySetInnerHTML) with code block support
