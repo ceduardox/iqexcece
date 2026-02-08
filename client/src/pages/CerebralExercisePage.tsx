@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Zap, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronRight, RotateCcw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,8 @@ function safeParseJSON(data: any, fallback: any = {}): any {
 export default function CerebralExercisePage() {
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria: string; tema: string }>();
+  const { i18n } = useTranslation();
+  const lang = i18n.language || "es";
   const [userAnswer, setUserAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -57,7 +60,8 @@ export default function CerebralExercisePage() {
   const [selectedLat, setSelectedLat] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
-    queryKey: [`/api/cerebral/${params.categoria}?tema=${params.tema}`],
+    queryKey: ['/api/cerebral', params.categoria, params.tema, lang],
+    queryFn: () => fetch(`/api/cerebral/${params.categoria}?tema=${params.tema}&lang=${lang}`).then(r => r.json()),
   });
 
   const content = data?.content ? {

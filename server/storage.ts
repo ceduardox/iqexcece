@@ -33,12 +33,12 @@ export interface IStorage {
   saveRazonamientoContent(content: InsertRazonamientoContent): Promise<RazonamientoContent>;
   
   // Cerebral content
-  getCerebralContent(categoria: string, temaNumero?: number): Promise<CerebralContent | undefined>;
-  getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]>;
+  getCerebralContent(categoria: string, temaNumero?: number, lang?: string): Promise<CerebralContent | undefined>;
+  getCerebralContentsByCategory(categoria: string, lang?: string): Promise<CerebralContent[]>;
   saveCerebralContent(content: InsertCerebralContent): Promise<CerebralContent>;
   
   // Cerebral intro
-  getCerebralIntro(categoria: string): Promise<CerebralIntro | null>;
+  getCerebralIntro(categoria: string, lang?: string): Promise<CerebralIntro | null>;
   saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro>;
   
   // Cerebral results
@@ -677,24 +677,29 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async getCerebralContent(categoria: string, temaNumero: number = 1): Promise<CerebralContent | undefined> {
+  async getCerebralContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<CerebralContent | undefined> {
     const [content] = await db.select().from(cerebralContents)
       .where(and(
         eq(cerebralContents.categoria, categoria),
-        eq(cerebralContents.temaNumero, temaNumero)
+        eq(cerebralContents.temaNumero, temaNumero),
+        eq(cerebralContents.lang, lang)
       ));
     return content;
   }
 
-  async getCerebralContentsByCategory(categoria: string): Promise<CerebralContent[]> {
+  async getCerebralContentsByCategory(categoria: string, lang: string = "es"): Promise<CerebralContent[]> {
     return db.select().from(cerebralContents)
-      .where(eq(cerebralContents.categoria, categoria))
+      .where(and(
+        eq(cerebralContents.categoria, categoria),
+        eq(cerebralContents.lang, lang)
+      ))
       .orderBy(cerebralContents.temaNumero);
   }
 
   async saveCerebralContent(insertContent: InsertCerebralContent): Promise<CerebralContent> {
     const temaNumero = insertContent.temaNumero || 1;
-    const existing = await this.getCerebralContent(insertContent.categoria, temaNumero);
+    const lang = insertContent.lang || "es";
+    const existing = await this.getCerebralContent(insertContent.categoria, temaNumero, lang);
     
     if (existing) {
       const [updated] = await db.update(cerebralContents)
@@ -709,7 +714,8 @@ export class DatabaseStorage implements IStorage {
         })
         .where(and(
           eq(cerebralContents.categoria, insertContent.categoria),
-          eq(cerebralContents.temaNumero, temaNumero)
+          eq(cerebralContents.temaNumero, temaNumero),
+          eq(cerebralContents.lang, lang)
         ))
         .returning();
       return updated;
@@ -718,6 +724,7 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db.insert(cerebralContents).values({
       categoria: insertContent.categoria,
       temaNumero: temaNumero,
+      lang: lang,
       title: insertContent.title,
       exerciseType: insertContent.exerciseType,
       imageUrl: insertContent.imageUrl || null,
@@ -729,13 +736,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cerebral intro
-  async getCerebralIntro(categoria: string): Promise<CerebralIntro | null> {
-    const [intro] = await db.select().from(cerebralIntros).where(eq(cerebralIntros.categoria, categoria));
+  async getCerebralIntro(categoria: string, lang: string = "es"): Promise<CerebralIntro | null> {
+    const [intro] = await db.select().from(cerebralIntros)
+      .where(and(
+        eq(cerebralIntros.categoria, categoria),
+        eq(cerebralIntros.lang, lang)
+      ));
     return intro || null;
   }
 
   async saveCerebralIntro(intro: InsertCerebralIntro): Promise<CerebralIntro> {
-    const existing = await this.getCerebralIntro(intro.categoria);
+    const lang = intro.lang || "es";
+    const existing = await this.getCerebralIntro(intro.categoria, lang);
     
     if (existing) {
       const [updated] = await db.update(cerebralIntros)
@@ -746,13 +758,17 @@ export class DatabaseStorage implements IStorage {
           buttonText: intro.buttonText,
           updatedAt: new Date(),
         })
-        .where(eq(cerebralIntros.categoria, intro.categoria))
+        .where(and(
+          eq(cerebralIntros.categoria, intro.categoria),
+          eq(cerebralIntros.lang, lang)
+        ))
         .returning();
       return updated;
     }
 
     const [created] = await db.insert(cerebralIntros).values({
       categoria: intro.categoria,
+      lang: lang,
       imageUrl: intro.imageUrl,
       title: intro.title,
       subtitle: intro.subtitle,

@@ -459,13 +459,15 @@ export async function registerRoutes(
   app.get("/api/cerebral/:categoria", async (req, res) => {
     const categoria = req.params.categoria;
     const temaNumero = parseInt(req.query.tema as string) || 1;
-    const content = await storage.getCerebralContent(categoria, temaNumero);
+    const lang = (req.query.lang as string) || "es";
+    const content = await storage.getCerebralContent(categoria, temaNumero, lang);
     res.json({ content: content || null });
   });
 
   app.get("/api/cerebral/:categoria/themes", async (req, res) => {
     const categoria = req.params.categoria;
-    const savedContents = await storage.getCerebralContentsByCategory(categoria);
+    const lang = (req.query.lang as string) || "es";
+    const savedContents = await storage.getCerebralContentsByCategory(categoria, lang);
     
     const savedThemes = savedContents.map(c => ({
       temaNumero: c.temaNumero,
@@ -480,7 +482,8 @@ export async function registerRoutes(
   // Get cerebral intro for category
   app.get("/api/cerebral/:categoria/intro", async (req, res) => {
     const categoria = req.params.categoria;
-    const intro = await storage.getCerebralIntro(categoria);
+    const lang = (req.query.lang as string) || "es";
+    const intro = await storage.getCerebralIntro(categoria, lang);
     res.json({ intro });
   });
 

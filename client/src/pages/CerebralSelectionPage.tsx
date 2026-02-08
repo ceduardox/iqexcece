@@ -33,18 +33,21 @@ const playButtonSound = () => {
 };
 
 export default function CerebralSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const params = useParams<{ categoria?: string }>();
   const { userData } = useUserData();
   const categoria = params.categoria || userData.ageGroup || "adolescentes";
+  const lang = i18n.language || "es";
 
   const { data: themesData, isLoading: themesLoading } = useQuery<{ themes: CerebralTheme[] }>({
-    queryKey: [`/api/cerebral/${categoria}/themes`],
+    queryKey: ['/api/cerebral', categoria, 'themes', lang],
+    queryFn: () => fetch(`/api/cerebral/${categoria}/themes?lang=${lang}`).then(r => r.json()),
   });
 
   const { data: introData, isLoading: introLoading } = useQuery<{ intro: CerebralIntro | null }>({
-    queryKey: [`/api/cerebral/${categoria}/intro`],
+    queryKey: ['/api/cerebral', categoria, 'intro', lang],
+    queryFn: () => fetch(`/api/cerebral/${categoria}/intro?lang=${lang}`).then(r => r.json()),
   });
 
   const themes = themesData?.themes || [];

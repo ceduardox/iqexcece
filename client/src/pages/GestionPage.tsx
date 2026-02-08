@@ -495,6 +495,123 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
   };
 
+  const translateCerebralBulk = async (targetLang: string) => {
+    if (bulkTranslating) return;
+    const hasContent = cerebralContent.title || cerebralContent.exerciseData?.instruction;
+    if (!hasContent) { alert("No hay contenido para traducir"); return; }
+    setBulkTranslating(true);
+    try {
+      const dataToTranslate: any = {};
+      if (cerebralContent.title) dataToTranslate.title = cerebralContent.title;
+      if (cerebralContent.exerciseData) {
+        const ed = cerebralContent.exerciseData;
+        if (ed.instruction) dataToTranslate.instruction = ed.instruction;
+        if (ed.correctAnswer) dataToTranslate.correctAnswer = ed.correctAnswer;
+        if (ed.answerOptions && Array.isArray(ed.answerOptions)) {
+          dataToTranslate.answerOptions = ed.answerOptions.map((o: any) => o.label || o.value || "");
+        }
+        if (ed.sequenceOptions && Array.isArray(ed.sequenceOptions)) {
+          dataToTranslate.sequenceOptions = ed.sequenceOptions.map((o: any) => o.label || o.value || "");
+        }
+        if (ed.memoriaItems && Array.isArray(ed.memoriaItems)) {
+          dataToTranslate.memoriaItems = ed.memoriaItems.map((o: any) => typeof o === 'string' ? o : o.label || "");
+        }
+        if (ed.memoriaOptions && Array.isArray(ed.memoriaOptions)) {
+          dataToTranslate.memoriaOptions = ed.memoriaOptions.map((o: any) => typeof o === 'string' ? o : o.label || "");
+        }
+        if (ed.patronOptions && Array.isArray(ed.patronOptions)) {
+          dataToTranslate.patronOptions = ed.patronOptions.map((o: any) => typeof o === 'string' ? o : o.label || "");
+        }
+        if (ed.stroopWord) dataToTranslate.stroopWord = ed.stroopWord;
+        if (ed.stroopOptions && Array.isArray(ed.stroopOptions)) {
+          dataToTranslate.stroopOptions = ed.stroopOptions;
+        }
+        if (ed.prefTitle1) dataToTranslate.prefTitle1 = ed.prefTitle1;
+        if (ed.prefTitle2) dataToTranslate.prefTitle2 = ed.prefTitle2;
+        if (ed.latInstruction) dataToTranslate.latInstruction = ed.latInstruction;
+        if (ed.latQuestion) dataToTranslate.latQuestion = ed.latQuestion;
+        if (ed.latLeft) dataToTranslate.latLeft = ed.latLeft;
+        if (ed.latRight) dataToTranslate.latRight = ed.latRight;
+      }
+      // Also translate intro
+      const introToTranslate: any = {};
+      if (cerebralIntro.title) introToTranslate.introTitle = cerebralIntro.title;
+      if (cerebralIntro.subtitle) introToTranslate.introSubtitle = cerebralIntro.subtitle;
+      if (cerebralIntro.buttonText) introToTranslate.introButton = cerebralIntro.buttonText;
+      
+      const allData = { ...dataToTranslate, ...introToTranslate };
+      
+      const res = await adminFetch("/api/admin/translate-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: allData, targetLang })
+      });
+      const result = await res.json();
+      if (result.translated) {
+        const t = result.translated;
+        setCerebralContent(p => {
+          const updated = { ...p };
+          if (t.title) updated.title = t.title;
+          if (updated.exerciseData) {
+            const ed = { ...updated.exerciseData };
+            if (t.instruction) ed.instruction = t.instruction;
+            if (t.correctAnswer) ed.correctAnswer = t.correctAnswer;
+            if (t.answerOptions && Array.isArray(t.answerOptions) && ed.answerOptions) {
+              ed.answerOptions = ed.answerOptions.map((o: any, i: number) => ({
+                ...o, label: t.answerOptions[i] || o.label, value: t.answerOptions[i] || o.value
+              }));
+            }
+            if (t.sequenceOptions && Array.isArray(t.sequenceOptions) && ed.sequenceOptions) {
+              ed.sequenceOptions = ed.sequenceOptions.map((o: any, i: number) => ({
+                ...o, label: t.sequenceOptions[i] || o.label, value: t.sequenceOptions[i] || o.value
+              }));
+            }
+            if (t.memoriaItems && Array.isArray(t.memoriaItems) && ed.memoriaItems) {
+              ed.memoriaItems = ed.memoriaItems.map((o: any, i: number) => 
+                typeof o === 'string' ? (t.memoriaItems[i] || o) : { ...o, label: t.memoriaItems[i] || o.label }
+              );
+            }
+            if (t.memoriaOptions && Array.isArray(t.memoriaOptions) && ed.memoriaOptions) {
+              ed.memoriaOptions = ed.memoriaOptions.map((o: any, i: number) => 
+                typeof o === 'string' ? (t.memoriaOptions[i] || o) : { ...o, label: t.memoriaOptions[i] || o.label }
+              );
+            }
+            if (t.patronOptions && Array.isArray(t.patronOptions) && ed.patronOptions) {
+              ed.patronOptions = ed.patronOptions.map((o: any, i: number) => 
+                typeof o === 'string' ? (t.patronOptions[i] || o) : { ...o, label: t.patronOptions[i] || o.label }
+              );
+            }
+            if (t.stroopWord) ed.stroopWord = t.stroopWord;
+            if (t.stroopOptions && Array.isArray(t.stroopOptions)) ed.stroopOptions = t.stroopOptions;
+            if (t.prefTitle1) ed.prefTitle1 = t.prefTitle1;
+            if (t.prefTitle2) ed.prefTitle2 = t.prefTitle2;
+            if (t.latInstruction) ed.latInstruction = t.latInstruction;
+            if (t.latQuestion) ed.latQuestion = t.latQuestion;
+            if (t.latLeft) ed.latLeft = t.latLeft;
+            if (t.latRight) ed.latRight = t.latRight;
+            updated.exerciseData = ed;
+          }
+          return updated;
+        });
+        if (t.introTitle || t.introSubtitle || t.introButton) {
+          setCerebralIntro(p => ({
+            ...p,
+            ...(t.introTitle && { title: t.introTitle }),
+            ...(t.introSubtitle && { subtitle: t.introSubtitle }),
+            ...(t.introButton && { buttonText: t.introButton }),
+          }));
+        }
+      } else if (result.error) {
+        alert(result.error);
+      }
+    } catch (err) {
+      console.error("Bulk translation error:", err);
+      alert("Error al traducir. Intenta de nuevo.");
+    } finally {
+      setBulkTranslating(false);
+    }
+  };
+
   const translateField = async (text: string, targetLang: string, fieldKey: string, onResult: (translated: string) => void) => {
     if (!text) return;
     setTranslatingField(fieldKey);
@@ -673,6 +790,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         body: JSON.stringify({
           categoria: contentCategory,
           temaNumero: selectedCerebralTema,
+          lang: contentLang,
           title: cerebralContent.title,
           exerciseType: cerebralContent.exerciseType,
           imageUrl: cerebralContent.imageUrl || null,
@@ -683,7 +801,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       });
       if (res.ok) {
         alert("Test Cerebral guardado correctamente");
-        const themesRes = await fetch(`/api/cerebral/${contentCategory}/themes`);
+        const themesRes = await fetch(`/api/cerebral/${contentCategory}/themes?lang=${contentLang}`);
         const themesData = await themesRes.json();
         if (themesData.themes) {
           setCerebralThemes(themesData.themes);
@@ -708,6 +826,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         },
         body: JSON.stringify({
           categoria: contentCategory,
+          lang: contentLang,
           ...cerebralIntro
         }),
       });
@@ -927,7 +1046,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     if (isLoggedIn && contentType === "cerebral") {
       const loadCerebralThemes = async () => {
         try {
-          const res = await fetch(`/api/cerebral/${contentCategory}/themes`);
+          const res = await fetch(`/api/cerebral/${contentCategory}/themes?lang=${contentLang}`);
           const data = await res.json();
           if (data.themes && data.themes.length > 0) {
             setCerebralThemes(data.themes);
@@ -945,7 +1064,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         }
         // Also load intro
         try {
-          const introRes = await fetch(`/api/cerebral/${contentCategory}/intro`);
+          const introRes = await fetch(`/api/cerebral/${contentCategory}/intro?lang=${contentLang}`);
           const introData = await introRes.json();
           if (introData.intro) {
             setCerebralIntro({
@@ -959,14 +1078,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadCerebralThemes();
     }
-  }, [isLoggedIn, contentCategory, contentType]);
+  }, [isLoggedIn, contentCategory, contentType, contentLang]);
 
   // Load cerebral content for selected theme
   useEffect(() => {
     if (isLoggedIn && contentType === "cerebral") {
       const loadCerebralContent = async () => {
         try {
-          const res = await fetch(`/api/cerebral/${contentCategory}?tema=${selectedCerebralTema}`);
+          const res = await fetch(`/api/cerebral/${contentCategory}?tema=${selectedCerebralTema}&lang=${contentLang}`);
           const data = await res.json();
           if (data.content) {
             const exerciseData = typeof data.content.exerciseData === "string" 
@@ -995,7 +1114,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadCerebralContent();
     }
-  }, [isLoggedIn, contentCategory, selectedCerebralTema, contentType]);
+  }, [isLoggedIn, contentCategory, selectedCerebralTema, contentType, contentLang]);
 
   // Load uploaded images
   useEffect(() => {
@@ -3244,6 +3363,24 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
               {contentType === "cerebral" && (
               <>
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+                <span className="text-white/60 text-sm">Idioma:</span>
+                {["es", "en", "pt"].map((l) => (
+                  <Button
+                    key={l}
+                    onClick={() => setContentLang(l)}
+                    variant={contentLang === l ? "default" : "outline"}
+                    size="sm"
+                    className={contentLang === l ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
+                    data-testid={`button-cerebral-lang-${l}`}
+                  >
+                    {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
+                  </Button>
+                ))}
+                {contentLang !== 'es' && (
+                  <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
+                )}
+              </div>
               {/* Intro Screen Configuration */}
               <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/20 space-y-4 mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
@@ -4018,6 +4155,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   {cerebralContent.isActive ? "Activo" : "Inactivo"}
                 </Button>
               </div>
+
+              {contentLang !== 'es' && (
+                <Button
+                  onClick={() => translateCerebralBulk(contentLang)}
+                  disabled={bulkTranslating}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 mb-2"
+                  data-testid="button-translate-cerebral"
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
+                </Button>
+              )}
 
               <Button
                 onClick={handleSaveCerebral}
