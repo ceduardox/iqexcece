@@ -1168,8 +1168,8 @@ export async function registerRoutes(
     const token = auth?.replace("Bearer ", "");
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
 
-    const { message, history } = req.body;
-    if (!message) return res.status(400).json({ error: "message required" });
+    const { message, history, image } = req.body;
+    if (!message && !image) return res.status(400).json({ error: "message or image required" });
 
     try {
       const apiKey = process.env.GEMINI_API_KEY;
@@ -1226,7 +1226,16 @@ Always wrap file operations in json code blocks. You may include multiple operat
         parts: [{ text: m.content }]
       }));
 
-      conversationHistory.push({ role: "user", parts: [{ text: message }] });
+      const userParts: any[] = [];
+      if (message) userParts.push({ text: message });
+      if (image) {
+        const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (match) {
+          userParts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+        }
+      }
+      if (userParts.length === 0) userParts.push({ text: "Analiza esta imagen" });
+      conversationHistory.push({ role: "user", parts: userParts });
 
       const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
       let responseText = null;

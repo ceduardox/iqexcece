@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Trash2, Bot, User, Loader2, AlertCircle } from "lucide-react";
+import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
+  image?: string;
   filesModified?: string[] | null;
   createdAt?: string | null;
 }
@@ -18,10 +18,11 @@ interface AdminAgentChatProps {
 export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [pastedImage, setPastedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     loadHistory();
@@ -30,6 +31,13 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  }, [input]);
 
   const loadHistory = async () => {
     try {
@@ -53,14 +61,35 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
     } catch {}
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const base64 = ev.target?.result as string;
+          setPastedImage(base64);
+        };
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && !pastedImage) || loading) return;
     const userMsg = input.trim();
     setInput("");
     setError("");
 
-    const newUserMsg: Message = { role: "user", content: userMsg };
+    const newUserMsg: Message = { role: "user", content: userMsg || "(imagen)", image: pastedImage || undefined };
     setMessages((prev) => [...prev, newUserMsg]);
+    const currentImage = pastedImage;
+    setPastedImage(null);
     setLoading(true);
 
     try {
@@ -69,13 +98,18 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
         content: m.content,
       }));
 
+      const body: any = { message: userMsg || "Analiza esta imagen", history };
+      if (currentImage) {
+        body.image = currentImage;
+      }
+
       const res = await fetch("/api/admin/agent/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${adminToken}`,
         },
-        body: JSON.stringify({ message: userMsg, history }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -94,7 +128,7 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
       setError(err.message || "Network error");
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
+      textareaRef.current?.focus();
     }
   };
 
@@ -168,19 +202,19 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
           <div className="flex flex-col items-center justify-center h-full text-white/40 gap-3">
             <Bot className="w-12 h-12" />
             <p className="text-center text-sm max-w-xs">
-              Soy tu agente de desarrollo. Puedo leer y modificar archivos del frontend. Pregunta lo que necesites.
+              Soy tu agente de desarrollo. Puedo leer y modificar cualquier archivo del proyecto. Pega imagenes (Ctrl+V) para que las analice.
             </p>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
               {[
                 "Lista los archivos de pages/",
-                "Lee el archivo Home.tsx",
-                "Cambia el color del titulo principal a azul",
+                "Lee el archivo routes.ts",
+                "Analiza la estructura del proyecto",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
                   onClick={() => {
                     setInput(suggestion);
-                    inputRef.current?.focus();
+                    textareaRef.current?.focus();
                   }}
                   className="text-xs bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-white/60 transition-colors"
                   data-testid={`suggestion-${suggestion.slice(0, 10)}`}
@@ -209,7 +243,15 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
                   : "bg-white/5 text-white/80"
               }`}
             >
-              {msg.role === "assistant" ? formatContent(msg.content) : msg.content}
+              {msg.image && (
+                <img
+                  src={msg.image}
+                  alt="Imagen pegada"
+                  className="max-w-full max-h-48 rounded-md mb-2 object-contain"
+                  data-testid={`msg-image-${i}`}
+                />
+              )}
+              {msg.role === "assistant" ? formatContent(msg.content) : (msg.content !== "(imagen)" ? msg.content : null)}
               {msg.filesModified && msg.filesModified.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-white/10">
                   <p className="text-xs text-emerald-400 font-medium mb-1">
@@ -255,21 +297,51 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex gap-2">
-        <Input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Escribe un mensaje al agente..."
-          className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
-          disabled={loading}
-          data-testid="input-agent-message"
-        />
+      {pastedImage && (
+        <div className="mb-2 relative inline-block">
+          <img
+            src={pastedImage}
+            alt="Preview"
+            className="max-h-32 rounded-lg border border-white/20 object-contain"
+            data-testid="pasted-image-preview"
+          />
+          <button
+            onClick={() => setPastedImage(null)}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
+            data-testid="button-remove-pasted-image"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
+        </div>
+      )}
+
+      <div className="flex gap-2 items-end">
+        <div className="flex-1 relative">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            onPaste={handlePaste}
+            placeholder="Escribe un mensaje o pega una imagen (Ctrl+V)..."
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-md px-3 py-2 text-sm resize-none min-h-[38px] max-h-[120px] focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+            disabled={loading}
+            rows={1}
+            data-testid="input-agent-message"
+          />
+          {pastedImage && (
+            <Image className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
+          )}
+        </div>
         <Button
           onClick={sendMessage}
-          disabled={loading || !input.trim()}
-          className="bg-emerald-600"
+          disabled={loading || (!input.trim() && !pastedImage)}
+          className="bg-emerald-600 min-h-[38px]"
           data-testid="button-send-agent"
         >
           <Send className="w-4 h-4" />
