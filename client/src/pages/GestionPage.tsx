@@ -92,6 +92,29 @@ interface CerebralIntroContentData {
   buttonText: string;
 }
 
+interface CerebralContentData {
+  id?: string;
+  categoria: string;
+  temaNumero: number;
+  lang: string;
+  title: string;
+  imageUrl?: string;
+  imageSize?: number;
+  exerciseType: string;
+  exerciseData: string;
+  isActive: boolean;
+}
+
+interface CerebralIntroContentData {
+  id?: string;
+  categoria: string;
+  lang: string;
+  imageUrl?: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+}
+
 export default function GestionPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");

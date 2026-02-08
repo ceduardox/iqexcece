@@ -1175,7 +1175,7 @@ export async function registerRoutes(
     detail?: string;
   }
 
-  async function executeAgentAction(action: any, steps: AgentStep[]): Promise<{ result: string; fileModified?: string }> {
+  async function executeAgentAction(action: any, steps: AgentStep[], filesReadInSession?: Set<string>): Promise<{ result: string; fileModified?: string }> {
     if (action.action === "readFile" && action.path && isPathSafe(action.path)) {
       steps.push({ type: "readFile", description: `Leyendo ${action.path}`, status: "running" });
       try {
@@ -1183,6 +1183,7 @@ export async function registerRoutes(
         const truncated = fileContent.length > 6000 ? fileContent.substring(0, 6000) + '\n... (truncated)' : fileContent;
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = `${fileContent.length} caracteres`;
+        if (filesReadInSession) filesReadInSession.add(action.path);
         return { result: `📄 **${action.path}** (${fileContent.length} chars):\n\`\`\`\n${truncated}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
@@ -1236,6 +1237,11 @@ export async function registerRoutes(
       }
     } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
       steps.push({ type: "editFile", description: `Editando ${action.path}`, status: "running" });
+      if (filesReadInSession && !filesReadInSession.has(action.path)) {
+        steps[steps.length - 1].status = "warning";
+        steps[steps.length - 1].detail = "No leíste este archivo primero";
+        return { result: `⚠️ You must readFile("${action.path}") before editing it. This ensures you have the exact current content. Read the file first, then try editing again.` };
+      }
       try {
         const filePath = path.resolve(action.path);
         const fileContent = fs.readFileSync(filePath, "utf-8");
@@ -1244,7 +1250,7 @@ export async function registerRoutes(
         if (occurrences === 0) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Texto no encontrado";
-          return { result: `❌ editFile failed: Could not find the specified text in ${action.path}. The text must match EXACTLY. Read the file first to copy the exact text.` };
+          return { result: `❌ editFile failed: Could not find the specified text in ${action.path}. TIPS: 1) Use readFile to see the current content and copy the EXACT text. 2) Check for extra spaces, tabs, or line breaks. 3) The file may have changed since you last read it - read it again. 4) Try a shorter, more unique snippet of text.` };
         } else if (occurrences > 1 && !action.replaceAll) {
           steps[steps.length - 1].status = "warning";
           steps[steps.length - 1].detail = `${occurrences} ocurrencias`;
@@ -1388,7 +1394,7 @@ export async function registerRoutes(
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 16384 }
+            generationConfig: { temperature: 0.3, maxOutputTokens: 16384 }
           })
         });
         const data = await response.json() as any;
@@ -1517,6 +1523,27 @@ CLARIFICATION BEHAVIOR:
 - If the user asks something unclear, ask ONE clarifying question instead of guessing
 - Only act autonomously when the task is clear and specific
 
+CHAIN OF THOUGHT - MANDATORY:
+Before EVERY action, write a brief "PENSAMIENTO:" block explaining:
+1. What you understand the user wants
+2. Which files are likely involved (use PROJECT KNOWLEDGE BASE)
+3. What you'll do and in what order
+4. What could go wrong
+This forces you to plan before acting and reduces errors significantly.
+
+Example:
+PENSAMIENTO: El usuario quiere cambiar el título de la página principal. Según el knowledge base, las páginas están en client/src/pages/. Primero leeré el archivo para encontrar el título actual, luego lo editaré.
+
+FILE LOCATION MAP (quick reference):
+- Pages: client/src/pages/ (React page components)
+- Components: client/src/components/ (reusable UI)
+- API routes: server/routes.ts (all backend endpoints)
+- Database schema: shared/schema.ts (Drizzle tables)
+- Styles: client/src/index.css (global CSS variables)
+- Hooks: client/src/hooks/ (custom React hooks)
+- Admin panel: client/src/pages/GestionPage.tsx
+- Storage layer: server/storage.ts (DB access methods)
+
 IMPORTANT RULES:
 1. ALWAYS read files before editing them. Never guess content.
 2. Respond in the SAME LANGUAGE the user writes (Spanish/English/Portuguese)
@@ -1558,6 +1585,7 @@ ${schemaContent.substring(0, 3000)}
       const allSteps: AgentStep[] = [];
       let loopCount = 0;
       fileBackups.clear();
+      const filesReadInSession = new Set<string>();
 
       for (let i = 0; i < MAX_LOOPS; i++) {
         loopCount = i + 1;
@@ -1575,7 +1603,7 @@ ${schemaContent.substring(0, 3000)}
           try {
             const jsonStr = block.replace(/```json\s*\n?/g, '').replace(/```\s*\n?/g, '').trim();
             const action = JSON.parse(jsonStr);
-            const { result, fileModified } = await executeAgentAction(action, allSteps);
+            const { result, fileModified } = await executeAgentAction(action, allSteps, filesReadInSession);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
             const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs"];
