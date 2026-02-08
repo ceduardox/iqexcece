@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot, Languages } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -44,6 +44,29 @@ interface QuizResult {
   tiempoCuestionario: number | null;
   isPwa: boolean;
   createdAt: string | null;
+}
+
+interface CerebralContentData {
+  id?: string;
+  categoria: string;
+  temaNumero: number;
+  lang: string;
+  title: string;
+  imageUrl?: string;
+  imageSize?: number;
+  exerciseType: string;
+  exerciseData: string;
+  isActive: boolean;
+}
+
+interface CerebralIntroContentData {
+  id?: string;
+  categoria: string;
+  lang: string;
+  imageUrl?: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
 }
 
 export default function GestionPage() {
@@ -104,32 +127,24 @@ export default function GestionPage() {
     { id: "3", label: "Ambos", value: "ambos", position: 2 }
   ];
   
-  const [cerebralContent, setCerebralContent] = useState<{
-    title: string; 
-    exerciseType: string; 
-    imageUrl: string; 
-    imageSize: number; 
-    exerciseData: any;
-    isActive: boolean;
-  }>({
+  const [cerebralContentData, setCerebralContentData] = useState<CerebralContentData>({
+    categoria: contentCategory,
+    temaNumero: selectedTema,
+    lang: contentLang,
     title: "",
-    exerciseType: "bailarina",
     imageUrl: "",
     imageSize: 100,
-    exerciseData: { instruction: "", correctAnswer: "", answerOptions: DEFAULT_BAILARINA_OPTIONS },
-    isActive: true
+    exerciseType: "bailarina",
+    exerciseData: JSON.stringify({ instruction: "", correctAnswer: "", answerOptions: DEFAULT_BAILARINA_OPTIONS }),
+    isActive: true,
   });
-  
-  const [cerebralIntro, setCerebralIntro] = useState<{
-    imageUrl: string;
-    title: string;
-    subtitle: string;
-    buttonText: string;
-  }>({
+  const [cerebralIntroData, setCerebralIntroData] = useState<CerebralIntroContentData>({
+    categoria: contentCategory,
+    lang: contentLang,
     imageUrl: "",
     title: "",
     subtitle: "",
-    buttonText: "Empezar"
+    buttonText: "Empezar",
   });
 
   // Image picker state
