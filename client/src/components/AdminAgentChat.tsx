@@ -202,13 +202,15 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
           <div className="flex flex-col items-center justify-center h-full text-white/40 gap-3">
             <Bot className="w-12 h-12" />
             <p className="text-center text-sm max-w-xs">
-              Soy tu agente de desarrollo. Puedo leer y modificar cualquier archivo del proyecto. Pega imagenes (Ctrl+V) para que las analice.
+              Soy tu agente de desarrollo. Puedo leer, analizar y modificar cualquier archivo del proyecto. Pega imagenes (Ctrl+V) para que las analice.
             </p>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
               {[
-                "Lista los archivos de pages/",
-                "Lee el archivo routes.ts",
-                "Analiza la estructura del proyecto",
+                "Analiza la estructura completa del proyecto",
+                "Lee y explica como funciona GestionPage.tsx",
+                "Que archivos tiene el servidor?",
+                "Cambia el titulo de la pagina principal",
+                "Muestra el schema de la base de datos",
               ].map((suggestion) => (
                 <button
                   key={suggestion}

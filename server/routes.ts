@@ -1186,17 +1186,31 @@ ${projectTree}
 
 CAPABILITIES:
 - Read any file: readFile(path)
-- Write any file: writeFile(path, content) 
+- Edit part of a file: editFile(path, oldText, newText) - replaces oldText with newText in the file
+- Write entire file: writeFile(path, content) - only for NEW files or small files
 - List any directory: listFiles(dir)
 - You have access to ALL project files: server/, client/, shared/, migrations/, scripts, configs, etc.
 
+REASONING PROCESS - ALWAYS follow these steps:
+1. THINK: Before doing anything, understand what the user wants. If they ask to analyze, read the files first.
+2. READ: Always read the relevant files before making changes. Never guess file contents or paths.
+3. PLAN: Explain to the user what you will do and why, in 2-3 sentences.
+4. ACT: Make the minimum necessary changes. Use editFile for existing files (search & replace specific sections). Only use writeFile for creating new files.
+5. VERIFY: After changes, briefly confirm what was modified.
+
+CODE QUALITY RULES:
+- Make MINIMAL changes. Do NOT rewrite entire files. Use editFile to change only the specific lines needed.
+- Preserve ALL existing imports, patterns, styles, and code conventions.
+- This project uses: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
+- Keep the same code style as the rest of the project (indentation, naming, etc.)
+- If you need to add a new import, add ONLY the import line, don't rewrite the whole file.
+- When the user sends an image, analyze it carefully and describe what you see or use the context to help.
+
 IMPORTANT RULES:
 1. You can access and modify ANY file in the project (server, client, shared, configs, etc.)
-2. When writing code, preserve existing patterns and imports
-3. Always explain what you plan to do before making changes
-4. Keep responses concise and focused
-5. When the user asks you to analyze something, read the relevant files first to understand the code
-6. Respond in the same language the user writes to you (Spanish, English, Portuguese)
+2. Respond in the SAME LANGUAGE the user writes to you (Spanish, English, Portuguese)
+3. Keep responses concise and actionable
+4. If you're unsure about something, read the file first before assuming
 
 DATABASE SCHEMA (shared/schema.ts):
 \`\`\`typescript
@@ -1206,20 +1220,29 @@ ${schemaContent}
 SERVER ROUTES SUMMARY (server/routes.ts - ${routesContent.length} chars):
 Key API endpoints available in the project. Use readFile to see full details.
 
-When you need to perform a file operation, respond with a JSON block:
+FILE OPERATIONS - wrap each in a json code block:
+
+Read a file:
 \`\`\`json
 {"action": "readFile", "path": "server/routes.ts"}
 \`\`\`
-or
+
+Edit part of a file (PREFERRED for existing files):
 \`\`\`json
-{"action": "writeFile", "path": "client/src/pages/Home.tsx", "content": "...file content..."}
+{"action": "editFile", "path": "client/src/pages/Home.tsx", "oldText": "the exact text to find", "newText": "the replacement text"}
 \`\`\`
-or
+
+Write entire new file (only for NEW or very small files):
+\`\`\`json
+{"action": "writeFile", "path": "client/src/components/NewComponent.tsx", "content": "...full content..."}
+\`\`\`
+
+List directory:
 \`\`\`json
 {"action": "listFiles", "dir": "server"}
 \`\`\`
 
-Always wrap file operations in json code blocks. You may include multiple operations in a single response. After file operations, provide a brief summary of changes made.`;
+You may include multiple operations in a single response.`;
 
       const conversationHistory = (history || []).map((m: any) => ({
         role: m.role === "user" ? "user" : "model",
@@ -1250,7 +1273,7 @@ Always wrap file operations in json code blocks. You may include multiple operat
               contents: conversationHistory,
               generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 8192,
+                maxOutputTokens: 16384,
               }
             })
           });
@@ -1290,6 +1313,25 @@ Always wrap file operations in json code blocks. You may include multiple operat
               responseText += `\n\n✅ File written: ${action.path}`;
             } catch (e: any) {
               responseText += `\n\n❌ Error writing ${action.path}: ${e.message}`;
+            }
+          } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
+            try {
+              const filePath = path.resolve(action.path);
+              const fileContent = fs.readFileSync(filePath, "utf-8");
+              const occurrences = fileContent.split(action.oldText).length - 1;
+              if (occurrences === 0) {
+                responseText += `\n\n❌ editFile failed: Could not find the specified text in ${action.path}. Read the file first to get the exact text.`;
+              } else if (occurrences > 1 && !action.replaceAll) {
+                responseText += `\n\n⚠️ editFile: Found ${occurrences} occurrences of the text in ${action.path}. Provide more unique/longer text to match exactly one location, or add "replaceAll": true to replace all.`;
+              } else {
+                const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
+                fs.writeFileSync(filePath, newContent, "utf-8");
+                filesModified.push(action.path);
+                console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s), ${action.oldText.length} chars) at ${new Date().toISOString()}`);
+                responseText += `\n\n✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})`;
+              }
+            } catch (e: any) {
+              responseText += `\n\n❌ Error editing ${action.path}: ${e.message}`;
             }
           } else if (action.action === "listFiles" && action.dir) {
             if (isPathSafe(action.dir)) {
