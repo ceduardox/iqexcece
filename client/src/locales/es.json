@@ -106,7 +106,17 @@
     "myResult": "Mi resultado - IQEXPONENCIAL",
     "resultTitle": "Resultado",
     "shareText": "¡Obtuve {{percentage}}% en el Test de Lectura! Velocidad: {{speed}} ppm.",
-    "shareTextFull": "¡Obtuve {{percentage}}% en el Test de Lectura! Velocidad: {{speed}} ppm.\n\nEntrena tu cerebro: https://iqexponencial.app"
+    "shareTextFull": "¡Obtuve {{percentage}}% en el Test de Lectura! Velocidad: {{speed}} ppm.\n\nEntrena tu cerebro: https://iqexponencial.app",
+    "razonamientoTitle": "Test Razonamiento",
+    "razonamientoSelectDesc": "Selecciona un test para evaluar tu capacidad de razonamiento.",
+    "chooseTest": "Elige un test",
+    "noTestsAvailable": "No hay tests disponibles",
+    "noTestsCreated": "Los tests de razonamiento para esta categoría aún no han sido creados.",
+    "typeMemory": "Memoria",
+    "typeLogic": "Lógica",
+    "typeProblems": "Problemas",
+    "typeTests": "Pruebas",
+    "startTest": "Iniciar"
   },
   "age": {
     "title": "Selecciona tu grupo",
@@ -248,17 +258,7 @@
     "searchInList": "Buscar",
     "backToList": "Volver a buscar en la lista",
     "notFound": "No se encontró",
-    "notInList": "Mi institución no está en la lista",
-    "razonamientoTitle": "Test Razonamiento",
-    "razonamientoSelectDesc": "Selecciona un test para evaluar tu capacidad de razonamiento.",
-    "chooseTest": "Elige un test",
-    "noTestsAvailable": "No hay tests disponibles",
-    "noTestsCreated": "Los tests de razonamiento para esta categoría aún no han sido creados.",
-    "typeMemory": "Memoria",
-    "typeLogic": "Lógica",
-    "typeProblems": "Problemas",
-    "typeTests": "Pruebas",
-    "startTest": "Iniciar"
+    "notInList": "Mi institución no está en la lista"
   },
   "common": {
     "loading": "Cargando...",

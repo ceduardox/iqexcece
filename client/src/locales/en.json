@@ -106,7 +106,17 @@
     "myResult": "My result - IQEXPONENCIAL",
     "resultTitle": "Result",
     "shareText": "I scored {{percentage}}% on the Reading Test! Speed: {{speed}} wpm.",
-    "shareTextFull": "I scored {{percentage}}% on the Reading Test! Speed: {{speed}} wpm.\n\nTrain your brain: https://iqexponencial.app"
+    "shareTextFull": "I scored {{percentage}}% on the Reading Test! Speed: {{speed}} wpm.\n\nTrain your brain: https://iqexponencial.app",
+    "razonamientoTitle": "Reasoning Test",
+    "razonamientoSelectDesc": "Select a test to evaluate your reasoning ability.",
+    "chooseTest": "Choose a test",
+    "noTestsAvailable": "No tests available",
+    "noTestsCreated": "Reasoning tests for this category have not been created yet.",
+    "typeMemory": "Memory",
+    "typeLogic": "Logic",
+    "typeProblems": "Problems",
+    "typeTests": "Tests",
+    "startTest": "Start"
   },
   "age": {
     "title": "Select your group",
@@ -248,17 +258,7 @@
     "searchInList": "Search",
     "backToList": "Back to search in list",
     "notFound": "Not found",
-    "notInList": "My institution is not in the list",
-    "razonamientoTitle": "Reasoning Test",
-    "razonamientoSelectDesc": "Select a test to evaluate your reasoning ability.",
-    "chooseTest": "Choose a test",
-    "noTestsAvailable": "No tests available",
-    "noTestsCreated": "Reasoning tests for this category have not been created yet.",
-    "typeMemory": "Memory",
-    "typeLogic": "Logic",
-    "typeProblems": "Problems",
-    "typeTests": "Tests",
-    "startTest": "Start"
+    "notInList": "My institution is not in the list"
   },
   "common": {
     "loading": "Loading...",
