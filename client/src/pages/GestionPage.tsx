@@ -1073,13 +1073,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               subtitle: introData.intro.subtitle || "",
               buttonText: introData.intro.buttonText || ""
             });
-          } else {
-            setCerebralIntro({
-              imageUrl: "",
-              title: "",
-              subtitle: "",
-              buttonText: ""
-            });
           }
         } catch {}
       };

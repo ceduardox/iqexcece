@@ -430,7 +430,10 @@ export async function registerRoutes(
   app.get("/api/razonamiento/:categoria/themes", async (req, res) => {
     const categoria = req.params.categoria;
     const lang = (req.query.lang as string) || 'es';
-    const savedContents = await storage.getRazonamientoContentsByCategory(categoria, lang);
+    let savedContents = await storage.getRazonamientoContentsByCategory(categoria, lang);
+    if (savedContents.length === 0 && lang !== "es") {
+      savedContents = await storage.getRazonamientoContentsByCategory(categoria, "es");
+    }
     
     const savedThemes = savedContents.map(c => ({
       temaNumero: c.temaNumero,
@@ -460,14 +463,20 @@ export async function registerRoutes(
     const categoria = req.params.categoria;
     const temaNumero = parseInt(req.query.tema as string) || 1;
     const lang = (req.query.lang as string) || "es";
-    const content = await storage.getCerebralContent(categoria, temaNumero, lang);
+    let content = await storage.getCerebralContent(categoria, temaNumero, lang);
+    if (!content && lang !== "es") {
+      content = await storage.getCerebralContent(categoria, temaNumero, "es");
+    }
     res.json({ content: content || null });
   });
 
   app.get("/api/cerebral/:categoria/themes", async (req, res) => {
     const categoria = req.params.categoria;
     const lang = (req.query.lang as string) || "es";
-    const savedContents = await storage.getCerebralContentsByCategory(categoria, lang);
+    let savedContents = await storage.getCerebralContentsByCategory(categoria, lang);
+    if (savedContents.length === 0 && lang !== "es") {
+      savedContents = await storage.getCerebralContentsByCategory(categoria, "es");
+    }
     
     const savedThemes = savedContents.map(c => ({
       temaNumero: c.temaNumero,
@@ -483,8 +492,11 @@ export async function registerRoutes(
   app.get("/api/cerebral/:categoria/intro", async (req, res) => {
     const categoria = req.params.categoria;
     const lang = (req.query.lang as string) || "es";
-    const intro = await storage.getCerebralIntro(categoria, lang);
-    res.json({ intro });
+    let intro = await storage.getCerebralIntro(categoria, lang);
+    if (!intro && lang !== "es") {
+      intro = await storage.getCerebralIntro(categoria, "es");
+    }
+    res.json({ intro: intro || null });
   });
 
   // Save cerebral intro (admin)
