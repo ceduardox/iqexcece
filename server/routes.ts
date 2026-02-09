@@ -1291,6 +1291,13 @@ export async function registerRoutes(
     } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
       steps.push({ type: "writeFile", description: `Creando ${action.path}`, status: "running" });
       try {
+        const protectedPatterns = [/locales\/.*\.json$/, /schema\.ts$/, /package\.json$/];
+        const isProtectedFile = protectedPatterns.some(p => p.test(action.path));
+        if (isProtectedFile && fs.existsSync(path.resolve(action.path))) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "Protected file - use editFile instead";
+          return { result: `❌ BLOCKED: ${action.path} is a protected file that already exists. Use editFile to make changes instead of writeFile. writeFile would DESTROY all existing content.` };
+        }
         if (fs.existsSync(path.resolve(action.path))) {
           fileBackups.set(action.path, fs.readFileSync(path.resolve(action.path), "utf-8"));
           saveFileBackups(fileBackups);
@@ -1805,6 +1812,41 @@ IMPORTANT RULES:
 12. NEVER edit server/routes.ts - that file contains YOUR OWN code. Editing it would break the agent itself.
 13. restartServer is DEFERRED - it runs AFTER your response is sent. Do NOT wait for it or call it multiple times. Call it ONCE at the end of your edits if backend files changed. The browser will auto-reload 4 seconds after restart.
 14. Batch ALL your edits first, then call validateCode, then restartServer ONCE if needed. Do not restart between edits.
+
+REACT/TYPESCRIPT CRITICAL RULES (LEARN FROM PAST MISTAKES):
+
+1. REACT HOOKS SCOPE: Functions like t() from useTranslation(), useState, useEffect, useCallback, useLocation, etc. are HOOKS.
+   They can ONLY be called INSIDE a React component function body. NEVER place code that uses hooks outside the component.
+   BAD (outside component):
+   const testTypes = [t('key1'), t('key2')]; // ERROR: t() is a hook result, not available here
+   export default function MyPage() { ... }
+   
+   GOOD (inside component):
+   export default function MyPage() {
+     const { t } = useTranslation();
+     const testTypes = [t('key1'), t('key2')]; // OK: inside component
+   }
+
+2. writeFile DESTROYS EXISTING FILES: NEVER use writeFile on files that already exist. It REPLACES the entire file.
+   This is especially dangerous for locale files (es.json, en.json, pt.json) that contain 280+ translation keys.
+   Using writeFile on them would DELETE all existing translations. ALWAYS use editFile for existing files.
+   If you need to add keys to a JSON file, use editFile to add them at the right location.
+
+3. DATA STRUCTURE CONSISTENCY: NEVER change the shape of arrays/objects without checking ALL places they are used.
+   BAD: Changing const items = ['a', 'b'] to const items = [{value: 'a', label: 'A'}] without updating every {items[i]} in JSX
+   GOOD: Keep the same data shape OR update every usage site
+
+4. i18n TRANSLATION PATTERN: When adding translations:
+   - Add keys to ALL 3 locale files (es.json, en.json, pt.json) using editFile
+   - Use the SAME key path in all files
+   - In components, call t('namespace.keyName') inside the component where useTranslation() is available
+   - Test keys match by checking that the JSON is valid after editing
+
+5. LOCALE FILE SAFETY: The locale files (client/src/locales/*.json) are CRITICAL shared resources.
+   - NEVER writeFile on them (destroys 280+ existing keys)
+   - ALWAYS use editFile to add/modify specific keys
+   - ALWAYS validate JSON after editing (check for missing commas, brackets)
+   - Each locale file must have the SAME structure and key set
 
 RESPONSE FORMAT - CRITICAL:
 - Your final response to the user must be SHORT and CLEAN (2-5 sentences)
