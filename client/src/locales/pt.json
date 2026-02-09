@@ -272,7 +272,16 @@
     "no": "Não",
     "notFound": "404 Página Não Encontrada",
     "notFoundDesc": "A página que você procura não existe.",
-    "goHome": "Ir ao início"
+    "goHome": "Ir ao início",
+    "easy": "Fácil",
+    "medium": "Médio",
+    "hard": "Difícil",
+    "recommended": "Recomendado",
+    "start": "Começar",
+    "continue": "Continuar",
+    "done": "Feito",
+    "requires": "Requer",
+    "level": "nível"
   },
   "lang": {
     "es": "Español",

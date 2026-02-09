@@ -33,18 +33,6 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
-  const testTypes = [
-    { value: 'logico', label: t('razonamiento.test_type_logical') },
-    { value: 'abstracto', label: t('razonamiento.test_type_abstract') },
-    { value: 'verbal', label: t('razonamiento.test_type_verbal') },
-  ];
-
-  const difficulties = [
-    { value: 'facil', label: t('razonamiento.difficulty_easy') },
-    { value: 'medio', label: t('razonamiento.difficulty_medium') },
-    { value: 'dificil', label: t('razonamiento.difficulty_hard') },
-  ];
-
 const getProgress = (category: string): RazonamientoProgress => {
   try {
     const saved = localStorage.getItem(`razonamiento_progress_${category}`);
@@ -83,6 +71,19 @@ export default function RazonamientoSelectionPage() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<RazonamientoProgress>({ completed: [], inProgress: null, scores: {} });
   const lang = i18n.language || 'es';
+
+  const testTypes = [
+    t('tests.typeMemory'),
+    t('tests.typeLogic'),
+    t('tests.typeProblems'),
+    t('tests.typeTests'),
+  ];
+
+  const difficulties = [
+    t('common.easy', 'Fácil'),
+    t('common.medium', 'Medio'),
+    t('common.hard', 'Difícil'),
+  ];
 
   const categoryLabels: Record<string, string> = {
     preescolar: t("age.preescolarShort"),
@@ -219,7 +220,7 @@ export default function RazonamientoSelectionPage() {
                   className="text-2xl font-black leading-tight mb-1"
                   style={{ color: "#1f2937" }}
                 >
-                  Test Razonamiento
+                  {t('tests.razonamientoTitle')}
                 </motion.h1>
                 <motion.p 
                   initial={{ opacity: 0, y: 10 }}
@@ -228,7 +229,7 @@ export default function RazonamientoSelectionPage() {
                   className="text-xs leading-relaxed"
                   style={{ color: "#9ca3af" }}
                 >
-                  Selecciona un test para evaluar tu capacidad de razonamiento.
+                  {t('tests.razonamientoSelectDesc')}
                 </motion.p>
               </div>
               
@@ -253,7 +254,7 @@ export default function RazonamientoSelectionPage() {
             {recommendedTheme && !loading && (
               <>
                 <h2 className="text-sm font-bold mb-2" style={{ color: "#1f2937" }}>
-                  Recomendado <span style={{ color: "#9ca3af", fontWeight: 400 }}>(5 min)</span>
+                  {t('common.recommended')} <span style={{ color: "#9ca3af", fontWeight: 400 }}>(5 min)</span>
                 </h2>
                 
                 <motion.div
@@ -280,7 +281,7 @@ export default function RazonamientoSelectionPage() {
                         {recommendedTheme.title}
                       </h3>
                       <p className="text-xs text-white/70">
-                        3-5 min · Medio · <span className="text-cyan-300">Lógica</span>
+                        3-5 min · {t('common.medium')} · <span className="text-cyan-300">{t('tests.typeLogic')}</span>
                       </p>
                       <div className="mt-1.5 h-1 rounded-full bg-white/20 overflow-hidden">
                         <div className="h-full rounded-full bg-cyan-300" style={{ width: "40%" }} />
@@ -290,7 +291,7 @@ export default function RazonamientoSelectionPage() {
                       className="px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1"
                       style={{ backgroundColor: "white", color: "#1f2937" }}
                     >
-                      Empezar <ChevronRight className="w-3 h-3" />
+                      {t('common.start')} <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
                 </motion.div>
@@ -301,7 +302,7 @@ export default function RazonamientoSelectionPage() {
 
         <div className="px-5 pt-2 pb-6">
           <h2 className="text-base font-bold mb-3" style={{ color: "#1f2937" }}>
-            Elige un test
+            {t('tests.chooseTest')}
           </h2>
 
           {loading ? (
@@ -319,9 +320,9 @@ export default function RazonamientoSelectionPage() {
               className="text-center py-12"
             >
               <Brain className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-2">No hay tests disponibles</p>
+              <p className="text-gray-500 text-lg mb-2">{t('tests.noTestsAvailable')}</p>
               <p className="text-gray-400 text-sm">
-                Los tests de razonamiento para esta categoría aún no han sido creados.
+                {t('tests.noTestsCreated')}
               </p>
             </motion.div>
           ) : (
@@ -405,7 +406,7 @@ export default function RazonamientoSelectionPage() {
                               style={{ backgroundColor: "rgba(16, 185, 129, 0.15)" }}
                             >
                               <Check className="w-3.5 h-3.5" style={{ color: "#10b981" }} />
-                              <span className="text-xs font-medium" style={{ color: "#10b981" }}>Hecho</span>
+                              <span className="text-xs font-medium" style={{ color: "#10b981" }}>{t('common.done')}</span>
                             </div>
                           )}
                           {isInProgress && (
@@ -416,7 +417,7 @@ export default function RazonamientoSelectionPage() {
                                 boxShadow: "0 2px 8px rgba(138, 63, 252, 0.3)"
                               }}
                             >
-                              Continuar
+                              {t('common.continue')}
                             </button>
                           )}
                           {themeStatus.status === "available" && !isInProgress && (
@@ -427,7 +428,7 @@ export default function RazonamientoSelectionPage() {
                                 boxShadow: "0 2px 8px rgba(138, 63, 252, 0.3)"
                               }}
                             >
-                              Iniciar
+                              {t('tests.startTest')}
                             </button>
                           )}
                           {isLocked && (
@@ -437,7 +438,7 @@ export default function RazonamientoSelectionPage() {
                             >
                               <Lock className="w-3 h-3" style={{ color: "#9ca3af" }} />
                               <span className="text-[10px]" style={{ color: "#9ca3af" }}>
-                                Requiere <span className="font-bold">nivel {themeStatus.requiredLevel}</span>
+                                {t('common.requires')} <span className="font-bold">{t('common.level')} {themeStatus.requiredLevel}</span>
                               </span>
                             </div>
                           )}
