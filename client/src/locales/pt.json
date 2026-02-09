@@ -248,7 +248,17 @@
     "searchInList": "Buscar",
     "backToList": "Voltar a buscar na lista",
     "notFound": "Não encontrado",
-    "notInList": "Minha instituição não está na lista"
+    "notInList": "Minha instituição não está na lista",
+    "razonamientoTitle": "Teste de Raciocínio",
+    "razonamientoSelectDesc": "Selecione um teste para avaliar sua capacidade de raciocínio.",
+    "chooseTest": "Escolha um teste",
+    "noTestsAvailable": "Nenhum teste disponível",
+    "noTestsCreated": "Os testes de raciocínio para esta categoria ainda não foram criados.",
+    "typeMemory": "Memória",
+    "typeLogic": "Lógica",
+    "typeProblems": "Problemas",
+    "typeTests": "Testes",
+    "startTest": "Iniciar"
   },
   "common": {
     "loading": "Carregando...",

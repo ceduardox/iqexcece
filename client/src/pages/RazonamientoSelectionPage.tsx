@@ -33,8 +33,17 @@ const playCardSound = () => {
   audio.play().catch(() => {});
 };
 
-const testTypes = ["Memoria", "Lógica", "Problemas", "Pruebas"];
-const difficulties = ["Fácil", "Medio", "Difícil"];
+  const testTypes = [
+    { value: 'logico', label: t('razonamiento.test_type_logical') },
+    { value: 'abstracto', label: t('razonamiento.test_type_abstract') },
+    { value: 'verbal', label: t('razonamiento.test_type_verbal') },
+  ];
+
+  const difficulties = [
+    { value: 'facil', label: t('razonamiento.difficulty_easy') },
+    { value: 'medio', label: t('razonamiento.difficulty_medium') },
+    { value: 'dificil', label: t('razonamiento.difficulty_hard') },
+  ];
 
 const getProgress = (category: string): RazonamientoProgress => {
   try {

@@ -248,7 +248,17 @@
     "searchInList": "Search",
     "backToList": "Back to search in list",
     "notFound": "Not found",
-    "notInList": "My institution is not in the list"
+    "notInList": "My institution is not in the list",
+    "razonamientoTitle": "Reasoning Test",
+    "razonamientoSelectDesc": "Select a test to evaluate your reasoning ability.",
+    "chooseTest": "Choose a test",
+    "noTestsAvailable": "No tests available",
+    "noTestsCreated": "Reasoning tests for this category have not been created yet.",
+    "typeMemory": "Memory",
+    "typeLogic": "Logic",
+    "typeProblems": "Problems",
+    "typeTests": "Tests",
+    "startTest": "Start"
   },
   "common": {
     "loading": "Loading...",
