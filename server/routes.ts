@@ -12,8 +12,31 @@ import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
-const ADMIN_TOKEN_SECRET = "iq-admin-secret-" + Math.random().toString(36).substring(2);
-let validAdminTokens = new Set<string>();
+const ADMIN_TOKEN_SECRET = "iq-admin-secret-2024";
+
+const TOKENS_FILE = path.join("/tmp", "admin_tokens.json");
+function loadAdminTokens(): Set<string> {
+  try {
+    if (fs.existsSync(TOKENS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TOKENS_FILE, "utf-8"));
+      const now = Date.now();
+      const valid = (data.tokens || []).filter((t: { token: string; expires: number }) => t.expires > now);
+      return new Set(valid.map((t: { token: string }) => t.token));
+    }
+  } catch {}
+  return new Set();
+}
+function saveAdminTokens() {
+  try {
+    const now = Date.now();
+    const entries = Array.from(validAdminTokens).map(t => {
+      const ts = parseInt(t.split("-").pop() || "0");
+      return { token: t, expires: ts + 24 * 60 * 60 * 1000 };
+    }).filter(e => e.expires > now);
+    fs.writeFileSync(TOKENS_FILE, JSON.stringify({ tokens: entries }), "utf-8");
+  } catch {}
+}
+let validAdminTokens = loadAdminTokens();
 
 const defaultReadingContent: Record<string, Record<number, any>> = {
   preescolar: {
@@ -220,6 +243,7 @@ export async function registerRoutes(
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       const token = ADMIN_TOKEN_SECRET + "-" + Date.now();
       validAdminTokens.add(token);
+      saveAdminTokens();
       res.json({ success: true, token });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
@@ -1181,7 +1205,24 @@ export async function registerRoutes(
     }
   });
 
-  const fileBackups = new Map<string, string>();
+  const BACKUPS_FILE = path.join("/tmp", "agent_file_backups.json");
+  function loadFileBackups(): Map<string, string> {
+    try {
+      if (fs.existsSync(BACKUPS_FILE)) {
+        const data = JSON.parse(fs.readFileSync(BACKUPS_FILE, "utf-8"));
+        return new Map(Object.entries(data));
+      }
+    } catch {}
+    return new Map();
+  }
+  function saveFileBackups(backups: Map<string, string>) {
+    try {
+      const obj: Record<string, string> = {};
+      backups.forEach((v, k) => { obj[k] = v; });
+      fs.writeFileSync(BACKUPS_FILE, JSON.stringify(obj), "utf-8");
+    } catch {}
+  }
+  const fileBackups = loadFileBackups();
 
   interface AgentStep {
     type: string;
@@ -1252,6 +1293,7 @@ export async function registerRoutes(
       try {
         if (fs.existsSync(path.resolve(action.path))) {
           fileBackups.set(action.path, fs.readFileSync(path.resolve(action.path), "utf-8"));
+          saveFileBackups(fileBackups);
         }
         const dir = path.dirname(path.resolve(action.path));
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -1274,6 +1316,7 @@ export async function registerRoutes(
         const filePath = path.resolve(action.path);
         const fileContent = fs.readFileSync(filePath, "utf-8");
         fileBackups.set(action.path, fileContent);
+        saveFileBackups(fileBackups);
         const occurrences = fileContent.split(action.oldText).length - 1;
         if (occurrences === 0) {
           steps[steps.length - 1].status = "error";
@@ -1374,6 +1417,7 @@ export async function registerRoutes(
         try {
           fs.writeFileSync(path.resolve(action.path), backup, "utf-8");
           fileBackups.delete(action.path);
+          saveFileBackups(fileBackups);
           steps[steps.length - 1].status = "success";
           steps[steps.length - 1].detail = "Restaurado";
           return { result: `↩️ Reverted ${action.path} to previous version`, fileModified: action.path };
@@ -1469,25 +1513,13 @@ export async function registerRoutes(
         return { result: `⚠️ TypeScript validation found ${errorCount} error(s):\n\`\`\`\n${truncOutput}\n\`\`\`` };
       }
     } else if (action.action === "restartServer") {
-      steps.push({ type: "restartServer", description: "Reiniciando servidor...", status: "running" });
-      try {
-        execFileSync("kill", ["-HUP", String(process.pid)], { timeout: 5000 });
-        steps[steps.length - 1].status = "success";
-        steps[steps.length - 1].detail = "Señal enviada";
-        return { result: `✅ Server restart signal sent. The server will reload automatically. Wait a few seconds before testing endpoints.` };
-      } catch (e: any) {
-        try {
-          const { execSync } = require('child_process');
-          execSync('touch server/index.ts', { cwd: PROJECT_ROOT, timeout: 5000 });
-          steps[steps.length - 1].status = "success";
-          steps[steps.length - 1].detail = "Touch trigger";
-          return { result: `✅ Server restart triggered via file touch. Wait a few seconds before testing endpoints.` };
-        } catch (e2: any) {
-          steps[steps.length - 1].status = "error";
-          steps[steps.length - 1].detail = e2.message;
-          return { result: `❌ Could not restart server: ${e2.message}. The user may need to restart manually.` };
-        }
+      steps.push({ type: "restartServer", description: "Reinicio programado (se ejecutará al finalizar)", status: "running" });
+      if (!(globalThis as any).__agentPendingRestart) {
+        (globalThis as any).__agentPendingRestart = true;
       }
+      steps[steps.length - 1].status = "success";
+      steps[steps.length - 1].detail = "Programado para después de respuesta";
+      return { result: `✅ Server restart SCHEDULED. It will execute AFTER the agent finishes responding. Do NOT call restartServer again - it's already queued. Continue with other actions or provide your final summary.` };
     } else if (action.action === "dbMigrate") {
       steps.push({ type: "dbMigrate", description: "Ejecutando migración de base de datos...", status: "running" });
       try {
@@ -1747,6 +1779,9 @@ IMPORTANT RULES:
 9. If verification fails, FIX the issue or undoEdit to revert. Do NOT leave broken code.
 10. Use the PROJECT KNOWLEDGE BASE above to understand architecture, recent changes, and project conventions BEFORE starting work.
 11. When editFile fails, ALWAYS re-read the exact section of the file before retrying. Never retry with the same oldText that already failed.
+12. NEVER edit server/routes.ts - that file contains YOUR OWN code. Editing it would break the agent itself.
+13. restartServer is DEFERRED - it runs AFTER your response is sent. Do NOT wait for it or call it multiple times. Call it ONCE at the end of your edits if backend files changed.
+14. Batch ALL your edits first, then call validateCode, then restartServer ONCE if needed. Do not restart between edits.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
@@ -1777,6 +1812,7 @@ ${schemaContent.substring(0, 3000)}
       const allSteps: AgentStep[] = [];
       let loopCount = 0;
       fileBackups.clear();
+      saveFileBackups(fileBackups);
       const filesReadInSession = new Set<string>();
 
       sendSSE('loop', { loop: 1, total: MAX_LOOPS });
@@ -1891,12 +1927,32 @@ ${schemaContent.substring(0, 3000)}
         console.error('Failed to save agent log:', logErr.message);
       }
 
+      const shouldRestart = !!(globalThis as any).__agentPendingRestart;
+      (globalThis as any).__agentPendingRestart = false;
+
       if (useSSE) {
         sendSSE('result', { response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
         res.write('event: done\ndata: {}\n\n');
-        return res.end();
+        res.end();
+        if (shouldRestart) {
+          setTimeout(() => {
+            try {
+              execFileSync("touch", ["server/index.ts"], { timeout: 5000, cwd: PROJECT_ROOT });
+              console.log("[AGENT] Deferred server restart triggered");
+            } catch {}
+          }, 1500);
+        }
+        return;
       }
       res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
+      if (shouldRestart) {
+        setTimeout(() => {
+          try {
+            execFileSync("touch", ["server/index.ts"], { timeout: 5000, cwd: PROJECT_ROOT });
+            console.log("[AGENT] Deferred server restart triggered");
+          } catch {}
+        }, 1500);
+      }
     } catch (err: any) {
       if (useSSE) {
         sendSSE('error', { error: err.message || "Agent error" });

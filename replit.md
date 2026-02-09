@@ -82,10 +82,12 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - **editFile**: Partial file edits with multi-occurrence protection and replaceAll option
   - **httpRequest**: Test API endpoints (restricted to /api/ paths, with timeout)
   - **dbQuery**: Query database (SELECT-only, forbidden keywords blocked, auto LIMIT 50)
-  - **restartServer**: Restart dev server after backend code changes (signal or file touch fallback)
+  - **restartServer**: DEFERRED restart - queues restart to execute AFTER response is sent (prevents self-kill during agent loop)
   - **dbMigrate**: Run `drizzle-kit push --force` to apply schema changes to the database
   - **readLogs**: Read server logs for debugging
-  - **undoEdit**: Revert files to pre-edit state using in-memory backups
+  - **undoEdit**: Revert files to pre-edit state using disk-persisted backups (/tmp/agent_file_backups.json)
+  - **Admin session persistence**: Tokens saved to /tmp/admin_tokens.json, survive server restarts (24h expiry)
+  - **Self-protection rules**: Agent cannot edit server/routes.ts (its own code), must batch edits before restart
   - Autonomous workflow: ANALYZE → PLAN → IMPLEMENT → VERIFY → FIX → CONFIRM
   - Impact analysis: searches imports/usages before editing to avoid breaking existing code
   - Action results injected back into conversation history for context continuity
