@@ -1,4 +1,4 @@
-cualimport type { Express, Request } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { UAParser } from "ua-parser-js";
@@ -1355,6 +1355,47 @@ export async function registerRoutes(
             warnings.push(`⚠️ WARNING: This edit removed ${linesRemoved} lines (${oldLines}→${newLines}). Make sure this was intentional.`);
           }
 
+          if (action.path.includes("locales/") && action.path.endsWith(".json")) {
+            try {
+              const parsed = JSON.parse(newContent);
+              const localeDir = path.dirname(path.resolve(action.path));
+              const currentFile = path.basename(action.path);
+              const allLocales = ["es.json", "en.json", "pt.json"];
+              const otherLocales = allLocales.filter(f => f !== currentFile);
+              const currentKeys = Object.keys(parsed);
+              for (const otherFile of otherLocales) {
+                try {
+                  const otherContent = JSON.parse(fs.readFileSync(path.join(localeDir, otherFile), "utf-8"));
+                  const otherKeys = Object.keys(otherContent);
+                  const missingInOther = currentKeys.filter(k => !otherKeys.includes(k));
+                  const missingInCurrent = otherKeys.filter(k => !currentKeys.includes(k));
+                  if (missingInOther.length > 0) {
+                    warnings.push(`⚠️ LOCALE SYNC: ${otherFile} is MISSING top-level keys that exist in ${currentFile}: [${missingInOther.join(", ")}]. You must add them.`);
+                  }
+                  if (missingInCurrent.length > 0) {
+                    warnings.push(`⚠️ LOCALE SYNC: ${currentFile} is MISSING top-level keys that exist in ${otherFile}: [${missingInCurrent.join(", ")}]. Check if you accidentally deleted them.`);
+                  }
+                } catch {}
+              }
+            } catch {}
+          }
+
+          if ((action.path.endsWith(".tsx") || action.path.endsWith(".ts")) && !action.path.includes("node_modules")) {
+            const importMatches = newContent.match(/import\s+.*?from\s+['"](\..*?)['"]/g) || [];
+            for (const imp of importMatches) {
+              const fromMatch = imp.match(/from\s+['"](\..+?)['"]/);
+              if (fromMatch) {
+                const importPath = fromMatch[1];
+                const dir = path.dirname(path.resolve(action.path));
+                const extensions = ["", ".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.tsx"];
+                const exists = extensions.some(ext => fs.existsSync(path.join(dir, importPath + ext)));
+                if (!exists) {
+                  warnings.push(`⚠️ BROKEN IMPORT: "${importPath}" in ${action.path} does not resolve to any file. This will cause a build error.`);
+                }
+              }
+            }
+          }
+
           fs.writeFileSync(filePath, newContent, "utf-8");
           console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s)) at ${new Date().toISOString()}`);
           steps[steps.length - 1].status = warnings.length > 0 ? "warning" : "success";
@@ -1613,6 +1654,7 @@ export async function registerRoutes(
     const sendSSE = (event: string, data: any) => {
       if (useSSE) {
         res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+        if (typeof (res as any).flush === 'function') (res as any).flush();
       }
     };
 
@@ -1921,7 +1963,14 @@ ${schemaContent.substring(0, 3000)}
       for (let i = 0; i < MAX_LOOPS; i++) {
         loopCount = i + 1;
         sendSSE('thinking', { loop: loopCount });
+        let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+        if (useSSE) {
+          heartbeatTimer = setInterval(() => {
+            try { res.write(`: heartbeat\n\n`); if (typeof (res as any).flush === 'function') (res as any).flush(); } catch {}
+          }, 5000);
+        }
         const responseText = await callGemini(apiKey, systemPrompt, conversationHistory);
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
         if (!responseText) {
           if (i === 0) {
             if (useSSE) {
@@ -1937,6 +1986,11 @@ ${schemaContent.substring(0, 3000)}
         const jsonBlocks = responseText.match(/```json\s*\n([\s\S]*?)\n```/g) || [];
         let hasContinuableActions = false;
         let actionResults = "";
+        const roundActions: string[] = [];
+        const editedFiles: string[] = [];
+        const searchResults: string[] = [];
+        const readFiles: string[] = [];
+        let hadValidationErrors = false;
 
         for (const block of jsonBlocks) {
           try {
@@ -1948,6 +2002,11 @@ ${schemaContent.substring(0, 3000)}
             if (newStep) sendSSE('step', newStep);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
+            roundActions.push(action.action);
+            if (action.action === "editFile" || action.action === "writeFile") editedFiles.push(action.path);
+            if (action.action === "searchFiles") searchResults.push(action.pattern);
+            if (action.action === "readFile") readFiles.push(action.path);
+            if (action.action === "validateCode" && result && result.includes("error")) hadValidationErrors = true;
             const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode", "restartServer", "dbMigrate"];
             if (continuableActions.includes(action.action)) {
               hasContinuableActions = true;
@@ -1968,13 +2027,47 @@ ${schemaContent.substring(0, 3000)}
         cleanResponse = cleanResponse.replace(/\n{3,}/g, "\n\n").trim();
 
         if (hasContinuableActions && i < MAX_LOOPS - 1) {
+          const reasoningQuestions: string[] = [];
+          if (editedFiles.length > 0) {
+            reasoningQuestions.push("AFTER-EDIT CHECK (MANDATORY):");
+            reasoningQuestions.push("1. What exactly changed in each file?");
+            reasoningQuestions.push("2. Did the change land in the CORRECT section/location of the file?");
+            reasoningQuestions.push("3. Are there OTHER files that need the same change? (e.g., if you edited es.json, did you also update en.json and pt.json?)");
+            reasoningQuestions.push("4. Does the code that REFERENCES these changes still work? (e.g., if you changed a key name, does the component use the same key?)");
+            reasoningQuestions.push("5. Could this have broken any imports or dependencies?");
+            const localeEdits = editedFiles.filter(f => f.includes("locales/") && f.endsWith(".json"));
+            if (localeEdits.length > 0) {
+              reasoningQuestions.push(`\nLOCALE ALERT: You edited ${localeEdits.join(", ")}. Verify: Are ALL 3 locale files (es.json, en.json, pt.json) updated with the SAME keys? Are the keys in the CORRECT namespace that the component expects?`);
+            }
+          }
+          if (searchResults.length > 0) {
+            reasoningQuestions.push("\nAFTER-SEARCH CHECK:");
+            reasoningQuestions.push("1. Did the search results confirm or CONTRADICT your assumptions?");
+            reasoningQuestions.push("2. Do you need to ADJUST your plan based on what you found?");
+            reasoningQuestions.push("3. Are there more dependencies than you expected?");
+          }
+          if (readFiles.length > 0) {
+            reasoningQuestions.push("\nAFTER-READ CHECK:");
+            reasoningQuestions.push("1. Is the file structure what you expected?");
+            reasoningQuestions.push("2. If you plan to editFile next, is your oldText going to match EXACTLY?");
+            reasoningQuestions.push("3. What SECTION of the file are you in? (verify the parent key/block/function)");
+          }
+          if (hadValidationErrors) {
+            reasoningQuestions.push("\nVALIDATION ERRORS DETECTED:");
+            reasoningQuestions.push("1. Is the error caused by YOUR change or was it pre-existing?");
+            reasoningQuestions.push("2. Do you understand the ROOT CAUSE, not just the symptom?");
+            reasoningQuestions.push("3. If you already tried fixing this, try a DIFFERENT approach instead of repeating.");
+          }
+          const reasoningBlock = reasoningQuestions.length > 0
+            ? `\n\n--- SELF-REVIEW (answer these BEFORE your next action) ---\n${reasoningQuestions.join("\n")}\n--- END SELF-REVIEW ---`
+            : "";
           conversationHistory.push({
             role: "model",
             parts: [{ text: responseText }]
           });
           conversationHistory.push({
             role: "user",
-            parts: [{ text: `[SYSTEM] Action results:\n${actionResults}\n\nAnalyze these results and proceed. Use editFile to make changes, httpRequest to test endpoints, dbQuery to verify data. When done, provide your final summary.` }]
+            parts: [{ text: `[SYSTEM] Action results:\n${actionResults}${reasoningBlock}\n\nAnswer the self-review questions above, then proceed with your next action. When done, provide your final summary.` }]
           });
           if (cleanResponse) {
             finalResponse += (finalResponse ? "\n\n" : "") + cleanResponse;
