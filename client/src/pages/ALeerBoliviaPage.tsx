@@ -1,14 +1,10 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
-import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
 import menuCurveImg from "@assets/menu_1769957804819.png";
-import { useMobile } from "@/hooks/use-mobile";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 const objectivesMeta = [
   { icon: Lightbulb, color: "#f59e0b", bg: "linear-gradient(135deg, #fef3c7, #fde68a)", titleKey: "obj1Title", descKey: "obj1Desc" },
   { icon: BookOpen, color: "#8b5cf6", bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", titleKey: "obj2Title", descKey: "obj2Desc" },
