@@ -1291,12 +1291,12 @@ export async function registerRoutes(
     } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
       steps.push({ type: "writeFile", description: `Creando ${action.path}`, status: "running" });
       try {
-        const protectedPatterns = [/locales\/.*\.json$/, /schema\.ts$/, /package\.json$/];
+        const protectedPatterns = [/schema\.ts$/, /package\.json$/, /routes\.ts$/];
         const isProtectedFile = protectedPatterns.some(p => p.test(action.path));
         if (isProtectedFile && fs.existsSync(path.resolve(action.path))) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Protected file - use editFile instead";
-          return { result: `❌ BLOCKED: ${action.path} is a protected file that already exists. Use editFile to make changes instead of writeFile. writeFile would DESTROY all existing content.` };
+          return { result: `❌ BLOCKED: ${action.path} is a protected file. Use editFile or replaceLines instead.` };
         }
         if (fs.existsSync(path.resolve(action.path))) {
           fileBackups.set(action.path, fs.readFileSync(path.resolve(action.path), "utf-8"));
@@ -1313,6 +1313,36 @@ export async function registerRoutes(
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
         return { result: `❌ Error writing ${action.path}: ${e.message}` };
+      }
+    } else if (action.action === "replaceLines" && action.path && action.startLine && action.endLine && action.newText !== undefined && isPathSafe(action.path)) {
+      steps.push({ type: "replaceLines", description: `Reemplazando líneas ${action.startLine}-${action.endLine} en ${action.path}`, status: "running" });
+      try {
+        const filePath = path.resolve(action.path);
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        fileBackups.set(action.path, fileContent);
+        saveFileBackups(fileBackups);
+        const lines = fileContent.split('\n');
+        const totalLines = lines.length;
+        const start = Math.max(1, Math.min(action.startLine, totalLines));
+        const end = Math.min(action.endLine, totalLines);
+        if (start > end) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = "startLine > endLine";
+          return { result: `❌ replaceLines failed: startLine (${start}) > endLine (${end})` };
+        }
+        const before = lines.slice(0, start - 1);
+        const after = lines.slice(end);
+        const newLines = action.newText.split('\n');
+        const newContent = [...before, ...newLines, ...after].join('\n');
+        fs.writeFileSync(filePath, newContent, "utf-8");
+        console.log(`[AGENT AUDIT] Lines replaced: ${action.path} (lines ${start}-${end} → ${newLines.length} new lines) at ${new Date().toISOString()}`);
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `líneas ${start}-${end} → ${newLines.length} nuevas`;
+        return { result: `✅ Replaced lines ${start}-${end} in ${action.path} with ${newLines.length} new lines (was ${totalLines} lines, now ${before.length + newLines.length + after.length} lines)`, fileModified: action.path };
+      } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
+        return { result: `❌ Error replacing lines in ${action.path}: ${e.message}` };
       }
     } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
       steps.push({ type: "editFile", description: `Editando ${action.path}`, status: "running" });
@@ -1698,14 +1728,19 @@ Search across files (grep):
 {"action": "searchFiles", "pattern": "className.*hero", "dir": "client/src", "glob": "*.tsx"}
 \`\`\`
 
-Edit part of a file (PREFERRED for changes):
+Replace lines by line number (MOST RELIABLE - use this for edits):
+\`\`\`json
+{"action": "replaceLines", "path": "client/src/pages/Home.tsx", "startLine": 45, "endLine": 60, "newText": "new code here"}
+\`\`\`
+
+Edit by text match (use ONLY for small, unique strings like a single line):
 \`\`\`json
 {"action": "editFile", "path": "client/src/pages/Home.tsx", "oldText": "exact text to find", "newText": "replacement text"}
 \`\`\`
 
-Write new file:
+Write/rewrite a file (use for NEW files or to REWRITE existing files when multiple edits are needed):
 \`\`\`json
-{"action": "writeFile", "path": "client/src/components/New.tsx", "content": "..."}
+{"action": "writeFile", "path": "client/src/pages/Home.tsx", "content": "full file content"}
 \`\`\`
 
 List directory:
@@ -1804,16 +1839,17 @@ IMPACT ANALYSIS - MANDATORY before editing:
 - NEVER make a change without checking what depends on it first
 
 WHEN TO USE WHICH ACTION:
-- readFile: To see file content. For large files (>200 lines), the system truncates showing first 80 + last 30 lines. Use startLine/endLine to read the specific section you need to edit.
-- searchFiles: When you need to find WHERE something is used/defined across the project. Also use this to find the EXACT line numbers of text before editing.
-- editFile: To change specific parts of existing files. The oldText MUST match EXACTLY character-for-character.
-- writeFile: Only for creating brand NEW files
-- httpRequest: To TEST an endpoint after changes (GET, POST, PUT, DELETE)
-- dbQuery: To VERIFY data in the database (SELECT queries only)
-- undoEdit: To REVERT a file to its state before your edit if something went wrong
-- readLogs: To check server logs for errors
-- restartServer: To restart the dev server after editing server-side code. ALWAYS do this before httpRequest testing if you changed backend files.
-- dbMigrate: To push schema changes to the database after modifying shared/schema.ts. ALWAYS do this before testing if you changed the schema.
+- readFile: To see file content WITH LINE NUMBERS. Note the line numbers - you need them for replaceLines.
+- searchFiles: To find WHERE something is used/defined across the project.
+- replaceLines: PREFERRED for edits. Read the file first, note the line numbers, then replace lines X-Y with new code. This is the MOST RELIABLE way to edit.
+- editFile: ONLY for tiny changes (rename a variable, fix a typo). The oldText must match exactly - use sparingly.
+- writeFile: To create NEW files OR to REWRITE existing files completely. Use this when you need to change many parts of a file - it's faster and more reliable than multiple editFile calls.
+- httpRequest: To TEST an endpoint after changes.
+- dbQuery: To VERIFY data in the database (SELECT queries only).
+- undoEdit: To REVERT a file to its state before your edit.
+- readLogs: To check server logs for errors.
+- restartServer: To restart the dev server. ALWAYS call this after ANY file edit.
+- dbMigrate: To push schema changes after modifying shared/schema.ts.
 
 CODE CONVENTIONS & FORBIDDEN CHANGES:
 - NEVER modify: vite.config.ts, server/vite.ts, drizzle.config.ts, package.json
@@ -2007,11 +2043,11 @@ ${schemaContent.substring(0, 3000)}
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
             roundActions.push(action.action);
-            if (action.action === "editFile" || action.action === "writeFile") editedFiles.push(action.path);
+            if (action.action === "editFile" || action.action === "writeFile" || action.action === "replaceLines") editedFiles.push(action.path);
             if (action.action === "searchFiles") searchResults.push(action.pattern);
             if (action.action === "readFile") readFiles.push(action.path);
             if (action.action === "validateCode" && result && result.includes("error")) hadValidationErrors = true;
-            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode", "restartServer", "dbMigrate"];
+            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode", "restartServer", "dbMigrate", "replaceLines"];
             if (continuableActions.includes(action.action)) {
               hasContinuableActions = true;
             }
@@ -2105,6 +2141,10 @@ ${schemaContent.substring(0, 3000)}
       }
 
       if (!finalResponse) finalResponse = "No pude generar una respuesta. Intenta de nuevo.";
+
+      if (allFilesModified.length === 0 && message && /cambia|modifica|agrega|añade|slider|implementa|crea|haz|pon|quita|elimina|mueve|arregla|fix|add|change|update|create|implement|remove/i.test(message)) {
+        finalResponse += "\n\n⚠️ AVISO: No se modificó ningún archivo durante esta sesión. Si esperabas cambios, intenta ser más específico o pídeme que use writeFile para reescribir el archivo.";
+      }
 
       if (loopCount > 1) {
         finalResponse = `🔄 *${loopCount} pasos de razonamiento*\n\n` + finalResponse;
