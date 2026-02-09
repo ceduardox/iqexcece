@@ -1800,6 +1800,30 @@ ${schemaContent.substring(0, 3000)}
         filesModified: allFilesModified.length > 0 ? allFilesModified : null,
       });
 
+      try {
+        const logsDir = path.resolve("server/ai-logs");
+        if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const ms = String(now.getMilliseconds()).padStart(3, '0');
+        const timestamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}-${ms}`;
+        const logContent = [
+          `=== AI Agent Conversation Log ===`,
+          `Date: ${now.toISOString()}`,
+          `Loops: ${loopCount}`,
+          allFilesModified.length > 0 ? `Files Modified: ${allFilesModified.join(', ')}` : '',
+          `\n--- USER ---`,
+          message || "(imagen)",
+          `\n--- ASSISTANT ---`,
+          finalResponse,
+          allSteps.length > 0 ? `\n--- STEPS (${allSteps.length}) ---` : '',
+          ...allSteps.map((s, idx) => `${idx+1}. [${s.status}] ${s.type}: ${s.description}${s.detail ? ' → ' + s.detail : ''}`),
+        ].filter(Boolean).join('\n');
+        fs.writeFileSync(path.join(logsDir, `agent_${timestamp}.txt`), logContent, 'utf-8');
+      } catch (logErr: any) {
+        console.error('Failed to save agent log:', logErr.message);
+      }
+
       if (useSSE) {
         sendSSE('result', { response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
         res.write('event: done\ndata: {}\n\n');
