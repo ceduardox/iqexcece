@@ -1335,11 +1335,32 @@ export async function registerRoutes(
           return { result: `⚠️ editFile: Found ${occurrences} occurrences in ${action.path}. Provide more context to match exactly one location, or add "replaceAll": true.` };
         } else {
           const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
+
+          const warnings: string[] = [];
+
+          if (action.path.endsWith('.json')) {
+            try {
+              JSON.parse(newContent);
+            } catch (jsonErr: any) {
+              steps[steps.length - 1].status = "error";
+              steps[steps.length - 1].detail = "JSON inválido después del edit";
+              return { result: `❌ editFile BLOCKED: The edit would produce invalid JSON in ${action.path}. Error: ${jsonErr.message}. Please fix your newText and try again.` };
+            }
+          }
+
+          const oldLines = fileContent.split('\n').length;
+          const newLines = newContent.split('\n').length;
+          const linesRemoved = oldLines - newLines;
+          if (linesRemoved > 20) {
+            warnings.push(`⚠️ WARNING: This edit removed ${linesRemoved} lines (${oldLines}→${newLines}). Make sure this was intentional.`);
+          }
+
           fs.writeFileSync(filePath, newContent, "utf-8");
           console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s)) at ${new Date().toISOString()}`);
-          steps[steps.length - 1].status = "success";
-          steps[steps.length - 1].detail = `${occurrences} cambio(s)`;
-          return { result: `✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})`, fileModified: action.path };
+          steps[steps.length - 1].status = warnings.length > 0 ? "warning" : "success";
+          steps[steps.length - 1].detail = `${occurrences} cambio(s)${warnings.length > 0 ? ' ⚠️' : ''}`;
+          const warningText = warnings.length > 0 ? '\n' + warnings.join('\n') : '';
+          return { result: `✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})${warningText}`, fileModified: action.path };
         }
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
