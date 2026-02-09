@@ -1,0 +1,92 @@
+=== AI Agent Conversation Log ===
+Date: 2026-02-09T00:19:19.391Z
+Loops: 1
+
+--- USER ---
+ubica en el admin donde esta esto
+
+--- ASSISTANT ---
+PENSAMIENTO: El usuario me ha proporcionado una imagen de la interfaz de administración y me pide que ubique dónde se encuentra esa sección en el código.
+
+La imagen muestra:
+*   Un título: "Editar Contenido de Test Cerebral"
+*   Pestañas de navegación: "Lectura", "Razonamiento", "Test Cerebral" (la última seleccionada)
+*   Botones de categoría: "Pre-escolar", "Niños", "Adolescentes", "Universitarios", "Profesionales", "Adulto Mayor"
+*   Selector de idioma: "Idioma: ES EN PT"
+
+Esto corresponde directamente a la sección de gestión de contenido en el panel de administración.
+
+**Ubicación en el código:**
+
+Esta sección se encuentra en el archivo:
+
+`client/src/pages/GestionPage.tsx`
+
+Dentro de este archivo, específicamente en el bloque de código que se renderiza cuando `activeTab === "contenido"` y `contentType === "cerebral"`.
+
+La estructura sería algo como:
+
+```typescript
+// ... (código anterior)
+
+{activeTab === "contenido" && (
+  <div className="space-y-6">
+    <div className="flex space-x-4 mb-4">
+      {/* Botones Lectura, Razonamiento, Test Cerebral */}
+      <Button variant={contentType === "lectura" ? "secondary" : "outline"} onClick={() => setContentType("lectura")}>Lectura</Button>
+      <Button variant={contentType === "razonamiento" ? "secondary" : "outline"} onClick={() => setContentType("razonamiento")}>Razonamiento</Button>
+      <Button variant={contentType === "cerebral" ? "secondary" : "outline"} onClick={() => setContentType("cerebral")}>Test Cerebral</Button>
+    </div>
+
+    {/* ... Sección de Lectura ... */}
+    {contentType === "lectura" && (
+      // ... Contenido de Lectura con su selector de idioma y botón traducir
+    )}
+
+    {/* ... Sección de Razonamiento ... */}
+    {contentType === "razonamiento" && (
+      // ... Contenido de Razonamiento con su selector de idioma y botón traducir
+    )}
+
+    {/* SECCIÓN DE INTERÉS: Test Cerebral */}
+    {contentType === "cerebral" && (
+      <div className="space-y-6">
+        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Brain className="h-5 w-5" /> Editar Contenido de Test Cerebral {/* Título */}
+        </h3>
+
+        <div className="flex items-center space-x-2 mb-4">
+          {/* Selector de Idioma */}
+          <Select onValueChange={setContentLang} defaultValue={contentLang}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Idioma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="pt">Português</SelectItem>
+            </SelectContent>
+          </Select>
+          {/* Botones de Categoría */}
+          <Select onValueChange={setContentCategory} defaultValue={contentCategory}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="preescolar">Preescolar</SelectItem>
+              <SelectItem value="ninos">Niños</SelectItem>
+              {/* ... otras categorías ... */}
+            </SelectContent>
+          </Select>
+          {/* ... Selector de Tema y Botones "Nuevo Tema" y "Traducir Todo" */}
+        </div>
+        {/* ... Campos de la Pantalla de Introducción y Contenido del Ejercicio */}
+      </div>
+    )}
+  </div>
+)}
+
+// ... (resto del código)
+```
+
+La imagen muestra la interfaz de usuario que se renderiza cuando `activeTab` es "contenido" y `contentType` es "cerebral".

@@ -82,6 +82,8 @@ IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speak
   - **editFile**: Partial file edits with multi-occurrence protection and replaceAll option
   - **httpRequest**: Test API endpoints (restricted to /api/ paths, with timeout)
   - **dbQuery**: Query database (SELECT-only, forbidden keywords blocked, auto LIMIT 50)
+  - **restartServer**: Restart dev server after backend code changes (signal or file touch fallback)
+  - **dbMigrate**: Run `drizzle-kit push --force` to apply schema changes to the database
   - **readLogs**: Read server logs for debugging
   - **undoEdit**: Revert files to pre-edit state using in-memory backups
   - Autonomous workflow: ANALYZE → PLAN → IMPLEMENT → VERIFY → FIX → CONFIRM

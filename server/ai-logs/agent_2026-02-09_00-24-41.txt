@@ -1,0 +1,397 @@
+=== AI Agent Conversation Log ===
+Date: 2026-02-09T00:24:41.830Z
+Loops: 1
+
+--- USER ---
+haz el ajuste
+
+--- ASSISTANT ---
+PENSAMIENTO: El usuario me ha pedido que implemente la lógica de fallback en las funciones `fetchReadingContent` y `fetchRazonamientoContent` en `client/src/pages/GestionPage.tsx`. Esto asegurará que, al seleccionar un idioma (EN/PT) por primera vez para un tema/categoría que solo tiene contenido en ES, el contenido en español se cargue como base para la traducción.
+
+Voy a realizar los siguientes pasos:
+
+1.  **Leer `client/src/pages/GestionPage.tsx`** para obtener el contenido actual.
+2.  **Modificar `fetchReadingContent`:**
+    *   Añadir la lógica de fallback: si la primera llamada para `contentLang` no devuelve datos, y `contentLang` no es "es", intentar una segunda llamada con `lang="es"`.
+3.  **Modificar `fetchRazonamientoContent`:**
+    *   Aplicar la misma lógica de fallback.
+
+Comenzaré leyendo `client/src/pages/GestionPage.tsx`.
+
+📄 **client/src/pages/GestionPage.tsx** (341700 chars):
+```
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
+import { motion } from "framer-motion";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot, Languages } from "lucide-react";
+import AdminBlogPanel from "@/components/AdminBlogPanel";
+import AdminAgentChat from "@/components/AdminAgentChat";
+import ReactCrop, { type Crop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ResultadosLecturaPanel from "@/components/ResultadosLecturaPanel";
+
+interface Session {
+  id: string;
+  sessionId: string;
+  ip: string | null;
+  device: string | null;
+  browser: string | null;
+  isPwa: boolean;
+  ageGroup: string | null;
+  selectedProblems: string[] | null;
+  isActive: boolean;
+  isCurrentlyActive: boolean;
+  lastActivity: string | null;
+  createdAt: string | null;
+}
+
+interface SessionsData {
+  total: number;
+  activeCount: number;
+  sessions: Session[];
+}
+
+interface QuizResult {
+  id: string;
+  nombre: string;
+  email: string | null;
+  edad: string | null;
+  ciudad: string | null;
+  telefono: string | null;
+  comentario: string | null;
+  categoria: string | null;
+  tiempoLectura: number | null;
+  tiempoCuestionario: number | null;
+  isPwa: boolean;
+  createdAt: string | null;
+}
+
+interface CerebralContentData {
+  id?: string;
+  categoria: string;
+  temaNumero: number;
+  lang: string;
+  title: string;
+  imageUrl?: string;
+  imageSize?: number;
+  exerciseType: string;
+  exerciseData: string;
+  isActive: boolean;
+}
+
+interface CerebralIntroData {
+  id?: string;
+  categoria: string;
+  lang: string;
+  imageUrl?: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+}
+
+export default function GestionPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");
+  const [password, setPassword] = useState(() => localStorage.getItem("adminPass") || "");
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("adminUser"));
+  const [editorModeEnabled, setEditorModeEnabled] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [data, setData] = useState<SessionsData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente">("sesiones");
+  const [trainingResults, setTrainingResults] = useState<any[]>([]);
+  const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [cerebralResults, setCerebralResults] = useState<any[]>([]);
+  const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("all");
+  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
+  const [selectedTema, setSelectedTema] = useState(1);
+  const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
+  const [contentLang, setContentLang] = useState<string>("es");
+  const [sessionPage, setSessionPage] = useState(1);
+  const SESSIONS_PER_PAGE = 20;
+  
+  // Images state
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [crop, setCrop] = useState<Crop>();
+  const [compressionQuality, setCompressionQuality] = useState(80);
+  const [originalSize, setOriginalSize] = useState(0);
+  const [compressedSize, setCompressedSize] = useState(0);
+  const [imageName, setImageName] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  
+  // Razonamiento state
+  const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [selectedRazonamientoTema, setSelectedRazonamientoTema] = useState(1);
+  const [razonamientoContent, setRazonamientoContent] = useState<{title: string; imageUrl: string; imageSize: number; questions: {question
+... (truncated)
+```
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`. Ahora voy a modificar `fetchReadingContent` para incluir la lógica de fallback.
+
+**Modificación de `fetchReadingContent`:**
+
+*   `oldText`:
+    ```typescript
+      const fetchReadingContent = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+          const response = await fetch(
+            `/api/admin/reading-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=${contentLang}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch reading content");
+          }
+          const data: ReadingContent = await response.json();
+          if (data) {
+            setReadingContentId(data.id || null);
+            setReadingTitle(data.title || "");
+            setReadingContent(data.content || "");
+            setReadingImageUrl(data.imageUrl || "");
+            setReadingPageMainImage(data.pageMainImage || "");
+            setReadingPageSmallImage(data.pageSmallImage || "");
+            setReadingCategoryImage(data.categoryImage || "");
+            setReadingQuestions(data.questions || "");
+          } else {
+            resetReadingContentForm();
+          }
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: err.message,
+            variant: "destructive",
+          });
+          resetReadingContentForm();
+        } finally {
+          setLoading(false);
+        }
+      }, [token, contentCategory, selectedTema, contentLang]);
+    ```
+*   `newText`:
+    ```typescript
+      const fetchReadingContent = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+          let data: ReadingContent | null = null;
+          let fetchedLang = contentLang;
+
+          // First, try to fetch content for the currently selected language
+          let response = await fetch(
+            `/api/admin/reading-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=${contentLang}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (response.ok) {
+            data = await response.json();
+          }
+
+          // If no data found for the current language and it's not Spanish, try fetching Spanish content as fallback
+          if (!data && contentLang !== "es") {
+            response = await fetch(
+              `/api/admin/reading-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=es`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.ok) {
+              data = await response.json();
+              if (data) {
+                fetchedLang = "es"; // Indicate that Spanish content was loaded as fallback
+                toast({
+                  title: "Información",
+                  description: `No se encontró contenido en ${contentLang.toUpperCase()}. Se cargó la versión en Español para traducción.`,
+                  variant: "default",
+                });
+              }
+            }
+          }
+
+          if (data) {
+            setReadingContentId(data.id || null);
+            setReadingTitle(data.title || "");
+            setReadingContent(data.content || "");
+            setReadingImageUrl(data.imageUrl || "");
+            setReadingPageMainImage(data.pageMainImage || "");
+            setReadingPageSmallImage(data.pageSmallImage || "");
+            setReadingCategoryImage(data.categoryImage || "");
+            setReadingQuestions(data.questions || "");
+            // Ensure contentLang is set to the fetched language, important for saving translations
+            if (fetchedLang !== contentLang) {
+              // This is a special case. We don't want to change contentLang state,
+              // but rather use the loaded ES content as a base for the current contentLang.
+              // The handleSaveReadingContent will use contentLang for saving.
+            }
+          } else {
+            resetReadingContentForm();
+            toast({
+              title: "Información",
+              description: `No se encontró contenido para la categoría y tema seleccionados en ningún idioma.`,
+              variant: "default",
+            });
+          }
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: `Error al cargar contenido de lectura: ${err.message}`,
+            variant: "destructive",
+          });
+          resetReadingContentForm();
+        } finally {
+          setLoading(false);
+        }
+      }, [token, contentCategory, selectedTema, contentLang]);
+    ```
+
+Procedo con el `editFile` para `fetchReadingContent`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: La modificación de `fetchReadingContent` fue exitosa. Ahora voy a modificar `fetchRazonamientoContent` con la misma lógica de fallback.
+
+**Modificación de `fetchRazonamientoContent`:**
+
+*   `oldText`:
+    ```typescript
+      const fetchRazonamientoContent = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+          const response = await fetch(
+            `/api/admin/razonamiento-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=${contentLang}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch razonamiento content");
+          }
+          const data: RazonamientoContent = await response.json();
+          if (data) {
+            setRazonamientoContentId(data.id || null);
+            setRazonamientoTitle(data.title || "");
+            setRazonamientoImageUrl(data.imageUrl || "");
+            setRazonamientoImageSize(data.imageSize || 100);
+            setRazonamientoQuestions(data.questions || "");
+          } else {
+            resetRazonamientoContentForm();
+          }
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: err.message,
+            variant: "destructive",
+          });
+          resetRazonamientoContentForm();
+        } finally {
+          setLoading(false);
+        }
+      }, [token, contentCategory, selectedTema, contentLang]);
+    ```
+*   `newText`:
+    ```typescript
+      const fetchRazonamientoContent = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+          let data: RazonamientoContent | null = null;
+          let fetchedLang = contentLang;
+
+          // First, try to fetch content for the currently selected language
+          let response = await fetch(
+            `/api/admin/razonamiento-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=${contentLang}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (response.ok) {
+            data = await response.json();
+          }
+
+          // If no data found for the current language and it's not Spanish, try fetching Spanish content as fallback
+          if (!data && contentLang !== "es") {
+            response = await fetch(
+              `/api/admin/razonamiento-content?categoria=${contentCategory}&temaNumero=${selectedTema}&lang=es`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.ok) {
+              data = await response.json();
+              if (data) {
+                fetchedLang = "es"; // Indicate that Spanish content was loaded as fallback
+                toast({
+                  title: "Información",
+                  description: `No se encontró contenido en ${contentLang.toUpperCase()}. Se cargó la versión en Español para traducción.`,
+                  variant: "default",
+                });
+              }
+            }
+          }
+
+          if (data) {
+            setRazonamientoContentId(data.id || null);
+            setRazonamientoTitle(data.title || "");
+            setRazonamientoImageUrl(data.imageUrl || "");
+            setRazonamientoImageSize(data.imageSize || 100);
+            setRazonamientoQuestions(data.questions || "");
+            // Ensure contentLang is set to the fetched language, important for saving translations
+            if (fetchedLang !== contentLang) {
+              // This is a special case. We don't want to change contentLang state,
+              // but rather use the loaded ES content as a base for the current contentLang.
+              // The handleSaveRazonamientoContent will use contentLang for saving.
+            }
+          } else {
+            resetRazonamientoContentForm();
+            toast({
+              title: "Información",
+              description: `No se encontró contenido para la categoría y tema seleccionados en ningún idioma.`,
+              variant: "default",
+            });
+          }
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: `Error al cargar contenido de razonamiento: ${err.message}`,
+            variant: "destructive",
+          });
+          resetRazonamientoContentForm();
+        } finally {
+          setLoading(false);
+        }
+      }, [token, contentCategory, selectedTema, contentLang]);
+    ```
+
+Procedo con el `editFile` para `fetchRazonamientoContent`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+---
+
+**Implementación Completa:**
+
+He implementado la lógica de fallback para la carga de contenido en las funciones `fetchReadingContent` y `fetchRazonamientoContent` en `client/src/pages/GestionPage.tsx`.
+
+**Resumen de los cambios realizados:**
+
+*   **`fetchReadingContent` y `fetchRazonamientoContent`:**
+    *   Ahora intentan cargar el contenido para el `contentLang` actualmente seleccionado.
+    *   Si no se encuentra contenido para ese idioma Y el idioma seleccionado no es español, realizan una segunda llamada para intentar cargar el contenido en español (`lang="es"`) como fallback.
+    *   Si se carga el contenido en español como fallback, se muestra un `toast` informativo al usuario.
+    *   Si no se encuentra contenido en ningún idioma, se reinicia el formulario y se muestra un `toast` de información.
+
+Con estos cambios, al seleccionar un idioma (inglés o portugués) por primera vez para un tema/categoría que solo tiene contenido en español, el formulario debería precargarse con la versión en español, permitiendo al administrador usar el botón "Traducir Todo" de manera efectiva.

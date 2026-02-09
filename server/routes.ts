@@ -1456,6 +1456,42 @@ export async function registerRoutes(
         steps[steps.length - 1].detail = `${errorCount} error(es)`;
         return { result: `⚠️ TypeScript validation found ${errorCount} error(s):\n\`\`\`\n${truncOutput}\n\`\`\`` };
       }
+    } else if (action.action === "restartServer") {
+      steps.push({ type: "restartServer", description: "Reiniciando servidor...", status: "running" });
+      try {
+        execFileSync("kill", ["-HUP", String(process.pid)], { timeout: 5000 });
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = "Señal enviada";
+        return { result: `✅ Server restart signal sent. The server will reload automatically. Wait a few seconds before testing endpoints.` };
+      } catch (e: any) {
+        try {
+          const { execSync } = require('child_process');
+          execSync('touch server/index.ts', { cwd: PROJECT_ROOT, timeout: 5000 });
+          steps[steps.length - 1].status = "success";
+          steps[steps.length - 1].detail = "Touch trigger";
+          return { result: `✅ Server restart triggered via file touch. Wait a few seconds before testing endpoints.` };
+        } catch (e2: any) {
+          steps[steps.length - 1].status = "error";
+          steps[steps.length - 1].detail = e2.message;
+          return { result: `❌ Could not restart server: ${e2.message}. The user may need to restart manually.` };
+        }
+      }
+    } else if (action.action === "dbMigrate") {
+      steps.push({ type: "dbMigrate", description: "Ejecutando migración de base de datos...", status: "running" });
+      try {
+        const output = execFileSync("npx", ["drizzle-kit", "push", "--force"], { encoding: "utf-8", timeout: 60000, cwd: PROJECT_ROOT });
+        const lines = output.split('\n').filter((l: string) => l.trim().length > 0).slice(0, 25);
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = "Migración completada";
+        return { result: `✅ Database migration completed successfully:\n\`\`\`\n${lines.join('\n')}\n\`\`\`` };
+      } catch (e: any) {
+        const stdout = (e.stdout || "").toString();
+        const stderr = (e.stderr || "").toString();
+        const output = (stdout + "\n" + stderr).split('\n').filter((l: string) => l.trim().length > 0).slice(0, 20).join('\n');
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = "Error en migración";
+        return { result: `❌ Database migration failed:\n\`\`\`\n${output}\n\`\`\`` };
+      }
     }
     return { result: "" };
   }
@@ -1596,6 +1632,16 @@ Validate TypeScript after edits (checks for compilation errors):
 {"action": "validateCode"}
 \`\`\`
 
+Restart the dev server (REQUIRED after editing server-side files like routes.ts, storage.ts, schema.ts):
+\`\`\`json
+{"action": "restartServer"}
+\`\`\`
+
+Run database migration (REQUIRED after modifying shared/schema.ts to apply changes to the actual database):
+\`\`\`json
+{"action": "dbMigrate"}
+\`\`\`
+
 AGENTIC WORKFLOW:
 You work in an AUTOMATIC LOOP with up to 8 rounds. When you use readFile, searchFiles, listFiles, httpRequest, dbQuery, or readLogs, the system executes them and feeds the results back to you automatically.
 
@@ -1605,8 +1651,15 @@ WORKFLOW PATTERN - Follow this when making changes:
 3. IMPLEMENT: Make the edits using editFile
 4. VALIDATE: Run validateCode after edits to check for TypeScript errors
 5. FIX: If validation fails, analyze the NEW errors and fix them. If 3 fixes fail, use undoEdit to revert.
-6. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data
-7. CONFIRM: Do a final verification to ensure everything works
+6. MIGRATE: If you modified shared/schema.ts, run dbMigrate to apply database changes
+7. RESTART: If you modified server-side files (routes.ts, storage.ts, schema.ts), run restartServer
+8. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data
+9. CONFIRM: Do a final verification to ensure everything works
+
+CRITICAL DEPLOYMENT STEPS:
+- After editing shared/schema.ts → ALWAYS run dbMigrate before testing
+- After editing server/*.ts or shared/*.ts → ALWAYS run restartServer before testing with httpRequest
+- Frontend files (client/src/) auto-reload via Vite, no restart needed
 
 IMPACT ANALYSIS - Before editing:
 - Search for imports/usages of the file you're changing to see what depends on it
@@ -1623,6 +1676,8 @@ WHEN TO USE WHICH ACTION:
 - dbQuery: To VERIFY data in the database (SELECT queries only)
 - undoEdit: To REVERT a file to its state before your edit if something went wrong
 - readLogs: To check server logs for errors
+- restartServer: To restart the dev server after editing server-side code. ALWAYS do this before httpRequest testing if you changed backend files.
+- dbMigrate: To push schema changes to the database after modifying shared/schema.ts. ALWAYS do this before testing if you changed the schema.
 
 CODE CONVENTIONS & FORBIDDEN CHANGES:
 - NEVER modify: vite.config.ts, server/vite.ts, drizzle.config.ts, package.json
@@ -1744,7 +1799,7 @@ ${schemaContent.substring(0, 3000)}
             if (newStep) sendSSE('step', newStep);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
-            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode"];
+            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode", "restartServer", "dbMigrate"];
             if (continuableActions.includes(action.action)) {
               hasContinuableActions = true;
             }

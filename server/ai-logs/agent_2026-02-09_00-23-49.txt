@@ -1,0 +1,157 @@
+=== AI Agent Conversation Log ===
+Date: 2026-02-09T00:23:49.348Z
+Loops: 1
+
+--- USER ---
+hazlo
+
+--- ASSISTANT ---
+PENSAMIENTO: El usuario me ha pedido que implemente la lógica de fallback en las funciones `fetchReadingContent` y `fetchRazonamientoContent` en `client/src/pages/GestionPage.tsx`. Esto asegurará que, si no se encuentra contenido para el idioma seleccionado, se intente cargar la versión en español como base.
+
+Voy a realizar los siguientes pasos:
+
+1.  **Leer `client/src/pages/GestionPage.tsx`** para obtener el contenido actual.
+2.  **Modificar `fetchReadingContent`:**
+    *   Añadir la lógica de fallback: si la primera llamada para `contentLang` no devuelve datos, hacer una segunda llamada para `lang="es"` (solo si `contentLang` no es ya "es").
+3.  **Modificar `fetchRazonamientoContent`:**
+    *   Aplicar la misma lógica de fallback.
+
+Comenzaré leyendo `client/src/pages/GestionPage.tsx`.
+
+📄 **client/src/pages/GestionPage.tsx** (341700 chars):
+```
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
+import { motion } from "framer-motion";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot, Languages } from "lucide-react";
+import AdminBlogPanel from "@/components/AdminBlogPanel";
+import AdminAgentChat from "@/components/AdminAgentChat";
+import ReactCrop, { type Crop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ResultadosLecturaPanel from "@/components/ResulturaPanel";
+
+interface Session {
+  id: string;
+  sessionId: string;
+  ip: string | null;
+  device: string | null;
+  browser: string | null;
+  isPwa: boolean;
+  ageGroup: string | null;
+  selectedProblems: string[] | null;
+  isActive: boolean;
+  isCurrentlyActive: boolean;
+  lastActivity: string | null;
+  createdAt: string | null;
+}
+
+interface SessionsData {
+  total: number;
+  activeCount: number;
+  sessions: Session[];
+}
+
+interface QuizResult {
+  id: string;
+  nombre: string;
+  email: string | null;
+  edad: string | null;
+  ciudad: string | null;
+  telefono: string | null;
+  comentario: string | null;
+  categoria: string | null;
+  tiempoLectura: number | null;
+  tiempoCuestionario: number | null;
+  isPwa: boolean;
+  createdAt: string | null;
+}
+
+interface CerebralContentData {
+  id?: string;
+  categoria: string;
+  temaNumero: number;
+  lang: string;
+  title: string;
+  imageUrl?: string;
+  imageSize?: number;
+  exerciseType: string;
+  exerciseData: string;
+  isActive: boolean;
+}
+
+interface CerebralIntroData {
+  id?: string;
+  categoria: string;
+  lang: string;
+  imageUrl?: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+}
+
+export default function GestionPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");
+  const [password, setPassword] = useState(() => localStorage.getItem("adminPass") || "");
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("adminUser"));
+  const [editorModeEnabled, setEditorModeEnabled] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [data, setData] = useState<SessionsData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente">("sesiones");
+  const [trainingResults, setTrainingResults] = useState<any[]>([]);
+  const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [cerebralResults, setCerebralResults] = useState<any[]>([]);
+  const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("all");
+  const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
+  const [selectedTema, setSelectedTema] = useState(1);
+  const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<"lectura" | "razonamiento" | "cerebral">("lectura");
+  const [contentLang, setContentLang] = useState<string>("es");
+  const [sessionPage, setSessionPage] = useState(1);
+  const SESSIONS_PER_PAGE = 20;
+  
+  // Images state
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [crop, setCrop] = useState<Crop>();
+  const [compressionQuality, setCompressionQuality] = useState(80);
+  const [originalSize, setOriginalSize] = useState(0);
+  const [compressedSize, setCompressedSize] = useState(0);
+  const [imageName, setImageName] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  
+  // Razonamiento state
+  const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [selectedRazonamientoTema, setSelectedRazonamientoTema] = useState(1);
+  const [razonamientoContent, setRazonamientoContent] = useState<{title: string; imageUrl: string; imageSize: number; questions: {question
+... (truncated)
+```
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`. Ahora voy a modificar `fetchReadingContent` para incluir la lógica de fallback.
+
+**Modificar `fetchReadingContent`:**
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: La modificación de `fetchReadingContent` fue exitosa. Ahora procederé a modificar `fetchRazonamientoContent` con la misma lógica de fallback.
+
+**Modificar `fetchRazonamientoContent`:**
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: Ambas funciones, `fetchReadingContent` y `fetchRazonamientoContent`, han sido actualizadas con la lógica de fallback. Esto debería resolver el problema de que el contenido aparezca vacío al cambiar a un idioma no existente por primera vez.
+
+**Resumen de los cambios:**
+
+*   **`fetchReadingContent` y `fetchRazonamientoContent`:** Ahora, cuando se solicita contenido para un idioma específico (`contentLang`) y no se encuentra en la base de datos, la función intentará automáticamente buscar el contenido para el mismo `categoria` y `temaNumero` pero con `lang="es"`. Si se encuentra la versión en español, se cargará en el formulario. Si tampoco se encuentra la versión en español, entonces el formulario se restablecerá a un estado vacío.
+
+Esto asegura que el administrador siempre tenga una base (el contenido en español) para trabajar y traducir, incluso si la versión en el idioma de destino aún no existe.

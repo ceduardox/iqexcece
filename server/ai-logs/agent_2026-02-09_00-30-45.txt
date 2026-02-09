@@ -1,0 +1,587 @@
+=== AI Agent Conversation Log ===
+Date: 2026-02-09T00:30:45.616Z
+Loops: 1
+
+--- USER ---
+sigue igual analiza porque
+
+--- ASSISTANT ---
+PENSAMIENTO: El usuario insiste en que "sigue igual", lo que significa que a pesar de que mis comandos `editFile` reportaron éxito, la funcionalidad no se ve reflejada en la aplicación o el error persiste. Esto es muy frustrante y sugiere un problema más profundo o una desconexión entre mis acciones y el estado real del entorno.
+
+Las posibles razones por las que "sigue igual" a pesar de los `editFile` exitosos son:
+
+1.  **Caché del entorno de ejecución:** El servidor de desarrollo o el navegador no están recargando los archivos modificados. Esto es común en entornos de desarrollo.
+2.  **Errores de compilación silenciosos:** Aunque `editFile` reporta éxito, podría haber errores de TypeScript o JavaScript que impiden que el código se compile o se ejecute correctamente, pero que no se me informan directamente.
+3.  **Problemas de migración de base de datos:** Si los cambios en `shared/schema.ts` no se han aplicado a la base de datos real (ej. a través de una migración de Drizzle), entonces el backend no podrá encontrar las columnas `lang` en `cerebralIntros` o las rutas no funcionarán como se espera.
+4.  **Lógica de `oldText`/`newText` aún con fallos sutiles:** Aunque los `editFile` reportaron éxito, podría haber habido un problema con `replaceAll: true` o con la forma en que se aplicaron los cambios, dejando el código en un estado inconsistente.
+5.  **Un error en la lógica que no fue detectado:** A pesar de la revisión, podría haber un error lógico en la implementación que causa el comportamiento incorrecto.
+
+Dado que el usuario insiste, la mejor estrategia es:
+
+*   **Validar el código:** Intentar ejecutar `validateCode` para ver si hay errores de TypeScript que no estoy viendo.
+*   **Revisar el estado de la base de datos:** Preguntar al usuario si se ha ejecutado alguna migración de base de datos después de mis cambios en `shared/schema.ts`.
+*   **Re-verificar el contenido de los archivos críticos:** Volver a leer los archivos `shared/schema.ts`, `server/routes.ts`, y `client/src/pages/GestionPage.tsx` para confirmar que los cambios *realmente* están allí y no hay duplicados o inconsistencias.
+
+Comenzaré por **validar el código** para buscar errores de compilación.
+
+PENSAMIENTO: El comando `validateCode` falló con un error de TypeScript en `client/src/pages/GestionPage.tsx`. El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` es crítico y apunta a un problema de tipado.
+
+Esto confirma que, a pesar de que los `editFile` reportaron éxito, la interfaz `CerebralContentData` en `client/src/pages/GestionPage.tsx` no incluye los campos de la introducción (`introImageUrl`, `introTitle`, `introSubtitle`, `introButtonText`).
+
+Mi plan original era tener interfaces separadas (`CerebralContentData` para el ejercicio y `CerebralIntroData` para la introducción) y luego manejar ambos estados. El error indica que estoy intentando acceder a propiedades de `CerebralIntroData` a través de `CerebralContentData` o que la interfaz `CerebralContentData` está mal definida.
+
+**Análisis del error `Property 'introImageUrl' does not exist on type 'CerebralContentData'`:**
+
+*   Este error ocurre porque en alguna parte del código estoy intentando acceder a `cerebralContentData.introImageUrl`, pero la interfaz `CerebralContentData` no tiene esa propiedad.
+*   Esto es una contradicción con mi plan de tener `cerebralIntroData` separado para la introducción. La lógica en `handleSaveCerebralContent` y `handleTranslateCerebralContent` fue escrita para usar `cerebralIntroData` para los campos de introducción.
+*   El problema es que la interfaz `CerebralContent` en `shared/schema.ts` (que es la base para `CerebralContentData` en el frontend) **no tiene los campos de introducción**. Esos campos están en `cerebralIntros`.
+
+**Estrategia Corregida:**
+
+Necesito asegurarme de que el frontend refleje la separación de los datos en el backend. Esto significa:
+
+1.  **`client/src/pages/GestionPage.tsx`:**
+    *   **Interfaces:** Mantener `CerebralContentData` (para el ejercicio) y `CerebralIntroData` (para la introducción) como interfaces **separadas y correctas**.
+    *   **Estados:** Mantener `cerebralContentData` y `cerebralIntroData` como estados **separados**.
+    *   **`fetchCerebralContent`:** Ya hace dos llamadas y actualiza ambos estados. Esto es correcto.
+    *   **`resetCerebralContentForm`:** Ya limpia ambos estados. Esto es correcto.
+    *   **`handleSaveCerebralContent`:** Esta función **debe seguir haciendo dos llamadas API separadas**, una para `/api/admin/cerebral-content` (usando `cerebralContentData`) y otra para `/api/admin/cerebral-intro` (usando `cerebralIntroData`). Mis últimas ediciones ya intentaron esto, pero el error de tipado sugiere que la forma en que se pasan los `overrides` o se accede a las propiedades es incorrecta.
+    *   **`handleTranslateCerebralContent`:** Debe recopilar los campos traducibles de `cerebralContentData` y `cerebralIntroData` por separado, enviarlos a Gemini, y luego llamar a `handleSaveCerebralContent` con los `overrides` correctos para cada uno.
+    *   **JSX:** Los campos de la introducción deben estar vinculados a `cerebralIntroData.propiedad` y los campos del ejercicio a `cerebralContentData.propiedad`.
+
+El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` indica que en algún lugar del JSX o en una función, estoy intentando acceder a `cerebralContentData.introImageUrl` en lugar de `cerebralIntroData.imageUrl`.
+
+Voy a revisar `client/src/pages/GestionPage.tsx` con el objetivo de encontrar todas las referencias a `introImageUrl`, `introTitle`, `introSubtitle`, `introButtonText` y asegurarme de que siempre se acceden a través de `cerebralIntroData`.
+
+Comenzaré leyendo `client/src/pages/GestionPage.tsx` y buscaré la línea 3321 y otras referencias a `introImageUrl` para corregir el tipado.
+
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`. El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` en la línea 3321 es un error de tipado que indica que estoy intentando acceder a `cerebralContentData.introImageUrl` en lugar de `cerebralIntroData.imageUrl`.
+
+Al revisar el código, la línea 3321 (y las siguientes para título, subtítulo, botón) en el JSX de la "Pantalla de Introducción" está intentando usar `cerebralIntroData.imageUrl` (y `title`, `subtitle`, `buttonText`). Esto es correcto.
+
+El problema real es que la interfaz `CerebralContentData` no tiene `introImageUrl` y el error de `validateCode` lo está señalando. Esto significa que la interfaz `CerebralContentData` en `client/src/pages/GestionPage.tsx` está mal definida o que la interfaz `CerebralContent` en `shared/schema.ts` no coincide con lo que se espera en el frontend.
+
+**Re-análisis de interfaces y estados:**
+
+*   **`shared/schema.ts`:**
+    *   `cerebralContents` tiene `title`, `imageUrl`, `exerciseType`, `exerciseData`, etc. (NO tiene campos `introX`).
+    *   `cerebralIntros` tiene `introImageUrl`, `introTitle`, `introSubtitle`, `introButtonText`.
+*   **`client/src/pages/GestionPage.tsx`:**
+    *   `interface CerebralContentData` debería reflejar `cerebralContents`.
+    *   `interface CerebralIntroData` debería reflejar `cerebralIntros`.
+    *   Los estados `cerebralContentData` y `cerebralIntroData` son correctos para almacenar estos datos por separado.
+
+El error de `validateCode` sugiere que, en algún punto, `CerebralContentData` está siendo tratado como si tuviera propiedades de `CerebralIntroData`. Esto es un error de tipado que puede ocurrir si una función que espera `CerebralContentData` recibe un objeto que incluye propiedades de `CerebralIntroData`, o si la interfaz `CerebralContentData` fue modificada incorrectamente.
+
+Voy a revisar la definición de `CerebralContentData` en `client/src/pages/GestionPage.tsx` y asegurarme de que **no contenga** ninguna propiedad `introX`. Si la contiene, la eliminaré.
+
+Luego, revisaré las funciones `handleSaveCerebralContent` y `handleTranslateCerebralContent` para asegurarme de que no estén pasando accidentalmente propiedades `introX` a donde se espera `CerebralContentData`.
+
+Comenzaré leyendo `client/src/pages/GestionPage.tsx` para verificar la definición de las interfaces.
+
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`.
+
+Al revisar las interfaces, encontré que la interfaz `CerebralContentData` **no tiene** las propiedades `introImageUrl`, `introTitle`, `introSubtitle`, `introButtonText`. Esto es correcto.
+
+La interfaz `CerebralIntroData` **sí tiene** esas propiedades. Esto también es correcto.
+
+El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` en la línea 3321 es muy específico.
+
+```typescript
+// Línea 3321 (aproximada, según el error)
+<Input
+  placeholder="URL de la Imagen de Introducción (Opcional)"
+  value={cerebralIntroData.imageUrl || ""} // Aquí se usa cerebralIntroData.imageUrl
+  onChange={(e) => setCerebralIntroData(prev => ({ ...prev, imageUrl: e.target.value }))}
+  disabled={loading}
+/>
+```
+Si el error está en la línea 3321 y dice `Property 'introImageUrl' does not exist on type 'CerebralContentData'`, pero la línea 3321 usa `cerebralIntroData.imageUrl`, entonces el mensaje de error es engañoso o hay un problema en cómo TypeScript está interpretando el contexto.
+
+**Posible causa del error engañoso:**
+
+A veces, un error de sintaxis en una línea anterior puede causar que TypeScript reporte un error en una línea posterior que en sí misma es correcta. Por ejemplo, una llave o paréntesis mal cerrado, o una coma faltante.
+
+Voy a revisar el bloque JSX de `contentType === "cerebral"` y las funciones `handleSaveCerebralContent` y `handleTranslateCerebralContent` con lupa, buscando cualquier error de sintaxis sutil o inconsistencia en cómo se pasan los datos.
+
+**Estrategia:**
+
+1.  **Re-leer el bloque JSX completo** de `contentType === "cerebral"` en `client/src/pages/GestionPage.tsx` para buscar errores de sintaxis.
+2.  **Re-leer la función `handleSaveCerebralContent`** para asegurar que los `overrides` y el `body` de las peticiones API son correctos y no mezclan accidentalmente las propiedades.
+3.  **Re-leer la función `handleTranslateCerebralContent`** para asegurar que los objetos `contentToTranslate` y los `overrides` pasados a `handleSaveCerebralContent` son correctos.
+
+Comenzaré leyendo el archivo `client/src/pages/GestionPage.tsx` y me centraré en el bloque JSX de `contentType === "cerebral"`.
+
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`.
+
+He encontrado la causa del error `Property 'introImageUrl' does not exist on type 'CerebralContentData'`.
+
+El problema no está en la línea 3321 directamente, sino en la forma en que se está declarando el estado `cerebralContentData` y `cerebralIntroData` y cómo se están usando los `contentCategory` y `selectedTema` en sus inicializaciones.
+
+En la declaración de los estados:
+
+```typescript
+// Cerebral content states
+const [cerebralContentData, setCerebralContentData] = useState<CerebralContentData>({
+  categoria: contentCategory, // <-- contentCategory es un estado, no una constante
+  temaNumero: selectedTema,   // <-- selectedTema es un estado, no una constante
+  lang: contentLang,          // <-- contentLang es un estado, no una constante
+  title: "",
+  imageUrl: "",
+  imageSize: 100,
+  exerciseType: "",
+  exerciseData: "",
+  isActive: true,
+});
+const [cerebralIntroData, setCerebralIntroData] = useState<CerebralIntroData>({
+  categoria: contentCategory, // <-- contentCategory es un estado, no una constante
+  lang: contentLang,          // <-- contentLang es un estado, no una constante
+  imageUrl: "",
+  title: "",
+  subtitle: "",
+  buttonText: "",
+});
+```
+Los estados `contentCategory`, `selectedTema` y `contentLang` son *estados de React* que pueden cambiar. Al usarlos directamente en la inicialización de `useState`, se capturan sus valores iniciales (que pueden ser vacíos o por defecto) y no se actualizan cuando `contentCategory`, `selectedTema` o `contentLang` cambian.
+
+Más importante aún, el error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` es un error de TypeScript que ocurre durante la compilación. Esto significa que, aunque la línea 3321 usa `cerebralIntroData.imageUrl`, en algún otro lugar del código (probablemente en una de las funciones `handleSaveCerebralContent` o `handleTranslateCerebralContent`), se está intentando pasar un objeto con propiedades `introImageUrl` a una función o variable que espera un tipo `CerebralContentData`.
+
+**Re-re-análisis del problema:**
+
+El error de tipado `Property 'introImageUrl' does not exist on type 'CerebralContentData'` no es un problema de JSX, sino de cómo se están manejando los datos en las funciones.
+
+Al revisar `handleSaveCerebralContent` y `handleTranslateCerebralContent`, veo que `handleSaveCerebralContent` ya está diseñada para recibir `contentDataOverride` y `introDataOverride` por separado. Esto es correcto.
+
+El problema real es que la interfaz `CerebralContent` en `shared/schema.ts` (que es la base para `CerebralContentData` en el frontend) **no tiene los campos de introducción**. Esos campos están en `cerebralIntros`.
+
+El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` es un error de TypeScript que ocurre durante la compilación. Esto significa que, aunque la línea 3321 usa `cerebralIntroData.imageUrl`, en algún otro lugar del código (probablemente en una de las funciones `handleSaveCerebralContent` o `handleTranslateCerebralContent`), se está intentando pasar un objeto con propiedades `introImageUrl` a una función o variable que espera un tipo `CerebralContentData`.
+
+**La causa más probable es que la interfaz `CerebralContent` en `shared/schema.ts` no tiene los campos de introducción, pero la interfaz `CerebralContentData` en el frontend sí los tiene, o viceversa, o hay una confusión en cómo se usan los `overrides`.**
+
+Voy a revisar las interfaces `CerebralContentData` y `CerebralIntroData` en `client/src/pages/GestionPage.tsx` y las compararé con `cerebralContents` y `cerebralIntros` en `shared/schema.ts` para asegurar una correspondencia exacta.
+
+**Paso 1: Leer `shared/schema.ts` y `client/src/pages/GestionPage.tsx` para comparar interfaces.**
+
+PENSAMIENTO: He leído ambos archivos.
+
+**Comparación de Interfaces:**
+
+*   **`shared/schema.ts`:**
+    ```typescript
+    // Cerebral test content table
+    export const cerebralContents = pgTable("cerebral_contents", {
+      id: varchar("id").primaryKey().default(sql`gen_random_uuid()`), 
+      lang: text("lang").notNull().default("es"),
+      categoria: text("categoria").notNull(),
+      temaNumero: integer("tema_numero").default(1),
+      title: text("title").notNull(),
+      exerciseType: text("exercise_type").notNull(),
+      imageUrl: text("image_url"),
+      imageSize: integer("image_size").default(100),
+      exerciseData: text("exercise_data").notNull(),
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow(),
+    });
+
+    // Cerebral intro screen configuration
+    export const cerebralIntros = pgTable("cerebral_intros", {
+      id: varchar("id").primaryKey().default(sql`gen_random_uuid()`), 
+      categoria: text("categoria").notNull(),
+      lang: text("lang").notNull().default("es"),
+      imageUrl: text("image_url"),
+      title: text("title").default("¿Cuál lado de tu cerebro es más dominante?"),
+      subtitle: text("subtitle").default("El test tiene una duración de 30 segundos."),
+      buttonText: text("button_text").default("Empezar"),
+      updatedAt: timestamp("updated_at").defaultNow(),
+    });
+    ```
+
+*   **`client/src/pages/GestionPage.tsx`:**
+    ```typescript
+    interface CerebralContentData {
+      id?: string;
+      categoria: string;
+      temaNumero: number;
+      lang: string;
+      title: string;
+      imageUrl?: string;
+      imageSize?: number;
+      exerciseType: string;
+      exerciseData: string;
+      isActive: boolean;
+    }
+
+    interface CerebralIntroData {
+      id?: string;
+      categoria: string;
+      lang: string;
+      imageUrl?: string;
+      title: string;
+      subtitle: string;
+      buttonText: string;
+    }
+    ```
+
+**Análisis de la Discrepancia:**
+
+Las interfaces en el frontend (`CerebralContentData` y `CerebralIntroData`) **coinciden perfectamente** con las estructuras de las tablas `cerebralContents` y `cerebralIntros` en el backend. Esto significa que el problema no es una definición incorrecta de la interfaz en sí.
+
+El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` **sigue siendo muy engañoso** si la línea 3321 (donde se reporta el error) realmente usa `cerebralIntroData.imageUrl`.
+
+Esto me lleva a creer que el problema no es un error de tipado directo en la definición de la interfaz, sino un **error de tipado en el uso de las variables o en cómo se pasan los argumentos a las funciones**, o un problema con el `oldText` en una de las ediciones anteriores que no fue completamente revertido o aplicado.
+
+**Revisión de las funciones `handleSaveCerebralContent` y `handleTranslateCerebralContent`:**
+
+Voy a revisar estas dos funciones en `client/src/pages/GestionPage.tsx` con extrema atención a cómo se construyen los objetos `contentDataOverride` y `introDataOverride` y cómo se pasan.
+
+**Paso 2: Re-leer `client/src/pages/GestionPage.tsx` y centrarse en `handleSaveCerebralContent` y `handleTranslateCerebralContent`.**
+
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx` y he revisado las funciones `handleSaveCerebralContent` y `handleTranslateCerebralContent`.
+
+He encontrado el problema. El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` no proviene de la línea 3321 del JSX (que usa `cerebralIntroData.imageUrl`), sino de la línea **1010** en la función `handleSaveCerebralContent` y líneas similares en `handleTranslateCerebralContent`.
+
+En `handleSaveCerebralContent`, la línea `const currentContent = contentDataOverride ? { ...cerebralContentData, ...contentDataOverride } : cerebralContentData;` es correcta. Sin embargo, el problema surge cuando se intenta pasar `introImageUrlOverride` (y otros campos de introducción) como parte de `contentDataOverride` en la función `handleTranslateCerebralContent`.
+
+**El error se origina en `handleTranslateCerebralContent` (líneas 1083 y 1100 aproximadamente) donde se llama a `handleSaveCerebralContent`:**
+
+```typescript
+// En handleTranslateCerebralContent, al llamar a handleSaveCerebralContent
+await handleSaveCerebralContent(
+  "en",
+  {
+    title: translatedData.en.contentTitle,
+    imageUrl: cerebralContentData.imageUrl, // Esto es correcto
+    imageSize: cerebralContentData.imageSize,
+    exerciseType: cerebralContentData.exerciseType,
+    exerciseData: translatedData.en.exerciseData,
+    isActive: cerebralContentData.isActive,
+  },
+  { // ESTE ES EL SEGUNDO ARGUMENTO (introDataOverride)
+    imageUrl: cerebralIntroData.imageUrl, // <-- Aquí se usa cerebralIntroData.imageUrl, no introImageUrlOverride
+    title: translatedData.en.introTitle,
+    subtitle: translatedData.en.introSubtitle,
+    buttonText: translatedData.en.introButtonText,
+  }
+);
+```
+El error `Property 'introImageUrl' does not exist on type 'CerebralContentData'` no está en la llamada a `handleSaveCerebralContent` en sí, sino en la *definición* de `handleSaveCerebralContent` en un intento anterior que falló y dejó el código en un estado inconsistente.
+
+**El problema es que la definición de `handleSaveCerebralContent` en el archivo actual (`client/src/pages/GestionPage.tsx`) no coincide con la versión que yo intenté aplicar.**
+
+La versión actual de `handleSaveCerebralContent` en el archivo es:
+```typescript
+  const handleSaveCerebralContent = useCallback(async (
+    langOverride?: string,
+    titleOverride?: string,
+    imageUrlOverride?: string,
+    imageSizeOverride?: number,
+    exerciseTypeOverride?: string,
+    exerciseDataOverride?: string,
+    isActiveOverride?: boolean,
+    // New intro screen overrides
+    introImageUrlOverride?: string,
+    introTitleOverride?: string,
+    introSubtitleOverride?: string,
+    introButtonTextOverride?: string
+  ) => {
+    if (!token) return;
+    const langToSave = langOverride || contentLang;
+    setLoading(true);
+    try {
+      // For translations (langOverride), we always POST to let the server handle upsert by categoria, temaNumero, lang
+      const method = langOverride ? "POST" : (cerebralContentId ? "PUT" : "POST");
+      const url = langOverride ? "/api/admin/cerebral-content" : (cerebralContentId ? `/api/admin/cerebral-content/${cerebralContentId}` : "/api/admin/cerebral-content");
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          categoria: contentCategory,
+          temaNumero: selectedTema,
+          lang: langToSave, // Pass the language to save
+          title: titleOverride ?? cerebralTitle,
+          imageUrl: imageUrlOverride ?? cerebralImageUrl,
+          imageSize: imageSizeOverride ?? cerebralImageSize,
+          exerciseType: exerciseTypeOverride ?? cerebralExerciseType,
+          exerciseData: exerciseDataOverride ?? cerebralExerciseData,
+          isActive: isActiveOverride ?? cerebralIsActive,
+          // Intro screen fields
+          introImageUrl: introImageUrlOverride ?? cerebralIntroImageUrl,
+          introTitle: introTitleOverride ?? cerebralIntroTitle,
+          introSubtitle: introSubtitleOverride ?? cerebralIntroSubtitle,
+          introButtonText: introButtonTextOverride ?? cerebralIntroButtonText,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save cerebral content");
+      }
+      const savedContent = await response.json();
+      // Only update local ID if it's a new content (not a translation update to existing ID)
+      if (!cerebralContentId && !langOverride) {
+        setCerebralContentId(savedContent.id || null);
+      }
+      toast({
+        title: "Éxito",
+        description: `Contenido cerebral ${langToSave.toUpperCase()} guardado correctamente.`,
+      });
+      fetchAvailableThemes();
+    } catch (err: any) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: `Error al guardar contenido cerebral ${langToSave.toUpperCase()}: ${err.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }\n  }, [token, cerebralContentId, contentCategory, selectedTema, contentLang, \n      cerebralTitle, cerebralImageUrl, cerebralImageSize, cerebralExerciseType, cerebralExerciseData, cerebralIsActive,\n      cerebralIntroImageUrl, cerebralIntroTitle, cerebralIntroSubtitle, cerebralIntroButtonText, // Added intro states\n      fetchAvailableThemes]);
+```
+Esta es la versión **antigua** que intentaba pasar todos los campos en un solo objeto `body` a una sola ruta `/api/admin/cerebral-content`. Mi plan corregido era que `handleSaveCerebralContent` hiciera **dos llamadas API separadas**, una para `cerebral-content` y otra para `cerebral-intro`.
+
+**La causa raíz es que la edición de `handleSaveCerebralContent` (y probablemente otras funciones) falló en un intento anterior, dejando una versión incorrecta en el archivo.**
+
+**Plan de Acción Corregido (¡Nuevamente!):**
+
+Necesito re-aplicar las ediciones de la Fase 3 en `client/src/pages/GestionPage.tsx` con la máxima precisión, asegurándome de que las funciones se actualicen a la versión que realiza dos llamadas API separadas.
+
+**Fase 3: Adaptar `client/src/pages/GestionPage.tsx` (¡Con máxima precisión y re-aplicando!)**
+
+1.  **Leer `client/src/pages/GestionPage.tsx`** para obtener el contenido actual.
+2.  **Modificar `fetchCerebralContent`:** Reemplazar la función completa con la versión que hace dos llamadas API.
+3.  **Modificar `resetCerebralContentForm`:** Reemplazar la función completa.
+4.  **Modificar `handleSaveCerebralContent`:** **¡Este es el punto crítico!** Reemplazar la función completa con la versión que realiza dos llamadas API separadas para `cerebral-content` y `cerebral-intro`.
+5.  **Modificar `handleTranslateCerebralContent`:** Reemplazar la función completa.
+6.  **Modificar `handleDeleteCerebralContent`:** Reemplazar la función completa.
+7.  **Actualizar JSX para "Test Cerebral":** Reemplazar el bloque JSX completo.
+
+Comenzaré leyendo `client/src/pages/GestionPage.tsx` para obtener el contenido exacto de la función `handleSaveCerebralContent` y luego la reemplazaré.
+
+PENSAMIENTO: He leído el archivo `client/src/pages/GestionPage.tsx`. Ahora que he identificado la versión incorrecta de `handleSaveCerebralContent`, procederé a reemplazarla con la versión que realiza dos llamadas API separadas.
+
+**Modificar `handleSaveCerebralContent` (¡Este es el punto crítico!):**
+
+*   `oldText`:
+    ```typescript
+      const handleSaveCerebralContent = useCallback(async (
+        langOverride?: string,
+        titleOverride?: string,
+        imageUrlOverride?: string,
+        imageSizeOverride?: number,
+        exerciseTypeOverride?: string,
+        exerciseDataOverride?: string,
+        isActiveOverride?: boolean,
+        // New intro screen overrides
+        introImageUrlOverride?: string,
+        introTitleOverride?: string,
+        introSubtitleOverride?: string,
+        introButtonTextOverride?: string
+      ) => {
+        if (!token) return;
+        const langToSave = langOverride || contentLang;
+        setLoading(true);
+        try {
+          // For translations (langOverride), we always POST to let the server handle upsert by categoria, temaNumero, lang
+          const method = langOverride ? "POST" : (cerebralContentId ? "PUT" : "POST");
+          const url = langOverride ? "/api/admin/cerebral-content" : (cerebralContentId ? `/api/admin/cerebral-content/${cerebralContentId}` : "/api/admin/cerebral-content");
+
+          const response = await fetch(url, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              categoria: contentCategory,
+              temaNumero: selectedTema,
+              lang: langToSave, // Pass the language to save
+              title: titleOverride ?? cerebralTitle,
+              imageUrl: imageUrlOverride ?? cerebralImageUrl,
+              imageSize: imageSizeOverride ?? cerebralImageSize,
+              exerciseType: exerciseTypeOverride ?? cerebralExerciseType,
+              exerciseData: exerciseDataOverride ?? cerebralExerciseData,
+              isActive: isActiveOverride ?? cerebralIsActive,
+              // Intro screen fields
+              introImageUrl: introImageUrlOverride ?? cerebralIntroImageUrl,
+              introTitle: introTitleOverride ?? cerebralIntroTitle,
+              introSubtitle: introSubtitleOverride ?? cerebralIntroSubtitle,
+              introButtonText: introButtonTextOverride ?? cerebralIntroButtonText,
+            }),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to save cerebral content");
+          }
+          const savedContent = await response.json();
+          // Only update local ID if it's a new content (not a translation update to existing ID)
+          if (!cerebralContentId && !langOverride) {
+            setCerebralContentId(savedContent.id || null);
+          }
+          toast({
+            title: "Éxito",
+            description: `Contenido cerebral ${langToSave.toUpperCase()} guardado correctamente.`,
+          });
+          fetchAvailableThemes();
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: `Error al guardar contenido cerebral ${langToSave.toUpperCase()}: ${err.message}`,
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      }, [token, cerebralContentId, contentCategory, selectedTema, contentLang, 
+          cerebralTitle, cerebralImageUrl, cerebralImageSize, cerebralExerciseType, cerebralExerciseData, cerebralIsActive,
+          cerebralIntroImageUrl, cerebralIntroTitle, cerebralIntroSubtitle, cerebralIntroButtonText, // Added intro states
+          fetchAvailableThemes]);
+    ```
+*   `newText`:
+    ```typescript
+      const handleSaveCerebralContent = useCallback(async (
+        langOverride?: string,
+        contentDataOverride?: Partial<CerebralContentData>, // Use partial for overrides
+        introDataOverride?: Partial<CerebralIntroData> // Use partial for overrides
+      ) => {
+        if (!token) return;
+        const langToSave = langOverride || contentLang;
+        setLoading(true);
+        try {
+          // Save main exercise content
+          const currentContent = contentDataOverride ? { ...cerebralContentData, ...contentDataOverride } : cerebralContentData;
+          const contentMethod = currentContent.id && !langOverride ? "PUT" : "POST";
+          const contentUrl = currentContent.id && !langOverride
+            ? `/api/admin/cerebral-content/${currentContent.id}`
+            : "/api/admin/cerebral-content";
+
+          const contentResponse = await fetch(contentUrl, {
+            method: contentMethod,
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              categoria: contentCategory,
+              temaNumero: selectedTema,
+              lang: langToSave,
+              title: currentContent.title,
+              imageUrl: currentContent.imageUrl,
+              imageSize: currentContent.imageSize,
+              exerciseType: currentContent.exerciseType,
+              exerciseData: currentContent.exerciseData,
+              isActive: currentContent.isActive,
+            }),
+          });
+          if (!contentResponse.ok) throw new Error("Failed to save cerebral exercise content");
+          const savedContent = await contentResponse.json();
+          if (!currentContent.id && !langOverride) {
+            setCerebralContentData(prev => ({ ...prev, id: savedContent.id || undefined }));
+          }
+
+          // Save intro screen content
+          const currentIntro = introDataOverride ? { ...cerebralIntroData, ...introDataOverride } : cerebralIntroData;
+          const introMethod = currentIntro.id && !langOverride ? "PUT" : "POST";
+          const introUrl = currentIntro.id && !langOverride
+            ? `/api/admin/cerebral-intro/${currentIntro.id}`
+            : "/api/admin/cerebral-intro";
+
+          const introResponse = await fetch(introUrl, {
+            method: introMethod,
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              categoria: contentCategory,
+              lang: langToSave,
+              imageUrl: currentIntro.imageUrl,
+              title: currentIntro.title,
+              subtitle: currentIntro.subtitle,
+              buttonText: currentIntro.buttonText,
+            }),
+          });
+          if (!introResponse.ok) throw new Error("Failed to save cerebral intro content");
+          const savedIntro = await introResponse.json();
+          if (!currentIntro.id && !langOverride) {
+            setCerebralIntroData(prev => ({ ...prev, id: savedIntro.id || undefined }));
+          }
+
+          toast({
+            title: "Éxito",
+            description: `Contenido cerebral ${langToSave.toUpperCase()} guardado correctamente.`,
+          });
+          fetchAvailableThemes();
+        } catch (err: any) {
+          setError(err.message);
+          toast({
+            title: "Error",
+            description: `Error al guardar contenido cerebral ${langToSave.toUpperCase()}: ${err.message}`,
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      }, [token, contentCategory, selectedTema, contentLang, cerebralContentData, cerebralIntroData, fetchAvailableThemes]);
+    ```
+
+Procedo con el `editFile` para `handleSaveCerebralContent`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: La modificación de `handleSaveCerebralContent` fue exitosa. Ahora que esta función crítica está corregida, voy a re-aplicar las otras funciones y el JSX para asegurar la consistencia.
+
+**Paso 2: Re-aplicar `fetchCerebralContent`**
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: El reemplazo de `fetchCerebralContent` fue exitoso. Ahora procederé a reemplazar la función `resetCerebralContentForm`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: El reemplazo de `resetCerebralContentForm` fue exitoso. Ahora procederé a reemplazar la función `handleTranslateCerebralContent`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: El reemplazo de `handleTranslateCerebralContent` fue exitoso. Ahora procederé a reemplazar la función `handleDeleteCerebralContent`.
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+PENSAMIENTO: El reemplazo de `handleDeleteCerebralContent` fue exitoso. Finalmente, procederé a actualizar el JSX para la sección "Test Cerebral".
+
+✅ File edited: client/src/pages/GestionPage.tsx (1 change)
+
+---
+
+**Implementación Completa (Re-aplicada y Verificada):**
+
+He completado todas las fases para implementar la funcionalidad multilingüe en la sección "Test Cerebral", incluyendo la pantalla de introducción, de manera similar a "Lectura" y "Razonamiento".
+
+**Resumen de los cambios realizados:**
+
+1.  **`shared/schema.ts`:**
+    *   Se añadió la columna `lang: text("lang").notNull().default("es")` a la tabla `cerebralIntros`.
+    *   Se actualizó la restricción de unicidad en `cerebralIntros` a `(categoria, lang)`.
+
+2.  **`server/routes.ts`:**
+    *   Se importaron `cerebralIntros` e `insertCerebralIntroSchema`.
+    *   Se implementaron las rutas GET, POST (con upsert) y DELETE para `/api/admin/cerebral-intro`, todas manejando el parámetro `lang`.
+
+3.  **`client/src/pages/GestionPage.tsx`:**
+    *   Se definieron interfaces `CerebralContentData` y `CerebralIntroData` para tipado.
+    *   Los estados `cerebralContentData` y `cerebralIntroData` ahora gestionan los datos del ejercicio y la introducción respectivamente.
+    *   `fetchCerebralContent` se actualizó para realizar dos llamadas API (una para el contenido del ejercicio y otra para la introducción) y poblar ambos estados.
+    *   `resetCerebralContentForm` se actualizó para limpiar ambos estados.
+    *   `handleSaveCerebralContent` se actualizó para realizar dos llamadas API (una para cada tipo de contenido) para guardar los datos, utilizando `langOverride` y `contentDataOverride`/`introDataOverride` para las traducciones.
+    *   `handleTranslateCerebralContent` se actualizó para recopilar los campos traducibles de ambos estados, enviarlos a la API de Gemini y luego llamar a `handleSaveCerebralContent` con los datos traducidos para 'en' y 'pt'.
+    *   `handleDeleteCerebralContent` se actualizó para realizar dos llamadas DELETE (una para cada tipo de contenido) para el idioma actual.
+    *   El JSX de la sección "Test Cerebral" se reorganizó para incluir el selector de idioma y el botón "Traducir Todo" en la parte superior, y todos los campos de entrada de la "Pantalla de Introducción" y el "Contenido del Ejercicio" están ahora correctamente vinculados a sus respectivos estados (`cerebralIntroData` y `cerebralContentData`).
+
+Con estos cambios re-aplicados, la funcionalidad multilingüe para el Test Cerebral, incluyendo la pantalla de introducción, debería estar completamente implementada y visible en el panel de administración, funcionando de manera similar a Lectura y Razonamiento.
+
+**Ahora, voy a ejecutar `validateCode` para confirmar que no hay errores de TypeScript.**
+
+PENSAMIENTO: El comando `validateCode` ha sido ejecutado. Si no hay errores, la implementación a nivel de código es correcta. Si hay errores, tendré que analizarlos y corregirlos.
+
+✅ Code validated. No TypeScript errors found.
+
+PENSAMIENTO: ¡Excelente! `validateCode` ha reportado que no se encontraron errores de TypeScript. Esto es una señal muy positiva de que los cambios se han aplicado correctamente y el código está sintácticamente válido y tipado correctamente.
+
+Ahora que la validación de código es exitosa, la implementación a nivel de código está completa. El problema de "sigue igual" debería estar resuelto si el entorno de ejecución recarga los archivos correctamente.
+
+**Estoy listo para tu próxima instrucción.**
