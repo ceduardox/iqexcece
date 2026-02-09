@@ -1920,11 +1920,11 @@ RESPONSE FORMAT - CRITICAL:
 - Example BAD response: "Aquí está el código que cambié: [code block]" (NEVER do this)
 
 SMART RESTART DECISIONS:
-- Frontend files (client/src/) → NO restart needed, Vite hot-reloads automatically
+- ALWAYS call restartServer once at the end after editing ANY file (frontend or backend). This ensures all users see the changes immediately.
 - Server files (server/*.ts) → YES, call restartServer once at the end
 - Schema (shared/schema.ts) → YES, call dbMigrate THEN restartServer
-- CSS/styles only → NO restart needed
-- If you only changed frontend files, do NOT call restartServer. It's unnecessary and wastes time.
+- Frontend files (client/src/) → YES, call restartServer to force reload for all connected clients
+- Only exception: If you ONLY read files or searched without editing anything, no restart needed.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
