@@ -1969,8 +1969,12 @@ ${schemaContent.substring(0, 3000)}
             try { res.write(`: heartbeat\n\n`); if (typeof (res as any).flush === 'function') (res as any).flush(); } catch {}
           }, 5000);
         }
-        const responseText = await callGemini(apiKey, systemPrompt, conversationHistory);
-        if (heartbeatTimer) clearInterval(heartbeatTimer);
+        let responseText: string | null = null;
+        try {
+          responseText = await callGemini(apiKey, systemPrompt, conversationHistory);
+        } finally {
+          if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+        }
         if (!responseText) {
           if (i === 0) {
             if (useSSE) {
