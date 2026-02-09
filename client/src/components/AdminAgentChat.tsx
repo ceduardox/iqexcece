@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertTriangle, Search, FileText, Database, Globe, Undo2, ScrollText, FolderOpen } from "lucide-react";
+import { Send, Trash2, Bot, User, Loader2, AlertCircle, X, Image, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertTriangle, Search, FileText, Database, Globe, Undo2, ScrollText, FolderOpen, Map, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AgentStep {
@@ -35,6 +35,8 @@ function StepIcon({ type }: { type: string }) {
     case "dbQuery": return <Database className={cls} />;
     case "undoEdit": return <Undo2 className={cls} />;
     case "readLogs": return <ScrollText className={cls} />;
+    case "scanStructure": return <Map className={cls} />;
+    case "validateCode": return <ShieldCheck className={cls} />;
     default: return <FileText className={cls} />;
   }
 }
@@ -111,6 +113,30 @@ function StepsAccordion({ steps }: { steps: AgentStep[] }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function CollapsibleResponse({ content, formatContent, defaultOpen }: { content: string; formatContent: (c: string) => any; defaultOpen: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  useEffect(() => { setOpen(defaultOpen); }, [defaultOpen, content]);
+  const firstLine = content.split('\n')[0]?.substring(0, 100) || 'Respuesta';
+  const preview = firstLine.replace(/\*\*/g, '').replace(/```[\s\S]*?```/g, '').trim();
+  const isShort = content.length < 200;
+
+  if (isShort) return <>{formatContent(content)}</>;
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 w-full text-left"
+        data-testid="button-toggle-response"
+      >
+        {open ? <ChevronDown className="w-3.5 h-3.5 text-white/40 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />}
+        {!open && <span className="text-white/50 text-xs truncate">{preview}...</span>}
+      </button>
+      {open && <div className="mt-1">{formatContent(content)}</div>}
     </div>
   );
 }
@@ -396,7 +422,9 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
           </div>
         )}
 
-        {messages.map((msg, i) => (
+        {messages.map((msg, i) => {
+          const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
+          return (
           <div
             key={i}
             className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -421,7 +449,9 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
                   data-testid={`msg-image-${i}`}
                 />
               )}
-              {msg.role === "assistant" ? formatContent(msg.content) : (msg.content !== "(imagen)" ? msg.content : null)}
+              {msg.role === "assistant" ? (
+                <CollapsibleResponse content={msg.content} formatContent={formatContent} defaultOpen={isLastAssistant} />
+              ) : (msg.content !== "(imagen)" ? msg.content : null)}
               {msg.steps && msg.steps.length > 0 && (
                 <StepsAccordion steps={msg.steps} />
               )}
@@ -447,7 +477,8 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div className="flex gap-2 items-start">

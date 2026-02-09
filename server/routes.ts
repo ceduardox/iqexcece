@@ -1395,6 +1395,67 @@ export async function registerRoutes(
         steps[steps.length - 1].detail = e.message;
         return { result: `❌ Error reading logs: ${e.message}` };
       }
+    } else if (action.action === "scanStructure" && action.path && isPathSafe(action.path)) {
+      steps.push({ type: "scanStructure", description: `Escaneando estructura de ${action.path}`, status: "running" });
+      try {
+        const fileContent = fs.readFileSync(path.resolve(action.path), "utf-8");
+        const lines = fileContent.split('\n');
+        const entries: string[] = [];
+        const braceStack: { name: string; startLine: number; depth: number }[] = [];
+        let depth = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const trimmed = line.trim();
+          if (/^(export\s+)?(const|let|function|class|interface|type|enum)\s/.test(trimmed) ||
+              /^(export\s+)?default\s+(function|class)\s/.test(trimmed)) {
+            const nameMatch = trimmed.match(/(?:export\s+)?(?:default\s+)?(?:const|let|function|class|interface|type|enum)\s+(\w+)/);
+            const name = nameMatch ? nameMatch[1] : trimmed.substring(0, 60);
+            braceStack.push({ name, startLine: i + 1, depth });
+          }
+          for (const ch of line) {
+            if (ch === '{') depth++;
+            if (ch === '}') {
+              depth--;
+              const top = braceStack[braceStack.length - 1];
+              if (top && depth <= top.depth) {
+                entries.push(`L${top.startLine}-${i + 1}: ${lines[top.startLine - 1].trim().substring(0, 80)}`);
+                braceStack.pop();
+              }
+            }
+          }
+        }
+        for (const remaining of braceStack) {
+          entries.push(`L${remaining.startLine}-?: ${lines[remaining.startLine - 1].trim().substring(0, 80)}`);
+        }
+        const result = entries.join('\n') || 'No definitions found';
+        const truncResult = result.length > 8000 ? result.substring(0, 8000) + '\n... (truncated)' : result;
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = `${entries.length} definiciones`;
+        if (filesReadInSession) filesReadInSession.add(action.path);
+        return { result: `🗺️ **Structure of ${action.path}** (${lines.length} lines, ${entries.length} definitions):\n\`\`\`\n${truncResult}\n\`\`\`` };
+      } catch (e: any) {
+        steps[steps.length - 1].status = "error";
+        steps[steps.length - 1].detail = e.message;
+        return { result: `❌ Error scanning ${action.path}: ${e.message}` };
+      }
+    } else if (action.action === "validateCode") {
+      steps.push({ type: "validateCode", description: "Validando TypeScript...", status: "running" });
+      try {
+        execFileSync("npx", ["tsc", "--noEmit", "--pretty", "false"], { encoding: "utf-8", timeout: 30000, cwd: PROJECT_ROOT });
+        steps[steps.length - 1].status = "success";
+        steps[steps.length - 1].detail = "Sin errores";
+        return { result: `✅ TypeScript validation passed - no errors found.` };
+      } catch (e: any) {
+        const stdout = (e.stdout || "").toString();
+        const stderr = (e.stderr || "").toString();
+        const output = stdout + "\n" + stderr;
+        const allErrors = output.split('\n').filter((l: string) => l.trim().length > 0).slice(0, 20);
+        const errorCount = allErrors.filter((l: string) => l.includes('error')).length;
+        const truncOutput = allErrors.join('\n');
+        steps[steps.length - 1].status = errorCount > 0 ? "error" : "warning";
+        steps[steps.length - 1].detail = `${errorCount} error(es)`;
+        return { result: `⚠️ TypeScript validation found ${errorCount} error(s):\n\`\`\`\n${truncOutput}\n\`\`\`` };
+      }
     }
     return { result: "" };
   }
@@ -1525,16 +1586,27 @@ Read server logs:
 {"action": "readLogs"}
 \`\`\`
 
+Scan file structure (get function/class definitions with line ranges - USE THIS for large files before editing):
+\`\`\`json
+{"action": "scanStructure", "path": "client/src/pages/GestionPage.tsx"}
+\`\`\`
+
+Validate TypeScript after edits (checks for compilation errors):
+\`\`\`json
+{"action": "validateCode"}
+\`\`\`
+
 AGENTIC WORKFLOW:
 You work in an AUTOMATIC LOOP with up to 8 rounds. When you use readFile, searchFiles, listFiles, httpRequest, dbQuery, or readLogs, the system executes them and feeds the results back to you automatically.
 
 WORKFLOW PATTERN - Follow this when making changes:
-1. ANALYZE: Read/search files to understand the codebase and what's affected
+1. ANALYZE: Use scanStructure for large files (>200 lines) to get a map, then readFile specific sections
 2. PLAN: Identify what files need to change and what might break
 3. IMPLEMENT: Make the edits using editFile
-4. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data, or readFile to confirm changes
-5. FIX: If verification fails, analyze the error and fix. Use undoEdit if needed.
-6. CONFIRM: Do a final verification to ensure everything works
+4. VALIDATE: Run validateCode after edits to check for TypeScript errors
+5. FIX: If validation fails, analyze the NEW errors and fix them. If 3 fixes fail, use undoEdit to revert.
+6. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data
+7. CONFIRM: Do a final verification to ensure everything works
 
 IMPACT ANALYSIS - Before editing:
 - Search for imports/usages of the file you're changing to see what depends on it
@@ -1672,7 +1744,7 @@ ${schemaContent.substring(0, 3000)}
             if (newStep) sendSSE('step', newStep);
             if (result) actionResults += "\n\n" + result;
             if (fileModified) allFilesModified.push(fileModified);
-            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs"];
+            const continuableActions = ["readFile", "searchFiles", "listFiles", "httpRequest", "dbQuery", "readLogs", "scanStructure", "validateCode"];
             if (continuableActions.includes(action.action)) {
               hasContinuableActions = true;
             }
