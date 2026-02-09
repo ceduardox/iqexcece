@@ -1687,29 +1687,51 @@ Run database migration (REQUIRED after modifying shared/schema.ts to apply chang
 \`\`\`
 
 AGENTIC WORKFLOW:
-You work in an AUTOMATIC LOOP with up to 8 rounds. When you use readFile, searchFiles, listFiles, httpRequest, dbQuery, or readLogs, the system executes them and feeds the results back to you automatically.
+You work in an AUTOMATIC LOOP with up to 12 rounds. When you use readFile, searchFiles, listFiles, httpRequest, dbQuery, or readLogs, the system executes them and feeds the results back to you automatically.
 
-WORKFLOW PATTERN - Follow this when making changes:
-1. ANALYZE: Use scanStructure for large files (>200 lines) to get a map, then readFile specific sections
-2. PLAN: Identify what files need to change and what might break
-3. IMPLEMENT: Make the edits using editFile
-4. VALIDATE: Run validateCode after edits to check for TypeScript errors
-5. FIX: If validation fails, analyze the NEW errors and fix them. If 3 fixes fail, use undoEdit to revert.
-6. MIGRATE: If you modified shared/schema.ts, run dbMigrate to apply database changes
-7. RESTART: If you modified server-side files (routes.ts, storage.ts, schema.ts), run restartServer
-8. VERIFY: Use httpRequest to test API endpoints, dbQuery to check data
-9. CONFIRM: Do a final verification to ensure everything works
+MANDATORY FIRST RESPONSE - On EVERY new user request, your FIRST response MUST be:
+PLAN:
+- Objetivo: [what the user wants in 1 sentence]
+- Archivos involucrados: [list files you think need changes]
+- Dependencias: [what imports/uses those files, found via searchFiles]
+- Pasos: [numbered list of specific actions in order]
+- Riesgos: [what could break]
+
+Then execute searchFiles to verify your assumptions before ANY editFile.
+NEVER skip this plan. NEVER start with editFile as your first action.
+
+WORKFLOW PATTERN - Follow this STRICTLY:
+ROUND 1: PLAN + SEARCH
+- Write the PLAN above
+- searchFiles to find usages/imports of files you'll change
+- readFile the specific sections you need to edit
+
+ROUND 2-5: IMPLEMENT + VALIDATE
+- editFile for each change (one at a time, small changes)
+- After EACH editFile, immediately run validateCode
+- If validateCode fails: analyze the error, fix it or undoEdit. Do NOT continue with more edits if there are errors.
+- If 3 fixes fail on the same file, undoEdit and try a different approach
+
+ROUND 6-7: DEPLOY + TEST
+- If schema changed → dbMigrate
+- If server files changed → restartServer (ONCE, at the end)
+- httpRequest to test endpoints
+- dbQuery to verify data
+
+ROUND 8: CONFIRM
+- Brief summary of what was done and verified
 
 CRITICAL DEPLOYMENT STEPS:
 - After editing shared/schema.ts → ALWAYS run dbMigrate before testing
 - After editing server/*.ts or shared/*.ts → ALWAYS run restartServer before testing with httpRequest
 - Frontend files (client/src/) auto-reload via Vite, no restart needed
 
-IMPACT ANALYSIS - Before editing:
-- Search for imports/usages of the file you're changing to see what depends on it
-- If changing a function signature, find all callers first
+IMPACT ANALYSIS - MANDATORY before editing:
+- ALWAYS searchFiles for imports/usages of the file you're changing BEFORE editing
+- If changing a function signature, find ALL callers first
 - If changing a component, check where it's used
-- NEVER make a change that could break existing functionality without checking
+- If changing a type/interface, find everything that uses it
+- NEVER make a change without checking what depends on it first
 
 WHEN TO USE WHICH ACTION:
 - readFile: To see file content. For large files (>200 lines), the system truncates showing first 80 + last 30 lines. Use startLine/endLine to read the specific section you need to edit.
@@ -1739,15 +1761,16 @@ CLARIFICATION BEHAVIOR:
 - Only act autonomously when the task is clear and specific
 
 CHAIN OF THOUGHT - MANDATORY:
-Before EVERY action, write a brief "PENSAMIENTO:" block explaining:
-1. What you understand the user wants
-2. Which files are likely involved (use PROJECT KNOWLEDGE BASE)
-3. What you'll do and in what order
-4. What could go wrong
-This forces you to plan before acting and reduces errors significantly.
+Before EVERY action block, write "PENSAMIENTO:" explaining your reasoning. This is NOT optional.
+Format:
+PENSAMIENTO: [What I know] → [What I need to find out] → [What I'll do next] → [What could go wrong]
 
-Example:
-PENSAMIENTO: El usuario quiere cambiar el título de la página principal. Según el knowledge base, las páginas están en client/src/pages/. Primero leeré el archivo para encontrar el título actual, luego lo editaré.
+AUTOCORRECTION RULES:
+- If editFile fails with "not found": STOP. Re-read the exact section. The file probably changed. Never retry with the same oldText.
+- If validateCode shows errors after your edit: Read the error carefully. Fix the SPECIFIC error, don't rewrite the whole function.
+- If 3 consecutive fixes fail: undoEdit ALL changes to that file and try a completely DIFFERENT approach.
+- If httpRequest returns an error after restart: Read the error, check server logs with readLogs, then fix.
+- NEVER leave the conversation with broken code. Either fix it or undo it.
 
 FILE LOCATION MAP (quick reference):
 - Pages: client/src/pages/ (React page components)
@@ -1806,7 +1829,7 @@ ${schemaContent.substring(0, 3000)}
       if (userParts.length === 0) userParts.push({ text: "Analiza esta imagen" });
       conversationHistory.push({ role: "user", parts: userParts });
 
-      const MAX_LOOPS = 8;
+      const MAX_LOOPS = 12;
       let finalResponse = "";
       const allFilesModified: string[] = [];
       const allSteps: AgentStep[] = [];
