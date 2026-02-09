@@ -2015,7 +2015,10 @@ ${schemaContent.substring(0, 3000)}
             if (continuableActions.includes(action.action)) {
               hasContinuableActions = true;
             }
-          } catch {}
+          } catch (parseErr: any) {
+            console.error(`[AGENT] Failed to parse/execute action block: ${parseErr.message}`);
+            actionResults += `\n\n❌ ACTION PARSE ERROR: ${parseErr.message}. Fix your JSON syntax.`;
+          }
         }
 
         let cleanResponse = responseText;
@@ -2029,6 +2032,19 @@ ${schemaContent.substring(0, 3000)}
           } catch {}
         }
         cleanResponse = cleanResponse.replace(/\n{3,}/g, "\n\n").trim();
+
+        if (jsonBlocks.length === 0 && i < MAX_LOOPS - 1 && i === 0) {
+          conversationHistory.push({
+            role: "model",
+            parts: [{ text: responseText }]
+          });
+          conversationHistory.push({
+            role: "user",
+            parts: [{ text: `[SYSTEM] You responded with text only but NO actions. The user asked you to make changes. You MUST use your tools (readFile, editFile, writeFile, etc.) to actually implement the changes. Do NOT just describe what you would do - DO IT. Start by using readFile or listFiles to examine the relevant code, then use editFile or writeFile to make the changes. Act NOW.` }]
+          });
+          sendSSE('loop', { loop: loopCount + 1, total: MAX_LOOPS });
+          continue;
+        }
 
         if (hasContinuableActions && i < MAX_LOOPS - 1) {
           const reasoningQuestions: string[] = [];
