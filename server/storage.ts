@@ -312,6 +312,7 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       categoria: insertContent.categoria,
       temaNumero: insertContent.temaNumero || 1,
+      lang: insertContent.lang || "es",
       title: insertContent.title,
       exerciseType: insertContent.exerciseType,
       imageUrl: insertContent.imageUrl || null,
@@ -331,6 +332,7 @@ export class MemStorage implements IStorage {
     return {
       id: randomUUID(),
       categoria: intro.categoria,
+      lang: intro.lang || "es",
       imageUrl: intro.imageUrl || null,
       title: intro.title || "¿Cuál lado de tu cerebro es más dominante?",
       subtitle: intro.subtitle || "El test tiene una duración de 30 segundos.",

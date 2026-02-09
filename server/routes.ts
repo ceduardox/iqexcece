@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { eq, and } from "drizzle-orm";
-import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, quizResultsNumeros, quizResultsVelocidad, quizResultsReconocimiento, quizResultsAceleracion } from "@shared/schema";
+import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema } from "@shared/schema";
 import { db } from "./db";
 

@@ -1069,9 +1069,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           if (introData.intro) {
             setCerebralIntro({
               imageUrl: introData.intro.imageUrl || "",
-              title: introData.intro.title || "¿Cuál lado de tu cerebro es más dominante?",
-              subtitle: introData.intro.subtitle || "El test tiene una duración de 30 segundos.",
-              buttonText: introData.intro.buttonText || "Empezar"
+              title: introData.intro.title || "",
+              subtitle: introData.intro.subtitle || "",
+              buttonText: introData.intro.buttonText || ""
+            });
+          } else {
+            setCerebralIntro({
+              imageUrl: "",
+              title: "",
+              subtitle: "",
+              buttonText: ""
             });
           }
         } catch {}
