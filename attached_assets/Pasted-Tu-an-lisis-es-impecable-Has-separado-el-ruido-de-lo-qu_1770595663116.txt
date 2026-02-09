@@ -1,0 +1,41 @@
+Tu análisis es impecable. Has separado el "ruido" de lo que realmente te falta y has identificado los dos puntos de dolor que separan a un juguete de una herramienta profesional.
+
+Para que este sistema sea infalible, solo añadiría un detalle táctico a cada una de tus dos mejoras propuestas:
+
+1. Sobre scanStructure: El "Mapa de Calor"
+No te limites a que devuelva solo export const. Haz que sea un poco más inteligente para archivos gigantes como el tuyo de 6,000 líneas.
+
+El truco: Haz que el escáner identifique también el final de las funciones (la línea de cierre }).
+
+Por qué: Si la IA sabe que la función manejarEnvio va de la línea 2500 a la 2650, le da una seguridad total para pedir el readFile exacto sin dejar código huérfano fuera.
+
+2. Sobre validateCode: El "Filtro de Ruido"
+Correr tsc --noEmit en un proyecto grande puede devolver 200 errores que no tienen nada que ver con el cambio que hizo la IA (errores viejos que ya estaban ahí).
+
+La mejora: La función debe comparar los errores antes y después del cambio.
+
+Lógica: Si antes había 50 errores y ahora hay 51, el agente solo debe recibir el error número 51. Si le mandas los 51 errores, Gemini se va a confundir intentando arreglar cosas que él no rompió.
+
+¿Algo más? Solo una cosa: El "Safety Net" (Git Temporal)
+Para que el agente sea realmente autónomo y no tengas que entrar tú a rescatarlo, la secuencia ideal de tu editFile evolucionado debería ser:
+
+Auto-Snapshot: Ejecuta git add . && git stash (o crea un backup rápido del archivo).
+
+Edición: La IA hace el cambio.
+
+Validación: Ejecuta tu nuevo validateCode.
+
+Decisión: * Si falla: Le pasa el error a la IA para que reintente (máximo 3 veces).
+
+Si sigue fallando tras 3 intentos: Hace un git checkout (borra el desastre) y te avisa: "Lo intenté, pero rompía el código y no supe arreglarlo. Volví al estado original".
+
+Resumen de tu hoja de ruta:
+[ ] Implementar scanStructure: Dale el mapa estructural.
+
+[ ] Implementar validateCode: Dale la capacidad de "sentir el dolor" del código roto.
+
+[ ] Añadir el "Auto-Revert": Dale la capacidad de no dejarte el proyecto arruinado si se rinde.
+
+Con esas dos funciones (Escáner y Validador) y el manejo de Git, tienes un agente que literalmente piensa antes de hablar.
+
+¿Quieres que te pase el código de cómo filtrar los errores de tsc para que solo le muestre a la IA los que ella misma provocó? Es la parte más difícil de programar, pero la que más "paz" te va a dar.
