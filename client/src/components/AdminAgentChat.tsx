@@ -148,6 +148,7 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
   const [loading, setLoading] = useState(false);
   const [loadingSteps, setLoadingSteps] = useState<AgentStep[]>([]);
   const [error, setError] = useState("");
+  const [reloading, setReloading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -266,6 +267,10 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
         };
         setMessages((prev) => [...prev, assistantMsg]);
         playNotification();
+        if (data.restartTriggered) {
+          setReloading(true);
+          setTimeout(() => { window.location.reload(); }, 4000);
+        }
         return;
       }
 
@@ -308,6 +313,10 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
                 };
                 setMessages((prev) => [...prev, assistantMsg]);
                 playNotification();
+                if (data.restartTriggered) {
+                  setReloading(true);
+                  setTimeout(() => { window.location.reload(); }, 4000);
+                }
               } else if (currentEvent === 'error') {
                 setError(data.error || "Agent error");
               }
@@ -326,46 +335,27 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
   };
 
   const formatContent = (content: string) => {
-    const parts = content.split(/(```[\s\S]*?```)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith("```")) {
-        const lines = part.split("\n");
-        const lang = lines[0].replace("```", "").trim();
-        const code = lines.slice(1, -1).join("\n");
-        return (
-          <div key={i} className="my-2 rounded-lg overflow-hidden">
-            {lang && (
-              <div className="bg-gray-800 text-gray-400 text-xs px-3 py-1">
-                {lang}
-              </div>
-            )}
-            <pre className="bg-gray-900 text-green-400 text-xs p-3 overflow-x-auto whitespace-pre-wrap break-all">
-              <code>{code}</code>
-            </pre>
-          </div>
-        );
-      }
-      const segments = part.split(/(\*\*.*?\*\*)/g);
-      return (
-        <span key={i}>
-          {segments.map((seg, j) => {
-            if (seg.startsWith("**") && seg.endsWith("**")) {
-              return (
-                <strong key={j} className="text-white font-semibold">
-                  {seg.slice(2, -2)}
-                </strong>
-              );
-            }
-            return seg.split("\n").map((line, k, arr) => (
-              <span key={`${j}-${k}`}>
-                {line}
-                {k < arr.length - 1 && <br />}
-              </span>
-            ));
-          })}
-        </span>
-      );
-    });
+    const cleaned = content.replace(/```[\s\S]*?```/g, '').replace(/PENSAMIENTO:[\s\S]*?(?=\n\n|\n[A-Z])/g, '').trim();
+    const segments = cleaned.split(/(\*\*.*?\*\*)/g);
+    return (
+      <span>
+        {segments.map((seg, j) => {
+          if (seg.startsWith("**") && seg.endsWith("**")) {
+            return (
+              <strong key={j} className="text-white font-semibold">
+                {seg.slice(2, -2)}
+              </strong>
+            );
+          }
+          return seg.split("\n").map((line, k, arr) => (
+            <span key={`${j}-${k}`}>
+              {line}
+              {k < arr.length - 1 && <br />}
+            </span>
+          ));
+        })}
+      </span>
+    );
   };
 
   return (
@@ -521,6 +511,13 @@ export default function AdminAgentChat({ adminToken }: AdminAgentChatProps) {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {reloading && (
+          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2 animate-pulse">
+            <Loader2 className="w-4 h-4 text-emerald-400 animate-spin flex-shrink-0" />
+            <p className="text-xs text-emerald-400">Servidor reiniciado. Recargando pagina...</p>
           </div>
         )}
 

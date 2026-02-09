@@ -1795,7 +1795,7 @@ IMPORTANT RULES:
 2. Respond in the SAME LANGUAGE the user writes (Spanish/English/Portuguese)
 3. Make MINIMAL changes. Use editFile, not writeFile, for existing files.
 4. Preserve existing code style, imports, and conventions.
-5. When done with all changes, end with a brief summary of what was changed.
+5. When done with all changes, end with a BRIEF summary (2-3 sentences max). Do NOT show code in your final response. The user sees the steps accordion for details.
 6. If a readFile or searchFiles returns results, analyze them and decide next steps.
 7. Project stack: React, TypeScript, Tailwind CSS, shadcn/ui, Wouter, TanStack Query, Drizzle ORM, Express.
 8. After making edits, VERIFY they work using httpRequest or dbQuery when applicable.
@@ -1803,8 +1803,23 @@ IMPORTANT RULES:
 10. Use the PROJECT KNOWLEDGE BASE above to understand architecture, recent changes, and project conventions BEFORE starting work.
 11. When editFile fails, ALWAYS re-read the exact section of the file before retrying. Never retry with the same oldText that already failed.
 12. NEVER edit server/routes.ts - that file contains YOUR OWN code. Editing it would break the agent itself.
-13. restartServer is DEFERRED - it runs AFTER your response is sent. Do NOT wait for it or call it multiple times. Call it ONCE at the end of your edits if backend files changed.
+13. restartServer is DEFERRED - it runs AFTER your response is sent. Do NOT wait for it or call it multiple times. Call it ONCE at the end of your edits if backend files changed. The browser will auto-reload 4 seconds after restart.
 14. Batch ALL your edits first, then call validateCode, then restartServer ONCE if needed. Do not restart between edits.
+
+RESPONSE FORMAT - CRITICAL:
+- Your final response to the user must be SHORT and CLEAN (2-5 sentences)
+- NEVER include code blocks in your final response. The user does NOT want to see code.
+- NEVER include PENSAMIENTO blocks in your final response.
+- Just say WHAT you did and WHAT changed, like a task summary.
+- Example good response: "Listo. Cambié el título de la página principal a 'Mi App' y actualicé el color del fondo a azul. Los cambios ya están aplicados."
+- Example BAD response: "Aquí está el código que cambié: [code block]" (NEVER do this)
+
+SMART RESTART DECISIONS:
+- Frontend files (client/src/) → NO restart needed, Vite hot-reloads automatically
+- Server files (server/*.ts) → YES, call restartServer once at the end
+- Schema (shared/schema.ts) → YES, call dbMigrate THEN restartServer
+- CSS/styles only → NO restart needed
+- If you only changed frontend files, do NOT call restartServer. It's unnecessary and wastes time.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
 \`\`\`typescript
@@ -1954,7 +1969,7 @@ ${schemaContent.substring(0, 3000)}
       (globalThis as any).__agentPendingRestart = false;
 
       if (useSSE) {
-        sendSSE('result', { response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
+        sendSSE('result', { response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps, restartTriggered: shouldRestart });
         res.write('event: done\ndata: {}\n\n');
         res.end();
         if (shouldRestart) {
@@ -1967,7 +1982,7 @@ ${schemaContent.substring(0, 3000)}
         }
         return;
       }
-      res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps });
+      res.json({ response: finalResponse, filesModified: allFilesModified, loops: loopCount, steps: allSteps, restartTriggered: shouldRestart });
       if (shouldRestart) {
         setTimeout(() => {
           try {
