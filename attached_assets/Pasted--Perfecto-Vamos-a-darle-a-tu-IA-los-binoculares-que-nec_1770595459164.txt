@@ -1,0 +1,78 @@
+¡Perfecto! Vamos a darle a tu IA los "binoculares" que necesita. Para un archivo de 6,000 líneas, leerlo todo es como intentar beber agua de una manguera de incendios: la IA se ahoga.
+
+La solución es una función de "Escaneo de Estructura". Esta función no lee el código, solo lee los títulos (nombres de funciones, constantes, interfaces) y te dice en qué línea están.
+
+1. El Código: "El Escáner de Arquitectura"
+Crea esta función en tu backend de Node.js. Servirá para que la IA diga: "No me des todo el archivo, solo quiero ver de la línea 400 a la 500".
+
+JavaScript
+const fs = require('fs');
+
+function obtenerEsquema(rutaArchivo) {
+    const contenido = fs.readFileSync(rutaArchivo, 'utf8');
+    const lineas = contenido.split('\n');
+    let esquema = "";
+
+    lineas.forEach((linea, index) => {
+        // Buscamos definiciones de funciones, constantes importantes o interfaces
+        if (linea.includes('export const') || 
+            linea.includes('function') || 
+            linea.includes('interface') || 
+            linea.includes('class ')) {
+            
+            // Guardamos el número de línea y el texto de la definición
+            esquema += `Línea ${index + 1}: ${linea.trim()}\n`;
+        }
+    });
+
+    return esquema;
+}
+2. El nuevo flujo de "Inteligencia"
+Ahora, cuando le pidas algo a tu agente sobre GestionPage.tsx, el proceso debe ser este:
+
+Paso 1 (Mapa): El agente ejecuta obtenerEsquema('GestionPage.tsx').
+
+Paso 2 (Visión): La IA recibe algo como esto:
+
+Línea 120: export const TablaUsuarios = ...
+
+Línea 2500: const manejarEnvio = (data) => ...
+
+Línea 4800: export const BotonEliminar = ...
+
+Paso 3 (Zoom): La IA dice: "Ok, el error está en el envío de datos, dame solo de la línea 2450 a la 2550".
+
+Paso 4 (Edición): La IA edita ese pequeño bloque. Al ser un bloque corto, no se equivoca con los espacios ni las llaves.
+
+3. ¿Cómo evitar que "rompa" el archivo al editar?
+Para que no falle por un espacio o una tabulación (tu punto 3), cambia tu herramienta de edición por una de "Reemplazo por Bloques Seguros".
+
+En lugar de que la IA te dé el código nuevo, oblígala a enviarte este formato:
+
+BUSCAR: (código viejo exacto) REEMPLAZAR: (código nuevo)
+
+Si tu servidor de Node.js no encuentra el bloque "BUSCAR" exactamente como la IA lo puso, detén la operación y dile: "Error: El código que intentas cambiar no existe tal cual lo describiste. Revisa los espacios y vuelve a intentarlo".
+
+4. La "Prueba de Fuego" (Validación)
+Para solucionar que "edita a ciegas" (tu punto 2 y 6), añade este paso final en tu servidor de Node.js después de cada edición:
+
+JavaScript
+const { execSync } = require('child_process');
+
+try {
+    // Intentamos compilar o revisar tipos
+    execSync('npx tsc --noEmit'); 
+    console.log("¡Éxito! El código es válido.");
+} catch (error) {
+    // Si falla, le mandamos el error DE LA CONSOLA a la IA
+    const logError = error.stdout.toString();
+    enviarALaIA(`Rompiste el código. Aquí está el error de la terminal: ${logError}. Arréglalo.`);
+}
+¿Qué ganamos con esto?
+Tu IA ya no es tonta: Ahora tiene un mapa de las 6,000 líneas.
+
+Tu IA ya no es ciega: Ahora escucha los errores de TypeScript/Node.
+
+Tu IA tiene memoria: Si falla la compilación, se ve obligada a corregir antes de entregarte el trabajo.
+
+¿Te gustaría que te ayude a redactar el "System Prompt" (las instrucciones secretas) para que Gemini sepa que ahora tiene estas nuevas herramientas disponibles? Es lo que hará que empiece a usarlas correctamente.
