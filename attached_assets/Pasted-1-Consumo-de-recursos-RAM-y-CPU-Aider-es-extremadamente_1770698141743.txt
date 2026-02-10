@@ -1,0 +1,49 @@
+1. ¿Consumo de recursos? (RAM y CPU)
+Aider es extremadamente ligero. A diferencia de Bolt.new o el propio Replit Agent (que corren procesos pesados en el navegador), Aider es solo un script de Python que envía texto a la API de Gemini.
+
+En Replit: Funcionará perfectamente incluso en un Repl gratuito. No "congela" la máquina porque el trabajo pesado (el razonamiento) lo hace el servidor de Google Gemini, no tu Repl.
+
+Memoria: Consume apenas unos 100-200MB de RAM, que es nada comparado con los GBs que pide un navegador moderno.
+
+2. ¿Demora mucho la instalación?
+En absoluto. En Replit, la conexión a internet es muy rápida.
+
+Tiempo estimado: Entre 30 y 60 segundos. Solo necesitas ejecutar pip install aider-chat. No tienes que configurar bases de datos complejas para que el agente funcione.
+
+3. ¿Todo por comandos? (El Chat Visual)
+No. Aquí es donde sucede la "magia" que buscas. Aunque lo inicias con un comando, Aider tiene un modo llamado --browser.
+
+Al activarlo, Aider abre una interfaz de chat idéntica a la de Replit o ChatGPT en una ventana nueva.
+
+No escribes comandos para programar: Escribes en lenguaje natural: "Pon un fondo con degradado animado y haz que el menú desaparezca al hacer scroll".
+
+Solo usas la terminal para lanzar el programa, el resto es puro chat.
+
+4. ¿El tema del puerto (Port)?
+Replit es muy inteligente con esto. Cuando lanzas Aider con el modo navegador:
+
+Aider abre un puerto interno (por ejemplo, el 8501).
+
+Replit detectará automáticamente que hay una aplicación corriendo y te mostrará una notificación: "A port has been opened. Open in browser".
+
+Haces clic y se te abre tu panel de control de IA privado.
+
+Pasos exactos para no fallar:
+En Replit, abre la Shell (terminal) y pega esto:
+
+Bash
+pip install aider-chat
+Añade tu API Key de Gemini en la herramienta "Secrets" (el candado) con el nombre GEMINI_API_KEY.
+
+Lanza tu agente con este comando único:
+
+Bash
+aider --model google/gemini-1.5-pro --browser
+Haz clic en el enlace o botón que te dará Replit y ¡listo! Tienes tu propio "Replit Agent" pero usando tus créditos de Gemini.
+
+¿Qué ganas con esto?
+Economía: Gastarás céntimos de dólar de tu API 
+
+Seguridad: Como te dije antes, Aider no borrará nada sin que tú lo veas en el chat.
+
+Animaciones: Gemini 1.5 Pro es un experto en librerías modernas como GSAP o Framer Motion. Solo pídelo en el chat.
