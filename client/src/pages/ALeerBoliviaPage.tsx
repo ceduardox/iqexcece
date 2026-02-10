@@ -212,7 +212,11 @@ export default function ALeerBoliviaPage() {
           </motion.div>
         </section>
 
-        <section className="px-5 pb-10">
+        <section
+          className={`px-5 pb-10 ${getEditableClass("section-objectives")}`}
+          style={{ background: styles["section-objectives"]?.background || undefined }}
+          onClick={(e) => { if (editorMode) handleElementClick("section-objectives", e); }}
+        >
           <motion.div
             className="text-center mb-6"
             initial={{ opacity: 0, y: 15 }}
@@ -349,7 +353,11 @@ export default function ALeerBoliviaPage() {
           </div>
         </section>
 
-        <section className="px-5 pb-12">
+        <section
+          className={`px-5 pb-12 ${getEditableClass("section-participar")}`}
+          style={{ background: styles["section-participar"]?.background || undefined }}
+          onClick={(e) => { if (editorMode) handleElementClick("section-participar", e); }}
+        >
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -366,16 +374,18 @@ export default function ALeerBoliviaPage() {
           </motion.div>
 
           <motion.div
-            className="rounded-2xl overflow-hidden mb-6"
+            className={`rounded-2xl overflow-hidden mb-6 ${getEditableClass("participar-image")}`}
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-image", e); } }}
           >
             <img
-              src={participarImg}
+              src={styles["participar-image"]?.imageUrl || participarImg}
               alt="Estudiante leyendo"
               className="w-full h-48 object-cover rounded-2xl"
+              style={{ height: styles["participar-image"]?.iconSize ? `${styles["participar-image"].iconSize * 2}px` : undefined }}
               data-testid="img-participar"
             />
           </motion.div>
@@ -383,14 +393,22 @@ export default function ALeerBoliviaPage() {
           <div className="space-y-4">
             {participarItems.map((item, i) => {
               const Icon = item.icon;
+              const cardKey = `pcard-${item.id}`;
               return (
                 <motion.div
                   key={item.id}
-                  className="flex items-start gap-3"
+                  className={`flex items-start gap-3 rounded-xl p-3 ${getEditableClass(cardKey)}`}
+                  style={{
+                    background: styles[cardKey]?.background || undefined,
+                    boxShadow: styles[cardKey]?.shadowBlur
+                      ? `0 ${(styles[cardKey]?.shadowBlur || 6) / 2}px ${styles[cardKey]?.shadowBlur || 6}px ${styles[cardKey]?.shadowColor || "rgba(0,0,0,0.06)"}`
+                      : undefined,
+                  }}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.4 }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(cardKey, e); } }}
                   data-testid={`card-participar-${i}`}
                 >
                   <motion.div
