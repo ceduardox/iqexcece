@@ -234,16 +234,23 @@ export default function ALeerBoliviaPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div
-              className={`w-full h-48 rounded-2xl flex items-center justify-center ${getEditableClass("hero-image")}`}
+              className={`w-full rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
               style={{
+                height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : 192,
                 background: styles["hero-image"]?.imageUrl
-                  ? `url(${styles["hero-image"].imageUrl}) center/cover no-repeat`
-                  : "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)"
+                  ? undefined
+                  : styles["hero-image"]?.background || "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)",
               }}
-              onClick={(e) => { if (editorMode) handleElementClick("hero-image", e); }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-image", e); } }}
               data-testid="img-placeholder"
             >
-              {!styles["hero-image"]?.imageUrl && (
+              {styles["hero-image"]?.imageUrl ? (
+                <img
+                  src={styles["hero-image"].imageUrl}
+                  alt="Hero"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <div className="text-center">
                   <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
                   <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
@@ -255,7 +262,11 @@ export default function ALeerBoliviaPage() {
 
         <section
           className={`px-5 pb-10 ${getEditableClass("section-objectives")}`}
-          style={{ background: styles["section-objectives"]?.background || undefined }}
+          style={{
+            background: styles["section-objectives"]?.imageUrl
+              ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
+              : styles["section-objectives"]?.background || undefined,
+          }}
           onClick={(e) => { if (editorMode) handleElementClick("section-objectives", e); }}
         >
           <motion.div
