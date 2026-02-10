@@ -354,8 +354,12 @@ export default function ALeerBoliviaPage() {
         </section>
 
         <section
-          className={`px-5 pb-12 ${getEditableClass("section-participar")}`}
-          style={{ background: styles["section-participar"]?.background || undefined }}
+          className={`px-5 pb-12 pt-8 ${getEditableClass("section-participar")}`}
+          style={{
+            background: styles["section-participar"]?.imageUrl
+              ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
+              : styles["section-participar"]?.background || undefined,
+          }}
           onClick={(e) => { if (editorMode) handleElementClick("section-participar", e); }}
         >
           <motion.div
@@ -365,6 +369,15 @@ export default function ALeerBoliviaPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3"
+              style={{ background: "linear-gradient(135deg, #fff7ed, #fed7aa)" }}
+              animate={{ scale: [1, 1.04, 1] }}
+              transition={{ repeat: Infinity, duration: 3 }}
+            >
+              <Users className="w-4 h-4 text-orange-600" />
+              <span className="text-xs font-bold text-orange-700">Participaci\u00f3n</span>
+            </motion.div>
             <h2 className="text-xl font-black text-gray-800 mb-3 leading-tight" data-testid="text-participar-title">
               {"\u00bfC\u00f3mo y Qui\u00e9nes pueden participar?"}
             </h2>
@@ -373,59 +386,108 @@ export default function ALeerBoliviaPage() {
             </p>
           </motion.div>
 
-          <motion.div
-            className={`rounded-2xl overflow-hidden mb-6 ${getEditableClass("participar-image")}`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-image", e); } }}
-          >
-            <img
-              src={styles["participar-image"]?.imageUrl || participarImg}
-              alt="Estudiante leyendo"
-              className="w-full h-48 object-cover rounded-2xl"
-              style={{ height: styles["participar-image"]?.iconSize ? `${styles["participar-image"].iconSize * 2}px` : undefined }}
-              data-testid="img-participar"
-            />
-          </motion.div>
+          <div className="flex flex-col md:flex-row gap-6 items-stretch">
+            <motion.div
+              className={`md:w-1/2 rounded-2xl overflow-hidden ${getEditableClass("participar-image")}`}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-image", e); } }}
+            >
+              <img
+                src={styles["participar-image"]?.imageUrl || "https://iqexponencial.app/api/images/0ac59e05-5b57-4642-9b78-9f50eca502f1"}
+                alt="Estudiante leyendo"
+                className="w-full h-56 md:h-full object-cover rounded-2xl"
+                style={{ height: styles["participar-image"]?.iconSize ? `${styles["participar-image"].iconSize * 2}px` : undefined }}
+                data-testid="img-participar"
+              />
+            </motion.div>
 
-          <div className="space-y-4">
-            {participarItems.map((item, i) => {
-              const Icon = item.icon;
-              const cardKey = `pcard-${item.id}`;
-              return (
-                <motion.div
-                  key={item.id}
-                  className={`flex items-start gap-3 rounded-xl p-3 ${getEditableClass(cardKey)}`}
-                  style={{
-                    background: styles[cardKey]?.background || undefined,
-                    boxShadow: styles[cardKey]?.shadowBlur
-                      ? `0 ${(styles[cardKey]?.shadowBlur || 6) / 2}px ${styles[cardKey]?.shadowBlur || 6}px ${styles[cardKey]?.shadowColor || "rgba(0,0,0,0.06)"}`
-                      : undefined,
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.4 }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(cardKey, e); } }}
-                  data-testid={`card-participar-${i}`}
-                >
+            <div className="md:w-1/2 hidden md:flex flex-col gap-3">
+              {participarItems.map((item, i) => {
+                const cardKey = `pcard-${item.id}`;
+                return (
                   <motion.div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: "linear-gradient(135deg, #ea580c, #f97316)" }}
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ repeat: Infinity, duration: 3, delay: i * 0.4 }}
+                    key={item.id}
+                    className={`flex items-start gap-3 rounded-xl p-3 ${getEditableClass(cardKey)}`}
+                    style={{
+                      background: styles[cardKey]?.imageUrl
+                        ? `url(${styles[cardKey].imageUrl}) center/cover no-repeat`
+                        : styles[cardKey]?.background || undefined,
+                      boxShadow: styles[cardKey]?.shadowBlur
+                        ? `0 ${(styles[cardKey]?.shadowBlur || 6) / 2}px ${styles[cardKey]?.shadowBlur || 6}px ${styles[cardKey]?.shadowColor || "rgba(0,0,0,0.06)"}`
+                        : undefined,
+                    }}
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, duration: 0.4 }}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(cardKey, e); } }}
+                    data-testid={`card-participar-${i}`}
                   >
-                    <CheckCheck className="w-4 h-4 text-white" />
+                    <motion.div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ background: "linear-gradient(135deg, #ea580c, #f97316)" }}
+                      animate={{ scale: [1, 1.15, 1] }}
+                      transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 text-white" />
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{item.title}</h3>
+                      <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                    </div>
                   </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">{item.title}</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            <div className="md:hidden">
+              <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                <CarouselContent className="-ml-2">
+                  {participarItems.map((item, i) => {
+                    const cardKey = `pcard-${item.id}`;
+                    return (
+                      <CarouselItem key={item.id} className="pl-2 basis-[85%]">
+                        <motion.div
+                          className={`rounded-2xl p-4 h-full ${getEditableClass(cardKey)}`}
+                          style={{
+                            background: styles[cardKey]?.imageUrl
+                              ? `url(${styles[cardKey].imageUrl}) center/cover no-repeat`
+                              : styles[cardKey]?.background || "linear-gradient(145deg, #fff7ed, #ffffff)",
+                            boxShadow: styles[cardKey]?.shadowBlur
+                              ? `0 ${(styles[cardKey]?.shadowBlur || 8) / 2}px ${styles[cardKey]?.shadowBlur || 8}px ${styles[cardKey]?.shadowColor || "rgba(234,88,12,0.1)"}`
+                              : "0 4px 20px rgba(234,88,12,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+                          }}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(cardKey, e); } }}
+                          data-testid={`card-participar-${i}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <motion.div
+                              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                              style={{ background: "linear-gradient(135deg, #ea580c, #f97316)" }}
+                              animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.1, 1] }}
+                              transition={{ repeat: Infinity, duration: 3, delay: i * 0.4 }}
+                            >
+                              <CheckCheck className="w-4 h-4 text-white" />
+                            </motion.div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-bold text-gray-800 mb-1">{item.title}</h3>
+                              <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+              </Carousel>
+            </div>
           </div>
 
           <motion.div
