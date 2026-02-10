@@ -1,13 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import participarImg from "@assets/image_1770684494294.png";
+
+const participarItems = [
+  { id: "p1", icon: School, title: "Camino Abierto para Escuelas de Bolivia", desc: "Extendemos una invitaci\u00f3n a todas las instituciones educativas de Bolivia para que se unan a esta iniciativa transformadora, destinada a enriquecer el panorama educativo a trav\u00e9s de la lectura." },
+  { id: "p2", icon: GraduationCap, title: "Estudiantes: Protagonistas del Cambio", desc: "Buscamos estudiantes listos para embarcarse en un viaje de descubrimiento y crecimiento personal a trav\u00e9s de actividades que despierten su pasi\u00f3n por la lectura." },
+  { id: "p3", icon: Smartphone, title: "Lectura Digital: La Aplicaci\u00f3n que Revoluciona", desc: "Incorporamos una aplicaci\u00f3n en dispositivos m\u00f3viles para realizar pruebas que no solo eval\u00faan sino que motivan, marcando un nuevo est\u00e1ndar en la educaci\u00f3n digital." },
+  { id: "p4", icon: BarChart3, title: "Resultados que Iluminan el Camino", desc: "Los resultados, enviados a padres e instituciones, ofrecen una clasificaci\u00f3n detallada de las habilidades lectoras, promoviendo un desarrollo educativo ajustado a las necesidades de cada estudiante." },
+  { id: "p5", icon: ClipboardList, title: "Requisitos para Forjar Futuros Lectores", desc: "El compromiso de las escuelas es crucial, as\u00ed como la autorizaci\u00f3n y el apoyo de un adulto responsable. Esto garantiza un entorno de apoyo total para los estudiantes seleccionados, permiti\u00e9ndoles participar plenamente en las pruebas y actividades propuestas." },
+];
 
 const objectivesMeta = [
   { id: "obj1", icon: Lightbulb, color: "#f59e0b", bg: "linear-gradient(135deg, #fef3c7, #fde68a)", titleKey: "obj1Title", descKey: "obj1Desc" },
@@ -338,6 +347,86 @@ export default function ALeerBoliviaPage() {
               </button>
             </div>
           </div>
+        </section>
+
+        <section className="px-5 pb-12">
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-xl font-black text-gray-800 mb-3 leading-tight" data-testid="text-participar-title">
+              {"\u00bfC\u00f3mo y Qui\u00e9nes pueden participar?"}
+            </h2>
+            <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
+              Impulsamos el futuro educativo de Bolivia con un concurso de lectura que no solo cultiva el amor por los libros entre estudiantes, sino que tambi\u00e9n afina sus habilidades anal\u00edticas y de comprensi\u00f3n.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="rounded-2xl overflow-hidden mb-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <img
+              src={participarImg}
+              alt="Estudiante leyendo"
+              className="w-full h-48 object-cover rounded-2xl"
+              data-testid="img-participar"
+            />
+          </motion.div>
+
+          <div className="space-y-4">
+            {participarItems.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.div
+                  key={item.id}
+                  className="flex items-start gap-3"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.4 }}
+                  data-testid={`card-participar-${i}`}
+                >
+                  <motion.div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: "linear-gradient(135deg, #ea580c, #f97316)" }}
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 3, delay: i * 0.4 }}
+                  >
+                    <CheckCheck className="w-4 h-4 text-white" />
+                  </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-bold text-gray-800 mb-1">{item.title}</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <motion.div
+            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <motion.button
+              className="px-10 py-3.5 rounded-xl text-white font-bold text-sm tracking-wide"
+              style={{ background: "linear-gradient(135deg, #ea580c, #dc2626)", boxShadow: "0 4px 15px rgba(234,88,12,0.3)" }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              data-testid="button-inscribete"
+            >
+              INSCR\u00cdBETE
+            </motion.button>
+          </motion.div>
         </section>
       </main>
 
