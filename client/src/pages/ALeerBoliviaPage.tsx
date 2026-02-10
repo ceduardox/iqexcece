@@ -1,25 +1,123 @@
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
+import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import type { CarouselApi } from "@/components/ui/carousel";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const objectivesMeta = [
-  { icon: Lightbulb, color: "#f59e0b", bg: "linear-gradient(135deg, #fef3c7, #fde68a)", titleKey: "obj1Title", descKey: "obj1Desc" },
-  { icon: BookOpen, color: "#8b5cf6", bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", titleKey: "obj2Title", descKey: "obj2Desc" },
-  { icon: Users, color: "#06b6d4", bg: "linear-gradient(135deg, #cffafe, #a5f3fc)", titleKey: "obj3Title", descKey: "obj3Desc" },
-  { icon: Target, color: "#10b981", bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", titleKey: "obj4Title", descKey: "obj4Desc" },
-  { icon: Award, color: "#f43f5e", bg: "linear-gradient(135deg, #ffe4e6, #fecdd3)", titleKey: "obj5Title", descKey: "obj5Desc" },
+  { id: "obj1", icon: Lightbulb, color: "#f59e0b", bg: "linear-gradient(135deg, #fef3c7, #fde68a)", titleKey: "obj1Title", descKey: "obj1Desc" },
+  { id: "obj2", icon: BookOpen, color: "#8b5cf6", bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", titleKey: "obj2Title", descKey: "obj2Desc" },
+  { id: "obj3", icon: Users, color: "#06b6d4", bg: "linear-gradient(135deg, #cffafe, #a5f3fc)", titleKey: "obj3Title", descKey: "obj3Desc" },
+  { id: "obj4", icon: Target, color: "#10b981", bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", titleKey: "obj4Title", descKey: "obj4Desc" },
+  { id: "obj5", icon: Award, color: "#f43f5e", bg: "linear-gradient(135deg, #ffe4e6, #fecdd3)", titleKey: "obj5Title", descKey: "obj5Desc" },
 ];
 
 export default function ALeerBoliviaPage() {
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "es";
+  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [styles, setStyles] = useState<PageStyles>({});
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setEditorMode(localStorage.getItem("editorMode") === "true");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(handleStorageChange, 500);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
+    fetch(`/api/page-styles/aleer-page?lang=${lang}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.style?.styles) {
+          try { setStyles(JSON.parse(data.style.styles)); } catch {}
+        }
+        clearTimeout(timeout);
+        setStylesLoaded(true);
+      })
+      .catch(() => { clearTimeout(timeout); setStylesLoaded(true); });
+    return () => clearTimeout(timeout);
+  }, [lang]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    const onSelect = () => setCurrentSlide(carouselApi.selectedScrollSnap());
+    carouselApi.on("select", onSelect);
+    onSelect();
+    return () => { carouselApi.off("select", onSelect); };
+  }, [carouselApi]);
+
+  const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) return;
+    try {
+      await fetch("/api/admin/page-styles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${adminToken}` },
+        body: JSON.stringify({ pageName: "aleer-page", styles: JSON.stringify(newStyles), lang })
+      });
+    } catch {}
+  }, [lang]);
+
+  const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
+    if (!editorMode) return;
+    e.stopPropagation();
+    setSelectedElement(elementId);
+  }, [editorMode]);
+
+  const handleStyleChange = useCallback((elementId: string, newStyle: ElementStyle) => {
+    const updated = { ...styles, [elementId]: { ...styles[elementId], ...newStyle } };
+    setStyles(updated);
+    saveStyles(updated);
+  }, [styles, saveStyles]);
+
+  const handleEditorClose = useCallback(() => {
+    setSelectedElement(null);
+    localStorage.setItem("editorMode", "false");
+    setEditorMode(false);
+  }, []);
+
+  const getEditableClass = useCallback((elementId: string) => {
+    if (!editorMode) return "";
+    const base = "transition-all duration-200";
+    return selectedElement === elementId
+      ? `${base} ring-2 ring-purple-500 ring-offset-2`
+      : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
+  }, [editorMode, selectedElement]);
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="flex items-center justify-center px-5 bg-white sticky top-0 z-50" style={{ paddingTop: 10, paddingBottom: 10 }}>
+      <header
+        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+        style={{ paddingTop: 10, paddingBottom: 10 }}
+        onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
+      >
         <button onClick={() => setLocation("/")} className="absolute left-5 p-2 text-gray-400" data-testid="button-back">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -86,14 +184,21 @@ export default function ALeerBoliviaPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div
-              className="w-full h-48 rounded-2xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)" }}
+              className={`w-full h-48 rounded-2xl flex items-center justify-center ${getEditableClass("hero-image")}`}
+              style={{
+                background: styles["hero-image"]?.imageUrl
+                  ? `url(${styles["hero-image"].imageUrl}) center/cover no-repeat`
+                  : "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)"
+              }}
+              onClick={(e) => { if (editorMode) handleElementClick("hero-image", e); }}
               data-testid="img-placeholder"
             >
-              <div className="text-center">
-                <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
-                <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
-              </div>
+              {!styles["hero-image"]?.imageUrl && (
+                <div className="text-center">
+                  <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
+                  <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
+                </div>
+              )}
             </div>
           </motion.div>
         </section>
@@ -111,43 +216,143 @@ export default function ALeerBoliviaPage() {
             </p>
           </motion.div>
 
-          <div className="space-y-4">
-            {objectivesMeta.map((obj, i) => {
-              const Icon = obj.icon;
-              return (
-                <motion.div
-                  key={i}
-                  className="bg-white rounded-2xl p-4 flex items-start gap-4"
-                  style={{ boxShadow: "0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)" }}
-                  initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.4 }}
-                  data-testid={`card-objective-${i}`}
-                >
-                  <motion.div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: obj.bg }}
-                    animate={{ 
-                      rotate: [0, 5, -5, 0],
-                      scale: [1, 1.05, 1]
-                    }}
-                    transition={{ repeat: Infinity, duration: 4, delay: i * 0.5 }}
+          <div className="relative">
+            <Carousel
+              opts={{ align: "start", loop: true }}
+              setApi={setCarouselApi}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-3">
+                {objectivesMeta.map((obj, i) => {
+                  const Icon = obj.icon;
+                  const iSize = iconSize(obj.id);
+                  return (
+                    <CarouselItem key={obj.id} className="pl-3 basis-[80%] sm:basis-[45%] md:basis-[33%]">
+                      <motion.div
+                        className={`bg-white rounded-2xl p-4 h-full ${getEditableClass(`card-${obj.id}`)}`}
+                        style={{
+                          boxShadow: styles[`card-${obj.id}`]?.shadowBlur
+                            ? `0 ${(styles[`card-${obj.id}`]?.shadowBlur || 10) / 2}px ${styles[`card-${obj.id}`]?.shadowBlur || 10}px ${styles[`card-${obj.id}`]?.shadowColor || "rgba(124,58,237,0.08)"}`
+                            : "0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+                          background: styles[`card-${obj.id}`]?.imageUrl
+                            ? `url(${styles[`card-${obj.id}`].imageUrl}) center/cover no-repeat`
+                            : styles[`card-${obj.id}`]?.background || undefined,
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.08, duration: 0.3 }}
+                        onClick={(e) => { if (editorMode) handleElementClick(`card-${obj.id}`, e); }}
+                        data-testid={`card-objective-${i}`}
+                      >
+                        <div className="flex flex-col items-center text-center gap-3">
+                          <motion.div
+                            className={`rounded-xl flex items-center justify-center shrink-0 ${getEditableClass(`icon-${obj.id}`)}`}
+                            style={{
+                              background: styles[`icon-${obj.id}`]?.imageUrl ? "transparent" : obj.bg,
+                              width: iSize + 24,
+                              height: iSize + 24,
+                            }}
+                            animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
+                            transition={{ repeat: Infinity, duration: 4, delay: i * 0.5 }}
+                            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${obj.id}`, e); }}}
+                          >
+                            {styles[`icon-${obj.id}`]?.imageUrl ? (
+                              <img
+                                src={styles[`icon-${obj.id}`].imageUrl}
+                                alt=""
+                                style={{ width: iSize, height: iSize, objectFit: "contain" }}
+                                className="drop-shadow-md"
+                              />
+                            ) : (
+                              <Icon style={{ color: obj.color, width: iSize, height: iSize }} />
+                            )}
+                          </motion.div>
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`text-sm font-bold text-gray-800 mb-1 ${getEditableClass(`title-${obj.id}`)}`}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`title-${obj.id}`, e); }}}
+                              style={{
+                                fontSize: styles[`title-${obj.id}`]?.fontSize || 14,
+                                color: styles[`title-${obj.id}`]?.textColor || "#1f2937",
+                              }}
+                            >
+                              {styles[`title-${obj.id}`]?.buttonText || t(`aleer.${obj.titleKey}`)}
+                            </h3>
+                            <p
+                              className={`text-xs text-gray-400 leading-relaxed ${getEditableClass(`desc-${obj.id}`)}`}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`desc-${obj.id}`, e); }}}
+                              style={{
+                                fontSize: styles[`desc-${obj.id}`]?.fontSize || 12,
+                                color: styles[`desc-${obj.id}`]?.textColor || "#9ca3af",
+                              }}
+                            >
+                              {styles[`desc-${obj.id}`]?.buttonText || t(`aleer.${obj.descKey}`)}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+            </Carousel>
+
+            <div className="flex items-center justify-center gap-3 mt-5">
+              <button
+                onClick={() => carouselApi?.scrollPrev()}
+                className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 active:scale-95 transition-transform"
+                data-testid="button-slide-prev"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                {objectivesMeta.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => carouselApi?.scrollTo(i)}
+                    className="transition-all duration-300"
+                    data-testid={`button-dot-${i}`}
                   >
-                    <Icon className="w-6 h-6" style={{ color: obj.color }} />
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">{t(`aleer.${obj.titleKey}`)}</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${obj.descKey}`)}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
+                    <div
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: currentSlide === i ? 20 : 6,
+                        height: 6,
+                        background: currentSlide === i
+                          ? "linear-gradient(135deg, #8b5cf6, #06b6d4)"
+                          : "#d1d5db",
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => carouselApi?.scrollNext()}
+                className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 active:scale-95 transition-transform"
+                data-testid="button-slide-next"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </section>
       </main>
 
       <BottomNavBar />
+
+      {editorMode && (
+        <EditorToolbar
+          selectedElement={selectedElement}
+          styles={styles}
+          onStyleChange={handleStyleChange}
+          onSave={() => saveStyles(styles)}
+          onClose={handleEditorClose}
+          onClearSelection={() => setSelectedElement(null)}
+        />
+      )}
     </div>
   );
 }
