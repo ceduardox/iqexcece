@@ -150,11 +150,21 @@ export default function ALeerBoliviaPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto pb-28">
-        <section className="relative px-5 pt-8 pb-10">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)" }} />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }} />
-          </div>
+        <section
+          className={`relative px-5 pt-8 pb-10 ${getEditableClass("section-hero")}`}
+          style={{
+            background: styles["section-hero"]?.imageUrl
+              ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
+              : styles["section-hero"]?.background || undefined,
+          }}
+          onClick={(e) => { if (editorMode) handleElementClick("section-hero", e); }}
+        >
+          {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)" }} />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }} />
+            </div>
+          )}
 
           <motion.div
             className="relative z-10 text-center"
@@ -172,16 +182,47 @@ export default function ALeerBoliviaPage() {
               <span className="text-xs font-bold text-purple-600">{t("aleer.badge")}</span>
             </motion.div>
 
-            <h1 className="text-2xl font-black text-gray-800 mb-2 leading-tight" data-testid="text-welcome-title">
+            <h1
+              className={`text-2xl font-black mb-2 leading-tight ${getEditableClass("hero-title")}`}
+              style={{
+                fontSize: styles["hero-title"]?.fontSize || undefined,
+                color: styles["hero-title"]?.textColor || "#1f2937",
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
+              data-testid="text-welcome-title"
+            >
               {t("aleer.welcome")}
             </h1>
-            <h2 className="text-lg font-bold mb-1" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <h2
+              className={`text-lg font-bold mb-1 ${getEditableClass("hero-subtitle1")}`}
+              style={{
+                background: styles["hero-subtitle1"]?.textColor ? undefined : "linear-gradient(135deg, #7c3aed, #06b6d4)",
+                WebkitBackgroundClip: styles["hero-subtitle1"]?.textColor ? undefined : "text",
+                WebkitTextFillColor: styles["hero-subtitle1"]?.textColor || "transparent",
+                fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
+            >
               {t("aleer.subtitle1")}
             </h2>
-            <h3 className="text-base font-bold text-purple-600 mb-4">
+            <h3
+              className={`text-base font-bold mb-4 ${getEditableClass("hero-subtitle2")}`}
+              style={{
+                color: styles["hero-subtitle2"]?.textColor || "#9333ea",
+                fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
+            >
               {t("aleer.subtitle2")}
             </h3>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto">
+            <p
+              className={`text-sm leading-relaxed max-w-md mx-auto ${getEditableClass("hero-desc")}`}
+              style={{
+                color: styles["hero-desc"]?.textColor || "#6b7280",
+                fontSize: styles["hero-desc"]?.fontSize || undefined,
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
+            >
               {t("aleer.description")}
             </p>
           </motion.div>
@@ -378,10 +419,25 @@ export default function ALeerBoliviaPage() {
               <Users className="w-4 h-4 text-orange-600" />
               <span className="text-xs font-bold text-orange-700">Participaci\u00f3n</span>
             </motion.div>
-            <h2 className="text-xl font-black text-gray-800 mb-3 leading-tight" data-testid="text-participar-title">
+            <h2
+              className={`text-xl font-black mb-3 leading-tight ${getEditableClass("participar-title")}`}
+              style={{
+                color: styles["participar-title"]?.textColor || "#1f2937",
+                fontSize: styles["participar-title"]?.fontSize || undefined,
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
+              data-testid="text-participar-title"
+            >
               {"\u00bfC\u00f3mo y Qui\u00e9nes pueden participar?"}
             </h2>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
+            <p
+              className={`text-xs leading-relaxed max-w-sm mx-auto ${getEditableClass("participar-desc")}`}
+              style={{
+                color: styles["participar-desc"]?.textColor || "#9ca3af",
+                fontSize: styles["participar-desc"]?.fontSize || undefined,
+              }}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
+            >
               Impulsamos el futuro educativo de Bolivia con un concurso de lectura que no solo cultiva el amor por los libros entre estudiantes, sino que tambi\u00e9n afina sus habilidades anal\u00edticas y de comprensi\u00f3n.
             </p>
           </motion.div>
