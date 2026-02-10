@@ -159,8 +159,17 @@ export default function ALeerBoliviaPage() {
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-hero", e); }}
         >
+          {editorMode && (
+            <div
+              className="absolute top-2 right-2 z-20 bg-purple-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); handleElementClick("section-hero", e); }}
+              data-testid="badge-edit-hero-bg"
+            >
+              Fondo Hero
+            </div>
+          )}
           {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)" }} />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }} />
             </div>
@@ -261,7 +270,7 @@ export default function ALeerBoliviaPage() {
         </section>
 
         <section
-          className={`px-5 pb-10 ${getEditableClass("section-objectives")}`}
+          className={`px-5 pb-10 relative ${getEditableClass("section-objectives")}`}
           style={{
             background: styles["section-objectives"]?.imageUrl
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
@@ -269,6 +278,15 @@ export default function ALeerBoliviaPage() {
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-objectives", e); }}
         >
+          {editorMode && (
+            <div
+              className="absolute top-2 right-2 z-20 bg-cyan-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); handleElementClick("section-objectives", e); }}
+              data-testid="badge-edit-objectives-bg"
+            >
+              Fondo Objetivos
+            </div>
+          )}
           <motion.div
             className="text-center mb-6"
             initial={{ opacity: 0, y: 15 }}
@@ -406,7 +424,7 @@ export default function ALeerBoliviaPage() {
         </section>
 
         <section
-          className={`px-5 pb-12 pt-8 ${getEditableClass("section-participar")}`}
+          className={`px-5 pb-12 pt-8 relative ${getEditableClass("section-participar")}`}
           style={{
             background: styles["section-participar"]?.imageUrl
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
@@ -414,6 +432,15 @@ export default function ALeerBoliviaPage() {
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-participar", e); }}
         >
+          {editorMode && (
+            <div
+              className="absolute top-2 right-2 z-20 bg-orange-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); handleElementClick("section-participar", e); }}
+              data-testid="badge-edit-participar-bg"
+            >
+              Fondo Participar
+            </div>
+          )}
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
