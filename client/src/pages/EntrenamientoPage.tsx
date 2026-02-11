@@ -126,9 +126,9 @@ export default function EntrenamientoPage() {
               style={{ background: gradients[index % gradients.length] }}
               data-testid={`card-entrenamiento-${item.id}`}
             >
-              <div className="p-4 flex items-center gap-4">
+              <div className="p-4 flex gap-4">
                 {item.imageUrl && (
-                  <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-white/20">
+                  <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 self-center">
                     <img
                       src={item.imageUrl}
                       alt={item.title}
@@ -137,18 +137,21 @@ export default function EntrenamientoPage() {
                   </div>
                 )}
                 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col">
                   <h3 className="text-lg font-bold text-white mb-1">
                     {item.title}
                   </h3>
                   {item.description && (
-                    <p className="text-sm text-white/80 leading-snug">
+                    <p className="text-sm text-white/80 leading-snug mb-2">
                       {item.description}
                     </p>
                   )}
+                  <div className="mt-auto">
+                    <span className="inline-flex items-center gap-1 bg-white/90 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                      Comenzar <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
-                
-                <ChevronRight className="w-6 h-6 text-white/60 flex-shrink-0" />
               </div>
             </motion.div>
           ))}
