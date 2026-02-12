@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
@@ -170,7 +170,6 @@ export default function AgeSelectionPage() {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
-  const [menuOpen, setMenuOpen] = useState(false);
   const [stylesLoaded, setStylesLoaded] = useState(false);
 
   useEffect(() => {
@@ -342,15 +341,8 @@ export default function AgeSelectionPage() {
           )}
         </div>
         
-        <div className="absolute right-5 flex items-center gap-1">
+        <div className="absolute right-5">
           <LanguageButton />
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            data-testid="button-menu"
-          >
-            <Menu className="w-6 h-6" strokeWidth={1.5} />
-          </button>
         </div>
       </header>
 
