@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
-import { VideoBackground, useIsVideo } from "@/components/VideoBackground";
+import { VideoBackground, useIsVideo, MediaIcon } from "@/components/VideoBackground";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -380,12 +380,7 @@ export default function EntrenamientoSelectionPage() {
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
                         style={{ width: iconSize, height: iconSize }}
                       >
-                        <img 
-                          src={iconUrl} 
-                          alt="" 
-                          className="drop-shadow-md"
-                          style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
-                        />
+                        <MediaIcon src={iconUrl} size={iconSize} />
                       </div>
                       
                       <div className="flex-1 min-w-0 flex flex-col">

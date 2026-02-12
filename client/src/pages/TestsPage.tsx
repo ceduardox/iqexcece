@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
-import { VideoBackground, isVideoUrl, useIsVideo } from "@/components/VideoBackground";
+import { VideoBackground, isVideoUrl, useIsVideo, MediaIcon } from "@/components/VideoBackground";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
@@ -132,12 +132,7 @@ function TestCard({
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
             style={{ width: iconSize, height: iconSize }}
           >
-            <img 
-              src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} 
-              alt="" 
-              className="drop-shadow-md"
-              style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
-            />
+            <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
           </div>
           
           <div className="flex-1 min-w-0 flex flex-col">

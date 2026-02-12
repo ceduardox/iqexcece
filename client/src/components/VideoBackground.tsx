@@ -42,6 +42,18 @@ export function useIsVideo(url: string | undefined): boolean {
   return isVideo;
 }
 
+export function MediaIcon({ src, size, className = "" }: { src: string; size: number; className?: string }) {
+  const isVideo = useIsVideo(src);
+  const style = { width: size, height: size, objectFit: "contain" as const };
+  
+  if (isVideo) {
+    return (
+      <video src={src} autoPlay loop muted playsInline className={`drop-shadow-md ${className}`} style={style} />
+    );
+  }
+  return <img src={src} alt="" className={`drop-shadow-md ${className}`} style={style} />;
+}
+
 interface VideoBackgroundProps {
   src: string;
   className?: string;
