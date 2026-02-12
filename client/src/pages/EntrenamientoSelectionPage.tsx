@@ -334,7 +334,7 @@ export default function EntrenamientoSelectionPage() {
             minHeight: getResolvedStyle("cards-section")?.sectionHeight
           }}
         >
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 md:max-w-5xl md:mx-auto md:justify-items-center">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 md:max-w-6xl md:mx-auto md:justify-items-center">
           {items.length === 0 ? (
             <div className="text-center py-8 col-span-full">
               <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
