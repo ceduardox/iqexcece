@@ -1,12 +1,31 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
+import { ArrowLeft, Menu, ChevronRight, Minus } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
-import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode, resolveStyle } from "@/components/EditorToolbar";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+
+function SpacerEl({ id, styles, isMobile, editorMode, getEditableClass, handleElementClick }: {
+  id: string; styles: PageStyles; isMobile: boolean; editorMode: boolean;
+  getEditableClass: (id: string) => string; handleElementClick: (id: string, e: React.MouseEvent) => void;
+}) {
+  const resolved = resolveStyle(styles, id, isMobile);
+  const height = resolved.sectionHeight ?? resolved.spacerHeight ?? 20;
+  const visible = resolved.visible !== false;
+  if (!visible && !editorMode) return null;
+  return (
+    <div className={`w-full ${getEditableClass(id)} ${!visible && editorMode ? "opacity-40" : ""}`}
+      onClick={(e) => handleElementClick(id, e)}
+      style={{ height: visible ? height : 4, background: editorMode ? "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,217,255,0.08) 5px, rgba(0,217,255,0.08) 10px)" : "transparent", transition: "height 0.2s ease" }}
+      data-testid={`spacer-${id}`}>
+      {editorMode && <div className="flex items-center justify-center h-full"><span className="text-[9px] text-gray-400 bg-gray-900/60 px-2 py-0.5 rounded"><Minus className="w-3 h-3 inline mr-1" />{id} ({height}px) {!visible ? "[oculto]" : ""}</span></div>}
+    </div>
+  );
+}
 
 const playCardSound = () => {
   const audio = new Audio('/card.mp3');
@@ -77,6 +96,7 @@ export default function EntrenamientoEdadPage() {
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+  const isMobile = useIsMobile();
 
   const storedItem = sessionStorage.getItem("selectedEntrenamientoItem");
   const item: EntrenamientoItem | null = storedItem ? JSON.parse(storedItem) : null;
@@ -183,20 +203,25 @@ export default function EntrenamientoEdadPage() {
   };
 
   const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
-    const s = styles[elementId];
-    if (!s) return defaultBg ? { background: defaultBg } : {};
+    const s = resolveStyle(styles, elementId, isMobile);
+    if (!s || Object.keys(s).length === 0) return defaultBg ? { background: defaultBg } : {};
     
     const result: React.CSSProperties = {};
     
     if (s.imageUrl) {
       result.backgroundImage = `url(${s.imageUrl})`;
-      result.backgroundSize = "cover";
+      result.backgroundSize = s.imageSize ? `${s.imageSize}%` : "cover";
       result.backgroundPosition = "center";
+      result.backgroundRepeat = "no-repeat";
     } else if (s.background) {
       result.background = s.background;
     } else if (defaultBg) {
       result.background = defaultBg;
     }
+
+    if (s.sectionHeight) result.minHeight = s.sectionHeight;
+    if (s.shadowBlur) result.boxShadow = `0 0 ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.3)"}`;
+    if (s.borderRadius) result.borderRadius = s.borderRadius;
     
     return result;
   };
@@ -232,8 +257,8 @@ export default function EntrenamientoEdadPage() {
         className={`flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
         style={{
-          paddingTop: styles["header"]?.paddingTop || 10,
-          paddingBottom: styles["header"]?.paddingBottom || 10,
+          paddingTop: resolveStyle(styles, "header", isMobile).paddingTop || 10,
+          paddingBottom: resolveStyle(styles, "header", isMobile).paddingBottom || 10,
           ...getElementStyle("header", "white")
         }}
       >
@@ -251,10 +276,10 @@ export default function EntrenamientoEdadPage() {
           data-testid="header-logo"
         >
           <img 
-            src={styles["header-logo"]?.imageUrl || LOGO_URL} 
+            src={resolveStyle(styles, "header-logo", isMobile).imageUrl || LOGO_URL} 
             alt="Logo" 
             style={{ 
-              height: styles["header-logo"]?.imageSize ? `${styles["header-logo"].imageSize}px` : "36px",
+              height: resolveStyle(styles, "header-logo", isMobile).imageSize ? `${resolveStyle(styles, "header-logo", isMobile).imageSize}px` : "36px",
               width: "auto"
             }}
           />
@@ -267,9 +292,9 @@ export default function EntrenamientoEdadPage() {
         className={`w-full sticky z-40 md:hidden ${getEditableClass("menu-curve")}`}
         onClick={(e) => handleElementClick("menu-curve", e)}
         style={{
-          top: (styles["header"]?.paddingTop || 10) + (styles["header"]?.paddingBottom || 10) + 36,
-          marginTop: styles["menu-curve"]?.marginTop || -4,
-          marginBottom: styles["menu-curve"]?.marginBottom || -20,
+          top: (resolveStyle(styles, "header", isMobile).paddingTop || 10) + (resolveStyle(styles, "header", isMobile).paddingBottom || 10) + 36,
+          marginTop: resolveStyle(styles, "menu-curve", isMobile).marginTop || -4,
+          marginBottom: resolveStyle(styles, "menu-curve", isMobile).marginBottom || -20,
         }}
       >
         <img 
@@ -280,6 +305,8 @@ export default function EntrenamientoEdadPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto pb-20">
+        <SpacerEl id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
+
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
@@ -299,33 +326,42 @@ export default function EntrenamientoEdadPage() {
               className={`font-bold mb-1 ${getEditableClass("main-title")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{ 
-                fontSize: styles["main-title"]?.fontSize || 22, 
-                color: styles["main-title"]?.textColor || "#5b21b6", 
-                fontWeight: styles["main-title"]?.fontWeight || 700 
+                fontSize: resolveStyle(styles, "main-title", isMobile).fontSize || 22, 
+                color: resolveStyle(styles, "main-title", isMobile).textColor || "#5b21b6", 
+                fontWeight: resolveStyle(styles, "main-title", isMobile).fontWeight || 700 
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || t("age.selectStage")}</span>
+              <span className="whitespace-pre-line">{resolveStyle(styles, "main-title", isMobile).buttonText || t("age.selectStage")}</span>
             </h1>
             <p 
               className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{ 
-                fontSize: styles["main-subtitle"]?.fontSize || 13, 
-                color: styles["main-subtitle"]?.textColor || "#9ca3af" 
+                fontSize: resolveStyle(styles, "main-subtitle", isMobile).fontSize || 13, 
+                color: resolveStyle(styles, "main-subtitle", isMobile).textColor || "#9ca3af" 
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || t("age.adjustDesc")}</span>
+              <span className="whitespace-pre-line">{resolveStyle(styles, "main-subtitle", isMobile).buttonText || t("age.adjustDesc")}</span>
             </p>
           </motion.div>
 
-          <div className="px-4 pb-4 space-y-2">
+          <SpacerEl id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
+
+          <div 
+            className={`px-4 pb-4 space-y-2 ${getEditableClass("cards-section")}`}
+            onClick={(e) => handleElementClick("cards-section", e)}
+            style={{ ...getElementStyle("cards-section"), padding: "16px", borderRadius: resolveStyle(styles, "cards-section", isMobile).borderRadius || 0 }}
+          >
             {categorias.map((cat, index) => {
               const cardId = `card-${cat.id}`;
               const iconId = `icon-${cat.id}`;
               const titleId = `title-${cat.id}`;
               const descId = `desc-${cat.id}`;
-              const cardStyle = styles[cardId];
-              const iconSize = styles[iconId]?.iconSize || 40;
+              const cardStyle = resolveStyle(styles, cardId, isMobile);
+              const iconStyle = resolveStyle(styles, iconId, isMobile);
+              const titleStyle = resolveStyle(styles, titleId, isMobile);
+              const descStyle = resolveStyle(styles, descId, isMobile);
+              const iconSize = iconStyle.iconSize || 40;
 
               return (
                 <motion.div
@@ -340,11 +376,11 @@ export default function EntrenamientoEdadPage() {
                   <motion.div
                     className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
                     style={{ 
-                      background: cardStyle?.imageUrl 
+                      background: cardStyle.imageUrl 
                         ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
-                        : cardStyle?.background || "white",
-                      borderRadius: cardStyle?.borderRadius || 16,
-                      boxShadow: cardStyle?.shadowBlur 
+                        : cardStyle.background || "white",
+                      borderRadius: cardStyle.borderRadius || 16,
+                      boxShadow: cardStyle.shadowBlur 
                         ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
                         : "0 1px 4px rgba(0,0,0,0.06)"
                     }}
@@ -357,12 +393,12 @@ export default function EntrenamientoEdadPage() {
                       style={{ 
                         width: iconSize + 8, 
                         height: iconSize + 8,
-                        background: styles[iconId]?.background || cat.iconBg,
+                        background: iconStyle.background || cat.iconBg,
                         padding: 6
                       }}
                     >
                       <img 
-                        src={styles[iconId]?.imageUrl || cat.iconUrl} 
+                        src={iconStyle.imageUrl || cat.iconUrl} 
                         alt="" 
                         className="drop-shadow-sm"
                         style={{ width: iconSize - 6, height: iconSize - 6, objectFit: "contain" }} 
@@ -374,21 +410,21 @@ export default function EntrenamientoEdadPage() {
                         className={`font-semibold leading-tight ${getEditableClass(titleId)}`}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
                         style={{
-                          fontSize: styles[titleId]?.fontSize || 14,
-                          color: styles[titleId]?.textColor || "#1f2937"
+                          fontSize: titleStyle.fontSize || 14,
+                          color: titleStyle.textColor || "#1f2937"
                         }}
                       >
-                        {styles[titleId]?.buttonText || t(cat.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
+                        {titleStyle.buttonText || t(cat.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
                       </h3>
                       <p 
                         className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
                         style={{
-                          fontSize: styles[descId]?.fontSize || 12,
-                          color: styles[descId]?.textColor || "#9ca3af"
+                          fontSize: descStyle.fontSize || 12,
+                          color: descStyle.textColor || "#9ca3af"
                         }}
                       >
-                        {styles[descId]?.buttonText || t(cat.descKey)}
+                        {descStyle.buttonText || t(cat.descKey)}
                       </p>
                     </div>
 
