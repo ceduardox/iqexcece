@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
-import { VideoBackground, useIsVideo, MediaIcon } from "@/components/VideoBackground";
+import { VideoBackground, MediaIcon } from "@/components/VideoBackground";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -33,46 +33,13 @@ interface EntrenamientoItem {
   isActive: boolean | null;
 }
 
-function EntCardInner({ cardStyle, hasBackgroundImage, defaultBg, textDark, editorMode, children }: {
-  cardStyle: any;
-  hasBackgroundImage: any;
-  defaultBg: string;
-  textDark: boolean;
-  editorMode: boolean;
-  children: React.ReactNode;
-}) {
-  const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
-  
-  return (
-    <motion.div
-      className="relative overflow-hidden rounded-2xl p-5 md:p-6"
-      style={{ 
-        background: (hasBackgroundImage && !bgIsVideo)
-          ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
-          : (cardStyle?.background || defaultBg),
-        boxShadow: cardStyle?.shadowBlur 
-          ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
-          : "0 4px 20px rgba(139, 92, 246, 0.15)",
-        border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none",
-        borderRadius: cardStyle?.borderRadius || 20
-      }}
-      whileTap={{ scale: editorMode ? 1 : 0.98 }}
-      transition={{ duration: 0.1 }}
-    >
-      {hasBackgroundImage && bgIsVideo && (
-        <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
-      )}
-      {children}
-    </motion.div>
-  );
-}
 
 const defaultCardStyles = [
-  { bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", textDark: true },
-  { bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6366f1 100%)", textDark: false },
-  { bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", textDark: true },
-  { bg: "linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0891b2 100%)", textDark: false },
-  { bg: "linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)", textDark: true },
+  { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
+  { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
+  { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
+  { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
+  { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
 ];
 
 const defaultIcons = [
@@ -215,25 +182,25 @@ export default function EntrenamientoSelectionPage() {
 
   if (!stylesLoaded || isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050a18" }}>
+        <div className="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #050a18 0%, #0a1628 30%, #0d1f3c 100%)" }}>
       <header 
-        className="flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50"
-        style={{ paddingTop: 10, paddingBottom: 10 }}
+        className="flex md:hidden items-center justify-center px-5 sticky top-0 z-50"
+        style={{ paddingTop: 10, paddingBottom: 10, background: "rgba(5,10,24,0.9)", backdropFilter: "blur(10px)" }}
       >
         <button 
           onClick={() => { playButtonSound(); setLocation("/"); }}
           className="absolute left-5 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(138,63,252,0.15)" }}
+          style={{ background: "rgba(0,217,255,0.1)", border: "1px solid rgba(0,217,255,0.3)" }}
           data-testid="button-back"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: "#00d9ff" }} />
         </button>
         <img 
           src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
@@ -247,7 +214,7 @@ export default function EntrenamientoSelectionPage() {
       </header>
 
       <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+        <img src={menuCurveImg} alt="" className="w-full h-auto" style={{ filter: "brightness(0.15) saturate(2) hue-rotate(200deg)" }} />
       </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
@@ -260,7 +227,7 @@ export default function EntrenamientoSelectionPage() {
             backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
+            ...getElementStyle("hero-section", "transparent")
           }}
           data-testid="hero-section"
         >
@@ -273,11 +240,11 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                 style={getElementStyle("hero-title")}
               >
-                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                <span style={{ color: styles["hero-title"]?.textColor || "#ffffff" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[0] || "Activa la"}
                 </span>
                 <br />
-                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                <span style={{ color: styles["hero-title"]?.textColor || "#ffffff" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[1] || "Inteligencia"}
                 </span>
                 <br />
@@ -296,7 +263,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.1 }}
                 className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
-                style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+                style={{ color: styles["hero-subtitle"]?.textColor || "rgba(255,255,255,0.8)", ...getElementStyle("hero-subtitle") }}
               >
                 {styles["hero-subtitle"]?.buttonText || t("training.heroSubtitle1")}
               </motion.p>
@@ -306,7 +273,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.12 }}
                 className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
-                style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                style={{ color: styles["hero-subtitle2"]?.textColor || "rgba(255,255,255,0.8)", ...getElementStyle("hero-subtitle2") }}
               >
                 {styles["hero-subtitle2"]?.buttonText || t("training.heroSubtitle2")}
               </motion.p>
@@ -317,7 +284,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.15 }}
                 className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
-                style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+                style={{ color: styles["hero-desc"]?.textColor || "rgba(255,255,255,0.5)", ...getElementStyle("hero-desc") }}
               >
                 {styles["hero-desc"]?.buttonText || t("training.heroDesc")}
               </motion.p>
@@ -325,11 +292,11 @@ export default function EntrenamientoSelectionPage() {
           </div>
         </div>
 
-        <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-2 gap-5 md:max-w-4xl md:mx-auto">
+        <div className="px-4 pb-8 -mt-2 grid grid-cols-2 gap-4 md:max-w-4xl md:mx-auto">
           {items.length === 0 ? (
             <div className="text-center py-8 col-span-full">
-              <Dumbbell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">{t("training.noItems")}</p>
+              <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-400">{t("training.noItems")}</p>
             </div>
           ) : (
             items.map((item, index) => {
@@ -344,7 +311,7 @@ export default function EntrenamientoSelectionPage() {
               const hasBackgroundImage = cardStyle?.imageUrl;
               const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
               const iconUrl = styles[iconId]?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 48;
+              const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 64;
               
               return (
                 <motion.div
@@ -354,86 +321,86 @@ export default function EntrenamientoSelectionPage() {
                   transition={{ delay: 0.1 + index * 0.1, duration: 0.4, type: "spring", stiffness: 100 }}
                   whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
                   onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
-                  className={`cursor-pointer shimmer-card ${getEditableClass(cardId)}`}
+                  className={`cursor-pointer ${getEditableClass(cardId)}`}
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
-                  <EntCardInner
-                    cardStyle={cardStyle}
-                    hasBackgroundImage={hasBackgroundImage}
-                    defaultBg={defaultStyle.bg}
-                    textDark={textDark}
-                    editorMode={editorMode}
+                  <motion.div
+                    className="relative overflow-hidden rounded-2xl p-4 flex flex-col items-center text-center"
+                    style={{ 
+                      background: hasBackgroundImage 
+                        ? `url(${cardStyle.imageUrl}) center/cover no-repeat`
+                        : (cardStyle?.background || defaultStyle.bg),
+                      border: "1px solid rgba(0,180,255,0.25)",
+                      boxShadow: cardStyle?.shadowBlur 
+                        ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,180,255,0.1)"}` 
+                        : "0 0 20px rgba(0,180,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05)",
+                      borderRadius: cardStyle?.borderRadius || 16
+                    }}
+                    whileTap={{ scale: editorMode ? 1 : 0.98 }}
+                    transition={{ duration: 0.1 }}
                   >
-                    <div 
-                      className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold"
-                      style={{ 
-                        background: textDark ? "rgba(139, 92, 246, 0.1)" : "rgba(255,255,255,0.2)",
-                        color: textDark ? "#7c3aed" : "white"
-                      }}
-                    >
-                      Entrenamiento
-                    </div>
+                    {hasBackgroundImage && (
+                      <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
+                    )}
                     
-                    <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
-                      <div 
-                        className={`flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
-                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
-                        style={{ width: iconSize, height: iconSize }}
-                      >
+                    <div 
+                      className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
+                      style={{ width: iconSize, height: iconSize }}
+                    >
+                      <div className="chroma-aura" />
+                      <div className="chroma-icon relative z-[1]">
                         <MediaIcon src={iconUrl} size={iconSize} />
                       </div>
-                      
-                      <div className="flex-1 min-w-0 flex flex-col">
-                        <h3 
-                          className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
-                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
-                          style={{ 
-                            fontSize: styles[titleId]?.fontSize || 18,
-                            color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
-                          }}
-                        >
-                          {styles[titleId]?.buttonText || item.title}
-                        </h3>
-                        {item.description && (
-                          <p 
-                            className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
-                            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
-                            style={{ 
-                              fontSize: styles[descId]?.fontSize || 13,
-                              color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
-                            }}
-                          >
-                            {styles[descId]?.buttonText || item.description}
-                          </p>
-                        )}
-                        <div className="mt-auto flex justify-end md:justify-center">
-                          <motion.button
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              if (editorMode) {
-                                handleElementClick(btnId, e);
-                              } else {
-                                playButtonSound(); 
-                                handleSelect(item);
-                              }
-                            }}
-                            style={{
-                              background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
-                              color: styles[btnId]?.textColor || "white",
-                              border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
-                            }}
-                            whileTap={{ scale: editorMode ? 1 : 0.95 }}
-                          >
-                            {styles[btnId]?.buttonText || "Iniciar"}
-                            <ChevronRight className="w-4 h-4" />
-                          </motion.button>
-                        </div>
-                      </div>
                     </div>
-                  </EntCardInner>
+                    
+                    <h3 
+                      className={`text-sm font-bold mb-1 leading-tight ${getEditableClass(titleId)}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
+                      style={{ 
+                        fontSize: styles[titleId]?.fontSize || 14,
+                        color: styles[titleId]?.textColor || "#ffffff"
+                      }}
+                    >
+                      {styles[titleId]?.buttonText || item.title}
+                    </h3>
+                    {item.description && (
+                      <p 
+                        className={`text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
+                        style={{ 
+                          fontSize: styles[descId]?.fontSize || 11,
+                          color: styles[descId]?.textColor || "rgba(255,255,255,0.55)"
+                        }}
+                      >
+                        {styles[descId]?.buttonText || item.description}
+                      </p>
+                    )}
+                    <motion.button
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 ${getEditableClass(btnId)}`}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (editorMode) {
+                          handleElementClick(btnId, e);
+                        } else {
+                          playButtonSound(); 
+                          handleSelect(item);
+                        }
+                      }}
+                      style={{
+                        background: styles[btnId]?.background || "linear-gradient(135deg, #00b4ff 0%, #0066ff 50%, #8b5cf6 100%)",
+                        color: styles[btnId]?.textColor || "white",
+                        border: "none",
+                        letterSpacing: "0.05em"
+                      }}
+                      whileTap={{ scale: editorMode ? 1 : 0.95 }}
+                    >
+                      {styles[btnId]?.buttonText || "START"}
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               );
             })
