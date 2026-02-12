@@ -270,7 +270,7 @@ export default function ContactoPage() {
         </motion.div>
 
         <div
-          className={`flex flex-col md:grid md:grid-cols-5 gap-3 rounded-2xl p-3 relative ${getEditableClass("cards-section")}`}
+          className={`flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-5 rounded-2xl p-3 md:p-6 relative ${getEditableClass("cards-section")}`}
           onClick={(e) => handleElementClick("cards-section", e)}
           style={{
             ...(() => {
@@ -302,7 +302,7 @@ export default function ContactoPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.16 }}
-            className={`w-full rounded-2xl overflow-hidden transition-all ${getEditableClass("contact-asesor")}`}
+            className={`w-full rounded-2xl overflow-hidden transition-all md:col-span-1 ${getEditableClass("contact-asesor")}`}
             style={{
               background: asesorCardS?.background || "linear-gradient(135deg, #7c3aed, #a855f7)",
               boxShadow: asesorCardS?.shadowBlur ? `0 4px ${asesorCardS.shadowBlur}px ${asesorCardS.shadowColor || "rgba(0,0,0,0.1)"}` : "0 4px 20px rgba(124,58,237,0.2)",
@@ -311,14 +311,14 @@ export default function ContactoPage() {
             data-testid="button-contact-asesor"
           >
             <div
-              className="flex items-center md:flex-col md:items-center md:text-center p-4 md:p-6 gap-4 md:gap-3 cursor-pointer"
+              className="flex items-center md:flex-col md:items-center md:text-center p-4 md:py-10 md:px-6 gap-4 md:gap-4 cursor-pointer"
               onClick={(e) => {
                 if (editorMode) { handleElementClick("contact-asesor", e); }
                 else { playClick(); setChatOpen(!chatOpen); }
               }}
             >
               <div
-                className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
+                className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
                 style={{ background: operatorS?.background || "rgba(255,255,255,0.15)" }}
               >
@@ -489,32 +489,35 @@ function ContactCard({ item, index, editorMode, getEditableClass, getResolvedSty
         if (editorMode) { handleElementClick(`contact-${item.id}`, e); }
         else { playClick(); item.action(); }
       }}
-      className={`w-full flex items-center md:flex-col md:items-center md:text-center gap-4 md:gap-3 p-4 md:p-6 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
+      className={`w-full flex items-center md:flex-col md:items-center md:text-center gap-4 md:gap-4 p-4 md:py-10 md:px-6 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
       style={{
         background: s?.background || "white",
-        boxShadow: s?.shadowBlur ? `0 4px ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.06)"}` : "0 2px 12px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+        boxShadow: s?.shadowBlur ? `0 4px ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.06)"}` : "0 4px 24px rgba(124,58,237,0.1), 0 1px 6px rgba(0,0,0,0.04)",
       }}
+      whileHover={{ scale: 1.03, y: -4 }}
       data-testid={`button-contact-${item.id}`}
     >
-      <div
-        className={`w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
+      <motion.div
+        className={`w-12 h-12 md:w-24 md:h-24 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
         style={{ background: iconS?.background || item.gradient }}
         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${item.id}`, e); } }}
+        animate={{ scale: [1, 1.08, 1] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
       >
         {iconS?.imageUrl ? (
-          <img src={iconS.imageUrl} alt="" className="object-contain" style={{ width: iconS?.imageSize ? `${iconS.imageSize}%` : 24, height: iconS?.imageSize ? `${iconS.imageSize}%` : 24 }} />
+          <img src={iconS.imageUrl} alt="" className="object-contain" style={{ width: iconS?.imageSize ? `${iconS.imageSize}%` : 32, height: iconS?.imageSize ? `${iconS.imageSize}%` : 32 }} />
         ) : (
-          <Icon className="w-6 h-6 md:w-10 md:h-10" style={{ color: item.iconColor }} />
+          <Icon className="w-6 h-6 md:w-12 md:h-12" style={{ color: item.iconColor }} />
         )}
-      </div>
+      </motion.div>
       <div className="flex-1 text-left md:text-center min-w-0">
         <span
-          className="text-base md:text-lg font-semibold block"
+          className="text-base md:text-xl font-semibold block"
           style={{ color: s?.textColor || "#374151", fontSize: s?.fontSize }}
         >
           {s?.buttonText || t(item.labelKey)}
         </span>
-        <span className="text-xs md:text-sm text-gray-400 block mt-0.5">
+        <span className="text-xs md:text-sm text-gray-400 block mt-0.5 md:mt-1">
           {getResolvedStyle(`sub-${item.id}`)?.buttonText || t(item.subKey)}
         </span>
       </div>
