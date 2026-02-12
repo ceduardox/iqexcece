@@ -153,7 +153,12 @@ function AgeCard({ category, index, onClick, editorMode, styles, onElementClick,
           </p>
         </div>
 
-        <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
+        <motion.div
+          animate={{ x: [0, 4, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
+        </motion.div>
       </motion.div>
     </motion.div>
   );
