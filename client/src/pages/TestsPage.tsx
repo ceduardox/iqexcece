@@ -119,9 +119,9 @@ function TestCard({
           Test
         </div>
         
-        <div className="flex items-center gap-3 pt-6">
+        <div className="flex gap-4 pt-6">
           <div 
-            className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
+            className={`flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
             style={{ width: iconSize, height: iconSize }}
           >
@@ -133,7 +133,7 @@ function TestCard({
             />
           </div>
           
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             <h3 
               className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
@@ -145,7 +145,7 @@ function TestCard({
               {styles[titleId]?.buttonText || title}
             </h3>
             <p 
-              className={`text-sm leading-snug ${getEditableClass(descId)}`}
+              className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
               style={{ 
                 fontSize: styles[descId]?.fontSize || 13,
@@ -154,33 +154,32 @@ function TestCard({
             >
               {styles[descId]?.buttonText || description}
             </p>
+            <div className="mt-auto flex justify-end">
+              <motion.button
+                className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
+                style={{
+                  background: styles[`btn-${testId}`]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
+                  color: styles[`btn-${testId}`]?.textColor || "white",
+                  border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (editorMode) { 
+                    onElementClick(`btn-${testId}`, e); 
+                  } else { 
+                    playButtonSound(); 
+                    onClick(); 
+                  } 
+                }}
+              >
+                {styles[`btn-${testId}`]?.buttonText || t("tests.start")}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </motion.button>
+            </div>
           </div>
-          
-          <motion.button
-            className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
-            style={{
-              background: styles[`btn-${testId}`]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
-              color: styles[`btn-${testId}`]?.textColor || "white",
-              border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)",
-              marginTop: styles[`btn-${testId}`]?.marginTop || 0,
-              marginRight: styles[`btn-${testId}`]?.marginRight || 0
-            }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              if (editorMode) { 
-                onElementClick(`btn-${testId}`, e); 
-              } else { 
-                playButtonSound(); 
-                onClick(); 
-              } 
-            }}
-          >
-            {styles[`btn-${testId}`]?.buttonText || t("tests.start")}
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </motion.button>
         </div>
       </motion.div>
     </motion.div>
