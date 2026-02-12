@@ -270,7 +270,7 @@ export default function ContactoPage() {
         </motion.div>
 
         <div
-          className={`flex flex-col gap-3 rounded-2xl p-3 relative ${getEditableClass("cards-section")}`}
+          className={`flex flex-col md:grid md:grid-cols-5 gap-3 rounded-2xl p-3 relative ${getEditableClass("cards-section")}`}
           onClick={(e) => handleElementClick("cards-section", e)}
           style={{
             ...(() => {
