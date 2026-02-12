@@ -432,8 +432,16 @@ export function EditorToolbar({
                   <span className="text-gray-400 text-xs w-16">Texto:</span>
                   <textarea
                     value={currentStyle.buttonText || ""}
-                    onChange={(e) => updateStyle({ buttonText: e.target.value })}
-                    placeholder="Contenido del texto (Enter para salto de línea)"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") {
+                        const { buttonText, ...rest } = currentStyle;
+                        if (selectedElement) onStyleChange(selectedElement, rest);
+                      } else {
+                        updateStyle({ buttonText: val });
+                      }
+                    }}
+                    placeholder="Vacío = usa traducción automática"
                     className="flex-1 min-h-[32px] text-xs bg-gray-800 border border-gray-700 text-white rounded px-2 py-1 resize-y"
                     rows={2}
                     data-testid="input-button-text"
