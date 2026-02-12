@@ -241,11 +241,11 @@ export default function EntrenamientoSelectionPage() {
                 style={getElementStyle("hero-title")}
               >
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[0] || "Activa la"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[0] || t("training.heroTitle1")}
                 </span>
                 <br />
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[1] || "Inteligencia"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[1] || t("training.heroTitle2")}
                 </span>
                 <br />
                 <span style={{ 
@@ -253,7 +253,7 @@ export default function EntrenamientoSelectionPage() {
                   WebkitBackgroundClip: "text", 
                   WebkitTextFillColor: "transparent" 
                 }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[2] || "eXponencial"}
+                  {styles["hero-title"]?.buttonText?.split('\n')[2] || t("training.heroTitle3")}
                 </span>
               </motion.h1>
               
