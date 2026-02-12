@@ -182,25 +182,25 @@ export default function EntrenamientoSelectionPage() {
 
   if (!stylesLoaded || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050a18" }}>
-        <div className="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #050a18 0%, #0a1628 30%, #0d1f3c 100%)" }}>
+    <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="flex md:hidden items-center justify-center px-5 sticky top-0 z-50"
-        style={{ paddingTop: 10, paddingBottom: 10, background: "rgba(5,10,24,0.9)", backdropFilter: "blur(10px)" }}
+        className="flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50"
+        style={{ paddingTop: 10, paddingBottom: 10 }}
       >
         <button 
           onClick={() => { playButtonSound(); setLocation("/"); }}
           className="absolute left-5 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(0,217,255,0.1)", border: "1px solid rgba(0,217,255,0.3)" }}
+          style={{ background: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(138,63,252,0.15)" }}
           data-testid="button-back"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: "#00d9ff" }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
         </button>
         <img 
           src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
@@ -214,7 +214,7 @@ export default function EntrenamientoSelectionPage() {
       </header>
 
       <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" style={{ filter: "brightness(0.15) saturate(2) hue-rotate(200deg)" }} />
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
@@ -227,7 +227,7 @@ export default function EntrenamientoSelectionPage() {
             backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            ...getElementStyle("hero-section", "transparent")
+            ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
           }}
           data-testid="hero-section"
         >
@@ -240,11 +240,11 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                 style={getElementStyle("hero-title")}
               >
-                <span style={{ color: styles["hero-title"]?.textColor || "#ffffff" }}>
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[0] || "Activa la"}
                 </span>
                 <br />
-                <span style={{ color: styles["hero-title"]?.textColor || "#ffffff" }}>
+                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[1] || "Inteligencia"}
                 </span>
                 <br />
@@ -263,7 +263,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.1 }}
                 className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
-                style={{ color: styles["hero-subtitle"]?.textColor || "rgba(255,255,255,0.8)", ...getElementStyle("hero-subtitle") }}
+                style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
                 {styles["hero-subtitle"]?.buttonText || t("training.heroSubtitle1")}
               </motion.p>
@@ -273,7 +273,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.12 }}
                 className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
-                style={{ color: styles["hero-subtitle2"]?.textColor || "rgba(255,255,255,0.8)", ...getElementStyle("hero-subtitle2") }}
+                style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
                 {styles["hero-subtitle2"]?.buttonText || t("training.heroSubtitle2")}
               </motion.p>
@@ -284,7 +284,7 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.15 }}
                 className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
-                style={{ color: styles["hero-desc"]?.textColor || "rgba(255,255,255,0.5)", ...getElementStyle("hero-desc") }}
+                style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
                 {styles["hero-desc"]?.buttonText || t("training.heroDesc")}
               </motion.p>
@@ -377,9 +377,9 @@ export default function EntrenamientoSelectionPage() {
                       </p>
                     )}
                     <motion.button
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 ${getEditableClass(btnId)}`}
+                      animate={{ scale: [1, 1.04, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      className={`w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         if (editorMode) {
@@ -390,14 +390,14 @@ export default function EntrenamientoSelectionPage() {
                         }
                       }}
                       style={{
-                        background: styles[btnId]?.background || "linear-gradient(135deg, #00b4ff 0%, #0066ff 50%, #8b5cf6 100%)",
+                        background: styles[btnId]?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
                         color: styles[btnId]?.textColor || "white",
                         border: "none",
-                        letterSpacing: "0.05em"
+                        boxShadow: "0 4px 15px rgba(139,92,246,0.3)"
                       }}
                       whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
-                      {styles[btnId]?.buttonText || "START"}
+                      {styles[btnId]?.buttonText || "Iniciar"}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </motion.div>
