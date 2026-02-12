@@ -103,6 +103,9 @@ export function EditorToolbar({
       exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       className={`fixed ${positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px]`}
       data-testid="editor-toolbar"
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-1 gap-2">
         <span className="text-white font-medium text-xs sm:text-sm truncate flex-1">

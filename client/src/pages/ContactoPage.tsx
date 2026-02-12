@@ -164,8 +164,33 @@ export default function ContactoPage() {
   const asesorCardS = getResolvedStyle("contact-asesor");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50/30 flex flex-col" onClick={() => { if (editorMode) setSelectedElement(null); }}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        ...(() => {
+          const bgS = getResolvedStyle("page-background");
+          if (bgS?.imageUrl) return { background: `url(${bgS.imageUrl}) center/cover no-repeat`, backgroundSize: bgS?.imageSize ? `${bgS.imageSize}%` : "cover" };
+          if (bgS?.background) return { background: bgS.background };
+          return { background: "#ffffff" };
+        })(),
+      }}
+      onClick={(e) => {
+        if (!editorMode) return;
+        if ((e.target as HTMLElement).closest('[data-testid="editor-toolbar"]')) return;
+        setSelectedElement(null);
+      }}
+    >
       <CurvedHeader showBack onBack={() => setLocation("/")} />
+
+      {editorMode && (
+        <div
+          className={`mx-auto mt-1 px-3 py-1 rounded-full text-[10px] text-gray-400 border border-dashed border-gray-300 ${getEditableClass("page-background")}`}
+          onClick={(e) => handleElementClick("page-background", e)}
+          data-testid="edit-page-background"
+        >
+          Fondo de página
+        </div>
+      )}
 
       <div className="flex-1 px-5 pb-28 max-w-md mx-auto w-full">
         <motion.div
