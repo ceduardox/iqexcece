@@ -295,7 +295,7 @@ export default function AgeSelectionPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+        className={`flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
         style={{
           paddingTop: styles["header"]?.paddingTop || 10,
@@ -355,7 +355,7 @@ export default function AgeSelectionPage() {
       </header>
 
       <div
-        className={`w-full sticky z-40 ${getEditableClass("menu-curve")}`}
+        className={`w-full sticky z-40 md:hidden ${getEditableClass("menu-curve")}`}
         onClick={(e) => handleElementClick("menu-curve", e)}
         style={{
           top: (styles["header"]?.paddingTop || 10) + (styles["header"]?.paddingBottom || 10) + 36,

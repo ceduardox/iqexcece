@@ -20,7 +20,7 @@ export function BottomNavBar() {
 
   const getActiveId = () => {
     if (location === "/") return "inicio";
-    if (location.startsWith("/tests")) return "tests";
+    if (location.startsWith("/tests") || location.startsWith("/age-selection")) return "tests";
     if (location.startsWith("/entrenamiento")) return "entrena";
     if (location.startsWith("/progreso")) return "progreso";
     if (location.startsWith("/blog")) return "mas";
