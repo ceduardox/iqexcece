@@ -2,8 +2,9 @@ import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 import { LanguageButton } from "@/components/LanguageButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
 interface CurvedHeaderProps {
   showBack?: boolean;
@@ -14,6 +15,7 @@ interface CurvedHeaderProps {
 
 export function CurvedHeader({ showBack = false, onBack, rightElement, showLang = true }: CurvedHeaderProps) {
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
 
   const handleBack = () => {
     if (onBack) {
@@ -22,6 +24,8 @@ export function CurvedHeader({ showBack = false, onBack, rightElement, showLang 
       setLocation("/");
     }
   };
+
+  if (!isMobile) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full" data-testid="curved-header">
