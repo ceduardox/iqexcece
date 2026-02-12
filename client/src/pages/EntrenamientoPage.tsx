@@ -107,9 +107,9 @@ export default function EntrenamientoPage() {
           </p>
         </motion.div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {items.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-slate-500 col-span-full">
               <p>No hay entrenamientos disponibles aún.</p>
               <p className="text-sm mt-2">Los entrenamientos se pueden agregar desde el panel de administración.</p>
             </div>
@@ -118,15 +118,31 @@ export default function EntrenamientoPage() {
           {items.map((item, index) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ 
+                opacity: 1, 
+                y: [0, -6, 0],
+                scale: 1,
+              }}
+              transition={{ 
+                opacity: { delay: 0.1 + index * 0.12, duration: 0.4 },
+                scale: { delay: 0.1 + index * 0.12, duration: 0.4, type: "spring", stiffness: 100 },
+                y: { 
+                  delay: 0.5 + index * 0.12,
+                  duration: 2.5, 
+                  repeat: Infinity, 
+                  repeatType: "loop",
+                  ease: "easeInOut",
+                  times: [0, 0.5, 1]
+                }
+              }}
+              whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.2 } }}
               onClick={() => handleItemClick(item)}
               className="relative rounded-2xl overflow-hidden cursor-pointer"
               style={{ background: gradients[index % gradients.length] }}
               data-testid={`card-entrenamiento-${item.id}`}
             >
-              <div className="p-4 flex gap-4">
+              <div className="p-4 flex gap-4 md:flex-col md:items-center md:text-center">
                 {item.imageUrl && (
                   <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 self-center">
                     <img
@@ -146,7 +162,7 @@ export default function EntrenamientoPage() {
                       {item.description}
                     </p>
                   )}
-                  <div className="mt-auto">
+                  <div className="mt-auto flex justify-end md:justify-center">
                     <span className="inline-flex items-center gap-1 bg-white/90 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
                       Comenzar <ChevronRight className="w-3.5 h-3.5" />
                     </span>
