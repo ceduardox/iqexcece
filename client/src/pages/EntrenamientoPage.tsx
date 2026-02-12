@@ -81,7 +81,9 @@ export default function EntrenamientoPage() {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-white flex flex-col"
     >
-      <CurvedHeader showBack onBack={handleBack} />
+      <div className="md:hidden">
+        <CurvedHeader showBack onBack={handleBack} />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -107,7 +109,7 @@ export default function EntrenamientoPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:max-w-3xl md:mx-auto">
           {items.length === 0 && (
             <div className="text-center py-12 text-slate-500 col-span-full">
               <p>No hay entrenamientos disponibles aún.</p>
@@ -142,9 +144,9 @@ export default function EntrenamientoPage() {
               style={{ background: gradients[index % gradients.length] }}
               data-testid={`card-entrenamiento-${item.id}`}
             >
-              <div className="p-4 flex gap-4 md:flex-col md:items-center md:text-center">
+              <div className="p-5 md:p-6 flex gap-4 md:flex-col md:items-center md:text-center">
                 {item.imageUrl && (
-                  <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 self-center">
+                  <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-xl overflow-hidden bg-white/20 self-center">
                     <img
                       src={item.imageUrl}
                       alt={item.title}
@@ -154,16 +156,16 @@ export default function EntrenamientoPage() {
                 )}
                 
                 <div className="flex-1 min-w-0 flex flex-col">
-                  <h3 className="text-lg font-bold text-white mb-1">
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-1">
                     {item.title}
                   </h3>
                   {item.description && (
-                    <p className="text-sm text-white/80 leading-snug mb-2">
+                    <p className="text-sm md:text-base text-white/80 leading-snug mb-3">
                       {item.description}
                     </p>
                   )}
                   <div className="mt-auto flex justify-end md:justify-center">
-                    <span className="inline-flex items-center gap-1 bg-white/90 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 bg-white/90 text-purple-700 text-xs md:text-sm font-semibold px-4 py-2 rounded-full">
                       Comenzar <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
