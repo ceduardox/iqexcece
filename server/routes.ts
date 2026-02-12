@@ -2388,19 +2388,24 @@ ${schemaContent.substring(0, 3000)}
     const auth = req.headers.authorization;
     const token = auth?.replace("Bearer ", "");
     if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = 20;
     const allChats = await db.select().from(asesorChats).orderBy(asesorChats.createdAt);
     const sessions: Record<string, typeof allChats> = {};
     for (const c of allChats) {
       if (!sessions[c.sessionId]) sessions[c.sessionId] = [];
       sessions[c.sessionId].push(c);
     }
-    const result = Object.entries(sessions).map(([sid, msgs]) => ({
+    const all = Object.entries(sessions).map(([sid, msgs]) => ({
       sessionId: sid,
       messageCount: msgs.length,
       lastMessage: msgs[msgs.length - 1]?.createdAt,
       messages: msgs
     })).sort((a, b) => new Date(b.lastMessage || 0).getTime() - new Date(a.lastMessage || 0).getTime());
-    res.json({ sessions: result });
+    const total = all.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginated = all.slice((page - 1) * limit, page * limit);
+    res.json({ sessions: paginated, total, page, totalPages });
   });
 
   return httpServer;

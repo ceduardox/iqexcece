@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -6345,20 +6345,28 @@ function AsesorIAPanel({ token }: { token: string }) {
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [chatPage, setChatPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalChats, setTotalChats] = useState(0);
 
   useEffect(() => {
     fetch("/api/admin/asesor/config", { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => { if (d.config?.prompt) setPrompt(d.config.prompt); })
       .catch(() => {});
-    loadChats();
   }, []);
 
-  const loadChats = () => {
+  useEffect(() => { loadChats(chatPage); }, [chatPage]);
+
+  const loadChats = (page = 1) => {
     setLoadingChats(true);
-    fetch("/api/admin/asesor/chats", { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`/api/admin/asesor/chats?page=${page}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setSessions(d.sessions || []))
+      .then(d => {
+        setSessions(d.sessions || []);
+        setTotalPages(d.totalPages || 1);
+        setTotalChats(d.total || 0);
+      })
       .catch(() => {})
       .finally(() => setLoadingChats(false));
   };
@@ -6410,9 +6418,9 @@ function AsesorIAPanel({ token }: { token: string }) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-violet-400" />
-              Conversaciones ({sessions.length})
+              Conversaciones ({totalChats})
             </h3>
-            <Button onClick={loadChats} variant="outline" size="sm" className="border-violet-500/30 text-violet-400" data-testid="button-refresh-chats">
+            <Button onClick={() => loadChats(chatPage)} variant="outline" size="sm" className="border-violet-500/30 text-violet-400" data-testid="button-refresh-chats">
               <RefreshCw className={`w-4 h-4 mr-1 ${loadingChats ? "animate-spin" : ""}`} />
               Actualizar
             </Button>
@@ -6463,6 +6471,34 @@ function AsesorIAPanel({ token }: { token: string }) {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                onClick={() => setChatPage(p => Math.max(1, p - 1))}
+                disabled={chatPage <= 1 || loadingChats}
+                variant="outline"
+                size="sm"
+                className="border-violet-500/30 text-violet-400"
+                data-testid="button-prev-page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-white/60 text-sm">
+                {chatPage} / {totalPages}
+              </span>
+              <Button
+                onClick={() => setChatPage(p => Math.min(totalPages, p + 1))}
+                disabled={chatPage >= totalPages || loadingChats}
+                variant="outline"
+                size="sm"
+                className="border-violet-500/30 text-violet-400"
+                data-testid="button-next-page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
             </div>
           )}
         </CardContent>
