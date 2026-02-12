@@ -5,10 +5,30 @@ import { Dumbbell, ChevronRight, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode, resolveStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { VideoBackground, MediaIcon } from "@/components/VideoBackground";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Minus } from "lucide-react";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+
+function SpacerEl({ id, styles, isMobile, editorMode, getEditableClass, handleElementClick }: {
+  id: string; styles: PageStyles; isMobile: boolean; editorMode: boolean;
+  getEditableClass: (id: string) => string; handleElementClick: (id: string, e: React.MouseEvent) => void;
+}) {
+  const resolved = resolveStyle(styles, id, isMobile);
+  const height = resolved.sectionHeight ?? resolved.spacerHeight ?? 20;
+  const visible = resolved.visible !== false;
+  if (!visible && !editorMode) return null;
+  return (
+    <div className={`w-full ${getEditableClass(id)} ${!visible && editorMode ? "opacity-40" : ""}`}
+      onClick={(e) => handleElementClick(id, e)}
+      style={{ height: visible ? height : 4, background: editorMode ? "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,217,255,0.08) 5px, rgba(0,217,255,0.08) 10px)" : "transparent", transition: "height 0.2s ease" }}
+      data-testid={`spacer-${id}`}>
+      {editorMode && <div className="flex items-center justify-center h-full"><span className="text-[9px] text-gray-400 bg-gray-900/60 px-2 py-0.5 rounded"><Minus className="w-3 h-3 inline mr-1" />{id} ({height}px) {!visible ? "[oculto]" : ""}</span></div>}
+    </div>
+  );
+}
 
 const playCardSound = () => {
   const audio = new Audio('/card.mp3');
@@ -59,6 +79,7 @@ export default function EntrenamientoSelectionPage() {
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+  const isMobile = useIsMobile();
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
     queryKey: ["/api/entrenamiento", "ninos", "items", lang],
@@ -154,8 +175,12 @@ export default function EntrenamientoSelectionPage() {
       : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
   }, [editorMode, selectedElement]);
 
+  const getResolvedStyle = useCallback((elementId: string): ElementStyle => {
+    return resolveStyle(styles, elementId, isMobile);
+  }, [styles, isMobile]);
+
   const getElementStyle = useCallback((elementId: string, defaultBg?: string) => {
-    const s = styles[elementId];
+    const s = getResolvedStyle(elementId);
     const result: React.CSSProperties = {};
     if (s?.imageUrl) {
       result.background = `url(${s.imageUrl}) center/cover no-repeat`;
@@ -171,8 +196,9 @@ export default function EntrenamientoSelectionPage() {
     if (s?.marginBottom) result.marginBottom = s.marginBottom;
     if (s?.marginLeft) result.marginLeft = s.marginLeft;
     if (s?.marginRight) result.marginRight = s.marginRight;
+    if (s?.sectionHeight) result.minHeight = s.sectionHeight;
     return result;
-  }, [styles]);
+  }, [getResolvedStyle]);
 
   const handleSelect = useCallback((item: EntrenamientoItem) => {
     if (editorMode) return;
@@ -219,13 +245,14 @@ export default function EntrenamientoSelectionPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
+        <SpacerEl id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
           style={{
             paddingTop: "16px",
             position: "relative",
-            backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
+            backgroundSize: getResolvedStyle("hero-section")?.imageSize ? `${getResolvedStyle("hero-section").imageSize}%` : "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
@@ -241,12 +268,12 @@ export default function EntrenamientoSelectionPage() {
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                 style={getElementStyle("hero-title")}
               >
-                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[0] || t("training.heroTitle1")}
+                <span style={{ color: getResolvedStyle("hero-title")?.textColor || "#8a3ffc" }}>
+                  {getResolvedStyle("hero-title")?.buttonText?.split('\n')[0] || t("training.heroTitle1")}
                 </span>
                 <br />
-                <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[1] || t("training.heroTitle2")}
+                <span style={{ color: getResolvedStyle("hero-title")?.textColor || "#8a3ffc" }}>
+                  {getResolvedStyle("hero-title")?.buttonText?.split('\n')[1] || t("training.heroTitle2")}
                 </span>
                 <br />
                 <span style={{ 
@@ -254,7 +281,7 @@ export default function EntrenamientoSelectionPage() {
                   WebkitBackgroundClip: "text", 
                   WebkitTextFillColor: "transparent" 
                 }}>
-                  {styles["hero-title"]?.buttonText?.split('\n')[2] || t("training.heroTitle3")}
+                  {getResolvedStyle("hero-title")?.buttonText?.split('\n')[2] || t("training.heroTitle3")}
                 </span>
               </motion.h1>
               
@@ -264,9 +291,9 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.1 }}
                 className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
-                style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+                style={{ color: getResolvedStyle("hero-subtitle")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
-                {styles["hero-subtitle"]?.buttonText || t("training.heroSubtitle1")}
+                {getResolvedStyle("hero-subtitle")?.buttonText || t("training.heroSubtitle1")}
               </motion.p>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -274,9 +301,9 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.12 }}
                 className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
-                style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                style={{ color: getResolvedStyle("hero-subtitle2")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
-                {styles["hero-subtitle2"]?.buttonText || t("training.heroSubtitle2")}
+                {getResolvedStyle("hero-subtitle2")?.buttonText || t("training.heroSubtitle2")}
               </motion.p>
               
               <motion.p 
@@ -285,23 +312,26 @@ export default function EntrenamientoSelectionPage() {
                 transition={{ delay: 0.15 }}
                 className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
-                style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+                style={{ color: getResolvedStyle("hero-desc")?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
-                {styles["hero-desc"]?.buttonText || t("training.heroDesc")}
+                {getResolvedStyle("hero-desc")?.buttonText || t("training.heroDesc")}
               </motion.p>
             </div>
           </div>
         </div>
 
+        <SpacerEl id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
+
         <div 
           className={`px-4 pb-8 -mt-2 relative ${getEditableClass("cards-section")}`}
           onClick={(e) => handleElementClick("cards-section", e)}
           style={{
-            ...(styles["cards-section"]?.imageUrl 
-              ? { background: `url(${styles["cards-section"].imageUrl}) center/cover no-repeat`, backgroundSize: styles["cards-section"]?.imageSize ? `${styles["cards-section"].imageSize}%` : "cover" }
-              : styles["cards-section"]?.background ? { background: styles["cards-section"].background } : {}),
-            borderRadius: styles["cards-section"]?.borderRadius || 0,
-            padding: styles["cards-section"]?.imageUrl ? "16px" : undefined
+            ...(() => { const cs = getResolvedStyle("cards-section"); return cs?.imageUrl 
+              ? { background: `url(${cs.imageUrl}) center/cover no-repeat`, backgroundSize: cs?.imageSize ? `${cs.imageSize}%` : "cover" }
+              : cs?.background ? { background: cs.background } : {}; })(),
+            borderRadius: getResolvedStyle("cards-section")?.borderRadius || 0,
+            padding: getResolvedStyle("cards-section")?.imageUrl ? "16px" : undefined,
+            minHeight: getResolvedStyle("cards-section")?.sectionHeight
           }}
         >
         <div className="grid grid-cols-2 gap-4 md:max-w-4xl md:mx-auto">
