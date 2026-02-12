@@ -5,6 +5,7 @@ import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, Chevron
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -153,12 +154,15 @@ export default function ALeerBoliviaPage() {
         <section
           className={`relative px-5 pt-8 pb-10 ${getEditableClass("section-hero")}`}
           style={{
-            background: styles["section-hero"]?.imageUrl
+            background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
               : styles["section-hero"]?.background || undefined,
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-hero", e); }}
         >
+          {isVideoUrl(styles["section-hero"]?.imageUrl) && (
+            <VideoBackground src={styles["section-hero"]!.imageUrl!} imageSize={styles["section-hero"]?.imageSize} />
+          )}
           {editorMode && (
             <div
               className="absolute top-2 right-2 z-20 bg-purple-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
@@ -272,12 +276,15 @@ export default function ALeerBoliviaPage() {
         <section
           className={`px-5 pb-10 relative ${getEditableClass("section-objectives")}`}
           style={{
-            background: styles["section-objectives"]?.imageUrl
+            background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
               : styles["section-objectives"]?.background || undefined,
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-objectives", e); }}
         >
+          {isVideoUrl(styles["section-objectives"]?.imageUrl) && (
+            <VideoBackground src={styles["section-objectives"]!.imageUrl!} imageSize={styles["section-objectives"]?.imageSize} />
+          )}
           {editorMode && (
             <div
               className="absolute top-2 right-2 z-20 bg-cyan-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
@@ -426,12 +433,15 @@ export default function ALeerBoliviaPage() {
         <section
           className={`px-5 pb-12 pt-8 relative ${getEditableClass("section-participar")}`}
           style={{
-            background: styles["section-participar"]?.imageUrl
+            background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
               : styles["section-participar"]?.background || undefined,
           }}
           onClick={(e) => { if (editorMode) handleElementClick("section-participar", e); }}
         >
+          {isVideoUrl(styles["section-participar"]?.imageUrl) && (
+            <VideoBackground src={styles["section-participar"]!.imageUrl!} imageSize={styles["section-participar"]?.imageSize} />
+          )}
           {editorMode && (
             <div
               className="absolute top-2 right-2 z-20 bg-orange-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"

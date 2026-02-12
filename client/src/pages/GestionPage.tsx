@@ -1135,8 +1135,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setOriginalSize(file.size);
     const reader = new FileReader();
     reader.onload = () => {
-      setImagePreview(reader.result as string);
-      compressImage(reader.result as string, compressionQuality);
+      const result = reader.result as string;
+      setImagePreview(result);
+      if (file.type === "video/webm") {
+        setCompressedSize(file.size);
+      } else {
+        compressImage(result, compressionQuality);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -1184,7 +1189,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   const saveImage = async () => {
     if (!imagePreview || !imageName) return;
     
-    // Get token from state or localStorage
     const authToken = token || localStorage.getItem("adminToken");
     if (!authToken) {
       setError("No autorizado. Por favor inicia sesión de nuevo.");
@@ -1193,42 +1197,49 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     
     setSaving(true);
     try {
-      const img = new Image();
-      img.src = imagePreview;
-      await new Promise(resolve => img.onload = resolve);
-      
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-      
-      // Calculate crop in pixels based on displayed image dimensions
-      if (crop && crop.width && crop.height && imgRef.current) {
-        const scaleX = img.naturalWidth / imgRef.current.width;
-        const scaleY = img.naturalHeight / imgRef.current.height;
-        
-        const cropX = (crop.x || 0) * scaleX;
-        const cropY = (crop.y || 0) * scaleY;
-        const cropW = crop.width * scaleX;
-        const cropH = crop.height * scaleY;
-        
-        canvas.width = cropW;
-        canvas.height = cropH;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-        width = Math.round(cropW);
-        height = Math.round(cropH);
+      const isVideo = imagePreview.startsWith('data:video/');
+      let data: string;
+      let width = 0;
+      let height = 0;
+
+      if (isVideo) {
+        data = imagePreview;
       } else {
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
+        const img = new Image();
+        img.src = imagePreview;
+        await new Promise(resolve => img.onload = resolve);
+        
+        const canvas = document.createElement('canvas');
+        width = img.width;
+        height = img.height;
+        
+        if (crop && crop.width && crop.height && imgRef.current) {
+          const scaleX = img.naturalWidth / imgRef.current.width;
+          const scaleY = img.naturalHeight / imgRef.current.height;
+          
+          const cropX = (crop.x || 0) * scaleX;
+          const cropY = (crop.y || 0) * scaleY;
+          const cropW = crop.width * scaleX;
+          const cropH = crop.height * scaleY;
+          
+          canvas.width = cropW;
+          canvas.height = cropH;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+          width = Math.round(cropW);
+          height = Math.round(cropH);
+        } else {
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0);
+        }
+        
+        const isPng = imagePreview.startsWith('data:image/png');
+        data = isPng 
+          ? canvas.toDataURL('image/png')
+          : canvas.toDataURL('image/jpeg', compressionQuality / 100);
       }
-      
-      // Preserve PNG transparency, otherwise use JPEG
-      const isPng = imagePreview.startsWith('data:image/png');
-      const data = isPng 
-        ? canvas.toDataURL('image/png')
-        : canvas.toDataURL('image/jpeg', compressionQuality / 100);
       
       const res = await fetch("/api/admin/images", {
         method: "POST",
@@ -4342,14 +4353,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               <div className="p-4 border-2 border-dashed border-white/20 rounded-lg">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/webm"
                   onChange={handleImageSelect}
                   className="hidden"
                   id="image-upload"
                 />
                 <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center gap-2">
                   <Upload className="w-8 h-8 text-white/60" />
-                  <span className="text-white/60 text-sm">Subir imagen</span>
+                  <span className="text-white/60 text-sm">Subir imagen o video (.webm)</span>
                 </label>
               </div>
 
@@ -4363,53 +4374,67 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     className="bg-white/10 border-white/20 text-white"
                   />
                   
-                  {/* Crop Area */}
-                  <div className="space-y-2">
-                    <div className="flex gap-2 flex-wrap">
-                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop(undefined)}>
-                        Sin recorte
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 10, y: 10, width: 80, height: 80 })}>
-                        Recortar centro
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 0, y: 0, width: 100, height: 100 })}>
-                        Toda la imagen
-                      </Button>
+                  {imagePreview?.startsWith('data:video/') ? (
+                    <div className="space-y-2">
+                      <p className="text-cyan-400 text-xs">Video .webm - se guardará sin compresión</p>
+                      <div className="max-h-64 overflow-auto bg-gray-900 rounded p-2">
+                        <video src={imagePreview} controls autoPlay loop muted playsInline className="max-w-full rounded" />
+                      </div>
+                      <div className="text-white/60 text-sm">
+                        Tamaño: {(originalSize / 1024).toFixed(1)}KB
+                      </div>
                     </div>
-                    <p className="text-white/40 text-xs">Arrastra las esquinas o bordes para ajustar el recorte</p>
-                    <div className="max-h-64 overflow-auto bg-gray-900 rounded p-2">
-                      <ReactCrop 
-                        crop={crop} 
-                        onChange={c => setCrop(c)}
-                        ruleOfThirds
-                      >
-                        <img ref={imgRef} src={imagePreview} alt="Preview" className="max-w-full" />
-                      </ReactCrop>
-                    </div>
-                  </div>
-                  
-                  {/* Compression */}
-                  <div>
-                    <div className="flex justify-between text-white/60 text-sm mb-1">
-                      <span>Compresión: {compressionQuality}%</span>
-                      <span className="text-cyan-400">
-                        {(originalSize / 1024).toFixed(1)}KB → {(compressedSize / 1024).toFixed(1)}KB
-                        {originalSize > 0 && compressedSize < originalSize && ` (${Math.round((1 - compressedSize / originalSize) * 100)}% menos)`}
-                      </span>
-                    </div>
-                    {imagePreview?.startsWith('data:image/png') && (
-                      <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresión con pérdida</p>
-                    )}
-                    <input
-                      type="range"
-                      min="10"
-                      max="100"
-                      value={compressionQuality}
-                      onChange={(e) => setCompressionQuality(Number(e.target.value))}
-                      className="w-full"
-                      disabled={imagePreview?.startsWith('data:image/png')}
-                    />
-                  </div>
+                  ) : (
+                    <>
+                      {/* Crop Area */}
+                      <div className="space-y-2">
+                        <div className="flex gap-2 flex-wrap">
+                          <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop(undefined)}>
+                            Sin recorte
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 10, y: 10, width: 80, height: 80 })}>
+                            Recortar centro
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-xs border-white/20 text-white/80" onClick={() => setCrop({ unit: '%', x: 0, y: 0, width: 100, height: 100 })}>
+                            Toda la imagen
+                          </Button>
+                        </div>
+                        <p className="text-white/40 text-xs">Arrastra las esquinas o bordes para ajustar el recorte</p>
+                        <div className="max-h-64 overflow-auto bg-gray-900 rounded p-2">
+                          <ReactCrop 
+                            crop={crop} 
+                            onChange={c => setCrop(c)}
+                            ruleOfThirds
+                          >
+                            <img ref={imgRef} src={imagePreview} alt="Preview" className="max-w-full" />
+                          </ReactCrop>
+                        </div>
+                      </div>
+                      
+                      {/* Compression */}
+                      <div>
+                        <div className="flex justify-between text-white/60 text-sm mb-1">
+                          <span>Compresión: {compressionQuality}%</span>
+                          <span className="text-cyan-400">
+                            {(originalSize / 1024).toFixed(1)}KB → {(compressedSize / 1024).toFixed(1)}KB
+                            {originalSize > 0 && compressedSize < originalSize && ` (${Math.round((1 - compressedSize / originalSize) * 100)}% menos)`}
+                          </span>
+                        </div>
+                        {imagePreview?.startsWith('data:image/png') && (
+                          <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresión con pérdida</p>
+                        )}
+                        <input
+                          type="range"
+                          min="10"
+                          max="100"
+                          value={compressionQuality}
+                          onChange={(e) => setCompressionQuality(Number(e.target.value))}
+                          className="w-full"
+                          disabled={imagePreview?.startsWith('data:image/png')}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex gap-2">
                     <Button onClick={saveImage} disabled={saving} className="flex-1 bg-green-600">

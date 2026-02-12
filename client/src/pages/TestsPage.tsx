@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -87,9 +88,10 @@ function TestCard({
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 0.1 + index * 0.12, duration: 0.4, type: "spring", stiffness: 100 }}
+      whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.2 } }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
       className={`cursor-pointer ${getEditableClass(cardId)}`}
       data-testid={`card-test-${testId}`}
@@ -97,7 +99,7 @@ function TestCard({
       <motion.div
         className="relative overflow-hidden rounded-2xl p-4"
         style={{ 
-          background: hasBackgroundImage 
+          background: (hasBackgroundImage && !isVideoUrl(cardStyle?.imageUrl)) 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : (cardStyle?.background || defaultStyle.bg),
           borderRadius: cardStyle?.borderRadius || 20,
@@ -109,6 +111,9 @@ function TestCard({
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
+        {hasBackgroundImage && isVideoUrl(cardStyle?.imageUrl) && (
+          <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
+        )}
         <div 
           className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${getEditableClass(`badge-${testId}`)}`}
           style={{ 
@@ -340,7 +345,7 @@ export default function TestsPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+        className={`flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
         style={{
           paddingTop: styles["header"]?.paddingTop || 10,
@@ -393,7 +398,7 @@ export default function TestsPage() {
       </header>
 
       <div
-        className={`w-full sticky z-40 ${getEditableClass("menu-curve")}`}
+        className={`w-full sticky z-40 md:hidden ${getEditableClass("menu-curve")}`}
         onClick={(e) => handleElementClick("menu-curve", e)}
         style={{
           top: (styles["header"]?.paddingTop || 10) + (styles["header"]?.paddingBottom || 10) + 36,
