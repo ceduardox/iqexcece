@@ -292,7 +292,18 @@ export default function EntrenamientoSelectionPage() {
           </div>
         </div>
 
-        <div className="px-4 pb-8 -mt-2 grid grid-cols-2 gap-4 md:max-w-4xl md:mx-auto">
+        <div 
+          className={`px-4 pb-8 -mt-2 relative ${getEditableClass("cards-section")}`}
+          onClick={(e) => handleElementClick("cards-section", e)}
+          style={{
+            ...(styles["cards-section"]?.imageUrl 
+              ? { background: `url(${styles["cards-section"].imageUrl}) center/cover no-repeat`, backgroundSize: styles["cards-section"]?.imageSize ? `${styles["cards-section"].imageSize}%` : "cover" }
+              : styles["cards-section"]?.background ? { background: styles["cards-section"].background } : {}),
+            borderRadius: styles["cards-section"]?.borderRadius || 0,
+            padding: styles["cards-section"]?.imageUrl ? "16px" : undefined
+          }}
+        >
+        <div className="grid grid-cols-2 gap-4 md:max-w-4xl md:mx-auto">
           {items.length === 0 ? (
             <div className="text-center py-8 col-span-full">
               <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -348,10 +359,7 @@ export default function EntrenamientoSelectionPage() {
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
                       style={{ width: iconSize, height: iconSize }}
                     >
-                      <div className="chroma-aura" />
-                      <div className="chroma-icon relative z-[1]">
-                        <MediaIcon src={iconUrl} size={iconSize} />
-                      </div>
+                      <MediaIcon src={iconUrl} size={iconSize} />
                     </div>
                     
                     <h3 
@@ -390,10 +398,15 @@ export default function EntrenamientoSelectionPage() {
                         }
                       }}
                       style={{
-                        background: styles[btnId]?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
+                        background: styles[btnId]?.imageUrl 
+                          ? `url(${styles[btnId].imageUrl}) center/cover no-repeat`
+                          : (styles[btnId]?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
+                        backgroundSize: styles[btnId]?.imageSize ? `${styles[btnId].imageSize}%` : "cover",
                         color: styles[btnId]?.textColor || "white",
                         border: "none",
-                        boxShadow: "0 4px 15px rgba(139,92,246,0.3)"
+                        boxShadow: styles[btnId]?.shadowBlur 
+                          ? `0 ${styles[btnId].shadowBlur / 2}px ${styles[btnId].shadowBlur}px ${styles[btnId]?.shadowColor || "rgba(139,92,246,0.3)"}`
+                          : "0 4px 15px rgba(139,92,246,0.3)"
                       }}
                       whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
@@ -405,6 +418,7 @@ export default function EntrenamientoSelectionPage() {
               );
             })
           )}
+        </div>
         </div>
       </main>
 
