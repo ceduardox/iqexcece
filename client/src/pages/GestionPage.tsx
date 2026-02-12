@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -56,7 +56,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia">("sesiones");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -1653,6 +1653,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Bot className="w-5 h-5" />
             Agente IA
           </button>
+          <button
+            onClick={() => setActiveTab("asesor-ia")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "asesor-ia" ? "bg-violet-600 text-white" : "text-violet-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-asesor-ia"
+          >
+            <Headphones className="w-5 h-5" />
+            Chat IA
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1840,6 +1850,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Bot className="w-4 h-4 mr-1" />
             Agente
+          </Button>
+          <Button
+            onClick={() => setActiveTab("asesor-ia")}
+            variant={activeTab === "asesor-ia" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "asesor-ia" ? "bg-violet-600" : "border-violet-500/30 text-violet-400"}
+            data-testid="mobile-tab-asesor-ia"
+          >
+            <Headphones className="w-4 h-4 mr-1" />
+            Chat IA
           </Button>
         </div>
 
@@ -6122,6 +6142,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         {activeTab === "agente" && (
           <AdminAgentChat adminToken={token} />
         )}
+        {activeTab === "asesor-ia" && (
+          <AsesorIAPanel token={token} />
+        )}
         </div>
       </div>
     </div>
@@ -6313,5 +6336,137 @@ function InstitutionsPanel({ token }: { token: string }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function AsesorIAPanel({ token }: { token: string }) {
+  const [prompt, setPrompt] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loadingChats, setLoadingChats] = useState(false);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/asesor/config", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => { if (d.config?.prompt) setPrompt(d.config.prompt); })
+      .catch(() => {});
+    loadChats();
+  }, []);
+
+  const loadChats = () => {
+    setLoadingChats(true);
+    fetch("/api/admin/asesor/chats", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setSessions(d.sessions || []))
+      .catch(() => {})
+      .finally(() => setLoadingChats(false));
+  };
+
+  const savePrompt = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/admin/asesor/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ prompt }),
+      });
+    } catch {}
+    setSaving(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-black/40 border-violet-500/30">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+            <Headphones className="w-5 h-5 text-violet-400" />
+            Prompt del Asesor IA
+          </h3>
+          <p className="text-white/50 text-xs mb-3">
+            Este prompt define cómo se comporta el chat IA cuando los usuarios hablan con el asesor desde la página de Contacto.
+          </p>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Eres un asesor amable de IQ Exponencial..."
+            className="w-full h-40 bg-black/30 text-white border border-white/20 rounded-lg p-3 text-sm resize-y focus:border-violet-500 focus:outline-none"
+            data-testid="input-asesor-prompt"
+          />
+          <Button
+            onClick={savePrompt}
+            disabled={saving}
+            className="mt-3 bg-violet-600 hover:bg-violet-700"
+            data-testid="button-save-prompt"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? "Guardando..." : "Guardar Prompt"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black/40 border-violet-500/30">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-violet-400" />
+              Conversaciones ({sessions.length})
+            </h3>
+            <Button onClick={loadChats} variant="outline" size="sm" className="border-violet-500/30 text-violet-400" data-testid="button-refresh-chats">
+              <RefreshCw className={`w-4 h-4 mr-1 ${loadingChats ? "animate-spin" : ""}`} />
+              Actualizar
+            </Button>
+          </div>
+
+          {loadingChats && sessions.length === 0 ? (
+            <div className="text-white/50 text-center py-4">Cargando conversaciones...</div>
+          ) : sessions.length === 0 ? (
+            <div className="text-white/40 text-center py-6">No hay conversaciones aún</div>
+          ) : (
+            <div className="space-y-2 max-h-[500px] overflow-y-auto">
+              {sessions.map((session: any) => (
+                <div key={session.sessionId} className="bg-black/20 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setExpandedSession(expandedSession === session.sessionId ? null : session.sessionId)}
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
+                    data-testid={`button-session-${session.sessionId}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
+                        <MessageSquare className="w-4 h-4 text-violet-400" />
+                      </div>
+                      <div className="text-left">
+                        <span className="text-white text-sm font-medium block">{session.messageCount} mensajes</span>
+                        <span className="text-white/40 text-xs">{session.lastMessage ? new Date(session.lastMessage).toLocaleString() : ""}</span>
+                      </div>
+                    </div>
+                    {expandedSession === session.sessionId ? (
+                      <EyeOff className="w-4 h-4 text-white/40" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-white/40" />
+                    )}
+                  </button>
+                  {expandedSession === session.sessionId && (
+                    <div className="px-4 pb-3 space-y-2 border-t border-white/5 pt-2">
+                      {session.messages.map((msg: any, i: number) => (
+                        <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
+                            msg.role === "user"
+                              ? "bg-violet-600/40 text-white"
+                              : "bg-white/10 text-white/80"
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { MessageCircle, Mail, Newspaper, BookOpen, Headphones, ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { MessageCircle, Mail, Newspaper, BookOpen, Headphones, ChevronRight, Send, X, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,6 +20,17 @@ function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean):
 
 const DEFAULT_OPERATOR_IMG = "https://cdn-icons-png.flaticon.com/512/4825/4825038.png";
 
+function getSessionId() {
+  let sid = sessionStorage.getItem("asesor_session");
+  if (!sid) {
+    sid = `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    sessionStorage.setItem("asesor_session", sid);
+  }
+  return sid;
+}
+
+interface ChatMsg { role: "user" | "assistant"; content: string }
+
 export default function ContactoPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "es";
@@ -34,6 +45,13 @@ export default function ContactoPage() {
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkEditorMode = () => setEditorMode(localStorage.getItem("editorMode") === "true");
@@ -58,6 +76,40 @@ export default function ContactoPage() {
       .catch(() => { clearTimeout(timeout); setStylesLoaded(true); });
     return () => clearTimeout(timeout);
   }, [lang]);
+
+  useEffect(() => {
+    if (chatOpen) {
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [chatOpen, chatMessages.length]);
+
+  const sendMessage = async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+    setChatInput("");
+    const userMsg: ChatMsg = { role: "user", content: msg };
+    setChatMessages(prev => [...prev, userMsg]);
+    setChatLoading(true);
+    try {
+      const res = await fetch("/api/asesor/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, sessionId: getSessionId(), history: [...chatMessages, userMsg] }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setChatMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+      } else {
+        setChatMessages(prev => [...prev, { role: "assistant", content: data.error || "Error al responder" }]);
+      }
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Error de conexión" }]);
+    }
+    setChatLoading(false);
+  };
 
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -250,9 +302,6 @@ export default function ContactoPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.16 }}
-            onClick={(e) => {
-              if (editorMode) { handleElementClick("contact-asesor", e); }
-            }}
             className={`w-full rounded-2xl overflow-hidden transition-all ${getEditableClass("contact-asesor")}`}
             style={{
               background: asesorCardS?.background || "linear-gradient(135deg, #7c3aed, #a855f7)",
@@ -261,7 +310,13 @@ export default function ContactoPage() {
             }}
             data-testid="button-contact-asesor"
           >
-            <div className="flex items-center p-4 gap-4">
+            <div
+              className="flex items-center p-4 gap-4 cursor-pointer"
+              onClick={(e) => {
+                if (editorMode) { handleElementClick("contact-asesor", e); }
+                else { playClick(); setChatOpen(!chatOpen); }
+              }}
+            >
               <div
                 className={`w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
@@ -290,10 +345,88 @@ export default function ContactoPage() {
                   {getResolvedStyle("asesor-sub")?.buttonText || t("contact.asesorSub")}
                 </p>
               </div>
-              <motion.div {...arrowBounce}>
+              <motion.div
+                animate={{ rotate: chatOpen ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
                 <ChevronRight className="w-5 h-5 text-white/60 flex-shrink-0" />
               </motion.div>
             </div>
+
+            <AnimatePresence>
+              {chatOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="bg-white rounded-t-2xl mx-1 mb-1 overflow-hidden" style={{ borderRadius: 16 }}>
+                    <div className="flex items-center justify-between px-4 py-2 bg-purple-50 border-b border-purple-100">
+                      <span className="text-xs font-semibold text-purple-700">Chat con Asesor IA</span>
+                      <button onClick={(e) => { e.stopPropagation(); setChatOpen(false); }} className="text-purple-400 hover:text-purple-600" data-testid="button-close-chat">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="h-64 overflow-y-auto p-3 space-y-2 bg-gray-50" data-testid="chat-messages">
+                      {chatMessages.length === 0 && (
+                        <div className="text-center text-gray-400 text-xs mt-8">
+                          <Headphones className="w-8 h-8 mx-auto mb-2 text-purple-300" />
+                          <p className="font-medium text-gray-500">Escribe tu consulta</p>
+                          <p className="mt-1">Nuestro asesor IA te responderá al instante</p>
+                        </div>
+                      )}
+                      {chatMessages.map((msg, i) => (
+                        <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                          <div
+                            className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                              msg.role === "user"
+                                ? "bg-purple-600 text-white rounded-br-md"
+                                : "bg-white text-gray-700 border border-gray-200 rounded-bl-md"
+                            }`}
+                            data-testid={`chat-msg-${msg.role}-${i}`}
+                          >
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-white border border-gray-200 px-3 py-2 rounded-2xl rounded-bl-md">
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                          </div>
+                        </div>
+                      )}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    <div className="flex items-center gap-2 p-2 border-t border-gray-100 bg-white">
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
+                        placeholder="Escribe un mensaje..."
+                        className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 border-0 outline-none focus:ring-2 focus:ring-purple-300"
+                        disabled={chatLoading}
+                        data-testid="input-chat-message"
+                      />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); sendMessage(); }}
+                        disabled={chatLoading || !chatInput.trim()}
+                        className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center disabled:opacity-40 transition-all active:scale-95"
+                        data-testid="button-send-chat"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           {contactItems.slice(2).map((item, index) => (

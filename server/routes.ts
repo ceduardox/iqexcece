@@ -7,7 +7,7 @@ import * as path from "path";
 import { execFileSync } from "child_process";
 import { eq, and } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
-import { agentMessages, cerebralIntros, insertCerebralIntroSchema } from "@shared/schema";
+import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats } from "@shared/schema";
 import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
@@ -2308,6 +2308,99 @@ ${schemaContent.substring(0, 3000)}
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Translation error" });
     }
+  });
+
+  // ===== ASESOR CHAT ENDPOINTS =====
+
+  app.post("/api/asesor/chat", async (req, res) => {
+    const { message, sessionId, history } = req.body;
+    if (!message || !sessionId) return res.status(400).json({ error: "message and sessionId required" });
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "API not configured" });
+
+      const configRows = await db.select().from(asesorConfig).limit(1);
+      const systemPrompt = configRows[0]?.prompt || "Eres un asesor amable de IQ Exponencial, una plataforma de entrenamiento cognitivo. Responde de forma breve, clara y útil en español.";
+
+      await db.insert(asesorChats).values({ sessionId, role: "user", content: message });
+
+      const chatHistory = (history || []).slice(-10).map((m: any) => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }]
+      }));
+
+      chatHistory.push({ role: "user", parts: [{ text: message }] });
+
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+      let reply = null;
+      for (const model of models) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents: chatHistory,
+              generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
+            })
+          });
+          const data = await response.json() as any;
+          if (data?.error?.status === 'RESOURCE_EXHAUSTED') continue;
+          reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (reply) break;
+        } catch { continue; }
+      }
+
+      if (!reply) return res.status(429).json({ error: "Servicio temporalmente ocupado, intenta de nuevo." });
+
+      await db.insert(asesorChats).values({ sessionId, role: "assistant", content: reply });
+      res.json({ reply });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Error del chat" });
+    }
+  });
+
+  app.get("/api/admin/asesor/config", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const rows = await db.select().from(asesorConfig).limit(1);
+    res.json({ config: rows[0] || null });
+  });
+
+  app.post("/api/admin/asesor/config", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: "prompt required" });
+    const existing = await db.select().from(asesorConfig).limit(1);
+    if (existing.length > 0) {
+      await db.update(asesorConfig).set({ prompt, updatedAt: new Date() }).where(eq(asesorConfig.id, existing[0].id));
+    } else {
+      await db.insert(asesorConfig).values({ prompt });
+    }
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/asesor/chats", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    const allChats = await db.select().from(asesorChats).orderBy(asesorChats.createdAt);
+    const sessions: Record<string, typeof allChats> = {};
+    for (const c of allChats) {
+      if (!sessions[c.sessionId]) sessions[c.sessionId] = [];
+      sessions[c.sessionId].push(c);
+    }
+    const result = Object.entries(sessions).map(([sid, msgs]) => ({
+      sessionId: sid,
+      messageCount: msgs.length,
+      lastMessage: msgs[msgs.length - 1]?.createdAt,
+      messages: msgs
+    })).sort((a, b) => new Date(b.lastMessage || 0).getTime() - new Date(a.lastMessage || 0).getTime());
+    res.json({ sessions: result });
   });
 
   return httpServer;
