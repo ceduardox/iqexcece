@@ -1,11 +1,12 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Menu, Home, Dumbbell, BarChart3, MoreHorizontal, ChevronRight } from "lucide-react";
+import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playButtonSound = () => {
@@ -278,11 +279,6 @@ export default function AgeSelectionPage() {
     }
   }, [testId, setLocation, updateUserData, t]);
 
-  const handleNavHome = useCallback(() => {
-    playButtonSound();
-    setLocation("/");
-  }, [setLocation]);
-
   if (!stylesLoaded) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -369,7 +365,7 @@ export default function AgeSelectionPage() {
         />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="flex-1 overflow-y-auto pb-0">
         <div 
           className={`w-full ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
@@ -425,58 +421,7 @@ export default function AgeSelectionPage() {
         </div>
       </main>
 
-      <nav 
-        className={`fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-50 px-4 py-2 z-50 safe-area-inset-bottom ${getEditableClass("nav-bar")}`}
-        onClick={(e) => { if (editorMode) handleElementClick("nav-bar", e); }}
-        style={getElementStyle("nav-bar", "white")}
-      >
-        <div className="flex items-center justify-around max-w-md mx-auto">
-          <button 
-            onClick={(e) => { if (editorMode) handleElementClick("nav-inicio", e); else handleNavHome(); }}
-            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-inicio")}`}
-            style={getElementStyle("nav-inicio")}
-            data-testid="nav-inicio"
-          >
-            <div 
-              className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: styles["nav-inicio"]?.background || "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                boxShadow: styles["nav-inicio"]?.boxShadow || "0 4px 15px rgba(124, 58, 237, 0.4)"
-              }}
-            >
-              <Home className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>{t("nav.inicio")}</span>
-          </button>
-          <button 
-            onClick={(e) => { if (editorMode) handleElementClick("nav-entrenar", e); }}
-            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-entrenar")}`}
-            style={getElementStyle("nav-entrenar")}
-            data-testid="nav-entrenar"
-          >
-            <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
-          </button>
-          <button 
-            onClick={(e) => { if (editorMode) handleElementClick("nav-progreso", e); }}
-            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-progreso")}`}
-            style={getElementStyle("nav-progreso")}
-            data-testid="nav-progreso"
-          >
-            <BarChart3 className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>{t("nav.progreso")}</span>
-          </button>
-          <button 
-            onClick={(e) => { if (editorMode) handleElementClick("nav-mas", e); }}
-            className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-mas")}`}
-            style={getElementStyle("nav-mas")}
-            data-testid="nav-mas"
-          >
-            <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
-            <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
-          </button>
-        </div>
-      </nav>
+      <BottomNavBar />
 
       {editorMode && (
         <EditorToolbar
