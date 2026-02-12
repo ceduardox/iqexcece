@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Home, Brain, Dumbbell, BarChart3, MoreHorizontal, Newspaper, ChevronRight, BookOpen, type LucideIcon } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, type LucideIcon } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
 
@@ -35,7 +35,6 @@ export function TrainingNavBar({
     { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },
     { id: "diagnostico", icon: Brain, label: t("nav.diagnostico"), path: `/reading-selection/${categoria}` },
     { id: "entrenar", icon: Dumbbell, label: t("nav.entrenar"), path: "/entrenamiento" },
-    { id: "progreso", icon: BarChart3, label: t("nav.progreso"), path: `/progreso/${categoria}` },
   ];
 
   const navItems = items || defaultItems;
@@ -110,13 +109,24 @@ export function TrainingNavBar({
               </button>
               <button
                 onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/a-leer-bolivia"); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                className="w-full flex items-center gap-3 px-4 py-3 active:bg-purple-50"
                 data-testid="dropdown-item-aleer"
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                   <BookOpen className="w-4 h-4 text-emerald-500" />
                 </div>
                 <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
+              </button>
+              <button
+                onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/contacto"); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                data-testid="dropdown-item-contacto"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
+                  <Mail className="w-4 h-4 text-amber-600" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700">{t("nav.contacto")}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
               </button>
             </div>

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Brain, Dumbbell, TrendingUp, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "./LanguageButton";
 import { useLocation } from "wouter";
@@ -697,16 +697,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
             </button>
             
-            <button 
-              onClick={(e) => { if (editorMode) { handleElementClick("nav-progreso", e); } else { setLocation(`/progreso/${userData?.ageGroup || "ninos"}`); } }}
-              className={`flex flex-col items-center gap-0.5 p-2 ${getEditableClass("nav-progreso")}`}
-              style={getElementStyle("nav-progreso")}
-              data-testid="nav-progreso"
-            >
-              <TrendingUp className="w-5 h-5" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: styles["nav-progreso"]?.textColor || "#9ca3af" }}>{t("nav.progreso")}</span>
-            </button>
-            
             <div className="relative">
               <button 
                 onClick={(e) => { 
@@ -739,13 +729,24 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   </button>
                   <button
                     onClick={() => { setNavMoreOpen(false); setLocation("/a-leer-bolivia"); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                    className="w-full flex items-center gap-3 px-4 py-3 active:bg-purple-50"
                     data-testid="dropdown-item-aleer"
                   >
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                       <BookOpen className="w-4 h-4 text-emerald-500" />
                     </div>
                     <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
+                  </button>
+                  <button
+                    onClick={() => { setNavMoreOpen(false); setLocation("/contacto"); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                    data-testid="dropdown-item-contacto"
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
+                      <Mail className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">{t("nav.contacto")}</span>
                     <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                   </button>
                 </div>

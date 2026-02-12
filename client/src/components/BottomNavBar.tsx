@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Brain, Dumbbell, BarChart3, MoreHorizontal, Newspaper, ChevronRight, BookOpen } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
@@ -15,16 +15,15 @@ export function BottomNavBar() {
     { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },
     { id: "tests", icon: Brain, label: t("nav.diagnostico"), path: "/tests" },
     { id: "entrena", icon: Dumbbell, label: t("nav.entrena"), path: "/entrenamiento" },
-    { id: "progreso", icon: BarChart3, label: t("nav.progreso"), path: "/progreso" },
   ];
 
   const getActiveId = () => {
     if (location === "/") return "inicio";
     if (location.startsWith("/tests") || location.startsWith("/age-selection")) return "tests";
     if (location.startsWith("/entrenamiento")) return "entrena";
-    if (location.startsWith("/progreso")) return "progreso";
     if (location.startsWith("/blog")) return "mas";
     if (location.startsWith("/a-leer-bolivia")) return "mas";
+    if (location.startsWith("/contacto")) return "mas";
     return "";
   };
 
@@ -99,13 +98,24 @@ export function BottomNavBar() {
                 </button>
                 <button
                   onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/a-leer-bolivia"); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                  className="w-full flex items-center gap-3 px-4 py-3 active:bg-purple-50"
                   data-testid="dropdown-item-aleer"
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
                     <BookOpen className="w-4 h-4 text-emerald-500" />
                   </div>
                   <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
+                </button>
+                <button
+                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/contacto"); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
+                  data-testid="dropdown-item-contacto"
+                >
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
+                    <Mail className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">{t("nav.contacto")}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                 </button>
               </div>
