@@ -83,7 +83,7 @@ function TestCard({
   
   const cardStyle = styles[cardId];
   const hasBackgroundImage = cardStyle?.imageUrl;
-  const iconSize = styles[iconId]?.iconSize || 56;
+  const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 56;
   const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
   const textDark = defaultStyle.textDark;
   

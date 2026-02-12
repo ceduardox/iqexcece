@@ -309,7 +309,7 @@ export default function EntrenamientoSelectionPage() {
               const hasBackgroundImage = cardStyle?.imageUrl;
               const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
               const iconUrl = styles[iconId]?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const iconSize = styles[iconId]?.iconSize || 48;
+              const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 48;
               
               return (
                 <motion.div
