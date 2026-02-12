@@ -163,6 +163,10 @@ export default function EntrenamientoSelectionPage() {
     } else if (defaultBg) {
       result.background = defaultBg;
     }
+    if (s?.marginTop) result.marginTop = s.marginTop;
+    if (s?.marginBottom) result.marginBottom = s.marginBottom;
+    if (s?.marginLeft) result.marginLeft = s.marginLeft;
+    if (s?.marginRight) result.marginRight = s.marginRight;
     return result;
   }, [styles]);
 
@@ -286,27 +290,12 @@ export default function EntrenamientoSelectionPage() {
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: [0, -6, 0],
-                    scale: 1,
-                  }}
-                  transition={{ 
-                    opacity: { delay: 0.1 + index * 0.12, duration: 0.4 },
-                    scale: { delay: 0.1 + index * 0.12, duration: 0.4, type: "spring", stiffness: 100 },
-                    y: { 
-                      delay: 0.5 + index * 0.15,
-                      duration: 2.5, 
-                      repeat: Infinity, 
-                      repeatType: "loop",
-                      ease: "easeInOut",
-                      times: [0, 0.5, 1]
-                    }
-                  }}
-                  whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.2 } }}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.1 + index * 0.1, duration: 0.4, type: "spring", stiffness: 100 }}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
                   onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
-                  className={`cursor-pointer ${getEditableClass(cardId)}`}
+                  className={`cursor-pointer shimmer-card ${getEditableClass(cardId)}`}
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
                   <motion.div
@@ -376,6 +365,8 @@ export default function EntrenamientoSelectionPage() {
                         </div>
                         
                         <motion.button
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                           className={`flex-shrink-0 px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
                           onClick={(e) => { 
                             e.stopPropagation(); 
