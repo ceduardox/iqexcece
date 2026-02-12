@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, HelpCircle, Menu, Home, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
+import { BookOpen, Brain, HelpCircle, Home, Dumbbell, BarChart3, MoreHorizontal } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
@@ -119,7 +119,7 @@ function TestCard({
           Test
         </div>
         
-        <div className="flex gap-4 pt-6">
+        <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
           <div 
             className={`flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
@@ -154,7 +154,7 @@ function TestCard({
             >
               {styles[descId]?.buttonText || description}
             </p>
-            <div className="mt-auto flex justify-end">
+            <div className="mt-auto flex justify-end md:justify-center">
               <motion.button
                 className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
                 style={{
@@ -194,7 +194,6 @@ export default function TestsPage() {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
-  const [menuOpen, setMenuOpen] = useState(false);
   const [stylesLoaded, setStylesLoaded] = useState(false);
 
   useEffect(() => {
@@ -390,13 +389,6 @@ export default function TestsPage() {
         
         <div className="absolute right-5 flex items-center gap-1">
           <LanguageButton />
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            data-testid="button-menu"
-          >
-            <Menu className="w-6 h-6" strokeWidth={1.5} />
-          </button>
         </div>
       </header>
 
@@ -491,7 +483,7 @@ export default function TestsPage() {
           </div>
         </div>
 
-        <div className="px-4 pb-8 space-y-4 -mt-2">
+        <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
           {genericTestCategories.map((category, index) => (
             <TestCard
               key={category.id}
