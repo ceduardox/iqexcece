@@ -183,7 +183,9 @@ export default function EntrenamientoSelectionPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation("/"); }} />
+      <div className="md:hidden">
+        <CurvedHeader showBack onBack={() => { playButtonSound(); setLocation("/"); }} />
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div 
@@ -260,9 +262,9 @@ export default function EntrenamientoSelectionPage() {
           </div>
         </div>
 
-        <div className="px-4 pb-8 space-y-4 -mt-2">
+        <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-2 gap-5 md:max-w-4xl md:mx-auto">
           {items.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 col-span-full">
               <Dumbbell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">{t("training.noItems")}</p>
             </div>
@@ -284,15 +286,31 @@ export default function EntrenamientoSelectionPage() {
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.08, duration: 0.3 }}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: [0, -6, 0],
+                    scale: 1,
+                  }}
+                  transition={{ 
+                    opacity: { delay: 0.1 + index * 0.12, duration: 0.4 },
+                    scale: { delay: 0.1 + index * 0.12, duration: 0.4, type: "spring", stiffness: 100 },
+                    y: { 
+                      delay: 0.5 + index * 0.15,
+                      duration: 2.5, 
+                      repeat: Infinity, 
+                      repeatType: "loop",
+                      ease: "easeInOut",
+                      times: [0, 0.5, 1]
+                    }
+                  }}
+                  whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.2 } }}
                   onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
                   className={`cursor-pointer ${getEditableClass(cardId)}`}
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
                   <motion.div
-                    className="relative overflow-hidden rounded-2xl p-4"
+                    className="relative overflow-hidden rounded-2xl p-5 md:p-6"
                     style={{ 
                       background: hasBackgroundImage 
                         ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
@@ -316,19 +334,19 @@ export default function EntrenamientoSelectionPage() {
                       Entrenamiento
                     </div>
                     
-                    <div className="pt-6">
+                    <div className="pt-6 md:flex md:flex-col md:items-center md:text-center">
                       <h3 
-                        className={`text-base font-bold mb-3 uppercase tracking-wide ${getEditableClass(titleId)}`}
+                        className={`text-base md:text-lg font-bold mb-3 uppercase tracking-wide ${getEditableClass(titleId)}`}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
                         style={{ 
-                          fontSize: styles[titleId]?.fontSize || 15,
+                          fontSize: styles[titleId]?.fontSize || undefined,
                           color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
                         }}
                       >
                         {styles[titleId]?.buttonText || item.title}
                       </h3>
                       
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 md:flex-col">
                         <div 
                           className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
                           onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
@@ -345,10 +363,10 @@ export default function EntrenamientoSelectionPage() {
                         <div className="flex-1 min-w-0">
                           {item.description && (
                             <p 
-                              className={`text-sm leading-snug ${getEditableClass(descId)}`}
+                              className={`text-sm md:text-base leading-snug ${getEditableClass(descId)}`}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
                               style={{ 
-                                fontSize: styles[descId]?.fontSize || 13,
+                                fontSize: styles[descId]?.fontSize || undefined,
                                 color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
                               }}
                             >
@@ -358,7 +376,7 @@ export default function EntrenamientoSelectionPage() {
                         </div>
                         
                         <motion.button
-                          className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
+                          className={`flex-shrink-0 px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
                           onClick={(e) => { 
                             e.stopPropagation(); 
                             if (editorMode) {
