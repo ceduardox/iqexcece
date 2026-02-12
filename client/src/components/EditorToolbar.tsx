@@ -4,6 +4,7 @@ import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronL
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { useIsVideo } from "@/components/VideoBackground";
 
 export interface ElementStyle {
   background?: string;
@@ -54,6 +55,7 @@ export function EditorToolbar({
   const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
   const [toolbarPosition, setToolbarPosition] = useState<"bottom" | "top">("bottom");
   const currentStyle = selectedElement ? (styles[selectedElement] || {}) : {};
+  const previewIsVideo = useIsVideo(currentStyle.imageUrl);
   
   const updateStyle = (updates: Partial<ElementStyle>) => {
     if (!selectedElement) return;
@@ -403,8 +405,22 @@ export function EditorToolbar({
                   </div>
                 )}
                 {currentStyle.imageUrl && (
-                  <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-400 truncate">
-                    Vista: {currentStyle.imageUrl}
+                  <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-400">
+                    {previewIsVideo ? (
+                      <video 
+                        src={currentStyle.imageUrl} 
+                        autoPlay loop muted playsInline
+                        className="w-full h-20 object-cover rounded mb-1"
+                      />
+                    ) : (
+                      <img 
+                        src={currentStyle.imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-20 object-cover rounded mb-1"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    )}
+                    <div className="truncate">{currentStyle.imageUrl}</div>
                   </div>
                 )}
               </div>

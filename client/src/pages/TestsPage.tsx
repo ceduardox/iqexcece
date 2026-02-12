@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
-import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
+import { VideoBackground, isVideoUrl, useIsVideo } from "@/components/VideoBackground";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
@@ -86,6 +86,7 @@ function TestCard({
   const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 56;
   const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
   const textDark = defaultStyle.textDark;
+  const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
   
   return (
     <motion.div
@@ -100,7 +101,7 @@ function TestCard({
       <motion.div
         className="relative overflow-hidden rounded-2xl p-4"
         style={{ 
-          background: (hasBackgroundImage && !isVideoUrl(cardStyle?.imageUrl)) 
+          background: (hasBackgroundImage && !bgIsVideo) 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : (cardStyle?.background || defaultStyle.bg),
           borderRadius: cardStyle?.borderRadius || 20,
@@ -112,7 +113,7 @@ function TestCard({
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
-        {hasBackgroundImage && isVideoUrl(cardStyle?.imageUrl) && (
+        {hasBackgroundImage && bgIsVideo && (
           <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
         )}
         <div 

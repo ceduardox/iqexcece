@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
+import { VideoBackground, useIsVideo } from "@/components/VideoBackground";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -30,6 +31,40 @@ interface EntrenamientoItem {
   linkUrl: string | null;
   sortOrder: number | null;
   isActive: boolean | null;
+}
+
+function EntCardInner({ cardStyle, hasBackgroundImage, defaultBg, textDark, editorMode, children }: {
+  cardStyle: any;
+  hasBackgroundImage: any;
+  defaultBg: string;
+  textDark: boolean;
+  editorMode: boolean;
+  children: React.ReactNode;
+}) {
+  const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
+  
+  return (
+    <motion.div
+      className="relative overflow-hidden rounded-2xl p-5 md:p-6"
+      style={{ 
+        background: (hasBackgroundImage && !bgIsVideo)
+          ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+          : (cardStyle?.background || defaultBg),
+        boxShadow: cardStyle?.shadowBlur 
+          ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
+          : "0 4px 20px rgba(139, 92, 246, 0.15)",
+        border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none",
+        borderRadius: cardStyle?.borderRadius || 20
+      }}
+      whileTap={{ scale: editorMode ? 1 : 0.98 }}
+      transition={{ duration: 0.1 }}
+    >
+      {hasBackgroundImage && bgIsVideo && (
+        <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
+      )}
+      {children}
+    </motion.div>
+  );
 }
 
 const defaultCardStyles = [
@@ -322,20 +357,12 @@ export default function EntrenamientoSelectionPage() {
                   className={`cursor-pointer shimmer-card ${getEditableClass(cardId)}`}
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
-                  <motion.div
-                    className="relative overflow-hidden rounded-2xl p-5 md:p-6"
-                    style={{ 
-                      background: hasBackgroundImage 
-                        ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
-                        : (cardStyle?.background || defaultStyle.bg),
-                      boxShadow: cardStyle?.shadowBlur 
-                        ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
-                        : "0 4px 20px rgba(139, 92, 246, 0.15)",
-                      border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none",
-                      borderRadius: cardStyle?.borderRadius || 20
-                    }}
-                    whileTap={{ scale: editorMode ? 1 : 0.98 }}
-                    transition={{ duration: 0.1 }}
+                  <EntCardInner
+                    cardStyle={cardStyle}
+                    hasBackgroundImage={hasBackgroundImage}
+                    defaultBg={defaultStyle.bg}
+                    textDark={textDark}
+                    editorMode={editorMode}
                   >
                     <div 
                       className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold"
@@ -411,7 +438,7 @@ export default function EntrenamientoSelectionPage() {
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </EntCardInner>
                 </motion.div>
               );
             })
