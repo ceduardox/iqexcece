@@ -17,12 +17,17 @@
   "contact": {
     "title": "Contacto",
     "subtitle": "Selecciona una opción para comunicarte con nosotros",
-    "hablamos": "¡Hablamos!",
-    "whatsapp": "WhatsApp",
-    "email": "Email",
+    "hablamos": "¿Hablamos?",
     "blog": "Blog",
+    "blogSub": "Escritos Directos",
     "leerBolivia": "A Leer Bolivia",
-    "asesor": "Hablar con un asesor"
+    "leerBoliviaSub": "Notas para tu región",
+    "asesor": "Habla con un Asesor",
+    "asesorSub": "Conéctate con nuestro equipo en tiempo real",
+    "whatsapp": "Mensaje de WhatsApp",
+    "whatsappSub": "Atención inmediata vía chat",
+    "email": "Envíanos un Email",
+    "emailSub": "Soporte personalizado por correo"
   },
   "home": {
     "tests": "Tests",

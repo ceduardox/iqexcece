@@ -17,12 +17,17 @@
   "contact": {
     "title": "Contact",
     "subtitle": "Choose an option to get in touch with us",
-    "hablamos": "Let's talk!",
-    "whatsapp": "WhatsApp",
-    "email": "Email",
+    "hablamos": "Shall we talk?",
     "blog": "Blog",
+    "blogSub": "Direct Writings",
     "leerBolivia": "Read Bolivia",
-    "asesor": "Talk to an advisor"
+    "leerBoliviaSub": "News for your region",
+    "asesor": "Talk to an Advisor",
+    "asesorSub": "Connect with our team in real time",
+    "whatsapp": "WhatsApp Message",
+    "whatsappSub": "Immediate attention via chat",
+    "email": "Send us an Email",
+    "emailSub": "Personalized support by email"
   },
   "home": {
     "tests": "Tests",

@@ -18,6 +18,8 @@ function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean):
   return { ...base, ...desktop };
 }
 
+const DEFAULT_OPERATOR_IMG = "https://cdn-icons-png.flaticon.com/512/4825/4825038.png";
+
 export default function ContactoPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "es";
@@ -76,7 +78,7 @@ export default function ContactoPage() {
       await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${adminToken}` },
-        body: JSON.stringify({ pageName: `contacto-page`, lang, styles: JSON.stringify(styles) }),
+        body: JSON.stringify({ pageName: "contacto-page", lang, styles: JSON.stringify(styles) }),
       });
       toast({ title: "Guardado", description: "Estilos guardados correctamente" });
     } catch {
@@ -102,32 +104,16 @@ export default function ContactoPage() {
     if (s.fontWeight) result.fontWeight = s.fontWeight;
     if (s.textAlign) result.textAlign = s.textAlign as any;
     if (s.shadowBlur || s.shadowColor) result.boxShadow = `0 4px ${s.shadowBlur || 10}px ${s.shadowColor || "rgba(0,0,0,0.1)"}`;
-    if (s.marginTop || s.marginLeft) result.transform = `translate(${s.marginLeft || 0}px, ${s.marginTop || 0}px)`;
     if (s.imageUrl && s.imageSize) { result.backgroundImage = `url(${s.imageUrl})`; result.backgroundSize = `${s.imageSize}%`; result.backgroundPosition = "center"; result.backgroundRepeat = "no-repeat"; }
     return result;
   }, [styles, isMobile]);
 
   const contactItems = [
     {
-      id: "whatsapp",
-      icon: MessageCircle,
-      labelKey: "contact.whatsapp",
-      gradient: "linear-gradient(135deg, #25D366, #128C7E)",
-      iconColor: "#fff",
-      action: () => window.open("https://wa.me/59178767696", "_blank"),
-    },
-    {
-      id: "email",
-      icon: Mail,
-      labelKey: "contact.email",
-      gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)",
-      iconColor: "#fff",
-      action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; },
-    },
-    {
       id: "blog",
       icon: Newspaper,
       labelKey: "contact.blog",
+      subKey: "contact.blogSub",
       gradient: "linear-gradient(135deg, #f3e8ff, #e0f2fe)",
       iconColor: "#8b5cf6",
       action: () => setLocation("/blog"),
@@ -136,17 +122,28 @@ export default function ContactoPage() {
       id: "leer-bolivia",
       icon: BookOpen,
       labelKey: "contact.leerBolivia",
+      subKey: "contact.leerBoliviaSub",
       gradient: "linear-gradient(135deg, #d1fae5, #cffafe)",
       iconColor: "#10b981",
       action: () => setLocation("/a-leer-bolivia"),
     },
     {
-      id: "asesor",
-      icon: Headphones,
-      labelKey: "contact.asesor",
-      gradient: "linear-gradient(135deg, #fef3c7, #fde68a)",
-      iconColor: "#d97706",
-      action: () => {},
+      id: "whatsapp",
+      icon: MessageCircle,
+      labelKey: "contact.whatsapp",
+      subKey: "contact.whatsappSub",
+      gradient: "linear-gradient(135deg, #25D366, #128C7E)",
+      iconColor: "#fff",
+      action: () => window.open("https://wa.me/59178767696", "_blank"),
+    },
+    {
+      id: "email",
+      icon: Mail,
+      labelKey: "contact.email",
+      subKey: "contact.emailSub",
+      gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)",
+      iconColor: "#fff",
+      action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; },
     },
   ];
 
@@ -163,8 +160,8 @@ export default function ContactoPage() {
     );
   }
 
-  const operatorImgS = getResolvedStyle("operator-image");
-  const defaultOperatorImg = "https://cdn-icons-png.flaticon.com/512/4825/4825038.png";
+  const operatorS = getResolvedStyle("operator-image");
+  const asesorCardS = getResolvedStyle("contact-asesor");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-purple-50/30 flex flex-col" onClick={() => { if (editorMode) setSelectedElement(null); }}>
@@ -177,32 +174,6 @@ export default function ContactoPage() {
           transition={{ duration: 0.4 }}
           className="mt-4 flex flex-col items-center"
         >
-          <div
-            className={`w-20 h-20 rounded-full overflow-hidden mb-3 flex items-center justify-center ${getEditableClass("operator-image")}`}
-            onClick={(e) => handleElementClick("operator-image", e)}
-            style={{
-              background: operatorImgS?.background || "linear-gradient(135deg, #f3e8ff, #e9d5ff)",
-              boxShadow: "0 4px 20px rgba(124,58,237,0.15)",
-            }}
-            data-testid="img-operator"
-          >
-            <img
-              src={operatorImgS?.imageUrl || defaultOperatorImg}
-              alt="operator"
-              className="w-full h-full object-cover"
-              style={{ width: operatorImgS?.imageSize ? `${operatorImgS.imageSize}%` : "100%", height: operatorImgS?.imageSize ? `${operatorImgS.imageSize}%` : "100%" }}
-            />
-          </div>
-
-          <h2
-            className={`text-lg font-bold text-purple-600 mb-1 ${getEditableClass("hablamos")}`}
-            onClick={(e) => handleElementClick("hablamos", e)}
-            style={getElementStyle("hablamos")}
-            data-testid="text-hablamos"
-          >
-            {getResolvedStyle("hablamos")?.buttonText || t("contact.hablamos")}
-          </h2>
-
           <h1
             className={`text-2xl font-bold text-center mb-1 ${getEditableClass("title")}`}
             onClick={(e) => handleElementClick("title", e)}
@@ -235,50 +206,85 @@ export default function ContactoPage() {
             minHeight: getResolvedStyle("cards-section")?.sectionHeight,
           }}
         >
-          {contactItems.map((item, index) => {
-            const Icon = item.icon;
-            const s = getResolvedStyle(`contact-${item.id}`);
-            const iconS = getResolvedStyle(`icon-${item.id}`);
-            return (
-              <motion.button
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.08 }}
-                onClick={(e) => {
-                  if (editorMode) { handleElementClick(`contact-${item.id}`, e); }
-                  else { playClick(); item.action(); }
-                }}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
-                style={{
-                  background: s?.background || "white",
-                  boxShadow: s?.shadowBlur ? `0 4px ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.06)"}` : "0 2px 12px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-                }}
-                data-testid={`button-contact-${item.id}`}
+          {contactItems.slice(0, 2).map((item, index) => (
+            <ContactCard
+              key={item.id}
+              item={item}
+              index={index}
+              editorMode={editorMode}
+              getEditableClass={getEditableClass}
+              getResolvedStyle={getResolvedStyle}
+              handleElementClick={handleElementClick}
+              playClick={playClick}
+              arrowBounce={arrowBounce}
+              t={t}
+            />
+          ))}
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.16 }}
+            onClick={(e) => {
+              if (editorMode) { handleElementClick("contact-asesor", e); }
+            }}
+            className={`w-full rounded-2xl overflow-hidden transition-all ${getEditableClass("contact-asesor")}`}
+            style={{
+              background: asesorCardS?.background || "linear-gradient(135deg, #7c3aed, #a855f7)",
+              boxShadow: asesorCardS?.shadowBlur ? `0 4px ${asesorCardS.shadowBlur}px ${asesorCardS.shadowColor || "rgba(0,0,0,0.1)"}` : "0 4px 20px rgba(124,58,237,0.2)",
+              borderRadius: asesorCardS?.borderRadius || 16,
+            }}
+            data-testid="button-contact-asesor"
+          >
+            <div className="flex items-center p-4 gap-4">
+              <div
+                className={`w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
+                style={{ background: operatorS?.background || "rgba(255,255,255,0.15)" }}
               >
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
-                  style={{ background: iconS?.background || item.gradient }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${item.id}`, e); } }}
+                <img
+                  src={operatorS?.imageUrl || DEFAULT_OPERATOR_IMG}
+                  alt="operator"
+                  className="w-full h-full object-cover"
+                  style={operatorS?.imageSize ? { width: `${operatorS.imageSize}%`, height: `${operatorS.imageSize}%` } : {}}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-white/80 text-xs font-medium mb-0.5 ${getEditableClass("hablamos")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hablamos", e); } }}
+                  style={(() => { const h = getResolvedStyle("hablamos"); return h?.textColor ? { color: h.textColor } : {}; })()}
+                  data-testid="text-hablamos"
                 >
-                  {iconS?.imageUrl ? (
-                    <img src={iconS.imageUrl} alt="" style={{ width: iconS?.imageSize ? `${iconS.imageSize}%` : 24, height: iconS?.imageSize ? `${iconS.imageSize}%` : 24, objectFit: "contain" }} />
-                  ) : (
-                    <Icon className="w-6 h-6" style={{ color: item.iconColor }} />
-                  )}
-                </div>
-                <span
-                  className="text-base font-semibold flex-1 text-left"
-                  style={{ color: s?.textColor || "#374151", fontSize: s?.fontSize }}
-                >
-                  {s?.buttonText || t(item.labelKey)}
-                </span>
-                <motion.div {...arrowBounce}>
-                  <ChevronRight className="w-5 h-5 text-gray-300 flex-shrink-0" />
-                </motion.div>
-              </motion.button>
-            );
-          })}
+                  {getResolvedStyle("hablamos")?.buttonText || t("contact.hablamos")}
+                </p>
+                <h3 className="text-white font-bold text-base leading-tight" style={{ color: asesorCardS?.textColor }}>
+                  {asesorCardS?.buttonText || t("contact.asesor")}
+                </h3>
+                <p className="text-white/70 text-xs mt-0.5" style={{ color: asesorCardS?.textColor ? `${asesorCardS.textColor}99` : undefined }}>
+                  {getResolvedStyle("asesor-sub")?.buttonText || t("contact.asesorSub")}
+                </p>
+              </div>
+              <motion.div {...arrowBounce}>
+                <ChevronRight className="w-5 h-5 text-white/60 flex-shrink-0" />
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {contactItems.slice(2).map((item, index) => (
+            <ContactCard
+              key={item.id}
+              item={item}
+              index={index + 3}
+              editorMode={editorMode}
+              getEditableClass={getEditableClass}
+              getResolvedStyle={getResolvedStyle}
+              handleElementClick={handleElementClick}
+              playClick={playClick}
+              arrowBounce={arrowBounce}
+              t={t}
+            />
+          ))}
         </div>
       </div>
 
@@ -297,5 +303,66 @@ export default function ContactoPage() {
         />
       )}
     </div>
+  );
+}
+
+interface ContactCardProps {
+  item: { id: string; icon: any; labelKey: string; subKey: string; gradient: string; iconColor: string; action: () => void };
+  index: number;
+  editorMode: boolean;
+  getEditableClass: (id: string) => string;
+  getResolvedStyle: (id: string) => ElementStyle | undefined;
+  handleElementClick: (id: string, e: React.MouseEvent) => void;
+  playClick: () => void;
+  arrowBounce: any;
+  t: (key: string) => string;
+}
+
+function ContactCard({ item, index, editorMode, getEditableClass, getResolvedStyle, handleElementClick, playClick, arrowBounce, t }: ContactCardProps) {
+  const Icon = item.icon;
+  const s = getResolvedStyle(`contact-${item.id}`);
+  const iconS = getResolvedStyle(`icon-${item.id}`);
+  return (
+    <motion.button
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.08 }}
+      onClick={(e) => {
+        if (editorMode) { handleElementClick(`contact-${item.id}`, e); }
+        else { playClick(); item.action(); }
+      }}
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
+      style={{
+        background: s?.background || "white",
+        boxShadow: s?.shadowBlur ? `0 4px ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.06)"}` : "0 2px 12px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+      }}
+      data-testid={`button-contact-${item.id}`}
+    >
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
+        style={{ background: iconS?.background || item.gradient }}
+        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${item.id}`, e); } }}
+      >
+        {iconS?.imageUrl ? (
+          <img src={iconS.imageUrl} alt="" className="object-contain" style={{ width: iconS?.imageSize ? `${iconS.imageSize}%` : 24, height: iconS?.imageSize ? `${iconS.imageSize}%` : 24 }} />
+        ) : (
+          <Icon className="w-6 h-6" style={{ color: item.iconColor }} />
+        )}
+      </div>
+      <div className="flex-1 text-left min-w-0">
+        <span
+          className="text-base font-semibold block"
+          style={{ color: s?.textColor || "#374151", fontSize: s?.fontSize }}
+        >
+          {s?.buttonText || t(item.labelKey)}
+        </span>
+        <span className="text-xs text-gray-400 block mt-0.5">
+          {getResolvedStyle(`sub-${item.id}`)?.buttonText || t(item.subKey)}
+        </span>
+      </div>
+      <motion.div {...arrowBounce}>
+        <ChevronRight className="w-5 h-5 text-gray-300 flex-shrink-0" />
+      </motion.div>
+    </motion.button>
   );
 }
