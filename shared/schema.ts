@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, integer, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, integer, serial, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -417,3 +417,19 @@ export const agentMessages = pgTable("agent_messages", {
 });
 
 export type AgentMessage = typeof agentMessages.$inferSelect;
+
+export const asesorConfig = pgTable("asesor_config", {
+  id: serial("id").primaryKey(),
+  prompt: text("prompt").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const asesorChats = pgTable("asesor_chats", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AsesorChat = typeof asesorChats.$inferSelect;
