@@ -4471,7 +4471,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </div>
                       )}
                     </div>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                       {pageImages.map((img) => (
                         <div key={img.id} className="bg-white/10 rounded p-1.5 space-y-1">
                           {img.name?.toLowerCase().endsWith('.webm') || img.name?.toLowerCase().endsWith('.mp4') ? (
