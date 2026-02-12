@@ -24,7 +24,7 @@ export function CurvedHeader({ showBack = false, onBack, rightElement, showLang 
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white" data-testid="curved-header">
+    <header className="sticky top-0 z-50 w-full" data-testid="curved-header">
       <div 
         className="relative pt-3 pb-2 px-5"
         style={{
@@ -67,7 +67,7 @@ export function CurvedHeader({ showBack = false, onBack, rightElement, showLang 
         </div>
       </div>
       
-      <div className="w-full" style={{ marginTop: -2, marginBottom: -8 }}>
+      <div className="w-full" style={{ marginTop: -2, marginBottom: -12 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
     </header>
