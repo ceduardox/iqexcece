@@ -347,70 +347,68 @@ export default function EntrenamientoSelectionPage() {
                       Entrenamiento
                     </div>
                     
-                    <div className="pt-6 md:flex md:flex-col md:items-center md:text-center">
-                      <h3 
-                        className={`text-base md:text-lg font-bold mb-3 uppercase tracking-wide ${getEditableClass(titleId)}`}
-                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
-                        style={{ 
-                          fontSize: styles[titleId]?.fontSize || undefined,
-                          color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
-                        }}
+                    <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
+                      <div 
+                        className={`flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
+                        style={{ width: iconSize, height: iconSize }}
                       >
-                        {styles[titleId]?.buttonText || item.title}
-                      </h3>
+                        <img 
+                          src={iconUrl} 
+                          alt="" 
+                          className="drop-shadow-md"
+                          style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
+                        />
+                      </div>
                       
-                      <div className="flex items-center gap-3 md:flex-col">
-                        <div 
-                          className={`flex-shrink-0 flex items-center justify-center ${getEditableClass(iconId)}`}
-                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
-                          style={{ width: iconSize, height: iconSize }}
-                        >
-                          <img 
-                            src={iconUrl} 
-                            alt="" 
-                            className="drop-shadow-md"
-                            style={{ width: iconSize, height: iconSize, objectFit: "contain" }} 
-                          />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          {item.description && (
-                            <p 
-                              className={`text-sm md:text-base leading-snug ${getEditableClass(descId)}`}
-                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
-                              style={{ 
-                                fontSize: styles[descId]?.fontSize || undefined,
-                                color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
-                              }}
-                            >
-                              {styles[descId]?.buttonText || item.description}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <motion.button
-                          animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                          className={`flex-shrink-0 px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            if (editorMode) {
-                              handleElementClick(btnId, e);
-                            } else {
-                              playButtonSound(); 
-                              handleSelect(item);
-                            }
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <h3 
+                          className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
+                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
+                          style={{ 
+                            fontSize: styles[titleId]?.fontSize || 18,
+                            color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
                           }}
-                          style={{
-                            background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
-                            color: styles[btnId]?.textColor || "white",
-                            border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
-                          }}
-                          whileTap={{ scale: editorMode ? 1 : 0.95 }}
                         >
-                          {styles[btnId]?.buttonText || "Iniciar"}
-                          <ChevronRight className="w-4 h-4" />
-                        </motion.button>
+                          {styles[titleId]?.buttonText || item.title}
+                        </h3>
+                        {item.description && (
+                          <p 
+                            className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
+                            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
+                            style={{ 
+                              fontSize: styles[descId]?.fontSize || 13,
+                              color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
+                            }}
+                          >
+                            {styles[descId]?.buttonText || item.description}
+                          </p>
+                        )}
+                        <div className="mt-auto flex justify-end md:justify-center">
+                          <motion.button
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(btnId)}`}
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (editorMode) {
+                                handleElementClick(btnId, e);
+                              } else {
+                                playButtonSound(); 
+                                handleSelect(item);
+                              }
+                            }}
+                            style={{
+                              background: styles[btnId]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
+                              color: styles[btnId]?.textColor || "white",
+                              border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)"
+                            }}
+                            whileTap={{ scale: editorMode ? 1 : 0.95 }}
+                          >
+                            {styles[btnId]?.buttonText || "Iniciar"}
+                            <ChevronRight className="w-4 h-4" />
+                          </motion.button>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
