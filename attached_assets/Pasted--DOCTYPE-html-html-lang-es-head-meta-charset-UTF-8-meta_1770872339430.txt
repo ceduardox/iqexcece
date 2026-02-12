@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo IQ - Efecto Chroma Glow</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #050505;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Capa de aura difusa de fondo */
+        .aura-bg {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.2) 0%, transparent 70%);
+            filter: blur(50px);
+            animation: pulseAura 6s ease-in-out infinite alternate;
+            z-index: 1;
+        }
+
+        .cubo {
+            width: 300px; /* Tamaño del cubo */
+            height: auto;
+            z-index: 2;
+            pointer-events: none;
+            
+            /* Efecto Drop-Shadow con ciclo de color */
+            filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.8));
+            
+            /* Combinación de animaciones: Levitación y cambio de color */
+            animation: 
+                levitar 4s ease-in-out infinite alternate,
+                cambioColor 8s linear infinite;
+        }
+
+        /* ANIMACIÓN 1: Levitación suave */
+        @keyframes levitar {
+            from {
+                transform: translateY(10px);
+            }
+            to {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* ANIMACIÓN 2: Ciclo de color (Efecto Chroma) */
+        @keyframes cambioColor {
+            0% {
+                filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.8)) hue-rotate(0deg);
+            }
+            50% {
+                /* Aquí pasará por los tonos morados y rosados automáticamente */
+                filter: drop-shadow(0 0 35px rgba(0, 242, 255, 1)) hue-rotate(120deg);
+            }
+            100% {
+                filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.8)) hue-rotate(360deg);
+            }
+        }
+
+        /* ANIMACIÓN 3: Pulso del aura de fondo */
+        @keyframes pulseAura {
+            from {
+                opacity: 0.3;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 0.7;
+                transform: scale(1.3);
+            }
+        }
+
+        /* Responsivo para móviles */
+        @media (max-width: 600px) {
+            .cubo { width: 220px; }
+            .aura-bg { width: 250px; height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="aura-bg"></div>
+        
+        <img src="https://iqexponencial.app/api/images/35654bae-6722-44ca-bc5a-c61fed108110" 
+             alt="Cubo IQ Exponencial" 
+             class="cubo">
+    </div>
+
+</body>
+</html>

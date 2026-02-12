@@ -128,11 +128,14 @@ function TestCard({
         
         <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
           <div 
-            className={`flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
+            className={`relative flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
             style={{ width: iconSize, height: iconSize }}
           >
-            <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
+            <div className="chroma-aura" />
+            <div className="chroma-icon relative z-[1]">
+              <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
+            </div>
           </div>
           
           <div className="flex-1 min-w-0 flex flex-col">
