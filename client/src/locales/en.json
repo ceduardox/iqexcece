@@ -14,6 +14,16 @@
     "idioma": "Language",
     "contacto": "Contact"
   },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Choose an option to get in touch with us",
+    "hablamos": "Let's talk!",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "blog": "Blog",
+    "leerBolivia": "Read Bolivia",
+    "asesor": "Talk to an advisor"
+  },
   "home": {
     "tests": "Tests",
     "testsDesc": "Evaluate your cognitive level",
