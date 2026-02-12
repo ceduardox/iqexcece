@@ -9,7 +9,6 @@ import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 import { LanguageButton } from "@/components/LanguageButton";
 
-// PDF.js will be loaded from CDN
 declare global {
   interface Window {
     pdfjsLib: any;
@@ -22,6 +21,49 @@ interface PDFFile {
   data: string;
   words?: string[];
   createdAt: number;
+}
+
+const MAX_PDF_SIZE_MB = 20;
+const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
+
+const DB_NAME = "aceleracion_pdfs_db";
+const DB_VERSION = 1;
+const STORE_NAME = "pdfs";
+
+function openPdfDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function idbGet(key: string): Promise<PDFFile[] | undefined> {
+  const db = await openPdfDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(key: string, value: PDFFile[]): Promise<void> {
+  const db = await openPdfDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
 }
 
 export default function AceleracionExercisePage() {
@@ -91,14 +133,31 @@ export default function AceleracionExercisePage() {
   }, [velocidadPPM]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(`aceleracion_pdfs_${itemId}`);
-    if (stored) {
-      setPdfs(JSON.parse(stored));
-    }
+    const loadFromIDB = async () => {
+      try {
+        const oldStored = localStorage.getItem(`aceleracion_pdfs_${itemId}`);
+        if (oldStored) {
+          const oldPdfs = JSON.parse(oldStored);
+          setPdfs(oldPdfs);
+          await idbSet(`aceleracion_pdfs_${itemId}`, oldPdfs);
+          localStorage.removeItem(`aceleracion_pdfs_${itemId}`);
+          return;
+        }
+        const stored = await idbGet(`aceleracion_pdfs_${itemId}`);
+        if (stored) {
+          setPdfs(stored);
+        }
+      } catch (err) {
+        console.error("Error loading PDFs:", err);
+      }
+    };
+    loadFromIDB();
   }, [itemId]);
 
   useEffect(() => {
-    localStorage.setItem(`aceleracion_pdfs_${itemId}`, JSON.stringify(pdfs));
+    idbSet(`aceleracion_pdfs_${itemId}`, pdfs).catch(err =>
+      console.error("Error saving PDFs to IndexedDB:", err)
+    );
   }, [pdfs, itemId]);
 
   // Load PDF.js from CDN if not loaded
@@ -175,27 +234,53 @@ export default function AceleracionExercisePage() {
     }
   };
 
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadError(null);
+
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setUploadError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(1)} MB). El máximo permitido es ${MAX_PDF_SIZE_MB} MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const pdfData = event.target?.result as string;
-      setIsExtracting(true);
-      
-      const extractedWords = await extractTextFromPdf(pdfData);
-      
-      const newPdf: PDFFile = {
-        id: `pdf_${Date.now()}`,
-        name: file.name,
-        data: pdfData,
-        words: extractedWords,
-        createdAt: Date.now()
-      };
-      setPdfs(prev => [...prev, newPdf]);
-      setShowUploader(false);
+      try {
+        const pdfData = event.target?.result as string;
+        setIsExtracting(true);
+        
+        const extractedWords = await extractTextFromPdf(pdfData);
+        
+        if (extractedWords.length === 0) {
+          setUploadError("No se pudo extraer texto del PDF. Verifica que el archivo no esté protegido o sea solo imágenes.");
+          setIsExtracting(false);
+          return;
+        }
+
+        const newPdf: PDFFile = {
+          id: `pdf_${Date.now()}`,
+          name: file.name,
+          data: pdfData,
+          words: extractedWords,
+          createdAt: Date.now()
+        };
+        setPdfs(prev => [...prev, newPdf]);
+        setShowUploader(false);
+        setIsExtracting(false);
+      } catch (err) {
+        console.error("Error processing PDF:", err);
+        setUploadError("Error al procesar el PDF. Intenta con otro archivo.");
+        setIsExtracting(false);
+      }
+    };
+    reader.onerror = () => {
+      setUploadError("Error al leer el archivo. Intenta de nuevo.");
       setIsExtracting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     };
     reader.readAsDataURL(file);
   };
@@ -1106,7 +1191,7 @@ export default function AceleracionExercisePage() {
                 size="sm"
                 variant="ghost"
                 className="text-white hover:bg-white/20"
-                onClick={() => setShowUploader(true)}
+                onClick={() => { setUploadError(null); setShowUploader(true); }}
                 data-testid="button-upload-header"
               >
                 <Upload className="w-5 h-5" />
@@ -1266,7 +1351,7 @@ export default function AceleracionExercisePage() {
             {/* Upload button when no PDFs */}
             {pdfs.length === 0 && (
               <button
-                onClick={() => setShowUploader(true)}
+                onClick={() => { setUploadError(null); setShowUploader(true); }}
                 className="w-full py-3 mb-6 rounded-md border border-gray-300 text-gray-600 font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                 data-testid="button-upload-pdf"
               >
@@ -1314,7 +1399,7 @@ export default function AceleracionExercisePage() {
 
                 {/* Add more button - minimal border radius */}
                 <button
-                  onClick={() => setShowUploader(true)}
+                  onClick={() => { setUploadError(null); setShowUploader(true); }}
                   className="w-full py-3 rounded-md border border-gray-300 text-gray-600 font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                   data-testid="button-add-more-pdf"
                 >
@@ -1391,11 +1476,17 @@ export default function AceleracionExercisePage() {
                       Haz clic para seleccionar
                     </p>
                     <p className="text-gray-400 text-sm">
-                      Solo archivos PDF
+                      Solo archivos PDF (máx. {MAX_PDF_SIZE_MB} MB)
                     </p>
                   </>
                 )}
               </div>
+
+              {uploadError && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {uploadError}
+                </div>
+              )}
 
               <input
                 ref={fileInputRef}
