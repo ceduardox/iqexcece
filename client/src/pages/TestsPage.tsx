@@ -63,6 +63,7 @@ interface TestCardProps {
   styles: PageStyles;
   onElementClick: (elementId: string, e: React.MouseEvent) => void;
   getEditableClass: (elementId: string) => string;
+  isMobile: boolean;
 }
 
 function TestCard({ 
@@ -74,7 +75,8 @@ function TestCard({
   editorMode,
   styles,
   onElementClick,
-  getEditableClass
+  getEditableClass,
+  isMobile
 }: TestCardProps) {
   const { t } = useTranslation();
   const cardId = `card-${testId}`;
@@ -82,9 +84,13 @@ function TestCard({
   const descId = `desc-${testId}`;
   const iconId = `icon-${testId}`;
   
-  const cardStyle = styles[cardId];
+  const cardStyle = resolveStyle(styles, cardId, isMobile);
+  const titleStyle = resolveStyle(styles, titleId, isMobile);
+  const descStyle = resolveStyle(styles, descId, isMobile);
+  const btnStyle = resolveStyle(styles, `btn-${testId}`, isMobile);
+  const iconStyle = resolveStyle(styles, iconId, isMobile);
   const hasBackgroundImage = cardStyle?.imageUrl;
-  const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 56;
+  const iconSize = iconStyle?.iconSize || iconStyle?.imageSize || 56;
   const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
   const textDark = defaultStyle.textDark;
   const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
@@ -135,7 +141,7 @@ function TestCard({
           >
             <div className="chroma-aura" />
             <div className="chroma-icon relative z-[1]">
-              <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
+              <MediaIcon src={iconStyle?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
             </div>
           </div>
           
@@ -144,28 +150,28 @@ function TestCard({
               className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{ 
-                fontSize: styles[titleId]?.fontSize || 18,
-                color: styles[titleId]?.textColor || (textDark ? "#1f2937" : "white")
+                fontSize: titleStyle?.fontSize || 18,
+                color: titleStyle?.textColor || (textDark ? "#1f2937" : "white")
               }}
             >
-              {styles[titleId]?.buttonText || title}
+              {titleStyle?.buttonText || title}
             </h3>
             <p 
               className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
               style={{ 
-                fontSize: styles[descId]?.fontSize || 13,
-                color: styles[descId]?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
+                fontSize: descStyle?.fontSize || 13,
+                color: descStyle?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
               }}
             >
-              {styles[descId]?.buttonText || description}
+              {descStyle?.buttonText || description}
             </p>
             <div className="mt-auto flex justify-end md:justify-center">
               <motion.button
                 className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
                 style={{
-                  background: styles[`btn-${testId}`]?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
-                  color: styles[`btn-${testId}`]?.textColor || "white",
+                  background: btnStyle?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
+                  color: btnStyle?.textColor || "white",
                   border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)",
                 }}
                 whileTap={{ scale: 0.95 }}
@@ -179,7 +185,7 @@ function TestCard({
                   } 
                 }}
               >
-                {styles[`btn-${testId}`]?.buttonText || t("tests.start")}
+                {btnStyle?.buttonText || t("tests.start")}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -581,6 +587,7 @@ export default function TestsPage() {
               styles={styles}
               onElementClick={handleElementClick}
               getEditableClass={getEditableClass}
+              isMobile={isMobile}
             />
           ))}
         </div>
