@@ -188,6 +188,49 @@ function TestCard({
   );
 }
 
+function HeroSection({ styles, getEditableClass, handleElementClick, getElementStyle, children }: {
+  styles: PageStyles;
+  getEditableClass: (id: string) => string;
+  handleElementClick: (id: string, e: React.MouseEvent) => void;
+  getElementStyle: (id: string, defaultBg?: string) => React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  const heroStyle = styles["hero-section"];
+  const heroIsVideo = useIsVideo(heroStyle?.backgroundType === "image" ? heroStyle?.imageUrl : undefined);
+  
+  const bgStyle: React.CSSProperties = {
+    paddingTop: "16px",
+    position: "relative",
+    overflow: "hidden",
+    ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
+  };
+  
+  if (heroIsVideo) {
+    delete bgStyle.backgroundImage;
+    delete bgStyle.backgroundSize;
+    delete bgStyle.backgroundPosition;
+    delete bgStyle.backgroundRepeat;
+  } else if (heroStyle?.imageSize) {
+    bgStyle.backgroundSize = `${heroStyle.imageSize}%`;
+    bgStyle.backgroundPosition = "center";
+    bgStyle.backgroundRepeat = "no-repeat";
+  }
+  
+  return (
+    <div 
+      className={`w-full ${getEditableClass("hero-section")}`}
+      onClick={(e) => handleElementClick("hero-section", e)}
+      style={bgStyle}
+      data-testid="hero-section"
+    >
+      {heroIsVideo && heroStyle?.imageUrl && (
+        <VideoBackground src={heroStyle.imageUrl} imageSize={heroStyle?.imageSize} />
+      )}
+      {children}
+    </div>
+  );
+}
+
 export default function TestsPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || 'es';
@@ -411,19 +454,7 @@ export default function TestsPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
-        <div 
-          className={`w-full ${getEditableClass("hero-section")}`}
-          onClick={(e) => handleElementClick("hero-section", e)}
-          style={{
-            paddingTop: "16px",
-            position: "relative",
-            backgroundSize: styles["hero-section"]?.imageSize ? `${styles["hero-section"].imageSize}%` : "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
-          }}
-          data-testid="hero-section"
-        >
+        <HeroSection styles={styles} getEditableClass={getEditableClass} handleElementClick={handleElementClick} getElementStyle={getElementStyle}>
           <div className="relative z-10 px-5 pb-8">
             <div>
               <motion.h1 
@@ -483,7 +514,7 @@ export default function TestsPage() {
               </motion.p>
             </div>
           </div>
-        </div>
+        </HeroSection>
 
         <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
           {genericTestCategories.map((category, index) => (
