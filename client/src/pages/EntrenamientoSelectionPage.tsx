@@ -200,19 +200,12 @@ export default function EntrenamientoSelectionPage() {
         >
           <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
         </button>
-        <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8a3ffc" />
-              <stop offset="100%" stopColor="#00d9ff" />
-            </linearGradient>
-          </defs>
-          <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-            <tspan fill="#8a3ffc">i</tspan>
-            <tspan fill="#8a3ffc">Q</tspan>
-            <tspan fill="url(#logoGrad)">x</tspan>
-          </text>
-        </svg>
+        <img 
+          src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+          alt="iQx" 
+          className="h-10 w-auto object-contain"
+          data-testid="header-logo-image"
+        />
         <div className="absolute right-5">
           <LanguageButton />
         </div>
