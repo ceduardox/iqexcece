@@ -364,7 +364,7 @@ export default function ContactoPage() {
                 >
                   <div className="bg-white rounded-t-2xl mx-1 mb-1 overflow-hidden" style={{ borderRadius: 16 }}>
                     <div className="flex items-center justify-between px-4 py-2 bg-purple-50 border-b border-purple-100">
-                      <span className="text-xs font-semibold text-purple-700">Chat con Asesor IA</span>
+                      <span className="text-xs font-semibold text-purple-700">Chat con Asesor</span>
                       <button onClick={(e) => { e.stopPropagation(); setChatOpen(false); }} className="text-purple-400 hover:text-purple-600" data-testid="button-close-chat">
                         <X className="w-4 h-4" />
                       </button>
@@ -375,7 +375,7 @@ export default function ContactoPage() {
                         <div className="text-center text-gray-400 text-xs mt-8">
                           <Headphones className="w-8 h-8 mx-auto mb-2 text-purple-300" />
                           <p className="font-medium text-gray-500">Escribe tu consulta</p>
-                          <p className="mt-1">Nuestro asesor IA te responderá al instante</p>
+                          <p className="mt-1">Nuestro asesor te responderá al instante</p>
                         </div>
                       )}
                       {chatMessages.map((msg, i) => (
