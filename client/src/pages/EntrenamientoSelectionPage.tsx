@@ -334,7 +334,7 @@ export default function EntrenamientoSelectionPage() {
             minHeight: getResolvedStyle("cards-section")?.sectionHeight
           }}
         >
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-5 md:max-w-6xl md:mx-auto">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 md:max-w-5xl md:mx-auto md:justify-items-center">
           {items.length === 0 ? (
             <div className="text-center py-8 col-span-full">
               <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -354,7 +354,8 @@ export default function EntrenamientoSelectionPage() {
               const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
               const rIcon = getResolvedStyle(iconId);
               const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const iconSize = rIcon?.iconSize || rIcon?.imageSize || 64;
+              const isMd = !isMobile;
+              const iconSize = rIcon?.iconSize || rIcon?.imageSize || (isMd ? 96 : 64);
               
               return (
                 <motion.div
@@ -368,7 +369,7 @@ export default function EntrenamientoSelectionPage() {
                   data-testid={`card-entrenamiento-${item.id}`}
                 >
                   <motion.div
-                    className="relative overflow-hidden rounded-2xl p-4 flex flex-col items-center text-center"
+                    className="relative overflow-hidden rounded-2xl p-4 md:p-8 flex flex-col items-center text-center"
                     style={{ 
                       background: hasBackgroundImage 
                         ? `url(${cardStyle.imageUrl}) center/cover no-repeat`
@@ -395,10 +396,10 @@ export default function EntrenamientoSelectionPage() {
                     </div>
                     
                     <h3 
-                      className={`text-sm font-bold mb-1 leading-tight ${getEditableClass(titleId)}`}
+                      className={`text-sm md:text-lg font-bold mb-1 md:mb-2 leading-tight ${getEditableClass(titleId)}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
                       style={{ 
-                        fontSize: getResolvedStyle(titleId)?.fontSize || 14,
+                        fontSize: getResolvedStyle(titleId)?.fontSize || (isMd ? 18 : 14),
                         color: getResolvedStyle(titleId)?.textColor || "#ffffff"
                       }}
                     >
