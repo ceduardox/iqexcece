@@ -311,14 +311,14 @@ export default function ContactoPage() {
             data-testid="button-contact-asesor"
           >
             <div
-              className="flex items-center p-4 gap-4 cursor-pointer"
+              className="flex items-center md:flex-col md:items-center md:text-center p-4 md:p-6 gap-4 md:gap-3 cursor-pointer"
               onClick={(e) => {
                 if (editorMode) { handleElementClick("contact-asesor", e); }
                 else { playClick(); setChatOpen(!chatOpen); }
               }}
             >
               <div
-                className={`w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
+                className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
                 style={{ background: operatorS?.background || "rgba(255,255,255,0.15)" }}
               >
@@ -489,7 +489,7 @@ function ContactCard({ item, index, editorMode, getEditableClass, getResolvedSty
         if (editorMode) { handleElementClick(`contact-${item.id}`, e); }
         else { playClick(); item.action(); }
       }}
-      className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
+      className={`w-full flex items-center md:flex-col md:items-center md:text-center gap-4 md:gap-3 p-4 md:p-6 rounded-2xl transition-all active:scale-[0.98] ${getEditableClass(`contact-${item.id}`)}`}
       style={{
         background: s?.background || "white",
         boxShadow: s?.shadowBlur ? `0 4px ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.06)"}` : "0 2px 12px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
@@ -497,28 +497,28 @@ function ContactCard({ item, index, editorMode, getEditableClass, getResolvedSty
       data-testid={`button-contact-${item.id}`}
     >
       <div
-        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
+        className={`w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`icon-${item.id}`)}`}
         style={{ background: iconS?.background || item.gradient }}
         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${item.id}`, e); } }}
       >
         {iconS?.imageUrl ? (
           <img src={iconS.imageUrl} alt="" className="object-contain" style={{ width: iconS?.imageSize ? `${iconS.imageSize}%` : 24, height: iconS?.imageSize ? `${iconS.imageSize}%` : 24 }} />
         ) : (
-          <Icon className="w-6 h-6" style={{ color: item.iconColor }} />
+          <Icon className="w-6 h-6 md:w-10 md:h-10" style={{ color: item.iconColor }} />
         )}
       </div>
-      <div className="flex-1 text-left min-w-0">
+      <div className="flex-1 text-left md:text-center min-w-0">
         <span
-          className="text-base font-semibold block"
+          className="text-base md:text-lg font-semibold block"
           style={{ color: s?.textColor || "#374151", fontSize: s?.fontSize }}
         >
           {s?.buttonText || t(item.labelKey)}
         </span>
-        <span className="text-xs text-gray-400 block mt-0.5">
+        <span className="text-xs md:text-sm text-gray-400 block mt-0.5">
           {getResolvedStyle(`sub-${item.id}`)?.buttonText || t(item.subKey)}
         </span>
       </div>
-      <motion.div {...arrowBounce}>
+      <motion.div {...arrowBounce} className="md:hidden">
         <ChevronRight className="w-5 h-5 text-gray-300 flex-shrink-0" />
       </motion.div>
     </motion.button>
