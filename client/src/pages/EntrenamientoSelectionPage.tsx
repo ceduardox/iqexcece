@@ -334,7 +334,7 @@ export default function EntrenamientoSelectionPage() {
             minHeight: getResolvedStyle("cards-section")?.sectionHeight
           }}
         >
-        <div className="grid grid-cols-2 gap-4 md:max-w-4xl md:mx-auto">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5 md:max-w-6xl md:mx-auto">
           {items.length === 0 ? (
             <div className="text-center py-8 col-span-full">
               <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -349,11 +349,12 @@ export default function EntrenamientoSelectionPage() {
               const btnId = `ent-btn-${index}`;
               
               const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
-              const cardStyle = styles[cardId];
+              const cardStyle = getResolvedStyle(cardId);
               const hasBackgroundImage = cardStyle?.imageUrl;
               const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
-              const iconUrl = styles[iconId]?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const iconSize = styles[iconId]?.iconSize || styles[iconId]?.imageSize || 64;
+              const rIcon = getResolvedStyle(iconId);
+              const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
+              const iconSize = rIcon?.iconSize || rIcon?.imageSize || 64;
               
               return (
                 <motion.div
@@ -397,22 +398,22 @@ export default function EntrenamientoSelectionPage() {
                       className={`text-sm font-bold mb-1 leading-tight ${getEditableClass(titleId)}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
                       style={{ 
-                        fontSize: styles[titleId]?.fontSize || 14,
-                        color: styles[titleId]?.textColor || "#ffffff"
+                        fontSize: getResolvedStyle(titleId)?.fontSize || 14,
+                        color: getResolvedStyle(titleId)?.textColor || "#ffffff"
                       }}
                     >
-                      {styles[titleId]?.buttonText || item.title}
+                      {getResolvedStyle(titleId)?.buttonText || item.title}
                     </h3>
                     {item.description && (
                       <p 
                         className={`text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
                         style={{ 
-                          fontSize: styles[descId]?.fontSize || 11,
-                          color: styles[descId]?.textColor || "rgba(255,255,255,0.55)"
+                          fontSize: getResolvedStyle(descId)?.fontSize || 11,
+                          color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
                         }}
                       >
-                        {styles[descId]?.buttonText || item.description}
+                        {getResolvedStyle(descId)?.buttonText || item.description}
                       </p>
                     )}
                     <motion.button
@@ -428,20 +429,20 @@ export default function EntrenamientoSelectionPage() {
                           handleSelect(item);
                         }
                       }}
-                      style={{
-                        background: styles[btnId]?.imageUrl 
-                          ? `url(${styles[btnId].imageUrl}) center/cover no-repeat`
-                          : (styles[btnId]?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
-                        backgroundSize: styles[btnId]?.imageSize ? `${styles[btnId].imageSize}%` : "cover",
-                        color: styles[btnId]?.textColor || "white",
+                      style={(() => { const bs = getResolvedStyle(btnId); return {
+                        background: bs?.imageUrl 
+                          ? `url(${bs.imageUrl}) center/cover no-repeat`
+                          : (bs?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
+                        backgroundSize: bs?.imageSize ? `${bs.imageSize}%` : "cover",
+                        color: bs?.textColor || "white",
                         border: "none",
-                        boxShadow: styles[btnId]?.shadowBlur 
-                          ? `0 ${styles[btnId].shadowBlur / 2}px ${styles[btnId].shadowBlur}px ${styles[btnId]?.shadowColor || "rgba(139,92,246,0.3)"}`
+                        boxShadow: bs?.shadowBlur 
+                          ? `0 ${bs.shadowBlur / 2}px ${bs.shadowBlur}px ${bs?.shadowColor || "rgba(139,92,246,0.3)"}`
                           : "0 4px 15px rgba(139,92,246,0.3)"
-                      }}
+                      };})()}
                       whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
-                      {styles[btnId]?.buttonText || "Iniciar"}
+                      {getResolvedStyle(btnId)?.buttonText || "Iniciar"}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </motion.div>
