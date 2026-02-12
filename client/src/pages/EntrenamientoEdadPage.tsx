@@ -23,41 +23,41 @@ interface EntrenamientoItem {
 const categorias = [
   { 
     id: "preescolar", 
-    label: "Pre-escolar", 
+    labelKey: "age.preescolar",
     ageRange: "3-5", 
-    description: "Juegos cortos, visuales y guiados.",
+    descKey: "age.preescolarDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588294.png",
     iconBg: "linear-gradient(135deg, #FFE082 0%, #FFB300 100%)"
   },
   { 
     id: "ninos", 
-    label: "Niños", 
+    labelKey: "age.ninos",
     ageRange: "6-11", 
-    description: "Atención, lectura y lógica básica.",
+    descKey: "age.ninosDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/2232/2232688.png",
     iconBg: "linear-gradient(135deg, #CE93D8 0%, #9C27B0 100%)"
   },
   { 
     id: "adolescentes", 
-    label: "Adolescentes", 
+    labelKey: "age.adolescentes",
     ageRange: "12-17", 
-    description: "Velocidad, enfoque y memoria.",
+    descKey: "age.adolescentesDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
     iconBg: "linear-gradient(135deg, #B39DDB 0%, #7E57C2 100%)"
   },
   { 
     id: "adultos", 
-    label: "Adultos", 
+    labelKey: "age.adultos",
     ageRange: "18-59", 
-    description: "Productividad, lectura y claridad mental.",
+    descKey: "age.adultosDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png",
     iconBg: "linear-gradient(135deg, #90CAF9 0%, #1976D2 100%)"
   },
   { 
     id: "adulto_mayor", 
-    label: "Adulto mayor", 
+    labelKey: "age.adultoMayor",
     ageRange: "60+", 
-    description: "Memoria, agilidad y prevención cognitiva.",
+    descKey: "age.adultoMayorDesc",
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png",
     iconBg: "linear-gradient(135deg, #CE93D8 0%, #8E24AA 100%)"
   },
@@ -67,7 +67,7 @@ const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-6
 
 export default function EntrenamientoEdadPage() {
   const [, setLocation] = useLocation();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = i18n.language || 'es';
   const params = useParams<{ itemId: string }>();
   const itemId = params.itemId;
@@ -303,7 +303,7 @@ export default function EntrenamientoEdadPage() {
                 fontWeight: styles["main-title"]?.fontWeight || 700 
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || "SELECCIONA TU EDAD"}</span>
+              <span className="whitespace-pre-line">{styles["main-title"]?.buttonText || t("age.selectStage")}</span>
             </h1>
             <p 
               className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
@@ -313,7 +313,7 @@ export default function EntrenamientoEdadPage() {
                 color: styles["main-subtitle"]?.textColor || "#9ca3af" 
               }}
             >
-              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || "Así ajustamos ejercicios y dificultad."}</span>
+              <span className="whitespace-pre-line">{styles["main-subtitle"]?.buttonText || t("age.adjustDesc")}</span>
             </p>
           </motion.div>
 
@@ -377,7 +377,7 @@ export default function EntrenamientoEdadPage() {
                           color: styles[titleId]?.textColor || "#1f2937"
                         }}
                       >
-                        {styles[titleId]?.buttonText || cat.label} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
+                        {styles[titleId]?.buttonText || t(cat.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({cat.ageRange})</span>
                       </h3>
                       <p 
                         className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
@@ -387,7 +387,7 @@ export default function EntrenamientoEdadPage() {
                           color: styles[descId]?.textColor || "#9ca3af"
                         }}
                       >
-                        {styles[descId]?.buttonText || cat.description}
+                        {styles[descId]?.buttonText || t(cat.descKey)}
                       </p>
                     </div>
 
