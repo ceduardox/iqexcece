@@ -91,17 +91,39 @@ export default function EntrenamientoEdadPage() {
       .then(data => {
         if (data.style?.styles) {
           try {
-            setStyles(JSON.parse(data.style.styles));
-          } catch (e) {
-            console.log("No saved styles");
-          }
+            const parsed = JSON.parse(data.style.styles);
+            if (Object.keys(parsed).length > 0) {
+              setStyles(parsed);
+              clearTimeout(timeout);
+              setStylesLoaded(true);
+              return;
+            }
+          } catch (e) {}
         }
-        clearTimeout(timeout);
-        setStylesLoaded(true);
+        return fetch(`/api/page-styles/age-selection?lang=${lang}`)
+          .then(res2 => res2.json())
+          .then(data2 => {
+            if (data2.style?.styles) {
+              try {
+                setStyles(JSON.parse(data2.style.styles));
+              } catch (e) {}
+            }
+            clearTimeout(timeout);
+            setStylesLoaded(true);
+          });
       })
       .catch(() => {
-        clearTimeout(timeout);
-        setStylesLoaded(true);
+        fetch(`/api/page-styles/age-selection?lang=${lang}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.style?.styles) {
+              try { setStyles(JSON.parse(data.style.styles)); } catch (e) {}
+            }
+          })
+          .finally(() => {
+            clearTimeout(timeout);
+            setStylesLoaded(true);
+          });
       });
     
     return () => clearTimeout(timeout);
@@ -115,18 +137,23 @@ export default function EntrenamientoEdadPage() {
     }
     
     try {
-      await fetch("/api/admin/page-styles", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`
-        },
-        body: JSON.stringify({ pageName: "entrenamiento-edad", styles: JSON.stringify(newStyles), lang })
-      });
+      const stylesStr = JSON.stringify(newStyles);
+      await Promise.all([
+        fetch("/api/admin/page-styles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+          body: JSON.stringify({ pageName: "entrenamiento-edad", styles: stylesStr, lang })
+        }),
+        fetch("/api/admin/page-styles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+          body: JSON.stringify({ pageName: "age-selection", styles: stylesStr, lang })
+        })
+      ]);
     } catch (error) {
       console.error("Error saving styles:", error);
     }
-  }, []);
+  }, [lang]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;

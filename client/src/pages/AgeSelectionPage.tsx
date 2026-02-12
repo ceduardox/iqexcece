@@ -207,18 +207,23 @@ export default function AgeSelectionPage() {
       return;
     }
     try {
-      await fetch("/api/admin/page-styles", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`
-        },
-        body: JSON.stringify({ pageName: "age-selection", styles: JSON.stringify(newStyles), lang })
-      });
+      const stylesStr = JSON.stringify(newStyles);
+      await Promise.all([
+        fetch("/api/admin/page-styles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+          body: JSON.stringify({ pageName: "age-selection", styles: stylesStr, lang })
+        }),
+        fetch("/api/admin/page-styles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+          body: JSON.stringify({ pageName: "entrenamiento-edad", styles: stylesStr, lang })
+        })
+      ]);
     } catch (e) {
       console.error("Error saving styles:", e);
     }
-  }, []);
+  }, [lang]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
