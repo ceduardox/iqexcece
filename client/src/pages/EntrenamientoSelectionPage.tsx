@@ -354,15 +354,13 @@ export default function EntrenamientoSelectionPage() {
                       <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
                     )}
                     
-                    <motion.div 
+                    <div 
                       className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
                       style={{ width: iconSize, height: iconSize }}
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
                     >
                       <MediaIcon src={iconUrl} size={iconSize} />
-                    </motion.div>
+                    </div>
                     
                     <h3 
                       className={`text-sm font-bold mb-1 leading-tight ${getEditableClass(titleId)}`}
@@ -387,6 +385,8 @@ export default function EntrenamientoSelectionPage() {
                       </p>
                     )}
                     <motion.button
+                      animate={{ scale: [1, 1.04, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                       className={`w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
                       onClick={(e) => { 
                         e.stopPropagation(); 
@@ -408,17 +408,10 @@ export default function EntrenamientoSelectionPage() {
                           ? `0 ${styles[btnId].shadowBlur / 2}px ${styles[btnId].shadowBlur}px ${styles[btnId]?.shadowColor || "rgba(139,92,246,0.3)"}`
                           : "0 4px 15px rgba(139,92,246,0.3)"
                       }}
-                      whileHover={{ scale: 1.03, boxShadow: "0 6px 20px rgba(139,92,246,0.45)" }}
-                      whileTap={{ scale: 0.92, boxShadow: "0 2px 8px rgba(139,92,246,0.2)" }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
-                      {styles[btnId]?.buttonText || t("tests.start")}
-                      <motion.div
-                        animate={{ x: [0, 3, 0] }}
-                        transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </motion.div>
+                      {styles[btnId]?.buttonText || "Iniciar"}
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </motion.div>
                 </motion.div>
