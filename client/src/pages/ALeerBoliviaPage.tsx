@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
-import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
 import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
@@ -37,6 +37,7 @@ export default function ALeerBoliviaPage() {
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -624,6 +625,8 @@ export default function ALeerBoliviaPage() {
           onSave={() => saveStyles(styles)}
           onClose={handleEditorClose}
           onClearSelection={() => setSelectedElement(null)}
+          deviceMode={deviceMode}
+          onDeviceModeChange={setDeviceMode}
         />
       )}
     </div>

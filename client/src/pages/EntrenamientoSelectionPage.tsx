@@ -5,7 +5,7 @@ import { Dumbbell, ChevronRight, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
-import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { VideoBackground, MediaIcon } from "@/components/VideoBackground";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -58,6 +58,7 @@ export default function EntrenamientoSelectionPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
     queryKey: ["/api/entrenamiento", "ninos", "items", lang],
@@ -432,6 +433,8 @@ export default function EntrenamientoSelectionPage() {
           onSave={() => saveStyles(styles)}
           onClose={handleEditorClose}
           onClearSelection={() => setSelectedElement(null)}
+          deviceMode={deviceMode}
+          onDeviceModeChange={setDeviceMode}
         />
       )}
     </div>

@@ -6,7 +6,7 @@ import { LanguageButton } from "./LanguageButton";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { EditorToolbar, type PageStyles, type ElementStyle } from "./EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { useSounds } from "@/hooks/use-sounds";
 
@@ -33,6 +33,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [styles, setStyles] = useState<PageStyles>({});
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   
   useEffect(() => {
     const checkEditorMode = () => {
@@ -763,6 +764,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             onSave={handleSaveStyles}
             onClose={handleCloseEditor}
             onClearSelection={() => setSelectedElement(null)}
+            deviceMode={deviceMode}
+            onDeviceModeChange={setDeviceMode}
           />
         )}
       </AnimatePresence>

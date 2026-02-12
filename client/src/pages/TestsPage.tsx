@@ -1,13 +1,14 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, HelpCircle, Home } from "lucide-react";
+import { BookOpen, Brain, HelpCircle, Home, Minus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useUserData } from "@/lib/user-context";
-import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode, resolveStyle } from "@/components/EditorToolbar";
 import { VideoBackground, isVideoUrl, useIsVideo, MediaIcon } from "@/components/VideoBackground";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
 const playCardSound = () => {
@@ -191,14 +192,15 @@ function TestCard({
   );
 }
 
-function HeroSection({ styles, getEditableClass, handleElementClick, getElementStyle, children }: {
+function HeroSection({ styles, getEditableClass, handleElementClick, getElementStyle, children, isMobile }: {
   styles: PageStyles;
   getEditableClass: (id: string) => string;
   handleElementClick: (id: string, e: React.MouseEvent) => void;
   getElementStyle: (id: string, defaultBg?: string) => React.CSSProperties;
   children: React.ReactNode;
+  isMobile: boolean;
 }) {
-  const heroStyle = styles["hero-section"];
+  const heroStyle = resolveStyle(styles, "hero-section", isMobile);
   const heroIsVideo = useIsVideo(heroStyle?.backgroundType === "image" ? heroStyle?.imageUrl : undefined);
   
   const bgStyle: React.CSSProperties = {
@@ -234,6 +236,43 @@ function HeroSection({ styles, getEditableClass, handleElementClick, getElementS
   );
 }
 
+function SpacerElement({ id, styles, isMobile, editorMode, getEditableClass, handleElementClick }: {
+  id: string;
+  styles: PageStyles;
+  isMobile: boolean;
+  editorMode: boolean;
+  getEditableClass: (id: string) => string;
+  handleElementClick: (id: string, e: React.MouseEvent) => void;
+}) {
+  const resolved = resolveStyle(styles, id, isMobile);
+  const height = resolved.sectionHeight ?? resolved.spacerHeight ?? 20;
+  const visible = resolved.visible !== false;
+  
+  if (!visible && !editorMode) return null;
+  
+  return (
+    <div
+      className={`w-full ${getEditableClass(id)} ${!visible && editorMode ? "opacity-40" : ""}`}
+      onClick={(e) => handleElementClick(id, e)}
+      style={{
+        height: visible ? height : 4,
+        background: editorMode ? (visible ? "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,217,255,0.08) 5px, rgba(0,217,255,0.08) 10px)" : "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,0,0,0.08) 5px, rgba(255,0,0,0.08) 10px)") : "transparent",
+        transition: "height 0.2s ease",
+      }}
+      data-testid={`spacer-${id}`}
+    >
+      {editorMode && (
+        <div className="flex items-center justify-center h-full">
+          <span className="text-[9px] text-gray-400 bg-gray-900/60 px-2 py-0.5 rounded">
+            <Minus className="w-3 h-3 inline mr-1" />
+            {id} ({height}px) {!visible ? "[oculto]" : ""}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TestsPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || 'es';
@@ -243,6 +282,8 @@ export default function TestsPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -328,9 +369,13 @@ export default function TestsPage() {
       : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
   }, [editorMode, selectedElement]);
 
+  const getResolvedStyle = useCallback((elementId: string): ElementStyle => {
+    return resolveStyle(styles, elementId, isMobile);
+  }, [styles, isMobile]);
+
   const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
-    const style = styles[elementId];
-    if (!style) return defaultBg ? { backgroundColor: defaultBg } : {};
+    const style = getResolvedStyle(elementId);
+    if (!style || Object.keys(style).length === 0) return defaultBg ? { backgroundColor: defaultBg } : {};
     
     const result: React.CSSProperties = {};
     
@@ -356,9 +401,10 @@ export default function TestsPage() {
     if (style.textAlign) result.textAlign = style.textAlign;
     if (style.fontWeight) result.fontWeight = style.fontWeight;
     if (style.borderRadius) result.borderRadius = style.borderRadius;
+    if (style.sectionHeight) result.minHeight = style.sectionHeight;
     
     return result;
-  }, [styles]);
+  }, [getResolvedStyle]);
 
   const handleTestClick = useCallback((testId: string) => {
     playCardSound();
@@ -457,7 +503,8 @@ export default function TestsPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto pb-24">
-        <HeroSection styles={styles} getEditableClass={getEditableClass} handleElementClick={handleElementClick} getElementStyle={getElementStyle}>
+        <SpacerElement id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
+        <HeroSection styles={styles} getEditableClass={getEditableClass} handleElementClick={handleElementClick} getElementStyle={getElementStyle} isMobile={isMobile}>
           <div className="relative z-10 px-5 pb-8">
             <div>
               <motion.h1 
@@ -519,6 +566,8 @@ export default function TestsPage() {
           </div>
         </HeroSection>
 
+        <SpacerElement id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
+
         <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
           {genericTestCategories.map((category, index) => (
             <TestCard
@@ -547,6 +596,8 @@ export default function TestsPage() {
           onSave={() => saveStyles(styles)}
           onClose={handleEditorClose}
           onClearSelection={() => setSelectedElement(null)}
+          deviceMode={deviceMode}
+          onDeviceModeChange={setDeviceMode}
         />
       )}
     </div>

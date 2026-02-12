@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Menu, ChevronRight } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
-import { EditorToolbar, type PageStyles, type ElementStyle } from "@/components/EditorToolbar";
+import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -76,6 +76,7 @@ export default function EntrenamientoEdadPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   const storedItem = sessionStorage.getItem("selectedEntrenamientoItem");
   const item: EntrenamientoItem | null = storedItem ? JSON.parse(storedItem) : null;
@@ -415,6 +416,8 @@ export default function EntrenamientoEdadPage() {
           onSave={() => saveStyles(styles)}
           onClose={handleEditorClose}
           onClearSelection={() => setSelectedElement(null)}
+          deviceMode={deviceMode}
+          onDeviceModeChange={setDeviceMode}
         />
       )}
     </div>

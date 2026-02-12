@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type } from "lucide-react";
+import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type, Monitor, Smartphone, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useIsVideo } from "@/components/VideoBackground";
+
+export type DeviceMode = "mobile" | "desktop";
 
 export interface ElementStyle {
   background?: string;
@@ -29,6 +31,21 @@ export interface ElementStyle {
   iconSize?: number;
   cardHeight?: number;
   labelText?: string;
+  sectionHeight?: number;
+  spacerHeight?: number;
+  visible?: boolean;
+}
+
+export function getDeviceKey(elementId: string, device: DeviceMode): string {
+  return device === "desktop" ? `${elementId}-desktop` : elementId;
+}
+
+export function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean): ElementStyle {
+  const baseStyle = styles[elementId] || {};
+  const desktopStyle = styles[`${elementId}-desktop`] || {};
+  if (isMobile) return baseStyle;
+  const merged = { ...baseStyle, ...desktopStyle };
+  return merged;
 }
 
 export interface PageStyles {
@@ -42,6 +59,8 @@ interface EditorToolbarProps {
   onSave: () => void;
   onClose: () => void;
   onClearSelection: () => void;
+  deviceMode: DeviceMode;
+  onDeviceModeChange: (mode: DeviceMode) => void;
 }
 
 export function EditorToolbar({ 
@@ -50,16 +69,19 @@ export function EditorToolbar({
   onStyleChange, 
   onSave, 
   onClose,
-  onClearSelection 
+  onClearSelection,
+  deviceMode,
+  onDeviceModeChange
 }: EditorToolbarProps) {
   const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
   const [toolbarPosition, setToolbarPosition] = useState<"bottom" | "top">("bottom");
-  const currentStyle = selectedElement ? (styles[selectedElement] || {}) : {};
+  const effectiveKey = selectedElement ? getDeviceKey(selectedElement, deviceMode) : null;
+  const currentStyle = effectiveKey ? (styles[effectiveKey] || {}) : {};
   const previewIsVideo = useIsVideo(currentStyle.imageUrl);
   
   const updateStyle = (updates: Partial<ElementStyle>) => {
-    if (!selectedElement) return;
-    onStyleChange(selectedElement, { ...currentStyle, ...updates });
+    if (!effectiveKey) return;
+    onStyleChange(effectiveKey, { ...currentStyle, ...updates });
   };
 
   const tabs = [
@@ -82,7 +104,7 @@ export function EditorToolbar({
       className={`fixed ${positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px]`}
       data-testid="editor-toolbar"
     >
-      <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
+      <div className="flex items-center justify-between mb-1 gap-2">
         <span className="text-white font-medium text-xs sm:text-sm truncate flex-1">
           {selectedElement ? `${selectedElement}` : "Selecciona elemento"}
         </span>
@@ -104,6 +126,30 @@ export function EditorToolbar({
             <X className="w-4 h-4" />
           </Button>
         </div>
+      </div>
+      <div className="flex items-center gap-1 mb-2 sm:mb-3">
+        <span className="text-gray-400 text-[10px] mr-1">Vista:</span>
+        <Button
+          size="sm"
+          variant={deviceMode === "mobile" ? "default" : "ghost"}
+          className={`h-6 px-2 text-[10px] ${deviceMode === "mobile" ? "bg-cyan-600" : "text-gray-400"}`}
+          onClick={() => onDeviceModeChange("mobile")}
+          data-testid="device-mobile"
+        >
+          <Smartphone className="w-3 h-3 mr-1" />
+          Móvil
+        </Button>
+        <Button
+          size="sm"
+          variant={deviceMode === "desktop" ? "default" : "ghost"}
+          className={`h-6 px-2 text-[10px] ${deviceMode === "desktop" ? "bg-cyan-600" : "text-gray-400"}`}
+          onClick={() => onDeviceModeChange("desktop")}
+          data-testid="device-desktop"
+        >
+          <Monitor className="w-3 h-3 mr-1" />
+          PC
+        </Button>
+        <span className="text-gray-500 text-[9px] ml-1">{deviceMode === "mobile" ? "Editando móvil" : "Editando PC"}</span>
       </div>
 
       {selectedElement && (
@@ -363,6 +409,50 @@ export function EditorToolbar({
                     <span className="text-white text-xs w-10">{currentStyle.cardHeight || 100}px</span>
                   </div>
                 )}
+                {(selectedElement?.startsWith("spacer-") || selectedElement?.includes("section") || selectedElement === "hero-section") && (
+                  <div className="mt-3 pt-3 border-t border-gray-700 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400 text-xs w-16">Altura:</span>
+                      <Slider
+                        value={[currentStyle.sectionHeight || (selectedElement?.startsWith("spacer-") ? 20 : 200)]}
+                        onValueChange={([val]) => updateStyle({ sectionHeight: val })}
+                        min={0}
+                        max={600}
+                        step={5}
+                        className="flex-1"
+                        data-testid="slider-section-height"
+                      />
+                      <span className="text-white text-xs w-10">{currentStyle.sectionHeight || (selectedElement?.startsWith("spacer-") ? 20 : 200)}px</span>
+                    </div>
+                    {selectedElement?.startsWith("spacer-") && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 text-xs w-16">Visible:</span>
+                        <Button
+                          size="sm"
+                          variant={currentStyle.visible !== false ? "default" : "outline"}
+                          onClick={() => updateStyle({ visible: true })}
+                          className="flex-1 text-xs"
+                          data-testid="spacer-visible"
+                        >
+                          Sí
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={currentStyle.visible === false ? "default" : "outline"}
+                          onClick={() => updateStyle({ visible: false })}
+                          className="flex-1 text-xs"
+                          data-testid="spacer-hidden"
+                        >
+                          Oculto
+                        </Button>
+                      </div>
+                    )}
+                    <p className="text-gray-500 text-[9px]">
+                      <Minus className="w-3 h-3 inline mr-1" />
+                      Configura {deviceMode === "mobile" ? "móvil" : "PC"} por separado
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -436,7 +526,7 @@ export function EditorToolbar({
                       const val = e.target.value;
                       if (val === "") {
                         const { buttonText, ...rest } = currentStyle;
-                        if (selectedElement) onStyleChange(selectedElement, rest);
+                        if (effectiveKey) onStyleChange(effectiveKey, rest);
                       } else {
                         updateStyle({ buttonText: val });
                       }
