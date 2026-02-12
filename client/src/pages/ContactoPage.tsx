@@ -244,7 +244,7 @@ export default function ContactoPage() {
         </div>
       )}
 
-      <div className="flex-1 px-5 pb-28 max-w-md mx-auto w-full">
+      <div className="flex-1 px-5 pb-28 max-w-md md:max-w-full mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
