@@ -410,7 +410,7 @@ export default function ContactoPage() {
                         onChange={(e) => setChatInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
                         placeholder="Escribe un mensaje..."
-                        className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 border-0 outline-none focus:ring-2 focus:ring-purple-300"
+                        className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 text-gray-900 placeholder-gray-400 border-0 outline-none focus:ring-2 focus:ring-purple-300"
                         disabled={chatLoading}
                         data-testid="input-chat-message"
                       />
