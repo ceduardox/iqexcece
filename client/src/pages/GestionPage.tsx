@@ -83,6 +83,7 @@ export default function GestionPage() {
   const [compressedSize, setCompressedSize] = useState(0);
   const [imageName, setImageName] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [imgPage, setImgPage] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
   
   // Razonamiento state
@@ -4452,37 +4453,47 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </div>
               )}
 
-              {/* Gallery */}
-              <div className="space-y-2">
-                <h3 className="text-white/80 font-semibold">Imágenes guardadas ({uploadedImages.length})</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {uploadedImages.map((img) => (
-                    <div key={img.id} className="bg-white/10 rounded-lg p-2 space-y-2">
-                      <img src={img.data} alt={img.name} className="w-full h-20 object-cover rounded" />
-                      <p className="text-white/60 text-xs truncate">{img.name}</p>
-                      <p className="text-white/40 text-xs">{img.width}x{img.height} • {(img.compressedSize / 1024).toFixed(1)}KB</p>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 text-xs border-cyan-500/30 text-cyan-400"
-                          onClick={() => copyImageUrl(img.id)}
-                        >
-                          {copiedId === img.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs border-red-500/30 text-red-400"
-                          onClick={() => deleteImage(img.id)}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
+              {/* Gallery with pagination */}
+              {(() => {
+                const PER_PAGE = 120;
+                const totalPages = Math.ceil(uploadedImages.length / PER_PAGE);
+                const page = Math.min(imgPage || 0, totalPages - 1);
+                const pageImages = uploadedImages.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white/80 font-semibold text-sm">Imágenes ({uploadedImages.length})</h3>
+                      {totalPages > 1 && (
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" variant="outline" className="h-6 px-2 text-xs border-white/20 text-white/60" onClick={() => setImgPage(Math.max(0, page - 1))} disabled={page === 0}>Ant</Button>
+                          <span className="text-white/50 text-xs px-1">{page + 1}/{totalPages}</span>
+                          <Button size="sm" variant="outline" className="h-6 px-2 text-xs border-white/20 text-white/60" onClick={() => setImgPage(Math.min(totalPages - 1, page + 1))} disabled={page >= totalPages - 1}>Sig</Button>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                      {pageImages.map((img) => (
+                        <div key={img.id} className="bg-white/10 rounded p-1.5 space-y-1">
+                          {img.name?.toLowerCase().endsWith('.webm') || img.name?.toLowerCase().endsWith('.mp4') ? (
+                            <video src={img.data} muted autoPlay loop playsInline className="w-full h-14 object-cover rounded" />
+                          ) : (
+                            <img src={img.data} alt={img.name} className="w-full h-14 object-cover rounded" />
+                          )}
+                          <p className="text-white/50 text-[10px] truncate">{img.name}</p>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" className="flex-1 h-5 text-[10px] border-cyan-500/30 text-cyan-400 px-1" onClick={() => copyImageUrl(img.id)}>
+                              {copiedId === img.id ? <Check className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-5 text-[10px] border-red-500/30 text-red-400 px-1" onClick={() => deleteImage(img.id)}>
+                              <Trash2 className="w-2.5 h-2.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
         )}
