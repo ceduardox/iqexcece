@@ -127,15 +127,16 @@ function TestCard({
         </div>
         
         <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
-          <motion.div 
+          <div 
             className={`relative flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
             style={{ width: iconSize, height: iconSize }}
-            animate={{ y: [0, -3, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: index * 0.5 }}
           >
-            <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
-          </motion.div>
+            <div className="chroma-aura" />
+            <div className="chroma-icon relative z-[1]">
+              <MediaIcon src={styles[iconId]?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
+            </div>
+          </div>
           
           <div className="flex-1 min-w-0 flex flex-col">
             <h3 
@@ -166,9 +167,7 @@ function TestCard({
                   color: styles[`btn-${testId}`]?.textColor || "white",
                   border: textDark ? "none" : "1px solid rgba(255,255,255,0.3)",
                 }}
-                whileHover={{ scale: 1.04, boxShadow: "0 6px 20px rgba(139,92,246,0.4)" }}
-                whileTap={{ scale: 0.92, boxShadow: "0 2px 8px rgba(139,92,246,0.2)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   if (editorMode) { 
@@ -180,16 +179,9 @@ function TestCard({
                 }}
               >
                 {styles[`btn-${testId}`]?.buttonText || t("tests.start")}
-                <motion.svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                  animate={{ x: [0, 3, 0] }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </motion.svg>
+                </svg>
               </motion.button>
             </div>
           </div>
