@@ -306,7 +306,7 @@
   to { opacity: 0.6; transform: scale(1.25); }
 }
 .chroma-icon {
-  animation: chromaLevitar 4s ease-in-out infinite alternate, chromaColor 8s linear infinite;
+  animation: chromaColor 8s linear infinite;
   pointer-events: none;
 }
 .chroma-aura {
