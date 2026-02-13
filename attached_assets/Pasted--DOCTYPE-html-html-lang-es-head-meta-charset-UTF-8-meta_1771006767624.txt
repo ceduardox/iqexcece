@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neuro-Lector Pro | IQ Exponencial</title>
+    <style>
+        :root {
+            --primary: #0051ff;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --bg: #ffffff;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg); font-family: 'Inter', -apple-system, sans-serif;
+            overflow: hidden; touch-action: none;
+        }
+
+        #app { display: flex; flex-direction: column; height: 100vh; }
+
+        header {
+            padding: 10px 20px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            background: rgba(255,255,255,0.95);
+            border-bottom: 1px solid #eee;
+            z-index: 100;
+        }
+
+        .stats-group { display: flex; flex-direction: column; align-items: center; }
+        .stats-label { font-size: 9px; color: #888; text-transform: uppercase; font-weight: 700; }
+        .stats-value { font-size: 18px; font-weight: 800; }
+
+        .logo { height: 28px; justify-self: start; }
+        #score-display { font-size: 22px; font-weight: 900; color: var(--primary); text-align: right; }
+
+        #stage {
+            flex-grow: 1; position: relative;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #ffffff 0%, #f4f7fa 100%);
+        }
+
+        /* OBJETIVO DINÁMICO */
+        #mission-bar {
+            position: absolute; top: 30px; width: 85%;
+            background: white; padding: 15px; border-radius: 20px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,81,255,0.05);
+            border: 2px solid #f0f4ff; transition: all 0.3s ease;
+        }
+
+        .category-target { 
+            display: block; font-size: 24px; color: var(--primary); 
+            font-weight: 900; letter-spacing: 1px;
+        }
+
+        #word-stream {
+            font-size: 48px; font-weight: 900; color: #1a1a1a;
+            text-transform: uppercase; letter-spacing: -1.5px;
+            transition: transform 0.1s; user-select: none;
+        }
+
+        /* OVERLAYS */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px; box-sizing: border-box;
+        }
+
+        .card {
+            background: white; padding: 40px; border-radius: 35px;
+            box-shadow: 0 25px 70px rgba(0, 81, 255, 0.12);
+            max-width: 400px; text-align: center;
+        }
+
+        .btn-start {
+            background: var(--primary); color: white; border: none;
+            padding: 18px 40px; border-radius: 40px; font-weight: 800;
+            margin-top: 25px; cursor: pointer; font-size: 16px; width: 100%;
+        }
+
+        /* ANIMACIONES */
+        .hit-pulse { animation: hitPulse 0.4s ease-out; }
+        @keyframes hitPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: var(--success); }
+            100% { transform: scale(1); }
+        }
+
+        .shake { animation: shakeAnim 0.4s; }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px); }
+            75% { transform: translateX(15px); }
+        }
+
+        .new-goal { animation: newGoalAnim 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes newGoalAnim {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="start-overlay" class="modal-overlay">
+        <div class="card">
+            <img src="https://iqexponencial.app/api/images/c8fbfb1b-665f-46e0-a58c-b99c4c3f0cdc" style="width: 80px; margin-bottom: 20px;">
+            <h2 style="color: var(--primary);">Neuro-Lector</h2>
+            <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                Lee la palabra central.<br>
+                Toca <b>SOLO</b> si pertenece a la categoría.<br>
+                Cada 5 aciertos el objetivo cambia.
+            </p>
+            <button class="btn-start" onclick="startGame()">INICIAR ENTRENAMIENTO</button>
+        </div>
+    </div>
+
+    <div id="gameover-overlay" class="modal-overlay" style="display: none;">
+        <div class="card">
+            <h2 style="color: var(--danger);">ENERGÍA AGOTADA</h2>
+            <p id="final-stats" style="font-size: 18px; color: #666;"></p>
+            <button class="btn-start" onclick="location.reload()">REINTENTAR</button>
+        </div>
+    </div>
+
+    <header>
+        <img src="https://iqexponencial.app/api/images/c8fbfb1b-665f-46e0-a58c-b99c4c3f0cdc" class="logo">
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <div class="stats-group">
+                <span class="stats-label">Aciertos</span>
+                <span id="hits-val" class="stats-value" style="color: var(--success);">0</span>
+            </div>
+            <div class="stats-group">
+                <span class="stats-label">Fallos</span>
+                <span id="fails-val" class="stats-value" style="color: var(--danger);">0</span>
+            </div>
+        </div>
+        <div id="score-display">500</div>
+    </header>
+
+    <div id="stage" onmousedown="handleAction(event)" ontouchstart="handleAction(event)">
+        <div id="mission-bar">
+            <span class="stats-label">Busca palabras de:</span>
+            <span class="category-target" id="current-category">---</span>
+        </div>
+        <div id="word-stream">LISTO</div>
+    </div>
+</div>
+
+<script>
+    const sfxHit = new Audio('https://neraversestudio.com/iqex/bur.mp3'); 
+    const sfxFail = new Audio('https://neraversestudio.com/iqex/error.mp3');
+
+    const DATA = {
+        "FINANZAS": ["BONO", "BOLSA", "PAGO", "BANCO", "VALOR", "EURO", "COBRO", "ACTIVO"],
+        "ANIMALES": ["LEÓN", "PERRO", "GATO", "LOBO", "AVES", "PECES", "TIGRE", "MONO"],
+        "CIUDADES": ["MADRID", "PARÍS", "TOKIO", "ROMA", "QUITO", "LIMA", "MIAMI", "BERLÍN"],
+        "FRUTAS": ["PERA", "COCO", "PIÑA", "MANGO", "UVA", "KIWI", "MORA", "LIMA"]
+    };
+
+    let categories = Object.keys(DATA);
+    let currentCategory = "";
+    let currentWord = "";
+    let score = 500;
+    let hits = 0;
+    let fails = 0;
+    let hitsStreak = 0;
+    let gameRunning = false;
+    let wordTimeout;
+    let speed = 1100;
+
+    function startGame() {
+        document.getElementById('start-overlay').style.display = 'none';
+        gameRunning = true;
+        
+        // Desbloqueo audio
+        sfxHit.play().then(() => sfxHit.pause());
+        sfxFail.play().then(() => sfxFail.pause());
+        
+        changeCategory();
+        nextWord();
+    }
+
+    function changeCategory() {
+        const oldCat = currentCategory;
+        do {
+            currentCategory = categories[Math.floor(Math.random() * categories.length)];
+        } while (currentCategory === oldCat);
+
+        const bar = document.getElementById('mission-bar');
+        document.getElementById('current-category').innerText = currentCategory;
+        
+        bar.classList.remove('new-goal');
+        void bar.offsetWidth; // Trigger reflow
+        bar.classList.add('new-goal');
+        hitsStreak = 0;
+    }
+
+    function nextWord() {
+        if(!gameRunning) return;
+
+        const isTarget = Math.random() < 0.35;
+        if(isTarget) {
+            currentWord = DATA[currentCategory][Math.floor(Math.random() * 8)];
+        } else {
+            const other = categories.filter(c => c !== currentCategory)[Math.floor(Math.random()*3)];
+            currentWord = DATA[other][Math.floor(Math.random() * 8)];
+        }
+
+        const display = document.getElementById('word-stream');
+        display.innerText = currentWord;
+        
+        wordTimeout = setTimeout(() => {
+            // Si era correcta y NO la tocó: penalización leve
+            if(gameRunning && DATA[currentCategory].includes(currentWord)) {
+                applyPenalty(100, false);
+            }
+            if(gameRunning) nextWord();
+        }, speed);
+    }
+
+    function handleAction(e) {
+        if(e) e.preventDefault();
+        if(!gameRunning) return;
+
+        clearTimeout(wordTimeout);
+        const isCorrect = DATA[currentCategory].includes(currentWord);
+
+        if(isCorrect) {
+            const clone = sfxHit.cloneNode();
+            clone.play();
+            
+            score += 100;
+            hits++;
+            hitsStreak++;
+            
+            document.getElementById('word-stream').classList.add('hit-pulse');
+            setTimeout(() => document.getElementById('word-stream').classList.remove('hit-pulse'), 400);
+
+            // LOGICA DE CAMBIO: Cada 5 aciertos cambia el objetivo
+            if(hitsStreak >= 5) {
+                changeCategory();
+                speed = Math.max(500, speed - 50); // Aumenta velocidad al cambiar objetivo
+            }
+        } else {
+            applyPenalty(250, true);
+        }
+
+        updateUI();
+        nextWord();
+    }
+
+    function applyPenalty(amt, isWrongTap) {
+        const failSound = sfxFail.cloneNode();
+        failSound.play();
+        
+        score -= amt;
+        if(isWrongTap) fails++;
+        hitsStreak = 0;
+
+        document.getElementById('stage').classList.add('shake');
+        setTimeout(() => document.getElementById('stage').classList.remove('shake'), 400);
+        
+        updateUI();
+        if(score <= 0) gameOver();
+    }
+
+    function updateUI() {
+        document.getElementById('score-display').innerText = score < 0 ? 0 : score;
+        document.getElementById('score-display').style.color = score < 300 ? 'var(--danger)' : 'var(--primary)';
+        document.getElementById('hits-val').innerText = hits;
+        document.getElementById('fails-val').innerText = fails;
+    }
+
+    function gameOver() {
+        gameRunning = false;
+        document.getElementById('gameover-overlay').style.display = 'flex';
+        document.getElementById('final-stats').innerHTML = `
+            <b>Puntaje: ${score < 0 ? 0 : score}</b><br>
+            Aciertos Totales: ${hits}<br>
+            Errores de Precisión: ${fails}
+        `;
+    }
+</script>
+</body>
+</html>

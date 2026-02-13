@@ -17,6 +17,7 @@ const GAME_CONFIG: Record<string, { icon: typeof Zap; gradient: string; translat
   velocidad: { icon: Gauge, gradient: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)", translationKey: "velocidad_lectura", route: "velocidad" },
   lectura: { icon: BookOpen, gradient: "linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)", translationKey: "lectura_test", route: "lectura" },
   aceleracion_lectura: { icon: FastForward, gradient: "linear-gradient(135deg, #10B981 0%, #3B82F6 100%)", translationKey: "aceleracion", route: "aceleracion" },
+  neurolector: { icon: BookOpen, gradient: "linear-gradient(135deg, #0051ff 0%, #00b4d8 100%)", translationKey: "neurolector", route: "neurolector" },
 };
 
 function NeuroSyncAnimation() {
@@ -196,6 +197,28 @@ function AceleracionAnimation() {
   );
 }
 
+function NeuroLectorAnimation() {
+  const words = ["BONO", "LEÓN", "ROMA", "PERA"];
+  return (
+    <div className="relative w-48 h-40 mx-auto flex flex-col items-center justify-center">
+      <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">{CATEGORIES_LABEL}</div>
+      <div className="text-lg font-black mb-3" style={{ color: "#0051ff" }}>FINANZAS</div>
+      {words.map((w, i) => (
+        <motion.div
+          key={i}
+          className="text-2xl font-black absolute"
+          style={{ color: i === 0 ? "#34c759" : "#1a1a1a" }}
+          animate={{ opacity: [0, 1, 1, 0], y: [20, 0, 0, -20] }}
+          transition={{ duration: 2, repeat: Infinity, delay: i * 0.8, repeatDelay: words.length * 0.8 - 2 }}
+        >
+          {w}
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+const CATEGORIES_LABEL = "Busca palabras de:";
+
 const ANIMATION_MAP: Record<string, () => JSX.Element> = {
   neurosync: NeuroSyncAnimation,
   neurolink: NeuroLinkAnimation,
@@ -203,6 +226,7 @@ const ANIMATION_MAP: Record<string, () => JSX.Element> = {
   velocidad: VelocidadAnimation,
   lectura: LecturaAnimation,
   aceleracion_lectura: AceleracionAnimation,
+  neurolector: NeuroLectorAnimation,
 };
 
 function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categoria: string; itemId: string }) {

@@ -201,7 +201,8 @@
     "reconocimientoVisual": "Reconocimiento Visual",
     "neuroSync": "Neuro-Sync",
     "neuroLink": "Neuro-Link Pro",
-    "memoryFlash": "Memory Flash"
+    "memoryFlash": "Memory Flash",
+    "neuroLector": "Neuro-Lector"
   },
   "blog": {
     "title": "Blog",
@@ -405,6 +406,26 @@
     "exitConfirm": "Sí, salir y guardar",
     "exitCancel": "Continuar jugando",
     "footer": "SISTEMA MEMORY FLASH v1.0 | IQ EXPONENCIAL"
+  },
+  "neurolector": {
+    "prepTitle": "Neuro-Lector",
+    "prepSubtitle": "Clasificación rápida de palabras",
+    "prepInstructions": "Se te mostrará una categoría (ej: FINANZAS). Las palabras aparecerán una a una. Toca la pantalla SOLO cuando la palabra pertenezca a la categoría indicada. Si tocas una palabra incorrecta, perderás puntos. Si no tocas una palabra correcta, también perderás puntos. ¡Cada 5 aciertos seguidos la categoría cambia!",
+    "prepButton": "Comenzar",
+    "go": "¡YA!",
+    "lookFor": "Busca palabras de:",
+    "score": "Puntaje",
+    "hits": "Aciertos",
+    "errors": "Errores",
+    "energyDepleted": "¡Energía agotada!",
+    "resultsSaved": "Tus resultados han sido guardados",
+    "playAgain": "Jugar de nuevo",
+    "viewProgress": "Ver mi progreso",
+    "exitTitle": "¿Seguro que quieres salir?",
+    "exitMessage": "Tu progreso actual se guardará automáticamente.",
+    "exitConfirm": "Sí, salir y guardar",
+    "exitCancel": "Continuar jugando",
+    "footer": "SISTEMA NEURO-LECTOR v1.0 | IQ EXPONENCIAL"
   },
   "prep": {
     "instructions": "Instrucciones",

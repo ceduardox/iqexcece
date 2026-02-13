@@ -201,7 +201,8 @@
     "reconocimientoVisual": "Visual Recognition",
     "neuroSync": "Neuro-Sync",
     "neuroLink": "Neuro-Link Pro",
-    "memoryFlash": "Memory Flash"
+    "memoryFlash": "Memory Flash",
+    "neuroLector": "Neuro-Lector"
   },
   "blog": {
     "title": "Blog",
@@ -405,6 +406,26 @@
     "exitConfirm": "Yes, exit and save",
     "exitCancel": "Continue playing",
     "footer": "MEMORY FLASH SYSTEM v1.0 | IQ EXPONENTIAL"
+  },
+  "neurolector": {
+    "prepTitle": "Neuro-Lector",
+    "prepSubtitle": "Quick word classification",
+    "prepInstructions": "A category will be shown (e.g. FINANCE). Words will appear one by one. Tap the screen ONLY when the word belongs to the indicated category. If you tap an incorrect word, you lose points. If you miss a correct word, you also lose points. Every 5 consecutive hits, the category changes!",
+    "prepButton": "Start",
+    "go": "GO!",
+    "lookFor": "Look for words in:",
+    "score": "Score",
+    "hits": "Hits",
+    "errors": "Errors",
+    "energyDepleted": "Energy depleted!",
+    "resultsSaved": "Your results have been saved",
+    "playAgain": "Play again",
+    "viewProgress": "View my progress",
+    "exitTitle": "Are you sure you want to exit?",
+    "exitMessage": "Your current progress will be saved automatically.",
+    "exitConfirm": "Yes, exit and save",
+    "exitCancel": "Continue playing",
+    "footer": "NEURO-LECTOR SYSTEM v1.0 | IQ EXPONENTIAL"
   },
   "prep": {
     "instructions": "Instructions",

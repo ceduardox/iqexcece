@@ -38,7 +38,8 @@ const exerciseTypeKeys: Record<string, string> = {
   reconocimiento_visual: "progress.reconocimientoVisual",
   neurosync: "progress.neuroSync",
   neurolink: "progress.neuroLink",
-  memoryflash: "progress.memoryFlash"
+  memoryflash: "progress.memoryFlash",
+  neurolector: "progress.neuroLector"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -49,7 +50,8 @@ const exerciseTypeColors: Record<string, string> = {
   reconocimiento_visual: "#ec4899",
   neurosync: "#0051ff",
   neurolink: "#0051ff",
-  memoryflash: "#0051ff"
+  memoryflash: "#0051ff",
+  neurolector: "#0051ff"
 };
 
 const exerciseTypeIcons: Record<string, typeof Zap> = {
@@ -60,7 +62,8 @@ const exerciseTypeIcons: Record<string, typeof Zap> = {
   reconocimiento_visual: Eye,
   neurosync: Zap,
   neurolink: Target,
-  memoryflash: Grid3X3
+  memoryflash: Grid3X3,
+  neurolector: BookOpen
 };
 
 function formatDate(dateStr: string | null): string {
@@ -229,6 +232,14 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
             <StatBox value={result.puntaje ?? 0} label={t("memoryflash.score")} color="#0051ff" />
             <StatBox value={result.nivelAlcanzado ?? 1} label={t("memoryflash.level")} color="#8a3ffc" />
             <StatBox value={result.respuestasCorrectas ?? 0} label={t("memoryflash.hits")} color="#22c55e" />
+          </div>
+        );
+      case "neurolector":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.puntaje ?? 0} label={t("neurolector.score")} color="#0051ff" />
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("neurolector.hits")} color="#34c759" />
+            <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("neurolector.errors")} color="#ff3b30" />
           </div>
         );
       default:

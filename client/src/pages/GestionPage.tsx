@@ -5156,6 +5156,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <option value="neurosync" className="bg-gray-700 text-white">Neuro-Sync</option>
                                 <option value="neurolink" className="bg-gray-700 text-white">Neuro-Link Pro</option>
                                 <option value="memoryflash" className="bg-gray-700 text-white">Memory Flash</option>
+                                <option value="neurolector" className="bg-gray-700 text-white">Neuro-Lector</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
                               </select>
                             </div>
