@@ -15,6 +15,11 @@ const playButtonSound = () => {
   audio.play().catch(() => {});
 };
 
+const hitPool: HTMLAudioElement[] = [];
+for (let i = 0; i < 5; i++) { const a = new Audio('/bura.mp3'); a.volume = 0.7; hitPool.push(a); }
+let hitIdx = 0;
+const playHitSound = () => { const a = hitPool[hitIdx]; a.currentTime = 0; a.play().catch(() => {}); hitIdx = (hitIdx + 1) % hitPool.length; };
+
 const errPool: HTMLAudioElement[] = [];
 for (let i = 0; i < 3; i++) { const a = new Audio('/errore.mp3'); a.volume = 0.6; errPool.push(a); }
 let errIdx = 0;
@@ -122,7 +127,7 @@ export default function NeuroLinkPage() {
     const expected = nextNodeRef.current;
 
     if (id === expected) {
-      
+      playHitSound();
       totalCorrectRef.current++;
       setTotalCorrect(totalCorrectRef.current);
 
