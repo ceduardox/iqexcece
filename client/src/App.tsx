@@ -38,6 +38,7 @@ import ReconocimientoSelectionPage from "@/pages/ReconocimientoSelectionPage";
 import ReconocimientoExercisePage from "@/pages/ReconocimientoExercisePage";
 import NeuroSyncPage from "@/pages/NeuroSyncPage";
 import NeuroLinkPage from "@/pages/NeuroLinkPage";
+import MemoryFlashPage from "@/pages/MemoryFlashPage";
 import ProgresoPage from "@/pages/ProgresoPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
@@ -82,6 +83,7 @@ function Router() {
       <Route path="/reconocimiento/:categoria/:itemId/ejercicio/:nivel" component={ReconocimientoExercisePage}/>
       <Route path="/neurosync/:categoria/:itemId" component={NeuroSyncPage}/>
       <Route path="/neurolink/:categoria/:itemId" component={NeuroLinkPage}/>
+      <Route path="/memoryflash/:categoria/:itemId" component={MemoryFlashPage}/>
       <Route path="/progreso" component={ProgresoPage}/>
       <Route path="/progreso/:categoria" component={ProgresoPage}/>
       <Route path="/blog" component={BlogPage}/>

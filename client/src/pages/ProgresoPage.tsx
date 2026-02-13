@@ -1,6 +1,6 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown, Grid3X3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -37,7 +37,8 @@ const exerciseTypeKeys: Record<string, string> = {
   aceleracion_desplazamiento: "progress.desplazamiento",
   reconocimiento_visual: "progress.reconocimientoVisual",
   neurosync: "progress.neuroSync",
-  neurolink: "progress.neuroLink"
+  neurolink: "progress.neuroLink",
+  memoryflash: "progress.memoryFlash"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -47,7 +48,8 @@ const exerciseTypeColors: Record<string, string> = {
   aceleracion_desplazamiento: "#0891b2",
   reconocimiento_visual: "#ec4899",
   neurosync: "#0051ff",
-  neurolink: "#0051ff"
+  neurolink: "#0051ff",
+  memoryflash: "#0051ff"
 };
 
 const exerciseTypeIcons: Record<string, typeof Zap> = {
@@ -57,7 +59,8 @@ const exerciseTypeIcons: Record<string, typeof Zap> = {
   aceleracion_desplazamiento: BookOpen,
   reconocimiento_visual: Eye,
   neurosync: Zap,
-  neurolink: Target
+  neurolink: Target,
+  memoryflash: Grid3X3
 };
 
 function formatDate(dateStr: string | null): string {
@@ -218,6 +221,14 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
             <StatBox value={result.puntaje ?? 0} label={t("neurolink.score")} color="#0051ff" />
             <StatBox value={result.nivelAlcanzado ?? 1} label={t("neurolink.level")} color="#8a3ffc" />
             <StatBox value={result.respuestasCorrectas ?? 0} label={t("neurolink.correct")} color="#22c55e" />
+          </div>
+        );
+      case "memoryflash":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.puntaje ?? 0} label={t("memoryflash.score")} color="#0051ff" />
+            <StatBox value={result.nivelAlcanzado ?? 1} label={t("memoryflash.level")} color="#8a3ffc" />
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("memoryflash.hits")} color="#22c55e" />
           </div>
         );
       default:

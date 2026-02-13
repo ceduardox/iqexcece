@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neuro-Flash Pro | IQ Exponencial</title>
+    <style>
+        :root {
+            --primary: #0051ff;
+            --bg: #ffffff;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --header-bg: #f5f5f7;
+            --text-dark: #1d1d1f;
+            --gray-light: #e8e8ed;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg); font-family: -apple-system, system-ui, sans-serif;
+            overflow: hidden; touch-action: none;
+        }
+
+        #app { display: flex; flex-direction: column; height: 100vh; }
+
+        /* HEADER AVANZADO */
+        header {
+            background: var(--header-bg);
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            height: 85px;
+            box-sizing: border-box;
+        }
+
+        .logo { height: 38px; width: auto; }
+
+        .telemetry {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        #status-display {
+            font-weight: 800;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            background: var(--gray-light);
+            color: #86868b;
+            transition: 0.2s;
+        }
+
+        #counter-display {
+            font-family: 'SF Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* DASHBOARD INFERIOR AL HEADER */
+        #stats-bar {
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: #86868b;
+            text-transform: uppercase;
+        }
+
+        /* AREA DE JUEGO */
+        #game-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: radial-gradient(circle, #fff 0%, #f9f9fb 100%);
+            position: relative;
+        }
+
+        #grid {
+            display: grid;
+            gap: 12px;
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1/1;
+        }
+
+        .cell {
+            background: #fff;
+            border: 2px solid #e5e5e7;
+            border-radius: 15px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        /* ESTADOS */
+        .cell.active { background: var(--primary) !important; border-color: var(--primary); transform: scale(0.94); }
+        .cell.correct { background: var(--success) !important; border-color: var(--success); }
+        .cell.error { background: var(--danger) !important; border-color: var(--danger); }
+
+        /* OVERLAY */
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.97); z-index: 100;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+        }
+
+        .btn-restart {
+            padding: 16px 45px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 35px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 81, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <img src="https://iqexponencial.app/api/images/c8fbfb1b-665f-46e0-a58c-b99c4c3f0cdc" class="logo">
+        <div class="telemetry">
+            <div id="status-display">SISTEMA INICIANDO</div>
+            <div id="counter-display">PASO: 0 / 0</div>
+        </div>
+    </header>
+
+    <div id="stats-bar">
+        <span>NIVEL: <span id="lvl-val" style="color:var(--primary)">1</span></span>
+        <span>ACERTADAS: <span id="hits-val" style="color:var(--success)">0</span></span>
+    </div>
+
+    <div id="game-container">
+        <div id="grid"></div>
+        <div id="overlay">
+            <div style="font-size: 40px; margin-bottom: 15px;">⚠️</div>
+            <h2 style="color: var(--danger); margin-bottom: 5px;">FALLA DE SECUENCIA</h2>
+            <p style="color: #86868b; margin-bottom: 30px;">La memoria de trabajo ha colapsado.</p>
+            <button class="btn-restart" onclick="restart()">REINTENTAR SESIÓN</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const gridEl = document.getElementById('grid');
+    const statusEl = document.getElementById('status-display');
+    const counterEl = document.getElementById('counter-display');
+    const lvlEl = document.getElementById('lvl-val');
+    const hitsEl = document.getElementById('hits-val');
+    const overlay = document.getElementById('overlay');
+
+    let level = 1;
+    let sequence = [];
+    let playerPos = 0;
+    let totalHits = 0;
+    let isShowing = false;
+
+    function initLevel() {
+        gridEl.innerHTML = '';
+        overlay.style.display = 'none';
+        sequence = [];
+        playerPos = 0;
+        
+        // Ajuste de dificultad de cuadrícula
+        let size = level < 4 ? 3 : (level < 8 ? 4 : 5);
+        gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+        for (let i = 0; i < size * size; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            const handle = (e) => { e.preventDefault(); handleInput(i); };
+            cell.addEventListener('touchstart', handle);
+            cell.addEventListener('mousedown', handle);
+            gridEl.appendChild(cell);
+        }
+
+        generateSequence(size * size);
+    }
+
+    function generateSequence(totalCells) {
+        const length = 2 + level;
+        counterEl.innerText = `PASO: 0 / ${length}`;
+        for (let i = 0; i < length; i++) {
+            sequence.push(Math.floor(Math.random() * totalCells));
+        }
+        setTimeout(showSequence, 1000);
+    }
+
+    async function showSequence() {
+        isShowing = true;
+        updateHeader("MEMORIZA", "#e8e8ed", "#86868b");
+
+        const flashSpeed = Math.max(120, 500 - (level * 35));
+
+        for (let id of sequence) {
+            await new Promise(r => setTimeout(r, 180));
+            const cell = gridEl.children[id];
+            cell.classList.add('active');
+            await new Promise(r => setTimeout(r, flashSpeed));
+            cell.classList.remove('active');
+        }
+
+        isShowing = false;
+        updateHeader("TU TURNO", "#0051ff", "#ffffff");
+    }
+
+    function handleInput(id) {
+        if (isShowing) return;
+
+        const cell = gridEl.children[id];
+        const expected = sequence[playerPos];
+
+        if (id === expected) {
+            // ACIERTO PARCIAL
+            cell.classList.add('active');
+            setTimeout(() => cell.classList.remove('active'), 150);
+            playerPos++;
+            totalHits++;
+            
+            hitsEl.innerText = totalHits;
+            counterEl.innerText = `PASO: ${playerPos} / ${sequence.length}`;
+
+            if (playerPos === sequence.length) {
+                // NIVEL COMPLETADO
+                updateHeader("¡ACERTADO!", "#34c759", "#ffffff");
+                level++;
+                lvlEl.innerText = level;
+                setTimeout(initLevel, 900);
+            }
+        } else {
+            // FALLA
+            cell.classList.add('error');
+            updateHeader("FALLA", "#ff3b30", "#ffffff");
+            gameOver();
+        }
+    }
+
+    function updateHeader(text, bg, color) {
+        statusEl.innerText = text;
+        statusEl.style.background = bg;
+        statusEl.style.color = color;
+    }
+
+    function gameOver() {
+        isShowing = true;
+        setTimeout(() => {
+            overlay.style.display = 'flex';
+        }, 600);
+    }
+
+    function restart() {
+        level = 1;
+        totalHits = 0;
+        lvlEl.innerText = "1";
+        hitsEl.innerText = "0";
+        initLevel();
+    }
+
+    window.onload = initLevel;
+</script>
+</body>
+</html>

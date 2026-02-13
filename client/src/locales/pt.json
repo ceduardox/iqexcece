@@ -200,7 +200,8 @@
     "desplazamiento": "Rolagem",
     "reconocimientoVisual": "Reconhecimento Visual",
     "neuroSync": "Neuro-Sync",
-    "neuroLink": "Neuro-Link Pro"
+    "neuroLink": "Neuro-Link Pro",
+    "memoryFlash": "Memory Flash"
   },
   "blog": {
     "title": "Blog",
@@ -354,5 +355,29 @@
     "exitConfirm": "Sim, sair e salvar",
     "exitCancel": "Continuar jogando",
     "footer": "SISTEMA NEURO-LINK PRO v1.0 | IQ EXPONENCIAL"
+  },
+  "memoryflash": {
+    "title": "Memory Flash",
+    "prepDesc": "Memorize a sequência de células iluminadas e reproduza na ordem",
+    "memorize": "MEMORIZE",
+    "yourTurn": "SUA VEZ",
+    "correct": "ACERTOU!",
+    "fail": "FALHA",
+    "score": "Pontuação",
+    "level": "Nível",
+    "hits": "Acertos",
+    "errors": "Erros",
+    "step": "Passo",
+    "sequenceFail": "Falha de Sequência",
+    "completed": "Sequência Concluída!",
+    "resultsSaved": "Seus resultados foram salvos",
+    "playAgain": "Jogar novamente",
+    "viewProgress": "Ver meu progresso",
+    "exit": "Sair",
+    "exitTitle": "Tem certeza que deseja sair?",
+    "exitMessage": "Seu progresso atual será salvo automaticamente.",
+    "exitConfirm": "Sim, sair e salvar",
+    "exitCancel": "Continuar jogando",
+    "footer": "SISTEMA MEMORY FLASH v1.0 | IQ EXPONENCIAL"
   }
 }
