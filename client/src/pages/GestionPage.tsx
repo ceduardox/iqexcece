@@ -2481,7 +2481,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       aceleracion_golpe: "Golpe de Vista",
                       aceleracion_desplazamiento: "Desplazamiento",
                       reconocimiento_visual: "Reconocimiento Visual",
-                      neurosync: "Neuro-Sync"
+                      neurosync: "Neuro-Sync",
+                      neurolink: "Neuro-Link Pro"
                     };
                     const categoriaLabels: Record<string, string> = {
                       preescolar: "Pre-escolar",
@@ -5152,6 +5153,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
                                 <option value="reconocimiento_visual" className="bg-gray-700 text-white">Reconocimiento Visual</option>
                                 <option value="neurosync" className="bg-gray-700 text-white">Neuro-Sync</option>
+                                <option value="neurolink" className="bg-gray-700 text-white">Neuro-Link Pro</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
                               </select>
                             </div>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neuro-Link Pro | IQ Exponencial</title>
+    <style>
+        :root {
+            --primary: #0051ff;
+            --bg: #ffffff;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --text-dark: #1d1d1f;
+            --header-bg: #f5f5f7;
+            --node-border: #d2d2d7;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; touch-action: none;
+        }
+
+        #app { display: flex; flex-direction: column; height: 100vh; width: 100%; }
+
+        /* HEADER */
+        header {
+            background: var(--header-bg);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e5e7;
+            height: 75px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .logo { height: 45px; width: auto; object-fit: contain; }
+
+        #status-display {
+            font-weight: 700; font-size: 12px;
+            padding: 5px 15px; border-radius: 20px;
+            text-transform: uppercase; transition: all 0.3s;
+            background: #e8e8ed; color: #86868b;
+        }
+
+        #countdown-timer {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 26px; font-weight: 700; color: var(--text-dark);
+            min-width: 65px; text-align: right;
+        }
+
+        /* DASHBOARD */
+        #sub-stats {
+            display: flex; justify-content: space-around;
+            padding: 10px; background: #fafafa; border-bottom: 1px solid #eee;
+            font-size: 11px; font-weight: 700; color: #86868b; letter-spacing: 0.5px;
+        }
+        .stat-val { color: var(--primary); }
+
+        /* JUEGO */
+        #game-field {
+            flex-grow: 1; position: relative; overflow: hidden;
+            background: radial-gradient(circle, #ffffff 0%, #f7f7f9 100%);
+        }
+
+        .node {
+            position: absolute; width: 52px; height: 52px;
+            background: #fff; border: 2px solid var(--node-border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px; font-weight: 700; color: var(--text-dark); z-index: 5;
+            transform: translate(-50%, -50%); transition: transform 0.1s, background 0.2s;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .node.completed { 
+            background: var(--primary); border-color: var(--primary); color: #fff;
+            transform: translate(-50%, -50%) scale(0.9);
+            box-shadow: 0 0 20px rgba(0, 81, 255, 0.3);
+        }
+
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        line { stroke: var(--primary); stroke-width: 4; stroke-linecap: round; opacity: 0.6; }
+
+        /* OVERLAY */
+        #fail-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98); z-index: 100;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .btn-restart {
+            padding: 15px 40px; background: var(--primary); color: #fff;
+            border: none; border-radius: 30px; font-weight: 700; font-size: 16px;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(0, 81, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <img src="https://iqexponencial.app/api/images/c8fbfb1b-665f-46e0-a58c-b99c4c3f0cdc" class="logo" alt="IQ Logo">
+        <div id="status-display">SISTEMA ONLINE</div>
+        <div id="countdown-timer">0.0</div>
+    </header>
+
+    <div id="sub-stats">
+        <span>SCORE: <span id="score" class="stat-val">0</span></span>
+        <span>NIVEL: <span id="level" class="stat-val">1</span></span>
+        <span>PROCESO: <span id="progress" class="stat-val">0/3</span></span>
+    </div>
+
+    <div id="game-field">
+        <svg id="svg-layer"></svg>
+        <div id="fail-overlay">
+            <h2 style="color: var(--danger); margin-bottom: 5px;">TIEMPO EXCEDIDO</h2>
+            <p style="color: #86868b; margin-bottom: 25px;">La sincronización sináptica ha fallado.</p>
+            <button class="btn-restart" onclick="restart()">REINTENTAR</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const field = document.getElementById('game-field');
+    const svg = document.getElementById('svg-layer');
+    const timerEl = document.getElementById('countdown-timer');
+    const statusEl = document.getElementById('status-display');
+    const scoreEl = document.getElementById('score');
+    const levelEl = document.getElementById('level');
+    const progressEl = document.getElementById('progress');
+    const failOverlay = document.getElementById('fail-overlay');
+
+    let score = 0;
+    let level = 1;
+    let nextNode = 1;
+    let nodesData = [];
+    let gameActive = false;
+    let timerInterval;
+    let startTime;
+
+    function initLevel() {
+        field.querySelectorAll('.node').forEach(n => n.remove());
+        svg.innerHTML = '';
+        failOverlay.style.display = 'none';
+        nextNode = 1;
+        nodesData = [];
+        gameActive = true;
+        
+        statusEl.innerText = "SINCERIZANDO...";
+        statusEl.style.background = "#e8e8ed";
+        statusEl.style.color = "#86868b";
+
+        const numNodes = 2 + level;
+        progressEl.innerText = `0/${numNodes}`;
+
+        // LÓGICA DE TIEMPO ACELERADO:
+        // Nivel 1: ~5 seg. Nivel 10: ~9 seg (pero para 12 nodos, lo que es mucho más difícil)
+        const duration = 2 + (numNodes * 0.9) * Math.pow(0.95, level); 
+
+        for (let i = 1; i <= numNodes; i++) {
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.innerText = i;
+            
+            const x = Math.random() * (field.clientWidth - 80) + 40;
+            const y = Math.random() * (field.clientHeight - 80) + 40;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            
+            const trigger = (e) => { e.preventDefault(); handleInteraction(i, x, y, node); };
+            node.addEventListener('touchstart', trigger, {passive: false});
+            node.addEventListener('mousedown', trigger);
+
+            field.appendChild(node);
+            nodesData.push({id: i, x, y});
+        }
+
+        startTimer(duration);
+    }
+
+    function startTimer(seconds) {
+        clearInterval(timerInterval);
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            let elapsed = (Date.now() - startTime) / 1000;
+            let remaining = Math.max(0, seconds - elapsed);
+            timerEl.innerText = remaining.toFixed(1);
+            if (remaining <= 0) triggerFail();
+        }, 50);
+    }
+
+    function handleInteraction(id, x, y, element) {
+        if (!gameActive || element.classList.contains('completed')) return;
+
+        if (id === nextNode) {
+            element.classList.add('completed');
+            progressEl.innerText = `${id}/${nodesData.length}`;
+            
+            if (nextNode > 1) {
+                const prev = nodesData[nextNode - 2];
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", prev.x); line.setAttribute("y1", prev.y);
+                line.setAttribute("x2", x); line.setAttribute("y2", y);
+                svg.appendChild(line);
+            }
+
+            if (id === nodesData.length) triggerWin();
+            nextNode++;
+        } else {
+            statusEl.innerText = "FALLA";
+            statusEl.style.background = "var(--danger)";
+            statusEl.style.color = "#fff";
+            setTimeout(() => { if(gameActive) statusEl.innerText = "SINCERIZANDO..."; }, 400);
+        }
+    }
+
+    function triggerWin() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        statusEl.innerText = "ACERTADO";
+        statusEl.style.background = "var(--success)";
+        statusEl.style.color = "#fff";
+        score += level * 100;
+        scoreEl.innerText = score;
+        level++;
+        levelEl.innerText = level;
+        setTimeout(initLevel, 600);
+    }
+
+    function triggerFail() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        statusEl.innerText = "ERROR CRÍTICO";
+        statusEl.style.background = "var(--danger)";
+        statusEl.style.color = "#fff";
+        failOverlay.style.display = 'flex';
+    }
+
+    function restart() {
+        score = 0; level = 1;
+        scoreEl.innerText = "0"; levelEl.innerText = "1";
+        initLevel();
+    }
+
+    window.onload = initLevel;
+    window.addEventListener('resize', () => { if(gameActive) initLevel(); });
+</script>
+</body>
+</html>

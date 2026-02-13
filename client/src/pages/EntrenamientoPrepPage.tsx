@@ -84,6 +84,8 @@ export default function EntrenamientoPrepPage() {
       setLocation(`/reconocimiento/${categoria}/${itemId}`);
     } else if (tipo === "neurosync") {
       setLocation(`/neurosync/${categoria}/${itemId}`);
+    } else if (tipo === "neurolink") {
+      setLocation(`/neurolink/${categoria}/${itemId}`);
     } else {
       setLocation(`/velocidad/${categoria}/${itemId}`);
     }

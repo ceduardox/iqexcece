@@ -199,7 +199,8 @@
     "golpeVista": "Visão Rápida",
     "desplazamiento": "Rolagem",
     "reconocimientoVisual": "Reconhecimento Visual",
-    "neuroSync": "Neuro-Sync"
+    "neuroSync": "Neuro-Sync",
+    "neuroLink": "Neuro-Link Pro"
   },
   "blog": {
     "title": "Blog",
@@ -330,5 +331,28 @@
     "exitMessage": "Seu progresso atual será salvo automaticamente.",
     "exitConfirm": "Sim, sair e salvar",
     "exitCancel": "Continuar jogando"
+  },
+  "neurolink": {
+    "title": "Neuro-Link Pro",
+    "prepDesc": "Conecte os nós em ordem numérica antes que o tempo acabe",
+    "syncing": "SINCRONIZANDO...",
+    "correct": "Corretas",
+    "fail": "FALHA",
+    "score": "Pontuação",
+    "level": "Nível",
+    "process": "Processo",
+    "time": "Tempo",
+    "errors": "Erros",
+    "timeUp": "Tempo Excedido",
+    "completed": "Nível Concluído!",
+    "resultsSaved": "Seus resultados foram salvos",
+    "playAgain": "Jogar novamente",
+    "viewProgress": "Ver meu progresso",
+    "exit": "Sair",
+    "exitTitle": "Tem certeza que deseja sair?",
+    "exitMessage": "Seu progresso atual será salvo automaticamente.",
+    "exitConfirm": "Sim, sair e salvar",
+    "exitCancel": "Continuar jogando",
+    "footer": "SISTEMA NEURO-LINK PRO v1.0 | IQ EXPONENCIAL"
   }
 }

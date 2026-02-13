@@ -36,7 +36,8 @@ const exerciseTypeKeys: Record<string, string> = {
   aceleracion_golpe: "progress.golpeVista",
   aceleracion_desplazamiento: "progress.desplazamiento",
   reconocimiento_visual: "progress.reconocimientoVisual",
-  neurosync: "progress.neuroSync"
+  neurosync: "progress.neuroSync",
+  neurolink: "progress.neuroLink"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -45,7 +46,8 @@ const exerciseTypeColors: Record<string, string> = {
   aceleracion_golpe: "#a855f7",
   aceleracion_desplazamiento: "#0891b2",
   reconocimiento_visual: "#ec4899",
-  neurosync: "#0051ff"
+  neurosync: "#0051ff",
+  neurolink: "#0051ff"
 };
 
 const exerciseTypeIcons: Record<string, typeof Zap> = {
@@ -54,7 +56,8 @@ const exerciseTypeIcons: Record<string, typeof Zap> = {
   aceleracion_golpe: BookOpen,
   aceleracion_desplazamiento: BookOpen,
   reconocimiento_visual: Eye,
-  neurosync: Zap
+  neurosync: Zap,
+  neurolink: Target
 };
 
 function formatDate(dateStr: string | null): string {
@@ -207,6 +210,14 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
             <StatBox value={result.puntaje ?? 0} label={t("neurosync.score")} color="#0051ff" />
             <StatBox value={`${datosExtra.accuracy ?? 0}%`} label={t("neurosync.accuracy")} color="#06b6d4" />
             <StatBox value={result.nivelAlcanzado ?? 1} label={t("neurosync.level")} color="#8a3ffc" />
+          </div>
+        );
+      case "neurolink":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.puntaje ?? 0} label={t("neurolink.score")} color="#0051ff" />
+            <StatBox value={result.nivelAlcanzado ?? 1} label={t("neurolink.level")} color="#8a3ffc" />
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("neurolink.correct")} color="#22c55e" />
           </div>
         );
       default:
