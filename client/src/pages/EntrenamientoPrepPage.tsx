@@ -6,6 +6,7 @@ import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useSounds } from "@/hooks/use-sounds";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
+import menuCurveImg from "@assets/menu_1769957804819.png";
 
 interface PrepData {
   imagen: string;
@@ -38,27 +39,38 @@ export default function EntrenamientoPrepPage() {
           return;
         }
         
-        const prepRes = await fetch(`/api/prep-page/${categoria}`);
-        const prepPageData = await prepRes.json();
-        
-        if (prepPageData.page) {
+        const item = itemData.item;
+        if (item && (item.prepTitle || item.prepInstructions || item.prepSubtitle || item.prepButtonText)) {
           setPrepData({
-            imagen: prepPageData.page.imagen || "",
-            titulo: prepPageData.page.titulo || "Preparación",
-            subtitulo: prepPageData.page.subtitulo || "",
-            instrucciones: prepPageData.page.instrucciones || "",
-            textoBoton: prepPageData.page.textoBoton || "Iniciar sesión",
+            imagen: item.prepImage || "",
+            titulo: item.prepTitle || item.title || "",
+            subtitulo: item.prepSubtitle || "",
+            instrucciones: item.prepInstructions || "",
+            textoBoton: item.prepButtonText || "",
             tipoEjercicio,
           });
-        } else if (itemData.item) {
-          setPrepData({
-            imagen: itemData.item.prepImage || "",
-            titulo: itemData.item.prepTitle || itemData.item.title || "Preparación",
-            subtitulo: itemData.item.prepSubtitle || "",
-            instrucciones: itemData.item.prepInstructions || "",
-            textoBoton: itemData.item.prepButtonText || "Iniciar sesión",
-            tipoEjercicio,
-          });
+        } else {
+          const prepRes = await fetch(`/api/prep-page/${categoria}`);
+          const prepPageData = await prepRes.json();
+          if (prepPageData.page) {
+            setPrepData({
+              imagen: prepPageData.page.imagen || "",
+              titulo: prepPageData.page.titulo || "",
+              subtitulo: prepPageData.page.subtitulo || "",
+              instrucciones: prepPageData.page.instrucciones || "",
+              textoBoton: prepPageData.page.textoBoton || "",
+              tipoEjercicio,
+            });
+          } else if (item) {
+            setPrepData({
+              imagen: item.prepImage || "",
+              titulo: item.title || "",
+              subtitulo: "",
+              instrucciones: "",
+              textoBoton: "",
+              tipoEjercicio,
+            });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -110,22 +122,25 @@ export default function EntrenamientoPrepPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="relative sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100 md:hidden">
-        <button
-          onClick={handleBack}
-          className="absolute left-4 p-2 text-purple-600"
-          data-testid="button-back"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        
-        <img 
-          src={LOGO_URL} 
-          alt="IQX" 
-          className="h-8"
-        />
-        <div className="absolute right-5"><LanguageButton /></div>
+      <header className="sticky top-0 z-50 w-full md:hidden" style={{ background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)" }}>
+        <div className="relative pt-3 pb-2 px-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255, 255, 255, 0.9)", boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)" }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+            </button>
+            <img src={LOGO_URL} alt="IQX" className="h-10 w-auto object-contain" />
+            <LanguageButton />
+          </div>
+        </div>
       </header>
+      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-28">
         <div 
