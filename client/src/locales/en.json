@@ -379,5 +379,10 @@
     "exitConfirm": "Yes, exit and save",
     "exitCancel": "Continue playing",
     "footer": "MEMORY FLASH SYSTEM v1.0 | IQ EXPONENTIAL"
+  },
+  "prep": {
+    "instructions": "Instructions",
+    "defaultTitle": "Preparation",
+    "defaultButton": "Start session"
   }
 }

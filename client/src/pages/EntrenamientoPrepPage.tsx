@@ -5,6 +5,7 @@ import { ArrowLeft, Target } from "lucide-react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useSounds } from "@/hooks/use-sounds";
 import { LanguageButton } from "@/components/LanguageButton";
+import { useTranslation } from "react-i18next";
 
 interface PrepData {
   imagen: string;
@@ -23,6 +24,7 @@ export default function EntrenamientoPrepPage() {
   const [prepData, setPrepData] = useState<PrepData | null>(null);
   const [loading, setLoading] = useState(true);
   const { playSound } = useSounds();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadPrepData = async () => {
@@ -143,7 +145,7 @@ export default function EntrenamientoPrepPage() {
                 className="text-2xl font-bold text-gray-800 leading-tight mb-2"
                 data-testid="text-prep-title"
               >
-                {prepData?.titulo || "Acelera tu Lectura"}
+                {prepData?.titulo || t("prep.defaultTitle")}
               </h1>
               
               {prepData?.subtitulo && (
@@ -185,7 +187,7 @@ export default function EntrenamientoPrepPage() {
             whileTap={{ scale: 0.98 }}
             data-testid="button-start"
           >
-            {prepData?.textoBoton || "Iniciar sesión"}
+            {prepData?.textoBoton || t("prep.defaultButton")}
           </motion.button>
         </div>
 
@@ -205,7 +207,7 @@ export default function EntrenamientoPrepPage() {
                   <Target className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800 text-sm mb-1">Instrucciones</h3>
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">{t("prep.instructions")}</h3>
                   <p className="text-gray-500 text-xs leading-relaxed">
                     {prepData.instrucciones}
                   </p>
