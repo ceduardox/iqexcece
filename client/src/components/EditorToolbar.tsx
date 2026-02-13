@@ -420,8 +420,8 @@ export function EditorToolbar({
                         value={[currentStyle.sectionHeight || (selectedElement?.startsWith("spacer-") ? 20 : 200)]}
                         onValueChange={([val]) => updateStyle({ sectionHeight: val })}
                         min={0}
-                        max={600}
-                        step={5}
+                        max={1500}
+                        step={10}
                         className="flex-1"
                         data-testid="slider-section-height"
                       />
