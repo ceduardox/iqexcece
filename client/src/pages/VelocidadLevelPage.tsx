@@ -101,7 +101,7 @@ export default function VelocidadLevelPage() {
   if (niveles.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-        <header className="p-4 flex items-center justify-between">
+        <header className="p-4 flex items-center justify-between md:hidden">
           <button
             onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
             className="flex items-center gap-2 text-white font-semibold"
@@ -121,7 +121,7 @@ export default function VelocidadLevelPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-pink-500 flex flex-col">
-      <header className="p-4 flex items-center justify-between">
+      <header className="p-4 flex items-center justify-between md:hidden">
         <button
           onClick={() => setLocation(`/entrenamiento-edad/${itemId}`)}
           className="flex items-center gap-2 text-white font-semibold"

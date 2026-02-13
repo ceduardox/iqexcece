@@ -125,7 +125,7 @@ export default function ALeerBoliviaPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header
-        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
+        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 md:hidden ${getEditableClass("header")}`}
         style={{ paddingTop: 10, paddingBottom: 10 }}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
       >
@@ -147,7 +147,7 @@ export default function ALeerBoliviaPage() {
         </svg>
       </header>
 
-      <div className="w-full sticky z-40" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
+      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 

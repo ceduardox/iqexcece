@@ -125,7 +125,7 @@ export default function VelocidadPatronPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="sticky top-0 z-50 w-full"
+        className="sticky top-0 z-50 w-full md:hidden"
         style={{
           background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
         }}
@@ -153,7 +153,7 @@ export default function VelocidadPatronPage() {
         </div>
       </header>
 
-      <div className="w-full sticky z-40" style={{ marginTop: -4, marginBottom: -20 }}>
+      <div className="w-full sticky z-40 md:hidden" style={{ marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 

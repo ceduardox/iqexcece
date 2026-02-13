@@ -350,7 +350,7 @@ export default function VelocidadExercisePage() {
     return (
       <div className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
         <header 
-          className="px-4 py-3 flex items-center justify-between"
+          className="px-4 py-3 flex items-center justify-between md:hidden"
           style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
         >
           <div className="h-6 w-32 bg-white/20 rounded animate-pulse mx-auto" />
@@ -391,7 +391,7 @@ export default function VelocidadExercisePage() {
   return (
     <div className="bg-white flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
       <header 
-        className="px-4 py-3 flex items-center justify-between"
+        className="px-4 py-3 flex items-center justify-between md:hidden"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
         <h1 className="text-white font-bold text-lg flex-1 text-center">{titulo}</h1>

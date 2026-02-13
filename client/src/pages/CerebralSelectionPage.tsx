@@ -79,7 +79,7 @@ export default function CerebralSelectionPage() {
   const renderHeader = () => (
     <>
       <header 
-        className="sticky top-0 z-50 w-full"
+        className="sticky top-0 z-50 w-full md:hidden"
         style={{
           background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
         }}
@@ -106,7 +106,7 @@ export default function CerebralSelectionPage() {
           </div>
         </div>
       </header>
-      <div className="w-full sticky z-40" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
+      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
     </>
@@ -143,7 +143,7 @@ export default function CerebralSelectionPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="sticky top-0 z-50 w-full"
+        className="sticky top-0 z-50 w-full md:hidden"
         style={{
           background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
         }}
@@ -171,7 +171,7 @@ export default function CerebralSelectionPage() {
         </div>
       </header>
 
-      <div className="w-full sticky z-40" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
+      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 

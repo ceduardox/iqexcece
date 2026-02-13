@@ -371,7 +371,7 @@ export default function ReadingContentPage() {
       <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
         {/* Capture area - contains header and content, excludes buttons */}
         <div ref={captureAreaRef} className="bg-white">
-          <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
+          <header className="flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100 md:hidden">
             <div className="flex items-center justify-center" data-testid="header-logo">
               <img 
                 src={HEADER_LOGO} 
@@ -580,7 +580,7 @@ export default function ReadingContentPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100">
+      <header className="flex items-center justify-center px-5 py-3 bg-white sticky top-0 z-50 border-b border-gray-100 md:hidden">
         <button 
           onClick={handleClose}
           className="absolute left-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"

@@ -198,7 +198,7 @@ export default function NumerosEjercicioPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header 
-        className="px-4 py-3"
+        className="px-4 py-3 md:hidden"
         style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
       >
         <div className="flex items-center justify-between gap-2 mb-3">

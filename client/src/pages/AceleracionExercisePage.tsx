@@ -854,7 +854,7 @@ export default function AceleracionExercisePage() {
     return (
       <div className="h-[100dvh] flex flex-col overflow-hidden bg-white">
         {/* Header - pill style with gradient */}
-        <header className="px-4 py-3 flex-shrink-0">
+        <header className="px-4 py-3 flex-shrink-0 md:hidden">
           <div 
             className="flex items-center justify-between px-4 py-2 rounded-full"
             style={{ background: "linear-gradient(90deg, #06B6D4 0%, #2563EB 100%)" }}
@@ -988,7 +988,7 @@ export default function AceleracionExercisePage() {
     return (
       <div className="h-[100dvh] flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)" }}>
         {/* Elegant header with gradient accent */}
-        <header className="relative px-4 pt-3 pb-4 flex-shrink-0">
+        <header className="relative px-4 pt-3 pb-4 flex-shrink-0 md:hidden">
           {/* Decorative gradient line */}
           <div 
             className="absolute top-0 left-0 right-0 h-1"
@@ -1160,7 +1160,7 @@ export default function AceleracionExercisePage() {
       <div className="min-h-screen bg-white flex flex-col">
         {/* Purple header with PDF name */}
         <header 
-          className="px-4 py-3"
+          className="px-4 py-3 md:hidden"
           style={{ 
             background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)"
           }}
@@ -1277,7 +1277,7 @@ export default function AceleracionExercisePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Clean header with logo */}
-      <header className="px-4 py-3">
+      <header className="px-4 py-3 md:hidden">
         <div className="flex items-center justify-between">
           <button
             onClick={handleBack}

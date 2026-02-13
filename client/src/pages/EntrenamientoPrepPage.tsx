@@ -102,7 +102,7 @@ export default function EntrenamientoPrepPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="relative sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100">
+      <header className="relative sticky top-0 z-50 bg-white flex items-center justify-center px-5 py-3 border-b border-gray-100 md:hidden">
         <button
           onClick={handleBack}
           className="absolute left-4 p-2 text-purple-600"

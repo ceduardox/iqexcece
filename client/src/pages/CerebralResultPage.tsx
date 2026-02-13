@@ -184,7 +184,7 @@ export default function CerebralResultPage() {
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       {/* Capture area - contains header and content, excludes buttons */}
       <div ref={captureAreaRef} className="bg-white">
-        <header className="relative flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100">
+        <header className="relative flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100 md:hidden">
           <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
           <div className="absolute right-5"><LanguageButton /></div>
         </header>

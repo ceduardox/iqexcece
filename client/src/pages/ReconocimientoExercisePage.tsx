@@ -554,7 +554,7 @@ export default function ReconocimientoExercisePage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header 
-        className="relative px-4 py-3 flex items-center justify-between"
+        className="relative px-4 py-3 flex items-center justify-between md:hidden"
         style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
       >
         <motion.button

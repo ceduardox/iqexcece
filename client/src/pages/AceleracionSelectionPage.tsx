@@ -184,7 +184,7 @@ export default function AceleracionSelectionPage() {
       }}
     >
       {/* Header */}
-      <header className="relative px-4 py-4 flex items-center justify-between">
+      <header className="relative px-4 py-4 flex items-center justify-between md:hidden">
         <motion.button
           onClick={handleBack}
           className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
