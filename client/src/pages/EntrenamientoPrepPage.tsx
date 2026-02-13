@@ -25,12 +25,13 @@ export default function EntrenamientoPrepPage() {
   const [prepData, setPrepData] = useState<PrepData | null>(null);
   const [loading, setLoading] = useState(true);
   const { playSound } = useSounds();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'es';
 
   useEffect(() => {
     const loadPrepData = async () => {
       try {
-        const itemRes = await fetch(`/api/entrenamiento/item/${itemId}`);
+        const itemRes = await fetch(`/api/entrenamiento/item/${itemId}?lang=${lang}`);
         const itemData = await itemRes.json();
         const tipoEjercicio = itemData.item?.tipoEjercicio || "velocidad";
         
@@ -79,7 +80,7 @@ export default function EntrenamientoPrepPage() {
       }
     };
     loadPrepData();
-  }, [categoria, itemId, setLocation]);
+  }, [categoria, itemId, setLocation, lang]);
 
   const handleStart = () => {
     playSound("iphone");

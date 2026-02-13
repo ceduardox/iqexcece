@@ -743,7 +743,12 @@ export async function registerRoutes(
 
   // Get single entrenamiento item by ID (public)
   app.get("/api/entrenamiento/item/:id", async (req, res) => {
+    const lang = (req.query.lang as string) || '';
     const item = await storage.getEntrenamientoItemById(req.params.id);
+    if (item && lang && lang !== item.lang) {
+      const translated = await storage.getEntrenamientoItemBySort(item.categoria, item.sortOrder ?? 0, lang);
+      if (translated) return res.json({ item: translated });
+    }
     res.json({ item });
   });
 

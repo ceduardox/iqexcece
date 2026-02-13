@@ -55,6 +55,7 @@ export interface IStorage {
   getEntrenamientoItems(categoria: string, lang?: string): Promise<EntrenamientoItem[]>;
   getEntrenamientoItemsExact(categoria: string, lang: string): Promise<EntrenamientoItem[]>;
   getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null>;
+  getEntrenamientoItemBySort(categoria: string, sortOrder: number, lang: string): Promise<EntrenamientoItem | null>;
   saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem>;
   updateEntrenamientoItem(id: string, item: Partial<InsertEntrenamientoItem>): Promise<EntrenamientoItem | null>;
   deleteEntrenamientoItem(id: string): Promise<void>;
@@ -378,6 +379,9 @@ export class MemStorage implements IStorage {
     return [];
   }
   async getEntrenamientoItemById(_id: string): Promise<EntrenamientoItem | null> {
+    return null;
+  }
+  async getEntrenamientoItemBySort(_categoria: string, _sortOrder: number, _lang: string): Promise<EntrenamientoItem | null> {
     return null;
   }
   async saveEntrenamientoItem(item: InsertEntrenamientoItem): Promise<EntrenamientoItem> {
@@ -906,6 +910,12 @@ export class DatabaseStorage implements IStorage {
 
   async getEntrenamientoItemById(id: string): Promise<EntrenamientoItem | null> {
     const [item] = await db.select().from(entrenamientoItems).where(eq(entrenamientoItems.id, id));
+    return item || null;
+  }
+
+  async getEntrenamientoItemBySort(categoria: string, sortOrder: number, lang: string): Promise<EntrenamientoItem | null> {
+    const [item] = await db.select().from(entrenamientoItems)
+      .where(and(eq(entrenamientoItems.categoria, categoria), eq(entrenamientoItems.sortOrder, sortOrder), eq(entrenamientoItems.lang, lang)));
     return item || null;
   }
 
