@@ -584,27 +584,24 @@ export default function CerebralExercisePage() {
     const isOdd = options.length % 2 !== 0;
     
     return (
-      <div className="space-y-6">
-        {/* Instruction - editable from admin */}
-        <div className="text-center space-y-1">
-          <p className="text-gray-600 text-lg">{title1}</p>
-          <p className="text-gray-800 font-semibold text-xl">{title2}</p>
+      <div className="flex flex-col h-full min-h-0">
+        <div className="text-center space-y-1 flex-shrink-0 py-2">
+          <p className="text-gray-600 text-base md:text-lg">{title1}</p>
+          <p className="text-gray-800 font-semibold text-lg md:text-xl">{title2}</p>
         </div>
 
-        {/* Main header image if provided */}
         {content?.imageUrl && (
-          <div className="flex justify-center">
+          <div className="flex justify-center flex-shrink-0 py-1">
             <img 
               src={content.imageUrl} 
               alt="Imagen del ejercicio"
-              style={{ width: `${content.imageSize}%`, maxWidth: '300px' }}
+              style={{ width: `${content.imageSize}%`, maxWidth: '200px' }}
               className="rounded-lg"
             />
           </div>
         )}
 
-        {/* Image options - center last item if odd count */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex-1 min-h-0 grid grid-cols-2 gap-2 md:gap-3 auto-rows-fr py-2">
           {options.map((opt: { imageUrl: string; meaning: string }, idx: number) => {
             const isLastOdd = isOdd && idx === options.length - 1;
             return (
@@ -617,7 +614,6 @@ export default function CerebralExercisePage() {
                   if (!selectedPreference) {
                     setSelectedPreference(opt);
                     setUserAnswer(opt.meaning);
-                    // Save answer to sessionStorage for final results
                     const stored = sessionStorage.getItem('preferenciaAnswers');
                     const answers = stored ? JSON.parse(stored) : [];
                     answers.push({ 
@@ -626,14 +622,13 @@ export default function CerebralExercisePage() {
                       meaning: opt.meaning 
                     });
                     sessionStorage.setItem('preferenciaAnswers', JSON.stringify(answers));
-                    // Auto-advance immediately after selection
                     setTimeout(() => {
                       handleNext();
                     }, 400);
                   }
                 }}
                 disabled={!!selectedPreference}
-                className={`aspect-square p-4 rounded-xl border-2 transition-all flex items-center justify-center bg-white ${
+                className={`p-2 rounded-xl border-2 transition-all flex items-center justify-center bg-white overflow-hidden ${
                   isLastOdd ? 'col-span-2 mx-auto w-1/2' : ''
                 } ${
                   selectedPreference?.imageUrl === opt.imageUrl 
@@ -650,7 +645,6 @@ export default function CerebralExercisePage() {
             );
           })}
         </div>
-
       </div>
     );
   };
@@ -869,11 +863,11 @@ export default function CerebralExercisePage() {
         )}
 
         {/* Exercise Content */}
-        <div className="px-5">
+        <div className="px-5 flex-1 min-h-0 flex flex-col">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl p-6 bg-white border border-gray-100"
+            className="rounded-3xl p-4 md:p-6 bg-white border border-gray-100 flex-1 min-h-0 flex flex-col"
             style={{
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)"
             }}
