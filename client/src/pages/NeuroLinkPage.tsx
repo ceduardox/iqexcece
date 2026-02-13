@@ -63,6 +63,7 @@ export default function NeuroLinkPage() {
   const nextNodeRef = useRef(1);
   const nodesRef = useRef<NodeData[]>([]);
   const usedTouchRef = useRef(false);
+  const saveResultsRef = useRef<() => void>(() => {});
 
   const initLevel = useCallback(() => {
     if (!fieldRef.current) return;
@@ -97,6 +98,7 @@ export default function NeuroLinkPage() {
       if (remaining <= 0) {
         gameActiveRef.current = false;
         if (timerRef.current) clearInterval(timerRef.current);
+        saveResultsRef.current();
         setPhase("failed");
       }
     }, 50);
@@ -191,6 +193,8 @@ export default function NeuroLinkPage() {
       }),
     }).catch(e => console.error("Error saving:", e));
   }, [categoria, sessionId]);
+
+  saveResultsRef.current = saveResults;
 
   const handleExitConfirm = useCallback(() => {
     playButtonSound();
