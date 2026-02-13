@@ -154,7 +154,7 @@ export default function RazonamientoSelectionPage() {
   const recommendedStatus = recommendedTheme ? getThemeStatus(recommendedTheme.temaNumero, recommendedIndex, progress) : null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full md:hidden"
         style={{
@@ -195,7 +195,7 @@ export default function RazonamientoSelectionPage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-24">
         <div 
           className="w-full"
           style={{

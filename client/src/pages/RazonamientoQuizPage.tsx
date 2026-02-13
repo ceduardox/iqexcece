@@ -176,7 +176,7 @@ export default function RazonamientoQuizPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center">
+      <div className="h-[100dvh] overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
@@ -188,7 +188,7 @@ export default function RazonamientoQuizPage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex flex-col items-center justify-center p-6">
+      <div className="h-[100dvh] overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex flex-col items-center justify-center p-6">
         <Brain className="w-16 h-16 text-white mb-4" />
         <h2 className="text-2xl font-bold text-white text-center mb-4">
           No hay preguntas disponibles
@@ -222,7 +222,7 @@ export default function RazonamientoQuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full md:hidden"
         style={{
@@ -263,7 +263,7 @@ export default function RazonamientoQuizPage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-24">
         <div 
           className="w-full"
           style={{
