@@ -121,35 +121,42 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     localStorage.setItem("editorMode", "false");
   };
   
-  const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
-    const style = resolveStyle(styles, elementId, isMobile);
+  const getResolvedStyle = useCallback((elementId: string): ElementStyle => {
+    return resolveStyle(styles, elementId, isMobile);
+  }, [styles, isMobile]);
+
+  const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
+    const style = getResolvedStyle(elementId);
+    if (!style || Object.keys(style).length === 0) return defaultBg ? { backgroundColor: defaultBg } : {};
+    
     const result: React.CSSProperties = {};
     
-    if (style?.backgroundType === "image" && style?.imageUrl) {
+    if (style.backgroundType === "image" && style.imageUrl) {
       result.backgroundImage = `url(${style.imageUrl})`;
       result.backgroundSize = style.imageSize ? `${style.imageSize}%` : "cover";
       result.backgroundPosition = "center";
       result.backgroundRepeat = "no-repeat";
       result.backgroundColor = "transparent";
-    } else if (style?.background) {
+    } else if (style.background) {
       result.backgroundColor = style.background;
     } else if (defaultBg) {
       result.backgroundColor = defaultBg;
     }
     
-    if (style?.boxShadow) result.boxShadow = style.boxShadow;
-    if (style?.marginTop) result.marginTop = style.marginTop;
-    if (style?.marginBottom) result.marginBottom = style.marginBottom;
-    if (style?.marginLeft) result.marginLeft = style.marginLeft;
-    if (style?.marginRight) result.marginRight = style.marginRight;
-    if (style?.textColor) result.color = style.textColor;
-    if (style?.fontSize) result.fontSize = style.fontSize;
-    if (style?.textAlign) result.textAlign = style.textAlign;
-    if (style?.fontWeight) result.fontWeight = style.fontWeight;
-    if (style?.borderRadius) result.borderRadius = style.borderRadius;
+    if (style.boxShadow) result.boxShadow = style.boxShadow;
+    if (style.marginTop) result.marginTop = style.marginTop;
+    if (style.marginBottom) result.marginBottom = style.marginBottom;
+    if (style.marginLeft) result.marginLeft = style.marginLeft;
+    if (style.marginRight) result.marginRight = style.marginRight;
+    if (style.textColor) result.color = style.textColor;
+    if (style.fontSize) result.fontSize = style.fontSize;
+    if (style.textAlign) result.textAlign = style.textAlign;
+    if (style.fontWeight) result.fontWeight = style.fontWeight;
+    if (style.borderRadius) result.borderRadius = style.borderRadius;
+    if (style.sectionHeight) result.minHeight = style.sectionHeight;
     
     return result;
-  };
+  }, [getResolvedStyle]);
   
   const getEditableClass = (elementId: string) => {
     if (!editorMode) return "";
