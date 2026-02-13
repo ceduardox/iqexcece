@@ -90,7 +90,7 @@ function TestCard({
   const btnStyle = resolveStyle(styles, `btn-${testId}`, isMobile);
   const iconStyle = resolveStyle(styles, iconId, isMobile);
   const hasBackgroundImage = cardStyle?.imageUrl;
-  const iconSize = iconStyle?.iconSize || iconStyle?.imageSize || 40;
+  const iconSize = iconStyle?.iconSize || iconStyle?.imageSize || 56;
   const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
   const textDark = defaultStyle.textDark;
   const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
@@ -106,7 +106,7 @@ function TestCard({
       data-testid={`card-test-${testId}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-2xl p-3"
+        className="relative overflow-hidden rounded-2xl p-4"
         style={{ 
           background: (hasBackgroundImage && !bgIsVideo) 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
@@ -124,7 +124,7 @@ function TestCard({
           <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
         )}
         <div 
-          className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold ${getEditableClass(`badge-${testId}`)}`}
+          className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${getEditableClass(`badge-${testId}`)}`}
           style={{ 
             background: textDark ? "rgba(139, 92, 246, 0.1)" : "rgba(255,255,255,0.2)",
             color: textDark ? "#7c3aed" : "white"
@@ -133,7 +133,7 @@ function TestCard({
           Test
         </div>
         
-        <div className="flex gap-3 pt-4 md:flex-col md:items-center md:text-center">
+        <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
           <div 
             className={`relative flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
@@ -147,20 +147,20 @@ function TestCard({
           
           <div className="flex-1 min-w-0 flex flex-col">
             <h3 
-              className={`text-sm font-bold mb-0.5 ${getEditableClass(titleId)}`}
+              className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{ 
-                fontSize: titleStyle?.fontSize || 14,
+                fontSize: titleStyle?.fontSize || 18,
                 color: titleStyle?.textColor || (textDark ? "#1f2937" : "white")
               }}
             >
               {titleStyle?.buttonText || title}
             </h3>
             <p 
-              className={`text-xs leading-snug mb-1 line-clamp-2 ${getEditableClass(descId)}`}
+              className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
               style={{ 
-                fontSize: descStyle?.fontSize || 11,
+                fontSize: descStyle?.fontSize || 13,
                 color: descStyle?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
               }}
             >
@@ -168,7 +168,7 @@ function TestCard({
             </p>
             <div className="mt-auto flex justify-end md:justify-center">
               <motion.button
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
                 style={{
                   background: btnStyle?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
                   color: btnStyle?.textColor || "white",
@@ -210,7 +210,7 @@ function HeroSection({ styles, getEditableClass, handleElementClick, getElementS
   const heroIsVideo = useIsVideo(heroStyle?.backgroundType === "image" ? heroStyle?.imageUrl : undefined);
   
   const bgStyle: React.CSSProperties = {
-    paddingTop: "8px",
+    paddingTop: "16px",
     position: "relative",
     overflow: "hidden",
     ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
@@ -511,23 +511,23 @@ export default function TestsPage() {
       <main className="flex-1 overflow-y-auto min-h-0 pb-4">
         <SpacerElement id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
         <HeroSection styles={styles} getEditableClass={getEditableClass} handleElementClick={handleElementClick} getElementStyle={getElementStyle} isMobile={isMobile}>
-          <div className="relative z-10 px-5 pb-2">
+          <div className="relative z-10 px-5 pb-4">
             <div>
               <motion.h1 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`text-[22px] md:text-4xl font-black leading-[1.1] mb-1 ${getEditableClass("hero-title")}`}
+                className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                 style={getElementStyle("hero-title")}
               >
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[0] || t("tests.title").split(' ')[0]}
                 </span>
-                {" "}
+                <br />
                 <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
                   {styles["hero-title"]?.buttonText?.split('\n')[1] || t("tests.title").split(' ')[1]}
                 </span>
-                {" "}
+                <br />
                 <span style={{ 
                   background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
                   WebkitBackgroundClip: "text", 
@@ -538,20 +538,20 @@ export default function TestsPage() {
               </motion.h1>
               
               <motion.p 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className={`text-xs font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
+                className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
                 style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
               >
                 {styles["hero-subtitle"]?.buttonText || t("tests.heroSubtitle1")}
               </motion.p>
               <motion.p 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.12 }}
-                className={`text-xs font-semibold mb-1 ${getEditableClass("hero-subtitle2")}`}
+                className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
                 style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
               >
@@ -559,10 +559,10 @@ export default function TestsPage() {
               </motion.p>
               
               <motion.p 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className={`text-[11px] leading-snug ${getEditableClass("hero-desc")}`}
+                className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                 onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
                 style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
               >
