@@ -431,14 +431,14 @@ export default function TestsPage() {
 
   if (!stylesLoaded) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="h-[100dvh] overflow-hidden bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
       <header 
         className={`flex md:hidden items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
@@ -508,10 +508,10 @@ export default function TestsPage() {
         />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-4">
         <SpacerElement id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
         <HeroSection styles={styles} getEditableClass={getEditableClass} handleElementClick={handleElementClick} getElementStyle={getElementStyle} isMobile={isMobile}>
-          <div className="relative z-10 px-5 pb-8">
+          <div className="relative z-10 px-5 pb-4">
             <div>
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
@@ -574,7 +574,7 @@ export default function TestsPage() {
 
         <SpacerElement id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
-        <div className="px-4 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="px-4 pb-4 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
           {genericTestCategories.map((category, index) => (
             <TestCard
               key={category.id}
