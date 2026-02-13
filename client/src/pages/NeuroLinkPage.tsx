@@ -60,6 +60,7 @@ export default function NeuroLinkPage() {
   const levelRef = useRef(1);
   const totalCorrectRef = useRef(0);
   const totalErrorsRef = useRef(0);
+  const lastClickRef = useRef(0);
 
   const initLevel = useCallback(() => {
     if (!fieldRef.current) return;
@@ -118,6 +119,9 @@ export default function NeuroLinkPage() {
 
   const handleNodeClick = useCallback((id: number) => {
     if (!gameActiveRef.current) return;
+    const now = Date.now();
+    if (now - lastClickRef.current < 80) return;
+    lastClickRef.current = now;
     setNextNode(prev => {
       if (id === prev) {
         playHitSound();
