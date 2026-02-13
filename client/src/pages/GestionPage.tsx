@@ -5780,12 +5780,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <Button
                               onClick={async () => {
                                 try {
-                                  const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify(item)
-                                  });
+                                  const isNewLang = adminEntLang !== 'es' && item.lang !== adminEntLang;
+                                  const payload = { ...item, lang: adminEntLang, categoria: entrenamientoCategory };
+                                  let res;
+                                  if (isNewLang) {
+                                    const { id, ...rest } = payload;
+                                    res = await adminFetch(`/api/admin/entrenamiento/item`, {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify(rest)
+                                    });
+                                  } else {
+                                    res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                      method: "PUT",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify(payload)
+                                    });
+                                  }
                                   if (res.ok) {
+                                    const data = await res.json();
+                                    if (isNewLang && data.item) {
+                                      const updated = [...entrenamientoItems];
+                                      updated[idx] = data.item;
+                                      setEntrenamientoItems(updated);
+                                    }
                                     alert("Sección guardada correctamente");
                                   } else {
                                     alert("Error: Token inválido o sesión expirada");
