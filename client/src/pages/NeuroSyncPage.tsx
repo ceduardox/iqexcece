@@ -15,6 +15,20 @@ const playButtonSound = () => {
   audio.play().catch(() => {});
 };
 
+const syncAudioPool: HTMLAudioElement[] = [];
+for (let i = 0; i < 5; i++) {
+  const a = new Audio('/bura.mp3');
+  a.volume = 0.7;
+  syncAudioPool.push(a);
+}
+let syncAudioIndex = 0;
+const playSyncSound = () => {
+  const a = syncAudioPool[syncAudioIndex];
+  a.currentTime = 0;
+  a.play().catch(() => {});
+  syncAudioIndex = (syncAudioIndex + 1) % syncAudioPool.length;
+};
+
 interface Impulse {
   id: number;
   x: number;
@@ -158,6 +172,7 @@ export default function NeuroSyncPage() {
         scoreRef.current += newHits * 50;
         hitsRef.current += newHits;
         setLevel(Math.floor(scoreRef.current / 500) + 1);
+        playSyncSound();
         showFeedback("SYNC", "#34c759");
       }
       if (didLose && !didSync) {
