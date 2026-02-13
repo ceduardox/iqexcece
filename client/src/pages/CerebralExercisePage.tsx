@@ -737,7 +737,7 @@ export default function CerebralExercisePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white p-4">
+      <div className="h-[100dvh] overflow-hidden bg-white p-4">
         <div className="max-w-md mx-auto space-y-4">
           <Skeleton className="h-16 w-full bg-purple-100" />
           <Skeleton className="h-64 w-full rounded-xl bg-purple-50" />
@@ -748,7 +748,7 @@ export default function CerebralExercisePage() {
 
   if (shouldRedirectToResults) {
     return (
-      <div className="min-h-screen bg-white p-4 flex items-center justify-center">
+      <div className="h-[100dvh] overflow-hidden bg-white p-4 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-gray-500">Calculando resultados...</p>
@@ -760,7 +760,7 @@ export default function CerebralExercisePage() {
   if (!content) {
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
+      <div className="h-[100dvh] overflow-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-4">
         <div className="max-w-md mx-auto text-center py-12">
           <Zap className="w-16 h-16 text-white/30 mx-auto mb-4" />
           <p className="text-white/60 text-lg">Ejercicio no encontrado.</p>
@@ -782,7 +782,7 @@ export default function CerebralExercisePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full md:hidden"
         style={{
@@ -816,7 +816,7 @@ export default function CerebralExercisePage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-24">
         <div 
           className="w-full"
           style={{

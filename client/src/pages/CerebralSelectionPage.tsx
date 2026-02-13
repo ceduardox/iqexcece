@@ -114,9 +114,9 @@ export default function CerebralSelectionPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
         {renderHeader()}
-        <main className="flex-1 p-5 space-y-4">
+        <main className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-48 w-full rounded-2xl" />
           <Skeleton className="h-32 w-full rounded-2xl" />
@@ -128,7 +128,7 @@ export default function CerebralSelectionPage() {
 
   if (themes.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
         {renderHeader()}
         <main className="flex-1 flex flex-col items-center justify-center p-6">
           <Brain className="w-16 h-16 text-purple-300 mb-4" />
@@ -141,7 +141,7 @@ export default function CerebralSelectionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
       <header 
         className="sticky top-0 z-50 w-full md:hidden"
         style={{
@@ -175,7 +175,7 @@ export default function CerebralSelectionPage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-24">
         <div 
           className="w-full"
           style={{
