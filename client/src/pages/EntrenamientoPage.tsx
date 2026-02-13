@@ -87,7 +87,7 @@ export default function EntrenamientoPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
-    fetch(`/api/page-styles/entrenamiento-items-${categoria}?lang=${lang}`)
+    fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -107,7 +107,7 @@ export default function EntrenamientoPage() {
       await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${adminToken}` },
-        body: JSON.stringify({ pageName: `entrenamiento-items-${categoria}`, styles: JSON.stringify(newStyles), lang })
+        body: JSON.stringify({ pageName: "entrenamiento-page", styles: JSON.stringify(newStyles), lang })
       });
     } catch (error) { console.error("Error saving styles:", error); }
   }, [lang, categoria]);
@@ -194,7 +194,7 @@ export default function EntrenamientoPage() {
         >
           <p className="text-white text-sm font-medium text-center" style={(() => {
             const s = getResolvedStyle("bannerText");
-            return { color: s?.color || "#fff", fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+            return { color: s?.textColor || "#fff", fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
           })()}>
             {page?.bannerText || "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!"}
           </p>
@@ -209,13 +209,13 @@ export default function EntrenamientoPage() {
           >
             <h1 className="text-3xl font-black text-slate-900 mb-2" style={(() => {
               const s = getResolvedStyle("pageTitle");
-              return { color: s?.color, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
             })()}>
               {page?.pageTitle || "Entrenamientos"}
             </h1>
             <p className="text-slate-500" style={(() => {
               const s = getResolvedStyle("pageDesc");
-              return { color: s?.color, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
             })()}>
               {page?.pageDescription || "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"}
             </p>
@@ -290,7 +290,7 @@ export default function EntrenamientoPage() {
                         className={`text-lg font-bold text-white mb-1 ${getEditableClass(titleId)}`}
                         onClick={(e) => handleElementClick(titleId, e)}
                         style={{
-                          color: ts?.color || "#fff",
+                          color: ts?.textColor || "#fff",
                           fontSize: ts?.fontSize ? `${ts.fontSize}px` : undefined,
                           fontWeight: ts?.fontWeight || "bold",
                           textAlign: (ts?.textAlign as any) || undefined,
@@ -303,7 +303,7 @@ export default function EntrenamientoPage() {
                           className={`text-sm text-white/70 leading-snug mb-3 ${getEditableClass(descId)}`}
                           onClick={(e) => handleElementClick(descId, e)}
                           style={{
-                            color: ds?.color || "rgba(255,255,255,0.7)",
+                            color: ds?.textColor || "rgba(255,255,255,0.7)",
                             fontSize: ds?.fontSize ? `${ds.fontSize}px` : undefined,
                           }}
                         >
@@ -317,7 +317,7 @@ export default function EntrenamientoPage() {
                           style={(() => {
                             return {
                               background: bs?.background || "rgba(139,92,246,0.9)",
-                              color: bs?.color || "#fff",
+                              color: bs?.textColor || "#fff",
                               boxShadow: bs?.shadowBlur
                                 ? `0 ${(bs.shadowBlur || 0) / 2}px ${bs.shadowBlur}px ${bs?.shadowColor || "rgba(139,92,246,0.3)"}`
                                 : "0 4px 15px rgba(139,92,246,0.3)"
