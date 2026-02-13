@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IQ Exponencial | Neuro-Sync</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --panel-bg: #ffffff;
+            --accent: #007aff;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --text-main: #1d1d1f;
+            --iq-blue: #0051ff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--panel-bg);
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        /* Branding y Logo */
+        #brand-header {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .main-logo {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Dashboard de Métricas */
+        #dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 15px;
+            background: #fafbfc;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-card { text-align: center; }
+        .stat-card .label { font-size: 9px; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 16px; font-weight: 700; color: var(--iq-blue); }
+
+        /* Área de Neuro-Aceleración */
+        #game-field {
+            position: relative;
+            flex-grow: 1;
+            background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f8f9fa 100%);
+            overflow: hidden;
+        }
+
+        /* Impulso Cognitivo */
+        .impulse {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--iq-blue);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(0, 81, 255, 0.3);
+        }
+
+        /* Receptor Sincronizador */
+        #neuro-catcher {
+            position: absolute;
+            bottom: 100px;
+            width: 70px;
+            height: 70px;
+            border: 2px solid var(--iq-blue);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 81, 255, 0.05);
+            pointer-events: none;
+        }
+
+        #neuro-catcher::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--iq-blue);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        #feedback {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 800;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Footer informativo */
+        .footer-tag {
+            padding: 10px;
+            font-size: 10px;
+            color: #ccc;
+            text-align: center;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <header id="brand-header">
+        <img src="https://iqexponencial.app/api/images/43c8a96f-020d-482e-83c7-3de342d11d48" alt="IQ Exponencial Logo" class="main-logo">
+    </header>
+
+    <div id="dashboard">
+        <div class="stat-card">
+            <div class="label">Puntaje</div>
+            <div id="score" class="value">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Precisión</div>
+            <div id="acc" class="value">--</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Neuronas</div>
+            <div id="level" class="value">1</div>
+        </div>
+    </div>
+
+    <div id="game-field" id="stage">
+        <div id="feedback">SYNC</div>
+        <div id="neuro-catcher" style="left: 50%;"></div>
+    </div>
+
+    <div class="footer-tag">SISTEMA DE NEURO-ACELERACIÓN v4.0 | IQ EXPONENCIAL</div>
+</div>
+
+<script>
+    const field = document.getElementById('game-field');
+    const catcher = document.getElementById('neuro-catcher');
+    const scoreVal = document.getElementById('score');
+    const accVal = document.getElementById('acc');
+    const fb = document.getElementById('feedback');
+
+    let score = 0;
+    let total = 0;
+    let hits = 0;
+    let posX = window.innerWidth / 2;
+
+    // Control táctil y mouse suave
+    const handleMove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const rect = field.getBoundingClientRect();
+        let x = clientX - rect.left;
+        
+        // Mantener dentro de bordes
+        if (x < 35) x = 35;
+        if (x > rect.width - 35) x = rect.width - 35;
+        
+        posX = x;
+        catcher.style.left = `${x}px`;
+    };
+
+    field.addEventListener('mousemove', handleMove);
+    field.addEventListener('touchmove', handleMove);
+
+    function notify(text, color) {
+        fb.innerText = text;
+        fb.style.color = color;
+        fb.style.opacity = '1';
+        setTimeout(() => fb.style.opacity = '0', 250);
+    }
+
+    function createImpulse() {
+        const impulse = document.createElement('div');
+        impulse.className = 'impulse';
+        const startX = Math.random() * (field.clientWidth - 60) + 30;
+        impulse.style.left = `${startX}px`;
+        impulse.style.top = `-20px`;
+        field.appendChild(impulse);
+
+        total++;
+        let y = -20;
+        let speed = 4 + (score / 1000); // Aumento progresivo
+
+        const run = setInterval(() => {
+            y += speed;
+            impulse.style.top = `${y}px`;
+
+            const rect = field.getBoundingClientRect();
+            const targetY = rect.height - 100;
+
+            // Detección de colisión mejorada
+            if (y > targetY - 20 && y < targetY + 20) {
+                const dist = Math.abs(startX - posX);
+                if (dist < 35) {
+                    score += 50;
+                    hits++;
+                    scoreVal.innerText = score;
+                    notify('SYNC', 'var(--success)');
+                    impulse.remove();
+                    clearInterval(run);
+                    updateStats();
+                }
+            }
+
+            if (y > rect.height) {
+                notify('LOST', 'var(--danger)');
+                impulse.remove();
+                clearInterval(run);
+                updateStats();
+            }
+        }, 16);
+    }
+
+    function updateStats() {
+        const accuracy = Math.round((hits / total) * 100);
+        accVal.innerText = `${accuracy}%`;
+        document.getElementById('level').innerText = Math.floor(score / 500) + 1;
+    }
+
+    // Intervalo de aparición basado en progreso
+    let spawnRate = 1200;
+    function gameLoop() {
+        createImpulse();
+        let next = Math.max(400, spawnRate - (score/10));
+        setTimeout(gameLoop, next);
+    }
+
+    gameLoop();
+</script>
+</body>
+</html>

@@ -198,7 +198,8 @@
     "numerosLetras": "Números y Letras",
     "golpeVista": "Golpe de Vista",
     "desplazamiento": "Desplazamiento",
-    "reconocimientoVisual": "Reconocimiento Visual"
+    "reconocimientoVisual": "Reconocimiento Visual",
+    "neuroSync": "Neuro-Sync"
   },
   "blog": {
     "title": "Blog",
@@ -306,5 +307,23 @@
     "es": "Español",
     "en": "English",
     "pt": "Português"
+  },
+  "neurosync": {
+    "title": "Neuro-Sync",
+    "getReady": "Prepárate para sincronizar",
+    "score": "Puntaje",
+    "accuracy": "Precisión",
+    "time": "Tiempo",
+    "level": "Neuronas",
+    "completed": "¡Sesión Completada!",
+    "resultsSaved": "Tus resultados han sido guardados",
+    "synced": "Sincronizados",
+    "playAgain": "Jugar de nuevo",
+    "viewProgress": "Ver mi progreso",
+    "footer": "SISTEMA DE NEURO-ACELERACIÓN v4.0 | IQ EXPONENCIAL",
+    "prepTitle": "Neuro-Sync",
+    "prepSubtitle": "Sincroniza impulsos cognitivos moviendo el receptor",
+    "prepInstructions": "Mueve el receptor circular con tu dedo para interceptar los impulsos que caen. Cuanto más sincronices, más rápido se vuelve el juego.",
+    "prepButton": "Iniciar Neuro-Sync"
   }
 }

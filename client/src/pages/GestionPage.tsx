@@ -2480,7 +2480,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       numeros: "Números y Letras",
                       aceleracion_golpe: "Golpe de Vista",
                       aceleracion_desplazamiento: "Desplazamiento",
-                      reconocimiento_visual: "Reconocimiento Visual"
+                      reconocimiento_visual: "Reconocimiento Visual",
+                      neurosync: "Neuro-Sync"
                     };
                     const categoriaLabels: Record<string, string> = {
                       preescolar: "Pre-escolar",
@@ -5150,6 +5151,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
                                 <option value="reconocimiento_visual" className="bg-gray-700 text-white">Reconocimiento Visual</option>
+                                <option value="neurosync" className="bg-gray-700 text-white">Neuro-Sync</option>
                                 <option value="otro" className="bg-gray-700 text-white">Otro (enlace externo)</option>
                               </select>
                             </div>

@@ -82,6 +82,8 @@ export default function EntrenamientoPrepPage() {
       setLocation(`/aceleracion/${categoria}/${itemId}`);
     } else if (tipo === "reconocimiento_visual") {
       setLocation(`/reconocimiento/${categoria}/${itemId}`);
+    } else if (tipo === "neurosync") {
+      setLocation(`/neurosync/${categoria}/${itemId}`);
     } else {
       setLocation(`/velocidad/${categoria}/${itemId}`);
     }

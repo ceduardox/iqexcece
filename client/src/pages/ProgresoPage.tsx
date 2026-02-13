@@ -35,7 +35,8 @@ const exerciseTypeKeys: Record<string, string> = {
   numeros: "progress.numerosLetras",
   aceleracion_golpe: "progress.golpeVista",
   aceleracion_desplazamiento: "progress.desplazamiento",
-  reconocimiento_visual: "progress.reconocimientoVisual"
+  reconocimiento_visual: "progress.reconocimientoVisual",
+  neurosync: "progress.neuroSync"
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -43,7 +44,8 @@ const exerciseTypeColors: Record<string, string> = {
   numeros: "#06b6d4",
   aceleracion_golpe: "#a855f7",
   aceleracion_desplazamiento: "#0891b2",
-  reconocimiento_visual: "#ec4899"
+  reconocimiento_visual: "#ec4899",
+  neurosync: "#0051ff"
 };
 
 const exerciseTypeIcons: Record<string, typeof Zap> = {
@@ -51,7 +53,8 @@ const exerciseTypeIcons: Record<string, typeof Zap> = {
   numeros: Target,
   aceleracion_golpe: BookOpen,
   aceleracion_desplazamiento: BookOpen,
-  reconocimiento_visual: Eye
+  reconocimiento_visual: Eye,
+  neurosync: Zap
 };
 
 function formatDate(dateStr: string | null): string {
@@ -196,6 +199,14 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
               <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("progress.incorrect")} color="#ef4444" />
               <StatBox value={datosExtra.skippedCount ?? 0} label={t("progress.noAnswer")} color="#9ca3af" />
             </div>
+          </div>
+        );
+      case "neurosync":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.puntaje ?? 0} label={t("neurosync.score")} color="#0051ff" />
+            <StatBox value={`${datosExtra.accuracy ?? 0}%`} label={t("neurosync.accuracy")} color="#06b6d4" />
+            <StatBox value={result.nivelAlcanzado ?? 1} label={t("neurosync.level")} color="#8a3ffc" />
           </div>
         );
       default:
