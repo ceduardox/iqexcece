@@ -60,7 +60,8 @@ export default function NeuroLinkPage() {
   const levelRef = useRef(1);
   const totalCorrectRef = useRef(0);
   const totalErrorsRef = useRef(0);
-  const lastClickRef = useRef(0);
+  const nextNodeRef = useRef(1);
+  const nodesRef = useRef<NodeData[]>([]);
 
   const initLevel = useCallback(() => {
     if (!fieldRef.current) return;
@@ -77,6 +78,8 @@ export default function NeuroLinkPage() {
       newNodes.push({ id: i, x, y, completed: false });
     }
 
+    nodesRef.current = newNodes;
+    nextNodeRef.current = 1;
     setNodes(newNodes);
     setLines([]);
     setNextNode(1);
@@ -119,53 +122,52 @@ export default function NeuroLinkPage() {
 
   const handleNodeClick = useCallback((id: number) => {
     if (!gameActiveRef.current) return;
-    const now = Date.now();
-    if (now - lastClickRef.current < 80) return;
-    lastClickRef.current = now;
-    setNextNode(prev => {
-      if (id === prev) {
-        playHitSound();
-        totalCorrectRef.current++;
-        setTotalCorrect(totalCorrectRef.current);
-        setNodes(ns => ns.map(n => n.id === id ? { ...n, completed: true } : n));
-        setNodes(ns => {
-          if (prev > 1) {
-            const prevNode = ns.find(n => n.id === prev - 1);
-            const currNode = ns.find(n => n.id === id);
-            if (prevNode && currNode) {
-              setLines(ls => [...ls, { x1: prevNode.x, y1: prevNode.y, x2: currNode.x, y2: currNode.y }]);
-            }
-          }
-          if (id === ns.length) {
-            gameActiveRef.current = false;
-            if (timerRef.current) clearInterval(timerRef.current);
-            setStatusText(t("neurolink.correct"));
-            setStatusColor("#34c759");
-            const pts = levelRef.current * 100;
-            scoreRef.current += pts;
-            setScore(scoreRef.current);
-            levelRef.current++;
-            setLevel(levelRef.current);
-            setTimeout(() => initLevel(), 600);
-          }
-          return ns;
-        });
-        return prev + 1;
-      } else {
-        playErrSound();
-        totalErrorsRef.current++;
-        setTotalErrors(totalErrorsRef.current);
-        setStatusText(t("neurolink.fail"));
-        setStatusColor("#ff3b30");
-        setTimeout(() => {
-          if (gameActiveRef.current) {
-            setStatusText(t("neurolink.syncing"));
-            setStatusColor("");
-          }
-        }, 400);
-        return prev;
+
+    const expected = nextNodeRef.current;
+
+    if (id === expected) {
+      playHitSound();
+      totalCorrectRef.current++;
+      setTotalCorrect(totalCorrectRef.current);
+
+      nodesRef.current = nodesRef.current.map(n => n.id === id ? { ...n, completed: true } : n);
+      setNodes([...nodesRef.current]);
+
+      if (expected > 1) {
+        const prevNode = nodesRef.current.find(n => n.id === expected - 1);
+        const currNode = nodesRef.current.find(n => n.id === id);
+        if (prevNode && currNode) {
+          setLines(ls => [...ls, { x1: prevNode.x, y1: prevNode.y, x2: currNode.x, y2: currNode.y }]);
+        }
       }
-    });
+
+      nextNodeRef.current = expected + 1;
+      setNextNode(expected + 1);
+
+      if (id === nodesRef.current.length) {
+        gameActiveRef.current = false;
+        if (timerRef.current) clearInterval(timerRef.current);
+        setStatusText(t("neurolink.correct"));
+        setStatusColor("#34c759");
+        scoreRef.current += levelRef.current * 100;
+        setScore(scoreRef.current);
+        levelRef.current++;
+        setLevel(levelRef.current);
+        setTimeout(() => initLevel(), 600);
+      }
+    } else {
+      playErrSound();
+      totalErrorsRef.current++;
+      setTotalErrors(totalErrorsRef.current);
+      setStatusText(t("neurolink.fail"));
+      setStatusColor("#ff3b30");
+      setTimeout(() => {
+        if (gameActiveRef.current) {
+          setStatusText(t("neurolink.syncing"));
+          setStatusColor("");
+        }
+      }, 400);
+    }
   }, [t, initLevel]);
 
   const saveResults = useCallback(() => {
