@@ -239,6 +239,24 @@
     "obj5Title": "Celebrating Academic Success",
     "obj5Desc": "We recognize and reward excellence in reading, highlighting student achievements in a special event that inspires the entire educational community."
   },
+  "velocidad_lectura": {
+    "prepTitle": "Reading Speed",
+    "prepSubtitle": "Improve your reading speed!",
+    "prepInstructions": "Read the text as fast as you can while maintaining comprehension. Your speed is measured in words per minute.",
+    "prepButton": "Start"
+  },
+  "lectura_test": {
+    "prepTitle": "Reading Test",
+    "prepSubtitle": "Evaluate your reading comprehension",
+    "prepInstructions": "Read the text carefully and answer the comprehension questions. Your speed and understanding will be evaluated.",
+    "prepButton": "Start"
+  },
+  "aceleracion": {
+    "prepTitle": "Reading Acceleration",
+    "prepSubtitle": "Accelerate your reading to the max!",
+    "prepInstructions": "Follow the visual pace to train your reading speed. The text advances automatically, keep focused.",
+    "prepButton": "Start"
+  },
   "exercises": {
     "empezar": "Start",
     "numeros": "Numbers",

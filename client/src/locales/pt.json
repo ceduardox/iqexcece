@@ -239,6 +239,24 @@
     "obj5Title": "Celebrar o Sucesso Acadêmico",
     "obj5Desc": "Reconhecemos e premiamos a excelência na leitura, destacando as conquistas dos estudantes em um evento especial que inspira toda a comunidade educacional."
   },
+  "velocidad_lectura": {
+    "prepTitle": "Velocidade de Leitura",
+    "prepSubtitle": "Melhore sua velocidade de leitura!",
+    "prepInstructions": "Leia o texto o mais rápido possível mantendo a compreensão. Sua velocidade é medida em palavras por minuto.",
+    "prepButton": "Começar"
+  },
+  "lectura_test": {
+    "prepTitle": "Teste de Leitura",
+    "prepSubtitle": "Avalie sua compreensão leitora",
+    "prepInstructions": "Leia o texto com atenção e responda as perguntas de compreensão. Sua velocidade e compreensão serão avaliadas.",
+    "prepButton": "Começar"
+  },
+  "aceleracion": {
+    "prepTitle": "Aceleração de Leitura",
+    "prepSubtitle": "Acelere ao máximo sua leitura!",
+    "prepInstructions": "Siga o ritmo visual para treinar sua velocidade de leitura. O texto avança automaticamente, mantenha o foco.",
+    "prepButton": "Começar"
+  },
   "exercises": {
     "empezar": "Começar",
     "numeros": "Números",
