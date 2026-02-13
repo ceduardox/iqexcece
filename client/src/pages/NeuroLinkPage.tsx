@@ -57,6 +57,7 @@ export default function NeuroLinkPage() {
   const totalErrorsRef = useRef(0);
   const nextNodeRef = useRef(1);
   const nodesRef = useRef<NodeData[]>([]);
+  const usedTouchRef = useRef(false);
 
   const initLevel = useCallback(() => {
     if (!fieldRef.current) return;
@@ -430,8 +431,8 @@ export default function NeuroLinkPage() {
               transition: "transform 0.1s, background 0.2s",
               WebkitTapHighlightColor: "transparent",
             }}
-            onTouchStart={(e) => { e.preventDefault(); handleNodeClick(node.id); }}
-            onMouseDown={() => handleNodeClick(node.id)}
+            onTouchStart={(e) => { e.preventDefault(); usedTouchRef.current = true; handleNodeClick(node.id); }}
+            onMouseDown={() => { if (usedTouchRef.current) { usedTouchRef.current = false; return; } handleNodeClick(node.id); }}
             data-testid={`node-${node.id}`}
           >
             {node.id}
