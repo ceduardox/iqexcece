@@ -194,7 +194,15 @@ export default function CerebralExercisePage() {
             return (
               <button
                 key={option.id}
-                onClick={() => !submitted && setUserAnswer(option.value)}
+                onClick={() => {
+                  if (submitted) return;
+                  setUserAnswer(option.value);
+                  const correctAnswer = content?.exerciseData.correctAnswer?.toString().toLowerCase().trim();
+                  const isRight = option.value.toLowerCase().trim() === correctAnswer;
+                  setIsCorrect(isRight);
+                  setSubmitted(true);
+                  setTimeout(() => handleNext(), 800);
+                }}
                 disabled={submitted}
                 className={`
                   relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl
