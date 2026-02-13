@@ -335,6 +335,10 @@
   },
   "neurolink": {
     "title": "Neuro-Link Pro",
+    "prepTitle": "Neuro-Link Pro",
+    "prepSubtitle": "Connect neurons to strengthen your cognitive network",
+    "prepInstructions": "Connect the nodes in numerical order before time runs out. Each level increases the number of nodes and reduces time.",
+    "prepButton": "Start Neuro-Link",
     "prepDesc": "Connect the nodes in numerical order before time runs out",
     "syncing": "SYNCING...",
     "correct": "Correct",
@@ -358,6 +362,10 @@
   },
   "memoryflash": {
     "title": "Memory Flash",
+    "prepTitle": "Memory Flash",
+    "prepSubtitle": "Train your visual memory with light sequences",
+    "prepInstructions": "Memorize the sequence of illuminated cells and reproduce them in the same order. Difficulty increases with more cells and longer sequences.",
+    "prepButton": "Start Memory Flash",
     "prepDesc": "Memorize the sequence of illuminated cells and reproduce it in order",
     "memorize": "MEMORIZE",
     "yourTurn": "YOUR TURN",
