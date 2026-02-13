@@ -1,24 +1,23 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Target, Zap, Brain, Grid3X3 } from "lucide-react";
+import { ArrowLeft, Target, Zap, Brain, Grid3X3, BookOpen, Gauge, FastForward } from "lucide-react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { useSounds } from "@/hooks/use-sounds";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
-interface PrepData {
-  imagen: string;
-  titulo: string;
-  subtitulo: string;
-  instrucciones: string;
-  textoBoton: string;
-  tipoEjercicio: string;
-}
-
 const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
-const GAME_TYPES = ["neurosync", "neurolink", "memoryflash"];
+
+const GAME_CONFIG: Record<string, { icon: typeof Zap; gradient: string; translationKey: string; route: string }> = {
+  neurosync: { icon: Zap, gradient: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)", translationKey: "neurosync", route: "neurosync" },
+  neurolink: { icon: Brain, gradient: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)", translationKey: "neurolink", route: "neurolink" },
+  memoryflash: { icon: Grid3X3, gradient: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)", translationKey: "memoryflash", route: "memoryflash" },
+  velocidad: { icon: Gauge, gradient: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)", translationKey: "velocidad_lectura", route: "velocidad" },
+  lectura: { icon: BookOpen, gradient: "linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)", translationKey: "lectura_test", route: "lectura" },
+  aceleracion_lectura: { icon: FastForward, gradient: "linear-gradient(135deg, #10B981 0%, #3B82F6 100%)", translationKey: "aceleracion", route: "aceleracion" },
+};
 
 function NeuroSyncAnimation() {
   return (
@@ -119,23 +118,104 @@ function MemoryFlashAnimation() {
   );
 }
 
+function VelocidadAnimation() {
+  return (
+    <div className="relative w-48 h-36 mx-auto flex flex-col items-center justify-center gap-2">
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="h-3 rounded-full"
+          style={{ background: "linear-gradient(90deg, #00C9A7, #00B4D8)", width: "70%" }}
+          animate={{ width: ["30%", "90%", "30%"], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.3 }}
+        />
+      ))}
+      <motion.div
+        className="absolute right-4 top-1/2 -translate-y-1/2"
+        animate={{ x: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.2, repeat: Infinity }}
+      >
+        <Gauge className="w-10 h-10" style={{ color: "#00B4D8" }} />
+      </motion.div>
+    </div>
+  );
+}
+
+function LecturaAnimation() {
+  return (
+    <div className="relative w-48 h-40 mx-auto flex flex-col items-center justify-center gap-1.5">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <motion.div
+          key={i}
+          className="h-2 rounded-full bg-gradient-to-r from-amber-400 to-red-400"
+          style={{ width: `${85 - i * 10}%` }}
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+        />
+      ))}
+      <motion.div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2"
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <BookOpen className="w-10 h-10" style={{ color: "#F59E0B" }} />
+      </motion.div>
+    </div>
+  );
+}
+
+function AceleracionAnimation() {
+  return (
+    <div className="relative w-48 h-40 mx-auto flex items-center justify-center">
+      <motion.div
+        className="absolute w-32 h-32 rounded-full border-4 border-dashed"
+        style={{ borderColor: "rgba(16,185,129,0.3)" }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      />
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="absolute h-2 rounded-full"
+          style={{ background: "linear-gradient(90deg, #10B981, #3B82F6)", width: 40, left: "50%", top: "50%" }}
+          animate={{
+            x: [0, Math.cos(i * 120 * Math.PI / 180) * 50],
+            y: [0, Math.sin(i * 120 * Math.PI / 180) * 50],
+            opacity: [0, 1, 0],
+          }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.5 }}
+        />
+      ))}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <FastForward className="w-10 h-10" style={{ color: "#10B981" }} />
+      </motion.div>
+    </div>
+  );
+}
+
+const ANIMATION_MAP: Record<string, () => JSX.Element> = {
+  neurosync: NeuroSyncAnimation,
+  neurolink: NeuroLinkAnimation,
+  memoryflash: MemoryFlashAnimation,
+  velocidad: VelocidadAnimation,
+  lectura: LecturaAnimation,
+  aceleracion_lectura: AceleracionAnimation,
+};
+
 function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categoria: string; itemId: string }) {
   const [, setLocation] = useLocation();
   const { playSound } = useSounds();
   const { t } = useTranslation();
 
-  const config: Record<string, { icon: typeof Zap; gradient: string; animation: () => JSX.Element }> = {
-    neurosync: { icon: Zap, gradient: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)", animation: NeuroSyncAnimation },
-    neurolink: { icon: Brain, gradient: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)", animation: NeuroLinkAnimation },
-    memoryflash: { icon: Grid3X3, gradient: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)", animation: MemoryFlashAnimation },
-  };
-
-  const c = config[gameType] || config.neurosync;
-  const AnimComp = c.animation;
+  const c = GAME_CONFIG[gameType] || GAME_CONFIG.neurosync;
+  const AnimComp = ANIMATION_MAP[gameType] || NeuroSyncAnimation;
 
   const handleStart = () => {
     playSound("iphone");
-    setLocation(`/${gameType}/${categoria}/${itemId}`);
+    setLocation(`/${c.route}/${categoria}/${itemId}`);
   };
 
   return (
@@ -177,7 +257,7 @@ function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categ
           className="text-2xl font-bold text-gray-800 text-center leading-tight mb-2"
           data-testid="text-prep-title"
         >
-          {t(`${gameType}.prepTitle`)}
+          {t(`${c.translationKey}.prepTitle`)}
         </motion.h1>
 
         <motion.p
@@ -188,7 +268,7 @@ function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categ
           style={{ color: "#06B6D4" }}
           data-testid="text-prep-subtitle"
         >
-          {t(`${gameType}.prepSubtitle`)}
+          {t(`${c.translationKey}.prepSubtitle`)}
         </motion.p>
 
         <motion.div
@@ -207,7 +287,7 @@ function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categ
             <div className="flex-1">
               <h3 className="font-semibold text-gray-800 text-sm mb-1">{t("prep.instructions")}</h3>
               <p className="text-gray-500 text-xs leading-relaxed" data-testid="text-prep-instructions">
-                {t(`${gameType}.prepInstructions`)}
+                {t(`${c.translationKey}.prepInstructions`)}
               </p>
             </div>
           </div>
@@ -223,7 +303,7 @@ function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categ
           whileTap={{ scale: 0.98 }}
           data-testid="button-start"
         >
-          {t(`${gameType}.prepButton`)}
+          {t(`${c.translationKey}.prepButton`)}
         </motion.button>
       </main>
 
@@ -235,11 +315,9 @@ function GamePrepPage({ gameType, categoria, itemId }: { gameType: string; categ
 export default function EntrenamientoPrepPage() {
   const { categoria, itemId } = useParams<{ categoria: string; itemId: string }>();
   const [, setLocation] = useLocation();
-  const [prepData, setPrepData] = useState<PrepData | null>(null);
   const [loading, setLoading] = useState(true);
   const [gameType, setGameType] = useState<string | null>(null);
-  const { playSound } = useSounds();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const lang = i18n.language || 'es';
 
   useEffect(() => {
@@ -254,44 +332,10 @@ export default function EntrenamientoPrepPage() {
           return;
         }
 
-        if (GAME_TYPES.includes(tipoEjercicio)) {
+        if (GAME_CONFIG[tipoEjercicio]) {
           setGameType(tipoEjercicio);
-          setLoading(false);
-          return;
-        }
-
-        const item = itemData.item;
-        if (item && (item.prepTitle || item.prepInstructions || item.prepSubtitle || item.prepButtonText)) {
-          setPrepData({
-            imagen: item.prepImage || "",
-            titulo: item.prepTitle || item.title || "",
-            subtitulo: item.prepSubtitle || "",
-            instrucciones: item.prepInstructions || "",
-            textoBoton: item.prepButtonText || "",
-            tipoEjercicio,
-          });
         } else {
-          const prepRes = await fetch(`/api/prep-page/${categoria}`);
-          const prepPageData = await prepRes.json();
-          if (prepPageData.page) {
-            setPrepData({
-              imagen: prepPageData.page.imagen || "",
-              titulo: prepPageData.page.titulo || "",
-              subtitulo: prepPageData.page.subtitulo || "",
-              instrucciones: prepPageData.page.instrucciones || "",
-              textoBoton: prepPageData.page.textoBoton || "",
-              tipoEjercicio,
-            });
-          } else if (item) {
-            setPrepData({
-              imagen: item.prepImage || "",
-              titulo: item.title || "",
-              subtitulo: "",
-              instrucciones: "",
-              textoBoton: "",
-              tipoEjercicio,
-            });
-          }
+          setLocation(`/${tipoEjercicio}/${categoria}/${itemId}`);
         }
       } catch (e) {
         console.error(e);
@@ -314,145 +358,5 @@ export default function EntrenamientoPrepPage() {
     return <GamePrepPage gameType={gameType} categoria={categoria || ""} itemId={itemId || ""} />;
   }
 
-  const handleStart = () => {
-    playSound("iphone");
-    const tipo = prepData?.tipoEjercicio || "velocidad";
-    if (tipo === "velocidad") {
-      setLocation(`/velocidad/${categoria}/${itemId}`);
-    } else if (tipo === "numeros") {
-      setLocation(`/numeros/${categoria}/${itemId}`);
-    } else if (tipo === "lectura") {
-      setLocation(`/lectura/${categoria}/${itemId}`);
-    } else if (tipo === "memoria") {
-      setLocation(`/memoria/${categoria}/${itemId}`);
-    } else if (tipo === "aceleracion_lectura") {
-      setLocation(`/aceleracion/${categoria}/${itemId}`);
-    } else if (tipo === "reconocimiento_visual") {
-      setLocation(`/reconocimiento/${categoria}/${itemId}`);
-    } else {
-      setLocation(`/velocidad/${categoria}/${itemId}`);
-    }
-  };
-
-  const handleBack = () => {
-    playSound("iphone");
-    window.history.back();
-  };
-
-  return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-50 w-full md:hidden" style={{ background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)" }}>
-        <div className="relative pt-3 pb-2 px-5">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255, 255, 255, 0.9)", boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)" }}
-              data-testid="button-back"
-            >
-              <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
-            </button>
-            <img src={LOGO_URL} alt="IQX" className="h-10 w-auto object-contain" />
-            <LanguageButton />
-          </div>
-        </div>
-      </header>
-      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
-        <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
-
-      <main className="flex-1 overflow-y-auto pb-28">
-        <div
-          className="relative px-5 pt-6 pb-8"
-          style={{
-            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 50%, rgba(255, 255, 255, 1) 100%)"
-          }}
-        >
-          <div className="flex items-start justify-between">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex-1 pr-4"
-            >
-              <h1
-                className="text-2xl font-bold text-gray-800 leading-tight mb-2"
-                data-testid="text-prep-title"
-              >
-                {prepData?.titulo || t("prep.defaultTitle")}
-              </h1>
-
-              {prepData?.subtitulo && (
-                <p
-                  className="text-sm text-gray-500 leading-relaxed"
-                  data-testid="text-prep-subtitle"
-                >
-                  {prepData.subtitulo}
-                </p>
-              )}
-            </motion.div>
-
-            {prepData?.imagen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-                className="flex-shrink-0"
-              >
-                <img
-                  src={prepData.imagen}
-                  alt=""
-                  className="w-24 h-24 object-contain"
-                  data-testid="img-prep"
-                />
-              </motion.div>
-            )}
-          </div>
-
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            onClick={handleStart}
-            className="w-full mt-6 py-3.5 rounded-full font-semibold text-white text-base shadow-lg"
-            style={{
-              background: "linear-gradient(135deg, #00C9A7 0%, #00B4D8 100%)"
-            }}
-            whileTap={{ scale: 0.98 }}
-            data-testid="button-start"
-          >
-            {prepData?.textoBoton || t("prep.defaultButton")}
-          </motion.button>
-        </div>
-
-        {prepData?.instrucciones && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="px-5 py-4"
-          >
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)" }}
-                >
-                  <Target className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800 text-sm mb-1">{t("prep.instructions")}</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">
-                    {prepData.instrucciones}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </main>
-
-      <TrainingNavBar activePage="entrenar" categoria={categoria} />
-    </div>
-  );
+  return null;
 }
