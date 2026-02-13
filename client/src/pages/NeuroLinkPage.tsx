@@ -403,38 +403,38 @@ export default function NeuroLinkPage() {
         style={{ background: "radial-gradient(circle, #ffffff 0%, #f7f7f9 100%)", border: "1px solid #e5e5e7" }}
         data-testid="game-field"
       >
-        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+        <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
           {lines.map((l, i) => (
-            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="#0051ff" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="#0051ff" strokeWidth={4} strokeLinecap="round" opacity={0.6} />
           ))}
         </svg>
 
         {nodes.map(node => (
-          <motion.div
+          <div
             key={`${level}-${node.id}`}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: node.id * 0.05, type: "spring", stiffness: 200 }}
-            className="absolute flex items-center justify-center rounded-full font-bold text-lg select-none"
+            className="absolute flex items-center justify-center rounded-full font-bold select-none"
             style={{
               width: 52,
               height: 52,
               left: node.x,
               top: node.y,
               transform: "translate(-50%, -50%)",
+              fontSize: 19,
               background: node.completed ? "#0051ff" : "#fff",
               border: `2px solid ${node.completed ? "#0051ff" : "#d2d2d7"}`,
               color: node.completed ? "#fff" : "#1d1d1f",
               boxShadow: node.completed ? "0 0 20px rgba(0, 81, 255, 0.3)" : "0 4px 12px rgba(0,0,0,0.05)",
               zIndex: 5,
               cursor: "pointer",
+              transition: "transform 0.1s, background 0.2s",
+              WebkitTapHighlightColor: "transparent",
             }}
             onTouchStart={(e) => { e.preventDefault(); handleNodeClick(node.id); }}
             onMouseDown={() => handleNodeClick(node.id)}
             data-testid={`node-${node.id}`}
           >
             {node.id}
-          </motion.div>
+          </div>
         ))}
       </div>
 
