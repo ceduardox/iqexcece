@@ -263,7 +263,7 @@ export default function RazonamientoQuizPage() {
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </div>
 
-      <main className="flex-1 overflow-y-auto min-h-0 pb-24">
+      <main className="flex-1 overflow-y-auto min-h-0 pb-4">
         <div 
           className="w-full"
           style={{
@@ -314,7 +314,7 @@ export default function RazonamientoQuizPage() {
         </div>
 
         {/* Question */}
-        <div className="px-5 pb-8">
+        <div className="px-5 pb-2 flex-1 min-h-0 flex flex-col">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentQuestion}
@@ -330,13 +330,12 @@ export default function RazonamientoQuizPage() {
                 </h2>
               </div>
 
-              {/* Image if present */}
               {imageUrl && (
                 <div className="flex justify-center">
                   <img 
                     src={imageUrl} 
                     alt={title}
-                    style={{ width: `${imageSize}%`, maxWidth: '300px' }}
+                    style={{ width: `${imageSize}%`, maxWidth: '200px' }}
                     className="rounded-2xl shadow-lg"
                     data-testid="img-razonamiento"
                   />
@@ -345,7 +344,7 @@ export default function RazonamientoQuizPage() {
 
               {/* Pregunta - Tarjeta formal futurista */}
               <div 
-                className="rounded-2xl p-6 border border-purple-100/50"
+                className="rounded-2xl p-4 border border-purple-100/50"
                 style={{
                   background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,245,255,0.9) 100%)",
                   boxShadow: "0 4px 20px rgba(138, 63, 252, 0.08), 0 1px 3px rgba(0,0,0,0.05)"
@@ -368,7 +367,7 @@ export default function RazonamientoQuizPage() {
               </div>
 
             {/* Opciones - Tarjetas formales futuristas */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {currentQ?.options.map((option, index) => {
                 const isSelected = selectedAnswer === index;
                 const isCorrect = questions[currentQuestion]?.correct === index;
