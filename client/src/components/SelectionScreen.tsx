@@ -6,7 +6,7 @@ import { LanguageButton } from "./LanguageButton";
 import { useLocation } from "wouter";
 import { useUserData } from "@/lib/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "./EditorToolbar";
+import { EditorToolbar, resolveStyle, type PageStyles, type ElementStyle, type DeviceMode } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { useSounds } from "@/hooks/use-sounds";
 
@@ -122,7 +122,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   };
   
   const getElementStyle = (elementId: string, defaultBg?: string): React.CSSProperties => {
-    const style = styles[elementId];
+    const style = resolveStyle(styles, elementId, isMobile);
     const result: React.CSSProperties = {};
     
     if (style?.backgroundType === "image" && style?.imageUrl) {
