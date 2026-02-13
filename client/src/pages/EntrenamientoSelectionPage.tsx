@@ -331,8 +331,7 @@ export default function EntrenamientoSelectionPage() {
               : cs?.background ? { background: cs.background } : {}; })(),
             borderRadius: getResolvedStyle("cards-section")?.borderRadius || 0,
             padding: getResolvedStyle("cards-section")?.imageUrl ? "16px" : undefined,
-            minHeight: getResolvedStyle("cards-section")?.sectionHeight,
-            paddingBottom: getResolvedStyle("cards-section")?.sectionHeight ? Math.max(32, getResolvedStyle("cards-section")!.sectionHeight - 400) : undefined
+            paddingBottom: getResolvedStyle("cards-section")?.sectionHeight || 32
           }}
         >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 md:max-w-6xl md:mx-auto md:justify-items-center">
