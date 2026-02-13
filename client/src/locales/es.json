@@ -324,6 +324,11 @@
     "prepTitle": "Neuro-Sync",
     "prepSubtitle": "Sincroniza impulsos cognitivos moviendo el receptor",
     "prepInstructions": "Mueve el receptor circular con tu dedo para interceptar los impulsos que caen. Cuanto más sincronices, más rápido se vuelve el juego.",
-    "prepButton": "Iniciar Neuro-Sync"
+    "prepButton": "Iniciar Neuro-Sync",
+    "exit": "Salir",
+    "exitTitle": "¿Seguro que quieres salir?",
+    "exitMessage": "Tu progreso actual se guardará automáticamente.",
+    "exitConfirm": "Sí, salir y guardar",
+    "exitCancel": "Continuar jugando"
   }
 }

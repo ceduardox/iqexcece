@@ -324,6 +324,11 @@
     "prepTitle": "Neuro-Sync",
     "prepSubtitle": "Sync cognitive impulses by moving the receptor",
     "prepInstructions": "Move the circular receptor with your finger to intercept falling impulses. The more you sync, the faster the game becomes.",
-    "prepButton": "Start Neuro-Sync"
+    "prepButton": "Start Neuro-Sync",
+    "exit": "Exit",
+    "exitTitle": "Are you sure you want to exit?",
+    "exitMessage": "Your current progress will be saved automatically.",
+    "exitConfirm": "Yes, exit and save",
+    "exitCancel": "Continue playing"
   }
 }

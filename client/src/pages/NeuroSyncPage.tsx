@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Zap, Target, Brain } from "lucide-react";
+import { ArrowLeft, Zap, Target, Brain, LogOut, X } from "lucide-react";
 import { LanguageButton } from "@/components/LanguageButton";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -30,6 +30,7 @@ export default function NeuroSyncPage() {
   const params = useParams<{ categoria: string; itemId: string }>();
   const categoria = params.categoria || "general";
   const itemId = params.itemId || "";
+  const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
 
   const [phase, setPhase] = useState<GamePhase>("prep");
   const [countdown, setCountdown] = useState(3);
@@ -41,6 +42,7 @@ export default function NeuroSyncPage() {
   const [impulses, setImpulses] = useState<Impulse[]>([]);
   const [feedback, setFeedback] = useState<{ text: string; color: string } | null>(null);
   const [catcherX, setCatcherX] = useState(50);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const fieldRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -170,27 +172,40 @@ export default function NeuroSyncPage() {
     return () => cancelAnimationFrame(animFrameRef.current);
   }, [phase, showFeedback]);
 
-  useEffect(() => {
-    if (phase !== "finished") return;
-    const accuracy = totalRef.current > 0 ? Math.round((hitsRef.current / totalRef.current) * 100) : 0;
+  const saveResults = useCallback(() => {
+    const acc = totalRef.current > 0 ? Math.round((hitsRef.current / totalRef.current) * 100) : 0;
     const isPwa = window.matchMedia('(display-mode: standalone)').matches;
-    fetch("/api/training-results", {
+    return fetch("/api/training-results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        sessionId: sessionId || null,
         categoria,
         tipoEjercicio: "neurosync",
         ejercicioTitulo: "Neuro-Sync",
         puntaje: scoreRef.current,
         nivelAlcanzado: Math.floor(scoreRef.current / 500) + 1,
-        tiempoSegundos: 60,
+        tiempoSegundos: 60 - timeLeft,
         respuestasCorrectas: hitsRef.current,
         respuestasTotales: totalRef.current,
-        datosExtra: JSON.stringify({ accuracy, level: Math.floor(scoreRef.current / 500) + 1 }),
+        datosExtra: JSON.stringify({ accuracy: acc, level: Math.floor(scoreRef.current / 500) + 1 }),
         isPwa,
       }),
     }).catch(e => console.error("Error saving result:", e));
-  }, [phase, categoria]);
+  }, [categoria, sessionId, timeLeft]);
+
+  useEffect(() => {
+    if (phase !== "finished") return;
+    saveResults();
+  }, [phase]);
+
+  const handleExitConfirm = useCallback(() => {
+    playButtonSound();
+    setShowExitConfirm(false);
+    saveResults().then(() => {
+      setLocation(`/progreso/${categoria}`);
+    });
+  }, [saveResults, setLocation, categoria]);
 
   const accuracy = total > 0 ? Math.round((hits / total) * 100) : 0;
 
@@ -306,30 +321,59 @@ export default function NeuroSyncPage() {
   }
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col" style={{ userSelect: "none" }}>
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100" style={{ background: "#fafbfc" }}>
-        <div className="text-center flex-1">
-          <p className="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">{t("neurosync.score")}</p>
-          <p className="text-lg font-bold" style={{ color: "#8a3ffc" }} data-testid="text-score">{score}</p>
+    <div className="h-[100dvh] overflow-hidden flex flex-col" style={{ userSelect: "none", background: "linear-gradient(180deg, #0f0c29 0%, #1a1145 40%, #302b63 100%)" }}>
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8a3ffc, #00d9ff)" }}>
+              <Brain className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-white font-bold text-sm">{t("neurosync.title")}</span>
+          </div>
+          <button
+            onClick={() => { playButtonSound(); setShowExitConfirm(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+            style={{ background: "rgba(255,59,48,0.15)", color: "#ff6b6b", border: "1px solid rgba(255,59,48,0.25)" }}
+            data-testid="button-exit"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            {t("neurosync.exit")}
+          </button>
         </div>
-        <div className="text-center flex-1">
-          <p className="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">{t("neurosync.accuracy")}</p>
-          <p className="text-lg font-bold" style={{ color: "#8a3ffc" }} data-testid="text-accuracy">{accuracy > 0 ? `${accuracy}%` : "--"}</p>
-        </div>
-        <div className="text-center flex-1">
-          <p className="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">{t("neurosync.time")}</p>
-          <p className="text-lg font-bold" style={{ color: timeLeft <= 10 ? "#ff3b30" : "#8a3ffc" }} data-testid="text-time">{timeLeft}s</p>
-        </div>
-        <div className="text-center flex-1">
-          <p className="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">{t("neurosync.level")}</p>
-          <p className="text-lg font-bold" style={{ color: "#8a3ffc" }} data-testid="text-level">{level}</p>
+
+        <div
+          className="rounded-2xl p-3"
+          style={{
+            background: "linear-gradient(145deg, rgba(138, 63, 252, 0.12) 0%, rgba(0, 217, 255, 0.08) 100%)",
+            border: "1px solid rgba(138, 63, 252, 0.2)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <div className="grid grid-cols-4 gap-2">
+            <div className="text-center">
+              <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>{t("neurosync.score")}</p>
+              <p className="text-xl font-black" style={{ color: "#00d9ff" }} data-testid="text-score">{score}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>{t("neurosync.accuracy")}</p>
+              <p className="text-xl font-black" style={{ color: "#a78bfa" }} data-testid="text-accuracy">{accuracy > 0 ? `${accuracy}%` : "--"}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>{t("neurosync.time")}</p>
+              <p className="text-xl font-black" style={{ color: timeLeft <= 10 ? "#ff6b6b" : "#34c759" }} data-testid="text-time">{timeLeft}s</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>{t("neurosync.level")}</p>
+              <p className="text-xl font-black" style={{ color: "#fbbf24" }} data-testid="text-level">{level}</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div
         ref={fieldRef}
-        className="flex-1 relative overflow-hidden"
-        style={{ background: "radial-gradient(circle at 50% 50%, #ffffff 0%, #f8f9fa 100%)", touchAction: "none" }}
+        className="flex-1 relative overflow-hidden mx-3 mb-2 rounded-2xl"
+        style={{ background: "radial-gradient(circle at 50% 50%, rgba(138,63,252,0.05) 0%, rgba(15,12,41,0.9) 100%)", touchAction: "none", border: "1px solid rgba(138,63,252,0.15)" }}
         onMouseMove={(e) => handleMove(e.clientX)}
         onTouchMove={(e) => handleMove(e.touches[0].clientX)}
         data-testid="game-field"
@@ -341,8 +385,8 @@ export default function NeuroSyncPage() {
             style={{
               width: 14,
               height: 14,
-              background: "#8a3ffc",
-              boxShadow: "0 0 12px rgba(138, 63, 252, 0.4)",
+              background: "linear-gradient(135deg, #8a3ffc, #00d9ff)",
+              boxShadow: "0 0 16px rgba(0, 217, 255, 0.5), 0 0 6px rgba(138, 63, 252, 0.4)",
               left: `${imp.x}%`,
               top: `${imp.y}%`,
               transform: "translate(-50%, -50%)",
@@ -360,12 +404,13 @@ export default function NeuroSyncPage() {
             width: 65,
             height: 65,
             borderRadius: "50%",
-            border: "2px solid #8a3ffc",
-            background: "rgba(138, 63, 252, 0.06)",
+            border: "2px solid rgba(0, 217, 255, 0.6)",
+            background: "rgba(0, 217, 255, 0.06)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
+            boxShadow: "0 0 20px rgba(0, 217, 255, 0.2), inset 0 0 15px rgba(0, 217, 255, 0.05)",
           }}
           data-testid="neuro-catcher"
         >
@@ -374,7 +419,7 @@ export default function NeuroSyncPage() {
             style={{
               width: 8,
               height: 8,
-              background: "#8a3ffc",
+              background: "#00d9ff",
               animation: "neurosync-pulse 1.5s infinite",
             }}
           />
@@ -382,20 +427,67 @@ export default function NeuroSyncPage() {
 
         {feedback && (
           <motion.div
-            initial={{ opacity: 1, scale: 1.2 }}
-            animate={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-extrabold pointer-events-none"
-            style={{ color: feedback.color }}
+            key={feedback.text + Date.now()}
+            initial={{ opacity: 1, scale: 1.3, y: 0 }}
+            animate={{ opacity: 0, scale: 0.8, y: -20 }}
+            transition={{ duration: 0.35 }}
+            className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-extrabold pointer-events-none"
+            style={{ color: feedback.color, textShadow: `0 0 20px ${feedback.color}` }}
           >
             {feedback.text}
           </motion.div>
         )}
       </div>
 
-      <div className="px-4 py-2 text-center text-[10px] text-gray-300 border-t border-gray-50">
+      <div className="px-4 py-1.5 text-center text-[9px] font-medium" style={{ color: "rgba(255,255,255,0.2)" }}>
         {t("neurosync.footer")}
       </div>
+
+      <AnimatePresence>
+        {showExitConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="mx-6 w-full max-w-sm rounded-3xl p-6"
+              style={{ background: "linear-gradient(145deg, #1a1145 0%, #302b63 100%)", border: "1px solid rgba(138,63,252,0.3)" }}
+            >
+              <div className="text-center mb-5">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(255,59,48,0.12)" }}>
+                  <LogOut className="w-8 h-8" style={{ color: "#ff6b6b" }} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1">{t("neurosync.exitTitle")}</h3>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{t("neurosync.exitMessage")}</p>
+              </div>
+              <div className="space-y-2">
+                <button
+                  onClick={handleExitConfirm}
+                  className="w-full py-3 rounded-full font-semibold text-white text-sm"
+                  style={{ background: "linear-gradient(135deg, #ff3b30, #ff6b6b)" }}
+                  data-testid="button-confirm-exit"
+                >
+                  {t("neurosync.exitConfirm")}
+                </button>
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="w-full py-3 rounded-full font-semibold text-sm"
+                  style={{ color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.2)" }}
+                  data-testid="button-cancel-exit"
+                >
+                  {t("neurosync.exitCancel")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         @keyframes neurosync-pulse {
