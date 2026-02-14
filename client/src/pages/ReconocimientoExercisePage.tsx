@@ -148,7 +148,7 @@ export default function ReconocimientoExercisePage() {
     playSound("iphone");
     if (timerRef.current) clearInterval(timerRef.current);
     if (comboRef.current) clearInterval(comboRef.current);
-    navigate(`/reconocimiento/${categoria}/${itemId}`);
+    navigate(`/entrenamiento`);
   };
 
   const handleClose = () => {

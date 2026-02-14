@@ -135,7 +135,7 @@ export default function ReconocimientoSelectionPage() {
 
   const handleBack = () => {
     playSound("iphone");
-    navigate(`/entrenamiento/${categoria}`);
+    navigate(`/entrenamiento`);
   };
 
   const handleNivelSelect = (nivel: number) => {
