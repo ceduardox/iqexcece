@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Play, ThumbsUp, ThumbsDown, Share2, RotateCcw, X } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { apiRequest } from "@/lib/queryClient";
@@ -110,6 +111,7 @@ export default function ReconocimientoExercisePage() {
   const itemId = params.itemId || "";
   const nivel = parseInt(params.nivel || "1");
   const { playSound } = useSounds();
+  const { t } = useTranslation();
 
   const levelConfig = getLevelConfig(nivel);
   const { rows, cols, centerRow, centerCol, targetPositions } = levelConfig;
@@ -146,7 +148,7 @@ export default function ReconocimientoExercisePage() {
     playSound("iphone");
     if (timerRef.current) clearInterval(timerRef.current);
     if (comboRef.current) clearInterval(comboRef.current);
-    window.history.back();
+    navigate(`/reconocimiento/${categoria}/${itemId}`);
   };
 
   const handleClose = () => {
@@ -212,7 +214,7 @@ export default function ReconocimientoExercisePage() {
         sessionId: sessionId || null,
         categoria,
         tipoEjercicio: "reconocimiento_visual",
-        ejercicioTitulo: `Reconocimiento Visual - Nivel ${nivel}`,
+        ejercicioTitulo: `${t("reconocimiento_visual.levelLabel")} ${nivel}`,
         puntaje: accuracy,
         nivelAlcanzado: nivel,
         tiempoSegundos: GAME_DURATION,
@@ -256,7 +258,7 @@ export default function ReconocimientoExercisePage() {
     setIsSharing(true);
     playSound("iphone");
     
-    const shareText = `Reconocimiento Visual | Nivel: ${nivel} | Correctas: ${correctCount} | Incorrectas: ${incorrectCount} | Sin responder: ${skippedCount}`;
+    const shareText = `${t("reconocimiento_visual.levelLabel")} ${nivel} | ${t("reconocimiento_visual.correctas")}: ${correctCount} | ${t("reconocimiento_visual.incorrectas")}: ${incorrectCount} | ${t("reconocimiento_visual.noAnswer")}: ${skippedCount}`;
     
     try {
       const logoImg = resultsRef.current.querySelector('img[alt="IQEXPONENCIAL"]') as HTMLImageElement;
@@ -420,7 +422,7 @@ export default function ReconocimientoExercisePage() {
             transition={{ delay: 0.2 }}
           >
             <h1 className="text-2xl font-bold text-gray-800">
-              {performancePercent >= 50 ? "¡Excelente trabajo!" : "¡Sigue practicando!"}
+              {performancePercent >= 50 ? t("reconocimiento_visual.excellentWork") : t("reconocimiento_visual.keepPracticing")}
             </h1>
           </motion.div>
 
@@ -430,7 +432,7 @@ export default function ReconocimientoExercisePage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Reconocimiento Visual - Nivel {nivel}
+            {t("reconocimiento_visual.levelLabel")} {nivel}
           </motion.p>
 
           <motion.div 
@@ -471,7 +473,7 @@ export default function ReconocimientoExercisePage() {
                 >
                   {performancePercent}%
                 </motion.span>
-                <span className="text-gray-400 text-sm">Precisión</span>
+                <span className="text-gray-400 text-sm">{t("reconocimiento_visual.accuracy")}</span>
               </div>
             </div>
           </motion.div>
@@ -484,15 +486,15 @@ export default function ReconocimientoExercisePage() {
           >
             <div className="flex-1 max-w-[90px] bg-green-50 rounded-2xl p-3 text-center border border-green-100">
               <p className="text-2xl font-bold text-green-600">{correctCount}</p>
-              <p className="text-green-600 text-xs mt-1">Correctas</p>
+              <p className="text-green-600 text-xs mt-1">{t("reconocimiento_visual.correctas")}</p>
             </div>
             <div className="flex-1 max-w-[90px] bg-red-50 rounded-2xl p-3 text-center border border-red-100">
               <p className="text-2xl font-bold text-red-500">{incorrectCount}</p>
-              <p className="text-red-500 text-xs mt-1">Incorrectas</p>
+              <p className="text-red-500 text-xs mt-1">{t("reconocimiento_visual.incorrectas")}</p>
             </div>
             <div className="flex-1 max-w-[90px] bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
               <p className="text-2xl font-bold text-gray-500">{skippedCount}</p>
-              <p className="text-gray-500 text-xs mt-1">Sin resp.</p>
+              <p className="text-gray-500 text-xs mt-1">{t("reconocimiento_visual.noAnswer")}</p>
             </div>
           </motion.div>
 
@@ -527,7 +529,7 @@ export default function ReconocimientoExercisePage() {
             data-testid="button-share"
           >
             <Share2 className="w-4 h-4" />
-            {isSharing ? "Compartiendo..." : "Compartir resultado"}
+            {isSharing ? t("reconocimiento_visual.sharing") : t("reconocimiento_visual.shareResult")}
           </motion.button>
 
           <motion.button
@@ -541,7 +543,7 @@ export default function ReconocimientoExercisePage() {
             data-testid="button-play-again"
           >
             <RotateCcw className="w-4 h-4" />
-            Practicar de nuevo
+            {t("reconocimiento_visual.playAgain")}
           </motion.button>
         </main>
 
@@ -565,7 +567,7 @@ export default function ReconocimientoExercisePage() {
         >
           <ChevronLeft className="w-5 h-5 text-white" />
         </motion.button>
-        <h1 className="text-white font-semibold text-sm flex-1 text-center">Amplía tu Reconocimiento Visual</h1>
+        <h1 className="text-white font-semibold text-sm flex-1 text-center">{t("reconocimiento_visual.title")}</h1>
         <div className="flex items-center gap-2">
           <LanguageButton />
           {gameState === "running" ? (
@@ -588,22 +590,22 @@ export default function ReconocimientoExercisePage() {
         style={{ background: "#f9fafb" }}
       >
         <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
-          <span className="text-gray-500 text-[10px] uppercase">Nivel</span>
+          <span className="text-gray-500 text-[10px] uppercase">{t("reconocimiento_visual.level")}</span>
           <span className="text-purple-600 font-bold text-sm">{nivel}</span>
         </div>
         <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
-          <span className="text-gray-500 text-[10px] uppercase">Tiempo</span>
+          <span className="text-gray-500 text-[10px] uppercase">{t("reconocimiento_visual.time")}</span>
           <span className="text-purple-600 font-bold text-sm">{timeLeft}s</span>
         </div>
         <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-lg shadow-sm border border-green-200">
           <span className="text-base">😊</span>
           <span className="text-green-600 font-bold text-sm">{correctCount}</span>
-          <span className="text-green-600 text-[10px]">Correcto</span>
+          <span className="text-green-600 text-[10px]">{t("reconocimiento_visual.correct")}</span>
         </div>
         <div className="flex items-center gap-1 px-2 py-1 bg-red-50 rounded-lg shadow-sm border border-red-200">
           <span className="text-base">😟</span>
           <span className="text-red-500 font-bold text-sm">{incorrectCount}</span>
-          <span className="text-red-500 text-[10px]">Incorrecto</span>
+          <span className="text-red-500 text-[10px]">{t("reconocimiento_visual.incorrect")}</span>
         </div>
       </div>
 
@@ -665,7 +667,7 @@ export default function ReconocimientoExercisePage() {
             data-testid="button-not-equal"
           >
             <ThumbsDown className="w-8 h-8 text-red-500" />
-            <span className="text-red-600 text-xs font-medium">No son iguales</span>
+            <span className="text-red-600 text-xs font-medium">{t("reconocimiento_visual.notEqual")}</span>
           </motion.button>
 
           <motion.button
@@ -677,7 +679,7 @@ export default function ReconocimientoExercisePage() {
             data-testid="button-equal"
           >
             <ThumbsUp className="w-8 h-8 text-green-500" />
-            <span className="text-green-600 text-xs font-medium">Sí, son iguales</span>
+            <span className="text-green-600 text-xs font-medium">{t("reconocimiento_visual.yesEqual")}</span>
           </motion.button>
         </div>
 
@@ -689,7 +691,7 @@ export default function ReconocimientoExercisePage() {
             whileTap={{ scale: 0.98 }}
             data-testid="button-start"
           >
-            Iniciar <Play className="w-4 h-4" fill="white" />
+            {t("reconocimiento_visual.startGame")} <Play className="w-4 h-4" fill="white" />
           </motion.button>
         )}
 

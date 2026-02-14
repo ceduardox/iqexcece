@@ -484,5 +484,27 @@
     "instructions": "Instrucciones",
     "defaultTitle": "Preparación",
     "defaultButton": "Iniciar sesión"
+  },
+  "reconocimiento_visual": {
+    "title": "Amplía tu Reconocimiento Visual",
+    "selectLevel": "Selecciona el Nivel",
+    "selectLevelDesc": "Elige la dificultad del ejercicio",
+    "level": "Nivel",
+    "time": "Tiempo",
+    "correct": "Correcto",
+    "incorrect": "Incorrecto",
+    "correctas": "Correctas",
+    "incorrectas": "Incorrectas",
+    "noAnswer": "Sin resp.",
+    "accuracy": "Precisión",
+    "excellentWork": "¡Excelente trabajo!",
+    "keepPracticing": "¡Sigue practicando!",
+    "levelLabel": "Reconocimiento Visual - Nivel",
+    "sharing": "Compartiendo...",
+    "shareResult": "Compartir resultado",
+    "playAgain": "Practicar de nuevo",
+    "notEqual": "No son iguales",
+    "yesEqual": "Sí, son iguales",
+    "startGame": "Iniciar Juego"
   }
 }

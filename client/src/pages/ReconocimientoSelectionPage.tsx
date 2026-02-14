@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Eye } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 
@@ -120,8 +121,8 @@ function AnimatedEye() {
 }
 
 const niveles = [
-  { id: 1, nombre: "Nivel 1", letras: letrasNivel1, count: 4 },
-  { id: 2, nombre: "Nivel 2", letras: letrasNivel2, count: 6 },
+  { id: 1, letras: letrasNivel1, count: 4 },
+  { id: 2, letras: letrasNivel2, count: 6 },
 ];
 
 export default function ReconocimientoSelectionPage() {
@@ -130,10 +131,11 @@ export default function ReconocimientoSelectionPage() {
   const categoria = params.categoria || "ninos";
   const itemId = params.itemId || "";
   const { playSound } = useSounds();
+  const { t } = useTranslation();
 
   const handleBack = () => {
     playSound("iphone");
-    window.history.back();
+    navigate(`/entrenamiento/${categoria}`);
   };
 
   const handleNivelSelect = (nivel: number) => {
@@ -180,7 +182,7 @@ export default function ReconocimientoSelectionPage() {
             transition={{ delay: 0.05 }}
           >
             <h1 className="text-lg sm:text-xl font-bold text-purple-600">
-              Amplía tu Reconocimiento Visual
+              {t("reconocimiento_visual.title")}
             </h1>
           </motion.div>
           
@@ -191,10 +193,10 @@ export default function ReconocimientoSelectionPage() {
             transition={{ delay: 0.1 }}
           >
             <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
-              Selecciona el Nivel
+              {t("reconocimiento_visual.selectLevel")}
             </h2>
             <p className="text-gray-400 text-xs sm:text-sm">
-              Elige la dificultad del ejercicio
+              {t("reconocimiento_visual.selectLevelDesc")}
             </p>
           </motion.div>
 
@@ -221,7 +223,7 @@ export default function ReconocimientoSelectionPage() {
                   
                   <div className="text-center">
                     <h3 className="text-gray-800 font-semibold text-xs sm:text-sm">
-                      {nivel.nombre}
+                      {t("reconocimiento_visual.level")} {nivel.id}
                     </h3>
                   </div>
                   
