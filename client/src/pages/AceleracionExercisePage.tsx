@@ -8,6 +8,7 @@ import { useSounds } from "@/hooks/use-sounds";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 import { LanguageButton } from "@/components/LanguageButton";
+import { useTranslation } from "react-i18next";
 
 declare global {
   interface Window {
@@ -73,6 +74,7 @@ export default function AceleracionExercisePage() {
   const itemId = params.itemId || "";
   const modo = params.modo || "golpe";
   const { playSound } = useSounds();
+  const { t } = useTranslation();
 
   const [pdfs, setPdfs] = useState<PDFFile[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<PDFFile | null>(null);
@@ -242,7 +244,7 @@ export default function AceleracionExercisePage() {
     setUploadError(null);
 
     if (file.size > MAX_PDF_SIZE_BYTES) {
-      setUploadError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(1)} MB). El máximo permitido es ${MAX_PDF_SIZE_MB} MB.`);
+      setUploadError(t("aceleracion.fileTooLarge", { size: (file.size / 1024 / 1024).toFixed(1), max: MAX_PDF_SIZE_MB }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -256,7 +258,7 @@ export default function AceleracionExercisePage() {
         const extractedWords = await extractTextFromPdf(pdfData);
         
         if (extractedWords.length === 0) {
-          setUploadError("No se pudo extraer texto del PDF. Verifica que el archivo no esté protegido o sea solo imágenes.");
+          setUploadError(t("aceleracion.noTextExtracted"));
           setIsExtracting(false);
           return;
         }
@@ -273,12 +275,12 @@ export default function AceleracionExercisePage() {
         setIsExtracting(false);
       } catch (err) {
         console.error("Error processing PDF:", err);
-        setUploadError("Error al procesar el PDF. Intenta con otro archivo.");
+        setUploadError(t("aceleracion.pdfError"));
         setIsExtracting(false);
       }
     };
     reader.onerror = () => {
-      setUploadError("Error al leer el archivo. Intenta de nuevo.");
+      setUploadError(t("aceleracion.readError"));
       setIsExtracting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
@@ -445,7 +447,7 @@ export default function AceleracionExercisePage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert('Imagen descargada');
+        alert(t("aceleracion.imageDownloaded"));
       }
     } catch (err) {
       console.log('Share error:', err);
@@ -459,7 +461,7 @@ export default function AceleracionExercisePage() {
           });
         } else {
           await navigator.clipboard.writeText(shareText);
-          alert('Resultado copiado al portapapeles');
+          alert(t("aceleracion.resultCopied"));
         }
       } catch {
         console.log('Share cancelled');
@@ -482,7 +484,7 @@ export default function AceleracionExercisePage() {
     // Save result to database
     if (!resultSaved) {
       const tipoEjercicio = modo === "golpe" ? "aceleracion_golpe" : "aceleracion_desplazamiento";
-      const ejercicioTitulo = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
+      const ejercicioTitulo = modo === "golpe" ? t("aceleracion.golpeVista") : t("aceleracion.desplazamiento");
       const performancePercent = Math.min(100, Math.round((localSpeed / 920) * 100));
       
       const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
@@ -602,7 +604,7 @@ export default function AceleracionExercisePage() {
     };
   }, [modo, isPlaying, localSpeed, words.length, handleExerciseComplete]);
 
-  const modeTitle = modo === "golpe" ? "Golpe de Vista" : "Desplazamiento";
+  const modeTitle = modo === "golpe" ? t("aceleracion.golpeVista") : t("aceleracion.desplazamiento");
   const progress = words.length > 0 ? Math.round((currentWordIndex / words.length) * 100) : 0;
   const wordsRead = currentWordIndex + 1;
 
@@ -676,7 +678,7 @@ export default function AceleracionExercisePage() {
             transition={{ delay: 0.2 }}
           >
             <h1 className="text-2xl font-bold text-gray-800">
-              {performancePercent >= 50 ? "¡Excelente trabajo!" : "¡Sigue practicando!"}
+              {performancePercent >= 50 ? t("aceleracion.excellentWork") : t("aceleracion.keepPracticing")}
             </h1>
           </motion.div>
 
@@ -739,7 +741,7 @@ export default function AceleracionExercisePage() {
                 >
                   {performancePercent}%
                 </motion.span>
-                <span className="text-gray-400 text-sm">Rendimiento</span>
+                <span className="text-gray-400 text-sm">{t("aceleracion.performance")}</span>
               </div>
               
               {/* Decorative dot on progress */}
@@ -762,19 +764,19 @@ export default function AceleracionExercisePage() {
             {/* Words card */}
             <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
               <p className="text-2xl font-bold text-purple-600">{wordsRead}</p>
-              <p className="text-gray-400 text-xs mt-1">Palabras</p>
+              <p className="text-gray-400 text-xs mt-1">{t("aceleracion.words")}</p>
             </div>
             
             {/* Speed card */}
             <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
               <p className="text-2xl font-bold text-gray-800">{displaySpeed}</p>
-              <p className="text-gray-400 text-xs mt-1">PPM</p>
+              <p className="text-gray-400 text-xs mt-1">{t("aceleracion.ppm")}</p>
             </div>
             
             {/* Time card */}
             <div className="flex-1 max-w-[100px] bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
               <p className="text-2xl font-bold text-cyan-600">{readingTimeFormatted}</p>
-              <p className="text-gray-400 text-xs mt-1">Tiempo</p>
+              <p className="text-gray-400 text-xs mt-1">{t("aceleracion.time")}</p>
             </div>
           </motion.div>
 
@@ -811,7 +813,7 @@ export default function AceleracionExercisePage() {
             data-testid="button-share"
           >
             <Share2 className="w-5 h-5" />
-            {isSharing ? 'Compartiendo...' : 'Compartir resultado'}
+            {isSharing ? t("aceleracion.sharing") : t("aceleracion.shareResult")}
           </motion.button>
 
           {/* Action buttons */}
@@ -830,7 +832,7 @@ export default function AceleracionExercisePage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Intentar otro test
+              {t("aceleracion.tryAnotherTest")}
             </button>
             <button
               onClick={handleBackToSelection}
@@ -838,7 +840,7 @@ export default function AceleracionExercisePage() {
               data-testid="button-back-selection"
             >
               <ChevronLeft className="w-4 h-4" />
-              Volver al inicio
+              {t("aceleracion.backToStart")}
             </button>
           </motion.div>
         </main>
@@ -860,7 +862,7 @@ export default function AceleracionExercisePage() {
             style={{ background: "linear-gradient(90deg, #06B6D4 0%, #2563EB 100%)" }}
           >
             <span className="text-white font-semibold text-sm">
-              Acelera al máximo tu Lectura
+              {t("aceleracion.accelerateReading")}
             </span>
             <div className="flex items-center gap-2">
               <LanguageButton />
@@ -878,13 +880,13 @@ export default function AceleracionExercisePage() {
         {/* Center info */}
         <div className="text-center py-4 flex-shrink-0">
           <p className="text-cyan-600 text-xs font-medium tracking-widest uppercase mb-1">
-            JUEGO
+            {t("aceleracion.game")}
           </p>
           <h1 className="text-gray-800 font-bold text-2xl mb-2">
-            Desplazamiento
+            {t("aceleracion.desplazamiento")}
           </h1>
           <p className="text-gray-800 font-bold text-2xl">
-            {localSpeed} palabras /min.
+            {localSpeed} {t("aceleracion.wordsMin")}
           </p>
         </div>
 
@@ -931,7 +933,7 @@ export default function AceleracionExercisePage() {
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-gray-400 text-xs">{words.length} palabras</span>
+              <span className="text-gray-400 text-xs">{words.length} {t("aceleracion.words")}</span>
               <span className="text-orange-500 text-xs font-medium">{scrollProgress}%</span>
             </div>
           </div>
@@ -958,12 +960,12 @@ export default function AceleracionExercisePage() {
               {isPlaying ? (
                 <>
                   <Pause className="w-5 h-5" />
-                  <span>Pausa</span>
+                  <span>{t("aceleracion.pause")}</span>
                 </>
               ) : (
                 <>
                   <Play className="w-5 h-5" />
-                  <span>Reanudar</span>
+                  <span>{t("aceleracion.resume")}</span>
                 </>
               )}
             </button>
@@ -998,7 +1000,7 @@ export default function AceleracionExercisePage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-cyan-400 text-[10px] sm:text-xs font-medium tracking-widest uppercase mb-0.5">
-                Entrenamiento Visual
+                {t("aceleracion.visualTraining")}
               </p>
               <h1 className="text-white font-bold text-lg sm:text-xl tracking-tight">
                 {modeTitle}
@@ -1026,7 +1028,7 @@ export default function AceleracionExercisePage() {
               style={{ background: "rgba(255,255,255,0.05)" }}
             >
               <p className="text-gray-400 text-xs text-center mb-2 tracking-wide">
-                VELOCIDAD DE LECTURA
+                {t("aceleracion.readingSpeed")}
               </p>
               <div className="text-center">
                 <span className="text-white font-bold text-3xl">{localSpeed}</span>
@@ -1095,7 +1097,7 @@ export default function AceleracionExercisePage() {
                 />
               </div>
               <div className="flex justify-between mt-2">
-                <span className="text-gray-500 text-xs">{currentWordIndex + 1} de {words.length}</span>
+                <span className="text-gray-500 text-xs">{currentWordIndex + 1} {t("aceleracion.of")} {words.length}</span>
                 <span className="text-cyan-400 text-xs font-medium">{progress}%</span>
               </div>
             </div>
@@ -1127,12 +1129,12 @@ export default function AceleracionExercisePage() {
                 {isPlaying ? (
                   <>
                     <Pause className="w-5 h-5" />
-                    <span>Pausar</span>
+                    <span>{t("aceleracion.pauseGolpe")}</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-5 h-5" />
-                    <span>Iniciar</span>
+                    <span>{t("aceleracion.startGolpe")}</span>
                   </>
                 )}
               </button>
@@ -1211,7 +1213,7 @@ export default function AceleracionExercisePage() {
               <div className="w-full h-full flex items-center justify-center p-8">
                 <div className="text-center">
                   <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">Vista previa no disponible</p>
+                  <p className="text-gray-500">{t("aceleracion.previewUnavailable")}</p>
                   <p className="text-gray-400 text-sm mt-1">{selectedPdf.name}</p>
                 </div>
               </div>
@@ -1225,7 +1227,7 @@ export default function AceleracionExercisePage() {
               className="flex-1 py-3 rounded-xl border-2 border-purple-200 text-purple-600 font-semibold transition-colors hover:bg-purple-50"
               data-testid="button-select-other"
             >
-              Seleccionar
+              {t("aceleracion.select")}
             </button>
             <button
               onClick={handleStartExercise}
@@ -1237,11 +1239,11 @@ export default function AceleracionExercisePage() {
               data-testid="button-start-exercise"
             >
               {isExtracting ? (
-                <span>Procesando...</span>
+                <span>{t("aceleracion.processing")}</span>
               ) : (
                 <>
                   <Play className="w-5 h-5" />
-                  Iniciar
+                  {t("aceleracion.start")}
                 </>
               )}
             </button>
@@ -1249,7 +1251,7 @@ export default function AceleracionExercisePage() {
 
           {/* Progress bar */}
           <div className="flex items-center gap-3">
-            <span className="text-gray-500 text-sm">Progreso:</span>
+            <span className="text-gray-500 text-sm">{t("aceleracion.progress")}:</span>
             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all"
@@ -1265,7 +1267,7 @@ export default function AceleracionExercisePage() {
           {/* Word count info */}
           {words.length > 0 && (
             <p className="text-center text-gray-400 text-sm mt-3">
-              {words.length} palabras detectadas
+              {t("aceleracion.wordsDetected", { count: words.length })}
             </p>
           )}
         </main>
@@ -1303,7 +1305,7 @@ export default function AceleracionExercisePage() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">Cargando...</p>
+              <p className="text-gray-500 text-sm">{t("aceleracion.loading")}</p>
             </div>
           </div>
         )}
@@ -1318,8 +1320,8 @@ export default function AceleracionExercisePage() {
                 </h1>
                 <p className="text-gray-500 text-sm">
                   {modo === "golpe" 
-                    ? "Entrena tu campo visual para capturar más palabras"
-                    : "Practica la lectura continua siguiendo el ritmo"
+                    ? t("aceleracion.golpeDesc")
+                    : t("aceleracion.desplazamientoDesc")
                   }
                 </p>
               </div>
@@ -1340,9 +1342,9 @@ export default function AceleracionExercisePage() {
                   <FileText className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">Instrucciones</h3>
+                  <h3 className="font-semibold text-gray-800">{t("aceleracion.instructions")}</h3>
                   <p className="text-gray-500 text-sm">
-                    Sube un PDF y practica la lectura rápida
+                    {t("aceleracion.uploadPdfInstr")}
                   </p>
                 </div>
               </div>
@@ -1356,7 +1358,7 @@ export default function AceleracionExercisePage() {
                 data-testid="button-upload-pdf"
               >
                 <Upload className="w-4 h-4" />
-                Subir PDF
+                {t("aceleracion.uploadPdf")}
               </button>
             )}
 
@@ -1364,7 +1366,7 @@ export default function AceleracionExercisePage() {
             {pdfs.length > 0 && (
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-700 text-sm">
-                  Tus documentos
+                  {t("aceleracion.yourDocuments")}
                 </h3>
                 {pdfs.map((pdf) => (
                   <motion.div
@@ -1381,7 +1383,7 @@ export default function AceleracionExercisePage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-800 truncate">{pdf.name}</p>
                       <p className="text-xs text-gray-400">
-                        {pdf.words?.length || 0} palabras · {new Date(pdf.createdAt).toLocaleDateString()}
+                        {pdf.words?.length || 0} {t("aceleracion.words")} · {new Date(pdf.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <button
@@ -1404,7 +1406,7 @@ export default function AceleracionExercisePage() {
                   data-testid="button-add-more-pdf"
                 >
                   <Upload className="w-4 h-4" />
-                  Agregar otro PDF
+                  {t("aceleracion.addMorePdf")}
                 </button>
               </div>
             )}
@@ -1412,16 +1414,16 @@ export default function AceleracionExercisePage() {
             {/* Config info */}
             <div className="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
               <h3 className="font-semibold text-gray-700 mb-3 text-sm">
-                Configuración actual
+                {t("aceleracion.currentConfig")}
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Velocidad:</span>
+                  <span className="text-gray-500">{t("aceleracion.speed")}:</span>
                   <span className="font-semibold text-purple-600">{velocidadPPM} PPM</span>
                 </div>
                 {modo === "golpe" && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Área visible:</span>
+                    <span className="text-gray-500">{t("aceleracion.visibleArea")}:</span>
                     <span className="font-semibold text-purple-600">{modoGolpePorcentaje}%</span>
                   </div>
                 )}
@@ -1449,7 +1451,7 @@ export default function AceleracionExercisePage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-800">Subir PDF</h3>
+                <h3 className="text-lg font-bold text-gray-800">{t("aceleracion.uploadPdfTitle")}</h3>
                 <button
                   onClick={() => setShowUploader(false)}
                   className="p-1 hover:bg-gray-100 rounded-full"
@@ -1466,17 +1468,17 @@ export default function AceleracionExercisePage() {
                   <>
                     <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                     <p className="text-gray-600 font-medium">
-                      Procesando documento...
+                      {t("aceleracion.processingDoc")}
                     </p>
                   </>
                 ) : (
                   <>
                     <Upload className="w-10 h-10 text-purple-400 mx-auto mb-3" />
                     <p className="text-gray-600 font-medium mb-1">
-                      Haz clic para seleccionar
+                      {t("aceleracion.clickToSelect")}
                     </p>
                     <p className="text-gray-400 text-sm">
-                      Solo archivos PDF (máx. {MAX_PDF_SIZE_MB} MB)
+                      {t("aceleracion.pdfOnly", { max: MAX_PDF_SIZE_MB })}
                     </p>
                   </>
                 )}

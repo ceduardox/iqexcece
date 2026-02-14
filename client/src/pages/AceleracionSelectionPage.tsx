@@ -2,6 +2,7 @@ import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect } from "react";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
@@ -153,6 +154,7 @@ export default function AceleracionSelectionPage() {
   const categoria = params.categoria || "ninos";
   const itemId = params.itemId || "";
   const { playSound } = useSounds();
+  const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ["/api/aceleracion", itemId],
@@ -226,10 +228,10 @@ export default function AceleracionSelectionPage() {
               transition={{ delay: 0.1 }}
             >
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
-                Selecciona el Modo
+                {t("aceleracion.selectMode")}
               </h1>
               <p className="text-gray-400 text-xs sm:text-sm">
-                Elige cómo quieres practicar tu lectura rápida
+                {t("aceleracion.selectModeDesc")}
               </p>
             </motion.div>
 
@@ -258,10 +260,10 @@ export default function AceleracionSelectionPage() {
                   {/* Text */}
                   <div className="text-center">
                     <h3 className="text-gray-800 font-semibold text-xs sm:text-sm mb-0.5">
-                      Golpe de Vista
+                      {t("aceleracion.golpeVista")}
                     </h3>
                     <p className="text-gray-400 text-[9px] sm:text-[10px]">
-                      Campo visual
+                      {t("aceleracion.golpeVisual")}
                     </p>
                   </div>
                   
@@ -296,10 +298,10 @@ export default function AceleracionSelectionPage() {
                   {/* Text */}
                   <div className="text-center">
                     <h3 className="text-gray-800 font-semibold text-xs sm:text-sm mb-0.5">
-                      Desplazamiento
+                      {t("aceleracion.desplazamiento")}
                     </h3>
                     <p className="text-gray-400 text-[9px] sm:text-[10px]">
-                      Lectura continua
+                      {t("aceleracion.lecturaContinua")}
                     </p>
                   </div>
                   
