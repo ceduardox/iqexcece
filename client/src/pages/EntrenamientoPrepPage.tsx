@@ -356,6 +356,11 @@ export default function EntrenamientoPrepPage() {
           return;
         }
 
+        if (tipoEjercicio === "reconocimiento_visual") {
+          setLocation(`/reconocimiento/${categoria}/${itemId}`);
+          return;
+        }
+
         if (GAME_CONFIG[tipoEjercicio]) {
           setGameType(tipoEjercicio);
         } else {
