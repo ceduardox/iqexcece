@@ -524,21 +524,26 @@ export function EditorToolbar({
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400 text-xs w-16">Texto:</span>
                   <textarea
-                    value={currentStyle.buttonText || ""}
+                    value={currentStyle.buttonText ?? ""}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "") {
-                        const { buttonText, ...rest } = currentStyle;
-                        if (effectiveKey) onStyleChange(effectiveKey, rest);
-                      } else {
-                        updateStyle({ buttonText: val });
-                      }
+                      updateStyle({ buttonText: e.target.value });
                     }}
                     placeholder="Vacío = usa traducción automática"
                     className="flex-1 min-h-[32px] text-xs bg-gray-800 border border-gray-700 text-white rounded px-2 py-1 resize-y"
                     rows={2}
                     data-testid="input-button-text"
                   />
+                  {currentStyle.buttonText && (
+                    <button
+                      onClick={() => {
+                        const { buttonText, ...rest } = currentStyle;
+                        if (effectiveKey) onStyleChange(effectiveKey, rest);
+                      }}
+                      className="text-red-400 text-xs px-1 hover:text-red-300"
+                      title="Limpiar texto"
+                      data-testid="button-clear-text"
+                    >✕</button>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400 text-xs w-16">Color:</span>

@@ -521,13 +521,13 @@
     "cardDesc_aceleracion_lectura": "Accelerate your visual reading",
     "cardTitle_reconocimiento_visual": "MAXIMIZE YOUR READING ACCELERATION",
     "cardDesc_reconocimiento_visual": "Visual recognition",
-    "cardTitle_neurosync": "NeuroSync",
-    "cardDesc_neurosync": "Neural synchronization",
-    "cardTitle_neurolink": "NeuroLink Pro",
-    "cardDesc_neurolink": "Neural link",
-    "cardTitle_memoryflash": "Memory Flash",
-    "cardDesc_memoryflash": "Visual memory",
-    "cardTitle_neurolector": "Neuro Reader Pro",
-    "cardDesc_neurolector": "Speed reading"
+    "cardTitle_neurosync": "NeuroSync - Brain Sync",
+    "cardDesc_neurosync": "Train your neural synchronization",
+    "cardTitle_neurolink": "NeuroLink Pro - Neural Connections",
+    "cardDesc_neurolink": "Strengthen your neural connections",
+    "cardTitle_memoryflash": "Memory Flash - Visual Memory",
+    "cardDesc_memoryflash": "Train your visual memory with rapid exercises",
+    "cardTitle_neurolector": "Neuro Reader Pro - Speed Reading",
+    "cardDesc_neurolector": "Develop advanced speed reading skills"
   }
 }
