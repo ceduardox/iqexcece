@@ -139,7 +139,6 @@ export default function GestionPage() {
   
   // Entrenamiento state
   const [entrenamientoCategory, setEntrenamientoCategory] = useState<"ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("ninos");
-  const [adminEntLang, setAdminEntLang] = useState<string>("es");
   const [entrenamientoCard, setEntrenamientoCard] = useState({
     imageUrl: "",
     title: "Entrenamiento",
@@ -151,9 +150,6 @@ export default function GestionPage() {
     pageTitle: "Entrenamientos",
     pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
   });
-  const [esCardRef, setEsCardRef] = useState({ title: "", description: "", buttonText: "" });
-  const [esPageRef, setEsPageRef] = useState({ bannerText: "", pageTitle: "", pageDescription: "" });
-  const [esItemsRef, setEsItemsRef] = useState<any[]>([]);
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
   
@@ -1142,48 +1138,22 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       const loadEntrenamientoData = async () => {
         const token = localStorage.getItem("admin_token") || "";
         const cat = entrenamientoCategory;
-        const langParam = adminEntLang;
         try {
-          const fetches: Promise<Response>[] = [
-            fetch(`/api/entrenamiento/${cat}/card?lang=${langParam}&fallback=false`),
-            fetch(`/api/entrenamiento/${cat}/page?lang=${langParam}&fallback=false`),
-            fetch(`/api/entrenamiento/${cat}/items?lang=${langParam}&fallback=false`),
+          const [cardRes, pageRes, itemsRes, prepRes, catPrepRes] = await Promise.all([
+            fetch(`/api/entrenamiento/${cat}/card?lang=es`),
+            fetch(`/api/entrenamiento/${cat}/page?lang=es`),
+            fetch(`/api/entrenamiento/${cat}/items?lang=es`),
             fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
             fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
-          ];
-          if (langParam !== 'es') {
-            fetches.push(
-              fetch(`/api/entrenamiento/${cat}/card?lang=es`),
-              fetch(`/api/entrenamiento/${cat}/page?lang=es`),
-              fetch(`/api/entrenamiento/${cat}/items?lang=es`)
-            );
-          }
-          const results = await Promise.all(fetches);
-          const cardData = await results[0].json();
-          const pageData = await results[1].json();
-          const itemsData = await results[2].json();
-          const prepPagesData = await results[3].json();
-          const catPrepData = await results[4].json();
-          if (langParam !== 'es') {
-            const esCard = await results[5].json();
-            const esPage = await results[6].json();
-            const esItems = await results[7].json();
-            setEsCardRef({ title: esCard.card?.title || "", description: esCard.card?.description || "", buttonText: esCard.card?.buttonText || "" });
-            setEsPageRef({ bannerText: esPage.page?.bannerText || "", pageTitle: esPage.page?.pageTitle || "", pageDescription: esPage.page?.pageDescription || "" });
-            setEsItemsRef(esItems.items || []);
-            const hasLangCard = cardData.card?.lang === langParam;
-            const hasLangPage = pageData.card?.lang === langParam;
-            setEntrenamientoCard(hasLangCard ? cardData.card : { categoria: cat, title: "", description: "", buttonText: "", imageUrl: esCard.card?.imageUrl || "" });
-            setEntrenamientoPage(hasLangPage ? pageData.page : { categoria: cat, bannerText: "", pageTitle: "", pageDescription: "" });
-            setEntrenamientoItems((itemsData.items && itemsData.items.length > 0) ? itemsData.items : (esItems.items || []));
-          } else {
-            setEsCardRef({ title: "", description: "", buttonText: "" });
-            setEsPageRef({ bannerText: "", pageTitle: "", pageDescription: "" });
-            setEsItemsRef([]);
-            if (cardData.card) setEntrenamientoCard(cardData.card);
-            if (pageData.page) setEntrenamientoPage(pageData.page);
-            setEntrenamientoItems(itemsData.items || []);
-          }
+          ]);
+          const cardData = await cardRes.json();
+          const pageData = await pageRes.json();
+          const itemsData = await itemsRes.json();
+          const prepPagesData = await prepRes.json();
+          const catPrepData = await catPrepRes.json();
+          if (cardData.card) setEntrenamientoCard(cardData.card);
+          if (pageData.page) setEntrenamientoPage(pageData.page);
+          setEntrenamientoItems(itemsData.items || []);
           setPrepPages(prepPagesData.pages || []);
           setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
           
@@ -1217,7 +1187,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadEntrenamientoData();
     }
-  }, [isLoggedIn, activeTab, entrenamientoCategory, adminEntLang]);
+  }, [isLoggedIn, activeTab, entrenamientoCategory]);
 
   const getAgeLabel = (age: string | null) => {
     const labels: Record<string, string> = {
@@ -4277,23 +4247,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 ))}
               </div>
 
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-white/60 text-sm">Idioma:</span>
-                {["es", "en", "pt"].map((l) => (
-                  <Button
-                    key={l}
-                    onClick={() => setAdminEntLang(l)}
-                    variant={adminEntLang === l ? "default" : "outline"}
-                    size="sm"
-                    className={adminEntLang === l ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
-                  >
-                    {l === "es" ? "ES" : l === "en" ? "EN" : "PT"}
-                  </Button>
-                ))}
-                {adminEntLang !== 'es' && (
-                  <span className="text-yellow-400 text-xs ml-2">Editando {adminEntLang === 'en' ? 'Inglés' : 'Portugués'} — campos vacíos usarán el español</span>
-                )}
-              </div>
+              
 
               {/* Página de Preparación */}
               <div className="p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl border border-purple-500/30 mb-6">
@@ -4515,35 +4469,32 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     )}
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Título {adminEntLang !== 'es' && esCardRef.title && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.title})</span>}</label>
+                    <label className="text-white/60 text-sm">Título</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoCard.title}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esCardRef.title : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esCardRef.description && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.description.substring(0, 40)}...)</span>}</label>
+                    <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
                         value={entrenamientoCard.description}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esCardRef.description : ""}
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Texto del Botón {adminEntLang !== 'es' && esCardRef.buttonText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esCardRef.buttonText})</span>}</label>
+                    <label className="text-white/60 text-sm">Texto del Botón</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoCard.buttonText}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esCardRef.buttonText : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
                     </div>
@@ -4554,7 +4505,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         const res = await adminFetch("/api/admin/entrenamiento/card", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory, lang: adminEntLang })
+                          body: JSON.stringify({ ...entrenamientoCard, categoria: entrenamientoCategory, lang: "es" })
                         });
                         if (res.ok) {
                           alert("Card guardado");
@@ -4573,34 +4524,31 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <div className="space-y-4 p-4 bg-white/5 rounded-xl">
                   <h3 className="text-white font-semibold">Configuración de Página</h3>
                   <div>
-                    <label className="text-white/60 text-sm">Banner (texto superior) {adminEntLang !== 'es' && esPageRef.bannerText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.bannerText.substring(0, 40)}...)</span>}</label>
+                    <label className="text-white/60 text-sm">Banner (texto superior)</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoPage.bannerText}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esPageRef.bannerText : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Título de Página {adminEntLang !== 'es' && esPageRef.pageTitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageTitle})</span>}</label>
+                    <label className="text-white/60 text-sm">Título de Página</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoPage.pageTitle}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esPageRef.pageTitle : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Descripción {adminEntLang !== 'es' && esPageRef.pageDescription && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esPageRef.pageDescription.substring(0, 40)}...)</span>}</label>
+                    <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
                         value={entrenamientoPage.pageDescription}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
-                        placeholder={adminEntLang !== 'es' ? esPageRef.pageDescription : ""}
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
                       />
@@ -4612,7 +4560,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         const res = await adminFetch("/api/admin/entrenamiento/page", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory, lang: adminEntLang })
+                          body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory, lang: "es" })
                         });
                         if (res.ok) {
                           alert("Página guardada");
@@ -4643,7 +4591,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
                             categoria: entrenamientoCategory,
-                            lang: adminEntLang,
+                            lang: "es",
                             title: "Nueva Sección",
                             description: "Descripción de la sección",
                             imageUrl: "",
@@ -4766,7 +4714,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
                           <div className="flex-1 space-y-3">
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Título de la sección {adminEntLang !== 'es' && esItemsRef[idx]?.title && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].title})</span>}</label>
+                              <label className="text-white/60 text-xs mb-1 block">Título de la sección</label>
                               <div className="flex gap-1">
                                 <Input
                                   value={item.title}
@@ -4776,12 +4724,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                     setEntrenamientoItems(updated);
                                   }}
                                   className="bg-white/10 border-teal-500/30 text-white font-semibold flex-1"
-                                  placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.title ? esItemsRef[idx].title : "Ej: Mejora tu Velocidad de Lectura"}
+                                  placeholder="Ej: Mejora tu Velocidad de Lectura"
                                 />
                               </div>
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Descripción breve {adminEntLang !== 'es' && esItemsRef[idx]?.description && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].description.substring(0, 40)}...)</span>}</label>
+                              <label className="text-white/60 text-xs mb-1 block">Descripción breve</label>
                               <div className="flex gap-1">
                                 <Input
                                   value={item.description || ""}
@@ -4791,7 +4739,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                     setEntrenamientoItems(updated);
                                   }}
                                   className="bg-white/10 border-teal-500/30 text-white/80 flex-1"
-                                  placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.description ? esItemsRef[idx].description : "Ej: Para procesar palabras rápidamente"}
+                                  placeholder="Ej: Para procesar palabras rápidamente"
                                 />
                               </div>
                             </div>
@@ -5249,7 +5197,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   )}
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Título {adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepTitle})</span>}</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Título</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepTitle || ""}
@@ -5259,14 +5207,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         setEntrenamientoItems(updated);
                                       }}
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
-                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle ? esItemsRef[idx].prepTitle : "Ej: Mejora tu Velocidad de Lectura"}
+                                      placeholder="Ej: Mejora tu Velocidad de Lectura"
                                     />
                                   </div>
                                 </div>
                               </div>
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado {adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepSubtitle})</span>}</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepSubtitle || ""}
@@ -5276,12 +5224,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         setEntrenamientoItems(updated);
                                       }}
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
-                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle ? esItemsRef[idx].prepSubtitle : "Ej: ¡Mejora tu lectura rápidamente!"}
+                                      placeholder="Ej: ¡Mejora tu lectura rápidamente!"
                                     />
                                   </div>
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Instrucciones {adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepInstructions.substring(0, 30)}...)</span>}</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
                                   <div className="flex gap-1">
                                     <textarea
                                       value={item.prepInstructions || ""}
@@ -5291,13 +5239,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         setEntrenamientoItems(updated);
                                       }}
                                       className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm flex-1"
-                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions ? esItemsRef[idx].prepInstructions : "Ej: Observa las palabras sin leer en voz alta..."}
+                                      placeholder="Ej: Observa las palabras sin leer en voz alta..."
                                       rows={2}
                                     />
                                   </div>
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón {adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText && <span className="text-yellow-400/60 text-xs ml-1">(ES: {esItemsRef[idx].prepButtonText})</span>}</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepButtonText || ""}
@@ -5307,7 +5255,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         setEntrenamientoItems(updated);
                                       }}
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
-                                      placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText ? esItemsRef[idx].prepButtonText : "Empezar"}
+                                      placeholder="Empezar"
                                     />
                                   </div>
                                 </div>
@@ -5368,30 +5316,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <Button
                               onClick={async () => {
                                 try {
-                                  const isNewLang = adminEntLang !== 'es' && (item as any).lang !== adminEntLang;
-                                  const payload = { ...item, lang: adminEntLang, categoria: entrenamientoCategory };
-                                  let res;
-                                  if (isNewLang) {
-                                    const { id, ...rest } = payload;
-                                    res = await adminFetch(`/api/admin/entrenamiento/item`, {
-                                      method: "POST",
-                                      headers: { "Content-Type": "application/json" },
-                                      body: JSON.stringify(rest)
-                                    });
-                                  } else {
-                                    res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
-                                      method: "PUT",
-                                      headers: { "Content-Type": "application/json" },
-                                      body: JSON.stringify(payload)
-                                    });
-                                  }
+                                  const payload = { ...item, lang: "es", categoria: entrenamientoCategory };
+                                  const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(payload)
+                                  });
                                   if (res.ok) {
-                                    const data = await res.json();
-                                    if (isNewLang && data.item) {
-                                      const updated = [...entrenamientoItems];
-                                      updated[idx] = data.item;
-                                      setEntrenamientoItems(updated);
-                                    }
                                     alert("Sección guardada correctamente");
                                   } else {
                                     alert("Error: Token inválido o sesión expirada");
