@@ -41,8 +41,7 @@ const defaultCardStyles = [
 
 export default function EntrenamientoPage() {
   const [, setLocation] = useLocation();
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language || 'es';
+  const { t } = useTranslation();
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "ninos";
   const { playSound } = useSounds();
@@ -107,10 +106,10 @@ export default function EntrenamientoPage() {
       await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${adminToken}` },
-        body: JSON.stringify({ pageName: "entrenamiento-page", styles: JSON.stringify(newStyles), lang })
+        body: JSON.stringify({ pageName: "entrenamiento-page", styles: JSON.stringify(newStyles) })
       });
     } catch (error) { console.error("Error saving styles:", error); }
-  }, [lang, categoria]);
+  }, [categoria]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
