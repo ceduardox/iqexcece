@@ -51,6 +51,7 @@ interface EntrenamientoItem {
   linkUrl: string | null;
   sortOrder: number | null;
   isActive: boolean | null;
+  tipoEjercicio?: string;
 }
 
 
@@ -71,8 +72,7 @@ const defaultIcons = [
 ];
 
 export default function EntrenamientoSelectionPage() {
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language || 'es';
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -82,9 +82,9 @@ export default function EntrenamientoSelectionPage() {
   const isMobile = useIsMobile();
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
-    queryKey: ["/api/entrenamiento", "ninos", "items", lang],
+    queryKey: ["/api/entrenamiento", "ninos", "items"],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/ninos/items?lang=${lang}`);
+      const res = await fetch(`/api/entrenamiento/ninos/items?lang=es`);
       return res.json();
     },
   });
@@ -106,7 +106,7 @@ export default function EntrenamientoSelectionPage() {
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     
-    fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
+    fetch(`/api/page-styles/entrenamiento-page`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -125,7 +125,7 @@ export default function EntrenamientoSelectionPage() {
       });
     
     return () => clearTimeout(timeout);
-  }, [lang]);
+  }, []);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -140,14 +140,13 @@ export default function EntrenamientoSelectionPage() {
         },
         body: JSON.stringify({
           pageName: "entrenamiento-page",
-          styles: JSON.stringify(newStyles),
-          lang
+          styles: JSON.stringify(newStyles)
         })
       });
     } catch (error) {
       console.error("Error saving styles:", error);
     }
-  }, [lang]);
+  }, []);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -403,7 +402,7 @@ export default function EntrenamientoSelectionPage() {
                         color: getResolvedStyle(titleId)?.textColor || "#ffffff"
                       }}
                     >
-                      {getResolvedStyle(titleId)?.buttonText || item.title}
+                      {getResolvedStyle(titleId)?.buttonText || t(`entrenamiento.cardTitle_${item.tipoEjercicio}`, { defaultValue: item.title })}
                     </h3>
                     {item.description && (
                       <p 
@@ -414,7 +413,7 @@ export default function EntrenamientoSelectionPage() {
                           color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
                         }}
                       >
-                        {getResolvedStyle(descId)?.buttonText || item.description}
+                        {getResolvedStyle(descId)?.buttonText || t(`entrenamiento.cardDesc_${item.tipoEjercicio}`, { defaultValue: item.description || "" })}
                       </p>
                     )}
                     <motion.button
@@ -443,7 +442,7 @@ export default function EntrenamientoSelectionPage() {
                       };})()}
                       whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
-                      {getResolvedStyle(btnId)?.buttonText || "Iniciar"}
+                      {getResolvedStyle(btnId)?.buttonText || t("entrenamiento.startBtn")}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </motion.div>
