@@ -402,239 +402,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return res;
   };
 
-  const [translatingField, setTranslatingField] = useState<string | null>(null);
-  const [bulkTranslating, setBulkTranslating] = useState(false);
-
-  const translateLecturaBulk = async (targetLang: string) => {
-    if (bulkTranslating) return;
-    const hasContent = currentEditContent.title || currentEditContent.content || currentEditContent.questions.length > 0;
-    if (!hasContent) { alert("No hay contenido para traducir"); return; }
-    setBulkTranslating(true);
-    try {
-      const dataToTranslate: any = {};
-      if (currentEditContent.title) dataToTranslate.title = currentEditContent.title;
-      if (currentEditContent.content) dataToTranslate.content = currentEditContent.content;
-      if (currentEditContent.questions.length > 0) {
-        dataToTranslate.questions = currentEditContent.questions.map((q: any) => ({
-          question: q.question || "",
-          options: q.options || []
-        }));
-      }
-      const res = await adminFetch("/api/admin/translate-bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: dataToTranslate, targetLang })
-      });
-      const result = await res.json();
-      if (result.translated) {
-        const t = result.translated;
-        setCurrentEditContent((p: typeof currentEditContent) => {
-          const updated = { ...p };
-          if (t.title) updated.title = t.title;
-          if (t.content) updated.content = t.content;
-          if (t.questions && Array.isArray(t.questions)) {
-            updated.questions = p.questions.map((q: any, i: number) => ({
-              ...q,
-              question: t.questions[i]?.question || q.question,
-              options: t.questions[i]?.options || q.options
-            }));
-          }
-          return updated;
-        });
-      } else if (result.error) {
-        alert(result.error);
-      }
-    } catch (err) {
-      console.error("Bulk translation error:", err);
-      alert("Error al traducir. Intenta de nuevo.");
-    } finally {
-      setBulkTranslating(false);
-    }
-  };
-  const translateRazonamientoBulk = async (targetLang: string) => {
-    if (bulkTranslating) return;
-    const hasContent = razonamientoContent.title || razonamientoContent.questions.length > 0;
-    if (!hasContent) { alert("No hay contenido para traducir"); return; }
-    setBulkTranslating(true);
-    try {
-      const dataToTranslate: any = {};
-      if (razonamientoContent.title) dataToTranslate.title = razonamientoContent.title;
-      if (razonamientoContent.questions.length > 0) {
-        dataToTranslate.questions = razonamientoContent.questions.map((q: any) => ({
-          question: q.question || "",
-          options: q.options || []
-        }));
-      }
-      const res = await adminFetch("/api/admin/translate-bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: dataToTranslate, targetLang })
-      });
-      const result = await res.json();
-      if (result.translated) {
-        const t = result.translated;
-        setRazonamientoContent(p => {
-          const updated = { ...p };
-          if (t.title) updated.title = t.title;
-          if (t.questions && Array.isArray(t.questions)) {
-            updated.questions = p.questions.map((q: any, i: number) => ({
-              ...q,
-              question: t.questions[i]?.question || q.question,
-              options: t.questions[i]?.options || q.options
-            }));
-          }
-          return updated;
-        });
-      } else if (result.error) {
-        alert(result.error);
-      }
-    } catch (err) {
-      console.error("Bulk translation error:", err);
-      alert("Error al traducir. Intenta de nuevo.");
-    } finally {
-      setBulkTranslating(false);
-    }
-  };
-
-  const translateCerebralBulk = async (targetLang: string) => {
-    if (bulkTranslating) return;
-    const hasContent = cerebralContent.title || cerebralContent.exerciseData?.instruction;
-    if (!hasContent) { alert("No hay contenido para traducir"); return; }
-    setBulkTranslating(true);
-    try {
-      const dataToTranslate: any = {};
-      if (cerebralContent.title) dataToTranslate.title = cerebralContent.title;
-      if (cerebralContent.exerciseData) {
-        const ed = cerebralContent.exerciseData;
-        if (ed.instruction) dataToTranslate.instruction = ed.instruction;
-        if (ed.correctAnswer) dataToTranslate.correctAnswer = ed.correctAnswer;
-        if (ed.answerOptions && Array.isArray(ed.answerOptions)) {
-          dataToTranslate.answerOptions = ed.answerOptions.map((o: any) => o.label || o.value || "");
-        }
-        if (ed.sequenceOptions && Array.isArray(ed.sequenceOptions)) {
-          dataToTranslate.sequenceOptions = ed.sequenceOptions.map((o: any) => o.label || o.value || "");
-        }
-        if (ed.memoriaItems && Array.isArray(ed.memoriaItems)) {
-          dataToTranslate.memoriaItems = ed.memoriaItems.map((o: any) => typeof o === 'string' ? o : o.label || "");
-        }
-        if (ed.memoriaOptions && Array.isArray(ed.memoriaOptions)) {
-          dataToTranslate.memoriaOptions = ed.memoriaOptions.map((o: any) => typeof o === 'string' ? o : o.label || "");
-        }
-        if (ed.patronOptions && Array.isArray(ed.patronOptions)) {
-          dataToTranslate.patronOptions = ed.patronOptions.map((o: any) => typeof o === 'string' ? o : o.label || "");
-        }
-        if (ed.stroopWord) dataToTranslate.stroopWord = ed.stroopWord;
-        if (ed.stroopOptions && Array.isArray(ed.stroopOptions)) {
-          dataToTranslate.stroopOptions = ed.stroopOptions;
-        }
-        if (ed.prefTitle1) dataToTranslate.prefTitle1 = ed.prefTitle1;
-        if (ed.prefTitle2) dataToTranslate.prefTitle2 = ed.prefTitle2;
-        if (ed.latInstruction) dataToTranslate.latInstruction = ed.latInstruction;
-        if (ed.latQuestion) dataToTranslate.latQuestion = ed.latQuestion;
-        if (ed.latLeft) dataToTranslate.latLeft = ed.latLeft;
-        if (ed.latRight) dataToTranslate.latRight = ed.latRight;
-      }
-      // Also translate intro
-      const introToTranslate: any = {};
-      if (cerebralIntro.title) introToTranslate.introTitle = cerebralIntro.title;
-      if (cerebralIntro.subtitle) introToTranslate.introSubtitle = cerebralIntro.subtitle;
-      if (cerebralIntro.buttonText) introToTranslate.introButton = cerebralIntro.buttonText;
-      
-      const allData = { ...dataToTranslate, ...introToTranslate };
-      
-      const res = await adminFetch("/api/admin/translate-bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: allData, targetLang })
-      });
-      const result = await res.json();
-      if (result.translated) {
-        const t = result.translated;
-        setCerebralContent(p => {
-          const updated = { ...p };
-          if (t.title) updated.title = t.title;
-          if (updated.exerciseData) {
-            const ed = { ...updated.exerciseData };
-            if (t.instruction) ed.instruction = t.instruction;
-            if (t.correctAnswer) ed.correctAnswer = t.correctAnswer;
-            if (t.answerOptions && Array.isArray(t.answerOptions) && ed.answerOptions) {
-              ed.answerOptions = ed.answerOptions.map((o: any, i: number) => ({
-                ...o, label: t.answerOptions[i] || o.label, value: t.answerOptions[i] || o.value
-              }));
-            }
-            if (t.sequenceOptions && Array.isArray(t.sequenceOptions) && ed.sequenceOptions) {
-              ed.sequenceOptions = ed.sequenceOptions.map((o: any, i: number) => ({
-                ...o, label: t.sequenceOptions[i] || o.label, value: t.sequenceOptions[i] || o.value
-              }));
-            }
-            if (t.memoriaItems && Array.isArray(t.memoriaItems) && ed.memoriaItems) {
-              ed.memoriaItems = ed.memoriaItems.map((o: any, i: number) => 
-                typeof o === 'string' ? (t.memoriaItems[i] || o) : { ...o, label: t.memoriaItems[i] || o.label }
-              );
-            }
-            if (t.memoriaOptions && Array.isArray(t.memoriaOptions) && ed.memoriaOptions) {
-              ed.memoriaOptions = ed.memoriaOptions.map((o: any, i: number) => 
-                typeof o === 'string' ? (t.memoriaOptions[i] || o) : { ...o, label: t.memoriaOptions[i] || o.label }
-              );
-            }
-            if (t.patronOptions && Array.isArray(t.patronOptions) && ed.patronOptions) {
-              ed.patronOptions = ed.patronOptions.map((o: any, i: number) => 
-                typeof o === 'string' ? (t.patronOptions[i] || o) : { ...o, label: t.patronOptions[i] || o.label }
-              );
-            }
-            if (t.stroopWord) ed.stroopWord = t.stroopWord;
-            if (t.stroopOptions && Array.isArray(t.stroopOptions)) ed.stroopOptions = t.stroopOptions;
-            if (t.prefTitle1) ed.prefTitle1 = t.prefTitle1;
-            if (t.prefTitle2) ed.prefTitle2 = t.prefTitle2;
-            if (t.latInstruction) ed.latInstruction = t.latInstruction;
-            if (t.latQuestion) ed.latQuestion = t.latQuestion;
-            if (t.latLeft) ed.latLeft = t.latLeft;
-            if (t.latRight) ed.latRight = t.latRight;
-            updated.exerciseData = ed;
-          }
-          return updated;
-        });
-        if (t.introTitle || t.introSubtitle || t.introButton) {
-          setCerebralIntro(p => ({
-            ...p,
-            ...(t.introTitle && { title: t.introTitle }),
-            ...(t.introSubtitle && { subtitle: t.introSubtitle }),
-            ...(t.introButton && { buttonText: t.introButton }),
-          }));
-        }
-      } else if (result.error) {
-        alert(result.error);
-      }
-    } catch (err) {
-      console.error("Bulk translation error:", err);
-      alert("Error al traducir. Intenta de nuevo.");
-    } finally {
-      setBulkTranslating(false);
-    }
-  };
-
-  const translateField = async (text: string, targetLang: string, fieldKey: string, onResult: (translated: string) => void) => {
-    if (!text) return;
-    setTranslatingField(fieldKey);
-    try {
-      const res = await adminFetch("/api/admin/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, targetLang })
-      });
-      const data = await res.json();
-      if (data.translated) {
-        onResult(data.translated);
-      } else if (data.error) {
-        alert(data.error);
-      }
-    } catch (err) {
-      console.error("Translation error:", err);
-    } finally {
-      setTranslatingField(null);
-    }
-  };
-
   const fetchSessions = async () => {
     if (!token) return;
     setLoading(true);
@@ -3101,18 +2868,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 ))}
               </div>
 
-              {contentLang !== 'es' && (
-                <Button
-                  onClick={() => translateLecturaBulk(contentLang)}
-                  disabled={bulkTranslating}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600"
-                  data-testid="button-translate-all-lectura"
-                >
-                  <Globe className="w-4 h-4 mr-2" />
-                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
-                </Button>
-              )}
-
               <Button
                 onClick={handleSaveContent}
                 disabled={saving}
@@ -3365,18 +3120,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                 ))}
               </div>
-
-              {contentLang !== 'es' && (
-                <Button
-                  onClick={() => translateRazonamientoBulk(contentLang)}
-                  disabled={bulkTranslating}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600"
-                  data-testid="button-translate-all-razonamiento"
-                >
-                  <Globe className="w-4 h-4 mr-2" />
-                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
-                </Button>
-              )}
 
               <Button
                 onClick={handleSaveRazonamiento}
@@ -4191,18 +3934,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </Button>
               </div>
 
-              {contentLang !== 'es' && (
-                <Button
-                  onClick={() => translateCerebralBulk(contentLang)}
-                  disabled={bulkTranslating}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 mb-2"
-                  data-testid="button-translate-cerebral"
-                >
-                  <Globe className="w-4 h-4 mr-2" />
-                  {bulkTranslating ? "Traduciendo todo..." : `Traducir todo a ${contentLang === 'en' ? 'Inglés' : 'Portugués'}`}
-                </Button>
-              )}
-
               <Button
                 onClick={handleSaveCerebral}
                 disabled={saving}
@@ -4678,12 +4409,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             className="bg-white/10 border-purple-500/30 text-white flex-1"
                             placeholder="Ej: Mejora tu Velocidad de Lectura"
                           />
-                          {adminEntLang !== 'es' && editingPrepPage.titulo && (
-                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-titulo'}
-                              onClick={() => translateField(editingPrepPage.titulo || "", adminEntLang, 'prep-titulo', (t) => setEditingPrepPage({...editingPrepPage!, titulo: t}))}>
-                              {translatingField === 'prep-titulo' ? '...' : 'IA'}
-                            </Button>
-                          )}
                         </div>
                       </div>
                       <div>
@@ -4695,12 +4420,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             className="bg-white/10 border-purple-500/30 text-white flex-1"
                             placeholder="Ej: ¡Mejora tu lectura rápidamente!"
                           />
-                          {adminEntLang !== 'es' && editingPrepPage.subtitulo && (
-                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-subtitulo'}
-                              onClick={() => translateField(editingPrepPage.subtitulo || "", adminEntLang, 'prep-subtitulo', (t) => setEditingPrepPage({...editingPrepPage!, subtitulo: t}))}>
-                              {translatingField === 'prep-subtitulo' ? '...' : 'IA'}
-                            </Button>
-                          )}
                         </div>
                       </div>
                       <div className="md:col-span-2">
@@ -4713,12 +4432,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             placeholder="Ej: Observa las palabras sin leer en voz alta..."
                             rows={2}
                           />
-                          {adminEntLang !== 'es' && editingPrepPage.instrucciones && (
-                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'prep-instrucciones'}
-                              onClick={() => translateField(editingPrepPage.instrucciones || "", adminEntLang, 'prep-instrucciones', (t) => setEditingPrepPage({...editingPrepPage!, instrucciones: t}))}>
-                              {translatingField === 'prep-instrucciones' ? '...' : 'IA'}
-                            </Button>
-                          )}
                         </div>
                       </div>
                       <div>
@@ -4730,12 +4443,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             className="bg-white/10 border-purple-500/30 text-white flex-1"
                             placeholder="Empezar"
                           />
-                          {adminEntLang !== 'es' && editingPrepPage.textoBoton && (
-                            <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'prep-textoBoton'}
-                              onClick={() => translateField(editingPrepPage.textoBoton || "", adminEntLang, 'prep-textoBoton', (t) => setEditingPrepPage({...editingPrepPage!, textoBoton: t}))}>
-                              {translatingField === 'prep-textoBoton' ? '...' : 'IA'}
-                            </Button>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -4816,12 +4523,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         placeholder={adminEntLang !== 'es' ? esCardRef.title : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
-                      {adminEntLang !== 'es' && esCardRef.title && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'card-title'}
-                          onClick={() => translateField(esCardRef.title, adminEntLang, 'card-title', (t) => setEntrenamientoCard(prev => ({...prev, title: t})))}>
-                          {translatingField === 'card-title' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -4834,12 +4535,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
                       />
-                      {adminEntLang !== 'es' && esCardRef.description && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'card-desc'}
-                          onClick={() => translateField(esCardRef.description, adminEntLang, 'card-desc', (t) => setEntrenamientoCard(prev => ({...prev, description: t})))}>
-                          {translatingField === 'card-desc' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -4851,12 +4546,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         placeholder={adminEntLang !== 'es' ? esCardRef.buttonText : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
-                      {adminEntLang !== 'es' && esCardRef.buttonText && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'card-btn'}
-                          onClick={() => translateField(esCardRef.buttonText, adminEntLang, 'card-btn', (t) => setEntrenamientoCard(prev => ({...prev, buttonText: t})))}>
-                          {translatingField === 'card-btn' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <Button
@@ -4892,12 +4581,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         placeholder={adminEntLang !== 'es' ? esPageRef.bannerText : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
-                      {adminEntLang !== 'es' && esPageRef.bannerText && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'page-banner'}
-                          onClick={() => translateField(esPageRef.bannerText, adminEntLang, 'page-banner', (t) => setEntrenamientoPage(prev => ({...prev, bannerText: t})))}>
-                          {translatingField === 'page-banner' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -4909,12 +4592,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         placeholder={adminEntLang !== 'es' ? esPageRef.pageTitle : ""}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
-                      {adminEntLang !== 'es' && esPageRef.pageTitle && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === 'page-title'}
-                          onClick={() => translateField(esPageRef.pageTitle, adminEntLang, 'page-title', (t) => setEntrenamientoPage(prev => ({...prev, pageTitle: t})))}>
-                          {translatingField === 'page-title' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -4927,12 +4604,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
                       />
-                      {adminEntLang !== 'es' && esPageRef.pageDescription && (
-                        <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === 'page-desc'}
-                          onClick={() => translateField(esPageRef.pageDescription, adminEntLang, 'page-desc', (t) => setEntrenamientoPage(prev => ({...prev, pageDescription: t})))}>
-                          {translatingField === 'page-desc' ? '...' : 'IA'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <Button
@@ -5107,12 +4778,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   className="bg-white/10 border-teal-500/30 text-white font-semibold flex-1"
                                   placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.title ? esItemsRef[idx].title : "Ej: Mejora tu Velocidad de Lectura"}
                                 />
-                                {adminEntLang !== 'es' && (esItemsRef[idx]?.title || item.title) && (
-                                  <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-title-${idx}`}
-                                    onClick={() => translateField(esItemsRef[idx]?.title || item.title, adminEntLang, `item-title-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].title = t; setEntrenamientoItems(updated); })}>
-                                    {translatingField === `item-title-${idx}` ? '...' : 'IA'}
-                                  </Button>
-                                )}
                               </div>
                             </div>
                             <div>
@@ -5128,12 +4793,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   className="bg-white/10 border-teal-500/30 text-white/80 flex-1"
                                   placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.description ? esItemsRef[idx].description : "Ej: Para procesar palabras rápidamente"}
                                 />
-                                {adminEntLang !== 'es' && (esItemsRef[idx]?.description || item.description) && (
-                                  <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-desc-${idx}`}
-                                    onClick={() => translateField(esItemsRef[idx]?.description || item.description, adminEntLang, `item-desc-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].description = t; setEntrenamientoItems(updated); })}>
-                                    {translatingField === `item-desc-${idx}` ? '...' : 'IA'}
-                                  </Button>
-                                )}
                               </div>
                             </div>
                             <div>
@@ -5237,17 +4896,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         placeholder="Ej: Identifica rápidamente\nNúmeros y Letras"
                                         rows={2}
                                       />
-                                      {adminEntLang !== 'es' && (
-                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0 self-start" disabled={translatingField === `numIntro-titulo-${idx}`}
-                                          onClick={() => {
-                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "Identifica rápidamente\nNúmeros y Letras") : "Identifica rápidamente\nNúmeros y Letras";
-                                            translateField(src, adminEntLang, `numIntro-titulo-${idx}`, (t) => {
-                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: t, descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!", subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande", imagenCabecera: prev?.imagenCabecera || "" }));
-                                            });
-                                          }}>
-                                          {translatingField === `numIntro-titulo-${idx}` ? '...' : 'IA'}
-                                        </Button>
-                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -5270,17 +4918,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                                         placeholder="Ej: ¡Haz más fuerte tu vista jugando!"
                                       />
-                                      {adminEntLang !== 'es' && (
-                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0" disabled={translatingField === `numIntro-desc-${idx}`}
-                                          onClick={() => {
-                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "¡Haz más fuerte tu vista jugando!") : "¡Haz más fuerte tu vista jugando!";
-                                            translateField(src, adminEntLang, `numIntro-desc-${idx}`, (t) => {
-                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras", descripcion: t, subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande", imagenCabecera: prev?.imagenCabecera || "" }));
-                                            });
-                                          }}>
-                                          {translatingField === `numIntro-desc-${idx}` ? '...' : 'IA'}
-                                        </Button>
-                                      )}
                                     </div>
                                   </div>
                                   <div>
@@ -5301,17 +4938,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                                         placeholder="Ej: Identifica el número o letra..."
                                       />
-                                      {adminEntLang !== 'es' && (
-                                        <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 shrink-0" disabled={translatingField === `numIntro-sub-${idx}`}
-                                          onClick={() => {
-                                            const src = numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "Identifica el número o letra para ver el mundo más grande") : "Identifica el número o letra para ver el mundo más grande";
-                                            translateField(src, adminEntLang, `numIntro-sub-${idx}`, (t) => {
-                                              setNumerosIntroData(prev => ({ ...prev, entrenamientoItemId: item.id, titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras", descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!", subtitulo: t, imagenCabecera: prev?.imagenCabecera || "" }));
-                                            });
-                                          }}>
-                                          {translatingField === `numIntro-sub-${idx}` ? '...' : 'IA'}
-                                        </Button>
-                                      )}
                                     </div>
                                   </div>
                                   <div className="flex justify-end pt-2">
@@ -5458,21 +5084,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                         className="bg-white/10 border-cyan-500/30 text-white text-sm flex-1"
                                         placeholder="Acelera al máximo tu Lectura"
                                       />
-                                      {adminEntLang !== 'es' && (
-                                        <Button size="sm" variant="outline" className="border-cyan-500/50 text-cyan-300 shrink-0" disabled={translatingField === `acel-titulo-${idx}`}
-                                          onClick={() => translateField(aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "Acelera al máximo tu Lectura") : "Acelera al máximo tu Lectura", adminEntLang, `acel-titulo-${idx}`, (t) => {
-                                            setAceleracionData(prev => ({
-                                              ...prev,
-                                              entrenamientoItemId: item.id,
-                                              titulo: t,
-                                              velocidadPPM: prev?.velocidadPPM || 200,
-                                              modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
-                                              imagenCabecera: prev?.imagenCabecera || ""
-                                            }));
-                                          })}>
-                                          {translatingField === `acel-titulo-${idx}` ? '...' : 'IA'}
-                                        </Button>
-                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -5650,12 +5261,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
                                       placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepTitle ? esItemsRef[idx].prepTitle : "Ej: Mejora tu Velocidad de Lectura"}
                                     />
-                                    {adminEntLang !== 'es' && (esItemsRef[idx]?.prepTitle || item.prepTitle) && (
-                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepTitle-${idx}`}
-                                        onClick={() => translateField(esItemsRef[idx]?.prepTitle || item.prepTitle || "", adminEntLang, `item-prepTitle-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepTitle = t; setEntrenamientoItems(updated); })}>
-                                        {translatingField === `item-prepTitle-${idx}` ? '...' : 'IA'}
-                                      </Button>
-                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -5673,12 +5278,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
                                       placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepSubtitle ? esItemsRef[idx].prepSubtitle : "Ej: ¡Mejora tu lectura rápidamente!"}
                                     />
-                                    {adminEntLang !== 'es' && (esItemsRef[idx]?.prepSubtitle || item.prepSubtitle) && (
-                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepSub-${idx}`}
-                                        onClick={() => translateField(esItemsRef[idx]?.prepSubtitle || item.prepSubtitle || "", adminEntLang, `item-prepSub-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepSubtitle = t; setEntrenamientoItems(updated); })}>
-                                        {translatingField === `item-prepSub-${idx}` ? '...' : 'IA'}
-                                      </Button>
-                                    )}
                                   </div>
                                 </div>
                                 <div>
@@ -5695,12 +5294,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepInstructions ? esItemsRef[idx].prepInstructions : "Ej: Observa las palabras sin leer en voz alta..."}
                                       rows={2}
                                     />
-                                    {adminEntLang !== 'es' && (esItemsRef[idx]?.prepInstructions || item.prepInstructions) && (
-                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0 self-start" disabled={translatingField === `item-prepInst-${idx}`}
-                                        onClick={() => translateField(esItemsRef[idx]?.prepInstructions || item.prepInstructions || "", adminEntLang, `item-prepInst-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepInstructions = t; setEntrenamientoItems(updated); })}>
-                                        {translatingField === `item-prepInst-${idx}` ? '...' : 'IA'}
-                                      </Button>
-                                    )}
                                   </div>
                                 </div>
                                 <div>
@@ -5716,12 +5309,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
                                       placeholder={adminEntLang !== 'es' && esItemsRef[idx]?.prepButtonText ? esItemsRef[idx].prepButtonText : "Empezar"}
                                     />
-                                    {adminEntLang !== 'es' && (esItemsRef[idx]?.prepButtonText || item.prepButtonText) && (
-                                      <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 shrink-0" disabled={translatingField === `item-prepBtn-${idx}`}
-                                        onClick={() => translateField(esItemsRef[idx]?.prepButtonText || item.prepButtonText || "", adminEntLang, `item-prepBtn-${idx}`, (t) => { const updated = [...entrenamientoItems]; updated[idx].prepButtonText = t; setEntrenamientoItems(updated); })}>
-                                        {translatingField === `item-prepBtn-${idx}` ? '...' : 'IA'}
-                                      </Button>
-                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -5781,7 +5368,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             <Button
                               onClick={async () => {
                                 try {
-                                  const isNewLang = adminEntLang !== 'es' && item.lang !== adminEntLang;
+                                  const isNewLang = adminEntLang !== 'es' && (item as any).lang !== adminEntLang;
                                   const payload = { ...item, lang: adminEntLang, categoria: entrenamientoCategory };
                                   let res;
                                   if (isNewLang) {
