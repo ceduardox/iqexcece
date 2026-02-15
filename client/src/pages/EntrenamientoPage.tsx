@@ -55,17 +55,17 @@ export default function EntrenamientoPage() {
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   const { data: pageData } = useQuery<{ page: EntrenamientoPageData }>({
-    queryKey: ["/api/entrenamiento", categoria, "page", lang],
+    queryKey: ["/api/entrenamiento", categoria, "page"],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/${categoria}/page?lang=${lang}`);
+      const res = await fetch(`/api/entrenamiento/${categoria}/page?lang=es`);
       return res.json();
     },
   });
 
   const { data: itemsData } = useQuery<{ items: EntrenamientoItem[] }>({
-    queryKey: ["/api/entrenamiento", categoria, "items", lang],
+    queryKey: ["/api/entrenamiento", categoria, "items"],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/${categoria}/items?lang=${lang}`);
+      const res = await fetch(`/api/entrenamiento/${categoria}/items?lang=es`);
       return res.json();
     },
   });
@@ -87,7 +87,7 @@ export default function EntrenamientoPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
-    fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
+    fetch(`/api/page-styles/entrenamiento-page`)
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
@@ -98,7 +98,7 @@ export default function EntrenamientoPage() {
       })
       .catch(() => { clearTimeout(timeout); setStylesLoaded(true); });
     return () => clearTimeout(timeout);
-  }, [lang, categoria]);
+  }, [categoria]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -196,7 +196,7 @@ export default function EntrenamientoPage() {
             const s = getResolvedStyle("bannerText");
             return { color: s?.textColor || "#fff", fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
           })()}>
-            {page?.bannerText || "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!"}
+            {t("entrenamiento.bannerText")}
           </p>
         </motion.div>
 
@@ -211,20 +211,20 @@ export default function EntrenamientoPage() {
               const s = getResolvedStyle("pageTitle");
               return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
             })()}>
-              {page?.pageTitle || "Entrenamientos"}
+              {t("entrenamiento.pageTitle")}
             </h1>
             <p className="text-slate-500" style={(() => {
               const s = getResolvedStyle("pageDesc");
               return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
             })()}>
-              {page?.pageDescription || "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"}
+              {t("entrenamiento.pageDesc")}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:max-w-3xl md:mx-auto">
             {items.length === 0 && (
               <div className="text-center py-12 text-slate-500 col-span-full">
-                <p>No hay entrenamientos disponibles aún.</p>
+                <p>{t("entrenamiento.noItems")}</p>
               </div>
             )}
 
@@ -296,7 +296,7 @@ export default function EntrenamientoPage() {
                           textAlign: (ts?.textAlign as any) || undefined,
                         }}
                       >
-                        {item.title}
+                        {t(`entrenamiento.cardTitle_${item.tipoEjercicio}`, { defaultValue: item.title })}
                       </h3>
                       {item.description && (
                         <p
@@ -307,7 +307,7 @@ export default function EntrenamientoPage() {
                             fontSize: ds?.fontSize ? `${ds.fontSize}px` : undefined,
                           }}
                         >
-                          {item.description}
+                          {t(`entrenamiento.cardDesc_${item.tipoEjercicio}`, { defaultValue: item.description })}
                         </p>
                       )}
                       <div className="mt-auto flex justify-end">
@@ -325,7 +325,7 @@ export default function EntrenamientoPage() {
                           })()}
                           whileTap={editorMode ? undefined : { scale: 0.95 }}
                         >
-                          {bs?.buttonText || "Iniciar"}
+                          {t("entrenamiento.startBtn")}
                           <ChevronRight className="w-3.5 h-3.5" />
                         </motion.button>
                       </div>

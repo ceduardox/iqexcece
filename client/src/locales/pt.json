@@ -506,5 +506,28 @@
     "notEqual": "Não são iguais",
     "yesEqual": "Sim, são iguais",
     "startGame": "Iniciar Jogo"
+  },
+  "entrenamiento": {
+    "pageTitle": "Treinamentos",
+    "pageDesc": "Melhore sua velocidade de percepção visual e fortaleça suas habilidades cognitivas",
+    "bannerText": "Aproveite agora exercícios de treinamento gratuitos por tempo limitado!",
+    "startBtn": "Iniciar",
+    "noItems": "Nenhum treinamento disponível ainda.",
+    "cardTitle_velocidad": "MELHORE SUA VELOCIDADE DE LEITURA",
+    "cardDesc_velocidad": "Treine sua velocidade de leitura",
+    "cardTitle_numeros": "IDENTIFIQUE RAPIDAMENTE NÚMEROS E LETRAS",
+    "cardDesc_numeros": "Treinamento de identificação",
+    "cardTitle_aceleracion_lectura": "ACELERAÇÃO DE LEITURA VISUAL",
+    "cardDesc_aceleracion_lectura": "Acelere sua leitura visual",
+    "cardTitle_reconocimiento_visual": "ACELERE AO MÁXIMO SUA LEITURA",
+    "cardDesc_reconocimiento_visual": "Reconhecimento visual",
+    "cardTitle_neurosync": "NeuroSync",
+    "cardDesc_neurosync": "Sincronização neural",
+    "cardTitle_neurolink": "NeuroLink Pro",
+    "cardDesc_neurolink": "Link neural",
+    "cardTitle_memoryflash": "Memory Flash",
+    "cardDesc_memoryflash": "Memória visual",
+    "cardTitle_neurolector": "Neuro Leitor Pro",
+    "cardDesc_neurolector": "Leitura rápida"
   }
 }
