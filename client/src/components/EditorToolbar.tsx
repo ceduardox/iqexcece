@@ -397,19 +397,19 @@ export function EditorToolbar({
                 <div className="text-center text-gray-400 text-xs">
                   Margen: T:{currentStyle.marginTop || 0} L:{currentStyle.marginLeft || 0}
                 </div>
-                {selectedElement?.startsWith("card-") && (
+                {(selectedElement?.startsWith("card-") || selectedElement?.startsWith("title-") || selectedElement?.startsWith("btn-") || selectedElement?.startsWith("desc-") || selectedElement?.startsWith("icon-")) && (
                   <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-700">
                     <span className="text-gray-400 text-xs w-16">Altura:</span>
                     <Slider
-                      value={[currentStyle.cardHeight || 100]}
+                      value={[currentStyle.cardHeight || 120]}
                       onValueChange={([val]) => updateStyle({ cardHeight: val })}
                       min={60}
-                      max={200}
+                      max={600}
                       step={5}
                       className="flex-1"
                       data-testid="slider-card-height"
                     />
-                    <span className="text-white text-xs w-10">{currentStyle.cardHeight || 100}px</span>
+                    <span className="text-white text-xs w-10">{currentStyle.cardHeight || 120}px</span>
                   </div>
                 )}
                 {(selectedElement?.startsWith("spacer-") || selectedElement?.includes("section") || selectedElement === "hero-section") && (

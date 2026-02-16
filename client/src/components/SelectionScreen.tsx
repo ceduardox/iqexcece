@@ -154,6 +154,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (style.fontWeight) result.fontWeight = style.fontWeight;
     if (style.borderRadius) result.borderRadius = style.borderRadius;
     if (style.sectionHeight) result.minHeight = style.sectionHeight;
+    if (style.cardHeight) result.minHeight = style.cardHeight;
     
     return result;
   }, [getResolvedStyle]);
@@ -421,7 +422,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               
               <div 
                 onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
-                className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-tests")}`}
+                className={`relative rounded-2xl ${editorMode ? '' : 'overflow-hidden'} cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-tests")}`}
                 style={getElementStyle("card-tests", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
                 data-testid="button-option-tests"
               >
@@ -492,7 +493,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             >
               <div 
                 onClick={(e) => editorMode ? handleElementClick("card-training", e) : handleOptionSelect("training")}
-                className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-training")}`}
+                className={`relative rounded-2xl ${editorMode ? '' : 'overflow-hidden'} cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-training")}`}
                 style={getElementStyle("card-training", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
                 data-testid="button-option-training"
               >
