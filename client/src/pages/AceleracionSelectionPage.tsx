@@ -315,21 +315,19 @@ export default function AceleracionSelectionPage() {
             </div>
 
             {/* Exercise info */}
-            {ejercicio?.titulo && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-6 text-center"
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 text-center"
+            >
+              <span 
+                className="inline-block px-4 py-2 rounded-full text-xs text-purple-600 font-medium"
+                style={{ background: "rgba(124, 58, 237, 0.08)" }}
               >
-                <span 
-                  className="inline-block px-4 py-2 rounded-full text-xs text-purple-600 font-medium"
-                  style={{ background: "rgba(124, 58, 237, 0.08)" }}
-                >
-                  {ejercicio.titulo}
-                </span>
-              </motion.div>
-            )}
+                {t("aceleracion.exerciseTitle")}
+              </span>
+            </motion.div>
           </div>
         )}
       </main>

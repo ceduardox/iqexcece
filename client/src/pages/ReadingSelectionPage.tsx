@@ -131,8 +131,9 @@ export default function ReadingSelectionPage() {
   const categoryLabel = categoryLabels[categoria] || "Pre escolar";
   const mainImage = defaultImages[categoria] || defaultImages.preescolar;
   
-  const recommendedTheme = themes[0];
-  const recommendedStatus = recommendedTheme ? getThemeStatus(recommendedTheme.temaNumero || 1, 0, progress, themes.length) : null;
+  const recommendedTheme = themes.find(t => !progress.completed.includes(t.temaNumero || 0)) || themes[0];
+  const recommendedIdx = themes.indexOf(recommendedTheme);
+  const recommendedStatus = recommendedTheme ? getThemeStatus(recommendedTheme.temaNumero || 1, recommendedIdx, progress, themes.length) : null;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

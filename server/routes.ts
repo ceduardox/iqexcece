@@ -419,7 +419,7 @@ export async function registerRoutes(
       }
     });
     
-    allThemes.sort((a, b) => (a.temaNumero || 1) - (b.temaNumero || 1));
+    allThemes.sort((a, b) => (b.temaNumero || 1) - (a.temaNumero || 1));
     
     res.json({ themes: allThemes });
   });
