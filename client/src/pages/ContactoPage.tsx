@@ -186,7 +186,7 @@ export default function ContactoPage() {
       subKey: "contact.whatsappSub",
       gradient: "linear-gradient(135deg, #25D366, #128C7E)",
       iconColor: "#fff",
-      action: () => window.open("https://wa.me/59178767696", "_blank"),
+      action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank"),
     },
     {
       id: "email",

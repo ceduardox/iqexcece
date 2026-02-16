@@ -181,7 +181,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   }, [setUserData, setLocation, playCard]);
 
   const handleWhatsApp = () => {
-    window.open("https://wa.me/59178767696", "_blank");
+    window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank");
   };
 
   const handleEmail = () => {
@@ -403,263 +403,267 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
         )}
 
-        <div className="px-5 pb-6 space-y-4 max-w-lg mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h2 
-              className={`text-base font-bold mb-3 ${getEditableClass("section-diagnostico")}`}
-              onClick={(e) => { if (editorMode) handleElementClick("section-diagnostico", e); }}
-              style={{ color: styles["section-diagnostico"]?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
+        <div className="px-5 pb-6 space-y-4 max-w-lg md:max-w-4xl mx-auto">
+          <div className="md:grid md:grid-cols-2 md:gap-4 space-y-4 md:space-y-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col"
             >
-              {t("home.sectionDiagnostico")}
-            </h2>
-            
-            <div 
-              onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
-              className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-tests")}`}
-              style={getElementStyle("card-tests", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
-              data-testid="button-option-tests"
-            >
-              <div className="p-4 flex items-start gap-3">
-                <div 
-                  className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-tests")}`}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-tests", e); }}}
-                  style={getElementStyle("icon-tests")}
-                >
-                  <img 
-                    src={styles["icon-tests"]?.imageUrl || avatar1Img} 
-                    alt="" 
-                    className="w-10 h-10 object-contain" 
-                    style={{ width: styles["icon-tests"]?.imageSize ? `${styles["icon-tests"].imageSize}%` : undefined }}
-                  />
+              <h2 
+                className={`text-base font-bold mb-3 md:hidden ${getEditableClass("section-diagnostico")}`}
+                onClick={(e) => { if (editorMode) handleElementClick("section-diagnostico", e); }}
+                style={{ color: styles["section-diagnostico"]?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
+              >
+                {t("home.sectionDiagnostico")}
+              </h2>
+              
+              <div 
+                onClick={(e) => editorMode ? handleElementClick("card-tests", e) : handleOptionSelect("tests")}
+                className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-tests")}`}
+                style={getElementStyle("card-tests", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
+                data-testid="button-option-tests"
+              >
+                <div className="p-4 flex items-start gap-3 flex-1">
+                  <div 
+                    className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-tests")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-tests", e); }}}
+                    style={getElementStyle("icon-tests")}
+                  >
+                    <img 
+                      src={styles["icon-tests"]?.imageUrl || avatar1Img} 
+                      alt="" 
+                      className="w-10 h-10 object-contain" 
+                      style={{ width: styles["icon-tests"]?.imageSize ? `${styles["icon-tests"].imageSize}%` : undefined }}
+                    />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <h3 
+                      className={`text-sm font-bold mb-0.5 ${getEditableClass("title-tests")}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-tests", e); }}}
+                      style={{ color: styles["title-tests"]?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
+                    >
+                      {t("home.cardTestsTitle")}
+                    </h3>
+                    <p 
+                      className={`text-xs leading-snug ${getEditableClass("desc-tests")}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-tests", e); }}}
+                      style={{ color: styles["desc-tests"]?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
+                    >
+                      {t("home.cardTestsDesc")}
+                    </p>
+                  </div>
                 </div>
                 
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 
-                    className={`text-sm font-bold mb-0.5 ${getEditableClass("title-tests")}`}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-tests", e); }}}
-                    style={{ color: styles["title-tests"]?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
+                <div className="px-4 pb-4">
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); } else { handleOptionSelect("tests"); }}}
+                    className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
+                    style={{ 
+                      fontSize: styles["btn-diagnostico"]?.fontSize || 12,
+                      ...getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")
+                    }}
+                    data-testid="button-iniciar-diagnostico"
                   >
-                    {t("home.cardTestsTitle")}
-                  </h3>
-                  <p 
-                    className={`text-xs leading-snug ${getEditableClass("desc-tests")}`}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-tests", e); }}}
-                    style={{ color: styles["desc-tests"]?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
-                  >
-                    {t("home.cardTestsDesc")}
-                  </p>
+                    <span 
+                      className={getEditableClass("icon-btn-diagnostico")}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-diagnostico", e); }}}
+                    >
+                      {styles["icon-btn-diagnostico"]?.imageUrl ? (
+                        <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} />
+                      ) : (
+                        <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
+                      )}
+                    </span>
+                    <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || t("home.btnDiagnostico")}</span>
+                  </motion.button>
                 </div>
               </div>
-              
-              <div className="px-4 pb-4">
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); } else { handleOptionSelect("tests"); }}}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
-                  style={{ 
-                    fontSize: styles["btn-diagnostico"]?.fontSize || 12,
-                    ...getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")
-                  }}
-                  data-testid="button-iniciar-diagnostico"
-                >
-                  <span 
-                    className={getEditableClass("icon-btn-diagnostico")}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-diagnostico", e); }}}
-                  >
-                    {styles["icon-btn-diagnostico"]?.imageUrl ? (
-                      <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} />
-                    ) : (
-                      <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
-                    )}
-                  </span>
-                  <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || t("home.btnDiagnostico")}</span>
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
-            <div 
-              onClick={(e) => editorMode ? handleElementClick("card-training", e) : handleOptionSelect("training")}
-              className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 ${getEditableClass("card-training")}`}
-              style={getElementStyle("card-training", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
-              data-testid="button-option-training"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="flex flex-col"
             >
-              <div className="p-4 flex items-start gap-3">
-                <div 
-                  className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-training")}`}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-training", e); }}}
-                  style={getElementStyle("icon-training")}
-                >
-                  <img 
-                    src={styles["icon-training"]?.imageUrl || trainingImg} 
-                    alt="" 
-                    className="w-10 h-10 object-contain"
-                    style={{ width: styles["icon-training"]?.imageSize ? `${styles["icon-training"].imageSize}%` : undefined }}
-                  />
+              <div 
+                onClick={(e) => editorMode ? handleElementClick("card-training", e) : handleOptionSelect("training")}
+                className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex-1 flex flex-col ${getEditableClass("card-training")}`}
+                style={getElementStyle("card-training", "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)")}
+                data-testid="button-option-training"
+              >
+                <div className="p-4 flex items-start gap-3 flex-1">
+                  <div 
+                    className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-training")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-training", e); }}}
+                    style={getElementStyle("icon-training")}
+                  >
+                    <img 
+                      src={styles["icon-training"]?.imageUrl || trainingImg} 
+                      alt="" 
+                      className="w-10 h-10 object-contain"
+                      style={{ width: styles["icon-training"]?.imageSize ? `${styles["icon-training"].imageSize}%` : undefined }}
+                    />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <h3 
+                      className={`text-sm font-bold mb-0.5 ${getEditableClass("title-training")}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-training", e); }}}
+                      style={{ color: styles["title-training"]?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
+                    >
+                      {t("home.cardTrainingTitle")}
+                    </h3>
+                    <p 
+                      className={`text-xs leading-snug ${getEditableClass("desc-training")}`}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-training", e); }}}
+                      style={{ color: styles["desc-training"]?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
+                    >
+                      {t("home.cardTrainingDesc")}
+                    </p>
+                  </div>
                 </div>
                 
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <h3 
-                    className={`text-sm font-bold mb-0.5 ${getEditableClass("title-training")}`}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-training", e); }}}
-                    style={{ color: styles["title-training"]?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
+                <div className="px-4 pb-4">
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); } else { handleOptionSelect("training"); }}}
+                    className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
+                    style={{ 
+                      fontSize: styles["btn-entrenamiento"]?.fontSize || 12,
+                      ...getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
+                    }}
+                    data-testid="button-iniciar-entrenamiento"
                   >
-                    {t("home.cardTrainingTitle")}
-                  </h3>
-                  <p 
-                    className={`text-xs leading-snug ${getEditableClass("desc-training")}`}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-training", e); }}}
-                    style={{ color: styles["desc-training"]?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
-                  >
-                    {t("home.cardTrainingDesc")}
-                  </p>
+                    <span 
+                      className={getEditableClass("icon-btn-entrenamiento")}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-entrenamiento", e); }}}
+                    >
+                      {styles["icon-btn-entrenamiento"]?.imageUrl ? (
+                        <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
+                      ) : (
+                        <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
+                      )}
+                    </span>
+                    <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || t("home.btnEntrenamiento")}</span>
+                  </motion.button>
                 </div>
               </div>
-              
-              <div className="px-4 pb-4">
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); } else { handleOptionSelect("training"); }}}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
-                  style={{ 
-                    fontSize: styles["btn-entrenamiento"]?.fontSize || 12,
-                    ...getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
-                  }}
-                  data-testid="button-iniciar-entrenamiento"
-                >
-                  <span 
-                    className={getEditableClass("icon-btn-entrenamiento")}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-entrenamiento", e); }}}
-                  >
-                    {styles["icon-btn-entrenamiento"]?.imageUrl ? (
-                      <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
-                    ) : (
-                      <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
-                    )}
-                  </span>
-                  <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || t("home.btnEntrenamiento")}</span>
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); }}
-            className={`rounded-2xl border border-purple-100 p-4 shadow-sm ${getEditableClass("card-metodox")}`}
-            style={getElementStyle("card-metodox", "white")}
-          >
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); }}
+              className={`rounded-2xl border border-purple-100 p-4 shadow-sm flex flex-col ${getEditableClass("card-metodox")}`}
+              style={getElementStyle("card-metodox", "white")}
+            >
+              <div className="flex-1">
+                <h3 
+                  className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
+                  style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
+                >
+                  {t("home.metodoX")}
+                </h3>
+                <p 
+                  className={`text-xs ${getEditableClass("desc-metodox")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
+                  style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
+                >
+                  {t("home.metodoXDesc")}
+                </p>
+              </div>
+              
+              <button 
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); }}}
+                className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
+                style={{ 
+                  fontSize: styles["btn-metodo"]?.fontSize || 12,
+                  ...getElementStyle("btn-metodo")
+                }}
+                data-testid="button-conocer-metodo"
+              >
+                <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || t("home.btnMetodo")}</span>
+                <span 
+                  className={getEditableClass("icon-btn-metodo")}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
+                >
+                  {styles["icon-btn-metodo"]?.imageUrl ? (
+                    <img src={styles["icon-btn-metodo"].imageUrl} alt="" style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
+                  ) : (
+                    <ChevronRight style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
+                  )}
+                </span>
+              </button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm flex flex-col"
+            >
               <h3 
-                className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
-                style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
+                className={`text-base font-bold mb-3 ${getEditableClass("title-contacto")}`}
+                onClick={(e) => { if (editorMode) handleElementClick("title-contacto", e); }}
+                style={{ color: styles["title-contacto"]?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
               >
-                {t("home.metodoX")}
+                {t("home.contactanos")}
               </h3>
-              <p 
-                className={`text-xs ${getEditableClass("desc-metodox")}`}
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
-                style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
-              >
-                {t("home.metodoXDesc")}
-              </p>
-            </div>
-            
-            <button 
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); }}}
-              className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
-              style={{ 
-                fontSize: styles["btn-metodo"]?.fontSize || 12,
-                ...getElementStyle("btn-metodo")
-              }}
-              data-testid="button-conocer-metodo"
-            >
-              <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || t("home.btnMetodo")}</span>
-              <span 
-                className={getEditableClass("icon-btn-metodo")}
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
-              >
-                {styles["icon-btn-metodo"]?.imageUrl ? (
-                  <img src={styles["icon-btn-metodo"].imageUrl} alt="" style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
-                ) : (
-                  <ChevronRight style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
-                )}
-              </span>
-            </button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm"
-          >
-            <h3 
-              className={`text-base font-bold mb-3 ${getEditableClass("title-contacto")}`}
-              onClick={(e) => { if (editorMode) handleElementClick("title-contacto", e); }}
-              style={{ color: styles["title-contacto"]?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
-            >
-              {t("home.contactanos")}
-            </h3>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
-                style={{ 
-                  fontSize: styles["btn-whatsapp"]?.fontSize || 12,
-                  ...getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")
-                }}
-                data-testid="button-whatsapp"
-              >
-                <span 
-                  className={getEditableClass("icon-btn-whatsapp")}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-whatsapp", e); }}}
-                >
-                  {styles["icon-btn-whatsapp"]?.imageUrl ? (
-                    <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
-                  ) : (
-                    <MessageCircle style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
-                  )}
-                </span>
-                <span className="whitespace-pre-line">{styles["btn-whatsapp"]?.buttonText || "WhatsApp"}</span>
-              </button>
               
-              <button
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
-                style={{ 
-                  fontSize: styles["btn-email"]?.fontSize || 12,
-                  ...getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")
-                }}
-                data-testid="button-email"
-              >
-                <span 
-                  className={getEditableClass("icon-btn-email")}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-email", e); }}}
+              <div className="flex gap-2 flex-1 items-end">
+                <button
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
+                  style={{ 
+                    fontSize: styles["btn-whatsapp"]?.fontSize || 12,
+                    ...getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")
+                  }}
+                  data-testid="button-whatsapp"
                 >
-                  {styles["icon-btn-email"]?.imageUrl ? (
-                    <img src={styles["icon-btn-email"].imageUrl} alt="" style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
-                  ) : (
-                    <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
-                  )}
-                </span>
-                <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || t("home.email")}</span>
-              </button>
-            </div>
-          </motion.div>
+                  <span 
+                    className={getEditableClass("icon-btn-whatsapp")}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-whatsapp", e); }}}
+                  >
+                    {styles["icon-btn-whatsapp"]?.imageUrl ? (
+                      <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
+                    ) : (
+                      <MessageCircle style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
+                    )}
+                  </span>
+                  <span className="whitespace-pre-line">{styles["btn-whatsapp"]?.buttonText || "WhatsApp"}</span>
+                </button>
+                
+                <button
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
+                  style={{ 
+                    fontSize: styles["btn-email"]?.fontSize || 12,
+                    ...getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")
+                  }}
+                  data-testid="button-email"
+                >
+                  <span 
+                    className={getEditableClass("icon-btn-email")}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-email", e); }}}
+                  >
+                    {styles["icon-btn-email"]?.imageUrl ? (
+                      <img src={styles["icon-btn-email"].imageUrl} alt="" style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
+                    ) : (
+                      <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
+                    )}
+                  </span>
+                  <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || t("home.email")}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </main>
 
