@@ -269,6 +269,7 @@ export default function ReadingSelectionPage() {
           <div className="space-y-2.5">
             {themes.map((theme, index) => {
               const temaNum = theme.temaNumero || index + 1;
+              const displayNum = index + 1;
               const themeStatus = getThemeStatus(temaNum, index, progress, themes.length);
               const isLocked = themeStatus.status === "locked";
               const isCompleted = themeStatus.status === "completed";
@@ -283,7 +284,7 @@ export default function ReadingSelectionPage() {
                   transition={{ delay: 0.1 + index * 0.06 }}
                   onClick={() => handleReadingSelect(temaNum, themeStatus.status)}
                   className={`cursor-pointer ${isLocked ? "opacity-60" : ""}`}
-                  data-testid={`card-reading-${String(temaNum).padStart(2, '0')}`}
+                  data-testid={`card-reading-${String(displayNum).padStart(2, '0')}`}
                 >
                   <div
                     className="relative rounded-2xl overflow-hidden border"
@@ -311,7 +312,7 @@ export default function ReadingSelectionPage() {
                         {isPerfect ? (
                           <Star className="w-5 h-5 fill-current" style={{ color: "#f59e0b" }} />
                         ) : (
-                          String(temaNum).padStart(2, '0')
+                          String(displayNum).padStart(2, '0')
                         )}
                       </div>
                       
@@ -320,7 +321,7 @@ export default function ReadingSelectionPage() {
                           className="text-[10px] font-medium block mb-0.5"
                           style={{ color: "#9ca3af" }}
                         >
-                          {t("tests.reading")} {String(temaNum).padStart(2, '0')}
+                          {t("tests.reading")} {String(displayNum).padStart(2, '0')}
                         </span>
                         <h3 
                           className="text-sm font-bold truncate"

@@ -406,10 +406,12 @@ export async function registerRoutes(
         }))
       : [];
     
+    const isAdmin = req.query.admin === 'true';
     const savedThemes = savedContents.map(c => ({
       temaNumero: c.temaNumero,
       title: c.title,
-      categoryImage: c.categoryImage || c.imageUrl
+      categoryImage: c.categoryImage || c.imageUrl,
+      isActive: c.isActive !== false
     }));
     
     const allThemes = [...savedThemes];
@@ -421,7 +423,30 @@ export async function registerRoutes(
     
     allThemes.sort((a, b) => (b.temaNumero || 1) - (a.temaNumero || 1));
     
-    res.json({ themes: allThemes });
+    const filteredThemes = isAdmin ? allThemes : allThemes.filter(t => t.isActive !== false);
+    
+    res.json({ themes: filteredThemes });
+  });
+
+  // Toggle reading theme active status (admin)
+  app.patch("/api/admin/reading/toggle-active", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const { categoria, temaNumero, isActive } = req.body;
+      await db.update(readingContents)
+        .set({ isActive: isActive })
+        .where(and(
+          eq(readingContents.categoria, categoria),
+          eq(readingContents.temaNumero, temaNumero)
+        ));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to toggle" });
+    }
   });
 
   // Save reading content (admin)

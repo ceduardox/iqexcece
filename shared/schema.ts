@@ -87,6 +87,7 @@ export const readingContents = pgTable("reading_contents", {
   pageSmallImage: text("page_small_image"),
   categoryImage: text("category_image"),
   questions: text("questions").notNull(),
+  isActive: boolean("is_active").default(true),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

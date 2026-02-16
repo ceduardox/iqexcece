@@ -64,7 +64,7 @@ export default function GestionPage() {
   const [resultFilter, setResultFilter] = useState<"all" | "preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("all");
   const [contentCategory, setContentCategory] = useState<"preescolar" | "ninos" | "adolescentes" | "universitarios" | "profesionales" | "adulto_mayor">("preescolar");
   const [selectedTema, setSelectedTema] = useState(1);
-  const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string}[]>([]);
+  const [availableThemes, setAvailableThemes] = useState<{temaNumero: number; title: string; isActive?: boolean}[]>([]);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [expandedCerebralResult, setExpandedCerebralResult] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
@@ -607,7 +607,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   const loadThemes = async () => {
     try {
-      const res = await fetch(`/api/reading/${contentCategory}/themes`);
+      const res = await fetch(`/api/reading/${contentCategory}/themes?admin=true`);
       const data = await res.json();
       if (data.themes && data.themes.length > 0) {
         setAvailableThemes(data.themes);
@@ -2593,16 +2593,36 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <label className="text-white/60 text-sm mb-1 block">Tema de lectura</label>
                 <div className="flex flex-wrap gap-2 items-center">
                   {availableThemes.map((theme) => (
-                    <Button
-                      key={theme.temaNumero}
-                      size="sm"
-                      onClick={() => setSelectedTema(theme.temaNumero)}
-                      variant={selectedTema === theme.temaNumero ? "default" : "outline"}
-                      className={selectedTema === theme.temaNumero ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
-                      data-testid={`button-tema-${theme.temaNumero}`}
-                    >
-                      Tema {String(theme.temaNumero).padStart(2, '0')}
-                    </Button>
+                    <div key={theme.temaNumero} className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedTema(theme.temaNumero)}
+                        variant={selectedTema === theme.temaNumero ? "default" : "outline"}
+                        className={`${selectedTema === theme.temaNumero ? "bg-teal-600" : "border-teal-500/30 text-teal-400"} ${theme.isActive === false ? "opacity-40 line-through" : ""}`}
+                        data-testid={`button-tema-${theme.temaNumero}`}
+                      >
+                        Tema {String(theme.temaNumero).padStart(2, '0')}
+                      </Button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newActive = theme.isActive === false ? true : false;
+                          try {
+                            await fetch("/api/admin/reading/toggle-active", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                              body: JSON.stringify({ categoria: contentCategory, temaNumero: theme.temaNumero, isActive: newActive }),
+                            });
+                            setAvailableThemes(prev => prev.map(t => t.temaNumero === theme.temaNumero ? { ...t, isActive: newActive } : t));
+                          } catch {}
+                        }}
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${theme.isActive === false ? "bg-red-500/30 text-red-400" : "bg-green-500/30 text-green-400"}`}
+                        title={theme.isActive === false ? "Activar" : "Desactivar"}
+                        data-testid={`button-toggle-tema-${theme.temaNumero}`}
+                      >
+                        {theme.isActive === false ? "✕" : "✓"}
+                      </button>
+                    </div>
                   ))}
                   <Button
                     size="sm"
