@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
@@ -22,7 +22,7 @@ export function BottomNavBar() {
     if (location.startsWith("/tests") || location.startsWith("/age-selection")) return "tests";
     if (location.startsWith("/entrenamiento")) return "entrena";
     if (location.startsWith("/blog")) return "mas";
-    if (location.startsWith("/a-leer-bolivia")) return "mas";
+    if (location.startsWith("/metodo-x")) return "mas";
     if (location.startsWith("/contacto")) return "mas";
     return "";
   };
@@ -97,14 +97,14 @@ export function BottomNavBar() {
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                 </button>
                 <button
-                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/a-leer-bolivia"); }}
+                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/metodo-x"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 active:bg-purple-50"
-                  data-testid="dropdown-item-aleer"
+                  data-testid="dropdown-item-metodox"
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #d1fae5, #cffafe)" }}>
-                    <BookOpen className="w-4 h-4 text-emerald-500" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #ede9fe, #e0e7ff)" }}>
+                    <Zap className="w-4 h-4 text-purple-500" />
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">{t("nav.aleerBolivia")}</span>
+                  <span className="text-sm font-semibold text-gray-700">{t("home.metodoX")}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
                 </button>
                 <button

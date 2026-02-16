@@ -44,6 +44,7 @@ import ProgresoPage from "@/pages/ProgresoPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
 import ALeerBoliviaPage from "@/pages/ALeerBoliviaPage";
+import MetodoXPage from "@/pages/MetodoXPage";
 import ContactoPage from "@/pages/ContactoPage";
 import NotFound from "@/pages/not-found";
 
@@ -91,6 +92,7 @@ function Router() {
       <Route path="/blog" component={BlogPage}/>
       <Route path="/blog/:id" component={BlogPostPage}/>
       <Route path="/a-leer-bolivia" component={ALeerBoliviaPage}/>
+      <Route path="/metodo-x" component={MetodoXPage}/>
       <Route path="/contacto" component={ContactoPage}/>
       <Route component={NotFound} />
     </Switch>

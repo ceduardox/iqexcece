@@ -560,8 +560,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); }}
-              className={`rounded-2xl border border-purple-100 p-4 shadow-sm flex flex-col ${getEditableClass("card-metodox")}`}
+              onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); else setLocation("/metodo-x"); }}
+              className={`rounded-2xl border border-purple-100 p-4 shadow-sm flex flex-col cursor-pointer ${getEditableClass("card-metodox")}`}
               style={getElementStyle("card-metodox", "white")}
             >
               <div className="flex-1">
@@ -582,7 +582,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </div>
               
               <button 
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); }}}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); } else { e.stopPropagation(); setLocation("/metodo-x"); }}}
                 className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
                 style={{ 
                   fontSize: styles["btn-metodo"]?.fontSize || 12,
