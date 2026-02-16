@@ -403,8 +403,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           </div>
         )}
 
-        <div className="px-5 pb-6 space-y-4 max-w-lg md:max-w-4xl mx-auto">
-          <div className="md:grid md:grid-cols-2 md:gap-4 space-y-4 md:space-y-0">
+        <div className="px-5 pb-6 space-y-4 max-w-lg md:max-w-full md:px-10 mx-auto">
+          <div className="md:grid md:grid-cols-2 md:gap-6 space-y-4 md:space-y-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
