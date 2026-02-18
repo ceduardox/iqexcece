@@ -164,7 +164,6 @@ export default function MetodoXPage() {
     { id: "programs-section", label: "Programas fondo" },
     { id: "programs-title", label: "Programas título" },
     ...programs.map((_, i) => [
-      { id: `prog-pill-${i}`, label: `Prog ${i + 1} pill` },
       { id: `prog-card-${i}`, label: `Prog ${i + 1} card` },
       { id: `prog-image-${i}`, label: `Prog ${i + 1} imagen` },
       { id: `prog-obj-icon-${i}`, label: `Prog ${i + 1} icono objetivo` },
@@ -493,7 +492,6 @@ export default function MetodoXPage() {
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-20 -right-20 w-60 h-60 rounded-full" style={{ background: "radial-gradient(circle, white, transparent)" }} />
             <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, white, transparent)" }} />
-            <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0], opacity: [0, 0.08, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/2 left-1/3 w-32 h-32 rounded-full" style={{ background: "radial-gradient(circle, #06b6d4, transparent)" }} />
           </div>
 
           <div className="relative max-w-5xl mx-auto">
@@ -501,7 +499,7 @@ export default function MetodoXPage() {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={`mb-6 ${getEditableClass("programs-title")}`}
+              className={`mb-8 ${getEditableClass("programs-title")}`}
               onClick={(e) => { if (editorMode) handleElementClick("programs-title", e); }}
               style={getElementStyle("programs-title")}
               data-testid="programs-title"
@@ -510,175 +508,141 @@ export default function MetodoXPage() {
               <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">{t("metodoX.programsTitle2")}</h2>
             </motion.div>
 
-            <div className="flex flex-wrap gap-2 mb-6">
-              {programs.map((prog, i) => (
-                <motion.button
-                  key={i}
-                  onClick={() => { playClick(); setActiveProg(i); }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`rounded-full px-4 py-2 text-xs font-bold transition-all flex items-center gap-2 ${getEditableClass(`prog-pill-${i}`)}`}
-                  style={{
-                    background: activeProg === i ? "white" : "rgba(255,255,255,0.15)",
-                    color: activeProg === i ? PROG_COLORS[i] : "white",
-                    boxShadow: activeProg === i ? "0 4px 15px rgba(0,0,0,0.2)" : "none",
-                    ...getElementStyle(`prog-pill-${i}`),
-                  }}
-                  data-testid={`button-prog-${i}`}
-                >
-                  <motion.span animate={activeProg === i ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black" style={{ background: activeProg === i ? PROG_COLORS[i] : "rgba(255,255,255,0.3)", color: "white" }}>X</motion.span>
-                  {prog.name}
-                </motion.button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 mb-6">
-              {programs.map((prog, i) => (
-                <div key={i} className="text-center" style={{ flex: "1 1 0", minWidth: 70 }}>
-                  <p className="text-[10px] text-white/60 font-medium">{prog.age}</p>
-                </div>
-              ))}
-            </div>
-
-            <AnimatePresence mode="wait">
+            {programs.map((prog, i) => (
               <motion.div
-                key={activeProg}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className={`rounded-2xl overflow-hidden ${getEditableClass(`prog-card-${activeProg}`)}`}
-                style={{ background: "white", boxShadow: "0 8px 30px rgba(0,0,0,0.25)", ...getElementStyle(`prog-card-${activeProg}`) }}
-                onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${activeProg}`, e); }}
-                data-testid={`prog-card-${activeProg}`}
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4 }}
+                className={`mb-10 last:mb-0 ${getEditableClass(`prog-card-${i}`)}`}
+                onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${i}`, e); }}
+                data-testid={`prog-card-${i}`}
               >
                 <div
-                  className={`w-full aspect-video bg-gray-200 flex items-center justify-center ${getEditableClass(`prog-image-${activeProg}`)}`}
+                  className={`w-full aspect-[16/9] md:aspect-[21/9] rounded-t-2xl bg-gray-700 flex items-end relative overflow-hidden ${getEditableClass(`prog-image-${i}`)}`}
                   style={{
-                    backgroundImage: resolveStyle(styles, `prog-image-${activeProg}`, isMobile)?.imageUrl ? `url(${resolveStyle(styles, `prog-image-${activeProg}`, isMobile)!.imageUrl})` : undefined,
+                    backgroundImage: resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl ? `url(${resolveStyle(styles, `prog-image-${i}`, isMobile)!.imageUrl})` : undefined,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
-                    ...getElementStyle(`prog-image-${activeProg}`),
+                    ...getElementStyle(`prog-image-${i}`),
                   }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-image-${activeProg}`, e); } }}
-                  data-testid={`prog-image-${activeProg}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-image-${i}`, e); } }}
+                  data-testid={`prog-image-${i}`}
                 >
-                  {!resolveStyle(styles, `prog-image-${activeProg}`, isMobile)?.imageUrl && (
-                    <p className="text-gray-400 text-xs">Usa el editor para agregar imagen</p>
+                  {!resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <p className="text-white/40 text-xs">Usa el editor para agregar imagen</p>
+                    </div>
                   )}
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-lg font-bold" style={{ color: PROG_COLORS[activeProg] }}>
-                      {programs[activeProg].name}
-                    </h3>
-                    <span className="w-7 h-7 rounded-full flex items-center justify-center font-black text-white text-xs" style={{ background: PROG_COLORS[activeProg] }}>X</span>
-                    <span className="text-xs text-gray-400 font-medium">{programs[activeProg].age}</span>
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }} />
+                  <div className="relative p-5 md:p-6 w-full flex flex-wrap items-end justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-2xl md:text-4xl font-black text-white leading-none">{prog.name}</h3>
+                      <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-white text-base md:text-xl" style={{ background: PROG_COLORS[i], boxShadow: `0 0 20px ${PROG_COLORS[i]}80` }}>X</motion.span>
+                      <span className="text-sm md:text-base text-white/70 font-medium">{prog.age}</span>
+                    </div>
+                    <div className="text-right max-w-[220px]">
+                      <p className="text-sm font-bold text-white">{prog.label}</p>
+                      <p className="text-[11px] text-white/60 leading-relaxed mt-1">{prog.desc}</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-700 mb-2">{programs[activeProg].label}</p>
-                  <p className="text-xs text-gray-500 leading-relaxed">{programs[activeProg].desc}</p>
+                </div>
+
+                <div
+                  className={`rounded-b-2xl overflow-hidden ${getEditableClass(`prog-detail-section-${i}`)}`}
+                  style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(10px)", ...getElementStyle(`prog-detail-section-${i}`) }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-detail-section-${i}`, e); } }}
+                  data-testid={`prog-detail-section-${i}`}
+                >
+                  <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5`}>
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <motion.div
+                        animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-obj-icon-${i}`)}`}
+                        style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-obj-icon-${i}`) }}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-icon-${i}`, e); } }}
+                        data-testid={`prog-obj-icon-${i}`}
+                      >
+                        {resolveStyle(styles, `prog-obj-icon-${i}`, isMobile)?.imageUrl ? (
+                          <img src={resolveStyle(styles, `prog-obj-icon-${i}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
+                        ) : (
+                          <Target className="w-7 h-7 text-white" />
+                        )}
+                      </motion.div>
+                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailObj")}</h4>
+                      <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
+                      <p className="text-[11px] text-white/70 leading-relaxed">{prog.obj}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <motion.div
+                        animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                        className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-bases-icon-${i}`)}`}
+                        style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-bases-icon-${i}`) }}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-icon-${i}`, e); } }}
+                        data-testid={`prog-bases-icon-${i}`}
+                      >
+                        {resolveStyle(styles, `prog-bases-icon-${i}`, isMobile)?.imageUrl ? (
+                          <img src={resolveStyle(styles, `prog-bases-icon-${i}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
+                        ) : (
+                          <Scan className="w-7 h-7 text-white" />
+                        )}
+                      </motion.div>
+                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailBases")}</h4>
+                      <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
+                      <p className="text-[11px] text-white/70 leading-relaxed">{prog.bases}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <motion.div animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)" }}>
+                        <CheckCircle2 className="w-7 h-7 text-white" />
+                      </motion.div>
+                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailComp")}</h4>
+                      <div className="space-y-1.5 mt-1">
+                        {prog.comps.map((comp, ci) => (
+                          <div key={ci} className="flex items-center gap-2 text-white/80">
+                            <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+                            <span className="text-[11px]">{comp}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/10 p-5">
+                    <h4 className="text-base font-bold text-white mb-4 italic">{t("metodoX.detailApp")}</h4>
+                    <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-3`}>
+                      {METHOD_APPS.map((m, mi) => {
+                        const MIcon = m.icon;
+                        return (
+                          <motion.div key={mi} className="flex flex-col items-center gap-2" whileHover={{ scale: 1.08 }}>
+                            <motion.div
+                              animate={{ y: [0, -4, 0], rotate: [0, 3, -3, 0] }}
+                              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: mi * 0.4 }}
+                              className={`w-12 h-12 rounded-xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
+                              style={{ background: "rgba(255,255,255,0.15)", ...getElementStyle(`method-app-icon-${mi}`) }}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`method-app-icon-${mi}`, e); } }}
+                              data-testid={`method-app-icon-${mi}`}
+                            >
+                              {resolveStyle(styles, `method-app-icon-${mi}`, isMobile)?.imageUrl ? (
+                                <img src={resolveStyle(styles, `method-app-icon-${mi}`, isMobile)!.imageUrl} alt="" className="w-6 h-6 object-contain" />
+                              ) : (
+                                <MIcon className="w-6 h-6 text-white" />
+                              )}
+                            </motion.div>
+                            <span className="text-[10px] font-semibold text-white/80 text-center">{m.label}</span>
+                            <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: mi * 0.2 }}><ChevronDown className="w-3 h-3 text-white/40" /></motion.div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
-            </AnimatePresence>
-
-            <motion.div
-              key={`detail-${activeProg}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
-              className={`mt-6 rounded-2xl overflow-hidden ${getEditableClass(`prog-detail-section-${activeProg}`)}`}
-              style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", ...getElementStyle(`prog-detail-section-${activeProg}`) }}
-              onClick={(e) => { if (editorMode) handleElementClick(`prog-detail-section-${activeProg}`, e); }}
-              data-testid={`prog-detail-section-${activeProg}`}
-            >
-              <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5`}>
-                <div className="flex flex-col items-center text-center gap-2">
-                  <motion.div
-                    animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-obj-icon-${activeProg}`)}`}
-                    style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-obj-icon-${activeProg}`) }}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-icon-${activeProg}`, e); } }}
-                    data-testid={`prog-obj-icon-${activeProg}`}
-                  >
-                    {resolveStyle(styles, `prog-obj-icon-${activeProg}`, isMobile)?.imageUrl ? (
-                      <img src={resolveStyle(styles, `prog-obj-icon-${activeProg}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
-                    ) : (
-                      <Target className="w-7 h-7 text-white" />
-                    )}
-                  </motion.div>
-                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailObj")}</h4>
-                  <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
-                  <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].obj}</p>
-                </div>
-
-                <div className="flex flex-col items-center text-center gap-2">
-                  <motion.div
-                    animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-bases-icon-${activeProg}`)}`}
-                    style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-bases-icon-${activeProg}`) }}
-                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-icon-${activeProg}`, e); } }}
-                    data-testid={`prog-bases-icon-${activeProg}`}
-                  >
-                    {resolveStyle(styles, `prog-bases-icon-${activeProg}`, isMobile)?.imageUrl ? (
-                      <img src={resolveStyle(styles, `prog-bases-icon-${activeProg}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
-                    ) : (
-                      <Scan className="w-7 h-7 text-white" />
-                    )}
-                  </motion.div>
-                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailBases")}</h4>
-                  <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
-                  <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].bases}</p>
-                </div>
-
-                <div className="flex flex-col items-center text-center gap-2">
-                  <motion.div animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)" }}>
-                    <CheckCircle2 className="w-7 h-7 text-white" />
-                  </motion.div>
-                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailComp")}</h4>
-                  <div className="space-y-1.5 mt-1">
-                    {programs[activeProg].comps.map((comp, ci) => (
-                      <div key={ci} className="flex items-center gap-2 text-white/80">
-                        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
-                        <span className="text-[11px]">{comp}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-white/10 p-5">
-                <h4 className="text-base font-bold text-white mb-4 italic">{t("metodoX.detailApp")}</h4>
-                <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-3`}>
-                  {METHOD_APPS.map((m, mi) => {
-                    const MIcon = m.icon;
-                    return (
-                      <motion.div key={mi} className="flex flex-col items-center gap-2" whileHover={{ scale: 1.08 }}>
-                        <motion.div
-                          animate={{ y: [0, -4, 0], rotate: [0, 3, -3, 0] }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: mi * 0.4 }}
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
-                          style={{ background: "rgba(255,255,255,0.15)", ...getElementStyle(`method-app-icon-${mi}`) }}
-                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`method-app-icon-${mi}`, e); } }}
-                          data-testid={`method-app-icon-${mi}`}
-                        >
-                          {resolveStyle(styles, `method-app-icon-${mi}`, isMobile)?.imageUrl ? (
-                            <img src={resolveStyle(styles, `method-app-icon-${mi}`, isMobile)!.imageUrl} alt="" className="w-6 h-6 object-contain" />
-                          ) : (
-                            <MIcon className="w-6 h-6 text-white" />
-                          )}
-                        </motion.div>
-                        <span className="text-[10px] font-semibold text-white/80 text-center">{m.label}</span>
-                        <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: mi * 0.2 }}><ChevronDown className="w-3 h-3 text-white/40" /></motion.div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
+            ))}
           </div>
         </div>
       </div>
