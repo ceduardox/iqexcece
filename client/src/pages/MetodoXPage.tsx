@@ -163,12 +163,13 @@ export default function MetodoXPage() {
     ]).flat(),
     { id: "programs-section", label: "Programas fondo" },
     { id: "programs-title", label: "Programas título" },
-    ...programs.map((_, i) => [
-      { id: `prog-card-${i}`, label: `Prog ${i + 1} card` },
-      { id: `prog-image-${i}`, label: `Prog ${i + 1} imagen` },
-      { id: `prog-obj-icon-${i}`, label: `Prog ${i + 1} icono objetivo` },
-      { id: `prog-bases-icon-${i}`, label: `Prog ${i + 1} icono bases` },
-      { id: `prog-detail-section-${i}`, label: `Prog ${i + 1} detalle fondo` },
+    ...programs.map((p, i) => [
+      { id: `prog-title-bg-${i}`, label: `${p.name} título fondo` },
+      { id: `prog-card-${i}`, label: `${p.name} card` },
+      { id: `prog-image-${i}`, label: `${p.name} imagen` },
+      { id: `prog-detail-section-${i}`, label: `${p.name} detalle fondo` },
+      { id: `prog-obj-icon-${i}`, label: `${p.name} icono objetivo` },
+      { id: `prog-bases-icon-${i}`, label: `${p.name} icono bases` },
     ]).flat(),
     ...METHOD_APPS.map((m, i) => ({ id: `method-app-icon-${i}`, label: `Método ${m.label} icono` })),
   ];
@@ -519,7 +520,12 @@ export default function MetodoXPage() {
                 onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${i}`, e); }}
                 data-testid={`prog-card-${i}`}
               >
-                <div className="rounded-t-2xl p-5 md:p-6" style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}dd, ${PROG_COLORS[i]}99)` }}>
+                <div
+                  className={`rounded-t-2xl p-5 md:p-6 ${getEditableClass(`prog-title-bg-${i}`)}`}
+                  style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}dd, ${PROG_COLORS[i]}99)`, ...getElementStyle(`prog-title-bg-${i}`) }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-title-bg-${i}`, e); } }}
+                  data-testid={`prog-title-bg-${i}`}
+                >
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <h3 className="text-2xl md:text-4xl font-black text-white leading-none">{prog.name}</h3>
