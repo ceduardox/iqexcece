@@ -519,8 +519,22 @@ export default function MetodoXPage() {
                 onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${i}`, e); }}
                 data-testid={`prog-card-${i}`}
               >
+                <div className="rounded-t-2xl p-5 md:p-6" style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}dd, ${PROG_COLORS[i]}99)` }}>
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-2xl md:text-4xl font-black text-white leading-none">{prog.name}</h3>
+                      <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-white text-base md:text-xl" style={{ background: "rgba(255,255,255,0.2)", boxShadow: `0 0 20px ${PROG_COLORS[i]}80` }}>X</motion.span>
+                      <span className="text-sm md:text-base text-white/70 font-medium">{prog.age}</span>
+                    </div>
+                    <div className="text-right max-w-[220px]">
+                      <p className="text-sm font-bold text-white">{prog.label}</p>
+                      <p className="text-[11px] text-white/60 leading-relaxed mt-1">{prog.desc}</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div
-                  className={`w-full aspect-[16/9] md:aspect-[21/9] rounded-t-2xl bg-gray-700 flex items-end relative overflow-hidden ${getEditableClass(`prog-image-${i}`)}`}
+                  className={`w-full aspect-[16/9] bg-gray-700 flex items-center justify-center ${getEditableClass(`prog-image-${i}`)}`}
                   style={{
                     backgroundImage: resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl ? `url(${resolveStyle(styles, `prog-image-${i}`, isMobile)!.imageUrl})` : undefined,
                     backgroundSize: "cover",
@@ -531,22 +545,8 @@ export default function MetodoXPage() {
                   data-testid={`prog-image-${i}`}
                 >
                   {!resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <p className="text-white/40 text-xs">Usa el editor para agregar imagen</p>
-                    </div>
+                    <p className="text-white/40 text-xs">Usa el editor para agregar imagen</p>
                   )}
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }} />
-                  <div className="relative p-5 md:p-6 w-full flex flex-wrap items-end justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-2xl md:text-4xl font-black text-white leading-none">{prog.name}</h3>
-                      <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-white text-base md:text-xl" style={{ background: PROG_COLORS[i], boxShadow: `0 0 20px ${PROG_COLORS[i]}80` }}>X</motion.span>
-                      <span className="text-sm md:text-base text-white/70 font-medium">{prog.age}</span>
-                    </div>
-                    <div className="text-right max-w-[220px]">
-                      <p className="text-sm font-bold text-white">{prog.label}</p>
-                      <p className="text-[11px] text-white/60 leading-relaxed mt-1">{prog.desc}</p>
-                    </div>
-                  </div>
                 </div>
 
                 <div
