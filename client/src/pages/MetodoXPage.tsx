@@ -164,6 +164,7 @@ export default function MetodoXPage() {
     { id: "programs-section", label: "Programas fondo" },
     { id: "programs-title", label: "Programas título" },
     ...programs.map((p, i) => [
+      { id: `prog-bg-${i}`, label: `${p.name} fondo exterior` },
       { id: `prog-title-bg-${i}`, label: `${p.name} título fondo` },
       { id: `prog-card-${i}`, label: `${p.name} card` },
       { id: `prog-image-${i}`, label: `${p.name} imagen` },
@@ -516,8 +517,14 @@ export default function MetodoXPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4 }}
-                className={`mb-10 last:mb-0 ${getEditableClass(`prog-card-${i}`)}`}
-                onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${i}`, e); }}
+                className={`mb-10 last:mb-0 rounded-2xl p-3 md:p-4 ${getEditableClass(`prog-bg-${i}`)}`}
+                style={{ background: "rgba(255,255,255,0.05)", ...getElementStyle(`prog-bg-${i}`) }}
+                onClick={(e) => { if (editorMode) handleElementClick(`prog-bg-${i}`, e); }}
+                data-testid={`prog-bg-${i}`}
+              >
+              <div
+                className={`${getEditableClass(`prog-card-${i}`)}`}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-card-${i}`, e); } }}
                 data-testid={`prog-card-${i}`}
               >
                 <div
@@ -647,6 +654,7 @@ export default function MetodoXPage() {
                     </div>
                   </div>
                 </div>
+              </div>
               </motion.div>
             ))}
           </div>
