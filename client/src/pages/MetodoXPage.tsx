@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Brain, Zap, TrendingUp, BarChart3, ChevronLeft, ChevronRight, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Brain, Zap, TrendingUp, BarChart3, ChevronLeft, ChevronRight, ArrowRight, ChevronDown, ChevronUp, Target, Scan, CheckCircle2, Eye, BookOpen, Network, Megaphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -130,10 +130,17 @@ export default function MetodoXPage() {
   ];
 
   const programs = [
-    { name: t("metodoX.prog1Name"), age: t("metodoX.prog1Age"), label: t("metodoX.prog1Label"), desc: t("metodoX.prog1Desc") },
-    { name: t("metodoX.prog2Name"), age: t("metodoX.prog2Age"), label: t("metodoX.prog2Label"), desc: t("metodoX.prog2Desc") },
-    { name: t("metodoX.prog3Name"), age: t("metodoX.prog3Age"), label: t("metodoX.prog3Label"), desc: t("metodoX.prog3Desc") },
-    { name: t("metodoX.prog4Name"), age: t("metodoX.prog4Age"), label: t("metodoX.prog4Label"), desc: t("metodoX.prog4Desc") },
+    { name: t("metodoX.prog1Name"), age: t("metodoX.prog1Age"), label: t("metodoX.prog1Label"), desc: t("metodoX.prog1Desc"), obj: t("metodoX.prog1Obj"), bases: t("metodoX.prog1Bases"), comps: [t("metodoX.prog1Comp1"), t("metodoX.prog1Comp2"), t("metodoX.prog1Comp3")] },
+    { name: t("metodoX.prog2Name"), age: t("metodoX.prog2Age"), label: t("metodoX.prog2Label"), desc: t("metodoX.prog2Desc"), obj: t("metodoX.prog2Obj"), bases: t("metodoX.prog2Bases"), comps: [t("metodoX.prog2Comp1"), t("metodoX.prog2Comp2"), t("metodoX.prog2Comp3")] },
+    { name: t("metodoX.prog3Name"), age: t("metodoX.prog3Age"), label: t("metodoX.prog3Label"), desc: t("metodoX.prog3Desc"), obj: t("metodoX.prog3Obj"), bases: t("metodoX.prog3Bases"), comps: [t("metodoX.prog3Comp1"), t("metodoX.prog3Comp2"), t("metodoX.prog3Comp3")] },
+    { name: t("metodoX.prog4Name"), age: t("metodoX.prog4Age"), label: t("metodoX.prog4Label"), desc: t("metodoX.prog4Desc"), obj: t("metodoX.prog4Obj"), bases: t("metodoX.prog4Bases"), comps: [t("metodoX.prog4Comp1"), t("metodoX.prog4Comp2"), t("metodoX.prog4Comp3")] },
+  ];
+
+  const METHOD_APPS = [
+    { key: "activacion", label: t("metodoX.detailActivacion"), icon: Zap },
+    { key: "decodificacion", label: t("metodoX.detailDecodificacion"), icon: Eye },
+    { key: "arquitectura", label: t("metodoX.detailArquitectura"), icon: Network },
+    { key: "proyeccion", label: t("metodoX.detailProyeccion"), icon: Megaphone },
   ];
 
   const PROG_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b"];
@@ -160,7 +167,11 @@ export default function MetodoXPage() {
       { id: `prog-pill-${i}`, label: `Prog ${i + 1} pill` },
       { id: `prog-card-${i}`, label: `Prog ${i + 1} card` },
       { id: `prog-image-${i}`, label: `Prog ${i + 1} imagen` },
+      { id: `prog-obj-icon-${i}`, label: `Prog ${i + 1} icono objetivo` },
+      { id: `prog-bases-icon-${i}`, label: `Prog ${i + 1} icono bases` },
+      { id: `prog-detail-section-${i}`, label: `Prog ${i + 1} detalle fondo` },
     ]).flat(),
+    ...METHOD_APPS.map((m, i) => ({ id: `method-app-icon-${i}`, label: `Método ${m.label} icono` })),
   ];
 
   const nextStep = () => setActiveStep((p) => (p + 1) % steps.length);
@@ -570,6 +581,97 @@ export default function MetodoXPage() {
                 </div>
               </motion.div>
             </AnimatePresence>
+
+            <motion.div
+              key={`detail-${activeProg}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
+              className={`mt-6 rounded-2xl overflow-hidden ${getEditableClass(`prog-detail-section-${activeProg}`)}`}
+              style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", ...getElementStyle(`prog-detail-section-${activeProg}`) }}
+              onClick={(e) => { if (editorMode) handleElementClick(`prog-detail-section-${activeProg}`, e); }}
+              data-testid={`prog-detail-section-${activeProg}`}
+            >
+              <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5`}>
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div
+                    className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-obj-icon-${activeProg}`)}`}
+                    style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-obj-icon-${activeProg}`) }}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-icon-${activeProg}`, e); } }}
+                    data-testid={`prog-obj-icon-${activeProg}`}
+                  >
+                    {resolveStyle(styles, `prog-obj-icon-${activeProg}`, isMobile)?.imageUrl ? (
+                      <img src={resolveStyle(styles, `prog-obj-icon-${activeProg}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
+                    ) : (
+                      <Target className="w-7 h-7 text-white" />
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailObj")}</h4>
+                  <ChevronDown className="w-3 h-3 text-white/50" />
+                  <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].obj}</p>
+                </div>
+
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div
+                    className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-bases-icon-${activeProg}`)}`}
+                    style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-bases-icon-${activeProg}`) }}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-icon-${activeProg}`, e); } }}
+                    data-testid={`prog-bases-icon-${activeProg}`}
+                  >
+                    {resolveStyle(styles, `prog-bases-icon-${activeProg}`, isMobile)?.imageUrl ? (
+                      <img src={resolveStyle(styles, `prog-bases-icon-${activeProg}`, isMobile)!.imageUrl} alt="" className="w-7 h-7 object-contain" />
+                    ) : (
+                      <Scan className="w-7 h-7 text-white" />
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailBases")}</h4>
+                  <ChevronDown className="w-3 h-3 text-white/50" />
+                  <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].bases}</p>
+                </div>
+
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)" }}>
+                    <CheckCircle2 className="w-7 h-7 text-white" />
+                  </div>
+                  <h4 className="text-sm font-bold text-white">{t("metodoX.detailComp")}</h4>
+                  <div className="space-y-1.5 mt-1">
+                    {programs[activeProg].comps.map((comp, ci) => (
+                      <div key={ci} className="flex items-center gap-2 text-white/80">
+                        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+                        <span className="text-[11px]">{comp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 p-5">
+                <h4 className="text-base font-bold text-white mb-4 italic">{t("metodoX.detailApp")}</h4>
+                <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-3`}>
+                  {METHOD_APPS.map((m, mi) => {
+                    const MIcon = m.icon;
+                    return (
+                      <div key={mi} className="flex flex-col items-center gap-2">
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
+                          style={{ background: "rgba(255,255,255,0.15)", ...getElementStyle(`method-app-icon-${mi}`) }}
+                          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`method-app-icon-${mi}`, e); } }}
+                          data-testid={`method-app-icon-${mi}`}
+                        >
+                          {resolveStyle(styles, `method-app-icon-${mi}`, isMobile)?.imageUrl ? (
+                            <img src={resolveStyle(styles, `method-app-icon-${mi}`, isMobile)!.imageUrl} alt="" className="w-6 h-6 object-contain" />
+                          ) : (
+                            <MIcon className="w-6 h-6 text-white" />
+                          )}
+                        </div>
+                        <span className="text-[10px] font-semibold text-white/80 text-center">{m.label}</span>
+                        <ChevronDown className="w-3 h-3 text-white/40" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
