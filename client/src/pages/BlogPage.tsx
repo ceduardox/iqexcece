@@ -407,7 +407,7 @@ export default function BlogPage() {
                 {featuredPost && !debouncedSearch && page === 1 && (
                   <motion.div
                     className="mb-5 rounded-2xl overflow-hidden cursor-pointer relative group"
-                    style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.1)" }}
+                    style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.15)" }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -415,7 +415,7 @@ export default function BlogPage() {
                     onClick={() => { playSound("card"); navigate(`/blog/${featuredPost.id}`); }}
                     data-testid={`card-featured-${featuredPost.id}`}
                   >
-                    <div className="relative h-52 md:h-64 overflow-hidden bg-gradient-to-br from-purple-400 to-cyan-400">
+                    <div className="relative h-56 md:h-72 overflow-hidden bg-gradient-to-br from-purple-400 to-cyan-400">
                       {featuredPost.imagenPortada ? (
                         <img
                           src={featuredPost.imagenPortada}
@@ -427,26 +427,36 @@ export default function BlogPage() {
                           <Sparkles className="w-16 h-16 text-white/30" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-5">
-                        {featuredPost.categoriaId && getCategoryName(featuredPost.categoriaId) && (
-                          <motion.span
-                            className="inline-block px-3 py-1 rounded-full text-[10px] font-bold text-white mb-2 backdrop-blur-sm"
-                            style={{ background: getCategoryColor(featuredPost.categoriaId) + "bb" }}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 }}
-                          >
-                            {getCategoryName(featuredPost.categoriaId)}
-                          </motion.span>
-                        )}
-                        <h2 className="text-lg md:text-xl font-bold text-white leading-tight mb-1.5 drop-shadow-sm">
-                          {featuredPost.titulo}
-                        </h2>
-                        <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 mb-2">
-                          {getExcerpt(featuredPost.contenido, featuredPost.descripcion)}
-                        </p>
-                        <div className="flex items-center gap-3 text-white/60 text-[10px]">
+                      {featuredPost.categoriaId && getCategoryName(featuredPost.categoriaId) && (
+                        <motion.span
+                          className="absolute top-3 left-3 inline-block px-3 py-1 rounded-full text-[10px] font-bold text-white backdrop-blur-sm"
+                          style={{ background: getCategoryColor(featuredPost.categoriaId) + "cc" }}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          {getCategoryName(featuredPost.categoriaId)}
+                        </motion.span>
+                      )}
+                    </div>
+                    <div className="relative p-5 pb-5" style={{ background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7c3aed 100%)" }}>
+                      <div className="flex justify-end mb-2">
+                        <span
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-white"
+                          style={{ background: "#2dd4bf", boxShadow: "0 2px 10px rgba(45,212,191,0.4)" }}
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          {featuredPost.createdAt ? `Publicado el ${formatDate(featuredPost.createdAt)}` : ""}
+                        </span>
+                      </div>
+                      <h2 className="text-lg md:text-xl font-bold text-white leading-tight mb-1.5">
+                        {featuredPost.titulo}
+                      </h2>
+                      <p className="text-white/75 text-xs md:text-sm leading-relaxed line-clamp-3 mb-3">
+                        {getExcerpt(featuredPost.contenido, featuredPost.descripcion)}
+                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-3 text-white/50 text-[10px]">
                           {featuredPost.autor && (
                             <span className="flex items-center gap-1">
                               <User className="w-3 h-3" />
@@ -454,25 +464,28 @@ export default function BlogPage() {
                             </span>
                           )}
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(featuredPost.createdAt)}
-                          </span>
-                          <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {estimateReadingTime(featuredPost.contenido)} min
                           </span>
                         </div>
+                        <span
+                          className="inline-flex items-center gap-1 px-5 py-2 rounded-full text-xs font-bold text-white transition-transform group-hover:translate-x-0.5"
+                          style={{ background: "#2dd4bf", boxShadow: "0 2px 10px rgba(45,212,191,0.4)" }}
+                          data-testid={`link-read-featured-${featuredPost.id}`}
+                        >
+                          {t("blog.readMore")} <ChevronRight className="w-4 h-4" />
+                        </span>
                       </div>
                     </div>
                   </motion.div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {(debouncedSearch || page > 1 ? posts : remainingPosts).map((post, index) => (
                     <motion.div
                       key={post.id}
-                      className="bg-white rounded-2xl overflow-hidden cursor-pointer group"
-                      style={{ boxShadow: "0 2px 16px rgba(124,58,237,0.06)" }}
+                      className="rounded-2xl overflow-hidden cursor-pointer group"
+                      style={{ boxShadow: "0 4px 24px rgba(124,58,237,0.12)" }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.06, duration: 0.4 }}
@@ -480,40 +493,44 @@ export default function BlogPage() {
                       onClick={() => { playSound("card"); navigate(`/blog/${post.id}`); }}
                       data-testid={`card-post-${post.id}`}
                     >
-                      {post.imagenPortada && (
-                        <div className="relative h-40 overflow-hidden">
+                      <div className="relative h-48 md:h-52 overflow-hidden bg-gradient-to-br from-purple-400 to-cyan-400">
+                        {post.imagenPortada ? (
                           <img
                             src={post.imagenPortada}
                             alt={post.titulo}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                          {post.categoriaId && getCategoryName(post.categoriaId) && (
-                            <span
-                              className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white backdrop-blur-sm"
-                              style={{ background: getCategoryColor(post.categoriaId) + "cc" }}
-                              data-testid={`badge-category-${post.id}`}
-                            >
-                              {getCategoryName(post.categoriaId)}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="p-4">
-                        {!post.imagenPortada && post.categoriaId && getCategoryName(post.categoriaId) && (
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpen className="w-14 h-14 text-white/30" />
+                          </div>
+                        )}
+                        {post.categoriaId && getCategoryName(post.categoriaId) && (
                           <span
-                            className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white mb-2"
-                            style={{ background: getCategoryColor(post.categoriaId) }}
+                            className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-white backdrop-blur-sm"
+                            style={{ background: getCategoryColor(post.categoriaId) + "cc" }}
+                            data-testid={`badge-category-${post.id}`}
                           >
                             {getCategoryName(post.categoriaId)}
                           </span>
                         )}
-                        <h3 className="text-sm font-bold text-gray-800 leading-snug mb-1.5 line-clamp-2">{post.titulo}</h3>
-                        <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">
+                      </div>
+                      <div className="relative p-4 pb-5" style={{ background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7c3aed 100%)" }}>
+                        <div className="flex justify-end mb-2">
+                          <span
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-white"
+                            style={{ background: "#2dd4bf", boxShadow: "0 2px 8px rgba(45,212,191,0.4)" }}
+                          >
+                            <Calendar className="w-3 h-3" />
+                            {post.createdAt ? `Publicado el ${formatDate(post.createdAt)}` : ""}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-white leading-snug mb-1.5 line-clamp-2">{post.titulo}</h3>
+                        <p className="text-xs text-white/75 leading-relaxed mb-3 line-clamp-3">
                           {getExcerpt(post.contenido, post.descripcion)}
                         </p>
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-gray-400 min-w-0">
+                          <div className="flex items-center gap-2 text-white/50 min-w-0">
                             {post.autor && (
                               <span className="flex items-center gap-1 text-[10px] truncate">
                                 <User className="w-3 h-3 shrink-0" />
@@ -526,11 +543,11 @@ export default function BlogPage() {
                             </span>
                           </div>
                           <span
-                            className="text-[11px] font-semibold flex items-center gap-0.5 shrink-0 transition-transform group-hover:translate-x-0.5"
-                            style={{ color: getCategoryColor(post.categoriaId) }}
+                            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-[11px] font-bold text-white transition-transform group-hover:translate-x-0.5"
+                            style={{ background: "#2dd4bf", boxShadow: "0 2px 8px rgba(45,212,191,0.4)" }}
                             data-testid={`link-read-more-${post.id}`}
                           >
-                            Leer <ChevronRight className="w-3.5 h-3.5" />
+                            {t("blog.readMore")} <ChevronRight className="w-3.5 h-3.5" />
                           </span>
                         </div>
                       </div>
