@@ -121,10 +121,10 @@ export default function MetodoXPage() {
   }, [styles, isMobile]);
 
   const steps = [
-    { title: t("metodoX.step1Title"), desc: t("metodoX.step1Desc") },
-    { title: t("metodoX.step2Title"), desc: t("metodoX.step2Desc") },
-    { title: t("metodoX.step3Title"), desc: t("metodoX.step3Desc") },
-    { title: t("metodoX.step4Title"), desc: t("metodoX.step4Desc") },
+    { title: t("metodoX.step1Title"), subtitle: t("metodoX.step1Subtitle"), hook: t("metodoX.step1Hook"), desc: t("metodoX.step1Desc"), detail: t("metodoX.step1Detail") },
+    { title: t("metodoX.step2Title"), subtitle: t("metodoX.step2Subtitle"), hook: t("metodoX.step2Hook"), desc: t("metodoX.step2Desc"), detail: t("metodoX.step2Detail") },
+    { title: t("metodoX.step3Title"), subtitle: t("metodoX.step3Subtitle"), hook: t("metodoX.step3Hook"), desc: t("metodoX.step3Desc"), detail: t("metodoX.step3Detail") },
+    { title: t("metodoX.step4Title"), subtitle: t("metodoX.step4Subtitle"), hook: t("metodoX.step4Hook"), desc: t("metodoX.step4Desc"), detail: t("metodoX.step4Detail") },
   ];
 
   const EDITABLE_SECTIONS = [
@@ -294,33 +294,33 @@ export default function MetodoXPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ duration: 0.3 }}
-                  className={`rounded-2xl p-5 border border-purple-100 ${getEditableClass(`step-card-${activeStep}`)}`}
+                  className={`rounded-2xl overflow-hidden border border-purple-100 ${getEditableClass(`step-card-${activeStep}`)}`}
                   style={{ background: "white", boxShadow: "0 4px 20px rgba(124,58,237,0.08)", ...getElementStyle(`step-card-${activeStep}`, "white") }}
                   onClick={(e) => { if (editorMode) handleElementClick(`step-card-${activeStep}`, e); }}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="p-4 flex items-center gap-3" style={{ background: STEP_COLORS[activeStep].bg }}>
                     <div
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
-                      style={{ background: STEP_COLORS[activeStep].bg, boxShadow: `0 4px 12px ${STEP_COLORS[activeStep].shadow}`, ...getElementStyle(`step-icon-${activeStep}`) }}
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
+                      style={{ background: "rgba(255,255,255,0.2)", ...getElementStyle(`step-icon-${activeStep}`) }}
                       onClick={(e) => { if (editorMode) handleElementClick(`step-icon-${activeStep}`, e); }}
                     >
                       {resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.imageUrl ? (
-                        <img src={resolveStyle(styles, `step-icon-${activeStep}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 28, height: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 28 }} />
+                        <img src={resolveStyle(styles, `step-icon-${activeStep}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 24, height: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 24 }} />
                       ) : (
-                        (() => { const Icon = STEP_ICONS[activeStep]; return <Icon className="w-7 h-7 text-white" />; })()
+                        (() => { const Icon = STEP_ICONS[activeStep]; return <Icon className="w-6 h-6 text-white" />; })()
                       )}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
                         <span
-                          className={`text-2xl font-extrabold ${getEditableClass(`step-num-${activeStep}`)}`}
-                          style={{ color: STEP_COLORS[activeStep].shadow.replace("0.3", "1"), ...getElementStyle(`step-num-${activeStep}`) }}
+                          className={`text-2xl font-extrabold text-white/40 ${getEditableClass(`step-num-${activeStep}`)}`}
+                          style={getElementStyle(`step-num-${activeStep}`)}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-num-${activeStep}`, e); }}
                         >
                           {String(activeStep + 1).padStart(2, "0")}
                         </span>
                         <h3
-                          className={`text-base font-bold text-gray-800 ${getEditableClass(`step-title-${activeStep}`)}`}
+                          className={`text-sm font-bold text-white ${getEditableClass(`step-title-${activeStep}`)}`}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-title-${activeStep}`, e); }}
                           style={getElementStyle(`step-title-${activeStep}`)}
                           data-testid={`text-step-title-${activeStep}`}
@@ -328,13 +328,22 @@ export default function MetodoXPage() {
                           {steps[activeStep].title}
                         </h3>
                       </div>
-                      <p
-                        className={`text-xs text-gray-500 leading-relaxed ${getEditableClass(`step-desc-${activeStep}`)}`}
-                        onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${activeStep}`, e); }}
-                        style={getElementStyle(`step-desc-${activeStep}`)}
-                        data-testid={`text-step-desc-${activeStep}`}
-                      >
-                        {steps[activeStep].desc}
+                      <p className="text-white/80 text-xs font-semibold">{steps[activeStep].subtitle}</p>
+                    </div>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <p className="text-xs font-bold text-purple-700 italic">{steps[activeStep].hook}</p>
+                    <p
+                      className={`text-xs text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${activeStep}`)}`}
+                      onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${activeStep}`, e); }}
+                      style={getElementStyle(`step-desc-${activeStep}`)}
+                      data-testid={`text-step-desc-${activeStep}`}
+                    >
+                      {steps[activeStep].desc}
+                    </p>
+                    <div className="rounded-xl p-3" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.05), rgba(6,182,212,0.05))" }}>
+                      <p className="text-[11px] text-gray-500 leading-relaxed italic">
+                        {steps[activeStep].detail}
                       </p>
                     </div>
                   </div>
@@ -359,7 +368,7 @@ export default function MetodoXPage() {
                         width: activeStep === i ? 24 : 8,
                         height: 8,
                         borderRadius: 4,
-                        background: activeStep === i ? "linear-gradient(135deg, #7c3aed, #a855f7)" : "#e5e7eb",
+                        background: activeStep === i ? STEP_COLORS[i].bg : "#e5e7eb",
                       }}
                       data-testid={`button-step-dot-${i}`}
                     />
@@ -375,7 +384,7 @@ export default function MetodoXPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               {steps.map((step, i) => {
                 const Icon = STEP_ICONS[i];
                 return (
@@ -385,14 +394,14 @@ export default function MetodoXPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className={`rounded-2xl p-6 border border-purple-100 flex flex-col gap-4 ${getEditableClass(`step-card-${i}`)}`}
+                    className={`rounded-2xl overflow-hidden border border-purple-100 flex flex-col ${getEditableClass(`step-card-${i}`)}`}
                     style={{ background: "white", boxShadow: "0 4px 20px rgba(124,58,237,0.08)", ...getElementStyle(`step-card-${i}`, "white") }}
                     onClick={(e) => { if (editorMode) handleElementClick(`step-card-${i}`, e); }}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="p-5 flex items-center gap-4" style={{ background: STEP_COLORS[i].bg }}>
                       <div
                         className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${i}`)}`}
-                        style={{ background: STEP_COLORS[i].bg, boxShadow: `0 4px 12px ${STEP_COLORS[i].shadow}`, ...getElementStyle(`step-icon-${i}`) }}
+                        style={{ background: "rgba(255,255,255,0.2)", ...getElementStyle(`step-icon-${i}`) }}
                         onClick={(e) => { if (editorMode) handleElementClick(`step-icon-${i}`, e); }}
                       >
                         {resolveStyle(styles, `step-icon-${i}`, isMobile)?.imageUrl ? (
@@ -401,30 +410,43 @@ export default function MetodoXPage() {
                           <Icon className="w-7 h-7 text-white" />
                         )}
                       </div>
-                      <span
-                        className={`text-3xl font-extrabold ${getEditableClass(`step-num-${i}`)}`}
-                        style={{ color: STEP_COLORS[i].shadow.replace("0.3", "0.7"), ...getElementStyle(`step-num-${i}`) }}
-                        onClick={(e) => { if (editorMode) handleElementClick(`step-num-${i}`, e); }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-3xl font-extrabold text-white/30 ${getEditableClass(`step-num-${i}`)}`}
+                            style={getElementStyle(`step-num-${i}`)}
+                            onClick={(e) => { if (editorMode) handleElementClick(`step-num-${i}`, e); }}
+                          >
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <h3
+                            className={`text-base font-bold text-white ${getEditableClass(`step-title-${i}`)}`}
+                            onClick={(e) => { if (editorMode) handleElementClick(`step-title-${i}`, e); }}
+                            style={getElementStyle(`step-title-${i}`)}
+                            data-testid={`text-step-title-${i}`}
+                          >
+                            {step.title}
+                          </h3>
+                        </div>
+                        <p className="text-white/80 text-sm font-semibold mt-0.5">{step.subtitle}</p>
+                      </div>
                     </div>
-                    <h3
-                      className={`text-lg font-bold text-gray-800 ${getEditableClass(`step-title-${i}`)}`}
-                      onClick={(e) => { if (editorMode) handleElementClick(`step-title-${i}`, e); }}
-                      style={getElementStyle(`step-title-${i}`)}
-                      data-testid={`text-step-title-${i}`}
-                    >
-                      {step.title}
-                    </h3>
-                    <p
-                      className={`text-sm text-gray-500 leading-relaxed ${getEditableClass(`step-desc-${i}`)}`}
-                      onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${i}`, e); }}
-                      style={getElementStyle(`step-desc-${i}`)}
-                      data-testid={`text-step-desc-${i}`}
-                    >
-                      {step.desc}
-                    </p>
+                    <div className="p-5 flex-1 flex flex-col gap-3">
+                      <p className="text-sm font-bold text-purple-700 italic">{step.hook}</p>
+                      <p
+                        className={`text-sm text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${i}`)}`}
+                        onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${i}`, e); }}
+                        style={getElementStyle(`step-desc-${i}`)}
+                        data-testid={`text-step-desc-${i}`}
+                      >
+                        {step.desc}
+                      </p>
+                      <div className="rounded-xl p-4 mt-auto" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.05), rgba(6,182,212,0.05))" }}>
+                        <p className="text-xs text-gray-500 leading-relaxed italic">
+                          {step.detail}
+                        </p>
+                      </div>
+                    </div>
                   </motion.div>
                 );
               })}
