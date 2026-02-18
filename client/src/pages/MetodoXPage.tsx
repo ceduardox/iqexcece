@@ -50,6 +50,8 @@ export default function MetodoXPage() {
     return () => { window.removeEventListener("storage", checkEditorMode); clearInterval(interval); };
   }, []);
 
+  const [activeProg, setActiveProg] = useState(0);
+
   useEffect(() => { setAdminToken(localStorage.getItem("adminToken")); }, []);
 
   useEffect(() => {
@@ -127,6 +129,15 @@ export default function MetodoXPage() {
     { title: t("metodoX.step4Title"), subtitle: t("metodoX.step4Subtitle"), hook: t("metodoX.step4Hook"), desc: t("metodoX.step4Desc"), detail: t("metodoX.step4Detail") },
   ];
 
+  const programs = [
+    { name: t("metodoX.prog1Name"), age: t("metodoX.prog1Age"), label: t("metodoX.prog1Label"), desc: t("metodoX.prog1Desc") },
+    { name: t("metodoX.prog2Name"), age: t("metodoX.prog2Age"), label: t("metodoX.prog2Label"), desc: t("metodoX.prog2Desc") },
+    { name: t("metodoX.prog3Name"), age: t("metodoX.prog3Age"), label: t("metodoX.prog3Label"), desc: t("metodoX.prog3Desc") },
+    { name: t("metodoX.prog4Name"), age: t("metodoX.prog4Age"), label: t("metodoX.prog4Label"), desc: t("metodoX.prog4Desc") },
+  ];
+
+  const PROG_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b"];
+
   const EDITABLE_SECTIONS = [
     { id: "hero-section", label: "Hero fondo" },
     { id: "hero-icon", label: "Hero icono" },
@@ -142,6 +153,13 @@ export default function MetodoXPage() {
       { id: `step-num-${i}`, label: `Paso ${i + 1} número` },
       { id: `step-title-${i}`, label: `Paso ${i + 1} título` },
       { id: `step-desc-${i}`, label: `Paso ${i + 1} desc` },
+    ]).flat(),
+    { id: "programs-section", label: "Programas fondo" },
+    { id: "programs-title", label: "Programas título" },
+    ...programs.map((_, i) => [
+      { id: `prog-pill-${i}`, label: `Prog ${i + 1} pill` },
+      { id: `prog-card-${i}`, label: `Prog ${i + 1} card` },
+      { id: `prog-image-${i}`, label: `Prog ${i + 1} imagen` },
     ]).flat(),
   ];
 
@@ -453,6 +471,106 @@ export default function MetodoXPage() {
             </div>
           )}
 
+        </div>
+
+        <div
+          className={`relative py-10 px-5 ${getEditableClass("programs-section")}`}
+          style={{ background: "linear-gradient(135deg, #6d28d9, #7c3aed, #06b6d4)", ...getElementStyle("programs-section") }}
+          onClick={(e) => { if (editorMode) handleElementClick("programs-section", e); }}
+          data-testid="programs-section"
+        >
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+          </div>
+
+          <div className="relative max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className={`mb-6 ${getEditableClass("programs-title")}`}
+              onClick={(e) => { if (editorMode) handleElementClick("programs-title", e); }}
+              style={getElementStyle("programs-title")}
+              data-testid="programs-title"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">{t("metodoX.programsTitle")}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">{t("metodoX.programsTitle2")}</h2>
+            </motion.div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {programs.map((prog, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => { playClick(); setActiveProg(i); }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`rounded-full px-4 py-2 text-xs font-bold transition-all flex items-center gap-2 ${getEditableClass(`prog-pill-${i}`)}`}
+                  style={{
+                    background: activeProg === i ? "white" : "rgba(255,255,255,0.15)",
+                    color: activeProg === i ? PROG_COLORS[i] : "white",
+                    boxShadow: activeProg === i ? "0 4px 15px rgba(0,0,0,0.2)" : "none",
+                    ...getElementStyle(`prog-pill-${i}`),
+                  }}
+                  data-testid={`button-prog-${i}`}
+                >
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black" style={{ background: activeProg === i ? PROG_COLORS[i] : "rgba(255,255,255,0.3)", color: "white" }}>X</span>
+                  {prog.name}
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-6">
+              {programs.map((prog, i) => (
+                <div key={i} className="text-center" style={{ flex: "1 1 0", minWidth: 70 }}>
+                  <p className="text-[10px] text-white/60 font-medium">{prog.age}</p>
+                </div>
+              ))}
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeProg}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className={`rounded-2xl overflow-hidden ${getEditableClass(`prog-card-${activeProg}`)}`}
+                style={{ background: "white", boxShadow: "0 8px 30px rgba(0,0,0,0.25)", ...getElementStyle(`prog-card-${activeProg}`) }}
+                onClick={(e) => { if (editorMode) handleElementClick(`prog-card-${activeProg}`, e); }}
+                data-testid={`prog-card-${activeProg}`}
+              >
+                <div
+                  className={`w-full aspect-video bg-gray-200 flex items-center justify-center ${getEditableClass(`prog-image-${activeProg}`)}`}
+                  style={{
+                    backgroundImage: resolveStyle(styles, `prog-image-${activeProg}`, isMobile)?.imageUrl ? `url(${resolveStyle(styles, `prog-image-${activeProg}`, isMobile)!.imageUrl})` : undefined,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    ...getElementStyle(`prog-image-${activeProg}`),
+                  }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-image-${activeProg}`, e); } }}
+                  data-testid={`prog-image-${activeProg}`}
+                >
+                  {!resolveStyle(styles, `prog-image-${activeProg}`, isMobile)?.imageUrl && (
+                    <p className="text-gray-400 text-xs">Usa el editor para agregar imagen</p>
+                  )}
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-lg font-bold" style={{ color: PROG_COLORS[activeProg] }}>
+                      {programs[activeProg].name}
+                    </h3>
+                    <span className="w-7 h-7 rounded-full flex items-center justify-center font-black text-white text-xs" style={{ background: PROG_COLORS[activeProg] }}>X</span>
+                    <span className="text-xs text-gray-400 font-medium">{programs[activeProg].age}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 mb-2">{programs[activeProg].label}</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">{programs[activeProg].desc}</p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
