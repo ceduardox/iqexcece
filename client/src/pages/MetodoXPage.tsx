@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Brain, Zap, TrendingUp, BarChart3, BookOpen, Eye, Target, Lightbulb, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { Brain, Zap, TrendingUp, BarChart3, ChevronLeft, ChevronRight, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -25,7 +25,6 @@ const STEP_COLORS = [
   { bg: "linear-gradient(135deg, #10b981, #06b6d4)", shadow: "rgba(16,185,129,0.3)" },
   { bg: "linear-gradient(135deg, #3b82f6, #6366f1)", shadow: "rgba(59,130,246,0.3)" },
 ];
-const BENEFIT_ICONS = [BookOpen, Eye, Brain, Target, Lightbulb, Zap];
 
 export default function MetodoXPage() {
   const { t, i18n } = useTranslation();
@@ -42,6 +41,7 @@ export default function MetodoXPage() {
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     const checkEditorMode = () => setEditorMode(localStorage.getItem("editorMode") === "true");
@@ -127,13 +127,22 @@ export default function MetodoXPage() {
     { title: t("metodoX.step4Title"), desc: t("metodoX.step4Desc") },
   ];
 
-  const benefits = [
-    t("metodoX.benefit1"),
-    t("metodoX.benefit2"),
-    t("metodoX.benefit3"),
-    t("metodoX.benefit4"),
-    t("metodoX.benefit5"),
-    t("metodoX.benefit6"),
+  const EDITABLE_SECTIONS = [
+    { id: "hero-section", label: "Hero fondo" },
+    { id: "hero-icon", label: "Hero icono" },
+    { id: "hero-title", label: "Hero título" },
+    { id: "hero-subtitle", label: "Hero subtítulo" },
+    { id: "hero-desc", label: "Hero descripción" },
+    { id: "hero-btn", label: "Hero botón" },
+    { id: "section-title", label: "Título sección pasos" },
+    { id: "section-desc", label: "Desc sección pasos" },
+    ...steps.map((_, i) => [
+      { id: `step-card-${i}`, label: `Paso ${i + 1} tarjeta` },
+      { id: `step-icon-${i}`, label: `Paso ${i + 1} icono` },
+      { id: `step-num-${i}`, label: `Paso ${i + 1} número` },
+      { id: `step-title-${i}`, label: `Paso ${i + 1} título` },
+      { id: `step-desc-${i}`, label: `Paso ${i + 1} desc` },
+    ]).flat(),
   ];
 
   const nextStep = () => setActiveStep((p) => (p + 1) % steps.length);
@@ -422,74 +431,66 @@ export default function MetodoXPage() {
             </div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-10"
-          >
-            <h2
-              className={`text-xl md:text-2xl font-bold text-gray-800 mb-4 ${getEditableClass("benefits-title")}`}
-              onClick={(e) => { if (editorMode) handleElementClick("benefits-title", e); }}
-              style={getElementStyle("benefits-title")}
-              data-testid="text-benefits-title"
-            >
-              {t("metodoX.benefitsTitle")}
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-              {benefits.map((b, i) => {
-                const Icon = BENEFIT_ICONS[i];
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 15 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.08 }}
-                    className={`flex items-start gap-2.5 p-3 md:p-4 rounded-xl border border-purple-50 ${getEditableClass(`benefit-${i}`)}`}
-                    style={{ background: "rgba(124,58,237,0.02)", ...getElementStyle(`benefit-${i}`) }}
-                    onClick={(e) => { if (editorMode) handleElementClick(`benefit-${i}`, e); }}
-                    data-testid={`card-benefit-${i}`}
-                  >
-                    <div
-                      className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getEditableClass(`benefit-icon-${i}`)}`}
-                      style={{ background: STEP_COLORS[i % 4].bg, boxShadow: `0 2px 8px ${STEP_COLORS[i % 4].shadow}`, ...getElementStyle(`benefit-icon-${i}`) }}
-                      onClick={(e) => { if (editorMode) handleElementClick(`benefit-icon-${i}`, e); }}
-                    >
-                      {resolveStyle(styles, `benefit-icon-${i}`, isMobile)?.imageUrl ? (
-                        <img src={resolveStyle(styles, `benefit-icon-${i}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `benefit-icon-${i}`, isMobile)?.iconSize || 16, height: resolveStyle(styles, `benefit-icon-${i}`, isMobile)?.iconSize || 16 }} />
-                      ) : (
-                        <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                      )}
-                    </div>
-                    <span
-                      className={`text-xs md:text-sm text-gray-600 leading-relaxed pt-1 ${getEditableClass(`benefit-text-${i}`)}`}
-                      onClick={(e) => { if (editorMode) handleElementClick(`benefit-text-${i}`, e); }}
-                      style={getElementStyle(`benefit-text-${i}`)}
-                    >
-                      {b}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
         </div>
       </div>
 
       <BottomNavBar />
 
       {editorMode && (
-        <EditorToolbar
-          selectedElement={selectedElement}
-          styles={styles}
-          onStyleChange={handleStyleChange}
-          onSave={handleSaveStyles}
-          onClose={handleCloseEditor}
-          onClearSelection={() => setSelectedElement(null)}
-          deviceMode={deviceMode}
-          onDeviceModeChange={setDeviceMode}
-        />
+        <>
+          <div className="fixed left-3 top-1/2 -translate-y-1/2 z-[9999]" data-testid="section-navigator">
+            <button
+              onClick={() => setNavOpen(!navOpen)}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white mb-1"
+              style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)", boxShadow: "0 2px 10px rgba(124,58,237,0.4)" }}
+              data-testid="button-toggle-nav"
+            >
+              {navOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            </button>
+            <AnimatePresence>
+              {navOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-gray-900/95 backdrop-blur-sm rounded-xl p-2 max-h-[60vh] overflow-y-auto"
+                  style={{ width: 180, boxShadow: "0 4px 20px rgba(0,0,0,0.4)", scrollbarWidth: "thin" }}
+                >
+                  <p className="text-[9px] text-gray-400 font-bold uppercase px-2 mb-1">Secciones</p>
+                  {EDITABLE_SECTIONS.map(sec => (
+                    <button
+                      key={sec.id}
+                      onClick={() => {
+                        setSelectedElement(sec.id);
+                        const el = document.querySelector(`[data-testid*="${sec.id}"]`);
+                        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
+                        selectedElement === sec.id
+                          ? "bg-purple-600 text-white"
+                          : "text-gray-300 hover:bg-gray-800"
+                      }`}
+                      data-testid={`nav-${sec.id}`}
+                    >
+                      {sec.label}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <EditorToolbar
+            selectedElement={selectedElement}
+            styles={styles}
+            onStyleChange={handleStyleChange}
+            onSave={handleSaveStyles}
+            onClose={handleCloseEditor}
+            onClearSelection={() => setSelectedElement(null)}
+            deviceMode={deviceMode}
+            onDeviceModeChange={setDeviceMode}
+          />
+        </>
       )}
     </div>
   );
