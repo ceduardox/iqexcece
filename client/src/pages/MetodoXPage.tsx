@@ -491,8 +491,9 @@ export default function MetodoXPage() {
           data-testid="programs-section"
         >
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, white, transparent)" }} />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+            <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-20 -right-20 w-60 h-60 rounded-full" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+            <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+            <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0], opacity: [0, 0.08, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/2 left-1/3 w-32 h-32 rounded-full" style={{ background: "radial-gradient(circle, #06b6d4, transparent)" }} />
           </div>
 
           <div className="relative max-w-5xl mx-auto">
@@ -527,7 +528,7 @@ export default function MetodoXPage() {
                   }}
                   data-testid={`button-prog-${i}`}
                 >
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black" style={{ background: activeProg === i ? PROG_COLORS[i] : "rgba(255,255,255,0.3)", color: "white" }}>X</span>
+                  <motion.span animate={activeProg === i ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black" style={{ background: activeProg === i ? PROG_COLORS[i] : "rgba(255,255,255,0.3)", color: "white" }}>X</motion.span>
                   {prog.name}
                 </motion.button>
               ))}
@@ -594,7 +595,9 @@ export default function MetodoXPage() {
             >
               <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5`}>
                 <div className="flex flex-col items-center text-center gap-2">
-                  <div
+                  <motion.div
+                    animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-obj-icon-${activeProg}`)}`}
                     style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-obj-icon-${activeProg}`) }}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-icon-${activeProg}`, e); } }}
@@ -605,14 +608,16 @@ export default function MetodoXPage() {
                     ) : (
                       <Target className="w-7 h-7 text-white" />
                     )}
-                  </div>
+                  </motion.div>
                   <h4 className="text-sm font-bold text-white">{t("metodoX.detailObj")}</h4>
-                  <ChevronDown className="w-3 h-3 text-white/50" />
+                  <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
                   <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].obj}</p>
                 </div>
 
                 <div className="flex flex-col items-center text-center gap-2">
-                  <div
+                  <motion.div
+                    animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
                     className={`w-14 h-14 rounded-full flex items-center justify-center ${getEditableClass(`prog-bases-icon-${activeProg}`)}`}
                     style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)", ...getElementStyle(`prog-bases-icon-${activeProg}`) }}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-icon-${activeProg}`, e); } }}
@@ -623,16 +628,16 @@ export default function MetodoXPage() {
                     ) : (
                       <Scan className="w-7 h-7 text-white" />
                     )}
-                  </div>
+                  </motion.div>
                   <h4 className="text-sm font-bold text-white">{t("metodoX.detailBases")}</h4>
-                  <ChevronDown className="w-3 h-3 text-white/50" />
+                  <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}><ChevronDown className="w-3 h-3 text-white/50" /></motion.div>
                   <p className="text-[11px] text-white/70 leading-relaxed">{programs[activeProg].bases}</p>
                 </div>
 
                 <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)" }}>
+                  <motion.div animate={{ y: [0, -6, 0], boxShadow: ["0 0 0 rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.2)", "0 0 0 rgba(255,255,255,0)"] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.1)" }}>
                     <CheckCircle2 className="w-7 h-7 text-white" />
-                  </div>
+                  </motion.div>
                   <h4 className="text-sm font-bold text-white">{t("metodoX.detailComp")}</h4>
                   <div className="space-y-1.5 mt-1">
                     {programs[activeProg].comps.map((comp, ci) => (
@@ -651,8 +656,10 @@ export default function MetodoXPage() {
                   {METHOD_APPS.map((m, mi) => {
                     const MIcon = m.icon;
                     return (
-                      <div key={mi} className="flex flex-col items-center gap-2">
-                        <div
+                      <motion.div key={mi} className="flex flex-col items-center gap-2" whileHover={{ scale: 1.08 }}>
+                        <motion.div
+                          animate={{ y: [0, -4, 0], rotate: [0, 3, -3, 0] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: mi * 0.4 }}
                           className={`w-12 h-12 rounded-xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
                           style={{ background: "rgba(255,255,255,0.15)", ...getElementStyle(`method-app-icon-${mi}`) }}
                           onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`method-app-icon-${mi}`, e); } }}
@@ -663,10 +670,10 @@ export default function MetodoXPage() {
                           ) : (
                             <MIcon className="w-6 h-6 text-white" />
                           )}
-                        </div>
+                        </motion.div>
                         <span className="text-[10px] font-semibold text-white/80 text-center">{m.label}</span>
-                        <ChevronDown className="w-3 h-3 text-white/40" />
-                      </div>
+                        <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: mi * 0.2 }}><ChevronDown className="w-3 h-3 text-white/40" /></motion.div>
+                      </motion.div>
                     );
                   })}
                 </div>
