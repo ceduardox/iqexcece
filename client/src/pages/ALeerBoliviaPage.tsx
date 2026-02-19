@@ -10,6 +10,10 @@ import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carouse
 import type { CarouselApi } from "@/components/ui/carousel";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 import participarImg from "@assets/image_1770684494294.png";
+import laxCyan from "@assets/laxcyan2_1771479429192.png";
+import laxPurpura from "@assets/laxpurpura_1771479319056.png";
+import laxBlanca from "@assets/laxblanca_1771479319056.png";
+import laxVerde from "@assets/laxverde_1771479319057.png";
 
 const participarItems = [
   { id: "p1", icon: School, title: "Camino Abierto para Escuelas de Bolivia", desc: "Extendemos una invitaci\u00f3n a todas las instituciones educativas de Bolivia para que se unan a esta iniciativa transformadora, destinada a enriquecer el panorama educativo a trav\u00e9s de la lectura." },
@@ -123,7 +127,13 @@ export default function ALeerBoliviaPage() {
   const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.img src={laxCyan} alt="" className="absolute opacity-[0.07] w-[260px] md:w-[480px]" style={{ top: "5%", right: "-60px" }} animate={{ rotate: [0, 10, -6, 0], scale: [1, 1.07, 0.96, 1] }} transition={{ duration: 19, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.img src={laxPurpura} alt="" className="absolute opacity-[0.05] w-[190px] md:w-[340px]" style={{ top: "32%", left: "-55px" }} animate={{ rotate: [0, -7, 5, 0], y: [0, 18, -12, 0] }} transition={{ duration: 23, repeat: Infinity, ease: "easeInOut", delay: 3 }} />
+        <motion.img src={laxVerde} alt="" className="absolute opacity-[0.06] w-[210px] md:w-[370px]" style={{ bottom: "12%", right: "3%" }} animate={{ rotate: [0, 6, -9, 0], x: [0, -18, 14, 0] }} transition={{ duration: 21, repeat: Infinity, ease: "easeInOut", delay: 5 }} />
+        <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.04] w-[170px] md:w-[290px]" style={{ top: "58%", left: "28%" }} animate={{ rotate: [0, -9, 7, 0], scale: [1, 1.09, 0.94, 1] }} transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 8 }} />
+      </div>
       <header
         className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 md:hidden ${getEditableClass("header")}`}
         style={{ paddingTop: 10, paddingBottom: 10 }}
