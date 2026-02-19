@@ -141,7 +141,7 @@ export default function MetodoXPage() {
     if (s.fontWeight) result.fontWeight = s.fontWeight;
     if (s.textAlign) result.textAlign = s.textAlign as any;
     if (s.shadowBlur || s.shadowColor) result.boxShadow = `0 4px ${s.shadowBlur || 10}px ${s.shadowColor || "rgba(0,0,0,0.1)"}`;
-    if (s.imageUrl && s.imageSize) {
+    if (s.imageUrl && s.imageSize && s.backgroundType === "image") {
       result.backgroundImage = `url(${s.imageUrl})`;
       result.backgroundSize = `${s.imageSize}%`;
       result.backgroundPosition = "center";

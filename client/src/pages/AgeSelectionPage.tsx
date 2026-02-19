@@ -285,7 +285,7 @@ export default function AgeSelectionPage() {
     
     const result: React.CSSProperties = {};
     
-    if (s.imageUrl) {
+    if (s.imageUrl && s.backgroundType === "image") {
       result.backgroundImage = `url(${s.imageUrl})`;
       result.backgroundSize = s.imageSize ? `${s.imageSize}%` : "cover";
       result.backgroundPosition = "center";

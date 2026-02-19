@@ -464,7 +464,7 @@ export function EditorToolbar({
                 <Input
                   type="text"
                   value={currentStyle.imageUrl || ""}
-                  onChange={(e) => updateStyle({ imageUrl: e.target.value, backgroundType: "image" })}
+                  onChange={(e) => updateStyle({ imageUrl: e.target.value })}
                   placeholder="https://ejemplo.com/imagen.jpg"
                   className="h-8 text-xs bg-gray-800 border-gray-700 text-white"
                   data-testid="input-image-url"

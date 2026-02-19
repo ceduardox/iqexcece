@@ -181,7 +181,7 @@ export default function EntrenamientoSelectionPage() {
   const getElementStyle = useCallback((elementId: string, defaultBg?: string) => {
     const s = getResolvedStyle(elementId);
     const result: React.CSSProperties = {};
-    if (s?.imageUrl) {
+    if (s?.imageUrl && s?.backgroundType === "image") {
       result.background = `url(${s.imageUrl}) center/cover no-repeat`;
       if (s?.imageSize) {
         result.backgroundSize = `${s.imageSize}%`;
@@ -325,11 +325,11 @@ export default function EntrenamientoSelectionPage() {
           className={`px-4 pb-8 -mt-2 relative ${getEditableClass("cards-section")}`}
           onClick={(e) => handleElementClick("cards-section", e)}
           style={{
-            ...(() => { const cs = getResolvedStyle("cards-section"); return cs?.imageUrl 
+            ...(() => { const cs = getResolvedStyle("cards-section"); return (cs?.imageUrl && cs?.backgroundType === "image")
               ? { background: `url(${cs.imageUrl}) center/cover no-repeat`, backgroundSize: cs?.imageSize ? `${cs.imageSize}%` : "cover" }
               : cs?.background ? { background: cs.background } : {}; })(),
             borderRadius: getResolvedStyle("cards-section")?.borderRadius || 0,
-            padding: getResolvedStyle("cards-section")?.imageUrl ? "16px" : undefined,
+            padding: (getResolvedStyle("cards-section")?.imageUrl && getResolvedStyle("cards-section")?.backgroundType === "image") ? "16px" : undefined,
             paddingBottom: getResolvedStyle("cards-section")?.sectionHeight || 32
           }}
         >
@@ -430,7 +430,7 @@ export default function EntrenamientoSelectionPage() {
                         }
                       }}
                       style={(() => { const bs = getResolvedStyle(btnId); return {
-                        background: bs?.imageUrl 
+                        background: (bs?.imageUrl && bs?.backgroundType === "image")
                           ? `url(${bs.imageUrl}) center/cover no-repeat`
                           : (bs?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
                         backgroundSize: bs?.imageSize ? `${bs.imageSize}%` : "cover",
