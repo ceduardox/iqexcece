@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { MessageCircle, Mail, Headphones, ChevronRight, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine } from "lucide-react";
+import { MessageCircle, Mail, Headphones, ChevronRight, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine, Building2, Navigation } from "lucide-react";
+import scCentroImg from "@assets/santacruz_centro_1771477590891.JPG";
+import scNorteImg from "@assets/santac_cruz_norte_1771477590891.JPG";
+import cbbaAmericasImg from "@assets/cochabamba_americas_1771477590890.JPG";
+import cbbaCentroImg from "@assets/cochambaba_centro_1771477590891.JPG";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -670,6 +674,106 @@ export default function ContactoPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-10"
+            data-testid="offices-section"
+          >
+            <div className="text-center mb-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.7 }}
+                className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+                style={{ background: "linear-gradient(135deg, #6d28d9, #06b6d4)" }}
+              >
+                <Building2 className="w-7 h-7 text-white" />
+              </motion.div>
+              <h2 className="text-2xl md:text-4xl font-black" style={{ background: "linear-gradient(135deg, #6d28d9, #a855f7, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                {t("contact.ourOffices")}
+              </h2>
+              <p className="text-gray-500 text-sm mt-2">{t("contact.ourOfficesDesc")}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { name: "Santa Cruz - Centro", img: scCentroImg, address: "Av. Cochabamba No. 694, esquina Calle Saavedra", phone: "74160960 - 73600060", email: "info@iqmaximo.com", delay: 0, gradient: "from-purple-600 to-violet-800" },
+                { name: "Santa Cruz - Norte", img: scNorteImg, address: "Av. Los Cusis # 139, entre Banzer y Beni", phone: "75577756 - 73600060", email: "info@iqmaximo.com", delay: 0.1, gradient: "from-cyan-600 to-teal-800" },
+                { name: "Cochabamba - Américas", img: cbbaAmericasImg, address: "Calle Luis Calvo esq. Collasuyo", phone: "77024283 - 73600060", email: "info@iqmaximo.com", delay: 0.2, gradient: "from-indigo-600 to-purple-800" },
+                { name: "Cochabamba - Centro", img: cbbaCentroImg, address: "c. 16 de Julio # 515, entre Venezuela y Federico Blanco", phone: "77024284 - 73600060", email: "info@iqmaximo.com", delay: 0.3, gradient: "from-emerald-600 to-cyan-800" },
+              ].map((office, i) => (
+                <motion.div
+                  key={office.name}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 + office.delay }}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  className="group relative rounded-2xl overflow-hidden bg-white"
+                  style={{ boxShadow: "0 4px 24px rgba(124,58,237,0.1), 0 1px 6px rgba(0,0,0,0.04)" }}
+                  data-testid={`office-card-${i}`}
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <motion.img
+                      src={office.img}
+                      alt={office.name}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.08 }}
+                      transition={{ duration: 0.6 }}
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${office.gradient} opacity-60`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 p-4"
+                      initial={{ y: 10 }}
+                      animate={{ y: 0 }}
+                    >
+                      <h3 className="text-white font-black text-lg tracking-wide drop-shadow-lg">{office.name}</h3>
+                    </motion.div>
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full border-2 border-white/30 border-t-white/80"
+                    />
+                  </div>
+
+                  <div className="p-5 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <MapPin className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officeAddress")}</p>
+                        <p className="text-sm text-gray-700 leading-relaxed">{office.address}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Phone className="w-4 h-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officePhone")}</p>
+                        <p className="text-sm text-gray-700 font-medium">{office.phone}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Mail className="w-4 h-4 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officeEmail")}</p>
+                        <p className="text-sm text-gray-700">{office.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
 

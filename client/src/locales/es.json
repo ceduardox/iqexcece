@@ -51,7 +51,12 @@
     "formWhoTrial": "¿QUIÉN TOMARÁ LA PRUEBA GRATUITA?",
     "formSending": "Enviando...",
     "formSuccess": "Formulario enviado correctamente",
-    "formError": "Error al enviar el formulario"
+    "formError": "Error al enviar el formulario",
+    "ourOffices": "Nuestras Oficinas",
+    "ourOfficesDesc": "Visítanos en cualquiera de nuestras sucursales",
+    "officeAddress": "Dirección",
+    "officePhone": "Teléfono",
+    "officeEmail": "E-mail"
   },
   "home": {
     "tests": "Tests",

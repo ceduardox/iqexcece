@@ -51,7 +51,12 @@
     "formWhoTrial": "WHO WILL TAKE THE FREE TRIAL?",
     "formSending": "Sending...",
     "formSuccess": "Form submitted successfully",
-    "formError": "Error submitting form"
+    "formError": "Error submitting form",
+    "ourOffices": "Our Offices",
+    "ourOfficesDesc": "Visit us at any of our branches",
+    "officeAddress": "Address",
+    "officePhone": "Phone",
+    "officeEmail": "E-mail"
   },
   "home": {
     "tests": "Tests",
