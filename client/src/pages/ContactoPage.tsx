@@ -684,94 +684,154 @@ export default function ContactoPage() {
             className="mt-10"
             data-testid="offices-section"
           >
-            <div className="text-center mb-8">
+            <div className="text-center mb-10">
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.7 }}
-                className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 relative"
                 style={{ background: "linear-gradient(135deg, #6d28d9, #06b6d4)" }}
               >
-                <Building2 className="w-7 h-7 text-white" />
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[-4px] rounded-2xl border-2 border-dashed border-purple-300/40"
+                />
+                <Building2 className="w-8 h-8 text-white" />
               </motion.div>
               <h2 className="text-2xl md:text-4xl font-black" style={{ background: "linear-gradient(135deg, #6d28d9, #a855f7, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {t("contact.ourOffices")}
               </h2>
-              <p className="text-gray-500 text-sm mt-2">{t("contact.ourOfficesDesc")}</p>
+              <motion.div
+                animate={{ scaleX: [0.3, 1, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="mx-auto mt-3 h-0.5 w-32 rounded-full"
+                style={{ background: "linear-gradient(90deg, transparent, #a855f7, #06b6d4, transparent)" }}
+              />
+              <p className="text-gray-500 text-sm mt-3">{t("contact.ourOfficesDesc")}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
               {[
-                { name: "Santa Cruz - Centro", img: scCentroImg, address: "Av. Cochabamba No. 694, esquina Calle Saavedra", phone: "74160960 - 73600060", email: "info@iqmaximo.com", delay: 0, gradient: "from-purple-600 to-violet-800" },
-                { name: "Santa Cruz - Norte", img: scNorteImg, address: "Av. Los Cusis # 139, entre Banzer y Beni", phone: "75577756 - 73600060", email: "info@iqmaximo.com", delay: 0.1, gradient: "from-cyan-600 to-teal-800" },
-                { name: "Cochabamba - Américas", img: cbbaAmericasImg, address: "Calle Luis Calvo esq. Collasuyo", phone: "77024283 - 73600060", email: "info@iqmaximo.com", delay: 0.2, gradient: "from-indigo-600 to-purple-800" },
-                { name: "Cochabamba - Centro", img: cbbaCentroImg, address: "c. 16 de Julio # 515, entre Venezuela y Federico Blanco", phone: "77024284 - 73600060", email: "info@iqmaximo.com", delay: 0.3, gradient: "from-emerald-600 to-cyan-800" },
+                { name: "Santa Cruz - Centro", img: scCentroImg, address: "Av. Cochabamba No. 694, esquina Calle Saavedra", phone: "74160960 - 73600060", email: "info@iqexponencial.com", delay: 0, color: "#7c3aed", glow: "rgba(124,58,237,0.25)" },
+                { name: "Santa Cruz - Norte", img: scNorteImg, address: "Av. Los Cusis # 139, entre Banzer y Beni", phone: "75577756 - 73600060", email: "info@iqexponencial.com", delay: 0.12, color: "#0891b2", glow: "rgba(8,145,178,0.25)" },
+                { name: "Cochabamba - Américas", img: cbbaAmericasImg, address: "Calle Luis Calvo esq. Collasuyo", phone: "77024283 - 73600060", email: "info@iqexponencial.com", delay: 0.24, color: "#6366f1", glow: "rgba(99,102,241,0.25)" },
+                { name: "Cochabamba - Centro", img: cbbaCentroImg, address: "c. 16 de Julio # 515, entre Venezuela y Federico Blanco", phone: "77024284 - 73600060", email: "info@iqexponencial.com", delay: 0.36, color: "#059669", glow: "rgba(5,150,105,0.25)" },
               ].map((office, i) => (
                 <motion.div
                   key={office.name}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.8 + office.delay }}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  className="group relative rounded-2xl overflow-hidden bg-white"
-                  style={{ boxShadow: "0 4px 24px rgba(124,58,237,0.1), 0 1px 6px rgba(0,0,0,0.04)" }}
+                  initial={{ opacity: 0, y: 40, rotateX: 15 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 + office.delay }}
+                  whileHover={{ y: -8 }}
+                  className="group relative rounded-3xl bg-white"
+                  style={{ boxShadow: `0 8px 32px ${office.glow}, 0 2px 8px rgba(0,0,0,0.06)` }}
                   data-testid={`office-card-${i}`}
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <motion.img
-                      src={office.img}
-                      alt={office.name}
-                      className="w-full h-full object-cover"
-                      whileHover={{ scale: 1.08 }}
-                      transition={{ duration: 0.6 }}
+                  <div className="relative overflow-hidden rounded-t-3xl">
+                    <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                      <motion.img
+                        src={office.img}
+                        alt={office.name}
+                        className="absolute inset-0 w-full h-full object-cover object-center"
+                        animate={{ scale: [1, 1.04, 1] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: i * 2 }}
+                      />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 30%, ${office.color}22 70%, ${office.color}88 100%)` }} />
+                    </div>
+
+                    <motion.div
+                      animate={{ opacity: [0.4, 0.8, 0.4], x: ["-100%", "200%"] }}
+                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: i * 1.2 }}
+                      className="absolute top-0 left-0 w-1/3 h-full pointer-events-none"
+                      style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)" }}
                     />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${office.gradient} opacity-60`} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <motion.div
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl backdrop-blur-md"
+                        style={{ background: `${office.color}cc` }}
+                      >
+                        <Navigation className="w-4 h-4 text-white" />
+                        <h3 className="text-white font-black text-sm tracking-wide">{office.name}</h3>
+                      </motion.div>
+                    </div>
+
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 p-4"
-                      initial={{ y: 10 }}
-                      animate={{ y: 0 }}
-                    >
-                      <h3 className="text-white font-black text-lg tracking-wide drop-shadow-lg">{office.name}</h3>
-                    </motion.div>
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full border-2 border-white/30 border-t-white/80"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.7, 0.3] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.8 }}
+                      className="absolute top-4 right-4 w-3 h-3 rounded-full"
+                      style={{ background: office.color, boxShadow: `0 0 12px ${office.color}` }}
                     />
                   </div>
 
                   <div className="p-5 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <MapPin className="w-4 h-4 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officeAddress")}</p>
+                    <motion.div
+                      className="flex items-start gap-3"
+                      animate={{ x: [0, 2, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 + i * 0.3 }}
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${office.color}15` }}
+                      >
+                        <MapPin className="w-4 h-4" style={{ color: office.color }} />
+                      </motion.div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t("contact.officeAddress")}</p>
                         <p className="text-sm text-gray-700 leading-relaxed">{office.address}</p>
                       </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Phone className="w-4 h-4 text-teal-600" />
+                    <motion.div
+                      className="flex items-start gap-3"
+                      animate={{ x: [0, 2, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 + i * 0.3 }}
+                    >
+                      <motion.div
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${office.color}15` }}
+                      >
+                        <Phone className="w-4 h-4" style={{ color: office.color }} />
+                      </motion.div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t("contact.officePhone")}</p>
+                        <p className="text-sm text-gray-700 font-semibold">{office.phone}</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officePhone")}</p>
-                        <p className="text-sm text-gray-700 font-medium">{office.phone}</p>
-                      </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Mail className="w-4 h-4 text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{t("contact.officeEmail")}</p>
+                    <motion.div
+                      className="flex items-start gap-3"
+                      animate={{ x: [0, 2, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 + i * 0.3 }}
+                    >
+                      <motion.div
+                        animate={{ y: [0, -3, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${office.color}15` }}
+                      >
+                        <Mail className="w-4 h-4" style={{ color: office.color }} />
+                      </motion.div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t("contact.officeEmail")}</p>
                         <p className="text-sm text-gray-700">{office.email}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
+
+                  <motion.div
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.7 }}
+                    className="absolute bottom-0 left-0 right-0 h-1 rounded-b-3xl"
+                    style={{ background: `linear-gradient(90deg, transparent, ${office.color}, transparent)` }}
+                  />
                 </motion.div>
               ))}
             </div>
