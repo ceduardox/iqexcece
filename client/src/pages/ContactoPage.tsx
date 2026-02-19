@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { MessageCircle, Mail, Headphones, ChevronRight, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine, Building2, Navigation } from "lucide-react";
+import { MessageCircle, Mail, Headphones, ChevronRight, ChevronDown, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine, Building2, Navigation } from "lucide-react";
 import scCentroImg from "@assets/santacruz_centro_1771477590891.JPG";
 import scNorteImg from "@assets/santac_cruz_norte_1771477590891.JPG";
 import cbbaAmericasImg from "@assets/cochabamba_americas_1771477590890.JPG";
@@ -176,6 +176,8 @@ export default function ContactoPage() {
   const [trialForm, setTrialForm] = useState(emptyTrial);
   const [submittingGeneral, setSubmittingGeneral] = useState(false);
   const [submittingTrial, setSubmittingTrial] = useState(false);
+  const [formGeneralOpen, setFormGeneralOpen] = useState(!isMobile);
+  const [formTrialOpen, setFormTrialOpen] = useState(!isMobile);
 
   const submitGeneral = async () => {
     if (!generalForm.nombres) return;
@@ -563,46 +565,91 @@ export default function ContactoPage() {
             style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}
             data-testid="form-escribenos"
           >
-            <div className="flex flex-col md:flex-row">
-              <div className="p-6 md:p-10 md:w-2/5 flex flex-col justify-center text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl font-black text-white mb-3">{t("contact.formWriteUs")}</h2>
-                <p className="text-white/80 text-sm md:text-base leading-relaxed">{t("contact.formWriteUsDesc")}</p>
+            {isMobile ? (
+              <>
+                <button
+                  onClick={() => setFormGeneralOpen(!formGeneralOpen)}
+                  className="w-full flex items-center justify-between p-5"
+                  data-testid="toggle-form-general"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <PenLine className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-black text-white">{t("contact.formWriteUs")}</h2>
+                      <p className="text-white/60 text-xs">{t("contact.formWriteUsDesc")}</p>
+                    </div>
+                  </div>
+                  <motion.div animate={{ rotate: formGeneralOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                    <ChevronDown className="w-5 h-5 text-white/70" />
+                  </motion.div>
+                </button>
+                <AnimatePresence>
+                  {formGeneralOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-white/95 backdrop-blur-sm p-5 rounded-t-2xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={generalForm.nombres} onChange={(v) => setGeneralForm(p => ({ ...p, nombres: v }))} testId="input-gen-nombres" />
+                          <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={generalForm.apellidos} onChange={(v) => setGeneralForm(p => ({ ...p, apellidos: v }))} testId="input-gen-apellidos" />
+                          <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={generalForm.telefono} onChange={(v) => setGeneralForm(p => ({ ...p, telefono: v }))} testId="input-gen-telefono" />
+                          <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={generalForm.email} onChange={(v) => setGeneralForm(p => ({ ...p, email: v }))} type="email" testId="input-gen-email" />
+                          <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={generalForm.ciudad} onChange={(v) => setGeneralForm(p => ({ ...p, ciudad: v }))} testId="input-gen-ciudad" />
+                          <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={generalForm.pais} onChange={(v) => setGeneralForm(p => ({ ...p, pais: v }))} testId="input-gen-pais" />
+                        </div>
+                        <div className="mt-3">
+                          <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
+                            <PenLine className="w-3.5 h-3.5 text-gray-400" />
+                            {t("contact.formComment")}
+                          </label>
+                          <textarea value={generalForm.comentario} onChange={(e) => setGeneralForm(p => ({ ...p, comentario: e.target.value }))} rows={3} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent" data-testid="input-gen-comentario" />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                          <button onClick={submitGeneral} disabled={submittingGeneral || !generalForm.nombres} className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50" style={{ background: "linear-gradient(135deg, #5eead4, #14b8a6)" }} data-testid="button-submit-general">
+                            {submittingGeneral ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              <div className="flex flex-row">
+                <div className="p-10 w-2/5 flex flex-col justify-center text-left">
+                  <h2 className="text-3xl font-black text-white mb-3">{t("contact.formWriteUs")}</h2>
+                  <p className="text-white/80 text-base leading-relaxed">{t("contact.formWriteUsDesc")}</p>
+                </div>
+                <div className="bg-white/95 backdrop-blur-sm p-8 flex-1 rounded-l-2xl">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={generalForm.nombres} onChange={(v) => setGeneralForm(p => ({ ...p, nombres: v }))} testId="input-gen-nombres" />
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={generalForm.apellidos} onChange={(v) => setGeneralForm(p => ({ ...p, apellidos: v }))} testId="input-gen-apellidos" />
+                    <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={generalForm.telefono} onChange={(v) => setGeneralForm(p => ({ ...p, telefono: v }))} testId="input-gen-telefono" />
+                    <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={generalForm.email} onChange={(v) => setGeneralForm(p => ({ ...p, email: v }))} type="email" testId="input-gen-email" />
+                    <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={generalForm.ciudad} onChange={(v) => setGeneralForm(p => ({ ...p, ciudad: v }))} testId="input-gen-ciudad" />
+                    <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={generalForm.pais} onChange={(v) => setGeneralForm(p => ({ ...p, pais: v }))} testId="input-gen-pais" />
+                  </div>
+                  <div className="mt-3">
+                    <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
+                      <PenLine className="w-3.5 h-3.5 text-gray-400" />
+                      {t("contact.formComment")}
+                    </label>
+                    <textarea value={generalForm.comentario} onChange={(e) => setGeneralForm(p => ({ ...p, comentario: e.target.value }))} rows={3} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent" data-testid="input-gen-comentario" />
+                  </div>
+                  <div className="flex justify-center mt-4">
+                    <button onClick={submitGeneral} disabled={submittingGeneral || !generalForm.nombres} className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50" style={{ background: "linear-gradient(135deg, #5eead4, #14b8a6)" }} data-testid="button-submit-general">
+                      {submittingGeneral ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white/95 backdrop-blur-sm p-5 md:p-8 md:flex-1 rounded-t-2xl md:rounded-t-none md:rounded-l-2xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={generalForm.nombres} onChange={(v) => setGeneralForm(p => ({ ...p, nombres: v }))} testId="input-gen-nombres" />
-                  <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={generalForm.apellidos} onChange={(v) => setGeneralForm(p => ({ ...p, apellidos: v }))} testId="input-gen-apellidos" />
-                  <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={generalForm.telefono} onChange={(v) => setGeneralForm(p => ({ ...p, telefono: v }))} testId="input-gen-telefono" />
-                  <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={generalForm.email} onChange={(v) => setGeneralForm(p => ({ ...p, email: v }))} type="email" testId="input-gen-email" />
-                  <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={generalForm.ciudad} onChange={(v) => setGeneralForm(p => ({ ...p, ciudad: v }))} testId="input-gen-ciudad" />
-                  <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={generalForm.pais} onChange={(v) => setGeneralForm(p => ({ ...p, pais: v }))} testId="input-gen-pais" />
-                </div>
-                <div className="mt-3">
-                  <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
-                    <PenLine className="w-3.5 h-3.5 text-gray-400" />
-                    {t("contact.formComment")}
-                  </label>
-                  <textarea
-                    value={generalForm.comentario}
-                    onChange={(e) => setGeneralForm(p => ({ ...p, comentario: e.target.value }))}
-                    rows={3}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent"
-                    data-testid="input-gen-comentario"
-                  />
-                </div>
-                <div className="flex justify-center mt-4">
-                  <button
-                    onClick={submitGeneral}
-                    disabled={submittingGeneral || !generalForm.nombres}
-                    className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #5eead4, #14b8a6)" }}
-                    data-testid="button-submit-general"
-                  >
-                    {submittingGeneral ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
-                  </button>
-                </div>
-              </div>
-            </div>
+            )}
           </motion.div>
 
           <motion.div
@@ -613,68 +660,130 @@ export default function ContactoPage() {
             style={{ background: "linear-gradient(135deg, #0d9488, #0891b2)" }}
             data-testid="form-prueba-gratuita"
           >
-            <div className="flex flex-col md:flex-row">
-              <div className="p-6 md:p-10 md:w-2/5 flex flex-col justify-center text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  <span style={{ color: "#fbbf24" }}>IQx,</span>
-                </h2>
-                <p className="text-white/90 text-sm md:text-base leading-relaxed mb-4">{t("contact.formTrialDesc")}</p>
-                <p className="text-yellow-300 font-bold text-lg">{t("contact.formTrialMotivation")}</p>
+            {isMobile ? (
+              <>
+                <button
+                  onClick={() => setFormTrialOpen(!formTrialOpen)}
+                  className="w-full flex items-center justify-between p-5"
+                  data-testid="toggle-form-trial"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-yellow-300" />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-black text-white">
+                        <span style={{ color: "#fbbf24" }}>IQx</span> {t("contact.formTrialTitle")}
+                      </h2>
+                      <p className="text-white/60 text-xs">{t("contact.formTrialMotivation")}</p>
+                    </div>
+                  </div>
+                  <motion.div animate={{ rotate: formTrialOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                    <ChevronDown className="w-5 h-5 text-white/70" />
+                  </motion.div>
+                </button>
+                <AnimatePresence>
+                  {formTrialOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-col gap-4 p-5">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                          <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formContactData")}</h3>
+                          <div className="grid grid-cols-1 gap-3">
+                            <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.nombres} onChange={(v) => setTrialForm(p => ({ ...p, nombres: v }))} testId="input-trial-nombres" />
+                            <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.apellidos} onChange={(v) => setTrialForm(p => ({ ...p, apellidos: v }))} testId="input-trial-apellidos" />
+                            <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.cedula} onChange={(v) => setTrialForm(p => ({ ...p, cedula: v }))} testId="input-trial-cedula" />
+                            <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.fechaNacimiento} onChange={(v) => setTrialForm(p => ({ ...p, fechaNacimiento: v }))} type="date" testId="input-trial-fecha" />
+                            <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.edad} onChange={(v) => setTrialForm(p => ({ ...p, edad: v }))} testId="input-trial-edad" />
+                            <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.telefono} onChange={(v) => setTrialForm(p => ({ ...p, telefono: v }))} testId="input-trial-tel" />
+                            <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.email} onChange={(v) => setTrialForm(p => ({ ...p, email: v }))} type="email" testId="input-trial-email" />
+                            <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.ciudad} onChange={(v) => setTrialForm(p => ({ ...p, ciudad: v }))} testId="input-trial-ciudad" />
+                            <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pais} onChange={(v) => setTrialForm(p => ({ ...p, pais: v }))} testId="input-trial-pais" />
+                          </div>
+                        </div>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                          <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formWhoTrial")}</h3>
+                          <div className="grid grid-cols-1 gap-3">
+                            <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.pgNombres} onChange={(v) => setTrialForm(p => ({ ...p, pgNombres: v }))} testId="input-pg-nombres" />
+                            <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.pgApellidos} onChange={(v) => setTrialForm(p => ({ ...p, pgApellidos: v }))} testId="input-pg-apellidos" />
+                            <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.pgCedula} onChange={(v) => setTrialForm(p => ({ ...p, pgCedula: v }))} testId="input-pg-cedula" />
+                            <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.pgFechaNac} onChange={(v) => setTrialForm(p => ({ ...p, pgFechaNac: v }))} type="date" testId="input-pg-fecha" />
+                            <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.pgEdad} onChange={(v) => setTrialForm(p => ({ ...p, pgEdad: v }))} testId="input-pg-edad" />
+                            <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.pgTelefono} onChange={(v) => setTrialForm(p => ({ ...p, pgTelefono: v }))} testId="input-pg-tel" />
+                            <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.pgEmail} onChange={(v) => setTrialForm(p => ({ ...p, pgEmail: v }))} type="email" testId="input-pg-email" />
+                            <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.pgCiudad} onChange={(v) => setTrialForm(p => ({ ...p, pgCiudad: v }))} testId="input-pg-ciudad" />
+                            <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pgPais} onChange={(v) => setTrialForm(p => ({ ...p, pgPais: v }))} testId="input-pg-pais" />
+                          </div>
+                        </div>
+                        <div className="flex justify-center mt-2 mb-2">
+                          <button onClick={submitTrial} disabled={submittingTrial || !trialForm.nombres} className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50" style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }} data-testid="button-submit-trial">
+                            {submittingTrial ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              <div className="flex flex-row">
+                <div className="p-10 w-2/5 flex flex-col justify-center text-left">
+                  <h2 className="text-3xl font-black text-white mb-3">
+                    <span style={{ color: "#fbbf24" }}>IQx,</span>
+                  </h2>
+                  <p className="text-white/90 text-base leading-relaxed mb-4">{t("contact.formTrialDesc")}</p>
+                  <p className="text-yellow-300 font-bold text-lg">{t("contact.formTrialMotivation")}</p>
+                </div>
+                <div className="flex-1 flex flex-col gap-4 p-8">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                    <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formContactData")}</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.nombres} onChange={(v) => setTrialForm(p => ({ ...p, nombres: v }))} testId="input-trial-nombres" />
+                      <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.apellidos} onChange={(v) => setTrialForm(p => ({ ...p, apellidos: v }))} testId="input-trial-apellidos" />
+                    </div>
+                    <div className="mt-3"><FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.cedula} onChange={(v) => setTrialForm(p => ({ ...p, cedula: v }))} testId="input-trial-cedula" /></div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.fechaNacimiento} onChange={(v) => setTrialForm(p => ({ ...p, fechaNacimiento: v }))} type="date" testId="input-trial-fecha" />
+                      <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.edad} onChange={(v) => setTrialForm(p => ({ ...p, edad: v }))} testId="input-trial-edad" />
+                    </div>
+                    <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.telefono} onChange={(v) => setTrialForm(p => ({ ...p, telefono: v }))} testId="input-trial-tel" /></div>
+                    <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.email} onChange={(v) => setTrialForm(p => ({ ...p, email: v }))} type="email" testId="input-trial-email" /></div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.ciudad} onChange={(v) => setTrialForm(p => ({ ...p, ciudad: v }))} testId="input-trial-ciudad" />
+                      <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pais} onChange={(v) => setTrialForm(p => ({ ...p, pais: v }))} testId="input-trial-pais" />
+                    </div>
+                  </div>
+                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                    <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formWhoTrial")}</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.pgNombres} onChange={(v) => setTrialForm(p => ({ ...p, pgNombres: v }))} testId="input-pg-nombres" />
+                      <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.pgApellidos} onChange={(v) => setTrialForm(p => ({ ...p, pgApellidos: v }))} testId="input-pg-apellidos" />
+                    </div>
+                    <div className="mt-3"><FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.pgCedula} onChange={(v) => setTrialForm(p => ({ ...p, pgCedula: v }))} testId="input-pg-cedula" /></div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.pgFechaNac} onChange={(v) => setTrialForm(p => ({ ...p, pgFechaNac: v }))} type="date" testId="input-pg-fecha" />
+                      <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.pgEdad} onChange={(v) => setTrialForm(p => ({ ...p, pgEdad: v }))} testId="input-pg-edad" />
+                    </div>
+                    <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.pgTelefono} onChange={(v) => setTrialForm(p => ({ ...p, pgTelefono: v }))} testId="input-pg-tel" /></div>
+                    <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.pgEmail} onChange={(v) => setTrialForm(p => ({ ...p, pgEmail: v }))} type="email" testId="input-pg-email" /></div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.pgCiudad} onChange={(v) => setTrialForm(p => ({ ...p, pgCiudad: v }))} testId="input-pg-ciudad" />
+                      <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pgPais} onChange={(v) => setTrialForm(p => ({ ...p, pgPais: v }))} testId="input-pg-pais" />
+                    </div>
+                  </div>
+                  <div className="flex justify-center mt-2 mb-2">
+                    <button onClick={submitTrial} disabled={submittingTrial || !trialForm.nombres} className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50" style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }} data-testid="button-submit-trial">
+                      {submittingTrial ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="md:flex-1 flex flex-col gap-4 p-5 md:p-8">
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
-                  <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formContactData")}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.nombres} onChange={(v) => setTrialForm(p => ({ ...p, nombres: v }))} testId="input-trial-nombres" />
-                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.apellidos} onChange={(v) => setTrialForm(p => ({ ...p, apellidos: v }))} testId="input-trial-apellidos" />
-                  </div>
-                  <div className="mt-3">
-                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.cedula} onChange={(v) => setTrialForm(p => ({ ...p, cedula: v }))} testId="input-trial-cedula" />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                    <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.fechaNacimiento} onChange={(v) => setTrialForm(p => ({ ...p, fechaNacimiento: v }))} type="date" testId="input-trial-fecha" />
-                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.edad} onChange={(v) => setTrialForm(p => ({ ...p, edad: v }))} testId="input-trial-edad" />
-                  </div>
-                  <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.telefono} onChange={(v) => setTrialForm(p => ({ ...p, telefono: v }))} testId="input-trial-tel" /></div>
-                  <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.email} onChange={(v) => setTrialForm(p => ({ ...p, email: v }))} type="email" testId="input-trial-email" /></div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                    <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.ciudad} onChange={(v) => setTrialForm(p => ({ ...p, ciudad: v }))} testId="input-trial-ciudad" />
-                    <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pais} onChange={(v) => setTrialForm(p => ({ ...p, pais: v }))} testId="input-trial-pais" />
-                  </div>
-                </div>
-
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
-                  <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formWhoTrial")}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.pgNombres} onChange={(v) => setTrialForm(p => ({ ...p, pgNombres: v }))} testId="input-pg-nombres" />
-                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.pgApellidos} onChange={(v) => setTrialForm(p => ({ ...p, pgApellidos: v }))} testId="input-pg-apellidos" />
-                  </div>
-                  <div className="mt-3"><FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.pgCedula} onChange={(v) => setTrialForm(p => ({ ...p, pgCedula: v }))} testId="input-pg-cedula" /></div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                    <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.pgFechaNac} onChange={(v) => setTrialForm(p => ({ ...p, pgFechaNac: v }))} type="date" testId="input-pg-fecha" />
-                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.pgEdad} onChange={(v) => setTrialForm(p => ({ ...p, pgEdad: v }))} testId="input-pg-edad" />
-                  </div>
-                  <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.pgTelefono} onChange={(v) => setTrialForm(p => ({ ...p, pgTelefono: v }))} testId="input-pg-tel" /></div>
-                  <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.pgEmail} onChange={(v) => setTrialForm(p => ({ ...p, pgEmail: v }))} type="email" testId="input-pg-email" /></div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                    <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.pgCiudad} onChange={(v) => setTrialForm(p => ({ ...p, pgCiudad: v }))} testId="input-pg-ciudad" />
-                    <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pgPais} onChange={(v) => setTrialForm(p => ({ ...p, pgPais: v }))} testId="input-pg-pais" />
-                  </div>
-                </div>
-
-                <div className="flex justify-center mt-2 mb-2">
-                  <button
-                    onClick={submitTrial}
-                    disabled={submittingTrial || !trialForm.nombres}
-                    className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
-                    data-testid="button-submit-trial"
-                  >
-                    {submittingTrial ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
-                  </button>
-                </div>
-              </div>
-            </div>
+            )}
           </motion.div>
 
           <motion.div
