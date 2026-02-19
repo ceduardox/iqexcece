@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Brain, Zap, TrendingUp, BarChart3, ChevronLeft, ChevronRight, ArrowRight, ChevronDown, ChevronUp, Target, Scan, CheckCircle2, Eye, BookOpen, Network, Megaphone } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -9,6 +9,35 @@ import { useToast } from "@/hooks/use-toast";
 import { CurvedHeader } from "@/components/CurvedHeader";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
+import laxCyan from "@assets/laxcyan2_1771479429192.png";
+import laxPurpura from "@assets/laxpurpura_1771479319056.png";
+import laxBlanca from "@assets/laxblanca_1771479319056.png";
+import laxVerde from "@assets/laxverde_1771479319057.png";
+
+function Card3D({ children, className, style, onClick, ...props }: any) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-100, 100], [8, -8]), { stiffness: 300, damping: 30 });
+  const rotateY = useSpring(useTransform(x, [-100, 100], [-8, 8]), { stiffness: 300, damping: 30 });
+  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set(e.clientX - rect.left - rect.width / 2);
+    y.set(e.clientY - rect.top - rect.height / 2);
+  };
+  const handleLeave = () => { x.set(0); y.set(0); };
+  return (
+    <motion.div
+      className={className}
+      style={{ ...style, rotateX, rotateY, transformStyle: "preserve-3d", perspective: 800 }}
+      onMouseMove={handleMouse}
+      onMouseLeave={handleLeave}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean): ElementStyle | undefined {
   const base = styles[elementId];
@@ -200,7 +229,14 @@ export default function MetodoXPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-white flex flex-col" data-testid="page-metodo-x">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-white flex flex-col relative overflow-hidden" data-testid="page-metodo-x">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.img src={laxCyan} alt="" className="absolute opacity-[0.06] w-[240px] md:w-[420px]" style={{ top: "2%", right: "-65px" }} animate={{ rotate: [0, 8, -5, 0], scale: [1, 1.05, 0.97, 1] }} transition={{ duration: 21, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.img src={laxPurpura} alt="" className="absolute opacity-[0.05] w-[180px] md:w-[310px]" style={{ top: "38%", left: "-50px" }} animate={{ rotate: [0, -7, 6, 0], y: [0, 22, -14, 0] }} transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }} />
+        <motion.img src={laxVerde} alt="" className="absolute opacity-[0.05] w-[200px] md:w-[360px]" style={{ bottom: "10%", right: "-35px" }} animate={{ rotate: [0, 6, -8, 0], x: [0, -16, 12, 0] }} transition={{ duration: 23, repeat: Infinity, ease: "easeInOut", delay: 6 }} />
+        <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.03] w-[150px] md:w-[260px]" style={{ top: "62%", left: "30%" }} animate={{ rotate: [0, -10, 7, 0], scale: [1, 1.08, 0.95, 1] }} transition={{ duration: 27, repeat: Infinity, ease: "easeInOut", delay: 9 }} />
+      </div>
+      <div className="relative z-[1] flex flex-col min-h-screen">
       <CurvedHeader showBack onBack={() => setLocation("/")} />
 
       <div className="flex-1 overflow-y-auto pb-28">
@@ -217,8 +253,8 @@ export default function MetodoXPage() {
           <div className="relative z-10 flex flex-col items-center justify-center px-6 py-12 text-center" style={{ minHeight: isMobile ? 320 : 380 }}>
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              animate={{ scale: [1, 1.08, 1], opacity: 1, boxShadow: ["0 0 0px rgba(168,85,247,0)", "0 0 30px rgba(168,85,247,0.5)", "0 0 0px rgba(168,85,247,0)"] }}
+              transition={{ scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }, boxShadow: { duration: 3, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.4 } }}
               className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 ${getEditableClass("hero-icon")}`}
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
@@ -276,17 +312,27 @@ export default function MetodoXPage() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.45 }}
               whileTap={{ scale: 0.95 }}
-              onClick={(e) => { if (editorMode) { handleElementClick("hero-btn", e); } else { playClick(); setLocation("/tests"); } }}
+              onClick={(e) => {
+                if (editorMode) { handleElementClick("hero-btn", e); }
+                else {
+                  playClick();
+                  const msg = encodeURIComponent("Hola, quiero empezar con el método X, mi nombre es ");
+                  window.open(`https://wa.me/59173600060?text=${msg}`, "_blank");
+                }
+              }}
               className={`mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white flex items-center gap-2 ${getEditableClass("hero-btn")}`}
               style={{
                 background: "linear-gradient(135deg, #a855f7, #7c3aed)",
                 boxShadow: "0 4px 15px rgba(168,85,247,0.4)",
                 ...getElementStyle("hero-btn"),
               }}
+              whileHover={{ scale: 1.05, boxShadow: "0 8px 30px rgba(168,85,247,0.6)" }}
               data-testid="button-metodo-start"
             >
               {resolveStyle(styles, "hero-btn", isMobile)?.buttonText || t("metodoX.btnStart")}
-              <ArrowRight className="w-4 h-4" />
+              <motion.span animate={{ x: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+                <ArrowRight className="w-4 h-4" />
+              </motion.span>
             </motion.button>
           </div>
         </div>
@@ -418,15 +464,15 @@ export default function MetodoXPage() {
               {steps.map((step, i) => {
                 const Icon = STEP_ICONS[i];
                 return (
-                  <motion.div
+                  <Card3D
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className={`rounded-2xl overflow-hidden border border-purple-100 flex flex-col ${getEditableClass(`step-card-${i}`)}`}
+                    className={`rounded-2xl overflow-hidden border border-purple-100 flex flex-col cursor-pointer transition-shadow duration-300 hover:shadow-xl hover:shadow-purple-200/40 ${getEditableClass(`step-card-${i}`)}`}
                     style={{ background: "white", boxShadow: "0 4px 20px rgba(124,58,237,0.08)", ...getElementStyle(`step-card-${i}`, "white") }}
-                    onClick={(e) => { if (editorMode) handleElementClick(`step-card-${i}`, e); }}
+                    onClick={(e: any) => { if (editorMode) handleElementClick(`step-card-${i}`, e); }}
                   >
                     <div className="p-5 flex items-center gap-4" style={{ background: STEP_COLORS[i].bg }}>
                       <div
@@ -477,7 +523,7 @@ export default function MetodoXPage() {
                         </p>
                       </div>
                     </div>
-                  </motion.div>
+                  </Card3D>
                 );
               })}
             </div>
@@ -511,15 +557,15 @@ export default function MetodoXPage() {
             </motion.div>
 
             {programs.map((prog, i) => (
-              <motion.div
+              <Card3D
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4 }}
-                className={`mb-10 last:mb-0 rounded-2xl p-3 md:p-4 ${getEditableClass(`prog-bg-${i}`)}`}
+                className={`mb-10 last:mb-0 rounded-2xl p-3 md:p-4 transition-shadow duration-300 hover:shadow-2xl hover:shadow-purple-500/20 ${getEditableClass(`prog-bg-${i}`)}`}
                 style={{ background: "rgba(255,255,255,0.05)", ...getElementStyle(`prog-bg-${i}`) }}
-                onClick={(e) => { if (editorMode) handleElementClick(`prog-bg-${i}`, e); }}
+                onClick={(e: any) => { if (editorMode) handleElementClick(`prog-bg-${i}`, e); }}
                 data-testid={`prog-bg-${i}`}
               >
               <div
@@ -655,13 +701,14 @@ export default function MetodoXPage() {
                   </div>
                 </div>
               </div>
-              </motion.div>
+              </Card3D>
             ))}
           </div>
         </div>
       </div>
 
       <BottomNavBar />
+      </div>
 
       {editorMode && (
         <>
