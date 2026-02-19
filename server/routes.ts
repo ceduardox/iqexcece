@@ -7,7 +7,7 @@ import * as path from "path";
 import { execFileSync } from "child_process";
 import { eq, and } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
-import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats } from "@shared/schema";
+import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions } from "@shared/schema";
 import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
@@ -2436,6 +2436,60 @@ ${schemaContent.substring(0, 3000)}
     const totalPages = Math.ceil(total / limit);
     const paginated = all.slice((page - 1) * limit, page * limit);
     res.json({ sessions: paginated, total, page, totalPages });
+  });
+
+  app.post("/api/contact-submit", async (req, res) => {
+    try {
+      const data = req.body;
+      const [row] = await db.insert(contactSubmissions).values({
+        formType: data.formType || "general",
+        nombres: data.nombres || null,
+        apellidos: data.apellidos || null,
+        telefono: data.telefono || null,
+        email: data.email || null,
+        ciudad: data.ciudad || null,
+        pais: data.pais || null,
+        comentario: data.comentario || null,
+        cedula: data.cedula || null,
+        fechaNacimiento: data.fechaNacimiento || null,
+        edad: data.edad || null,
+        pruebaGratuitaNombres: data.pruebaGratuitaNombres || null,
+        pruebaGratuitaApellidos: data.pruebaGratuitaApellidos || null,
+        pruebaGratuitaCedula: data.pruebaGratuitaCedula || null,
+        pruebaGratuitaFechaNac: data.pruebaGratuitaFechaNac || null,
+        pruebaGratuitaEdad: data.pruebaGratuitaEdad || null,
+        pruebaGratuitaTelefono: data.pruebaGratuitaTelefono || null,
+        pruebaGratuitaEmail: data.pruebaGratuitaEmail || null,
+        pruebaGratuitaCiudad: data.pruebaGratuitaCiudad || null,
+        pruebaGratuitaPais: data.pruebaGratuitaPais || null,
+      }).returning();
+      res.json({ success: true, id: row.id });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/contact-submissions", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!adminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const { desc } = await import("drizzle-orm");
+      const rows = await db.select().from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt));
+      res.json({ submissions: rows });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/admin/contact-submissions/:id", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!adminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      await db.delete(contactSubmissions).where(eq(contactSubmissions.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   return httpServer;

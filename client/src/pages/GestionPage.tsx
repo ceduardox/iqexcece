@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -56,7 +56,10 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios">("sesiones");
+  const [contactSubs, setContactSubs] = useState<any[]>([]);
+  const [contactSubsLoading, setContactSubsLoading] = useState(false);
+  const [expandedContactSub, setExpandedContactSub] = useState<number | null>(null);
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -396,6 +399,24 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       }
     }
     return res;
+  };
+
+  const fetchContactSubmissions = async () => {
+    if (!token) return;
+    setContactSubsLoading(true);
+    try {
+      const res = await fetch("/api/admin/contact-submissions", { headers: { Authorization: `Bearer ${token}` } });
+      const d = await res.json();
+      setContactSubs(d.submissions || []);
+    } catch {}
+    setContactSubsLoading(false);
+  };
+
+  const deleteContactSub = async (id: number) => {
+    try {
+      await fetch(`/api/admin/contact-submissions/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      setContactSubs(prev => prev.filter(s => s.id !== id));
+    } catch {}
   };
 
   const fetchSessions = async () => {
@@ -1400,6 +1421,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Headphones className="w-5 h-5" />
             Chat IA
           </button>
+          <button
+            onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "formularios" ? "bg-lime-600 text-white" : "text-lime-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-formularios"
+          >
+            <ClipboardList className="w-5 h-5" />
+            Formularios
+          </button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1597,6 +1628,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Headphones className="w-4 h-4 mr-1" />
             Chat IA
+          </Button>
+          <Button
+            onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
+            variant={activeTab === "formularios" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "formularios" ? "bg-lime-600" : "border-lime-500/30 text-lime-400"}
+            data-testid="mobile-tab-formularios"
+          >
+            <ClipboardList className="w-4 h-4 mr-1" />
+            Formularios
           </Button>
         </div>
 
@@ -5708,6 +5749,82 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         {activeTab === "asesor-ia" && (
           <AsesorIAPanel token={token} />
         )}
+
+        {activeTab === "formularios" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <ClipboardList className="w-6 h-6 text-lime-400" />
+                Formularios de Contacto
+              </h2>
+              <Button onClick={fetchContactSubmissions} variant="outline" className="border-lime-500/30 text-lime-400" disabled={contactSubsLoading}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${contactSubsLoading ? "animate-spin" : ""}`} />
+                Actualizar
+              </Button>
+            </div>
+            {contactSubsLoading && <p className="text-gray-400 text-sm">Cargando...</p>}
+            {!contactSubsLoading && contactSubs.length === 0 && <p className="text-gray-400 text-sm">No hay envíos de formulario aún.</p>}
+            <div className="space-y-3">
+              {contactSubs.map((sub: any) => (
+                <div key={sub.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+                  <div
+                    className="flex items-center justify-between gap-2 p-4 cursor-pointer"
+                    onClick={() => setExpandedContactSub(expandedContactSub === sub.id ? null : sub.id)}
+                    data-testid={`contact-sub-${sub.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${sub.formType === "general" ? "bg-purple-500/20 text-purple-300" : "bg-teal-500/20 text-teal-300"}`}>
+                          {sub.formType === "general" ? "Escríbenos" : "Prueba Gratuita"}
+                        </span>
+                        <span className="text-white font-medium text-sm truncate">{sub.nombres} {sub.apellidos}</span>
+                      </div>
+                      <p className="text-gray-400 text-xs mt-1">{sub.email || sub.telefono || ""} - {sub.createdAt ? new Date(sub.createdAt).toLocaleString() : ""}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button onClick={(e) => { e.stopPropagation(); deleteContactSub(sub.id); }} className="text-red-400 hover:text-red-300 p-1" data-testid={`delete-sub-${sub.id}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedContactSub === sub.id ? "rotate-180" : ""}`} />
+                    </div>
+                  </div>
+                  {expandedContactSub === sub.id && (
+                    <div className="px-4 pb-4 border-t border-white/10 pt-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                        {sub.nombres && <FieldRow label="Nombres" value={sub.nombres} />}
+                        {sub.apellidos && <FieldRow label="Apellidos" value={sub.apellidos} />}
+                        {sub.cedula && <FieldRow label="Cédula" value={sub.cedula} />}
+                        {sub.fechaNacimiento && <FieldRow label="Fecha Nac." value={sub.fechaNacimiento} />}
+                        {sub.edad && <FieldRow label="Edad" value={sub.edad} />}
+                        {sub.telefono && <FieldRow label="Teléfono" value={sub.telefono} />}
+                        {sub.email && <FieldRow label="Email" value={sub.email} />}
+                        {sub.ciudad && <FieldRow label="Ciudad" value={sub.ciudad} />}
+                        {sub.pais && <FieldRow label="País" value={sub.pais} />}
+                        {sub.comentario && <div className="sm:col-span-2"><FieldRow label="Comentario" value={sub.comentario} /></div>}
+                      </div>
+                      {sub.formType === "prueba_gratuita" && (sub.pruebaGratuitaNombres || sub.pruebaGratuitaApellidos) && (
+                        <div className="mt-3 pt-3 border-t border-white/10">
+                          <p className="text-teal-300 font-bold text-xs mb-2">Quien toma la prueba:</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                            {sub.pruebaGratuitaNombres && <FieldRow label="Nombres" value={sub.pruebaGratuitaNombres} />}
+                            {sub.pruebaGratuitaApellidos && <FieldRow label="Apellidos" value={sub.pruebaGratuitaApellidos} />}
+                            {sub.pruebaGratuitaCedula && <FieldRow label="Cédula" value={sub.pruebaGratuitaCedula} />}
+                            {sub.pruebaGratuitaFechaNac && <FieldRow label="Fecha Nac." value={sub.pruebaGratuitaFechaNac} />}
+                            {sub.pruebaGratuitaEdad && <FieldRow label="Edad" value={sub.pruebaGratuitaEdad} />}
+                            {sub.pruebaGratuitaTelefono && <FieldRow label="Teléfono" value={sub.pruebaGratuitaTelefono} />}
+                            {sub.pruebaGratuitaEmail && <FieldRow label="Email" value={sub.pruebaGratuitaEmail} />}
+                            {sub.pruebaGratuitaCiudad && <FieldRow label="Ciudad" value={sub.pruebaGratuitaCiudad} />}
+                            {sub.pruebaGratuitaPais && <FieldRow label="País" value={sub.pruebaGratuitaPais} />}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>
@@ -6066,6 +6183,15 @@ function AsesorIAPanel({ token }: { token: string }) {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function FieldRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-gray-400 text-xs">{label}:</span>
+      <span className="text-white text-sm ml-1">{value}</span>
     </div>
   );
 }

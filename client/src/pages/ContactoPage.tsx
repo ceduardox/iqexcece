@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { MessageCircle, Mail, Newspaper, BookOpen, Headphones, ChevronRight, ChevronDown, Send, X, Loader2, Sparkles, ArrowDown } from "lucide-react";
+import { MessageCircle, Mail, Headphones, ChevronRight, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -162,11 +162,38 @@ export default function ContactoPage() {
   }, [styles, isMobile]);
 
   const contactItems = [
-    { id: "blog", icon: Newspaper, labelKey: "contact.blog", subKey: "contact.blogSub", gradient: "linear-gradient(135deg, #f3e8ff, #e0f2fe)", iconColor: "#8b5cf6", action: () => setLocation("/blog") },
-    { id: "leer-bolivia", icon: BookOpen, labelKey: "contact.leerBolivia", subKey: "contact.leerBoliviaSub", gradient: "linear-gradient(135deg, #d1fae5, #cffafe)", iconColor: "#10b981", action: () => setLocation("/a-leer-bolivia") },
     { id: "whatsapp", icon: MessageCircle, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank") },
     { id: "email", icon: Mail, labelKey: "contact.email", subKey: "contact.emailSub", gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)", iconColor: "#fff", action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; } },
   ];
+
+  const emptyGeneral = { nombres: "", apellidos: "", telefono: "", email: "", ciudad: "", pais: "", comentario: "" };
+  const emptyTrial = { nombres: "", apellidos: "", cedula: "", fechaNacimiento: "", edad: "", telefono: "", email: "", ciudad: "", pais: "", pgNombres: "", pgApellidos: "", pgCedula: "", pgFechaNac: "", pgEdad: "", pgTelefono: "", pgEmail: "", pgCiudad: "", pgPais: "" };
+  const [generalForm, setGeneralForm] = useState(emptyGeneral);
+  const [trialForm, setTrialForm] = useState(emptyTrial);
+  const [submittingGeneral, setSubmittingGeneral] = useState(false);
+  const [submittingTrial, setSubmittingTrial] = useState(false);
+
+  const submitGeneral = async () => {
+    if (!generalForm.nombres) return;
+    setSubmittingGeneral(true);
+    try {
+      const res = await fetch("/api/contact-submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ formType: "general", ...generalForm }) });
+      if (res.ok) { toast({ title: t("contact.formSuccess") }); setGeneralForm(emptyGeneral); }
+      else toast({ title: t("contact.formError"), variant: "destructive" });
+    } catch { toast({ title: t("contact.formError"), variant: "destructive" }); }
+    setSubmittingGeneral(false);
+  };
+
+  const submitTrial = async () => {
+    if (!trialForm.nombres) return;
+    setSubmittingTrial(true);
+    try {
+      const res = await fetch("/api/contact-submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ formType: "prueba_gratuita", nombres: trialForm.nombres, apellidos: trialForm.apellidos, cedula: trialForm.cedula, fechaNacimiento: trialForm.fechaNacimiento, edad: trialForm.edad, telefono: trialForm.telefono, email: trialForm.email, ciudad: trialForm.ciudad, pais: trialForm.pais, pruebaGratuitaNombres: trialForm.pgNombres, pruebaGratuitaApellidos: trialForm.pgApellidos, pruebaGratuitaCedula: trialForm.pgCedula, pruebaGratuitaFechaNac: trialForm.pgFechaNac, pruebaGratuitaEdad: trialForm.pgEdad, pruebaGratuitaTelefono: trialForm.pgTelefono, pruebaGratuitaEmail: trialForm.pgEmail, pruebaGratuitaCiudad: trialForm.pgCiudad, pruebaGratuitaPais: trialForm.pgPais }) });
+      if (res.ok) { toast({ title: t("contact.formSuccess") }); setTrialForm(emptyTrial); }
+      else toast({ title: t("contact.formError"), variant: "destructive" });
+    } catch { toast({ title: t("contact.formError"), variant: "destructive" }); }
+    setSubmittingTrial(false);
+  };
 
   const arrowBounce = {
     animate: { x: [0, 4, 0] },
@@ -401,7 +428,7 @@ export default function ContactoPage() {
               minHeight: getResolvedStyle("cards-section")?.sectionHeight,
             }}
           >
-            {contactItems.slice(0, 2).map((item, index) => (
+            {contactItems.map((item, index) => (
               <ContactCard
                 key={item.id}
                 item={item}
@@ -487,7 +514,6 @@ export default function ContactoPage() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-
                       <div className="h-64 overflow-y-auto p-3 space-y-2 bg-gray-50" data-testid="chat-messages">
                         {chatMessages.length === 0 && (
                           <div className="text-center text-gray-400 text-xs mt-8">
@@ -498,14 +524,7 @@ export default function ContactoPage() {
                         )}
                         {chatMessages.map((msg, i) => (
                           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                            <div
-                              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
-                                msg.role === "user"
-                                  ? "bg-purple-600 text-white rounded-br-md"
-                                  : "bg-white text-gray-700 border border-gray-200 rounded-bl-md"
-                              }`}
-                              data-testid={`chat-msg-${msg.role}-${i}`}
-                            >
+                            <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${msg.role === "user" ? "bg-purple-600 text-white rounded-br-md" : "bg-white text-gray-700 border border-gray-200 rounded-bl-md"}`} data-testid={`chat-msg-${msg.role}-${i}`}>
                               {msg.content}
                             </div>
                           </div>
@@ -519,25 +538,9 @@ export default function ContactoPage() {
                         )}
                         <div ref={chatEndRef} />
                       </div>
-
                       <div className="flex items-center gap-2 p-2 border-t border-gray-100 bg-white">
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
-                          placeholder="Escribe un mensaje..."
-                          className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 text-gray-900 placeholder-gray-400 border-0 outline-none focus:ring-2 focus:ring-purple-300"
-                          disabled={chatLoading}
-                          data-testid="input-chat-message"
-                        />
-                        <button
-                          onClick={(e) => { e.stopPropagation(); sendMessage(); }}
-                          disabled={chatLoading || !chatInput.trim()}
-                          className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center disabled:opacity-40 transition-all active:scale-95"
-                          data-testid="button-send-chat"
-                        >
+                        <input ref={inputRef} type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }} placeholder="Escribe un mensaje..." className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 text-gray-900 placeholder-gray-400 border-0 outline-none focus:ring-2 focus:ring-purple-300" disabled={chatLoading} data-testid="input-chat-message" />
+                        <button onClick={(e) => { e.stopPropagation(); sendMessage(); }} disabled={chatLoading || !chatInput.trim()} className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center disabled:opacity-40 transition-all active:scale-95" data-testid="button-send-chat">
                           <Send className="w-4 h-4" />
                         </button>
                       </div>
@@ -546,22 +549,130 @@ export default function ContactoPage() {
                 )}
               </AnimatePresence>
             </motion.div>
-
-            {contactItems.slice(2).map((item, index) => (
-              <ContactCard
-                key={item.id}
-                item={item}
-                index={index + 3}
-                editorMode={editorMode}
-                getEditableClass={getEditableClass}
-                getResolvedStyle={getResolvedStyle}
-                handleElementClick={handleElementClick}
-                playClick={playClick}
-                arrowBounce={arrowBounce}
-                t={t}
-              />
-            ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-8 rounded-2xl overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}
+            data-testid="form-escribenos"
+          >
+            <div className="flex flex-col md:flex-row">
+              <div className="p-6 md:p-10 md:w-2/5 flex flex-col justify-center text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-black text-white mb-3">{t("contact.formWriteUs")}</h2>
+                <p className="text-white/80 text-sm md:text-base leading-relaxed">{t("contact.formWriteUsDesc")}</p>
+              </div>
+              <div className="bg-white/95 backdrop-blur-sm p-5 md:p-8 md:flex-1 rounded-t-2xl md:rounded-t-none md:rounded-l-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={generalForm.nombres} onChange={(v) => setGeneralForm(p => ({ ...p, nombres: v }))} testId="input-gen-nombres" />
+                  <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={generalForm.apellidos} onChange={(v) => setGeneralForm(p => ({ ...p, apellidos: v }))} testId="input-gen-apellidos" />
+                  <FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={generalForm.telefono} onChange={(v) => setGeneralForm(p => ({ ...p, telefono: v }))} testId="input-gen-telefono" />
+                  <FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={generalForm.email} onChange={(v) => setGeneralForm(p => ({ ...p, email: v }))} type="email" testId="input-gen-email" />
+                  <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={generalForm.ciudad} onChange={(v) => setGeneralForm(p => ({ ...p, ciudad: v }))} testId="input-gen-ciudad" />
+                  <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={generalForm.pais} onChange={(v) => setGeneralForm(p => ({ ...p, pais: v }))} testId="input-gen-pais" />
+                </div>
+                <div className="mt-3">
+                  <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
+                    <PenLine className="w-3.5 h-3.5 text-gray-400" />
+                    {t("contact.formComment")}
+                  </label>
+                  <textarea
+                    value={generalForm.comentario}
+                    onChange={(e) => setGeneralForm(p => ({ ...p, comentario: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent"
+                    data-testid="input-gen-comentario"
+                  />
+                </div>
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={submitGeneral}
+                    disabled={submittingGeneral || !generalForm.nombres}
+                    className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg, #5eead4, #14b8a6)" }}
+                    data-testid="button-submit-general"
+                  >
+                    {submittingGeneral ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mt-8 rounded-2xl overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #0d9488, #0891b2)" }}
+            data-testid="form-prueba-gratuita"
+          >
+            <div className="flex flex-col md:flex-row">
+              <div className="p-6 md:p-10 md:w-2/5 flex flex-col justify-center text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-black text-white mb-3">
+                  <span style={{ color: "#fbbf24" }}>IQx,</span>
+                </h2>
+                <p className="text-white/90 text-sm md:text-base leading-relaxed mb-4">{t("contact.formTrialDesc")}</p>
+                <p className="text-yellow-300 font-bold text-lg">{t("contact.formTrialMotivation")}</p>
+              </div>
+              <div className="md:flex-1 flex flex-col gap-4 p-5 md:p-8">
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                  <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formContactData")}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.nombres} onChange={(v) => setTrialForm(p => ({ ...p, nombres: v }))} testId="input-trial-nombres" />
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.apellidos} onChange={(v) => setTrialForm(p => ({ ...p, apellidos: v }))} testId="input-trial-apellidos" />
+                  </div>
+                  <div className="mt-3">
+                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.cedula} onChange={(v) => setTrialForm(p => ({ ...p, cedula: v }))} testId="input-trial-cedula" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.fechaNacimiento} onChange={(v) => setTrialForm(p => ({ ...p, fechaNacimiento: v }))} type="date" testId="input-trial-fecha" />
+                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.edad} onChange={(v) => setTrialForm(p => ({ ...p, edad: v }))} testId="input-trial-edad" />
+                  </div>
+                  <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.telefono} onChange={(v) => setTrialForm(p => ({ ...p, telefono: v }))} testId="input-trial-tel" /></div>
+                  <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.email} onChange={(v) => setTrialForm(p => ({ ...p, email: v }))} type="email" testId="input-trial-email" /></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.ciudad} onChange={(v) => setTrialForm(p => ({ ...p, ciudad: v }))} testId="input-trial-ciudad" />
+                    <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pais} onChange={(v) => setTrialForm(p => ({ ...p, pais: v }))} testId="input-trial-pais" />
+                  </div>
+                </div>
+
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5">
+                  <h3 className="text-center font-bold text-gray-700 text-sm mb-4 tracking-wide">{t("contact.formWhoTrial")}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formNames")} value={trialForm.pgNombres} onChange={(v) => setTrialForm(p => ({ ...p, pgNombres: v }))} testId="input-pg-nombres" />
+                    <FormField icon={<User className="w-4 h-4" />} label={t("contact.formLastNames")} value={trialForm.pgApellidos} onChange={(v) => setTrialForm(p => ({ ...p, pgApellidos: v }))} testId="input-pg-apellidos" />
+                  </div>
+                  <div className="mt-3"><FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formId")} value={trialForm.pgCedula} onChange={(v) => setTrialForm(p => ({ ...p, pgCedula: v }))} testId="input-pg-cedula" /></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <FormField icon={<Calendar className="w-4 h-4" />} label={t("contact.formBirthDate")} value={trialForm.pgFechaNac} onChange={(v) => setTrialForm(p => ({ ...p, pgFechaNac: v }))} type="date" testId="input-pg-fecha" />
+                    <FormField icon={<Hash className="w-4 h-4" />} label={t("contact.formAge")} value={trialForm.pgEdad} onChange={(v) => setTrialForm(p => ({ ...p, pgEdad: v }))} testId="input-pg-edad" />
+                  </div>
+                  <div className="mt-3"><FormField icon={<Phone className="w-4 h-4" />} label={t("contact.formPhone")} value={trialForm.pgTelefono} onChange={(v) => setTrialForm(p => ({ ...p, pgTelefono: v }))} testId="input-pg-tel" /></div>
+                  <div className="mt-3"><FormField icon={<Mail className="w-4 h-4" />} label={t("contact.formEmail")} value={trialForm.pgEmail} onChange={(v) => setTrialForm(p => ({ ...p, pgEmail: v }))} type="email" testId="input-pg-email" /></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <FormField icon={<MapPin className="w-4 h-4" />} label={t("contact.formCity")} value={trialForm.pgCiudad} onChange={(v) => setTrialForm(p => ({ ...p, pgCiudad: v }))} testId="input-pg-ciudad" />
+                    <FormField icon={<Globe className="w-4 h-4" />} label={t("contact.formCountry")} value={trialForm.pgPais} onChange={(v) => setTrialForm(p => ({ ...p, pgPais: v }))} testId="input-pg-pais" />
+                  </div>
+                </div>
+
+                <div className="flex justify-center mt-2 mb-2">
+                  <button
+                    onClick={submitTrial}
+                    disabled={submittingTrial || !trialForm.nombres}
+                    className="px-10 py-3 rounded-full text-white font-bold text-sm tracking-wider transition-all active:scale-95 disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
+                    data-testid="button-submit-trial"
+                  >
+                    {submittingTrial ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t("contact.formSend")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
         </div>
       </div>
 
@@ -579,6 +690,24 @@ export default function ContactoPage() {
           onDeviceModeChange={setDeviceMode}
         />
       )}
+    </div>
+  );
+}
+
+function FormField({ icon, label, value, onChange, type = "text", testId }: { icon: React.ReactNode; label: string; value: string; onChange: (v: string) => void; type?: string; testId: string }) {
+  return (
+    <div>
+      <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
+        <span className="text-gray-400">{icon}</span>
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent"
+        data-testid={testId}
+      />
     </div>
   );
 }
