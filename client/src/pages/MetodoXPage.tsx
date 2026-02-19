@@ -49,10 +49,10 @@ function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean):
 
 const STEP_ICONS = [Brain, Zap, TrendingUp, BarChart3];
 const STEP_COLORS = [
-  { bg: "linear-gradient(135deg, #7c3aed, #a855f7)", shadow: "rgba(124,58,237,0.3)" },
-  { bg: "linear-gradient(135deg, #f59e0b, #f97316)", shadow: "rgba(245,158,11,0.3)" },
-  { bg: "linear-gradient(135deg, #10b981, #06b6d4)", shadow: "rgba(16,185,129,0.3)" },
-  { bg: "linear-gradient(135deg, #3b82f6, #6366f1)", shadow: "rgba(59,130,246,0.3)" },
+  { bg: "linear-gradient(135deg, #7c3aed, #a855f7)", shadow: "rgba(124,58,237,0.3)", accent: "#7c3aed", light: "rgba(124,58,237,0.08)", mid: "rgba(124,58,237,0.15)", glow: "rgba(124,58,237,0.5)", border: "#a855f7" },
+  { bg: "linear-gradient(135deg, #f59e0b, #f97316)", shadow: "rgba(245,158,11,0.3)", accent: "#f59e0b", light: "rgba(245,158,11,0.08)", mid: "rgba(245,158,11,0.15)", glow: "rgba(245,158,11,0.5)", border: "#f97316" },
+  { bg: "linear-gradient(135deg, #10b981, #06b6d4)", shadow: "rgba(16,185,129,0.3)", accent: "#10b981", light: "rgba(16,185,129,0.08)", mid: "rgba(16,185,129,0.15)", glow: "rgba(16,185,129,0.5)", border: "#06b6d4" },
+  { bg: "linear-gradient(135deg, #3b82f6, #6366f1)", shadow: "rgba(59,130,246,0.3)", accent: "#3b82f6", light: "rgba(59,130,246,0.08)", mid: "rgba(59,130,246,0.15)", glow: "rgba(59,130,246,0.5)", border: "#6366f1" },
 ];
 
 export default function MetodoXPage() {
@@ -370,33 +370,36 @@ export default function MetodoXPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ duration: 0.3 }}
-                  className={`rounded-2xl overflow-hidden border border-purple-100 ${getEditableClass(`step-card-${activeStep}`)}`}
-                  style={{ background: "white", boxShadow: "0 4px 20px rgba(124,58,237,0.08)", ...getElementStyle(`step-card-${activeStep}`, "white") }}
+                  className={`rounded-2xl overflow-hidden ${getEditableClass(`step-card-${activeStep}`)}`}
+                  style={{ background: "white", boxShadow: `0 6px 25px ${STEP_COLORS[activeStep].shadow}`, border: `2px solid ${STEP_COLORS[activeStep].mid}`, ...getElementStyle(`step-card-${activeStep}`, "white") }}
                   onClick={(e) => { if (editorMode) handleElementClick(`step-card-${activeStep}`, e); }}
                 >
-                  <div className="p-4 flex items-center gap-3" style={{ background: STEP_COLORS[activeStep].bg }}>
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
-                      style={{ background: "rgba(255,255,255,0.2)", ...getElementStyle(`step-icon-${activeStep}`) }}
+                  <div className="p-4 flex items-center gap-3 relative overflow-hidden" style={{ background: STEP_COLORS[activeStep].bg }}>
+                    <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-20" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1], boxShadow: [`0 0 0px transparent`, `0 0 18px ${STEP_COLORS[activeStep].glow}`, `0 0 0px transparent`] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
+                      style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)", ...getElementStyle(`step-icon-${activeStep}`) }}
                       onClick={(e) => { if (editorMode) handleElementClick(`step-icon-${activeStep}`, e); }}
                     >
                       {resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.imageUrl ? (
-                        <img src={resolveStyle(styles, `step-icon-${activeStep}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 24, height: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 24 }} />
+                        <img src={resolveStyle(styles, `step-icon-${activeStep}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 28, height: resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.iconSize || 28 }} />
                       ) : (
-                        (() => { const Icon = STEP_ICONS[activeStep]; return <Icon className="w-6 h-6 text-white" />; })()
+                        (() => { const Icon = STEP_ICONS[activeStep]; return <Icon className="w-7 h-7 text-white drop-shadow-lg" />; })()
                       )}
-                    </div>
-                    <div className="flex-1 min-w-0">
+                    </motion.div>
+                    <div className="flex-1 min-w-0 relative z-10">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-2xl font-extrabold text-white/40 ${getEditableClass(`step-num-${activeStep}`)}`}
-                          style={getElementStyle(`step-num-${activeStep}`)}
+                          className={`text-3xl font-black text-white/25 ${getEditableClass(`step-num-${activeStep}`)}`}
+                          style={{ textShadow: "0 2px 4px rgba(0,0,0,0.1)", ...getElementStyle(`step-num-${activeStep}`) }}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-num-${activeStep}`, e); }}
                         >
                           {String(activeStep + 1).padStart(2, "0")}
                         </span>
                         <h3
-                          className={`text-sm font-bold text-white ${getEditableClass(`step-title-${activeStep}`)}`}
+                          className={`text-base font-extrabold text-white drop-shadow-sm ${getEditableClass(`step-title-${activeStep}`)}`}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-title-${activeStep}`, e); }}
                           style={getElementStyle(`step-title-${activeStep}`)}
                           data-testid={`text-step-title-${activeStep}`}
@@ -404,11 +407,12 @@ export default function MetodoXPage() {
                           {steps[activeStep].title}
                         </h3>
                       </div>
-                      <p className="text-white/80 text-xs font-semibold">{steps[activeStep].subtitle}</p>
+                      <p className="text-white/90 text-xs font-semibold mt-0.5">{steps[activeStep].subtitle}</p>
                     </div>
                   </div>
-                  <div className="p-4 space-y-3">
-                    <p className="text-xs font-bold text-purple-700 italic">{steps[activeStep].hook}</p>
+                  <div className="p-4 space-y-3 relative" style={{ borderLeft: `3px solid ${STEP_COLORS[activeStep].accent}` }}>
+                    <div className="absolute top-0 right-0 w-24 h-24 opacity-[0.04] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[activeStep].accent}, transparent)` }} />
+                    <p className="text-xs font-bold italic" style={{ color: STEP_COLORS[activeStep].accent }}>{steps[activeStep].hook}</p>
                     <p
                       className={`text-xs text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${activeStep}`)}`}
                       onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${activeStep}`, e); }}
@@ -417,7 +421,7 @@ export default function MetodoXPage() {
                     >
                       {steps[activeStep].desc}
                     </p>
-                    <div className="rounded-xl p-3" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.05), rgba(6,182,212,0.05))" }}>
+                    <div className="rounded-xl p-3" style={{ background: STEP_COLORS[activeStep].light, borderLeft: `2px solid ${STEP_COLORS[activeStep].mid}` }}>
                       <p className="text-[11px] text-gray-500 leading-relaxed italic">
                         {steps[activeStep].detail}
                       </p>
@@ -427,36 +431,44 @@ export default function MetodoXPage() {
               </AnimatePresence>
 
               <div className="flex items-center justify-between mt-4">
-                <button
+                <motion.button
                   onClick={() => { playClick(); prevStep(); }}
-                  className="w-9 h-9 rounded-full flex items-center justify-center border border-purple-200 text-purple-400"
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: STEP_COLORS[activeStep].light, border: `1.5px solid ${STEP_COLORS[activeStep].mid}`, color: STEP_COLORS[activeStep].accent }}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.1 }}
                   data-testid="button-step-prev"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <div className="flex gap-2">
+                  <ChevronLeft className="w-5 h-5" />
+                </motion.button>
+                <div className="flex gap-2.5 items-center">
                   {steps.map((_, i) => (
-                    <button
+                    <motion.button
                       key={i}
                       onClick={() => { playClick(); setActiveStep(i); }}
                       className="transition-all duration-300"
+                      animate={activeStep === i ? { boxShadow: `0 0 10px ${STEP_COLORS[i].glow}` } : { boxShadow: "0 0 0px transparent" }}
                       style={{
-                        width: activeStep === i ? 24 : 8,
-                        height: 8,
-                        borderRadius: 4,
-                        background: activeStep === i ? STEP_COLORS[i].bg : "#e5e7eb",
+                        width: activeStep === i ? 28 : 10,
+                        height: 10,
+                        borderRadius: 5,
+                        background: activeStep === i ? STEP_COLORS[i].bg : STEP_COLORS[i].mid,
                       }}
+                      whileTap={{ scale: 0.8 }}
                       data-testid={`button-step-dot-${i}`}
                     />
                   ))}
                 </div>
-                <button
+                <motion.button
                   onClick={() => { playClick(); nextStep(); }}
-                  className="w-9 h-9 rounded-full flex items-center justify-center border border-purple-200 text-purple-400"
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: STEP_COLORS[activeStep].light, border: `1.5px solid ${STEP_COLORS[activeStep].mid}`, color: STEP_COLORS[activeStep].accent }}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.1 }}
                   data-testid="button-step-next"
                 >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+                  <ChevronRight className="w-5 h-5" />
+                </motion.button>
               </div>
             </div>
           ) : (
@@ -470,26 +482,29 @@ export default function MetodoXPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className={`rounded-2xl overflow-hidden border border-purple-100 flex flex-col cursor-pointer transition-shadow duration-300 hover:shadow-xl hover:shadow-purple-200/40 ${getEditableClass(`step-card-${i}`)}`}
-                    style={{ background: "white", boxShadow: "0 4px 20px rgba(124,58,237,0.08)", ...getElementStyle(`step-card-${i}`, "white") }}
+                    className={`rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:shadow-xl ${getEditableClass(`step-card-${i}`)}`}
+                    style={{ background: "white", boxShadow: `0 6px 25px ${STEP_COLORS[i].shadow}`, border: `2px solid ${STEP_COLORS[i].mid}`, ...getElementStyle(`step-card-${i}`, "white") }}
                     onClick={(e: any) => { if (editorMode) handleElementClick(`step-card-${i}`, e); }}
                   >
-                    <div className="p-5 flex items-center gap-4" style={{ background: STEP_COLORS[i].bg }}>
-                      <div
-                        className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${i}`)}`}
-                        style={{ background: "rgba(255,255,255,0.2)", ...getElementStyle(`step-icon-${i}`) }}
-                        onClick={(e) => { if (editorMode) handleElementClick(`step-icon-${i}`, e); }}
+                    <div className="p-5 flex items-center gap-4 relative overflow-hidden" style={{ background: STEP_COLORS[i].bg }}>
+                      <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-15" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+                      <motion.div
+                        animate={{ scale: [1, 1.08, 1], boxShadow: [`0 0 0px transparent`, `0 0 20px ${STEP_COLORS[i].glow}`, `0 0 0px transparent`] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+                        className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${i}`)}`}
+                        style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)", ...getElementStyle(`step-icon-${i}`) }}
+                        onClick={(e: any) => { if (editorMode) handleElementClick(`step-icon-${i}`, e); }}
                       >
                         {resolveStyle(styles, `step-icon-${i}`, isMobile)?.imageUrl ? (
-                          <img src={resolveStyle(styles, `step-icon-${i}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 28, height: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 28 }} />
+                          <img src={resolveStyle(styles, `step-icon-${i}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 32, height: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 32 }} />
                         ) : (
-                          <Icon className="w-7 h-7 text-white" />
+                          <Icon className="w-8 h-8 text-white drop-shadow-lg" />
                         )}
-                      </div>
-                      <div className="flex-1 min-w-0">
+                      </motion.div>
+                      <div className="flex-1 min-w-0 relative z-10">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-3xl font-extrabold text-white/30 ${getEditableClass(`step-num-${i}`)}`}
+                            className={`text-3xl font-black text-white/25 ${getEditableClass(`step-num-${i}`)}`}
                             style={getElementStyle(`step-num-${i}`)}
                             onClick={(e) => { if (editorMode) handleElementClick(`step-num-${i}`, e); }}
                           >
@@ -504,11 +519,12 @@ export default function MetodoXPage() {
                             {step.title}
                           </h3>
                         </div>
-                        <p className="text-white/80 text-sm font-semibold mt-0.5">{step.subtitle}</p>
+                        <p className="text-white/90 text-sm font-semibold mt-0.5">{step.subtitle}</p>
                       </div>
                     </div>
-                    <div className="p-5 flex-1 flex flex-col gap-3">
-                      <p className="text-sm font-bold text-purple-700 italic">{step.hook}</p>
+                    <div className="p-5 flex-1 flex flex-col gap-3 relative" style={{ borderLeft: `3px solid ${STEP_COLORS[i].accent}` }}>
+                      <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[i].accent}, transparent)` }} />
+                      <p className="text-sm font-bold italic" style={{ color: STEP_COLORS[i].accent }}>{step.hook}</p>
                       <p
                         className={`text-sm text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${i}`)}`}
                         onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${i}`, e); }}
@@ -517,7 +533,7 @@ export default function MetodoXPage() {
                       >
                         {step.desc}
                       </p>
-                      <div className="rounded-xl p-4 mt-auto" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.05), rgba(6,182,212,0.05))" }}>
+                      <div className="rounded-xl p-4 mt-auto" style={{ background: STEP_COLORS[i].light, borderLeft: `2px solid ${STEP_COLORS[i].mid}` }}>
                         <p className="text-xs text-gray-500 leading-relaxed italic">
                           {step.detail}
                         </p>
