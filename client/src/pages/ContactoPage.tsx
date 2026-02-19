@@ -5,6 +5,10 @@ import scCentroImg from "@assets/santacruz_centro_1771477590891.JPG";
 import scNorteImg from "@assets/santac_cruz_norte_1771477590891.JPG";
 import cbbaAmericasImg from "@assets/cochabamba_americas_1771477590890.JPG";
 import cbbaCentroImg from "@assets/cochambaba_centro_1771477590891.JPG";
+import laxCyan from "@assets/laxcyan2_1771479429192.png";
+import laxPurpura from "@assets/laxpurpura_1771479319056.png";
+import laxBlanca from "@assets/laxblanca_1771479319056.png";
+import laxVerde from "@assets/laxverde_1771479319057.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -236,6 +240,41 @@ export default function ContactoPage() {
     >
       <CurvedHeader showBack onBack={() => setLocation("/")} />
 
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.img
+          src={laxCyan}
+          alt=""
+          className="absolute opacity-[0.07]"
+          style={{ width: isMobile ? "280px" : "500px", top: isMobile ? "8%" : "5%", right: isMobile ? "-80px" : "-60px" }}
+          animate={{ rotate: [0, 8, -4, 0], scale: [1, 1.05, 0.98, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.img
+          src={laxPurpura}
+          alt=""
+          className="absolute opacity-[0.05]"
+          style={{ width: isMobile ? "200px" : "350px", top: isMobile ? "35%" : "30%", left: isMobile ? "-60px" : "-40px" }}
+          animate={{ rotate: [0, -6, 5, 0], y: [0, 20, -10, 0] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        />
+        <motion.img
+          src={laxVerde}
+          alt=""
+          className="absolute opacity-[0.06]"
+          style={{ width: isMobile ? "220px" : "400px", bottom: isMobile ? "15%" : "10%", right: isMobile ? "-50px" : "5%" }}
+          animate={{ rotate: [0, 5, -8, 0], x: [0, -15, 10, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 6 }}
+        />
+        <motion.img
+          src={laxBlanca}
+          alt=""
+          className="absolute opacity-[0.04]"
+          style={{ width: isMobile ? "180px" : "300px", top: isMobile ? "60%" : "55%", left: isMobile ? "30%" : "40%" }}
+          animate={{ rotate: [0, -10, 6, 0], scale: [1, 1.08, 0.95, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 9 }}
+        />
+      </div>
+
       {editorMode && (
         <div
           className={`mx-auto mt-1 px-3 py-1 rounded-full text-[10px] text-gray-400 border border-dashed border-gray-300 ${getEditableClass("page-background")}`}
@@ -246,7 +285,7 @@ export default function ContactoPage() {
         </div>
       )}
 
-      <div className="flex-1 pb-28 w-full">
+      <div className="flex-1 pb-28 w-full relative z-[1]">
         <div
           className={`relative overflow-hidden ${getEditableClass("hero-section")}`}
           style={{ ...getElementStyle("hero-section") }}
