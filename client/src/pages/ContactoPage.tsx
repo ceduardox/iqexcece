@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { MessageCircle, Mail, Newspaper, BookOpen, Headphones, ChevronRight, Send, X, Loader2 } from "lucide-react";
+import { MessageCircle, Mail, Newspaper, BookOpen, Headphones, ChevronRight, ChevronDown, Send, X, Loader2, Sparkles, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -18,6 +18,7 @@ function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean):
   return { ...base, ...desktop };
 }
 
+const HERO_IMG = "https://iqexponencial.app/api/images/8892fe4f-7ef0-45f3-ab1f-04bcf6c78960";
 const DEFAULT_OPERATOR_IMG = "https://cdn-icons-png.flaticon.com/512/4825/4825038.png";
 
 function getSessionId() {
@@ -161,42 +162,10 @@ export default function ContactoPage() {
   }, [styles, isMobile]);
 
   const contactItems = [
-    {
-      id: "blog",
-      icon: Newspaper,
-      labelKey: "contact.blog",
-      subKey: "contact.blogSub",
-      gradient: "linear-gradient(135deg, #f3e8ff, #e0f2fe)",
-      iconColor: "#8b5cf6",
-      action: () => setLocation("/blog"),
-    },
-    {
-      id: "leer-bolivia",
-      icon: BookOpen,
-      labelKey: "contact.leerBolivia",
-      subKey: "contact.leerBoliviaSub",
-      gradient: "linear-gradient(135deg, #d1fae5, #cffafe)",
-      iconColor: "#10b981",
-      action: () => setLocation("/a-leer-bolivia"),
-    },
-    {
-      id: "whatsapp",
-      icon: MessageCircle,
-      labelKey: "contact.whatsapp",
-      subKey: "contact.whatsappSub",
-      gradient: "linear-gradient(135deg, #25D366, #128C7E)",
-      iconColor: "#fff",
-      action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank"),
-    },
-    {
-      id: "email",
-      icon: Mail,
-      labelKey: "contact.email",
-      subKey: "contact.emailSub",
-      gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)",
-      iconColor: "#fff",
-      action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; },
-    },
+    { id: "blog", icon: Newspaper, labelKey: "contact.blog", subKey: "contact.blogSub", gradient: "linear-gradient(135deg, #f3e8ff, #e0f2fe)", iconColor: "#8b5cf6", action: () => setLocation("/blog") },
+    { id: "leer-bolivia", icon: BookOpen, labelKey: "contact.leerBolivia", subKey: "contact.leerBoliviaSub", gradient: "linear-gradient(135deg, #d1fae5, #cffafe)", iconColor: "#10b981", action: () => setLocation("/a-leer-bolivia") },
+    { id: "whatsapp", icon: MessageCircle, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank") },
+    { id: "email", icon: Mail, labelKey: "contact.email", subKey: "contact.emailSub", gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)", iconColor: "#fff", action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; } },
   ];
 
   const arrowBounce = {
@@ -244,205 +213,355 @@ export default function ContactoPage() {
         </div>
       )}
 
-      <div className="flex-1 px-5 pb-28 max-w-md md:max-w-full mx-auto w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mt-4 flex flex-col items-center"
+      <div className="flex-1 pb-28 w-full">
+        <div
+          className={`relative overflow-hidden ${getEditableClass("hero-section")}`}
+          style={{ ...getElementStyle("hero-section") }}
+          onClick={(e) => { if (editorMode) handleElementClick("hero-section", e); }}
+          data-testid="hero-section"
         >
-          <h1
-            className={`text-2xl font-bold text-center mb-1 ${getEditableClass("title")}`}
-            onClick={(e) => handleElementClick("title", e)}
-            style={getElementStyle("title")}
-            data-testid="text-contacto-title"
-          >
-            {getResolvedStyle("title")?.buttonText || t("contact.title")}
-          </h1>
-          <p
-            className={`text-sm text-gray-500 text-center mb-6 ${getEditableClass("subtitle")}`}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              animate={{ scale: [1, 1.4, 1], opacity: [0.06, 0.15, 0.06] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-20 -right-20 w-72 h-72 rounded-full"
+              style={{ background: "radial-gradient(circle, #a855f7, transparent)" }}
+            />
+            <motion.div
+              animate={{ scale: [1, 1.3, 1], opacity: [0.04, 0.12, 0.04] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+              className="absolute -bottom-10 -left-10 w-56 h-56 rounded-full"
+              style={{ background: "radial-gradient(circle, #06b6d4, transparent)" }}
+            />
+            <motion.div
+              animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/3 right-10 w-3 h-3 rounded-full bg-purple-400/30"
+            />
+            <motion.div
+              animate={{ x: [0, -20, 0], y: [0, 15, 0] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute top-1/2 left-8 w-2 h-2 rounded-full bg-cyan-400/30"
+            />
+          </div>
+
+          <div className="relative max-w-5xl mx-auto px-5 pt-6 pb-8">
+            <div className={`flex ${isMobile ? "flex-col" : "flex-row items-center gap-10"}`}>
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className={`${isMobile ? "w-full" : "flex-1"} flex flex-col gap-4`}
+              >
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                  className={`text-3xl md:text-5xl font-black leading-tight ${getEditableClass("hero-title")}`}
+                  style={{ background: "linear-gradient(135deg, #6d28d9, #a855f7, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", ...getElementStyle("hero-title") }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
+                  data-testid="text-hero-title"
+                >
+                  {t("contact.title")}
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className={`text-sm md:text-base text-gray-600 leading-relaxed ${getEditableClass("hero-desc")}`}
+                  style={getElementStyle("hero-desc")}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
+                  data-testid="text-hero-desc"
+                >
+                  {t("contact.heroDesc")}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                  className={`relative rounded-2xl overflow-hidden p-4 md:p-5 mt-2 ${getEditableClass("cta-block")}`}
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)", ...getElementStyle("cta-block") }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("cta-block", e); } }}
+                  data-testid="cta-block"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.25, 0.1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-2 right-2 w-16 h-16 rounded-full"
+                    style={{ background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent)" }}
+                  />
+                  <div className="relative flex items-center gap-3">
+                    <motion.div
+                      animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.15, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="w-7 h-7 text-yellow-300 flex-shrink-0" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-white font-bold text-base md:text-lg">{t("contact.ctaTitle")}</h3>
+                      <p className="text-white/80 text-xs md:text-sm mt-0.5">{t("contact.ctaDesc")}</p>
+                    </div>
+                  </div>
+                  <motion.div
+                    animate={{ y: [0, 6, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="flex justify-center mt-3"
+                  >
+                    <ArrowDown className="w-5 h-5 text-white/60" />
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className={`${isMobile ? "mt-6 mx-auto" : ""} relative flex-shrink-0`}
+              >
+                <div
+                  className={`relative ${getEditableClass("hero-image")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-image", e); } }}
+                  data-testid="hero-image"
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: "conic-gradient(from 0deg, #7c3aed, #06b6d4, #a855f7, #f59e0b, #7c3aed)",
+                      padding: 3,
+                      borderRadius: "50%",
+                    }}
+                  />
+                  <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(from 0deg, #7c3aed, #06b6d4, #a855f7, #f59e0b, #7c3aed)", padding: 3 }}>
+                    <div className="w-full h-full rounded-full bg-white" />
+                  </div>
+
+                  <div
+                    className="relative w-52 h-52 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-white"
+                    style={{ boxShadow: "0 20px 60px rgba(124,58,237,0.3), 0 0 40px rgba(6,182,212,0.15)" }}
+                  >
+                    <img
+                      src={getResolvedStyle("hero-image")?.imageUrl || HERO_IMG}
+                      alt="Contacto IQ Exponencial"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(124,58,237,0.3) 0%, transparent 50%)" }} />
+                  </div>
+
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], boxShadow: ["0 0 0 rgba(124,58,237,0)", "0 0 30px rgba(124,58,237,0.4)", "0 0 0 rgba(124,58,237,0)"] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-2 -right-2 w-12 h-12 rounded-full flex items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
+                  >
+                    <span className="text-white font-black text-sm">IQ</span>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ y: [0, -8, 0], rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -bottom-1 -left-3 w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, #06b6d4, #0891b2)", boxShadow: "0 4px 15px rgba(6,182,212,0.4)" }}
+                  >
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </motion.div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-5 max-w-md md:max-w-full mx-auto w-full mt-4">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className={`text-sm text-gray-500 text-center mb-5 ${getEditableClass("subtitle")}`}
             onClick={(e) => handleElementClick("subtitle", e)}
             style={getElementStyle("subtitle")}
             data-testid="text-contacto-subtitle"
           >
             {getResolvedStyle("subtitle")?.buttonText || t("contact.subtitle")}
-          </p>
-        </motion.div>
+          </motion.p>
 
-        <div
-          className={`flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-5 rounded-2xl p-3 md:p-6 relative ${getEditableClass("cards-section")}`}
-          onClick={(e) => handleElementClick("cards-section", e)}
-          style={{
-            ...(() => {
-              const cs = getResolvedStyle("cards-section");
-              return cs?.imageUrl
-                ? { background: `url(${cs.imageUrl}) center/cover no-repeat`, backgroundSize: cs?.imageSize ? `${cs.imageSize}%` : "cover" }
-                : cs?.background ? { background: cs.background } : {};
-            })(),
-            borderRadius: getResolvedStyle("cards-section")?.borderRadius || 16,
-            minHeight: getResolvedStyle("cards-section")?.sectionHeight,
-          }}
-        >
-          {contactItems.slice(0, 2).map((item, index) => (
-            <ContactCard
-              key={item.id}
-              item={item}
-              index={index}
-              editorMode={editorMode}
-              getEditableClass={getEditableClass}
-              getResolvedStyle={getResolvedStyle}
-              handleElementClick={handleElementClick}
-              playClick={playClick}
-              arrowBounce={arrowBounce}
-              t={t}
-            />
-          ))}
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.16 }}
-            className={`w-full rounded-2xl overflow-hidden transition-all md:col-span-1 ${getEditableClass("contact-asesor")}`}
+          <div
+            className={`flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-5 rounded-2xl p-3 md:p-6 relative ${getEditableClass("cards-section")}`}
+            onClick={(e) => handleElementClick("cards-section", e)}
             style={{
-              background: asesorCardS?.background || "linear-gradient(135deg, #7c3aed, #a855f7)",
-              boxShadow: asesorCardS?.shadowBlur ? `0 4px ${asesorCardS.shadowBlur}px ${asesorCardS.shadowColor || "rgba(0,0,0,0.1)"}` : "0 4px 20px rgba(124,58,237,0.2)",
-              borderRadius: asesorCardS?.borderRadius || 16,
+              ...(() => {
+                const cs = getResolvedStyle("cards-section");
+                return cs?.imageUrl
+                  ? { background: `url(${cs.imageUrl}) center/cover no-repeat`, backgroundSize: cs?.imageSize ? `${cs.imageSize}%` : "cover" }
+                  : cs?.background ? { background: cs.background } : {};
+              })(),
+              borderRadius: getResolvedStyle("cards-section")?.borderRadius || 16,
+              minHeight: getResolvedStyle("cards-section")?.sectionHeight,
             }}
-            data-testid="button-contact-asesor"
           >
-            <div
-              className="flex items-center md:flex-col md:items-center md:text-center p-4 md:py-10 md:px-6 gap-4 md:gap-4 cursor-pointer"
-              onClick={(e) => {
-                if (editorMode) { handleElementClick("contact-asesor", e); }
-                else { playClick(); setChatOpen(!chatOpen); }
+            {contactItems.slice(0, 2).map((item, index) => (
+              <ContactCard
+                key={item.id}
+                item={item}
+                index={index}
+                editorMode={editorMode}
+                getEditableClass={getEditableClass}
+                getResolvedStyle={getResolvedStyle}
+                handleElementClick={handleElementClick}
+                playClick={playClick}
+                arrowBounce={arrowBounce}
+                t={t}
+              />
+            ))}
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.16 }}
+              className={`w-full rounded-2xl overflow-hidden transition-all md:col-span-1 ${getEditableClass("contact-asesor")}`}
+              style={{
+                background: asesorCardS?.background || "linear-gradient(135deg, #7c3aed, #a855f7)",
+                boxShadow: asesorCardS?.shadowBlur ? `0 4px ${asesorCardS.shadowBlur}px ${asesorCardS.shadowColor || "rgba(0,0,0,0.1)"}` : "0 4px 20px rgba(124,58,237,0.2)",
+                borderRadius: asesorCardS?.borderRadius || 16,
               }}
+              data-testid="button-contact-asesor"
             >
               <div
-                className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
-                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
-                style={{ background: operatorS?.background || "rgba(255,255,255,0.15)" }}
+                className="flex items-center md:flex-col md:items-center md:text-center p-4 md:py-10 md:px-6 gap-4 md:gap-4 cursor-pointer"
+                onClick={(e) => {
+                  if (editorMode) { handleElementClick("contact-asesor", e); }
+                  else { playClick(); setChatOpen(!chatOpen); }
+                }}
               >
-                <img
-                  src={operatorS?.imageUrl || DEFAULT_OPERATOR_IMG}
-                  alt="operator"
-                  className="w-full h-full object-cover"
-                  style={operatorS?.imageSize ? { width: `${operatorS.imageSize}%`, height: `${operatorS.imageSize}%` } : {}}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-white/80 text-xs font-medium mb-0.5 ${getEditableClass("hablamos")}`}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hablamos", e); } }}
-                  style={(() => { const h = getResolvedStyle("hablamos"); return h?.textColor ? { color: h.textColor } : {}; })()}
-                  data-testid="text-hablamos"
+                <div
+                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/30 ${getEditableClass("operator-image")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("operator-image", e); } }}
+                  style={{ background: operatorS?.background || "rgba(255,255,255,0.15)" }}
                 >
-                  {getResolvedStyle("hablamos")?.buttonText || t("contact.hablamos")}
-                </p>
-                <h3 className="text-white font-bold text-base leading-tight" style={{ color: asesorCardS?.textColor }}>
-                  {asesorCardS?.buttonText || t("contact.asesor")}
-                </h3>
-                <p className="text-white/70 text-xs mt-0.5" style={{ color: asesorCardS?.textColor ? `${asesorCardS.textColor}99` : undefined }}>
-                  {getResolvedStyle("asesor-sub")?.buttonText || t("contact.asesorSub")}
-                </p>
-              </div>
-              <motion.div
-                animate={{ rotate: chatOpen ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronRight className="w-5 h-5 text-white/60 flex-shrink-0" />
-              </motion.div>
-            </div>
-
-            <AnimatePresence>
-              {chatOpen && (
+                  <img
+                    src={operatorS?.imageUrl || DEFAULT_OPERATOR_IMG}
+                    alt="operator"
+                    className="w-full h-full object-cover"
+                    style={operatorS?.imageSize ? { width: `${operatorS.imageSize}%`, height: `${operatorS.imageSize}%` } : {}}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={`text-white/80 text-xs font-medium mb-0.5 ${getEditableClass("hablamos")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hablamos", e); } }}
+                    style={(() => { const h = getResolvedStyle("hablamos"); return h?.textColor ? { color: h.textColor } : {}; })()}
+                    data-testid="text-hablamos"
+                  >
+                    {getResolvedStyle("hablamos")?.buttonText || t("contact.hablamos")}
+                  </p>
+                  <h3 className="text-white font-bold text-base leading-tight" style={{ color: asesorCardS?.textColor }}>
+                    {asesorCardS?.buttonText || t("contact.asesor")}
+                  </h3>
+                  <p className="text-white/70 text-xs mt-0.5" style={{ color: asesorCardS?.textColor ? `${asesorCardS.textColor}99` : undefined }}>
+                    {getResolvedStyle("asesor-sub")?.buttonText || t("contact.asesorSub")}
+                  </p>
+                </div>
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+                  animate={{ rotate: chatOpen ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div className="bg-white rounded-t-2xl mx-1 mb-1 overflow-hidden" style={{ borderRadius: 16 }}>
-                    <div className="flex items-center justify-between px-4 py-2 bg-purple-50 border-b border-purple-100">
-                      <span className="text-xs font-semibold text-purple-700">Chat con Asesor</span>
-                      <button onClick={(e) => { e.stopPropagation(); setChatOpen(false); }} className="text-purple-400 hover:text-purple-600" data-testid="button-close-chat">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="h-64 overflow-y-auto p-3 space-y-2 bg-gray-50" data-testid="chat-messages">
-                      {chatMessages.length === 0 && (
-                        <div className="text-center text-gray-400 text-xs mt-8">
-                          <Headphones className="w-8 h-8 mx-auto mb-2 text-purple-300" />
-                          <p className="font-medium text-gray-500">Escribe tu consulta</p>
-                          <p className="mt-1">Nuestro asesor te responderá al instante</p>
-                        </div>
-                      )}
-                      {chatMessages.map((msg, i) => (
-                        <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                          <div
-                            className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
-                              msg.role === "user"
-                                ? "bg-purple-600 text-white rounded-br-md"
-                                : "bg-white text-gray-700 border border-gray-200 rounded-bl-md"
-                            }`}
-                            data-testid={`chat-msg-${msg.role}-${i}`}
-                          >
-                            {msg.content}
-                          </div>
-                        </div>
-                      ))}
-                      {chatLoading && (
-                        <div className="flex justify-start">
-                          <div className="bg-white border border-gray-200 px-3 py-2 rounded-2xl rounded-bl-md">
-                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-                          </div>
-                        </div>
-                      )}
-                      <div ref={chatEndRef} />
-                    </div>
-
-                    <div className="flex items-center gap-2 p-2 border-t border-gray-100 bg-white">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
-                        placeholder="Escribe un mensaje..."
-                        className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 text-gray-900 placeholder-gray-400 border-0 outline-none focus:ring-2 focus:ring-purple-300"
-                        disabled={chatLoading}
-                        data-testid="input-chat-message"
-                      />
-                      <button
-                        onClick={(e) => { e.stopPropagation(); sendMessage(); }}
-                        disabled={chatLoading || !chatInput.trim()}
-                        className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center disabled:opacity-40 transition-all active:scale-95"
-                        data-testid="button-send-chat"
-                      >
-                        <Send className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/60 flex-shrink-0" />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+              </div>
 
-          {contactItems.slice(2).map((item, index) => (
-            <ContactCard
-              key={item.id}
-              item={item}
-              index={index + 3}
-              editorMode={editorMode}
-              getEditableClass={getEditableClass}
-              getResolvedStyle={getResolvedStyle}
-              handleElementClick={handleElementClick}
-              playClick={playClick}
-              arrowBounce={arrowBounce}
-              t={t}
-            />
-          ))}
+              <AnimatePresence>
+                {chatOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-white rounded-t-2xl mx-1 mb-1 overflow-hidden" style={{ borderRadius: 16 }}>
+                      <div className="flex items-center justify-between px-4 py-2 bg-purple-50 border-b border-purple-100">
+                        <span className="text-xs font-semibold text-purple-700">Chat con Asesor</span>
+                        <button onClick={(e) => { e.stopPropagation(); setChatOpen(false); }} className="text-purple-400 hover:text-purple-600" data-testid="button-close-chat">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="h-64 overflow-y-auto p-3 space-y-2 bg-gray-50" data-testid="chat-messages">
+                        {chatMessages.length === 0 && (
+                          <div className="text-center text-gray-400 text-xs mt-8">
+                            <Headphones className="w-8 h-8 mx-auto mb-2 text-purple-300" />
+                            <p className="font-medium text-gray-500">Escribe tu consulta</p>
+                            <p className="mt-1">Nuestro asesor te responderá al instante</p>
+                          </div>
+                        )}
+                        {chatMessages.map((msg, i) => (
+                          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                            <div
+                              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                                msg.role === "user"
+                                  ? "bg-purple-600 text-white rounded-br-md"
+                                  : "bg-white text-gray-700 border border-gray-200 rounded-bl-md"
+                              }`}
+                              data-testid={`chat-msg-${msg.role}-${i}`}
+                            >
+                              {msg.content}
+                            </div>
+                          </div>
+                        ))}
+                        {chatLoading && (
+                          <div className="flex justify-start">
+                            <div className="bg-white border border-gray-200 px-3 py-2 rounded-2xl rounded-bl-md">
+                              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                            </div>
+                          </div>
+                        )}
+                        <div ref={chatEndRef} />
+                      </div>
+
+                      <div className="flex items-center gap-2 p-2 border-t border-gray-100 bg-white">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
+                          placeholder="Escribe un mensaje..."
+                          className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-100 text-gray-900 placeholder-gray-400 border-0 outline-none focus:ring-2 focus:ring-purple-300"
+                          disabled={chatLoading}
+                          data-testid="input-chat-message"
+                        />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); sendMessage(); }}
+                          disabled={chatLoading || !chatInput.trim()}
+                          className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center disabled:opacity-40 transition-all active:scale-95"
+                          data-testid="button-send-chat"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {contactItems.slice(2).map((item, index) => (
+              <ContactCard
+                key={item.id}
+                item={item}
+                index={index + 3}
+                editorMode={editorMode}
+                getEditableClass={getEditableClass}
+                getResolvedStyle={getResolvedStyle}
+                handleElementClick={handleElementClick}
+                playClick={playClick}
+                arrowBounce={arrowBounce}
+                t={t}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

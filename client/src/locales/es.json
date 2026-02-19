@@ -17,6 +17,9 @@
   "contact": {
     "title": "Contacto",
     "subtitle": "Selecciona una opción para comunicarte con nosotros",
+    "heroDesc": "Lo que usted requiera acerca de nuestros servicios y programas. Para encontrar e informarse acerca de nuestra experiencia, para consultar y/o solicitar un ejecutivo, no dude en entablar contacto con nosotros. Estaremos complacidos y felices en responderle rápidamente.",
+    "ctaTitle": "Haga una PRUEBA GRATUITA",
+    "ctaDesc": "Llene el formulario que encontrará más abajo y habilítese",
     "hablamos": "¿Hablamos?",
     "blog": "Blog",
     "blogSub": "Escritos Directos",
