@@ -176,8 +176,8 @@ export default function ContactoPage() {
   const [trialForm, setTrialForm] = useState(emptyTrial);
   const [submittingGeneral, setSubmittingGeneral] = useState(false);
   const [submittingTrial, setSubmittingTrial] = useState(false);
-  const [formGeneralOpen, setFormGeneralOpen] = useState(!isMobile);
-  const [formTrialOpen, setFormTrialOpen] = useState(!isMobile);
+  const [formGeneralOpen, setFormGeneralOpen] = useState(false);
+  const [formTrialOpen, setFormTrialOpen] = useState(false);
 
   const submitGeneral = async () => {
     if (!generalForm.nombres) return;
@@ -573,15 +573,28 @@ export default function ContactoPage() {
                   data-testid="toggle-form-general"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                    <motion.div
+                      animate={formGeneralOpen ? {} : { scale: [1, 1.15, 1], rotate: [0, 8, -8, 0] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
+                    >
                       <PenLine className="w-5 h-5 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="text-left">
                       <h2 className="text-lg font-black text-white">{t("contact.formWriteUs")}</h2>
-                      <p className="text-white/60 text-xs">{t("contact.formWriteUsDesc")}</p>
+                      <motion.p
+                        animate={formGeneralOpen ? {} : { opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="text-white/60 text-xs"
+                      >
+                        {t("contact.formWriteUsDesc")}
+                      </motion.p>
                     </div>
                   </div>
-                  <motion.div animate={{ rotate: formGeneralOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                  <motion.div
+                    animate={formGeneralOpen ? { rotate: 180 } : { rotate: 0, y: [0, 4, 0] }}
+                    transition={formGeneralOpen ? { duration: 0.3 } : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
                     <ChevronDown className="w-5 h-5 text-white/70" />
                   </motion.div>
                 </button>
@@ -668,17 +681,36 @@ export default function ContactoPage() {
                   data-testid="toggle-form-trial"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                    <motion.div
+                      animate={formTrialOpen ? {} : { scale: [1, 1.2, 1], boxShadow: ["0 0 0px #fbbf24", "0 0 16px #fbbf24", "0 0 0px #fbbf24"] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
+                    >
                       <Sparkles className="w-5 h-5 text-yellow-300" />
-                    </div>
+                    </motion.div>
                     <div className="text-left">
                       <h2 className="text-lg font-black text-white">
-                        <span style={{ color: "#fbbf24" }}>IQx</span> {t("contact.formTrialTitle")}
+                        <motion.span
+                          animate={formTrialOpen ? {} : { color: ["#fbbf24", "#fde68a", "#fbbf24"] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          style={{ color: "#fbbf24" }}
+                        >
+                          IQx
+                        </motion.span> {t("contact.formTrialTitle")}
                       </h2>
-                      <p className="text-white/60 text-xs">{t("contact.formTrialMotivation")}</p>
+                      <motion.p
+                        animate={formTrialOpen ? {} : { opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                        className="text-white/60 text-xs"
+                      >
+                        {t("contact.formTrialMotivation")}
+                      </motion.p>
                     </div>
                   </div>
-                  <motion.div animate={{ rotate: formTrialOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                  <motion.div
+                    animate={formTrialOpen ? { rotate: 180 } : { rotate: 0, y: [0, 4, 0] }}
+                    transition={formTrialOpen ? { duration: 0.3 } : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
                     <ChevronDown className="w-5 h-5 text-white/70" />
                   </motion.div>
                 </button>
