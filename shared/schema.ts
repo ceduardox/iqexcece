@@ -434,3 +434,30 @@ export const asesorChats = pgTable("asesor_chats", {
 });
 
 export type AsesorChat = typeof asesorChats.$inferSelect;
+
+export const contactSubmissions = pgTable("contact_submissions", {
+  id: serial("id").primaryKey(),
+  formType: text("form_type").notNull(),
+  nombres: text("nombres"),
+  apellidos: text("apellidos"),
+  telefono: text("telefono"),
+  email: text("email"),
+  ciudad: text("ciudad"),
+  pais: text("pais"),
+  comentario: text("comentario"),
+  cedula: text("cedula"),
+  fechaNacimiento: text("fecha_nacimiento"),
+  edad: text("edad"),
+  pruebaGratuitaNombres: text("prueba_gratuita_nombres"),
+  pruebaGratuitaApellidos: text("prueba_gratuita_apellidos"),
+  pruebaGratuitaCedula: text("prueba_gratuita_cedula"),
+  pruebaGratuitaFechaNac: text("prueba_gratuita_fecha_nac"),
+  pruebaGratuitaEdad: text("prueba_gratuita_edad"),
+  pruebaGratuitaTelefono: text("prueba_gratuita_telefono"),
+  pruebaGratuitaEmail: text("prueba_gratuita_email"),
+  pruebaGratuitaCiudad: text("prueba_gratuita_ciudad"),
+  pruebaGratuitaPais: text("prueba_gratuita_pais"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
