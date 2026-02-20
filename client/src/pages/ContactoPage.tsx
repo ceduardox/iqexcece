@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { MessageCircle, Mail, Headphones, ChevronRight, ChevronDown, Send, X, Loader2, Sparkles, ArrowDown, User, Phone, MapPin, Globe, FileText, Calendar, Hash, PenLine, Building2, Navigation } from "lucide-react";
-import scCentroImg from "@assets/santacruz_centro_1771477590891.JPG";
-import scNorteImg from "@assets/santac_cruz_norte_1771477590891.JPG";
-import cbbaAmericasImg from "@assets/cochabamba_americas_1771477590890.JPG";
-import cbbaCentroImg from "@assets/cochambaba_centro_1771477590891.JPG";
+import { SiWhatsapp } from "react-icons/si";
+import scCentroImg from "@assets/santa-cruz-centro_1771571803277.jpg";
+import scNorteImg from "@assets/santa-cruz-norte_1771571803278.jpg";
 import laxCyan from "@assets/laxcyan2_1771479429192.png";
 import laxPurpura from "@assets/laxpurpura_1771479319056.png";
 import laxBlanca from "@assets/laxblanca_1771479319056.png";
@@ -170,7 +169,7 @@ export default function ContactoPage() {
   }, [styles, isMobile]);
 
   const contactItems = [
-    { id: "whatsapp", icon: MessageCircle, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank") },
+    { id: "whatsapp", icon: SiWhatsapp, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank") },
     { id: "email", icon: Mail, labelKey: "contact.email", subKey: "contact.emailSub", gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)", iconColor: "#fff", action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; } },
   ];
 
@@ -895,8 +894,6 @@ export default function ContactoPage() {
               {[
                 { name: "Santa Cruz - Centro", img: scCentroImg, address: "Av. Cochabamba No. 694, esquina Calle Saavedra", phone: "74160960 - 73600060", email: "info@iqexponencial.com", delay: 0, color: "#7c3aed", glow: "rgba(124,58,237,0.25)" },
                 { name: "Santa Cruz - Norte", img: scNorteImg, address: "Av. Los Cusis # 139, entre Banzer y Beni", phone: "75577756 - 73600060", email: "info@iqexponencial.com", delay: 0.12, color: "#0891b2", glow: "rgba(8,145,178,0.25)" },
-                { name: "Cochabamba - Américas", img: cbbaAmericasImg, address: "Calle Luis Calvo esq. Collasuyo", phone: "77024283 - 73600060", email: "info@iqexponencial.com", delay: 0.24, color: "#6366f1", glow: "rgba(99,102,241,0.25)" },
-                { name: "Cochabamba - Centro", img: cbbaCentroImg, address: "c. 16 de Julio # 515, entre Venezuela y Federico Blanco", phone: "77024284 - 73600060", email: "info@iqexponencial.com", delay: 0.36, color: "#059669", glow: "rgba(5,150,105,0.25)" },
               ].map((office, i) => (
                 <motion.div
                   key={office.name}
