@@ -832,6 +832,76 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  // Get translations for an entrenamiento item (admin)
+  app.get("/api/admin/entrenamiento/item/:id/translations", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const sourceItem = await storage.getEntrenamientoItemById(req.params.id);
+      if (!sourceItem) return res.status(404).json({ error: "Item not found" });
+      const translations: Record<string, { id?: string; title: string; description: string }> = {};
+      for (const lang of ["en", "pt"]) {
+        const translated = await storage.getEntrenamientoItemBySort(
+          sourceItem.categoria, sourceItem.sortOrder ?? 0, lang
+        );
+        translations[lang] = translated
+          ? { id: translated.id, title: translated.title, description: translated.description || "" }
+          : { title: "", description: "" };
+      }
+      res.json({ translations });
+    } catch (e) {
+      res.status(500).json({ error: "Error fetching translations" });
+    }
+  });
+
+  // Save translations for an entrenamiento item (admin)
+  app.put("/api/admin/entrenamiento/item/:id/translations", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const sourceItem = await storage.getEntrenamientoItemById(req.params.id);
+      if (!sourceItem) return res.status(404).json({ error: "Item not found" });
+      const { translations } = req.body;
+      const results: Record<string, any> = {};
+      for (const lang of ["en", "pt"]) {
+        const t = translations?.[lang];
+        if (!t || (!t.title && !t.description)) continue;
+        const existing = await storage.getEntrenamientoItemBySort(
+          sourceItem.categoria, sourceItem.sortOrder ?? 0, lang
+        );
+        if (existing) {
+          const updated = await storage.updateEntrenamientoItem(existing.id, {
+            title: t.title,
+            description: t.description
+          });
+          results[lang] = updated;
+        } else {
+          const created = await storage.saveEntrenamientoItem({
+            categoria: sourceItem.categoria,
+            lang,
+            title: t.title,
+            description: t.description || "",
+            imageUrl: sourceItem.imageUrl,
+            linkUrl: sourceItem.linkUrl,
+            tipoEjercicio: sourceItem.tipoEjercicio,
+            sortOrder: sourceItem.sortOrder ?? 0,
+            isActive: sourceItem.isActive ?? true
+          });
+          results[lang] = created;
+        }
+      }
+      res.json({ success: true, results });
+    } catch (e) {
+      res.status(500).json({ error: "Error saving translations" });
+    }
+  });
+
   // ============ PREP PAGES (Páginas de Preparación) ============
   
   // Get all prep pages (admin)

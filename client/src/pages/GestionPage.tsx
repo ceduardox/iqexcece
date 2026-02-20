@@ -155,6 +155,10 @@ export default function GestionPage() {
   });
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
+  const [itemTranslations, setItemTranslations] = useState<Record<string, { en: { title: string; description: string }; pt: { title: string; description: string } }>>({});
+  const [openTranslationId, setOpenTranslationId] = useState<string | null>(null);
+  const [loadingTranslationId, setLoadingTranslationId] = useState<string | null>(null);
+  const [savingTranslationId, setSavingTranslationId] = useState<string | null>(null);
   
   // Páginas de preparación
   const [prepPages, setPrepPages] = useState<{id: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string}[]>([]);
@@ -4803,6 +4807,117 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   placeholder="Ej: Para procesar palabras rápidamente"
                                 />
                               </div>
+                            </div>
+                            <div>
+                              <button
+                                onClick={async () => {
+                                  if (openTranslationId === item.id) {
+                                    setOpenTranslationId(null);
+                                    return;
+                                  }
+                                  setOpenTranslationId(item.id);
+                                  if (!itemTranslations[item.id]) {
+                                    setLoadingTranslationId(item.id);
+                                    try {
+                                      const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}/translations`);
+                                      if (res.ok) {
+                                        const data = await res.json();
+                                        setItemTranslations(prev => ({
+                                          ...prev,
+                                          [item.id]: {
+                                            en: data.translations?.en || { title: "", description: "" },
+                                            pt: data.translations?.pt || { title: "", description: "" }
+                                          }
+                                        }));
+                                      }
+                                    } catch (e) { console.error(e); }
+                                    setLoadingTranslationId(null);
+                                  }
+                                }}
+                                className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg transition-all ${
+                                  openTranslationId === item.id
+                                    ? "bg-blue-500/30 text-blue-300 border border-blue-500/50"
+                                    : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/70"
+                                }`}
+                              >
+                                <Globe className="w-3.5 h-3.5" />
+                                Traducciones EN / PT
+                                <ChevronDown className={`w-3 h-3 transition-transform ${openTranslationId === item.id ? "rotate-180" : ""}`} />
+                              </button>
+                              {openTranslationId === item.id && (
+                                <div className="mt-2 space-y-3 p-3 bg-blue-900/20 border border-blue-500/20 rounded-xl">
+                                  {loadingTranslationId === item.id ? (
+                                    <div className="text-center py-4 text-blue-300/60 text-sm">Cargando traducciones...</div>
+                                  ) : (
+                                    <>
+                                      {(["en", "pt"] as const).map((lang) => (
+                                        <div key={lang} className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${lang === "en" ? "bg-blue-500/30 text-blue-300" : "bg-green-500/30 text-green-300"}`}>
+                                              {lang === "en" ? "EN" : "PT"}
+                                            </span>
+                                            <span className="text-white/40 text-xs">{lang === "en" ? "English" : "Português"}</span>
+                                          </div>
+                                          <Input
+                                            value={itemTranslations[item.id]?.[lang]?.title || ""}
+                                            onChange={(e) => {
+                                              setItemTranslations(prev => ({
+                                                ...prev,
+                                                [item.id]: {
+                                                  ...prev[item.id],
+                                                  [lang]: { ...prev[item.id]?.[lang], title: e.target.value }
+                                                }
+                                              }));
+                                            }}
+                                            className={`bg-white/5 text-white text-sm ${lang === "en" ? "border-blue-500/30" : "border-green-500/30"}`}
+                                            placeholder={lang === "en" ? "Title in English" : "Título em Português"}
+                                          />
+                                          <Input
+                                            value={itemTranslations[item.id]?.[lang]?.description || ""}
+                                            onChange={(e) => {
+                                              setItemTranslations(prev => ({
+                                                ...prev,
+                                                [item.id]: {
+                                                  ...prev[item.id],
+                                                  [lang]: { ...prev[item.id]?.[lang], description: e.target.value }
+                                                }
+                                              }));
+                                            }}
+                                            className={`bg-white/5 text-white/80 text-sm ${lang === "en" ? "border-blue-500/30" : "border-green-500/30"}`}
+                                            placeholder={lang === "en" ? "Description in English" : "Descrição em Português"}
+                                          />
+                                        </div>
+                                      ))}
+                                      <Button
+                                        onClick={async () => {
+                                          setSavingTranslationId(item.id);
+                                          try {
+                                            const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}/translations`, {
+                                              method: "PUT",
+                                              headers: { "Content-Type": "application/json" },
+                                              body: JSON.stringify({ translations: itemTranslations[item.id] })
+                                            });
+                                            if (res.ok) {
+                                              alert("Traducciones guardadas");
+                                            } else {
+                                              alert("Error al guardar traducciones");
+                                            }
+                                          } catch (e) {
+                                            alert("Error al guardar traducciones");
+                                          }
+                                          setSavingTranslationId(null);
+                                        }}
+                                        disabled={savingTranslationId === item.id}
+                                        size="sm"
+                                        className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white w-full"
+                                      >
+                                        <Save className="w-3.5 h-3.5 mr-2" />
+                                        {savingTranslationId === item.id ? "Guardando..." : "Guardar Traducciones"}
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             <div>
                               <label className="text-white/60 text-xs mb-1 block">Tipo de ejercicio</label>
