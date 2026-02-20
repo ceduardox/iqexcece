@@ -2471,7 +2471,7 @@ ${schemaContent.substring(0, 3000)}
 
   app.get("/api/admin/contact-submissions", async (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
-    if (!adminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
     try {
       const { desc } = await import("drizzle-orm");
       const rows = await db.select().from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt));
@@ -2483,7 +2483,7 @@ ${schemaContent.substring(0, 3000)}
 
   app.delete("/api/admin/contact-submissions/:id", async (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
-    if (!adminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
     try {
       await db.delete(contactSubmissions).where(eq(contactSubmissions.id, parseInt(req.params.id)));
       res.json({ success: true });
