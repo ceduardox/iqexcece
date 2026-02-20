@@ -4302,6 +4302,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     key={cat}
                     onClick={async () => {
                       setEntrenamientoCategory(cat);
+                      setItemTranslations({});
+                      setOpenTranslationId(null);
                     }}
                     variant={entrenamientoCategory === cat ? "default" : "outline"}
                     size="sm"
