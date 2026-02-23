@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, type LucideIcon } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
+import { useEmbed } from "@/hooks/use-embed";
 
 export interface NavItem {
   id: string;
@@ -25,10 +26,13 @@ export function TrainingNavBar({
   items,
   onNavClick
 }: TrainingNavBarProps) {
+  const isEmbed = useEmbed();
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { playSound } = useSounds();
   const [moreOpen, setMoreOpen] = useState(false);
+
+  if (isEmbed) return null;
   const isMoreActive = activePage === "blog" || activePage === "mas";
 
   const defaultItems: NavItem[] = [

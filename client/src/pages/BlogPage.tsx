@@ -324,10 +324,10 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafe] relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.img src={laxCyan} alt="" className="absolute opacity-[0.06] w-[250px] md:w-[450px]" style={{ top: "3%", right: "-70px" }} animate={{ rotate: [0, 6, -5, 0], scale: [1, 1.06, 0.97, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} />
-        <motion.img src={laxPurpura} alt="" className="absolute opacity-[0.04] w-[180px] md:w-[320px]" style={{ top: "40%", left: "-50px" }} animate={{ rotate: [0, -8, 4, 0], y: [0, 25, -15, 0] }} transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 4 }} />
-        <motion.img src={laxVerde} alt="" className="absolute opacity-[0.05] w-[200px] md:w-[380px]" style={{ bottom: "8%", right: "-40px" }} animate={{ rotate: [0, 7, -6, 0], x: [0, -20, 12, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 7 }} />
-        <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.03] w-[160px] md:w-[280px]" style={{ top: "65%", left: "35%" }} animate={{ rotate: [0, -12, 8, 0], scale: [1, 1.1, 0.93, 1] }} transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 10 }} />
+        <motion.img src={laxCyan} alt="" className="absolute opacity-[0.12] w-[250px] md:w-[600px]" style={{ top: "3%", right: "-70px" }} animate={{ rotate: [0, 6, -5, 0], scale: [1, 1.06, 0.97, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.img src={laxPurpura} alt="" className="absolute opacity-[0.09] w-[180px] md:w-[480px]" style={{ top: "40%", left: "-50px" }} animate={{ rotate: [0, -8, 4, 0], y: [0, 25, -15, 0] }} transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 4 }} />
+        <motion.img src={laxVerde} alt="" className="absolute opacity-[0.10] w-[200px] md:w-[520px]" style={{ bottom: "8%", right: "-40px" }} animate={{ rotate: [0, 7, -6, 0], x: [0, -20, 12, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 7 }} />
+        <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.07] w-[160px] md:w-[420px]" style={{ top: "65%", left: "35%" }} animate={{ rotate: [0, -12, 8, 0], scale: [1, 1.1, 0.93, 1] }} transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 10 }} />
       </div>
       <div className="relative z-[1] flex flex-col min-h-screen">
       <CurvedHeader
@@ -384,9 +384,9 @@ export default function BlogPage() {
         )}
       </AnimatePresence>
 
+      <div className="h-16 md:h-8" />
       {categories.length > 0 && mobileCategoryPills}
 
-      <div className="h-16" />
       <main className="flex-1 px-4 pb-28">
         <div className="max-w-5xl mx-auto flex gap-6">
           {categories.length > 0 && desktopCategorySidebar}
