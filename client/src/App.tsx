@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
+import { useEmbed } from "@/hooks/use-embed";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "@/lib/i18n";
 import Home from "@/pages/Home";
@@ -101,6 +102,11 @@ function Router() {
 
 function App() {
   usePreloadAssets();
+  const isEmbed = useEmbed();
+
+  if (isEmbed) {
+    document.documentElement.classList.add("embed-mode");
+  }
   
   return (
     <QueryClientProvider client={queryClient}>
@@ -108,7 +114,7 @@ function App() {
         <UserProvider>
           <Toaster />
           <Router />
-          <PWAInstallPrompt />
+          {!isEmbed && <PWAInstallPrompt />}
         </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>

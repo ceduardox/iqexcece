@@ -4,12 +4,16 @@ import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpe
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
+import { useEmbed } from "@/hooks/use-embed";
 
 export function BottomNavBar() {
+  const isEmbed = useEmbed();
   const { t } = useTranslation();
   const [location, setLocation] = useLocation();
   const { playSound } = useSounds();
   const [moreOpen, setMoreOpen] = useState(false);
+
+  if (isEmbed) return null;
 
   const navItems = [
     { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },

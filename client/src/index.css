@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Embed mode - hide headers and navigation when loaded in iframe */
+html.embed-mode header {
+  display: none !important;
+}
+html.embed-mode [data-testid="bottom-nav"] {
+  display: none !important;
+}
+html.embed-mode .h-24[aria-hidden="true"] {
+  display: none !important;
+}
+
 /* Hide scrollbar for all elements - native app feel */
 * {
   scrollbar-width: none;
