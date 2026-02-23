@@ -386,6 +386,7 @@ export default function BlogPage() {
 
       {categories.length > 0 && mobileCategoryPills}
 
+      <div className="h-16" />
       <main className="flex-1 px-4 pb-28">
         <div className="max-w-5xl mx-auto flex gap-6">
           {categories.length > 0 && desktopCategorySidebar}
