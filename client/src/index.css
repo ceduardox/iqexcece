@@ -12,6 +12,12 @@ html.embed-mode [data-testid="bottom-nav"] {
 html.embed-mode .h-24[aria-hidden="true"] {
   display: none !important;
 }
+html.embed-mode .sticky[class*="md:hidden"] img[src*="menu_"] {
+  display: none !important;
+}
+html.embed-mode .sticky[class*="md:hidden"]:has(img[src*="menu_"]) {
+  display: none !important;
+}
 
 /* Hide scrollbar for all elements - native app feel */
 * {
