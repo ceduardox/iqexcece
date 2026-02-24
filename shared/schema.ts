@@ -461,3 +461,11 @@ export const contactSubmissions = pgTable("contact_submissions", {
 });
 
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+
+export const adminRoles = pgTable("admin_roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  allowedTabs: text("allowed_tabs").array().notNull(),
+});
+
+export type AdminRole = typeof adminRoles.$inferSelect;

@@ -7,7 +7,7 @@ import * as path from "path";
 import { execFileSync } from "child_process";
 import { eq, and } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
-import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions } from "@shared/schema";
+import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles } from "@shared/schema";
 import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
@@ -2557,6 +2557,62 @@ ${schemaContent.substring(0, 3000)}
     try {
       await db.delete(contactSubmissions).where(eq(contactSubmissions.id, parseInt(req.params.id)));
       res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/roles", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const roles = await db.select().from(adminRoles);
+      res.json(roles);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/roles", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const { name, allowedTabs } = req.body;
+      if (!name || !allowedTabs) return res.status(400).json({ error: "Nombre y tabs requeridos" });
+      const [role] = await db.insert(adminRoles).values({ name, allowedTabs }).returning();
+      res.json(role);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put("/api/admin/roles/:id", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const { name, allowedTabs } = req.body;
+      const [role] = await db.update(adminRoles).set({ name, allowedTabs }).where(eq(adminRoles.id, parseInt(req.params.id))).returning();
+      res.json(role);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/admin/roles/:id", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      await db.delete(adminRoles).where(eq(adminRoles.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/roles", async (_req, res) => {
+    try {
+      const roles = await db.select().from(adminRoles);
+      res.json(roles);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
