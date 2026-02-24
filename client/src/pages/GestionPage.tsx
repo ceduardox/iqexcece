@@ -56,8 +56,12 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios" | "roles">("sesiones");
   const [resultadosOpen, setResultadosOpen] = useState(false);
+  const [activeRole, setActiveRole] = useState<{name: string; allowedTabs: string[]} | null>(null);
+  const [roles, setRoles] = useState<{id: number; name: string; allowedTabs: string[]}[]>([]);
+  const [loginRoles, setLoginRoles] = useState<{id: number; name: string; allowedTabs: string[]}[]>([]);
+  const [selectedLoginRole, setSelectedLoginRole] = useState<string>("");
   const [contactSubs, setContactSubs] = useState<any[]>([]);
   const [contactSubsLoading, setContactSubsLoading] = useState(false);
   const [expandedContactSub, setExpandedContactSub] = useState<number | null>(null);
@@ -342,6 +346,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         setToken(token);
         setIsLoggedIn(true);
         localStorage.setItem("adminToken", token);
+        if (selectedLoginRole) {
+          const role = loginRoles.find(r => r.name === selectedLoginRole);
+          if (role) {
+            setActiveRole({ name: role.name, allowedTabs: role.allowedTabs });
+            localStorage.setItem("adminRole", JSON.stringify({ name: role.name, allowedTabs: role.allowedTabs }));
+          }
+        } else {
+          setActiveRole(null);
+          localStorage.removeItem("adminRole");
+        }
         if (rememberMe) {
           localStorage.setItem("adminUser", username);
           localStorage.setItem("adminPass", password);
@@ -726,6 +740,55 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   useEffect(() => {
+    fetch("/api/roles").then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setLoginRoles(data);
+    }).catch(() => {});
+  }, []);
+
+  const fetchRoles = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("/api/admin/roles", { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (Array.isArray(data)) setRoles(data);
+    } catch {}
+  }, [token]);
+
+  useEffect(() => {
+    if (isLoggedIn && token) fetchRoles();
+  }, [isLoggedIn, token, fetchRoles]);
+
+  const ALL_MENU_ITEMS = [
+    { key: "sesiones", label: "Sesiones" },
+    { key: "resultados", label: "Resultados", children: ["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"] },
+    { key: "contenido", label: "Contenido" },
+    { key: "imagenes", label: "Imágenes" },
+    { key: "entrenamiento", label: "Entrenamiento" },
+    { key: "instituciones", label: "Instituciones" },
+    { key: "blog", label: "Blog" },
+    { key: "agente", label: "Agente IA" },
+    { key: "asesor-ia", label: "Chat IA" },
+    { key: "formularios", label: "Formularios" },
+    { key: "roles", label: "Roles" },
+  ];
+
+  useEffect(() => {
+    if (activeRole && activeRole.allowedTabs.length > 0 && !activeRole.allowedTabs.includes(activeTab) && !["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].some(t => t === activeTab && activeRole.allowedTabs.includes("resultados"))) {
+      setActiveTab(activeRole.allowedTabs[0] as any);
+    }
+  }, [activeRole]);
+
+  const isTabVisible = (tabKey: string): boolean => {
+    if (!activeRole) return true;
+    if (activeRole.allowedTabs.length === 0) return true;
+    const resultadosTabs = ["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"];
+    if (resultadosTabs.includes(tabKey)) {
+      return activeRole.allowedTabs.includes("resultados");
+    }
+    return activeRole.allowedTabs.includes(tabKey);
+  };
+
+  useEffect(() => {
     // Try to auto-login with saved credentials (tokens expire on server restart)
     const savedUser = localStorage.getItem("adminUser");
     const savedPass = localStorage.getItem("adminPass");
@@ -742,12 +805,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           if (data.token) {
             setToken(data.token);
             localStorage.setItem("adminToken", data.token);
+            const savedRole = localStorage.getItem("adminRole");
+            if (savedRole) {
+              try { setActiveRole(JSON.parse(savedRole)); } catch {}
+            }
             setIsLoggedIn(true);
           } else {
-            // Clear invalid saved credentials
             localStorage.removeItem("adminToken");
             localStorage.removeItem("adminUser");
             localStorage.removeItem("adminPass");
+            localStorage.removeItem("adminRole");
           }
         })
         .catch(() => {
@@ -1259,6 +1326,22 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   data-testid="input-admin-password"
                 />
+                {loginRoles.length > 0 && (
+                  <div>
+                    <label className="text-white/70 text-sm mb-1 block">Rol (opcional)</label>
+                    <select
+                      value={selectedLoginRole}
+                      onChange={(e) => setSelectedLoginRole(e.target.value)}
+                      className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm"
+                      data-testid="select-login-role"
+                    >
+                      <option value="" className="bg-slate-800">Administrador (todo)</option>
+                      {loginRoles.map(r => (
+                        <option key={r.id} value={r.name} className="bg-slate-800">{r.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1296,6 +1379,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         </div>
         
         <nav className="flex-1 space-y-2">
+          {activeRole && (
+            <div className="mb-3 px-3 py-2 bg-cyan-900/40 rounded-lg border border-cyan-500/20">
+              <p className="text-xs text-cyan-300">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
+            </div>
+          )}
+          {isTabVisible("sesiones") && (
           <button
             onClick={() => setActiveTab("sesiones")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1306,6 +1395,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Users className="w-5 h-5" />
             Sesiones
           </button>
+          )}
+          {isTabVisible("resultados") && (
           <div>
             <button
               onClick={() => setResultadosOpen(!resultadosOpen)}
@@ -1373,6 +1464,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
             )}
           </div>
+          )}
+          {isTabVisible("contenido") && (
           <button
             onClick={() => setActiveTab("contenido")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1383,6 +1476,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <BookOpen className="w-5 h-5" />
             Contenido
           </button>
+          )}
+          {isTabVisible("imagenes") && (
           <button
             onClick={() => setActiveTab("imagenes")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1393,6 +1488,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <ImageIcon className="w-5 h-5" />
             Imágenes
           </button>
+          )}
+          {isTabVisible("entrenamiento") && (
           <button
             onClick={() => setActiveTab("entrenamiento")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1403,6 +1500,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Zap className="w-5 h-5" />
             Entrenamiento
           </button>
+          )}
+          {isTabVisible("instituciones") && (
           <button
             onClick={() => setActiveTab("instituciones")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1413,6 +1512,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Building2 className="w-5 h-5" />
             Instituciones
           </button>
+          )}
+          {isTabVisible("blog") && (
           <button
             onClick={() => setActiveTab("blog")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1423,6 +1524,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Newspaper className="w-5 h-5" />
             Blog
           </button>
+          )}
+          {isTabVisible("agente") && (
           <button
             onClick={() => setActiveTab("agente")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1433,6 +1536,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Bot className="w-5 h-5" />
             Agente IA
           </button>
+          )}
+          {isTabVisible("asesor-ia") && (
           <button
             onClick={() => setActiveTab("asesor-ia")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1443,6 +1548,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Headphones className="w-5 h-5" />
             Chat IA
           </button>
+          )}
+          {isTabVisible("formularios") && (
           <button
             onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1453,6 +1560,19 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <ClipboardList className="w-5 h-5" />
             Formularios
           </button>
+          )}
+          {isTabVisible("roles") && (
+          <button
+            onClick={() => setActiveTab("roles")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "roles" ? "bg-yellow-600 text-white" : "text-yellow-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-roles"
+          >
+            <Users className="w-5 h-5" />
+            Roles
+          </button>
+          )}
         </nav>
 
         <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
@@ -1520,7 +1640,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           </div>
         </div>
 
+        {activeRole && (
+          <div className="md:hidden mb-2 px-3 py-1.5 bg-cyan-900/40 rounded-lg border border-cyan-500/20">
+            <p className="text-xs text-cyan-300">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
+          </div>
+        )}
         <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
+          {isTabVisible("sesiones") && (
           <Button
             onClick={() => setActiveTab("sesiones")}
             variant={activeTab === "sesiones" ? "default" : "outline"}
@@ -1531,6 +1657,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Users className="w-4 h-4 mr-1" />
             Sesiones
           </Button>
+          )}
+          {isTabVisible("resultados") && (
           <div className="relative">
             <Button
               onClick={() => setResultadosOpen(!resultadosOpen)}
@@ -1563,6 +1691,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
             )}
           </div>
+          )}
+          {isTabVisible("contenido") && (
           <Button
             onClick={() => setActiveTab("contenido")}
             variant={activeTab === "contenido" ? "default" : "outline"}
@@ -1573,6 +1703,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <BookOpen className="w-4 h-4 mr-1" />
             Contenido
           </Button>
+          )}
+          {isTabVisible("imagenes") && (
           <Button
             onClick={() => setActiveTab("imagenes")}
             variant={activeTab === "imagenes" ? "default" : "outline"}
@@ -1583,6 +1715,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <ImageIcon className="w-4 h-4 mr-1" />
             Imágenes
           </Button>
+          )}
+          {isTabVisible("entrenamiento") && (
           <Button
             onClick={() => setActiveTab("entrenamiento")}
             variant={activeTab === "entrenamiento" ? "default" : "outline"}
@@ -1593,6 +1727,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Zap className="w-4 h-4 mr-1" />
             Entrena
           </Button>
+          )}
+          {isTabVisible("instituciones") && (
           <Button
             onClick={() => setActiveTab("instituciones")}
             variant={activeTab === "instituciones" ? "default" : "outline"}
@@ -1603,6 +1739,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Building2 className="w-4 h-4 mr-1" />
             Instituc.
           </Button>
+          )}
+          {isTabVisible("blog") && (
           <Button
             onClick={() => setActiveTab("blog")}
             variant={activeTab === "blog" ? "default" : "outline"}
@@ -1613,6 +1751,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Newspaper className="w-4 h-4 mr-1" />
             Blog
           </Button>
+          )}
+          {isTabVisible("agente") && (
           <Button
             onClick={() => setActiveTab("agente")}
             variant={activeTab === "agente" ? "default" : "outline"}
@@ -1623,6 +1763,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Bot className="w-4 h-4 mr-1" />
             Agente
           </Button>
+          )}
+          {isTabVisible("asesor-ia") && (
           <Button
             onClick={() => setActiveTab("asesor-ia")}
             variant={activeTab === "asesor-ia" ? "default" : "outline"}
@@ -1633,6 +1775,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Headphones className="w-4 h-4 mr-1" />
             Chat IA
           </Button>
+          )}
+          {isTabVisible("formularios") && (
           <Button
             onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
             variant={activeTab === "formularios" ? "default" : "outline"}
@@ -1643,6 +1787,19 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <ClipboardList className="w-4 h-4 mr-1" />
             Formularios
           </Button>
+          )}
+          {isTabVisible("roles") && (
+          <Button
+            onClick={() => setActiveTab("roles")}
+            variant={activeTab === "roles" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "roles" ? "bg-yellow-600" : "border-yellow-500/30 text-yellow-400"}
+            data-testid="mobile-tab-roles"
+          >
+            <Users className="w-4 h-4 mr-1" />
+            Roles
+          </Button>
+          )}
         </div>
 
         <div className="max-w-6xl mx-auto">
@@ -5942,7 +6099,181 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             </div>
           </div>
         )}
+
+        {activeTab === "roles" && (
+          <RolesPanel token={token} roles={roles} fetchRoles={fetchRoles} allMenuItems={ALL_MENU_ITEMS} />
+        )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string; roles: {id: number; name: string; allowedTabs: string[]}[]; fetchRoles: () => void; allMenuItems: {key: string; label: string}[] }) {
+  const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleTabs, setNewRoleTabs] = useState<string[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editTabs, setEditTabs] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const menuOptions = allMenuItems.filter(m => m.key !== "roles");
+
+  const handleCreate = async () => {
+    if (!newRoleName.trim() || newRoleTabs.length === 0) return;
+    setSaving(true);
+    try {
+      await fetch("/api/admin/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: newRoleName.trim(), allowedTabs: newRoleTabs }),
+      });
+      setNewRoleName("");
+      setNewRoleTabs([]);
+      fetchRoles();
+    } catch {}
+    setSaving(false);
+  };
+
+  const handleUpdate = async (id: number) => {
+    setSaving(true);
+    try {
+      await fetch(`/api/admin/roles/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: editName, allowedTabs: editTabs }),
+      });
+      setEditingId(null);
+      fetchRoles();
+    } catch {}
+    setSaving(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Eliminar este rol?")) return;
+    try {
+      await fetch(`/api/admin/roles/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchRoles();
+    } catch {}
+  };
+
+  const toggleTab = (tab: string, tabs: string[], setTabs: (t: string[]) => void) => {
+    setTabs(tabs.includes(tab) ? tabs.filter(t => t !== tab) : [...tabs, tab]);
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <Users className="w-6 h-6 text-yellow-400" />
+        Gestión de Roles
+      </h2>
+      <p className="text-gray-400 text-sm">Crea roles con acceso limitado al menú. Al iniciar sesión se puede elegir el rol.</p>
+
+      <Card className="bg-black/40 border-yellow-500/30">
+        <CardHeader>
+          <CardTitle className="text-white text-lg">Crear Nuevo Rol</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder="Nombre del rol (ej: Secretaria)"
+            value={newRoleName}
+            onChange={(e) => setNewRoleName(e.target.value)}
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            data-testid="input-new-role-name"
+          />
+          <div>
+            <p className="text-sm text-gray-300 mb-2">Opciones del menú habilitadas:</p>
+            <div className="flex flex-wrap gap-2">
+              {menuOptions.map(item => (
+                <button
+                  key={item.key}
+                  onClick={() => toggleTab(item.key, newRoleTabs, setNewRoleTabs)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    newRoleTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"
+                  }`}
+                  data-testid={`new-role-tab-${item.key}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <Button onClick={handleCreate} disabled={saving || !newRoleName.trim() || newRoleTabs.length === 0} className="bg-yellow-600 hover:bg-yellow-700" data-testid="button-create-role">
+            <Plus className="w-4 h-4 mr-2" />
+            Crear Rol
+          </Button>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-3">
+        {roles.map(role => (
+          <Card key={role.id} className="bg-black/40 border-white/10">
+            <CardContent className="p-4">
+              {editingId === role.id ? (
+                <div className="space-y-3">
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="bg-white/10 border-white/20 text-white"
+                    data-testid={`input-edit-role-${role.id}`}
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {menuOptions.map(item => (
+                      <button
+                        key={item.key}
+                        onClick={() => toggleTab(item.key, editTabs, setEditTabs)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                          editTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"
+                        }`}
+                        data-testid={`edit-role-tab-${item.key}-${role.id}`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={() => handleUpdate(role.id)} disabled={saving} size="sm" className="bg-green-600 hover:bg-green-700" data-testid={`button-save-role-${role.id}`}>
+                      <Save className="w-3 h-3 mr-1" /> Guardar
+                    </Button>
+                    <Button onClick={() => setEditingId(null)} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-cancel-role-${role.id}`}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold">{role.name}</h3>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {role.allowedTabs.map(tab => {
+                        const item = allMenuItems.find(m => m.key === tab);
+                        return (
+                          <span key={tab} className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-300">
+                            {item?.label || tab}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button onClick={() => { setEditingId(role.id); setEditName(role.name); setEditTabs([...role.allowedTabs]); }} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-edit-role-${role.id}`}>
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button onClick={() => handleDelete(role.id)} variant="outline" size="sm" className="border-red-500/30 text-red-400" data-testid={`button-delete-role-${role.id}`}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+        {roles.length === 0 && (
+          <p className="text-gray-400 text-sm text-center py-8">No hay roles creados. El acceso por defecto es Administrador (ve todo).</p>
+        )}
       </div>
     </div>
   );
