@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList, BarChart3 } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -57,6 +57,7 @@ export default function GestionPage() {
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios">("sesiones");
+  const [resultadosOpen, setResultadosOpen] = useState(false);
   const [contactSubs, setContactSubs] = useState<any[]>([]);
   const [contactSubsLoading, setContactSubsLoading] = useState(false);
   const [expandedContactSub, setExpandedContactSub] = useState<number | null>(null);
@@ -1305,56 +1306,73 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Users className="w-5 h-5" />
             Sesiones
           </button>
-          <button
-            onClick={() => setActiveTab("resultados")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "resultados" ? "bg-green-600 text-white" : "text-green-400 hover:bg-white/10"
-            }`}
-            data-testid="sidebar-resultados"
-          >
-            <FileText className="w-5 h-5" />
-            Resultados Lectura
-          </button>
-          <button
-            onClick={() => setActiveTab("resultados-razonamiento")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "resultados-razonamiento" ? "bg-blue-600 text-white" : "text-blue-400 hover:bg-white/10"
-            }`}
-            data-testid="sidebar-resultados-razonamiento"
-          >
-            <Brain className="w-5 h-5" />
-            Resultados Razonamiento
-          </button>
-          <button
-            onClick={() => setActiveTab("resultados-cerebral")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "resultados-cerebral" ? "bg-purple-600 text-white" : "text-purple-400 hover:bg-white/10"
-            }`}
-            data-testid="sidebar-resultados-cerebral"
-          >
-            <Brain className="w-5 h-5" />
-            Resultados Cerebral
-          </button>
-          <button
-            onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "resultados-entrenamiento" ? "bg-rose-600 text-white" : "text-rose-400 hover:bg-white/10"
-            }`}
-            data-testid="sidebar-resultados-entrenamiento"
-          >
-            <Zap className="w-5 h-5" />
-            Resultados Entrenamiento
-          </button>
-          <button
-            onClick={() => setActiveTab("resultados-velocidad")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "resultados-velocidad" ? "bg-cyan-600 text-white" : "text-cyan-400 hover:bg-white/10"
-            }`}
-            data-testid="sidebar-resultados-velocidad"
-          >
-            <Zap className="w-5 h-5" />
-            Resultados Velocidad
-          </button>
+          <div>
+            <button
+              onClick={() => setResultadosOpen(!resultadosOpen)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                ["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "bg-green-600 text-white" : "text-green-400 hover:bg-white/10"
+              }`}
+              data-testid="sidebar-resultados-toggle"
+            >
+              <BarChart3 className="w-5 h-5" />
+              <span className="flex-1">Resultados</span>
+              {resultadosOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            {resultadosOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l border-white/10 pl-3">
+                <button
+                  onClick={() => setActiveTab("resultados")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+                    activeTab === "resultados" ? "bg-green-600/80 text-white" : "text-green-300 hover:bg-white/10"
+                  }`}
+                  data-testid="sidebar-resultados"
+                >
+                  <FileText className="w-4 h-4" />
+                  Lectura
+                </button>
+                <button
+                  onClick={() => setActiveTab("resultados-razonamiento")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+                    activeTab === "resultados-razonamiento" ? "bg-blue-600/80 text-white" : "text-blue-300 hover:bg-white/10"
+                  }`}
+                  data-testid="sidebar-resultados-razonamiento"
+                >
+                  <Brain className="w-4 h-4" />
+                  Razonamiento
+                </button>
+                <button
+                  onClick={() => setActiveTab("resultados-cerebral")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+                    activeTab === "resultados-cerebral" ? "bg-purple-600/80 text-white" : "text-purple-300 hover:bg-white/10"
+                  }`}
+                  data-testid="sidebar-resultados-cerebral"
+                >
+                  <Brain className="w-4 h-4" />
+                  Cerebral
+                </button>
+                <button
+                  onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+                    activeTab === "resultados-entrenamiento" ? "bg-rose-600/80 text-white" : "text-rose-300 hover:bg-white/10"
+                  }`}
+                  data-testid="sidebar-resultados-entrenamiento"
+                >
+                  <Zap className="w-4 h-4" />
+                  Entrenamiento
+                </button>
+                <button
+                  onClick={() => setActiveTab("resultados-velocidad")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+                    activeTab === "resultados-velocidad" ? "bg-cyan-600/80 text-white" : "text-cyan-300 hover:bg-white/10"
+                  }`}
+                  data-testid="sidebar-resultados-velocidad"
+                >
+                  <Zap className="w-4 h-4" />
+                  Velocidad
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setActiveTab("contenido")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
@@ -1513,56 +1531,38 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <Users className="w-4 h-4 mr-1" />
             Sesiones
           </Button>
-          <Button
-            onClick={() => setActiveTab("resultados")}
-            variant={activeTab === "resultados" ? "default" : "outline"}
-            size="sm"
-            className={activeTab === "resultados" ? "bg-green-600" : "border-green-500/30 text-green-400"}
-            data-testid="mobile-tab-resultados"
-          >
-            <FileText className="w-4 h-4 mr-1" />
-            Lectura
-          </Button>
-          <Button
-            onClick={() => setActiveTab("resultados-razonamiento")}
-            variant={activeTab === "resultados-razonamiento" ? "default" : "outline"}
-            size="sm"
-            className={activeTab === "resultados-razonamiento" ? "bg-blue-600" : "border-blue-500/30 text-blue-400"}
-            data-testid="mobile-tab-resultados-razonamiento"
-          >
-            <Brain className="w-4 h-4 mr-1" />
-            Razonamiento
-          </Button>
-          <Button
-            onClick={() => setActiveTab("resultados-cerebral")}
-            variant={activeTab === "resultados-cerebral" ? "default" : "outline"}
-            size="sm"
-            className={activeTab === "resultados-cerebral" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
-            data-testid="mobile-tab-resultados-cerebral"
-          >
-            <Brain className="w-4 h-4 mr-1" />
-            Cerebral
-          </Button>
-          <Button
-            onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
-            variant={activeTab === "resultados-entrenamiento" ? "default" : "outline"}
-            size="sm"
-            className={activeTab === "resultados-entrenamiento" ? "bg-rose-600" : "border-rose-500/30 text-rose-400"}
-            data-testid="mobile-tab-resultados-entrenamiento"
-          >
-            <Zap className="w-4 h-4 mr-1" />
-            Entrena
-          </Button>
-          <Button
-            onClick={() => setActiveTab("resultados-velocidad")}
-            variant={activeTab === "resultados-velocidad" ? "default" : "outline"}
-            size="sm"
-            className={activeTab === "resultados-velocidad" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
-            data-testid="mobile-tab-resultados-velocidad"
-          >
-            <Zap className="w-4 h-4 mr-1" />
-            Velocidad
-          </Button>
+          <div className="relative">
+            <Button
+              onClick={() => setResultadosOpen(!resultadosOpen)}
+              variant={["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "default" : "outline"}
+              size="sm"
+              className={["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "bg-green-600" : "border-green-500/30 text-green-400"}
+              data-testid="mobile-tab-resultados-toggle"
+            >
+              <BarChart3 className="w-4 h-4 mr-1" />
+              Resultados
+              {resultadosOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+            </Button>
+            {resultadosOpen && (
+              <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-white/20 rounded-lg shadow-xl p-1 min-w-[160px]">
+                <button onClick={() => { setActiveTab("resultados"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados" ? "bg-green-600 text-white" : "text-green-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados">
+                  <FileText className="w-3 h-3" /> Lectura
+                </button>
+                <button onClick={() => { setActiveTab("resultados-razonamiento"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-razonamiento" ? "bg-blue-600 text-white" : "text-blue-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-razonamiento">
+                  <Brain className="w-3 h-3" /> Razonamiento
+                </button>
+                <button onClick={() => { setActiveTab("resultados-cerebral"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-cerebral" ? "bg-purple-600 text-white" : "text-purple-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-cerebral">
+                  <Brain className="w-3 h-3" /> Cerebral
+                </button>
+                <button onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-entrenamiento" ? "bg-rose-600 text-white" : "text-rose-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-entrenamiento">
+                  <Zap className="w-3 h-3" /> Entrenamiento
+                </button>
+                <button onClick={() => { setActiveTab("resultados-velocidad"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-velocidad" ? "bg-cyan-600 text-white" : "text-cyan-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-velocidad">
+                  <Zap className="w-3 h-3" /> Velocidad
+                </button>
+              </div>
+            )}
+          </div>
           <Button
             onClick={() => setActiveTab("contenido")}
             variant={activeTab === "contenido" ? "default" : "outline"}
