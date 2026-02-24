@@ -342,16 +342,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       });
       
       if (res.ok) {
-        const { token } = await res.json();
-        setToken(token);
+        const data = await res.json();
+        setToken(data.token);
         setIsLoggedIn(true);
-        localStorage.setItem("adminToken", token);
-        if (selectedLoginRole) {
-          const role = loginRoles.find(r => r.name === selectedLoginRole);
-          if (role) {
-            setActiveRole({ name: role.name, allowedTabs: role.allowedTabs });
-            localStorage.setItem("adminRole", JSON.stringify({ name: role.name, allowedTabs: role.allowedTabs }));
-          }
+        localStorage.setItem("adminToken", data.token);
+        if (!data.isMainAdmin && data.role) {
+          setActiveRole({ name: data.role.name, allowedTabs: data.role.allowedTabs });
+          localStorage.setItem("adminRole", JSON.stringify({ name: data.role.name, allowedTabs: data.role.allowedTabs }));
         } else {
           setActiveRole(null);
           localStorage.removeItem("adminRole");
@@ -385,6 +382,13 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         if (data.token) {
           setToken(data.token);
           localStorage.setItem("adminToken", data.token);
+          if (!data.isMainAdmin && data.role) {
+            setActiveRole({ name: data.role.name, allowedTabs: data.role.allowedTabs });
+            localStorage.setItem("adminRole", JSON.stringify({ name: data.role.name, allowedTabs: data.role.allowedTabs }));
+          } else {
+            setActiveRole(null);
+            localStorage.removeItem("adminRole");
+          }
           return data.token;
         }
       } catch {}
@@ -1326,22 +1330,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   data-testid="input-admin-password"
                 />
-                {loginRoles.length > 0 && (
-                  <div>
-                    <label className="text-white/70 text-sm mb-1 block">Rol (opcional)</label>
-                    <select
-                      value={selectedLoginRole}
-                      onChange={(e) => setSelectedLoginRole(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm"
-                      data-testid="select-login-role"
-                    >
-                      <option value="" className="bg-slate-800">Administrador (todo)</option>
-                      {loginRoles.map(r => (
-                        <option key={r.id} value={r.name} className="bg-slate-800">{r.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -6116,10 +6104,31 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
   const [editName, setEditName] = useState("");
   const [editTabs, setEditTabs] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [subTab, setSubTab] = useState<"roles" | "usuarios">("usuarios");
+  const [adminUsersList, setAdminUsersList] = useState<any[]>([]);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserUsername, setNewUserUsername] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserRoleId, setNewUserRoleId] = useState<number>(0);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editUserEmail, setEditUserEmail] = useState("");
+  const [editUserUsername, setEditUserUsername] = useState("");
+  const [editUserPassword, setEditUserPassword] = useState("");
+  const [editUserRoleId, setEditUserRoleId] = useState<number>(0);
 
   const menuOptions = allMenuItems.filter(m => m.key !== "roles");
 
-  const handleCreate = async () => {
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (Array.isArray(data)) setAdminUsersList(data);
+    } catch {}
+  }, [token]);
+
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  const handleCreateRole = async () => {
     if (!newRoleName.trim() || newRoleTabs.length === 0) return;
     setSaving(true);
     try {
@@ -6135,7 +6144,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
     setSaving(false);
   };
 
-  const handleUpdate = async (id: number) => {
+  const handleUpdateRole = async (id: number) => {
     setSaving(true);
     try {
       await fetch(`/api/admin/roles/${id}`, {
@@ -6149,14 +6158,55 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
     setSaving(false);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteRole = async (id: number) => {
     if (!confirm("¿Eliminar este rol?")) return;
     try {
-      await fetch(`/api/admin/roles/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await fetch(`/api/admin/roles/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       fetchRoles();
+    } catch {}
+  };
+
+  const handleCreateUser = async () => {
+    if (!newUserEmail.trim() || !newUserUsername.trim() || !newUserPassword.trim() || !newUserRoleId) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: newUserEmail.trim(), username: newUserUsername.trim(), password: newUserPassword.trim(), roleId: newUserRoleId }),
+      });
+      if (res.ok) {
+        setNewUserEmail(""); setNewUserUsername(""); setNewUserPassword(""); setNewUserRoleId(0);
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Error al crear usuario");
+      }
+    } catch {}
+    setSaving(false);
+  };
+
+  const handleUpdateUser = async (id: number) => {
+    setSaving(true);
+    try {
+      const body: any = { email: editUserEmail, username: editUserUsername, roleId: editUserRoleId };
+      if (editUserPassword.trim()) body.password = editUserPassword.trim();
+      await fetch(`/api/admin/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      setEditingUserId(null);
+      fetchUsers();
+    } catch {}
+    setSaving(false);
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm("¿Eliminar este usuario?")) return;
+    try {
+      await fetch(`/api/admin/users/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      fetchUsers();
     } catch {}
   };
 
@@ -6168,113 +6218,139 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white flex items-center gap-2">
         <Users className="w-6 h-6 text-yellow-400" />
-        Gestión de Roles
+        Roles y Usuarios
       </h2>
-      <p className="text-gray-400 text-sm">Crea roles con acceso limitado al menú. Al iniciar sesión se puede elegir el rol.</p>
 
-      <Card className="bg-black/40 border-yellow-500/30">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Crear Nuevo Rol</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Nombre del rol (ej: Secretaria)"
-            value={newRoleName}
-            onChange={(e) => setNewRoleName(e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-            data-testid="input-new-role-name"
-          />
-          <div>
-            <p className="text-sm text-gray-300 mb-2">Opciones del menú habilitadas:</p>
-            <div className="flex flex-wrap gap-2">
-              {menuOptions.map(item => (
-                <button
-                  key={item.key}
-                  onClick={() => toggleTab(item.key, newRoleTabs, setNewRoleTabs)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    newRoleTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"
-                  }`}
-                  data-testid={`new-role-tab-${item.key}`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <Button onClick={handleCreate} disabled={saving || !newRoleName.trim() || newRoleTabs.length === 0} className="bg-yellow-600 hover:bg-yellow-700" data-testid="button-create-role">
-            <Plus className="w-4 h-4 mr-2" />
-            Crear Rol
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex gap-2">
+        <Button onClick={() => setSubTab("usuarios")} variant={subTab === "usuarios" ? "default" : "outline"} size="sm" className={subTab === "usuarios" ? "bg-cyan-600" : "border-white/20 text-gray-400"} data-testid="subtab-usuarios">
+          Usuarios
+        </Button>
+        <Button onClick={() => setSubTab("roles")} variant={subTab === "roles" ? "default" : "outline"} size="sm" className={subTab === "roles" ? "bg-yellow-600" : "border-white/20 text-gray-400"} data-testid="subtab-roles">
+          Roles
+        </Button>
+      </div>
 
-      <div className="space-y-3">
-        {roles.map(role => (
-          <Card key={role.id} className="bg-black/40 border-white/10">
-            <CardContent className="p-4">
-              {editingId === role.id ? (
-                <div className="space-y-3">
-                  <Input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
-                    data-testid={`input-edit-role-${role.id}`}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    {menuOptions.map(item => (
-                      <button
-                        key={item.key}
-                        onClick={() => toggleTab(item.key, editTabs, setEditTabs)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                          editTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"
-                        }`}
-                        data-testid={`edit-role-tab-${item.key}-${role.id}`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={() => handleUpdate(role.id)} disabled={saving} size="sm" className="bg-green-600 hover:bg-green-700" data-testid={`button-save-role-${role.id}`}>
-                      <Save className="w-3 h-3 mr-1" /> Guardar
-                    </Button>
-                    <Button onClick={() => setEditingId(null)} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-cancel-role-${role.id}`}>
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold">{role.name}</h3>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {role.allowedTabs.map(tab => {
-                        const item = allMenuItems.find(m => m.key === tab);
-                        return (
-                          <span key={tab} className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-300">
-                            {item?.label || tab}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button onClick={() => { setEditingId(role.id); setEditName(role.name); setEditTabs([...role.allowedTabs]); }} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-edit-role-${role.id}`}>
-                      <Pencil className="w-3 h-3" />
-                    </Button>
-                    <Button onClick={() => handleDelete(role.id)} variant="outline" size="sm" className="border-red-500/30 text-red-400" data-testid={`button-delete-role-${role.id}`}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+      {subTab === "usuarios" && (
+        <div className="space-y-4">
+          <Card className="bg-black/40 border-cyan-500/30">
+            <CardHeader><CardTitle className="text-white text-lg">Crear Usuario</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <Input placeholder="Correo electrónico" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-email" />
+              <Input placeholder="Nombre de usuario (login)" value={newUserUsername} onChange={(e) => setNewUserUsername(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-username" />
+              <Input type="password" placeholder="Contraseña" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-password" />
+              <div>
+                <p className="text-sm text-gray-300 mb-1">Rol asignado:</p>
+                <select value={newUserRoleId} onChange={(e) => setNewUserRoleId(Number(e.target.value))} className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm" data-testid="select-new-user-role">
+                  <option value={0} className="bg-slate-800">-- Seleccionar rol --</option>
+                  {roles.map(r => <option key={r.id} value={r.id} className="bg-slate-800">{r.name}</option>)}
+                </select>
+              </div>
+              <Button onClick={handleCreateUser} disabled={saving || !newUserEmail.trim() || !newUserUsername.trim() || !newUserPassword.trim() || !newUserRoleId} className="bg-cyan-600 hover:bg-cyan-700" data-testid="button-create-user">
+                <Plus className="w-4 h-4 mr-2" /> Crear Usuario
+              </Button>
+              {roles.length === 0 && <p className="text-yellow-400 text-xs">Primero crea un rol en la pestaña "Roles"</p>}
             </CardContent>
           </Card>
-        ))}
-        {roles.length === 0 && (
-          <p className="text-gray-400 text-sm text-center py-8">No hay roles creados. El acceso por defecto es Administrador (ve todo).</p>
-        )}
-      </div>
+
+          <div className="space-y-3">
+            {adminUsersList.map(user => (
+              <Card key={user.id} className="bg-black/40 border-white/10">
+                <CardContent className="p-4">
+                  {editingUserId === user.id ? (
+                    <div className="space-y-3">
+                      <Input value={editUserEmail} onChange={(e) => setEditUserEmail(e.target.value)} placeholder="Correo" className="bg-white/10 border-white/20 text-white" data-testid={`input-edit-user-email-${user.id}`} />
+                      <Input value={editUserUsername} onChange={(e) => setEditUserUsername(e.target.value)} placeholder="Usuario" className="bg-white/10 border-white/20 text-white" data-testid={`input-edit-user-username-${user.id}`} />
+                      <Input type="password" value={editUserPassword} onChange={(e) => setEditUserPassword(e.target.value)} placeholder="Nueva contraseña (dejar vacío para no cambiar)" className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid={`input-edit-user-password-${user.id}`} />
+                      <select value={editUserRoleId} onChange={(e) => setEditUserRoleId(Number(e.target.value))} className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm" data-testid={`select-edit-user-role-${user.id}`}>
+                        {roles.map(r => <option key={r.id} value={r.id} className="bg-slate-800">{r.name}</option>)}
+                      </select>
+                      <div className="flex gap-2">
+                        <Button onClick={() => handleUpdateUser(user.id)} disabled={saving} size="sm" className="bg-green-600 hover:bg-green-700" data-testid={`button-save-user-${user.id}`}><Save className="w-3 h-3 mr-1" /> Guardar</Button>
+                        <Button onClick={() => setEditingUserId(null)} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-cancel-user-${user.id}`}>Cancelar</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold">{user.username}</h3>
+                        <p className="text-gray-400 text-xs">{user.email}</p>
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-cyan-500/20 text-cyan-300">{user.roleName}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button onClick={() => { setEditingUserId(user.id); setEditUserEmail(user.email); setEditUserUsername(user.username); setEditUserPassword(""); setEditUserRoleId(user.roleId); }} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-edit-user-${user.id}`}><Pencil className="w-3 h-3" /></Button>
+                        <Button onClick={() => handleDeleteUser(user.id)} variant="outline" size="sm" className="border-red-500/30 text-red-400" data-testid={`button-delete-user-${user.id}`}><Trash2 className="w-3 h-3" /></Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {adminUsersList.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay usuarios creados. Crea uno arriba asignándole un rol.</p>}
+          </div>
+        </div>
+      )}
+
+      {subTab === "roles" && (
+        <div className="space-y-4">
+          <Card className="bg-black/40 border-yellow-500/30">
+            <CardHeader><CardTitle className="text-white text-lg">Crear Nuevo Rol</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <Input placeholder="Nombre del rol (ej: Secretaria)" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-role-name" />
+              <div>
+                <p className="text-sm text-gray-300 mb-2">Opciones del menú habilitadas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {menuOptions.map(item => (
+                    <button key={item.key} onClick={() => toggleTab(item.key, newRoleTabs, setNewRoleTabs)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${newRoleTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"}`} data-testid={`new-role-tab-${item.key}`}>{item.label}</button>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={handleCreateRole} disabled={saving || !newRoleName.trim() || newRoleTabs.length === 0} className="bg-yellow-600 hover:bg-yellow-700" data-testid="button-create-role">
+                <Plus className="w-4 h-4 mr-2" /> Crear Rol
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            {roles.map(role => (
+              <Card key={role.id} className="bg-black/40 border-white/10">
+                <CardContent className="p-4">
+                  {editingId === role.id ? (
+                    <div className="space-y-3">
+                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="bg-white/10 border-white/20 text-white" data-testid={`input-edit-role-${role.id}`} />
+                      <div className="flex flex-wrap gap-2">
+                        {menuOptions.map(item => (
+                          <button key={item.key} onClick={() => toggleTab(item.key, editTabs, setEditTabs)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${editTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"}`} data-testid={`edit-role-tab-${item.key}-${role.id}`}>{item.label}</button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={() => handleUpdateRole(role.id)} disabled={saving} size="sm" className="bg-green-600 hover:bg-green-700" data-testid={`button-save-role-${role.id}`}><Save className="w-3 h-3 mr-1" /> Guardar</Button>
+                        <Button onClick={() => setEditingId(null)} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-cancel-role-${role.id}`}>Cancelar</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold">{role.name}</h3>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {role.allowedTabs.map(tab => {
+                            const item = allMenuItems.find(m => m.key === tab);
+                            return <span key={tab} className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-300">{item?.label || tab}</span>;
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button onClick={() => { setEditingId(role.id); setEditName(role.name); setEditTabs([...role.allowedTabs]); }} variant="outline" size="sm" className="border-white/20 text-gray-400" data-testid={`button-edit-role-${role.id}`}><Pencil className="w-3 h-3" /></Button>
+                        <Button onClick={() => handleDeleteRole(role.id)} variant="outline" size="sm" className="border-red-500/30 text-red-400" data-testid={`button-delete-role-${role.id}`}><Trash2 className="w-3 h-3" /></Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {roles.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay roles creados aún.</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

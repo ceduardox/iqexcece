@@ -7,7 +7,7 @@ import * as path from "path";
 import { execFileSync } from "child_process";
 import { eq, and } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
-import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles } from "@shared/schema";
+import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db } from "./db";
 
 const ADMIN_USER = "CITEX";
@@ -238,15 +238,28 @@ export async function registerRoutes(
   });
 
   // Admin login
-  app.post("/api/admin/login", (req, res) => {
+  app.post("/api/admin/login", async (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       const token = ADMIN_TOKEN_SECRET + "-" + Date.now();
       validAdminTokens.add(token);
       saveAdminTokens();
-      res.json({ success: true, token });
+      res.json({ success: true, token, isMainAdmin: true });
     } else {
-      res.status(401).json({ error: "Invalid credentials" });
+      try {
+        const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, username));
+        if (user && user.password === password) {
+          const [role] = await db.select().from(adminRoles).where(eq(adminRoles.id, user.roleId));
+          const token = ADMIN_TOKEN_SECRET + "-" + Date.now();
+          validAdminTokens.add(token);
+          saveAdminTokens();
+          res.json({ success: true, token, isMainAdmin: false, role: role ? { name: role.name, allowedTabs: role.allowedTabs } : null, userEmail: user.email });
+        } else {
+          res.status(401).json({ error: "Invalid credentials" });
+        }
+      } catch {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
     }
   });
 
@@ -2613,6 +2626,66 @@ ${schemaContent.substring(0, 3000)}
     try {
       const roles = await db.select().from(adminRoles);
       res.json(roles);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/users", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const allUsers = await db.select().from(adminUsers);
+      const allRoles = await db.select().from(adminRoles);
+      const usersWithRole = allUsers.map(u => ({
+        ...u,
+        password: undefined,
+        roleName: allRoles.find(r => r.id === u.roleId)?.name || "Sin rol",
+      }));
+      res.json(usersWithRole);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/users", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const { email, username, password, roleId } = req.body;
+      if (!email || !username || !password || !roleId) return res.status(400).json({ error: "Todos los campos son requeridos" });
+      const existing = await db.select().from(adminUsers).where(eq(adminUsers.username, username));
+      if (existing.length > 0) return res.status(400).json({ error: "El usuario ya existe" });
+      const [user] = await db.insert(adminUsers).values({ email, username, password, roleId }).returning();
+      res.json({ ...user, password: undefined });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put("/api/admin/users/:id", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const { email, username, password, roleId } = req.body;
+      const updates: any = {};
+      if (email) updates.email = email;
+      if (username) updates.username = username;
+      if (password) updates.password = password;
+      if (roleId) updates.roleId = roleId;
+      const [user] = await db.update(adminUsers).set(updates).where(eq(adminUsers.id, parseInt(req.params.id))).returning();
+      res.json({ ...user, password: undefined });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      await db.delete(adminUsers).where(eq(adminUsers.id, parseInt(req.params.id)));
+      res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

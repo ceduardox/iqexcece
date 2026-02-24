@@ -469,3 +469,14 @@ export const adminRoles = pgTable("admin_roles", {
 });
 
 export type AdminRole = typeof adminRoles.$inferSelect;
+
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  username: text("username").notNull(),
+  password: text("password").notNull(),
+  roleId: integer("role_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AdminUser = typeof adminUsers.$inferSelect;
