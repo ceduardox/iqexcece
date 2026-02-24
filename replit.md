@@ -4,8 +4,16 @@
 
 IQEXPONENCIAL is a cognitive enhancement web application targeting Spanish-speaking users. The platform helps users identify their age group and cognitive challenges, then provides personalized mental improvement solutions. The app features an engaging onboarding flow with a loading screen, age/problem selection, fingerprint scanner, and options for Tests or Training.
 
-## Recent Changes (Jan 2026)
+## Recent Changes (Feb 2026)
 
+- **Role-based access control**: Admin panel menu filtering by role
+  - Database table: admin_roles (name, allowedTabs JSON array)
+  - Admin panel "Roles" tab for creating/editing/deleting roles
+  - Role selector dropdown on login screen (Admin default + custom roles)
+  - CSS-based menu filtering: sidebar and mobile tabs hide based on active role
+  - Role persists in localStorage on login, restores on auto-login
+  - Active tab auto-switches to first allowed tab when role limits access
+  - ALL_MENU_ITEMS constant defines full menu structure for role editor
 - Added admin panel at `/gestion` (login: CITEX / GESTORCITEXBO2014)
 - Admin panel now uses sidebar layout on desktop, tabs on mobile
 - "Remember me" checkbox saves login credentials to localStorage
