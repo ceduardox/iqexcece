@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, Zap } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, Zap, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
@@ -19,12 +19,14 @@ export function BottomNavBar() {
     { id: "inicio", icon: Home, label: t("nav.inicio"), path: "/" },
     { id: "tests", icon: Brain, label: t("nav.diagnostico"), path: "/tests" },
     { id: "entrena", icon: Dumbbell, label: t("nav.entrena"), path: "/entrenamiento" },
+    { id: "progreso", icon: BarChart3, label: t("nav.progreso"), path: "/progreso" },
   ];
 
   const getActiveId = () => {
     if (location === "/") return "inicio";
     if (location.startsWith("/tests") || location.startsWith("/age-selection")) return "tests";
     if (location.startsWith("/entrenamiento")) return "entrena";
+    if (location.startsWith("/progreso")) return "progreso";
     if (location.startsWith("/blog")) return "mas";
     if (location.startsWith("/metodo-x")) return "mas";
     if (location.startsWith("/contacto")) return "mas";

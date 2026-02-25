@@ -322,6 +322,20 @@ export const trainingResults = pgTable("training_results", {
 
 export const insertTrainingResultSchema = createInsertSchema(trainingResults).omit({ id: true, createdAt: true });
 
+// Mind maps table
+export const mindMaps = pgTable("mind_maps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: text("session_id").notNull(),
+  title: text("title").notNull().default("Nuevo mapa mental"),
+  data: text("data").notNull(), // JSON string { nodes: [], edges: [] }
+  isPublic: boolean("is_public").default(false),
+  shareToken: text("share_token").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMindMapSchema = createInsertSchema(mindMaps).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Page styles for visual editor
 export const pageStyles = pgTable("page_styles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -367,6 +381,8 @@ export type PageStyle = typeof pageStyles.$inferSelect;
 export type InsertPageStyle = z.infer<typeof insertPageStyleSchema>;
 export type TrainingResult = typeof trainingResults.$inferSelect;
 export type InsertTrainingResult = z.infer<typeof insertTrainingResultSchema>;
+export type MindMap = typeof mindMaps.$inferSelect;
+export type InsertMindMap = z.infer<typeof insertMindMapSchema>;
 
 export const instituciones = pgTable("instituciones", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

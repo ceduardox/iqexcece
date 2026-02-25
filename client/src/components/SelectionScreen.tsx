@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Brain, Dumbbell, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen, Map } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "./LanguageButton";
 import { useLocation } from "wouter";
@@ -553,6 +553,46 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || t("home.btnEntrenamiento")}</span>
                   </motion.button>
                 </div>
+              </div>
+
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.27 }}
+              onClick={() => { if (!editorMode) setLocation("/mapas-mentales"); }}
+              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex flex-col md:col-span-2"
+              style={{
+                backgroundImage: 'url("https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af")',
+                backgroundSize: "cover",
+                backgroundPosition: "center center",
+              }}
+              data-testid="button-option-mapas-mentales"
+            >
+              <div className="p-4 flex-1 flex flex-col justify-end">
+                <h3 className="text-base font-bold text-white mb-1">
+                  Crea mapas mentales
+                </h3>
+                <p className="text-xs text-white/90 leading-snug">
+                  Organiza ideas clave en segundos para estudiar, recordar y explicar mejor.
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => { e.stopPropagation(); if (!editorMode) setLocation("/mapas-mentales"); }}
+                  className="mt-3 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md"
+                  style={{ 
+                    fontSize: 12,
+                    marginLeft: 80,
+                    borderRadius: 13
+                  }}
+                  data-testid="button-crear-mapa-mental"
+                >
+                  <span>
+                    <Map style={{ width: 14, height: 14 }} />
+                  </span>
+                  Crear mapa mental
+                </motion.button>
               </div>
             </motion.div>
 

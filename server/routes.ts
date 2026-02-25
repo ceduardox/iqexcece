@@ -5,8 +5,8 @@ import { UAParser } from "ua-parser-js";
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
-import { eq, and } from "drizzle-orm";
-import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults } from "@shared/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db } from "./db";
 
@@ -234,6 +234,135 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to end session" });
+    }
+  });
+
+  // Mind maps (per-session)
+  app.get("/api/mindmaps", async (req, res) => {
+    try {
+      const sessionId = String(req.query.sessionId || "");
+      if (!sessionId) return res.status(400).json({ error: "sessionId is required" });
+
+      const maps = await db
+        .select()
+        .from(mindMaps)
+        .where(eq(mindMaps.sessionId, sessionId))
+        .orderBy(desc(mindMaps.updatedAt));
+
+      res.json({ maps });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to load mind maps" });
+    }
+  });
+
+  app.post("/api/mindmaps", async (req, res) => {
+    try {
+      const { sessionId, title, data } = req.body || {};
+      if (!sessionId || !data) return res.status(400).json({ error: "sessionId and data are required" });
+
+      const [created] = await db
+        .insert(mindMaps)
+        .values({
+          sessionId: String(sessionId),
+          title: String(title || "Nuevo mapa mental"),
+          data: typeof data === "string" ? data : JSON.stringify(data),
+          isPublic: false,
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      res.json({ map: created });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to create map" });
+    }
+  });
+
+  app.put("/api/mindmaps/:id", async (req, res) => {
+    try {
+      const { sessionId, title, data } = req.body || {};
+      const id = req.params.id;
+      if (!sessionId) return res.status(400).json({ error: "sessionId is required" });
+
+      const [existing] = await db.select().from(mindMaps).where(eq(mindMaps.id, id));
+      if (!existing) return res.status(404).json({ error: "Map not found" });
+      if (existing.sessionId !== String(sessionId)) return res.status(403).json({ error: "Not allowed" });
+
+      const [updated] = await db
+        .update(mindMaps)
+        .set({
+          title: title ? String(title) : existing.title,
+          data: data ? (typeof data === "string" ? data : JSON.stringify(data)) : existing.data,
+          updatedAt: new Date(),
+        })
+        .where(eq(mindMaps.id, id))
+        .returning();
+
+      res.json({ map: updated });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to update map" });
+    }
+  });
+
+  app.delete("/api/mindmaps/:id", async (req, res) => {
+    try {
+      const sessionId = String(req.query.sessionId || "");
+      const id = req.params.id;
+      if (!sessionId) return res.status(400).json({ error: "sessionId is required" });
+
+      const [existing] = await db.select().from(mindMaps).where(eq(mindMaps.id, id));
+      if (!existing) return res.status(404).json({ error: "Map not found" });
+      if (existing.sessionId !== sessionId) return res.status(403).json({ error: "Not allowed" });
+
+      await db.delete(mindMaps).where(eq(mindMaps.id, id));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to delete map" });
+    }
+  });
+
+  app.post("/api/mindmaps/:id/share", async (req, res) => {
+    try {
+      const { sessionId } = req.body || {};
+      const id = req.params.id;
+      if (!sessionId) return res.status(400).json({ error: "sessionId is required" });
+
+      const [existing] = await db.select().from(mindMaps).where(eq(mindMaps.id, id));
+      if (!existing) return res.status(404).json({ error: "Map not found" });
+      if (existing.sessionId !== String(sessionId)) return res.status(403).json({ error: "Not allowed" });
+
+      const shareToken =
+        existing.shareToken ||
+        `mm_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+
+      const [updated] = await db
+        .update(mindMaps)
+        .set({
+          isPublic: true,
+          shareToken,
+          updatedAt: new Date(),
+        })
+        .where(eq(mindMaps.id, id))
+        .returning();
+
+      const shareUrl = `${req.protocol}://${req.get("host")}/mapas-mentales/share/${shareToken}`;
+      res.json({ map: updated, shareUrl });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to share map" });
+    }
+  });
+
+  app.get("/api/mindmaps/share/:token", async (req, res) => {
+    try {
+      const token = req.params.token;
+      const [map] = await db
+        .select()
+        .from(mindMaps)
+        .where(and(eq(mindMaps.shareToken, token), eq(mindMaps.isPublic, true)));
+
+      if (!map) return res.status(404).json({ error: "Shared map not found" });
+      res.json({ map });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to load shared map" });
     }
   });
 

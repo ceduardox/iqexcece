@@ -336,3 +336,19 @@ html.embed-mode .sticky[class*="md:hidden"]:has(img[src*="menu_"]) {
   pointer-events: none;
   z-index: 0;
 }
+
+@keyframes xSoftLoop {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: translate3d(0, 10px, 0) scale(1.02);
+    opacity: 0.24;
+  }
+}
+
+.x-soft-loop {
+  animation: xSoftLoop 8s ease-in-out infinite;
+  will-change: transform, opacity;
+}

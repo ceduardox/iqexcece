@@ -47,6 +47,7 @@ import BlogPostPage from "@/pages/BlogPostPage";
 import ALeerBoliviaPage from "@/pages/ALeerBoliviaPage";
 import MetodoXPage from "@/pages/MetodoXPage";
 import ContactoPage from "@/pages/ContactoPage";
+import MindMapsPage from "@/pages/MindMapsPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -95,6 +96,8 @@ function Router() {
       <Route path="/a-leer-bolivia" component={ALeerBoliviaPage}/>
       <Route path="/metodo-x" component={MetodoXPage}/>
       <Route path="/contacto" component={ContactoPage}/>
+      <Route path="/mapas-mentales" component={MindMapsPage}/>
+      <Route path="/mapas-mentales/share/:token" component={MindMapsPage}/>
       <Route component={NotFound} />
     </Switch>
   );
