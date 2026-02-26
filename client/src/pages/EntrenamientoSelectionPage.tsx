@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Dumbbell, ChevronRight, ArrowLeft } from "lucide-react";
@@ -11,6 +11,20 @@ import { VideoBackground, MediaIcon } from "@/components/VideoBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Minus } from "lucide-react";
 import menuCurveImg from "@assets/menu_1769957804819.png";
+import { useToast } from "@/hooks/use-toast";
+
+const TRAINING_SELECTION_STYLE_CACHE_KEY = "page-style:entrenamiento-selection-page:";
+
+function readCachedTrainingSelectionStyles(lang: string): PageStyles {
+  try {
+    const raw = localStorage.getItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 function SpacerEl({ id, styles, isMobile, editorMode, getEditableClass, handleElementClick }: {
   id: string; styles: PageStyles; isMobile: boolean; editorMode: boolean;
@@ -54,6 +68,30 @@ interface EntrenamientoItem {
   tipoEjercicio?: string;
 }
 
+const normalizeExerciseType = (tipoEjercicio?: string | null): string => {
+  const normalized = (tipoEjercicio || "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/-/g, "_");
+
+  const aliasMap: Record<string, string> = {
+    velocidad_lectura: "velocidad",
+    progressive_visual_tracking: "velocidad",
+    rastreo_visual_progresivo: "velocidad",
+    vision_periferica: "reconocimiento_visual",
+    visión_periférica: "reconocimiento_visual",
+    atencion_selectiva: "numeros",
+    atención_selectiva: "numeros",
+    taquistoscopia: "aceleracion_lectura",
+    taquistoscopia_flash: "aceleracion_lectura",
+    flash: "aceleracion_lectura",
+    numeros_letras: "numeros",
+  };
+
+  return aliasMap[normalized] || normalized || "velocidad";
+};
+
 
 const defaultCardStyles = [
   { bg: "linear-gradient(145deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)", textDark: false },
@@ -72,19 +110,25 @@ const defaultIcons = [
 ];
 
 export default function EntrenamientoSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "es").startsWith("en")
+    ? "en"
+    : (i18n.language || "es").startsWith("pt")
+      ? "pt"
+      : "es";
   const [, setLocation] = useLocation();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [styles, setStyles] = useState<PageStyles>({});
-  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [styles, setStyles] = useState<PageStyles>(() => readCachedTrainingSelectionStyles(lang));
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const warnedAuthRef = useRef(false);
 
   const { data: itemsData, isLoading } = useQuery<{ items: EntrenamientoItem[] }>({
-    queryKey: ["/api/entrenamiento", "ninos", "items"],
+    queryKey: ["/api/entrenamiento", "ninos", "items", lang],
     queryFn: async () => {
-      const res = await fetch(`/api/entrenamiento/ninos/items?lang=es`);
+      const res = await fetch(`/api/entrenamiento/ninos/items?lang=${lang}`);
       return res.json();
     },
   });
@@ -104,49 +148,74 @@ export default function EntrenamientoSelectionPage() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
-    
-    fetch(`/api/page-styles/entrenamiento-page`)
+    const controller = new AbortController();
+    setStyles(readCachedTrainingSelectionStyles(lang));
+    fetch(`/api/page-styles/entrenamiento-selection-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
           try {
-            setStyles(JSON.parse(data.style.styles));
+            const nextStyles = JSON.parse(data.style.styles);
+            setStyles(nextStyles);
+            localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+            return;
           } catch (e) {
             console.log("No saved styles");
           }
         }
-        clearTimeout(timeout);
-        setStylesLoaded(true);
+        fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
+          .then(r => r.json())
+          .then(fallback => {
+            if (fallback.style?.styles) {
+              try {
+                const nextStyles = JSON.parse(fallback.style.styles);
+                setStyles(nextStyles);
+                localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+              } catch {}
+            }
+          });
       })
-      .catch(() => {
-        clearTimeout(timeout);
-        setStylesLoaded(true);
-      });
-    
-    return () => clearTimeout(timeout);
-  }, []);
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
-    if (!adminToken) return;
+    if (!adminToken) {
+      if (!warnedAuthRef.current) {
+        warnedAuthRef.current = true;
+        toast({ title: "No guardado", description: "Inicia sesion en admin para guardar estilos.", variant: "destructive" });
+      }
+      return;
+    }
     
     try {
-      await fetch("/api/admin/page-styles", {
+      const res = await fetch("/api/admin/page-styles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${adminToken}`
         },
         body: JSON.stringify({
-          pageName: "entrenamiento-page",
-          styles: JSON.stringify(newStyles)
+          pageName: "entrenamiento-selection-page",
+          styles: JSON.stringify(newStyles),
+          lang
         })
       });
+      if (!res.ok) {
+        if (res.status === 401 && !warnedAuthRef.current) {
+          warnedAuthRef.current = true;
+          toast({ title: "Sesion expirada", description: "Vuelve a iniciar sesion en admin para guardar.", variant: "destructive" });
+        }
+        return;
+      }
+      warnedAuthRef.current = false;
+      localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(newStyles));
     } catch (error) {
       console.error("Error saving styles:", error);
     }
-  }, []);
+  }, [toast, lang]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -206,7 +275,7 @@ export default function EntrenamientoSelectionPage() {
     setLocation(`/entrenamiento-edad/${item.id}`);
   }, [editorMode, setLocation]);
 
-  if (!stylesLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -355,6 +424,7 @@ export default function EntrenamientoSelectionPage() {
               const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
               const isMd = !isMobile;
               const iconSize = rIcon?.iconSize || rIcon?.imageSize || (isMd ? 96 : 64);
+              const exerciseType = normalizeExerciseType(item.tipoEjercicio);
               
               return (
                 <motion.div
@@ -402,7 +472,7 @@ export default function EntrenamientoSelectionPage() {
                         color: getResolvedStyle(titleId)?.textColor || "#ffffff"
                       }}
                     >
-                      {getResolvedStyle(titleId)?.buttonText || t(`entrenamiento.cardTitle_${item.tipoEjercicio}`, { defaultValue: item.title })}
+                      {t(`entrenamiento.cardTitle_${exerciseType}`, { defaultValue: item.title })}
                     </h3>
                     {item.description && (
                       <p 
@@ -413,7 +483,7 @@ export default function EntrenamientoSelectionPage() {
                           color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
                         }}
                       >
-                        {getResolvedStyle(descId)?.buttonText || t(`entrenamiento.cardDesc_${item.tipoEjercicio}`, { defaultValue: item.description || "" })}
+                        {t(`entrenamiento.cardDesc_${exerciseType}`, { defaultValue: item.description || "" })}
                       </p>
                     )}
                     <motion.button
@@ -442,7 +512,7 @@ export default function EntrenamientoSelectionPage() {
                       };})()}
                       whileTap={{ scale: editorMode ? 1 : 0.95 }}
                     >
-                      {getResolvedStyle(btnId)?.buttonText || t("entrenamiento.startBtn")}
+                      {t("entrenamiento.startBtn")}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </motion.div>

@@ -66,6 +66,19 @@ interface TestCardProps {
   isMobile: boolean;
 }
 
+const TESTS_STYLE_CACHE_KEY = "page-style:tests-page:";
+
+function readCachedTestStyles(lang: string): PageStyles {
+  try {
+    const raw = localStorage.getItem(`${TESTS_STYLE_CACHE_KEY}${lang}`);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 function TestCard({ 
   testId,
   title,
@@ -286,8 +299,7 @@ export default function TestsPage() {
   const { updateUserData } = useUserData();
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [styles, setStyles] = useState<PageStyles>({});
-  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
 
@@ -304,27 +316,24 @@ export default function TestsPage() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
-    
-    fetch(`/api/page-styles/tests-page?lang=${lang}`)
+    const controller = new AbortController();
+    setStyles(readCachedTestStyles(lang));
+    fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
           try {
-            setStyles(JSON.parse(data.style.styles));
+            const nextStyles = JSON.parse(data.style.styles);
+            setStyles(nextStyles);
+            localStorage.setItem(`${TESTS_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
           } catch (e) {
             console.log("No saved styles");
           }
         }
-        clearTimeout(timeout);
-        setStylesLoaded(true);
       })
-      .catch(() => {
-        clearTimeout(timeout);
-        setStylesLoaded(true);
-      });
-    
-    return () => clearTimeout(timeout);
+      .catch(() => {});
+
+    return () => controller.abort();
   }, [lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
@@ -344,6 +353,7 @@ export default function TestsPage() {
           lang
         })
       });
+      localStorage.setItem(`${TESTS_STYLE_CACHE_KEY}${lang}`, JSON.stringify(newStyles));
     } catch (error) {
       console.error("Error saving styles:", error);
     }
@@ -428,14 +438,6 @@ export default function TestsPage() {
     { id: "razonamiento", title: t("tests.razonamiento"), description: t("tests.razonamientoDesc") },
     { id: "cerebral", title: t("tests.cerebral"), description: t("tests.cerebralDesc") },
   ];
-
-  if (!stylesLoaded) {
-    return (
-      <div className="h-[100dvh] overflow-hidden bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">

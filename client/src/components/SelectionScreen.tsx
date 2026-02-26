@@ -18,6 +18,19 @@ interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
 }
 
+const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:";
+
+function readCachedStyles(lang: string): PageStyles {
+  try {
+    const raw = localStorage.getItem(`${HOME_STYLE_CACHE_KEY}${lang}`);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const { t, i18n } = useTranslation();
@@ -30,9 +43,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [styles, setStyles] = useState<PageStyles>({});
+  const [styles, setStyles] = useState<PageStyles>(() => readCachedStyles(lang));
   const [adminToken, setAdminToken] = useState<string | null>(null);
-  const [stylesLoaded, setStylesLoaded] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   
   useEffect(() => {
@@ -54,27 +66,23 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   
   useEffect(() => {
-    const timeout = setTimeout(() => setStylesLoaded(true), 2000);
-    
-    fetch(`/api/page-styles/selection-screen?lang=${lang}`)
+    const controller = new AbortController();
+    setStyles(readCachedStyles(lang));
+    fetch(`/api/page-styles/selection-screen?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
           try {
-            setStyles(JSON.parse(data.style.styles));
-          } catch (e) {
+            const nextStyles = JSON.parse(data.style.styles);
+            setStyles(nextStyles);
+            localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+          } catch {
             console.log("No saved styles");
           }
         }
-        clearTimeout(timeout);
-        setStylesLoaded(true);
       })
-      .catch(() => {
-        clearTimeout(timeout);
-        setStylesLoaded(true);
-      });
-    
-    return () => clearTimeout(timeout);
+      .catch(() => {});
+    return () => controller.abort();
   }, [lang]);
   
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
@@ -109,6 +117,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       if (!response.ok) {
         throw new Error("Failed to save");
       }
+      localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${lang}`, JSON.stringify(styles));
       
       toast({ title: "Guardado", description: "Los estilos se guardaron correctamente" });
     } catch (error) {
@@ -188,14 +197,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const handleEmail = () => {
     window.location.href = "mailto:soporte@inteligenciaexponencial.com";
   };
-
-  if (!stylesLoaded) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -561,37 +562,78 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.27 }}
-              onClick={() => { if (!editorMode) setLocation("/mapas-mentales"); }}
-              className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex flex-col md:col-span-2"
-              style={{
-                backgroundImage: 'url("https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af")',
-                backgroundSize: "cover",
-                backgroundPosition: "center center",
-              }}
+              onClick={(e) => { if (editorMode) handleElementClick("card-mindmaps", e); else setLocation("/mapas-mentales"); }}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex flex-col md:col-span-2 ${getEditableClass("card-mindmaps")}`}
+              style={getElementStyle("card-mindmaps", "linear-gradient(135deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.06) 100%)")}
               data-testid="button-option-mapas-mentales"
             >
-              <div className="p-4 flex-1 flex flex-col justify-end">
-                <h3 className="text-base font-bold text-white mb-1">
-                  Crea mapas mentales
-                </h3>
-                <p className="text-xs text-white/90 leading-snug">
-                  Organiza ideas clave en segundos para estudiar, recordar y explicar mejor.
-                </p>
+              <div className="absolute inset-0 pointer-events-none" style={{
+                backgroundImage: styles["bg-mindmaps"]?.imageUrl ? `url(${styles["bg-mindmaps"]?.imageUrl})` : 'url("https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af")',
+                backgroundSize: "cover",
+                backgroundPosition: "center center",
+                opacity: (styles["bg-mindmaps"] as any)?.opacity ?? 1,
+              }} />
+              <div className="relative p-4 flex items-start gap-3 flex-1">
+                <div
+                  className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${getEditableClass("icon-mindmaps")}`}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-mindmaps", e); } }}
+                  style={getElementStyle("icon-mindmaps")}
+                >
+                  {styles["icon-mindmaps"]?.imageUrl ? (
+                    <img
+                      src={styles["icon-mindmaps"].imageUrl}
+                      alt=""
+                      className="w-10 h-10 object-contain"
+                      style={{ width: styles["icon-mindmaps"]?.imageSize ? `${styles["icon-mindmaps"].imageSize}%` : undefined }}
+                    />
+                  ) : (
+                    <Map className="w-10 h-10 text-cyan-600" />
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3
+                    className={`text-sm font-bold mb-0.5 ${getEditableClass("title-mindmaps")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-mindmaps", e); } }}
+                    style={{ color: styles["title-mindmaps"]?.textColor || "#8a3ffc", ...getElementStyle("title-mindmaps") }}
+                  >
+                    {styles["title-mindmaps"]?.buttonText || "Crea mapas mentales"}
+                  </h3>
+                  <p
+                    className={`text-xs leading-snug ${getEditableClass("desc-mindmaps")}`}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-mindmaps", e); } }}
+                    style={{ color: styles["desc-mindmaps"]?.textColor || "#4b5563", ...getElementStyle("desc-mindmaps") }}
+                  >
+                    {styles["desc-mindmaps"]?.buttonText || "Organiza ideas clave en segundos para estudiar, recordar y explicar mejor."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  onClick={(e) => { e.stopPropagation(); if (!editorMode) setLocation("/mapas-mentales"); }}
-                  className="mt-3 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md"
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-mindmaps", e); } else { e.stopPropagation(); setLocation("/mapas-mentales"); } }}
+                  className={`mt-3 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-mindmaps")}`}
                   style={{ 
-                    fontSize: 12,
-                    marginLeft: 80,
-                    borderRadius: 13
+                    fontSize: styles["btn-mindmaps"]?.fontSize || 12,
+                    marginLeft: styles["btn-mindmaps"]?.marginLeft ?? "auto",
+                    marginRight: styles["btn-mindmaps"]?.marginRight ?? "auto",
+                    borderRadius: styles["btn-mindmaps"]?.borderRadius || 13,
+                    ...getElementStyle("btn-mindmaps", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
                   }}
                   data-testid="button-crear-mapa-mental"
                 >
-                  <span>
-                    <Map style={{ width: 14, height: 14 }} />
+                  <span
+                    className={getEditableClass("icon-btn-mindmaps")}
+                    onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-mindmaps", e); } }}
+                  >
+                    {styles["icon-btn-mindmaps"]?.imageUrl ? (
+                      <img src={styles["icon-btn-mindmaps"].imageUrl} alt="" style={{ width: styles["icon-btn-mindmaps"]?.iconSize || 14, height: styles["icon-btn-mindmaps"]?.iconSize || 14 }} />
+                    ) : (
+                      <Map style={{ width: styles["icon-btn-mindmaps"]?.iconSize || 14, height: styles["icon-btn-mindmaps"]?.iconSize || 14 }} />
+                    )}
                   </span>
-                  Crear mapa mental
+                  <span className="whitespace-pre-line">{styles["btn-mindmaps"]?.buttonText || "Crear mapa mental"}</span>
                 </motion.button>
               </div>
             </motion.div>

@@ -25,7 +25,13 @@ i18n
 
 export default i18n;
 
-export const languages = [
+export type AppLanguage = {
+  code: string;
+  label: string;
+  disabled?: boolean;
+};
+
+export const languages: AppLanguage[] = [
   { code: "es", label: "Español" },
   { code: "en", label: "English" },
   { code: "pt", label: "Português" },

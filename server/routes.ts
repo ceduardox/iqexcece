@@ -366,6 +366,202 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/mindmaps/ideas", async (req, res) => {
+    try {
+      const {
+        topic,
+        resultMode = "ideas",
+        configMode = "basico",
+        includeImages = false,
+        includeNotes = false,
+      } = req.body || {};
+
+      const cleanTopic = String(topic || "").trim();
+      if (!cleanTopic) return res.status(400).json({ error: "topic is required" });
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+
+      const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
+      const style =
+        resultMode === "explicar"
+          ? "Redacta ideas explicativas y con mayor contexto."
+          : "Redacta ideas cortas, claras y directas.";
+      const depth =
+        configMode === "profundo"
+          ? "Incluye subideas concretas y mas detalle por rama."
+          : "Mantener enfoque simple para estudio rapido.";
+
+      const prompt = `
+Genera la estructura de un mapa mental en JSON para el tema: "${cleanTopic}".
+${style}
+${depth}
+${includeImages ? "Incluye imageHint corto por cada rama." : "No incluyas imageHint."}
+${includeNotes ? "Incluye note corto por cada rama." : "No incluyas note."}
+
+Responde SOLO JSON valido con esta forma exacta:
+{
+  "centralTopic": "string",
+  "ideas": [
+    {
+      "title": "string",
+      "children": ["string", "string"],
+      "note": "string opcional",
+      "imageHint": "string opcional"
+    }
+  ]
+}
+
+Reglas:
+- 4 a 7 ideas principales.
+- maximo 4 children por idea.
+- texto en espanol.
+- sin markdown, sin comentarios, sin texto extra.
+`.trim();
+
+      let parsed: any = null;
+      let exhausted = false;
+      for (const model of models) {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.5, maxOutputTokens: 1200 },
+            }),
+          },
+        );
+
+        const data = await response.json() as any;
+        if (data?.error?.status === "RESOURCE_EXHAUSTED") {
+          exhausted = true;
+          continue;
+        }
+
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!raw) continue;
+
+        try {
+          const cleaned = raw.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
+          const json = JSON.parse(cleaned);
+          if (json && typeof json.centralTopic === "string" && Array.isArray(json.ideas)) {
+            parsed = {
+              centralTopic: json.centralTopic.trim() || cleanTopic,
+              ideas: json.ideas
+                .filter((i: any) => i && typeof i.title === "string" && i.title.trim())
+                .slice(0, 7)
+                .map((i: any) => ({
+                  title: String(i.title).trim(),
+                  children: Array.isArray(i.children)
+                    ? i.children.map((c: any) => String(c).trim()).filter(Boolean).slice(0, 4)
+                    : [],
+                  note: typeof i.note === "string" ? i.note.trim() : "",
+                  imageHint: typeof i.imageHint === "string" ? i.imageHint.trim() : "",
+                })),
+            };
+            break;
+          }
+        } catch {
+          // try next model
+        }
+      }
+
+      if (!parsed) {
+        if (exhausted) return res.status(429).json({ error: "Limite de IA alcanzado. Intenta en unos segundos." });
+        return res.status(500).json({ error: "No se pudo generar el mapa mental" });
+      }
+
+      if (includeImages && Array.isArray(parsed.ideas)) {
+        const pickBestImage = async (query: string) => {
+          const normalized = query.toLowerCase();
+          const tokens = normalized
+            .split(/\s+/)
+            .map((t) => t.trim())
+            .filter((t) => t.length > 2);
+
+          // 1) Openverse (better semantic matches for generic concepts)
+          try {
+            const ovRes = await fetch(
+              `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&page_size=10`,
+            );
+            if (ovRes.ok) {
+              const ovData = (await ovRes.json()) as any;
+              const results = Array.isArray(ovData?.results) ? ovData.results : [];
+              const scored = results
+                .map((r: any) => {
+                  const title = String(r?.title || "").toLowerCase();
+                  const tagText = Array.isArray(r?.tags) ? r.tags.map((t: any) => String(t?.name || "")).join(" ").toLowerCase() : "";
+                  const blob = `${title} ${tagText}`;
+                  const score = tokens.reduce((acc, tk) => acc + (blob.includes(tk) ? 1 : 0), 0);
+                  const url = String(r?.url || r?.thumbnail || "").trim();
+                  const isUntitled = title.includes("untitled") || title.includes("sin título");
+                  return { score, url, isUntitled };
+                })
+                .filter((x: any) => !!x.url)
+                .sort((a: any, b: any) => b.score - a.score);
+
+              if (scored.length > 0 && scored[0].score >= 1) return scored[0].url;
+              const usable = scored.find((x: any) => !x.isUntitled);
+              if (usable) return usable.url;
+              if (scored.length > 0) return scored[0].url;
+            }
+          } catch {
+            // continue with next provider
+          }
+
+          // 2) Wikimedia Commons
+          try {
+            const commonsSearch = await fetch(
+              `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1&format=json&origin=*`,
+            );
+            if (commonsSearch.ok) {
+              const commonsData = (await commonsSearch.json()) as any;
+              const top = commonsData?.query?.search?.[0];
+              const title = top?.title ? String(top.title) : "";
+              if (title) {
+                const summary = await fetch(
+                  `https://commons.wikimedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+                );
+                if (summary.ok) {
+                  const sumData = (await summary.json()) as any;
+                  const img = String(sumData?.thumbnail?.source || "").trim();
+                  if (img) return img;
+                }
+              }
+            }
+          } catch {
+            // continue with fallback
+          }
+
+          // 3) Stable fallback
+          return `https://loremflickr.com/600/400/${encodeURIComponent(query)}`;
+        };
+
+        const ideasWithImages = await Promise.all(
+          parsed.ideas.map(async (idea: any) => {
+            const hint = (idea.imageHint || idea.title || "").trim();
+            if (!hint) return { ...idea, imageUrl: "" };
+            const query = `${cleanTopic} ${idea.title || hint}`.trim();
+            const imageUrl = await pickBestImage(query);
+
+            return {
+              ...idea,
+              imageUrl,
+            };
+          }),
+        );
+
+        parsed = { ...parsed, ideas: ideasWithImages };
+      }
+
+      res.json({ map: parsed });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "No se pudo generar ideas" });
+    }
+  });
+
   // Admin login
   app.post("/api/admin/login", async (req, res) => {
     const { username, password } = req.body;
@@ -762,9 +958,34 @@ export async function registerRoutes(
     
     const mimeType = matches[1];
     const buffer = Buffer.from(matches[2], 'base64');
-    
-    res.set('Content-Type', mimeType);
-    res.set('Cache-Control', 'public, max-age=31536000');
+
+    // Support byte range requests for video playback in browsers.
+    const range = req.headers.range;
+    if (range && mimeType.startsWith("video/")) {
+      const total = buffer.length;
+      const [startRaw, endRaw] = range.replace(/bytes=/, "").split("-");
+      const start = Number.parseInt(startRaw, 10);
+      const end = endRaw ? Number.parseInt(endRaw, 10) : total - 1;
+
+      if (Number.isNaN(start) || Number.isNaN(end) || start < 0 || end >= total || start > end) {
+        res.status(416).set("Content-Range", `bytes */${total}`);
+        return res.end();
+      }
+
+      const chunk = buffer.subarray(start, end + 1);
+      res.status(206);
+      res.set("Content-Type", mimeType);
+      res.set("Accept-Ranges", "bytes");
+      res.set("Content-Range", `bytes ${start}-${end}/${total}`);
+      res.set("Content-Length", String(chunk.length));
+      res.set("Cache-Control", "public, max-age=31536000");
+      return res.end(chunk);
+    }
+
+    res.set("Content-Type", mimeType);
+    res.set("Content-Length", String(buffer.length));
+    res.set("Accept-Ranges", "bytes");
+    res.set("Cache-Control", "public, max-age=31536000");
     res.send(buffer);
   });
 
@@ -852,15 +1073,30 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid styles data" });
     }
     let imported = 0;
+    let errors = 0;
+    const summary: Record<string, number> = {};
     for (const style of styles) {
       try {
-        await storage.savePageStyle(style.pageName, style.styles);
+        if (!style?.pageName || typeof style.styles !== "string") {
+          errors++;
+          continue;
+        }
+        const styleLang = style.lang || "es";
+        await storage.savePageStyle(style.pageName, style.styles, styleLang);
         imported++;
+        const key = `${style.pageName} [${styleLang}]`;
+        summary[key] = (summary[key] || 0) + 1;
       } catch (e) {
+        errors++;
         console.error("Error importing style:", e);
       }
     }
-    res.json({ success: true, imported });
+    res.json({
+      success: true,
+      imported,
+      errors,
+      summary: Object.entries(summary).map(([target, count]) => ({ target, count })),
+    });
   });
 
   // ===========================================
@@ -1282,7 +1518,7 @@ export async function registerRoutes(
     const search = req.query.search as string;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const { posts, total } = await storage.getBlogPosts(categoriaId || undefined, "publicado", page, limit, search || undefined);
+    const { posts, total } = await storage.getBlogPostSummaries(categoriaId || undefined, "publicado", page, limit, search || undefined);
     res.json({ posts, total, page, totalPages: Math.ceil(total / limit) });
   });
 

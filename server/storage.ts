@@ -6,6 +6,17 @@ import { randomUUID } from "crypto";
 import { eq, desc, and, gt, count, sql, ilike, or } from "drizzle-orm";
 import { db } from "./db";
 
+export type BlogPostSummary = {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  imagenPortada: string | null;
+  categoriaId: string | null;
+  estado: string | null;
+  autor: string | null;
+  createdAt: Date | null;
+};
+
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -107,6 +118,7 @@ export interface IStorage {
   updateBlogCategory(id: string, data: Partial<InsertBlogCategory>): Promise<BlogCategory | null>;
   deleteBlogCategory(id: string): Promise<void>;
   getBlogPosts(categoriaId?: string, estado?: string, page?: number, limit?: number, search?: string): Promise<{ posts: BlogPost[]; total: number }>;
+  getBlogPostSummaries(categoriaId?: string, estado?: string, page?: number, limit?: number, search?: string): Promise<{ posts: BlogPostSummary[]; total: number }>;
   getBlogPost(id: string): Promise<BlogPost | null>;
   saveBlogPost(post: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, data: Partial<InsertBlogPost>): Promise<BlogPost | null>;
@@ -267,6 +279,7 @@ export class MemStorage implements IStorage {
       title: insertContent.title,
       content: insertContent.content,
       imageUrl: insertContent.imageUrl || null,
+      isActive: (insertContent as any).isActive ?? existing?.isActive ?? true,
       pageMainImage: insertContent.pageMainImage || null,
       pageSmallImage: insertContent.pageSmallImage || null,
       categoryImage: insertContent.categoryImage || null,
@@ -444,6 +457,7 @@ export class MemStorage implements IStorage {
   async updateBlogCategory(_id: string, _data: Partial<InsertBlogCategory>): Promise<BlogCategory | null> { return null; }
   async deleteBlogCategory(_id: string): Promise<void> {}
   async getBlogPosts(): Promise<{ posts: BlogPost[]; total: number }> { return { posts: [], total: 0 }; }
+  async getBlogPostSummaries(): Promise<{ posts: BlogPostSummary[]; total: number }> { return { posts: [], total: 0 }; }
   async getBlogPost(_id: string): Promise<BlogPost | null> { return null; }
   async saveBlogPost(post: InsertBlogPost): Promise<BlogPost> { return { id: randomUUID(), ...post, createdAt: new Date(), updatedAt: new Date() } as BlogPost; }
   async updateBlogPost(_id: string, _data: Partial<InsertBlogPost>): Promise<BlogPost | null> { return null; }
@@ -1200,6 +1214,59 @@ export class DatabaseStorage implements IStorage {
     } else {
       posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).limit(limit).offset(offset);
     }
+    return { posts, total };
+  }
+
+  async getBlogPostSummaries(categoriaId?: string, estado?: string, page: number = 1, limit: number = 10, search?: string): Promise<{ posts: BlogPostSummary[]; total: number }> {
+    const conditions = [];
+    if (categoriaId) conditions.push(eq(blogPosts.categoriaId, categoriaId));
+    if (estado) conditions.push(eq(blogPosts.estado, estado));
+    if (search) {
+      const searchPattern = `%${search}%`;
+      conditions.push(or(ilike(blogPosts.titulo, searchPattern), ilike(blogPosts.descripcion, searchPattern))!);
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const [countResult] = await db.select({ value: count() }).from(blogPosts).where(whereClause);
+    const total = countResult?.value || 0;
+    const offset = (page - 1) * limit;
+
+    let posts: BlogPostSummary[];
+    if (whereClause) {
+      posts = await db
+        .select({
+          id: blogPosts.id,
+          titulo: blogPosts.titulo,
+          descripcion: blogPosts.descripcion,
+          imagenPortada: blogPosts.imagenPortada,
+          categoriaId: blogPosts.categoriaId,
+          estado: blogPosts.estado,
+          autor: blogPosts.autor,
+          createdAt: blogPosts.createdAt,
+        })
+        .from(blogPosts)
+        .where(whereClause)
+        .orderBy(desc(blogPosts.createdAt))
+        .limit(limit)
+        .offset(offset);
+    } else {
+      posts = await db
+        .select({
+          id: blogPosts.id,
+          titulo: blogPosts.titulo,
+          descripcion: blogPosts.descripcion,
+          imagenPortada: blogPosts.imagenPortada,
+          categoriaId: blogPosts.categoriaId,
+          estado: blogPosts.estado,
+          autor: blogPosts.autor,
+          createdAt: blogPosts.createdAt,
+        })
+        .from(blogPosts)
+        .orderBy(desc(blogPosts.createdAt))
+        .limit(limit)
+        .offset(offset);
+    }
+
     return { posts, total };
   }
 

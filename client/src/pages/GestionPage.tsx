@@ -4195,7 +4195,11 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           body: JSON.stringify({ styles: data.styles })
                         });
                         const result = await res.json();
-                        alert(`Estilos importados: ${result.imported}`);
+                        const lines = Array.isArray(result.summary)
+                          ? result.summary.map((s: { target: string; count: number }) => `- ${s.target}: ${s.count}`)
+                          : [];
+                        const detail = lines.length ? `\n\nDetalle por página/idioma:\n${lines.join("\n")}` : "";
+                        alert(`Estilos importados: ${result.imported || 0}\nErrores: ${result.errors || 0}${detail}`);
                       } catch (err) {
                         alert("Error al importar estilos: " + (err as Error).message);
                       }

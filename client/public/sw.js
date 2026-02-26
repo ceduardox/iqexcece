@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.2';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -32,6 +32,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  const hasRange = event.request.headers.has('range');
+  const isApi = url.pathname.startsWith('/api/');
+  if (isApi || hasRange) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   
   event.respondWith(
     fetch(event.request)

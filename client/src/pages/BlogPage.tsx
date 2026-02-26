@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
 import { TrainingNavBar } from "@/components/TrainingNavBar";
 import { CurvedHeader } from "@/components/CurvedHeader";
+import { useIsMobile } from "@/hooks/use-mobile";
 import laxCyan from "@assets/laxcyan2_1771479429192.png";
 import laxPurpura from "@assets/laxpurpura_1771479319056.png";
 import laxBlanca from "@assets/laxblanca_1771479319056.png";
@@ -23,28 +24,21 @@ interface BlogPost {
   titulo: string;
   descripcion: string | null;
   imagenPortada: string | null;
-  contenido: string;
   categoriaId: string | null;
   estado: string | null;
   autor: string | null;
   createdAt: string | null;
 }
 
-function estimateReadingTime(html: string): number {
-  const text = html.replace(/<[^>]*>/g, "");
-  const words = text.split(/\s+/).filter(Boolean).length;
+function estimateReadingTime(textInput: string): number {
+  const text = (textInput || "").replace(/<[^>]*>/g, "");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 }
 
-function getExcerpt(html: string, desc: string | null): string {
+function getExcerpt(desc: string | null): string {
   if (desc && desc.trim()) return desc.length > 120 ? desc.slice(0, 120) + "..." : desc;
-  const text = html.replace(/<[^>]*>/g, "");
-  const sentences = text.match(/[^.!?]+[.!?]+/g);
-  if (sentences && sentences.length >= 2) {
-    const twoSentences = sentences.slice(0, 2).join(" ");
-    return twoSentences.length > 150 ? twoSentences.slice(0, 150) + "..." : twoSentences + "...";
-  }
-  return text.length > 150 ? text.slice(0, 150) + "..." : text + "...";
+  return "Sin descripción disponible.";
 }
 
 function formatDate(d: string | null): string {
@@ -68,6 +62,7 @@ export default function BlogPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [desktopCatOpen, setDesktopCatOpen] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,6 +84,7 @@ export default function BlogPage() {
 
   const { data: postsData, isLoading } = useQuery<{ posts: BlogPost[]; total: number; page: number; totalPages: number }>({
     queryKey: ["/api/blog-posts", selectedCategory, page, debouncedSearch],
+    staleTime: 60_000,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedCategory) params.append("categoriaId", selectedCategory);
@@ -324,10 +320,38 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafe] relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.img src={laxCyan} alt="" className="absolute opacity-[0.12] w-[250px] md:w-[600px]" style={{ top: "3%", right: "-70px" }} animate={{ rotate: [0, 6, -5, 0], scale: [1, 1.06, 0.97, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} />
-        <motion.img src={laxPurpura} alt="" className="absolute opacity-[0.09] w-[180px] md:w-[480px]" style={{ top: "40%", left: "-50px" }} animate={{ rotate: [0, -8, 4, 0], y: [0, 25, -15, 0] }} transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 4 }} />
-        <motion.img src={laxVerde} alt="" className="absolute opacity-[0.10] w-[200px] md:w-[520px]" style={{ bottom: "8%", right: "-40px" }} animate={{ rotate: [0, 7, -6, 0], x: [0, -20, 12, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 7 }} />
-        <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.07] w-[160px] md:w-[420px]" style={{ top: "65%", left: "35%" }} animate={{ rotate: [0, -12, 8, 0], scale: [1, 1.1, 0.93, 1] }} transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 10 }} />
+        <motion.img
+          src={laxCyan}
+          alt=""
+          className="absolute opacity-[0.12] w-[250px] md:w-[600px]"
+          style={{ top: "3%", right: "-70px" }}
+          animate={isMobile ? undefined : { rotate: [0, 6, -5, 0], scale: [1, 1.06, 0.97, 1] }}
+          transition={isMobile ? undefined : { duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.img
+          src={laxPurpura}
+          alt=""
+          className="absolute opacity-[0.09] w-[180px] md:w-[480px]"
+          style={{ top: "40%", left: "-50px" }}
+          animate={isMobile ? undefined : { rotate: [0, -8, 4, 0], y: [0, 25, -15, 0] }}
+          transition={isMobile ? undefined : { duration: 24, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+        />
+        <motion.img
+          src={laxVerde}
+          alt=""
+          className="absolute opacity-[0.10] w-[200px] md:w-[520px]"
+          style={{ bottom: "8%", right: "-40px" }}
+          animate={isMobile ? undefined : { rotate: [0, 7, -6, 0], x: [0, -20, 12, 0] }}
+          transition={isMobile ? undefined : { duration: 22, repeat: Infinity, ease: "easeInOut", delay: 7 }}
+        />
+        <motion.img
+          src={laxBlanca}
+          alt=""
+          className="absolute opacity-[0.07] w-[160px] md:w-[420px]"
+          style={{ top: "65%", left: "35%" }}
+          animate={isMobile ? undefined : { rotate: [0, -12, 8, 0], scale: [1, 1.1, 0.93, 1] }}
+          transition={isMobile ? undefined : { duration: 26, repeat: Infinity, ease: "easeInOut", delay: 10 }}
+        />
       </div>
       <div className="relative z-[1] flex flex-col min-h-screen">
       <CurvedHeader
@@ -433,6 +457,8 @@ export default function BlogPage() {
                           src={featuredPost.imagenPortada}
                           alt={featuredPost.titulo}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="eager"
+                          decoding="async"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -465,7 +491,7 @@ export default function BlogPage() {
                         {featuredPost.titulo}
                       </h2>
                       <p className="text-white/75 text-xs md:text-sm leading-relaxed line-clamp-3 mb-3">
-                        {getExcerpt(featuredPost.contenido, featuredPost.descripcion)}
+                        {getExcerpt(featuredPost.descripcion)}
                       </p>
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-3 text-white/50 text-[10px]">
@@ -477,7 +503,7 @@ export default function BlogPage() {
                           )}
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {estimateReadingTime(featuredPost.contenido)} min
+                            {estimateReadingTime(featuredPost.descripcion || "")} min
                           </span>
                         </div>
                         <span
@@ -511,6 +537,8 @@ export default function BlogPage() {
                             src={post.imagenPortada}
                             alt={post.titulo}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
@@ -539,7 +567,7 @@ export default function BlogPage() {
                         </div>
                         <h3 className="text-sm font-bold text-white leading-snug mb-1.5 line-clamp-2">{post.titulo}</h3>
                         <p className="text-xs text-white/75 leading-relaxed mb-3 line-clamp-3">
-                          {getExcerpt(post.contenido, post.descripcion)}
+                          {getExcerpt(post.descripcion)}
                         </p>
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 text-white/50 min-w-0">
@@ -551,7 +579,7 @@ export default function BlogPage() {
                             )}
                             <span className="flex items-center gap-1 text-[10px] shrink-0">
                               <Clock className="w-3 h-3" />
-                              {estimateReadingTime(post.contenido)} min
+                              {estimateReadingTime(post.descripcion || "")} min
                             </span>
                           </div>
                           <span

@@ -1,21 +1,81 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, Columns3, Download, Network, PencilRuler, Plus, Save, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Columns3, Download, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Kind = "mindmap" | "taskboard" | "whiteboard";
-type Node = { id: string; x: number; y: number; text: string };
+type Node = { id: string; x: number; y: number; text: string; imageUrl?: string };
 type Edge = { id: string; sourceId: string; targetId: string };
-type Task = { id: string; text: string };
-type TaskCols = { todo: Task[]; doing: Task[]; done: Task[] };
+type TaskChecklistItem = { id: string; text: string; done: boolean };
+type Task = { id: string; text: string; checklist?: TaskChecklistItem[] };
+type TaskCol = { id: string; title: string; tasks: Task[] };
+type TaskCols = TaskCol[];
 type Stroke = { id: string; color: string; width: number; points: { x: number; y: number }[] };
 type RecordMap = { id: string; title: string; data: string; updatedAt: string };
 type Data = { kind: Kind; nodes?: Node[]; edges?: Edge[]; columns?: TaskCols; strokes?: Stroke[] };
+type AiIdea = { title: string; children: string[]; note?: string; imageHint?: string; imageUrl?: string };
+type AiMap = { centralTopic: string; ideas: AiIdea[] };
 
 const SESSION_KEY = "iq_session_id";
 const NODE_W = 170;
 const NODE_H = 56;
+const WORLD_W = 2600;
+const WORLD_H = 1800;
 
-const colsDefault = (): TaskCols => ({ todo: [], doing: [], done: [] });
+const colsDefault = (): TaskCols => [
+  { id: "todo", title: "Por hacer", tasks: [] },
+  { id: "doing", title: "En proceso", tasks: [] },
+  { id: "done", title: "Hecho", tasks: [] },
+];
+
+function normalizeTaskColumns(input: any): TaskCols {
+  if (Array.isArray(input)) {
+    return input
+      .filter((c) => c && typeof c.id === "string" && typeof c.title === "string")
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        tasks: Array.isArray(c.tasks)
+          ? c.tasks.map((t: any) => ({
+              id: String(t.id || `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+              text: String(t.text || ""),
+              checklist: Array.isArray(t.checklist)
+                ? t.checklist.map((it: any) => ({
+                    id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    text: String(it.text || ""),
+                    done: Boolean(it.done),
+                  }))
+                : [],
+            }))
+          : [],
+      }));
+  }
+
+  if (input && typeof input === "object") {
+    const keys = Object.keys(input);
+    if (keys.length > 0) {
+      return keys.map((k) => ({
+        id: k,
+        title: k === "todo" ? "Por hacer" : k === "doing" ? "En proceso" : k === "done" ? "Hecho" : k,
+        tasks: Array.isArray(input[k])
+          ? input[k].map((t: any) => ({
+              id: String(t.id || `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+              text: String(t.text || ""),
+              checklist: Array.isArray(t.checklist)
+                ? t.checklist.map((it: any) => ({
+                    id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    text: String(it.text || ""),
+                    done: Boolean(it.done),
+                  }))
+                : [],
+            }))
+          : [],
+      }));
+    }
+  }
+
+  return colsDefault();
+}
 
 function getSessionId() {
   const current = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
@@ -29,7 +89,7 @@ function getSessionId() {
 function parseData(raw: string): Data {
   try {
     const parsed = JSON.parse(raw);
-    if (parsed?.kind === "taskboard") return { kind: "taskboard", columns: parsed.columns || colsDefault() };
+    if (parsed?.kind === "taskboard") return { kind: "taskboard", columns: normalizeTaskColumns(parsed.columns) };
     if (parsed?.kind === "whiteboard") return { kind: "whiteboard", strokes: Array.isArray(parsed.strokes) ? parsed.strokes : [] };
     if (parsed?.kind === "mindmap") return { kind: "mindmap", nodes: parsed.nodes || [], edges: parsed.edges || [] };
     if (Array.isArray(parsed?.nodes) || Array.isArray(parsed?.edges)) return { kind: "mindmap", nodes: parsed.nodes || [], edges: parsed.edges || [] };
@@ -49,6 +109,7 @@ export default function MindMapsPage() {
   const [, setLocation] = useLocation();
   const [shareMatch, shareParams] = useRoute("/mapas-mentales/share/:token");
   const token = shareParams ? shareParams.token : undefined;
+  const { toast } = useToast();
 
   const [sessionId] = useState(getSessionId);
   const [maps, setMaps] = useState<RecordMap[]>([]);
@@ -62,6 +123,22 @@ export default function MindMapsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [readonly, setReadonly] = useState(false);
+  const [showAiIdeas, setShowAiIdeas] = useState(true);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiResultMode, setAiResultMode] = useState<"ideas" | "explicar">("ideas");
+  const [aiConfigMode, setAiConfigMode] = useState<"basico" | "profundo">("basico");
+  const [aiIncludeImages, setAiIncludeImages] = useState(false);
+  const [aiIncludeNotes, setAiIncludeNotes] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiProgress, setAiProgress] = useState(0);
+  const [boardZoom, setBoardZoom] = useState(1);
+  const [boardOffset, setBoardOffset] = useState({ x: 0, y: 0 });
+  const [mobileLandscape, setMobileLandscape] = useState(false);
+  const [isCompactLayout, setIsCompactLayout] = useState<boolean>(() =>
+    typeof window === "undefined" ? true : window.matchMedia("(max-width: 1023px)").matches,
+  );
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -69,10 +146,15 @@ export default function MindMapsPage() {
   const [connectFromId, setConnectFromId] = useState<string | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{ id: string; dx: number; dy: number } | null>(null);
+  const panRef = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [cols, setCols] = useState<TaskCols>(colsDefault);
   const [taskText, setTaskText] = useState("");
-  const dragTask = useRef<{ from: keyof TaskCols; task: Task } | null>(null);
+  const [newColTitle, setNewColTitle] = useState("");
+  const [taskColId, setTaskColId] = useState("todo");
+  const [checkDrafts, setCheckDrafts] = useState<Record<string, string>>({});
+  const dragTask = useRef<{ fromColId: string; task: Task } | null>(null);
 
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [penColor, setPenColor] = useState("#7c3aed");
@@ -80,6 +162,33 @@ export default function MindMapsPage() {
   const drawingId = useRef<string | null>(null);
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) || null, [nodes, selectedNodeId]);
+
+  function clampOffset(nextX: number, nextY: number) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return { x: nextX, y: nextY };
+
+    const scaledW = WORLD_W * boardZoom;
+    const scaledH = WORLD_H * boardZoom;
+
+    const minX = scaledW > rect.width ? rect.width - scaledW : (rect.width - scaledW) / 2;
+    const maxX = scaledW > rect.width ? 0 : (rect.width - scaledW) / 2;
+    const minY = scaledH > rect.height ? rect.height - scaledH : (rect.height - scaledH) / 2;
+    const maxY = scaledH > rect.height ? 0 : (rect.height - scaledH) / 2;
+
+    return {
+      x: Math.max(minX, Math.min(nextX, maxX)),
+      y: Math.max(minY, Math.min(nextY, maxY)),
+    };
+  }
+
+  function toWorldCoords(clientX: number, clientY: number) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return {
+      x: (clientX - rect.left - boardOffset.x) / boardZoom,
+      y: (clientY - rect.top - boardOffset.y) / boardZoom,
+    };
+  }
 
   async function loadMaps() {
     const res = await fetch(`/api/mindmaps?sessionId=${encodeURIComponent(sessionId)}`);
@@ -91,6 +200,8 @@ export default function MindMapsPage() {
   function openMap(record: RecordMap) {
     const parsed = parseData(record.data);
     setShowChooser(false);
+    setBoardZoom(1);
+    setBoardOffset({ x: 0, y: 0 });
     setActiveId(record.id);
     setTitle(record.title || "Nuevo proyecto");
     setKind(parsed.kind);
@@ -100,7 +211,9 @@ export default function MindMapsPage() {
       setCols(colsDefault());
       setStrokes([]);
     } else if (parsed.kind === "taskboard") {
-      setCols(parsed.columns || colsDefault());
+      const normalized = normalizeTaskColumns(parsed.columns);
+      setCols(normalized);
+      setTaskColId(normalized[0]?.id || "todo");
       setNodes([]);
       setEdges([]);
       setStrokes([]);
@@ -129,7 +242,7 @@ export default function MindMapsPage() {
         setShowChooser(true);
         await loadMaps();
       } catch (e: any) {
-        alert(e.message || "Error");
+        toast({ title: "Error", description: e.message || "Error", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -139,16 +252,28 @@ export default function MindMapsPage() {
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
-      if (!dragRef.current || !boardRef.current || readonly || kind !== "mindmap") return;
-      const rect = boardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left - dragRef.current.dx;
-      const y = e.clientY - rect.top - dragRef.current.dy;
+      if (kind !== "mindmap") return;
+      if (panRef.current) {
+        const nx = panRef.current.ox + (e.clientX - panRef.current.startX);
+        const ny = panRef.current.oy + (e.clientY - panRef.current.startY);
+        setBoardOffset(clampOffset(nx, ny));
+        return;
+      }
+      if (!dragRef.current || !boardRef.current || readonly) return;
+      const world = toWorldCoords(e.clientX, e.clientY);
+      const x = world.x - dragRef.current.dx;
+      const y = world.y - dragRef.current.dy;
       setNodes((prev) =>
-        prev.map((n) => (n.id === dragRef.current!.id ? { ...n, x: Math.max(0, Math.min(x, rect.width - NODE_W)), y: Math.max(0, Math.min(y, rect.height - NODE_H)) } : n)),
+        prev.map((n) =>
+          n.id === dragRef.current!.id
+            ? { ...n, x: Math.max(0, Math.min(x, WORLD_W - NODE_W)), y: Math.max(0, Math.min(y, WORLD_H - NODE_H)) }
+            : n,
+        ),
       );
     };
     const up = () => {
       dragRef.current = null;
+      panRef.current = null;
       drawingId.current = null;
     };
     window.addEventListener("pointermove", move);
@@ -157,13 +282,217 @@ export default function MindMapsPage() {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
     };
-  }, [kind, readonly]);
+  }, [kind, readonly, boardZoom, boardOffset]);
+
+  useEffect(() => {
+    setBoardOffset((prev) => clampOffset(prev.x, prev.y));
+  }, [boardZoom, kind]);
+
+  useEffect(() => {
+    if (kind !== "taskboard") return;
+    if (!cols.length) return;
+    const exists = cols.some((c) => c.id === taskColId);
+    if (!exists) setTaskColId(cols[0].id);
+  }, [cols, taskColId, kind]);
+
+  useEffect(() => {
+    const onFs = () => {
+      if (!document.fullscreenElement) setMobileLandscape(false);
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const onChange = () => setIsCompactLayout(mq.matches);
+    onChange();
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else mq.removeListener(onChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isCompactLayout) {
+      setMobileSidebarOpen(false);
+      setMobileOptionsOpen(false);
+    }
+  }, [isCompactLayout]);
 
   function payload(): Data | null {
     if (!kind) return null;
     if (kind === "mindmap") return { kind, nodes, edges };
     if (kind === "taskboard") return { kind, columns: cols };
     return { kind, strokes };
+  }
+
+  function applyAiMapToBoard(aiMap: AiMap) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    const viewportW = (rect?.width || 1100) / boardZoom;
+    const viewportH = (rect?.height || 700) / boardZoom;
+    const centerX = Math.max(0, Math.min((-boardOffset.x) / boardZoom + viewportW / 2 - NODE_W / 2, WORLD_W - NODE_W));
+    const centerY = Math.max(0, Math.min((-boardOffset.y) / boardZoom + viewportH / 2 - NODE_H / 2, WORLD_H - NODE_H));
+
+    const now = Date.now();
+    const centralId = `node_ai_central_${now}`;
+    const nextNodes: Node[] = [{ id: centralId, x: centerX, y: centerY, text: aiMap.centralTopic || aiTopic.trim() || "Tema principal" }];
+    const nextEdges: Edge[] = [];
+
+    const mainIdeas = (aiMap.ideas || []).slice(0, 7);
+    const radius = Math.max(170, Math.min(Math.min(viewportW, viewportH) * 0.32, 280));
+
+    mainIdeas.forEach((idea, idx) => {
+      const angle = (Math.PI * 2 * idx) / Math.max(1, mainIdeas.length) - Math.PI / 2;
+      const mainX = centerX + Math.cos(angle) * radius;
+      const mainY = centerY + Math.sin(angle) * radius;
+      const mainId = `node_ai_main_${now}_${idx}`;
+
+        nextNodes.push({
+          id: mainId,
+          x: Math.max(0, Math.min(mainX, WORLD_W - NODE_W)),
+          y: Math.max(0, Math.min(mainY, WORLD_H - NODE_H)),
+          text: idea.title,
+        });
+      nextEdges.push({ id: `edge_ai_root_${now}_${idx}`, sourceId: centralId, targetId: mainId });
+
+      const children = (idea.children || []).slice(0, 4);
+      children.forEach((child, childIdx) => {
+        const childX = mainX + 40 + childIdx * 30;
+        const childY = mainY + 84 + childIdx * 40;
+        const childId = `node_ai_child_${now}_${idx}_${childIdx}`;
+        nextNodes.push({
+          id: childId,
+          x: Math.max(0, Math.min(childX, WORLD_W - NODE_W)),
+          y: Math.max(0, Math.min(childY, WORLD_H - NODE_H)),
+          text: child,
+        });
+        nextEdges.push({ id: `edge_ai_child_${now}_${idx}_${childIdx}`, sourceId: mainId, targetId: childId });
+      });
+
+      if (aiIncludeNotes && idea.note) {
+        const noteId = `node_ai_note_${now}_${idx}`;
+        nextNodes.push({
+          id: noteId,
+          x: Math.max(0, Math.min(mainX - 90, WORLD_W - NODE_W)),
+          y: Math.max(0, Math.min(mainY + 78, WORLD_H - NODE_H)),
+          text: `Nota: ${idea.note}`,
+        });
+        nextEdges.push({ id: `edge_ai_note_${now}_${idx}`, sourceId: mainId, targetId: noteId });
+      }
+
+      if (aiIncludeImages && (idea.imageHint || idea.imageUrl)) {
+        const imgId = `node_ai_img_${now}_${idx}`;
+        const imageUrl =
+          (idea.imageUrl || "").trim() ||
+          `https://picsum.photos/seed/${encodeURIComponent(idea.imageHint || idea.title)}/600/400`;
+        nextNodes.push({
+          id: imgId,
+          x: Math.max(0, Math.min(mainX + 98, WORLD_W - NODE_W)),
+          y: Math.max(0, Math.min(mainY - 78, WORLD_H - NODE_H)),
+          text: idea.imageHint || idea.title,
+          imageUrl,
+        });
+        nextEdges.push({ id: `edge_ai_img_${now}_${idx}`, sourceId: mainId, targetId: imgId });
+      }
+    });
+
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+    setSelectedNodeId(centralId);
+  }
+
+  async function generateAiIdeas() {
+    if (!aiTopic.trim() || readonly || kind !== "mindmap") return;
+    let progressTimer: ReturnType<typeof setInterval> | null = null;
+    try {
+      setAiBusy(true);
+      setAiProgress(8);
+      progressTimer = setInterval(() => {
+        setAiProgress((prev) => (prev >= 90 ? prev : prev + 7));
+      }, 400);
+      const res = await fetch("/api/mindmaps/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: aiTopic.trim(),
+          resultMode: aiResultMode,
+          configMode: aiConfigMode,
+          includeImages: aiIncludeImages,
+          includeNotes: aiIncludeNotes,
+        }),
+      });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await res.text();
+        if (text.includes("<!DOCTYPE")) {
+          throw new Error("El servidor devolvio HTML. Reinicia el servidor y verifica que exista la ruta /api/mindmaps/ideas.");
+        }
+        throw new Error("Respuesta invalida del servidor");
+      }
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "No se pudo generar ideas");
+      if (!data?.map?.centralTopic || !Array.isArray(data?.map?.ideas)) throw new Error("Respuesta invalida de IA");
+
+      const generated: AiMap = {
+        centralTopic: String(data.map.centralTopic),
+        ideas: data.map.ideas.map((i: any) => ({
+          title: String(i.title || "").trim(),
+          children: Array.isArray(i.children) ? i.children.map((c: any) => String(c).trim()).filter(Boolean) : [],
+          note: i.note ? String(i.note) : "",
+          imageHint: i.imageHint ? String(i.imageHint) : "",
+          imageUrl: i.imageUrl ? String(i.imageUrl) : "",
+        })).filter((i: AiIdea) => i.title),
+      };
+
+      applyAiMapToBoard(generated);
+      if (!title.trim() || title === "Nuevo proyecto") setTitle(aiTopic.trim());
+      setAiProgress(100);
+    } catch (e: any) {
+      toast({ title: "No se pudo generar", description: e.message || "Intenta nuevamente.", variant: "destructive" });
+    } finally {
+      if (progressTimer) clearInterval(progressTimer);
+      setTimeout(() => setAiProgress(0), 450);
+      setAiBusy(false);
+    }
+  }
+
+  async function toggleMobileLandscape() {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (!isMobile) return;
+    try {
+      const orientation = (screen as any).orientation;
+      if (!mobileLandscape) {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+        if (orientation?.lock) await orientation.lock("landscape");
+        setMobileLandscape(true);
+      } else {
+        if (orientation?.unlock) orientation.unlock();
+        if (document.fullscreenElement && document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+        setMobileLandscape(false);
+      }
+    } catch {
+      toast({ title: "Orientacion no disponible", description: "Tu navegador no permite bloqueo de orientacion. Puedes girar el movil manualmente.", variant: "destructive" });
+    }
+  }
+
+  function handleNodeImageUpload(file?: File | null) {
+    if (!file || !selectedNodeId) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      if (!result) return;
+      setNodes((prev) => prev.map((n) => (n.id === selectedNodeId ? { ...n, imageUrl: result } : n)));
+    };
+    reader.readAsDataURL(file);
   }
 
   async function saveProject() {
@@ -182,7 +511,7 @@ export default function MindMapsPage() {
       }
       await loadMaps();
     } catch (e: any) {
-      alert(e.message || "Error al guardar");
+      toast({ title: "Error al guardar", description: e.message || "Intenta nuevamente.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -191,7 +520,10 @@ export default function MindMapsPage() {
   async function deleteProject(id: string) {
     if (readonly || !confirm("Eliminar este proyecto?")) return;
     const res = await fetch(`/api/mindmaps/${id}?sessionId=${encodeURIComponent(sessionId)}`, { method: "DELETE" });
-    if (!res.ok) return alert("No se pudo eliminar");
+    if (!res.ok) {
+      toast({ title: "No se pudo eliminar", description: "Intenta nuevamente.", variant: "destructive" });
+      return;
+    }
     if (id === activeId) setKind(null);
     await loadMaps();
   }
@@ -201,10 +533,16 @@ export default function MindMapsPage() {
     const target = id || activeId;
     if (!target) return;
     const res = await fetch(`/api/mindmaps/${target}/share`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId }) });
-    if (!res.ok) return alert("No se pudo compartir");
+    if (!res.ok) {
+      toast({ title: "No se pudo compartir", description: "Intenta nuevamente.", variant: "destructive" });
+      return;
+    }
     const data = await res.json();
     setShareUrl(data.shareUrl || "");
-    if (data.shareUrl && navigator.clipboard) await navigator.clipboard.writeText(data.shareUrl);
+    if (data.shareUrl && navigator.clipboard) {
+      await navigator.clipboard.writeText(data.shareUrl);
+      toast({ title: "Enlace copiado", description: "Se copio el enlace para compartir." });
+    }
   }
 
   function newProject() {
@@ -218,8 +556,13 @@ export default function MindMapsPage() {
     setNodes([]);
     setEdges([]);
     setCols(colsDefault());
+    setTaskColId("todo");
+    setNewColTitle("");
+    setCheckDrafts({});
     setStrokes([]);
     setShareUrl("");
+    setBoardZoom(1);
+    setBoardOffset({ x: 0, y: 0 });
   }
 
   function handleBack() {
@@ -233,26 +576,87 @@ export default function MindMapsPage() {
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="relative min-h-screen bg-white pb-24 md:pb-8">
+    <div className="mindmaps-page relative min-h-screen bg-white pb-24 md:pb-8">
+      <style>{`
+        .mindmaps-page button {
+          transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        .mindmaps-page button:active {
+          transform: scale(0.97);
+        }
+      `}</style>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-purple-100 px-3 py-3">
-        <div className="max-w-7xl mx-auto flex items-center gap-2">
+        <div className="w-full px-1 md:px-3 flex items-center gap-2">
           <button onClick={handleBack} className="p-2 rounded-lg border border-purple-100 bg-white text-purple-700"><ArrowLeft className="w-4 h-4" /></button>
           {!showChooser && <input value={title} disabled={readonly} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0 h-10 rounded-xl border border-purple-100 px-3 text-sm font-semibold text-gray-800 bg-white" />}
           {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="h-10 px-3 rounded-xl text-white text-sm font-semibold flex items-center gap-2 shrink-0 disabled:opacity-60" style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 15px rgba(124, 58, 237, 0.35)" }}><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-3 md:p-4 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-3 md:gap-4">
+      <div className="w-full p-3 md:p-4 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 lg:gap-4">
+        {!readonly && isCompactLayout && (
+          <div className="rounded-2xl bg-white border border-purple-100 p-2 shadow-[0_6px_18px_rgba(17,24,39,0.08)] flex flex-wrap items-center justify-between gap-2">
+            <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-semibold text-purple-700 bg-purple-50 inline-flex items-center gap-1.5">
+              Proyectos {mobileSidebarOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            <button onClick={() => { setMobileOptionsOpen((v) => !v); setMobileSidebarOpen(false); }} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-semibold text-cyan-700 bg-cyan-50 inline-flex items-center gap-1.5">
+              Opciones {mobileOptionsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
+
+        {(!isCompactLayout || mobileSidebarOpen || mobileOptionsOpen) && (
         <aside className="rounded-2xl bg-white border border-purple-100 p-3 shadow-[0_8px_24px_rgba(17,24,39,0.08)]">
-          {!readonly && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 bg-white flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button>{!showChooser && <button onClick={() => { const blob = new Blob([JSON.stringify({ title, ...payload() }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title || "proyecto"}.json`; a.click(); URL.revokeObjectURL(url); }} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 bg-white flex items-center gap-2"><Download className="w-4 h-4" />JSON</button>}</div>}
-          <div className="space-y-2 max-h-[40vh] md:max-h-[65vh] overflow-auto pr-1">
+          {!readonly && (!isCompactLayout || mobileOptionsOpen) && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 bg-white flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button>{!showChooser && <button onClick={() => { const blob = new Blob([JSON.stringify({ title, ...payload() }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title || "proyecto"}.json`; a.click(); URL.revokeObjectURL(url); }} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 bg-white flex items-center gap-2"><Download className="w-4 h-4" />JSON</button>}</div>}
+          {!readonly && !showChooser && kind === "mindmap" && (!isCompactLayout || mobileOptionsOpen) && (
+            <div className="mb-3 rounded-xl border border-cyan-100 bg-gradient-to-br from-cyan-50/80 to-indigo-50/70 p-3">
+              <button onClick={() => setShowAiIdeas((p) => !p)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-md bg-cyan-500 text-white flex items-center justify-center"><Lightbulb className="w-4 h-4" /></span>
+                  <p className="text-sm font-bold text-gray-800">Generar ideas</p>
+                </div>
+                {showAiIdeas ? <ChevronUp className="w-4 h-4 text-cyan-700" /> : <ChevronDown className="w-4 h-4 text-cyan-700" />}
+              </button>
+              {showAiIdeas && (
+                <div className="mt-3 space-y-3">
+                  <p className="text-xs text-gray-600">Comienza tu mapa mental con IA</p>
+                  <textarea value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} placeholder="Que quieres mapear mentalmente?" className="w-full min-h-[72px] resize-none rounded-xl border border-cyan-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 bg-white" />
+                  <div>
+                    <p className="text-[11px] font-semibold text-gray-500 mb-1">Resultados</p>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setAiResultMode("ideas")} className={`h-8 px-3 rounded-lg text-xs font-semibold border ${aiResultMode === "ideas" ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-200 text-gray-700"}`}>Ideas</button>
+                      <button onClick={() => setAiResultMode("explicar")} className={`h-8 px-3 rounded-lg text-xs font-semibold border ${aiResultMode === "explicar" ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-200 text-gray-700"}`}>Explicar</button>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-gray-500 mb-1">Neuro-configuraciones</p>
+                    <button onClick={() => setAiConfigMode((p) => (p === "basico" ? "profundo" : "basico"))} className="h-8 px-3 rounded-lg text-xs font-semibold border border-gray-200 bg-white text-gray-700 inline-flex items-center gap-1"><Settings2 className="w-3.5 h-3.5 text-blue-600" />{aiConfigMode === "basico" ? "Configuracion basica" : "Configuracion profunda"}</button>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                      <input type="checkbox" checked={aiIncludeImages} onChange={(e) => setAiIncludeImages(e.target.checked)} className="w-4 h-4 accent-cyan-500" />
+                      Imagenes
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                      <input type="checkbox" checked={aiIncludeNotes} onChange={(e) => setAiIncludeNotes(e.target.checked)} className="w-4 h-4 accent-cyan-500" />
+                      Notas
+                    </label>
+                  </div>
+                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="w-full h-10 rounded-full text-white text-sm font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #1fa2ff, #1668df)", boxShadow: "0 8px 20px rgba(31, 162, 255, 0.28)" }}>{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
+                  {aiBusy && <div className="w-full h-2 rounded-full bg-cyan-100 overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300" style={{ width: `${aiProgress}%` }} /></div>}
+                </div>
+              )}
+            </div>
+          )}
+          {(!isCompactLayout || mobileSidebarOpen) && <div className="space-y-2 max-h-[40vh] md:max-h-[65vh] overflow-auto pr-1">
             {!readonly && maps.length === 0 && <p className="text-xs text-gray-500">Aun no tienes proyectos creados.</p>}
             {!readonly && maps.map((m) => { const d = parseData(m.data); return <div key={m.id} className={`rounded-xl border p-2 ${activeId === m.id ? "border-purple-400 bg-purple-50" : "border-purple-100 bg-white"}`}><button className="w-full text-left" onClick={() => openMap(m)}><p className="text-sm font-semibold text-gray-800 truncate">{m.title}</p><p className="text-[11px] text-gray-500">{kindLabel(d.kind)} - {new Date(m.updatedAt).toLocaleString("es-BO")}</p></button><div className="mt-2 flex items-center gap-2"><button className="h-7 px-2 rounded-md border border-cyan-200 text-xs text-cyan-700 bg-white flex items-center gap-1" onClick={() => shareProject(m.id)}><Share2 className="w-3.5 h-3.5" />Compartir</button><button className="h-7 px-2 rounded-md border border-rose-200 text-xs text-rose-700 flex items-center gap-1" onClick={() => deleteProject(m.id)}><Trash2 className="w-3.5 h-3.5" />Eliminar</button></div></div>; })}
-          </div>
-          {shareUrl && <div className="mt-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-2"><p className="text-[11px] text-cyan-700 break-all">{shareUrl}</p></div>}
+          </div>}
+          {(!isCompactLayout || mobileSidebarOpen) && shareUrl && <div className="mt-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-2"><p className="text-[11px] text-cyan-700 break-all">{shareUrl}</p></div>}
         </aside>
+        )}
 
-        <section className="rounded-2xl border border-purple-100 bg-white overflow-hidden shadow-[0_10px_30px_rgba(17,24,39,0.09)]">
+        <section className="w-full rounded-2xl border border-purple-100 bg-white overflow-hidden shadow-[0_10px_30px_rgba(17,24,39,0.09)]">
           {showChooser ? (
             <div className="p-5 md:p-6">
               <p className="text-sm font-semibold text-gray-700 mb-2"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">1</span>Ingresa el nombre de tu proyecto</p>
@@ -282,21 +686,198 @@ export default function MindMapsPage() {
                   );
                 })}
               </div>
-              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { alert("Selecciona una opcion para continuar."); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") setCols(colsDefault()); if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="h-11 px-8 rounded-full text-white font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 45%, #7c3aed 100%)", boxShadow: "0 10px 24px rgba(79,70,229,0.38)" }}>SIGUIENTE</button></div>
+              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: "Selecciona una opcion", description: "Selecciona una opcion para continuar.", variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="h-11 px-8 rounded-full text-white font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 45%, #7c3aed 100%)", boxShadow: "0 10px 24px rgba(79,70,229,0.38)" }}>SIGUIENTE</button></div>
             </div>
           ) : kind === "mindmap" ? (
             <>
-              {!readonly && <div className="border-b border-purple-100 p-2 flex flex-wrap items-center gap-2"><button onClick={() => { if (!boardRef.current) return; const rect = boardRef.current.getBoundingClientRect(); const node = { id: `node_${Date.now()}`, x: rect.width / 2 - NODE_W / 2, y: rect.height / 2 - NODE_H / 2, text: `Idea ${nodes.length + 1}` }; setNodes((p) => [...p, node]); setSelectedNodeId(node.id); }} className="h-9 px-3 rounded-lg text-white text-sm font-semibold flex items-center gap-2" style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}><Plus className="w-4 h-4" />Nodo</button><button onClick={() => setConnectFromId(selectedNodeId)} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 disabled:opacity-50">{connectFromId ? "Toca nodo destino..." : "Conectar nodos"}</button><button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.filter((n) => n.id !== selectedNodeId)); setEdges((p) => p.filter((e) => e.sourceId !== selectedNodeId && e.targetId !== selectedNodeId)); setSelectedNodeId(null); }} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-rose-200 text-sm font-medium text-rose-700 disabled:opacity-50">Eliminar nodo</button><input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="h-9 min-w-[210px] flex-1 rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" placeholder="Texto del nodo" /></div>}
-              <div ref={boardRef} className="relative w-full h-[66vh] md:h-[74vh] bg-[radial-gradient(circle,_rgba(124,58,237,0.16)_1px,_transparent_1px)] bg-[length:18px_18px] touch-none">
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">{edges.map((e) => { const s = nodes.find((n) => n.id === e.sourceId); const t = nodes.find((n) => n.id === e.targetId); if (!s || !t) return null; return <line key={e.id} x1={s.x + NODE_W / 2} y1={s.y + NODE_H / 2} x2={t.x + NODE_W / 2} y2={t.y + NODE_H / 2} stroke="#7c3aed" strokeWidth="2" strokeOpacity="0.75" />; })}</svg>
-                {nodes.map((n) => <button key={n.id} onClick={() => { if (connectFromId && connectFromId !== n.id) { const exists = edges.some((e) => (e.sourceId === connectFromId && e.targetId === n.id) || (e.sourceId === n.id && e.targetId === connectFromId)); if (!exists) setEdges((p) => [...p, { id: `edge_${Date.now()}`, sourceId: connectFromId, targetId: n.id }]); setConnectFromId(null); } setSelectedNodeId(n.id); }} onPointerDown={(e) => { const rect = boardRef.current?.getBoundingClientRect(); if (!rect) return; dragRef.current = { id: n.id, dx: e.clientX - rect.left - n.x, dy: e.clientY - rect.top - n.y }; }} className={`absolute px-3 py-2 rounded-xl border text-left shadow-sm select-none ${selectedNodeId === n.id ? "border-purple-500 bg-purple-50" : "border-purple-200 bg-white/95"}`} style={{ left: n.x, top: n.y, width: NODE_W, minHeight: NODE_H }}><span className="text-xs font-semibold text-gray-700 line-clamp-2">{n.text || "Nodo"}</span></button>)}
+              {!readonly && (
+                <div className="border-b border-purple-100 p-2 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => {
+                      if (!boardRef.current) return;
+                      const rect = boardRef.current.getBoundingClientRect();
+                      const wx = (-boardOffset.x + rect.width / 2) / boardZoom - NODE_W / 2;
+                      const wy = (-boardOffset.y + rect.height / 2) / boardZoom - NODE_H / 2;
+                      const node = {
+                        id: `node_${Date.now()}`,
+                        x: Math.max(0, Math.min(wx, WORLD_W - NODE_W)),
+                        y: Math.max(0, Math.min(wy, WORLD_H - NODE_H)),
+                        text: `Idea ${nodes.length + 1}`,
+                      };
+                      setNodes((p) => [...p, node]);
+                      setSelectedNodeId(node.id);
+                    }}
+                    className="h-9 px-3 rounded-lg text-white text-sm font-semibold flex items-center gap-2"
+                    style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Nodo
+                  </button>
+                  <button onClick={() => setConnectFromId(selectedNodeId)} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 disabled:opacity-50">{connectFromId ? "Toca nodo destino..." : "Conectar nodos"}</button>
+                  <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.filter((n) => n.id !== selectedNodeId)); setEdges((p) => p.filter((e) => e.sourceId !== selectedNodeId && e.targetId !== selectedNodeId)); setSelectedNodeId(null); }} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-rose-200 text-sm font-medium text-rose-700 disabled:opacity-50">Eliminar nodo</button>
+                  <button onClick={() => setBoardZoom((z) => Math.max(0.45, Number((z - 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">-</button>
+                  <span className="text-xs font-semibold text-gray-600 w-12 text-center">{Math.round(boardZoom * 100)}%</span>
+                  <button onClick={() => setBoardZoom((z) => Math.min(2.2, Number((z + 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">+</button>
+                  <button onClick={toggleMobileLandscape} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 md:hidden inline-flex items-center gap-1"><RotateCw className="w-4 h-4" />Horizontal</button>
+                  <label className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 inline-flex items-center gap-2 cursor-pointer">
+                    <ImagePlus className="w-4 h-4" />
+                    Imagen
+                    <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleNodeImageUpload(e.target.files?.[0] || null); e.currentTarget.value = ""; }} />
+                  </label>
+                  <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, imageUrl: "" } : n))); }} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 disabled:opacity-50">Quitar imagen</button>
+                  <span className="text-[11px] text-gray-500">Arrastra fondo para mover el lienzo</span>
+                  <input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="h-9 min-w-[210px] flex-1 rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" placeholder="Texto del nodo" />
+                </div>
+              )}
+              <div
+                ref={boardRef}
+                className="relative w-full h-[66vh] md:h-[74vh] bg-white touch-none overflow-hidden"
+                onPointerDown={(e) => {
+                  if (readonly) return;
+                  const target = e.target as HTMLElement;
+                  if (target.closest("[data-node-card='true']")) return;
+                  panRef.current = { startX: e.clientX, startY: e.clientY, ox: boardOffset.x, oy: boardOffset.y };
+                }}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const dir = e.deltaY > 0 ? -1 : 1;
+                  setBoardZoom((z) => Math.max(0.45, Math.min(2.2, Number((z + dir * 0.08).toFixed(2)))));
+                }}
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(circle,_rgba(124,58,237,0.16)_1px,_transparent_1px)] bg-[length:18px_18px]" />
+                <div
+                  className="absolute"
+                  style={{
+                    width: WORLD_W,
+                    height: WORLD_H,
+                    transform: `translate(${boardOffset.x}px, ${boardOffset.y}px) scale(${boardZoom})`,
+                    transformOrigin: "top left",
+                  }}
+                >
+                  <svg className="absolute left-0 top-0 pointer-events-none" width={WORLD_W} height={WORLD_H}>
+                    {edges.map((e) => {
+                      const s = nodes.find((n) => n.id === e.sourceId);
+                      const t = nodes.find((n) => n.id === e.targetId);
+                      if (!s || !t) return null;
+                      return <line key={e.id} x1={s.x + NODE_W / 2} y1={s.y + NODE_H / 2} x2={t.x + NODE_W / 2} y2={t.y + NODE_H / 2} stroke="#7c3aed" strokeWidth="2" strokeOpacity="0.75" />;
+                    })}
+                  </svg>
+                  {nodes.map((n) => (
+                    <button
+                      key={n.id}
+                      data-node-card="true"
+                      onClick={() => {
+                        if (connectFromId && connectFromId !== n.id) {
+                          const exists = edges.some((e) => (e.sourceId === connectFromId && e.targetId === n.id) || (e.sourceId === n.id && e.targetId === connectFromId));
+                          if (!exists) setEdges((p) => [...p, { id: `edge_${Date.now()}`, sourceId: connectFromId, targetId: n.id }]);
+                          setConnectFromId(null);
+                        }
+                        setSelectedNodeId(n.id);
+                      }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        const world = toWorldCoords(e.clientX, e.clientY);
+                        dragRef.current = { id: n.id, dx: world.x - n.x, dy: world.y - n.y };
+                      }}
+                      className={`absolute px-3 py-2 rounded-xl border text-left shadow-sm select-none ${selectedNodeId === n.id ? "border-purple-500 bg-purple-50" : "border-purple-200 bg-white/95"}`}
+                      style={{ left: n.x, top: n.y, width: NODE_W, minHeight: n.imageUrl ? 120 : NODE_H }}
+                    >
+                      {n.imageUrl ? (
+                        <>
+                          <img src={n.imageUrl} alt={n.text || "Imagen"} className="w-full h-16 object-cover rounded-md mb-1 border border-cyan-100" />
+                          <span className="text-[10px] font-semibold text-gray-700 line-clamp-2">{n.text || "Nodo"}</span>
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-semibold text-gray-700 line-clamp-2">{n.text || "Nodo"}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           ) : kind === "taskboard" ? (
             <div className="p-3 min-h-[66vh] md:min-h-[74vh]">
-              {!readonly && <div className="flex gap-2 mb-3"><input value={taskText} onChange={(e) => setTaskText(e.target.value)} placeholder="Nueva tarea" className="h-9 flex-1 rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" /><button onClick={() => { if (!taskText.trim()) return; setCols((p) => ({ ...p, todo: [...p.todo, { id: `task_${Date.now()}`, text: taskText.trim() }] })); setTaskText(""); }} className="h-9 px-3 rounded-lg text-white text-sm font-semibold" style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}>Agregar</button></div>}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {([{ id: "todo" as const, title: "Por hacer" }, { id: "doing" as const, title: "En proceso" }, { id: "done" as const, title: "Hecho" }]).map((c) => <div key={c.id} className="rounded-xl border border-purple-100 p-2" onDragOver={(e) => e.preventDefault()} onDrop={() => { if (dragTask.current) { const task = dragTask.current.task; const from = dragTask.current.from; setCols((p) => ({ ...p, [from]: p[from].filter((t) => t.id !== task.id), [c.id]: [...p[c.id], task] })); dragTask.current = null; } }}><p className="text-sm font-bold text-purple-700 mb-2">{c.title}</p><div className="space-y-2">{cols[c.id].map((t) => <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { from: c.id, task: t }; }} className="rounded-lg border border-purple-100 bg-white p-2"><p className="text-sm text-gray-700">{t.text}</p>{!readonly && <button className="mt-2 h-6 px-2 rounded border border-rose-200 text-xs text-rose-700" onClick={() => setCols((p) => ({ ...p, [c.id]: p[c.id].filter((x) => x.id !== t.id) }))}>Eliminar</button>}</div>)}</div></div>)}
+              {!readonly && (
+                <div className="space-y-2 mb-3">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input value={taskText} onChange={(e) => setTaskText(e.target.value)} placeholder="Nueva tarea" className="h-9 min-w-0 flex-1 rounded-lg border border-cyan-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
+                    <div className="flex gap-2">
+                      <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-9 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-lg border border-cyan-200 px-2 text-sm font-medium text-cyan-700 bg-white">
+                        {cols.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                      </select>
+                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [] }] } : c)); setTaskText(""); }} className="h-9 px-3 rounded-lg text-white text-sm font-semibold shadow-md whitespace-nowrap" style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}>Agregar</button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <input value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} placeholder="Nueva columna" className="h-9 flex-1 rounded-lg border border-fuchsia-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
+                    <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="h-9 px-3 rounded-lg border border-fuchsia-200 text-sm font-semibold text-fuchsia-700 bg-fuchsia-50">+ Columna</button>
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-3">
+                {cols.map((c) => (
+                  <div
+                    key={c.id}
+                    className="relative rounded-2xl border border-cyan-100 bg-gradient-to-b from-cyan-50/80 to-white p-2 shadow-[0_8px_20px_rgba(8,145,178,0.12)]"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => {
+                      if (dragTask.current) {
+                        const task = dragTask.current.task;
+                        const fromColId = dragTask.current.fromColId;
+                        setCols((p) => p.map((col) => {
+                          if (col.id === fromColId) return { ...col, tasks: col.tasks.filter((t) => t.id !== task.id) };
+                          if (col.id === c.id) return { ...col, tasks: [...col.tasks, task] };
+                          return col;
+                        }));
+                        dragTask.current = null;
+                      }
+                    }}
+                  >
+                    {!readonly && cols.length > 1 && (
+                      <button
+                        className="absolute top-2 right-2 w-7 h-7 rounded-md border border-rose-200 text-rose-700 bg-white inline-flex items-center justify-center"
+                        onClick={() => {
+                          setCols((p) => {
+                            const next = p.filter((col) => col.id !== c.id);
+                            if (taskColId === c.id && next[0]) setTaskColId(next[0].id);
+                            return next;
+                          });
+                        }}
+                        title="Eliminar columna"
+                        aria-label="Eliminar columna"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <div className="mb-2 flex items-center justify-between gap-2 pr-9">
+                      <p className="inline-flex max-w-full items-center rounded-md border border-cyan-200 bg-gradient-to-r from-cyan-100 to-indigo-100 px-2 py-1 text-sm font-black text-cyan-900 shadow-sm truncate">
+                        {c.title}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {c.tasks.map((t) => (
+                        <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className="rounded-xl border border-purple-100 bg-white p-2 shadow-sm">
+                          <p className="text-xs font-semibold text-slate-700">{t.text}</p>
+                          <div className="mt-2 space-y-1">
+                            {(t.checklist || []).map((it) => (
+                              <label key={it.id} className="flex items-center gap-2 text-xs text-slate-700">
+                                <input type="checkbox" className="accent-emerald-500" checked={!!it.done} onChange={(e) => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: (task.checklist || []).map((ci) => ci.id === it.id ? { ...ci, done: e.target.checked } : ci) }) }))} />
+                                <span className={`text-[11px] ${it.done ? "line-through text-slate-400" : "text-slate-700"}`}>{it.text}</span>
+                              </label>
+                            ))}
+                          </div>
+                          {!readonly && (
+                            <div className="mt-2 flex gap-1">
+                              <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 flex-1 rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
+                              <button className="h-7 px-2 rounded border border-emerald-200 text-xs text-emerald-700 bg-emerald-50" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
+                            </div>
+                          )}
+                          {!readonly && <button className="mt-2 h-6 px-2 rounded border border-rose-200 text-xs text-rose-700 bg-rose-50" onClick={() => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.filter((x) => x.id !== t.id) }))}>Eliminar</button>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
