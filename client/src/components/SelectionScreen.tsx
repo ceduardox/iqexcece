@@ -206,16 +206,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     return resolveStyle(styles, elementId, isMobile);
   }, [styles, isMobile]);
 
-  const getResolvedValue = useCallback((elementId: string): ElementStyle => {
-    return getResolvedStyle(elementId);
-  }, [getResolvedStyle]);
-
   const getElementStyle = useCallback((elementId: string, defaultBg?: string): React.CSSProperties => {
     const style = getResolvedStyle(elementId);
-    if (!style || Object.keys(style).length === 0) {
-      if (!defaultBg) return {};
-      return /gradient\(/i.test(defaultBg) ? { background: defaultBg } : { backgroundColor: defaultBg };
-    }
+    if (!style || Object.keys(style).length === 0) return defaultBg ? { backgroundColor: defaultBg } : {};
     
     const result: React.CSSProperties = {};
     
@@ -226,17 +219,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       result.backgroundRepeat = "no-repeat";
       result.backgroundColor = "transparent";
     } else if (style.background) {
-      if (/gradient\(/i.test(style.background)) {
-        result.background = style.background;
-      } else {
-        result.backgroundColor = style.background;
-      }
+      result.backgroundColor = style.background;
     } else if (defaultBg) {
-      if (/gradient\(/i.test(defaultBg)) {
-        result.background = defaultBg;
-      } else {
-        result.backgroundColor = defaultBg;
-      }
+      result.backgroundColor = defaultBg;
     }
     
     if (style.boxShadow) result.boxShadow = style.boxShadow;
@@ -300,8 +285,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 ${getEditableClass("header")}`}
           onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
           style={{
-            paddingTop: getResolvedValue("header")?.paddingTop || 10,
-            paddingBottom: getResolvedValue("header")?.paddingBottom || 10,
+            paddingTop: styles["header"]?.paddingTop || 10,
+            paddingBottom: styles["header"]?.paddingBottom || 10,
             ...getElementStyle("header", "white")
           }}
         >
@@ -312,12 +297,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("header-logo", e); }}}
             data-testid="header-logo"
           >
-            {getResolvedValue("header-logo")?.imageUrl ? (
+            {styles["header-logo"]?.imageUrl ? (
               <img 
-                src={getResolvedValue("header-logo").imageUrl} 
+                src={styles["header-logo"].imageUrl} 
                 alt="Logo" 
                 style={{ 
-                  height: getResolvedValue("header-logo")?.imageSize ? `${getResolvedValue("header-logo").imageSize}px` : "36px",
+                  height: styles["header-logo"]?.imageSize ? `${styles["header-logo"].imageSize}px` : "36px",
                   width: "auto"
                 }}
               />
@@ -349,9 +334,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           className={`w-full sticky z-40 ${getEditableClass("menu-curve")}`}
           onClick={(e) => handleElementClick("menu-curve", e)}
           style={{
-            top: (getResolvedValue("header")?.paddingTop || 10) + (getResolvedValue("header")?.paddingBottom || 10) + 36,
-            marginTop: getResolvedValue("menu-curve")?.marginTop || -4,
-            marginBottom: getResolvedValue("menu-curve")?.marginBottom || -20,
+            top: (styles["header"]?.paddingTop || 10) + (styles["header"]?.paddingBottom || 10) + 36,
+            marginTop: styles["menu-curve"]?.marginTop || -4,
+            marginBottom: styles["menu-curve"]?.marginBottom || -20,
           }}
         >
           <img 
@@ -386,9 +371,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                     style={getElementStyle("hero-title")}
                   >
-                    <span style={{ color: getResolvedValue("hero-title")?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
                     <br />
-                    <span style={{ color: getResolvedValue("hero-title")?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
+                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
                     <br />
                     <span style={{ 
                       background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -403,9 +388,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     transition={{ delay: 0.1 }}
                     className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
-                    style={{ color: getResolvedValue("hero-subtitle")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+                    style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                   >
-                    {getResolvedValue("hero-subtitle")?.buttonText || t("home.heroSubtitle1")}
+                    {styles["hero-subtitle"]?.buttonText || t("home.heroSubtitle1")}
                   </motion.p>
                   <motion.p 
                     initial={{ opacity: 0, y: 20 }}
@@ -413,9 +398,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     transition={{ delay: 0.12 }}
                     className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
-                    style={{ color: getResolvedValue("hero-subtitle2")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                    style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
                   >
-                    {getResolvedValue("hero-subtitle2")?.buttonText || t("home.heroSubtitle2")}
+                    {styles["hero-subtitle2"]?.buttonText || t("home.heroSubtitle2")}
                   </motion.p>
                   
                   <motion.p 
@@ -424,9 +409,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     transition={{ delay: 0.15 }}
                     className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
-                    style={{ color: getResolvedValue("hero-desc")?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+                    style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                   >
-                    {t("home.heroDesc")} <span className="font-semibold" style={{ color: getResolvedValue("hero-desc")?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
+                    {t("home.heroDesc")} <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
                   </motion.p>
                 </div>
               </div>
@@ -453,9 +438,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                   style={getElementStyle("hero-title")}
                 >
-                  <span style={{ color: getResolvedValue("hero-title")?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
                   <br />
-                  <span style={{ color: getResolvedValue("hero-title")?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
+                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
                   <br />
                   <span style={{ 
                     background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
@@ -470,9 +455,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   transition={{ delay: 0.1 }}
                   className={`text-sm font-semibold mb-0 ${getEditableClass("hero-subtitle")}`}
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle", e); }}
-                  style={{ color: getResolvedValue("hero-subtitle")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
+                  style={{ color: styles["hero-subtitle"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle") }}
                 >
-                  {getResolvedValue("hero-subtitle")?.buttonText || t("home.heroSubtitle1")}
+                  {styles["hero-subtitle"]?.buttonText || t("home.heroSubtitle1")}
                 </motion.p>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
@@ -480,9 +465,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   transition={{ delay: 0.12 }}
                   className={`text-sm font-semibold mb-2 ${getEditableClass("hero-subtitle2")}`}
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-subtitle2", e); }}
-                  style={{ color: getResolvedValue("hero-subtitle2")?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
+                  style={{ color: styles["hero-subtitle2"]?.textColor || "#1f2937", ...getElementStyle("hero-subtitle2") }}
                 >
-                  {getResolvedValue("hero-subtitle2")?.buttonText || t("home.heroSubtitle2")}
+                  {styles["hero-subtitle2"]?.buttonText || t("home.heroSubtitle2")}
                 </motion.p>
                 
                 <motion.p 
@@ -491,9 +476,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   transition={{ delay: 0.15 }}
                   className={`text-xs leading-relaxed ${getEditableClass("hero-desc")}`}
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-desc", e); }}
-                  style={{ color: getResolvedValue("hero-desc")?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
+                  style={{ color: styles["hero-desc"]?.textColor || "#6b7280", ...getElementStyle("hero-desc") }}
                 >
-                  {t("home.heroDesc")} <span className="font-semibold" style={{ color: getResolvedValue("hero-desc")?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
+                  {t("home.heroDesc")} <span className="font-semibold" style={{ color: styles["hero-desc"]?.textColor || "#374151" }}>{t("home.heroDescBold")}</span>{t("home.heroDescEnd")}
                 </motion.p>
               </div>
             </div>
@@ -511,7 +496,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <h2 
                 className={`text-base font-bold mb-3 md:hidden ${getEditableClass("section-diagnostico")}`}
                 onClick={(e) => { if (editorMode) handleElementClick("section-diagnostico", e); }}
-                style={{ color: getResolvedValue("section-diagnostico")?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
+                style={{ color: styles["section-diagnostico"]?.textColor || "#1f2937", ...getElementStyle("section-diagnostico") }}
               >
                 {t("home.sectionDiagnostico")}
               </h2>
@@ -529,10 +514,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     style={getElementStyle("icon-tests")}
                   >
                     <img 
-                      src={getResolvedValue("icon-tests")?.imageUrl || avatar1Img} 
+                      src={styles["icon-tests"]?.imageUrl || avatar1Img} 
                       alt="" 
                       className="w-10 h-10 object-contain" 
-                      style={{ width: getResolvedValue("icon-tests")?.imageSize ? `${getResolvedValue("icon-tests").imageSize}%` : undefined }}
+                      style={{ width: styles["icon-tests"]?.imageSize ? `${styles["icon-tests"].imageSize}%` : undefined }}
                     />
                   </div>
                   
@@ -540,14 +525,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <h3 
                       className={`text-sm font-bold mb-0.5 ${getEditableClass("title-tests")}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-tests", e); }}}
-                      style={{ color: getResolvedValue("title-tests")?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
+                      style={{ color: styles["title-tests"]?.textColor || "#8a3ffc", ...getElementStyle("title-tests") }}
                     >
                       {t("home.cardTestsTitle")}
                     </h3>
                     <p 
                       className={`text-xs leading-snug ${getEditableClass("desc-tests")}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-tests", e); }}}
-                      style={{ color: getResolvedValue("desc-tests")?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
+                      style={{ color: styles["desc-tests"]?.textColor || "#4b5563", ...getElementStyle("desc-tests") }}
                     >
                       {t("home.cardTestsDesc")}
                     </p>
@@ -560,7 +545,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); } else { handleOptionSelect("tests"); }}}
                     className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
                     style={{ 
-                      fontSize: getResolvedValue("btn-diagnostico")?.fontSize || 12,
+                      fontSize: styles["btn-diagnostico"]?.fontSize || 12,
                       ...getElementStyle("btn-diagnostico", "linear-gradient(90deg, #8a3ffc, #6b21a8)")
                     }}
                     data-testid="button-iniciar-diagnostico"
@@ -569,13 +554,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       className={getEditableClass("icon-btn-diagnostico")}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-diagnostico", e); }}}
                     >
-                      {getResolvedValue("icon-btn-diagnostico")?.imageUrl ? (
-                        <img src={getResolvedValue("icon-btn-diagnostico").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-diagnostico")?.iconSize || 14, height: getResolvedValue("icon-btn-diagnostico")?.iconSize || 14 }} />
+                      {styles["icon-btn-diagnostico"]?.imageUrl ? (
+                        <img src={styles["icon-btn-diagnostico"].imageUrl} alt="" style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} />
                       ) : (
-                        <Play style={{ width: getResolvedValue("icon-btn-diagnostico")?.iconSize || 14, height: getResolvedValue("icon-btn-diagnostico")?.iconSize || 14 }} className="fill-current" />
+                        <Play style={{ width: styles["icon-btn-diagnostico"]?.iconSize || 14, height: styles["icon-btn-diagnostico"]?.iconSize || 14 }} className="fill-current" />
                       )}
                     </span>
-                    <span className="whitespace-pre-line">{getResolvedValue("btn-diagnostico")?.buttonText || t("home.btnDiagnostico")}</span>
+                    <span className="whitespace-pre-line">{styles["btn-diagnostico"]?.buttonText || t("home.btnDiagnostico")}</span>
                   </motion.button>
                 </div>
               </div>
@@ -600,10 +585,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     style={getElementStyle("icon-training")}
                   >
                     <img 
-                      src={getResolvedValue("icon-training")?.imageUrl || trainingImg} 
+                      src={styles["icon-training"]?.imageUrl || trainingImg} 
                       alt="" 
                       className="w-10 h-10 object-contain"
-                      style={{ width: getResolvedValue("icon-training")?.imageSize ? `${getResolvedValue("icon-training").imageSize}%` : undefined }}
+                      style={{ width: styles["icon-training"]?.imageSize ? `${styles["icon-training"].imageSize}%` : undefined }}
                     />
                   </div>
                   
@@ -611,14 +596,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <h3 
                       className={`text-sm font-bold mb-0.5 ${getEditableClass("title-training")}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-training", e); }}}
-                      style={{ color: getResolvedValue("title-training")?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
+                      style={{ color: styles["title-training"]?.textColor || "#8a3ffc", ...getElementStyle("title-training") }}
                     >
                       {t("home.cardTrainingTitle")}
                     </h3>
                     <p 
                       className={`text-xs leading-snug ${getEditableClass("desc-training")}`}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-training", e); }}}
-                      style={{ color: getResolvedValue("desc-training")?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
+                      style={{ color: styles["desc-training"]?.textColor || "#4b5563", ...getElementStyle("desc-training") }}
                     >
                       {t("home.cardTrainingDesc")}
                     </p>
@@ -631,7 +616,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); } else { handleOptionSelect("training"); }}}
                     className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
                     style={{ 
-                      fontSize: getResolvedValue("btn-entrenamiento")?.fontSize || 12,
+                      fontSize: styles["btn-entrenamiento"]?.fontSize || 12,
                       ...getElementStyle("btn-entrenamiento", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
                     }}
                     data-testid="button-iniciar-entrenamiento"
@@ -640,13 +625,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       className={getEditableClass("icon-btn-entrenamiento")}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-entrenamiento", e); }}}
                     >
-                      {getResolvedValue("icon-btn-entrenamiento")?.imageUrl ? (
-                        <img src={getResolvedValue("icon-btn-entrenamiento").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-entrenamiento")?.iconSize || 14, height: getResolvedValue("icon-btn-entrenamiento")?.iconSize || 14 }} />
+                      {styles["icon-btn-entrenamiento"]?.imageUrl ? (
+                        <img src={styles["icon-btn-entrenamiento"].imageUrl} alt="" style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                       ) : (
-                        <Dumbbell style={{ width: getResolvedValue("icon-btn-entrenamiento")?.iconSize || 14, height: getResolvedValue("icon-btn-entrenamiento")?.iconSize || 14 }} />
+                        <Dumbbell style={{ width: styles["icon-btn-entrenamiento"]?.iconSize || 14, height: styles["icon-btn-entrenamiento"]?.iconSize || 14 }} />
                       )}
                     </span>
-                    <span className="whitespace-pre-line">{getResolvedValue("btn-entrenamiento")?.buttonText || t("home.btnEntrenamiento")}</span>
+                    <span className="whitespace-pre-line">{styles["btn-entrenamiento"]?.buttonText || t("home.btnEntrenamiento")}</span>
                   </motion.button>
                 </div>
               </div>
@@ -663,10 +648,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="button-option-mapas-mentales"
             >
               <div className="absolute inset-0 pointer-events-none" style={{
-                backgroundImage: getResolvedValue("bg-mindmaps")?.imageUrl ? `url(${getResolvedValue("bg-mindmaps")?.imageUrl})` : `url("${DEFAULT_MINDMAP_BG}")`,
+                backgroundImage: styles["bg-mindmaps"]?.imageUrl ? `url(${styles["bg-mindmaps"]?.imageUrl})` : `url("${DEFAULT_MINDMAP_BG}")`,
                 backgroundSize: "cover",
                 backgroundPosition: "center center",
-                opacity: (getResolvedValue("bg-mindmaps") as any)?.opacity ?? 1,
+                opacity: (styles["bg-mindmaps"] as any)?.opacity ?? 1,
               }} />
               <div className="relative p-4 flex items-start gap-3 flex-1">
                 <div
@@ -674,12 +659,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-mindmaps", e); } }}
                   style={getElementStyle("icon-mindmaps")}
                 >
-                  {getResolvedValue("icon-mindmaps")?.imageUrl ? (
+                  {styles["icon-mindmaps"]?.imageUrl ? (
                     <img
-                      src={getResolvedValue("icon-mindmaps").imageUrl}
+                      src={styles["icon-mindmaps"].imageUrl}
                       alt=""
                       className="w-10 h-10 object-contain"
-                      style={{ width: getResolvedValue("icon-mindmaps")?.imageSize ? `${getResolvedValue("icon-mindmaps").imageSize}%` : undefined }}
+                      style={{ width: styles["icon-mindmaps"]?.imageSize ? `${styles["icon-mindmaps"].imageSize}%` : undefined }}
                     />
                   ) : (
                     <Map className="w-10 h-10 text-cyan-600" />
@@ -690,16 +675,16 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   <h3
                     className={`text-sm font-bold mb-0.5 ${getEditableClass("title-mindmaps")}`}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-mindmaps", e); } }}
-                    style={{ color: getResolvedValue("title-mindmaps")?.textColor || "#8a3ffc", ...getElementStyle("title-mindmaps") }}
+                    style={{ color: styles["title-mindmaps"]?.textColor || "#8a3ffc", ...getElementStyle("title-mindmaps") }}
                   >
-                    {getResolvedValue("title-mindmaps")?.buttonText || "Crea mapas mentales"}
+                    {styles["title-mindmaps"]?.buttonText || "Crea mapas mentales"}
                   </h3>
                   <p
                     className={`text-xs leading-snug ${getEditableClass("desc-mindmaps")}`}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-mindmaps", e); } }}
-                    style={{ color: getResolvedValue("desc-mindmaps")?.textColor || "#4b5563", ...getElementStyle("desc-mindmaps") }}
+                    style={{ color: styles["desc-mindmaps"]?.textColor || "#4b5563", ...getElementStyle("desc-mindmaps") }}
                   >
-                    {getResolvedValue("desc-mindmaps")?.buttonText || "Organiza ideas clave en segundos para estudiar, recordar y explicar mejor."}
+                    {styles["desc-mindmaps"]?.buttonText || "Organiza ideas clave en segundos para estudiar, recordar y explicar mejor."}
                   </p>
                 </div>
               </div>
@@ -710,10 +695,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-mindmaps", e); } else { e.stopPropagation(); setLocation("/mapas-mentales"); } }}
                   className={`mt-3 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-mindmaps")}`}
                   style={{ 
-                    fontSize: getResolvedValue("btn-mindmaps")?.fontSize || 12,
-                    marginLeft: getResolvedValue("btn-mindmaps")?.marginLeft ?? "auto",
-                    marginRight: getResolvedValue("btn-mindmaps")?.marginRight ?? "auto",
-                    borderRadius: getResolvedValue("btn-mindmaps")?.borderRadius || 13,
+                    fontSize: styles["btn-mindmaps"]?.fontSize || 12,
+                    marginLeft: styles["btn-mindmaps"]?.marginLeft ?? "auto",
+                    marginRight: styles["btn-mindmaps"]?.marginRight ?? "auto",
+                    borderRadius: styles["btn-mindmaps"]?.borderRadius || 13,
                     ...getElementStyle("btn-mindmaps", "linear-gradient(90deg, #00d9ff, #8a3ffc)")
                   }}
                   data-testid="button-crear-mapa-mental"
@@ -722,13 +707,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     className={getEditableClass("icon-btn-mindmaps")}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-mindmaps", e); } }}
                   >
-                    {getResolvedValue("icon-btn-mindmaps")?.imageUrl ? (
-                      <img src={getResolvedValue("icon-btn-mindmaps").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-mindmaps")?.iconSize || 14, height: getResolvedValue("icon-btn-mindmaps")?.iconSize || 14 }} />
+                    {styles["icon-btn-mindmaps"]?.imageUrl ? (
+                      <img src={styles["icon-btn-mindmaps"].imageUrl} alt="" style={{ width: styles["icon-btn-mindmaps"]?.iconSize || 14, height: styles["icon-btn-mindmaps"]?.iconSize || 14 }} />
                     ) : (
-                      <Map style={{ width: getResolvedValue("icon-btn-mindmaps")?.iconSize || 14, height: getResolvedValue("icon-btn-mindmaps")?.iconSize || 14 }} />
+                      <Map style={{ width: styles["icon-btn-mindmaps"]?.iconSize || 14, height: styles["icon-btn-mindmaps"]?.iconSize || 14 }} />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{getResolvedValue("btn-mindmaps")?.buttonText || "Crear mapa mental"}</span>
+                  <span className="whitespace-pre-line">{styles["btn-mindmaps"]?.buttonText || "Crear mapa mental"}</span>
                 </motion.button>
               </div>
             </motion.div>
@@ -745,14 +730,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <h3 
                   className={`text-base font-bold mb-0.5 ${getEditableClass("title-metodox")}`}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-metodox", e); }}}
-                  style={{ color: getResolvedValue("title-metodox")?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
+                  style={{ color: styles["title-metodox"]?.textColor || "#1f2937", ...getElementStyle("title-metodox") }}
                 >
                   {t("home.metodoX")}
                 </h3>
                 <p 
                   className={`text-xs ${getEditableClass("desc-metodox")}`}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-metodox", e); }}}
-                  style={{ color: getResolvedValue("desc-metodox")?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
+                  style={{ color: styles["desc-metodox"]?.textColor || "#6b7280", ...getElementStyle("desc-metodox") }}
                 >
                   {t("home.metodoXDesc")}
                 </p>
@@ -762,20 +747,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); } else { e.stopPropagation(); setLocation("/metodo-x"); }}}
                 className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
                 style={{ 
-                  fontSize: getResolvedValue("btn-metodo")?.fontSize || 12,
+                  fontSize: styles["btn-metodo"]?.fontSize || 12,
                   ...getElementStyle("btn-metodo")
                 }}
                 data-testid="button-conocer-metodo"
               >
-                <span className="whitespace-pre-line">{getResolvedValue("btn-metodo")?.buttonText || t("home.btnMetodo")}</span>
+                <span className="whitespace-pre-line">{styles["btn-metodo"]?.buttonText || t("home.btnMetodo")}</span>
                 <span 
                   className={getEditableClass("icon-btn-metodo")}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-metodo", e); }}}
                 >
-                  {getResolvedValue("icon-btn-metodo")?.imageUrl ? (
-                    <img src={getResolvedValue("icon-btn-metodo").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-metodo")?.iconSize || 14, height: getResolvedValue("icon-btn-metodo")?.iconSize || 14 }} />
+                  {styles["icon-btn-metodo"]?.imageUrl ? (
+                    <img src={styles["icon-btn-metodo"].imageUrl} alt="" style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
                   ) : (
-                    <ChevronRight style={{ width: getResolvedValue("icon-btn-metodo")?.iconSize || 14, height: getResolvedValue("icon-btn-metodo")?.iconSize || 14 }} />
+                    <ChevronRight style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
                   )}
                 </span>
               </button>
@@ -790,7 +775,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <h3 
                 className={`text-base font-bold mb-3 ${getEditableClass("title-contacto")}`}
                 onClick={(e) => { if (editorMode) handleElementClick("title-contacto", e); }}
-                style={{ color: getResolvedValue("title-contacto")?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
+                style={{ color: styles["title-contacto"]?.textColor || "#1f2937", ...getElementStyle("title-contacto") }}
               >
                 {t("home.contactanos")}
               </h3>
@@ -800,7 +785,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
                   style={{ 
-                    fontSize: getResolvedValue("btn-whatsapp")?.fontSize || 12,
+                    fontSize: styles["btn-whatsapp"]?.fontSize || 12,
                     ...getElementStyle("btn-whatsapp", "linear-gradient(90deg, #25D366, #128C7E)")
                   }}
                   data-testid="button-whatsapp"
@@ -809,20 +794,20 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     className={getEditableClass("icon-btn-whatsapp")}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-whatsapp", e); }}}
                   >
-                    {getResolvedValue("icon-btn-whatsapp")?.imageUrl ? (
-                      <img src={getResolvedValue("icon-btn-whatsapp").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-whatsapp")?.iconSize || 16, height: getResolvedValue("icon-btn-whatsapp")?.iconSize || 16 }} />
+                    {styles["icon-btn-whatsapp"]?.imageUrl ? (
+                      <img src={styles["icon-btn-whatsapp"].imageUrl} alt="" style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
                     ) : (
-                      <MessageCircle style={{ width: getResolvedValue("icon-btn-whatsapp")?.iconSize || 16, height: getResolvedValue("icon-btn-whatsapp")?.iconSize || 16 }} />
+                      <MessageCircle style={{ width: styles["icon-btn-whatsapp"]?.iconSize || 16, height: styles["icon-btn-whatsapp"]?.iconSize || 16 }} />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{getResolvedValue("btn-whatsapp")?.buttonText || "WhatsApp"}</span>
+                  <span className="whitespace-pre-line">{styles["btn-whatsapp"]?.buttonText || "WhatsApp"}</span>
                 </button>
                 
                 <button
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
                   style={{ 
-                    fontSize: getResolvedValue("btn-email")?.fontSize || 12,
+                    fontSize: styles["btn-email"]?.fontSize || 12,
                     ...getElementStyle("btn-email", "linear-gradient(135deg, rgba(138, 63, 252, 0.08), rgba(0, 217, 255, 0.08))")
                   }}
                   data-testid="button-email"
@@ -831,13 +816,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     className={getEditableClass("icon-btn-email")}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("icon-btn-email", e); }}}
                   >
-                    {getResolvedValue("icon-btn-email")?.imageUrl ? (
-                      <img src={getResolvedValue("icon-btn-email").imageUrl} alt="" style={{ width: getResolvedValue("icon-btn-email")?.iconSize || 16, height: getResolvedValue("icon-btn-email")?.iconSize || 16 }} />
+                    {styles["icon-btn-email"]?.imageUrl ? (
+                      <img src={styles["icon-btn-email"].imageUrl} alt="" style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                     ) : (
-                      <Mail style={{ width: getResolvedValue("icon-btn-email")?.iconSize || 16, height: getResolvedValue("icon-btn-email")?.iconSize || 16 }} />
+                      <Mail style={{ width: styles["icon-btn-email"]?.iconSize || 16, height: styles["icon-btn-email"]?.iconSize || 16 }} />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{getResolvedValue("btn-email")?.buttonText || t("home.email")}</span>
+                  <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || t("home.email")}</span>
                 </button>
               </div>
             </motion.div>
@@ -857,13 +842,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div 
                 className="w-11 h-11 -mt-6 rounded-2xl flex items-center justify-center"
                 style={{ 
-                  background: getResolvedValue("nav-inicio")?.background || "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                  boxShadow: getResolvedValue("nav-inicio")?.boxShadow || "0 4px 15px rgba(124, 58, 237, 0.4)"
+                  background: styles["nav-inicio"]?.background || "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                  boxShadow: styles["nav-inicio"]?.boxShadow || "0 4px 15px rgba(124, 58, 237, 0.4)"
                 }}
               >
                 <Home className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] font-medium mt-1" style={{ color: getResolvedValue("nav-inicio")?.textColor || "#7c3aed" }}>{t("nav.inicio")}</span>
+              <span className="text-[10px] font-medium mt-1" style={{ color: styles["nav-inicio"]?.textColor || "#7c3aed" }}>{t("nav.inicio")}</span>
             </button>
             
             <button 
@@ -872,8 +857,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               style={getElementStyle("nav-diagnostico")}
               data-testid="nav-diagnostico"
             >
-              <Brain className="w-5 h-5" style={{ color: getResolvedValue("nav-diagnostico")?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: getResolvedValue("nav-diagnostico")?.textColor || "#9ca3af" }}>{t("nav.diagnostico")}</span>
+              <Brain className="w-5 h-5" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px]" style={{ color: styles["nav-diagnostico"]?.textColor || "#9ca3af" }}>{t("nav.diagnostico")}</span>
             </button>
             
             <button 
@@ -882,8 +867,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               style={getElementStyle("nav-entrenar")}
               data-testid="nav-entrenar"
             >
-              <Dumbbell className="w-5 h-5" style={{ color: getResolvedValue("nav-entrenar")?.textColor || "#9ca3af" }} />
-              <span className="text-[10px]" style={{ color: getResolvedValue("nav-entrenar")?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
+              <Dumbbell className="w-5 h-5" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }} />
+              <span className="text-[10px]" style={{ color: styles["nav-entrenar"]?.textColor || "#9ca3af" }}>{t("nav.entrenar")}</span>
             </button>
             
             <div className="relative">
@@ -896,8 +881,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 style={getElementStyle("nav-mas")}
                 data-testid="nav-mas"
               >
-                <MoreHorizontal className="w-5 h-5" style={{ color: getResolvedValue("nav-mas")?.textColor || "#9ca3af" }} />
-                <span className="text-[10px]" style={{ color: getResolvedValue("nav-mas")?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
+                <MoreHorizontal className="w-5 h-5" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }} />
+                <span className="text-[10px]" style={{ color: styles["nav-mas"]?.textColor || "#9ca3af" }}>{t("nav.mas")}</span>
               </button>
               {navMoreOpen && (
                 <div
@@ -962,5 +947,3 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     </div>
   );
 }
-
-
