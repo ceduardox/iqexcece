@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { ArrowLeft, ChevronDown, ChevronUp, Columns3, Download, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 type Kind = "mindmap" | "taskboard" | "whiteboard";
 type Node = { id: string; x: number; y: number; text: string; imageUrl?: string };
@@ -99,13 +100,8 @@ function parseData(raw: string): Data {
   return { kind: "mindmap", nodes: [], edges: [] };
 }
 
-function kindLabel(kind: Kind) {
-  if (kind === "mindmap") return "Mapa Mental";
-  if (kind === "taskboard") return "Tablero de tareas";
-  return "Pizarron";
-}
-
 export default function MindMapsPage() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [shareMatch, shareParams] = useRoute("/mapas-mentales/share/:token");
   const token = shareParams ? shareParams.token : undefined;
@@ -160,6 +156,17 @@ export default function MindMapsPage() {
   const [penColor, setPenColor] = useState("#7c3aed");
   const [penWidth, setPenWidth] = useState(3);
   const drawingId = useRef<string | null>(null);
+  const kindLabel = (value: Kind) => {
+    if (value === "mindmap") return t("mindmaps.typeMindmap");
+    if (value === "taskboard") return t("mindmaps.typeTaskboard");
+    return t("mindmaps.typeWhiteboard");
+  };
+
+  const chooserOptions = [
+    { id: "mindmap" as const, label: t("mindmaps.typeMindmap"), Icon: Network },
+    { id: "taskboard" as const, label: t("mindmaps.typeTaskboard"), Icon: Columns3 },
+    { id: "whiteboard" as const, label: t("mindmaps.typeWhiteboard"), Icon: PencilRuler },
+  ];
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) || null, [nodes, selectedNodeId]);
 
@@ -659,11 +666,11 @@ export default function MindMapsPage() {
         <section className="w-full rounded-2xl border border-purple-100 bg-white overflow-hidden shadow-[0_10px_30px_rgba(17,24,39,0.09)]">
           {showChooser ? (
             <div className="p-5 md:p-6">
-              <p className="text-sm font-semibold text-gray-700 mb-2"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">1</span>Ingresa el nombre de tu proyecto</p>
-              <input value={stepName} onChange={(e) => setStepName(e.target.value)} className="w-full h-11 rounded-xl border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white mb-5" placeholder="Proyecto de estudio" />
-              <p className="text-sm font-semibold text-gray-700 mb-3"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">2</span>Elige tu punto de partida:</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">1</span>{t("mindmaps.chooserProjectName")}</p>
+              <input value={stepName} onChange={(e) => setStepName(e.target.value)} className="w-full h-11 rounded-xl border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white mb-5" placeholder={t("mindmaps.chooserProjectPlaceholder")} />
+              <p className="text-sm font-semibold text-gray-700 mb-3"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">2</span>{t("mindmaps.chooserStartPoint")}</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[{ id: "mindmap" as const, label: "Mapa Mental", Icon: Network }, { id: "taskboard" as const, label: "Tablero de tareas", Icon: Columns3 }, { id: "whiteboard" as const, label: "Pizarron", Icon: PencilRuler }].map((o) => {
+                {chooserOptions.map((o) => {
                   const selectedClass = o.id === "mindmap"
                     ? "border-cyan-400 bg-gradient-to-br from-cyan-200/80 to-sky-200/80 shadow-[0_10px_24px_rgba(6,182,212,0.28)]"
                     : o.id === "taskboard"
@@ -686,7 +693,7 @@ export default function MindMapsPage() {
                   );
                 })}
               </div>
-              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: "Selecciona una opcion", description: "Selecciona una opcion para continuar.", variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="h-11 px-8 rounded-full text-white font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 45%, #7c3aed 100%)", boxShadow: "0 10px 24px rgba(79,70,229,0.38)" }}>SIGUIENTE</button></div>
+              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="h-11 px-8 rounded-full text-white font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 45%, #7c3aed 100%)", boxShadow: "0 10px 24px rgba(79,70,229,0.38)" }}>{t("mindmaps.next")}</button></div>
             </div>
           ) : kind === "mindmap" ? (
             <>

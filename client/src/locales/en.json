@@ -611,6 +611,17 @@
     "yesEqual": "Yes, they are equal",
     "startGame": "Start Game"
   },
+  "mindmaps": {
+    "chooserProjectName": "Enter your project name",
+    "chooserProjectPlaceholder": "Study project",
+    "chooserStartPoint": "Choose your starting point:",
+    "typeMindmap": "Mind Map",
+    "typeTaskboard": "Task Board",
+    "typeWhiteboard": "Whiteboard",
+    "selectOptionTitle": "Select an option",
+    "selectOptionDesc": "Select an option to continue.",
+    "next": "NEXT"
+  },
   "entrenamiento": {
     "pageTitle": "Training",
     "pageDesc": "Improve your visual perception speed and strengthen your cognitive skills",

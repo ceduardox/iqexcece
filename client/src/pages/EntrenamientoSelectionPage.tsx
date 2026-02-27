@@ -108,6 +108,46 @@ const defaultIcons = [
   "https://cdn-icons-png.flaticon.com/512/2693/2693507.png",
   "https://cdn-icons-png.flaticon.com/512/3176/3176267.png",
 ];
+const TRAINING_SELECTION_ASSET_WARM_KEY = "assets-warm:entrenamiento-selection-page:";
+const TRAINING_SELECTION_HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+
+function extractImageUrlsFromStyles(styles: PageStyles): string[] {
+  return Object.values(styles)
+    .map((style) => style?.imageUrl)
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+}
+
+function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
+  const unique = Array.from(new Set(urls.filter(Boolean)));
+  if (!unique.length) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let done = 0;
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    const timer = window.setTimeout(finish, timeoutMs);
+    const markDone = () => {
+      done += 1;
+      if (done >= unique.length) {
+        window.clearTimeout(timer);
+        finish();
+      }
+    };
+
+    unique.forEach((url) => {
+      const img = new Image();
+      img.onload = markDone;
+      img.onerror = markDone;
+      img.src = url;
+    });
+  });
+}
 
 export default function EntrenamientoSelectionPage() {
   const { t, i18n } = useTranslation();
@@ -120,6 +160,8 @@ export default function EntrenamientoSelectionPage() {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTrainingSelectionStyles(lang));
+  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTrainingSelectionStyles(lang)).length > 0);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === "1");
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -149,10 +191,14 @@ export default function EntrenamientoSelectionPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setStyles(readCachedTrainingSelectionStyles(lang));
+    const cachedStyles = readCachedTrainingSelectionStyles(lang);
+    setStyles(cachedStyles);
+    setStylesReady(Object.keys(cachedStyles).length > 0);
+    setAssetsReady(localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === "1");
+
     fetch(`/api/page-styles/entrenamiento-selection-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
@@ -163,22 +209,55 @@ export default function EntrenamientoSelectionPage() {
             console.log("No saved styles");
           }
         }
-        fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`)
-          .then(r => r.json())
-          .then(fallback => {
-            if (fallback.style?.styles) {
-              try {
-                const nextStyles = JSON.parse(fallback.style.styles);
-                setStyles(nextStyles);
-                localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
-              } catch {}
-            }
-          });
+        const fallbackRes = await fetch(`/api/page-styles/entrenamiento-page?lang=${lang}`, { signal: controller.signal });
+        const fallback = await fallbackRes.json();
+        if (fallback.style?.styles) {
+          try {
+            const nextStyles = JSON.parse(fallback.style.styles);
+            setStyles(nextStyles);
+            localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+          } catch {}
+        }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setStylesReady(true);
+      });
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [lang]);
+
+  useEffect(() => {
+    if (!stylesReady || isLoading) return;
+    const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
+    if (localStorage.getItem(warmKey) === "1") {
+      setAssetsReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    setAssetsReady(false);
+    const itemImageUrls = items
+      .map((item) => (item.imageUrl || "").trim())
+      .filter((url): url is string => !!url);
+
+    preloadImages([
+      ...extractImageUrlsFromStyles(styles),
+      ...defaultIcons,
+      TRAINING_SELECTION_HEADER_LOGO,
+      ...itemImageUrls,
+    ]).then(() => {
+      if (cancelled) return;
+      localStorage.setItem(warmKey, "1");
+      setAssetsReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [stylesReady, styles, lang, isLoading, items]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -275,7 +354,7 @@ export default function EntrenamientoSelectionPage() {
     setLocation(`/entrenamiento-edad/${item.id}`);
   }, [editorMode, setLocation]);
 
-  if (isLoading) {
+  if (isLoading || !stylesReady || !assetsReady) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -298,7 +377,7 @@ export default function EntrenamientoSelectionPage() {
           <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
         </button>
         <img 
-          src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+          src={TRAINING_SELECTION_HEADER_LOGO}
           alt="iQx" 
           className="h-10 w-auto object-contain"
           data-testid="header-logo-image"

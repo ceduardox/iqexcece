@@ -611,6 +611,17 @@
     "yesEqual": "Sim, são iguais",
     "startGame": "Iniciar Jogo"
   },
+  "mindmaps": {
+    "chooserProjectName": "Digite o nome do seu projeto",
+    "chooserProjectPlaceholder": "Projeto de estudo",
+    "chooserStartPoint": "Escolha seu ponto de partida:",
+    "typeMindmap": "Mapa Mental",
+    "typeTaskboard": "Quadro de tarefas",
+    "typeWhiteboard": "Quadro branco",
+    "selectOptionTitle": "Selecione uma opção",
+    "selectOptionDesc": "Selecione uma opção para continuar.",
+    "next": "PRÓXIMO"
+  },
   "entrenamiento": {
     "pageTitle": "Treinamentos",
     "pageDesc": "Melhore sua velocidade de percepção visual e fortaleça suas habilidades cognitivas",

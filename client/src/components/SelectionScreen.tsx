@@ -19,6 +19,46 @@ interface SelectionScreenProps {
 }
 
 const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:";
+const HOME_ASSET_WARM_KEY = "assets-warm:selection-screen:";
+const DEFAULT_MINDMAP_BG = "https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af";
+
+function extractImageUrlsFromStyles(styles: PageStyles): string[] {
+  return Object.values(styles)
+    .map((style) => style?.imageUrl)
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+}
+
+function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
+  const unique = Array.from(new Set(urls.filter(Boolean)));
+  if (!unique.length) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let done = 0;
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    const timer = window.setTimeout(finish, timeoutMs);
+    const markDone = () => {
+      done += 1;
+      if (done >= unique.length) {
+        window.clearTimeout(timer);
+        finish();
+      }
+    };
+
+    unique.forEach((url) => {
+      const img = new Image();
+      img.onload = markDone;
+      img.onerror = markDone;
+      img.src = url;
+    });
+  });
+}
 
 function readCachedStyles(lang: string): PageStyles {
   try {
@@ -44,6 +84,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedStyles(lang));
+  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedStyles(lang)).length > 0);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${HOME_ASSET_WARM_KEY}${lang}`) === "1");
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   
@@ -67,7 +109,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   useEffect(() => {
     const controller = new AbortController();
-    setStyles(readCachedStyles(lang));
+    const cachedStyles = readCachedStyles(lang);
+    setStyles(cachedStyles);
+    setStylesReady(Object.keys(cachedStyles).length > 0);
+    setAssetsReady(localStorage.getItem(`${HOME_ASSET_WARM_KEY}${lang}`) === "1");
+
     fetch(`/api/page-styles/selection-screen?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
@@ -81,9 +127,35 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           }
         }
       })
-      .catch(() => {});
-    return () => controller.abort();
+      .catch(() => {})
+      .finally(() => {
+        setStylesReady(true);
+      });
+    return () => {
+      controller.abort();
+    };
   }, [lang]);
+
+  useEffect(() => {
+    if (!stylesReady) return;
+    const warmKey = `${HOME_ASSET_WARM_KEY}${lang}`;
+    if (localStorage.getItem(warmKey) === "1") {
+      setAssetsReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    setAssetsReady(false);
+    preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG]).then(() => {
+      if (cancelled) return;
+      localStorage.setItem(warmKey, "1");
+      setAssetsReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [stylesReady, styles, lang]);
   
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -189,6 +261,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       setLocation("/entrenamiento");
     }
   }, [setUserData, setLocation, playCard]);
+
+  if (!stylesReady || !assetsReady) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handleWhatsApp = () => {
     window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank");
@@ -568,7 +648,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               data-testid="button-option-mapas-mentales"
             >
               <div className="absolute inset-0 pointer-events-none" style={{
-                backgroundImage: styles["bg-mindmaps"]?.imageUrl ? `url(${styles["bg-mindmaps"]?.imageUrl})` : 'url("https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af")',
+                backgroundImage: styles["bg-mindmaps"]?.imageUrl ? `url(${styles["bg-mindmaps"]?.imageUrl})` : `url("${DEFAULT_MINDMAP_BG}")`,
                 backgroundSize: "cover",
                 backgroundPosition: "center center",
                 opacity: (styles["bg-mindmaps"] as any)?.opacity ?? 1,

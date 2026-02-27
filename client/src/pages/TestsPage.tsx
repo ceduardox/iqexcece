@@ -52,6 +52,45 @@ const testCardStyles: Record<string, { bg: string; textDark: boolean; iconUrl: s
     iconUrl: "https://cdn-icons-png.flaticon.com/512/3588/3588614.png"
   },
 };
+const TESTS_ASSET_WARM_KEY = "assets-warm:tests-page:";
+
+function extractImageUrlsFromStyles(styles: PageStyles): string[] {
+  return Object.values(styles)
+    .map((style) => style?.imageUrl)
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+}
+
+function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
+  const unique = Array.from(new Set(urls.filter(Boolean)));
+  if (!unique.length) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let done = 0;
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    const timer = window.setTimeout(finish, timeoutMs);
+    const markDone = () => {
+      done += 1;
+      if (done >= unique.length) {
+        window.clearTimeout(timer);
+        finish();
+      }
+    };
+
+    unique.forEach((url) => {
+      const img = new Image();
+      img.onload = markDone;
+      img.onerror = markDone;
+      img.src = url;
+    });
+  });
+}
 
 interface TestCardProps {
   testId: string;
@@ -300,6 +339,8 @@ export default function TestsPage() {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
+  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTestStyles(lang)).length > 0);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === "1");
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
 
@@ -317,7 +358,11 @@ export default function TestsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setStyles(readCachedTestStyles(lang));
+    const cachedStyles = readCachedTestStyles(lang);
+    setStyles(cachedStyles);
+    setStylesReady(Object.keys(cachedStyles).length > 0);
+    setAssetsReady(localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === "1");
+
     fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
@@ -331,10 +376,37 @@ export default function TestsPage() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setStylesReady(true);
+      });
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [lang]);
+
+  useEffect(() => {
+    if (!stylesReady) return;
+    const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
+    if (localStorage.getItem(warmKey) === "1") {
+      setAssetsReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    setAssetsReady(false);
+    const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
+    preloadImages([...extractImageUrlsFromStyles(styles), ...defaultIconUrls]).then(() => {
+      if (cancelled) return;
+      localStorage.setItem(warmKey, "1");
+      setAssetsReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [stylesReady, styles, lang]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
     const adminToken = localStorage.getItem("adminToken");
@@ -438,6 +510,14 @@ export default function TestsPage() {
     { id: "razonamiento", title: t("tests.razonamiento"), description: t("tests.razonamientoDesc") },
     { id: "cerebral", title: t("tests.cerebral"), description: t("tests.cerebralDesc") },
   ];
+
+  if (!stylesReady || !assetsReady) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-white flex flex-col">
