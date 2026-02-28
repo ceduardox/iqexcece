@@ -40,6 +40,38 @@ const HERO_TITLE_LINE_VARIANTS = {
     transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   },
 };
+const HOME_CARD_ENTRANCE_VARIANTS = {
+  hidden: (index: number) => {
+    const from = [
+      { x: -220, y: -40, rotate: -4 },
+      { x: 220, y: -30, rotate: 4 },
+      { x: 0, y: 240, rotate: 0 },
+      { x: -200, y: 70, rotate: -3 },
+      { x: 200, y: 70, rotate: 3 },
+    ][index % 5];
+    return {
+      opacity: 0,
+      x: from.x,
+      y: from.y,
+      rotate: from.rotate,
+      scale: 0.92,
+      filter: "blur(10px)",
+    };
+  },
+  show: (index: number) => ({
+    opacity: 1,
+    x: 0,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      delay: 1.12 + index * 0.1,
+      duration: 0.72,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  }),
+};
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
@@ -554,9 +586,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         <div className="px-5 pb-6 space-y-4 max-w-lg md:max-w-full md:px-10 mx-auto">
           <div className="md:grid md:grid-cols-2 md:gap-6 space-y-4 md:space-y-0">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              variants={HOME_CARD_ENTRANCE_VARIANTS}
+              initial="hidden"
+              animate="show"
+              custom={0}
               className="flex flex-col"
             >
               <h2 
@@ -633,9 +666,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
+              variants={HOME_CARD_ENTRANCE_VARIANTS}
+              initial="hidden"
+              animate="show"
+              custom={1}
               className="flex flex-col"
             >
               <div 
@@ -705,9 +739,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.27 }}
+              variants={HOME_CARD_ENTRANCE_VARIANTS}
+              initial="hidden"
+              animate="show"
+              custom={2}
               onClick={(e) => { if (editorMode) handleElementClick("card-mindmaps", e); else setLocation("/mapas-mentales"); }}
               className={`relative rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-purple-100 flex flex-col md:col-span-2 ${getEditableClass("card-mindmaps")}`}
               style={getElementStyle("card-mindmaps", "linear-gradient(135deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.06) 100%)")}
@@ -785,9 +820,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              variants={HOME_CARD_ENTRANCE_VARIANTS}
+              initial="hidden"
+              animate="show"
+              custom={3}
               onClick={(e) => { if (editorMode) handleElementClick("card-metodox", e); else setLocation("/metodo-x"); }}
               className={`rounded-2xl border border-purple-100 p-4 shadow-sm flex flex-col cursor-pointer ${getEditableClass("card-metodox")}`}
               style={getElementStyle("card-metodox", "white")}
@@ -833,9 +869,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
+              variants={HOME_CARD_ENTRANCE_VARIANTS}
+              initial="hidden"
+              animate="show"
+              custom={4}
               className="rounded-2xl border border-purple-100 bg-white p-4 shadow-sm flex flex-col"
             >
               <h3 
