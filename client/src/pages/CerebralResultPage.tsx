@@ -23,7 +23,6 @@ export default function CerebralResultPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
-  const [captureMode, setCaptureMode] = useState(false);
   const [animatedLeftPercent, setAnimatedLeftPercent] = useState(0);
   const [animatedRightPercent, setAnimatedRightPercent] = useState(0);
   
@@ -71,10 +70,6 @@ export default function CerebralResultPage() {
     if (!captureAreaRef.current) return null;
     
     try {
-      setCaptureMode(true);
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-      );
       const capturedCanvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
@@ -123,8 +118,6 @@ export default function CerebralResultPage() {
     } catch (e) {
       console.error("Capture error:", e);
       return null;
-    } finally {
-      setCaptureMode(false);
     }
   };
   
@@ -364,8 +357,6 @@ export default function CerebralResultPage() {
                     </div>
                   </foreignObject>
 
-                  <image href={captureMode ? "/brain50.png" : "/brain50.svg"} x="0" y="0" width="240" height="260" opacity="0.22" />
-
                   <line
                     x1="120"
                     y1="18"
@@ -383,6 +374,11 @@ export default function CerebralResultPage() {
                     {animatedRightPercent}%
                   </text>
                 </motion.svg>
+                <img
+                  src="/brain50.svg"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-85"
+                />
               </motion.div>
 
               <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
