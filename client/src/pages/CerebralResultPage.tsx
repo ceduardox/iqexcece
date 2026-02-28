@@ -57,6 +57,7 @@ export default function CerebralResultPage() {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
+        foreignObjectRendering: true,
         logging: false,
         allowTaint: true,
       });
@@ -352,10 +353,10 @@ export default function CerebralResultPage() {
                     strokeDasharray="5,6"
                   />
 
-                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
+                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
                     {leftPercent}%
                   </text>
-                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
+                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
                     {rightPercent}%
                   </text>
                 </motion.svg>
