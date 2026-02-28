@@ -13,6 +13,15 @@ import { db } from "./db";
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
 const ADMIN_TOKEN_SECRET = "iq-admin-secret-2024";
+const ASESOR_RESPONSE_RULES = `
+Reglas obligatorias de respuesta:
+1) Usa el historial reciente (ultimos 10 mensajes) para evitar repetir informacion ya dada.
+2) No repitas frases ni ideas en la misma respuesta.
+3) Responde en maximo 5 lineas cortas.
+4) Si falta contexto para responder bien, haz 1 pregunta de aclaracion concreta.
+5) Mantente util, claro y directo, sin texto de relleno.
+6) No inventes datos. Si no sabes algo, dilo brevemente y propone el siguiente paso.
+`;
 
 const TOKENS_FILE = path.join("/tmp", "admin_tokens.json");
 function loadAdminTokens(): Set<string> {
@@ -2854,7 +2863,8 @@ ${schemaContent.substring(0, 3000)}
       if (!apiKey) return res.status(500).json({ error: "API not configured" });
 
       const configRows = await db.select().from(asesorConfig).limit(1);
-      const systemPrompt = configRows[0]?.prompt || "Eres un asesor amable de IQ Exponencial, una plataforma de entrenamiento cognitivo. Responde de forma breve, clara y útil en español.";
+      const basePrompt = configRows[0]?.prompt || "Eres un asesor amable de IQ Exponencial, una plataforma de entrenamiento cognitivo. Responde de forma breve, clara y útil en español.";
+      const systemPrompt = `${basePrompt}\n\n${ASESOR_RESPONSE_RULES}`;
 
       await db.insert(asesorChats).values({ sessionId, role: "user", content: message });
 
