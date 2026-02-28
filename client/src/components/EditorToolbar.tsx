@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type, Monitor, Smartphone, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,10 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
   const [toolbarPosition, setToolbarPosition] = useState<"bottom" | "top">("bottom");
+  const [floatingPosition, setFloatingPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const dragStartRef = useRef<{ pointerX: number; pointerY: number; startX: number; startY: number } | null>(null);
   const effectiveKey = selectedElement ? getDeviceKey(selectedElement, deviceMode) : null;
   const currentStyle = effectiveKey ? (styles[effectiveKey] || {}) : {};
   const previewIsVideo = useIsVideo(currentStyle.imageUrl);
@@ -96,12 +100,55 @@ export function EditorToolbar({
     ? "bottom-4 left-1/2 -translate-x-1/2" 
     : "top-4 left-1/2 -translate-x-1/2";
 
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  const handleDragStart = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (!toolbarRef.current) return;
+    const rect = toolbarRef.current.getBoundingClientRect();
+    setIsDragging(true);
+    dragStartRef.current = {
+      pointerX: e.clientX,
+      pointerY: e.clientY,
+      startX: floatingPosition?.x ?? rect.left,
+      startY: floatingPosition?.y ?? rect.top,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleDragMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current || !toolbarRef.current) return;
+    e.stopPropagation();
+    const rect = toolbarRef.current.getBoundingClientRect();
+    const margin = 8;
+    const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+    const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+    const x = clamp(dragStartRef.current.startX + (e.clientX - dragStartRef.current.pointerX), margin, maxX);
+    const y = clamp(dragStartRef.current.startY + (e.clientY - dragStartRef.current.pointerY), margin, maxY);
+    setFloatingPosition({ x, y });
+  };
+
+  const handleDragEnd = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsDragging(false);
+    dragStartRef.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const floatingStyle = floatingPosition
+    ? ({ left: floatingPosition.x, top: floatingPosition.y, transform: "none" } as const)
+    : undefined;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
-      className={`fixed ${positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px]`}
+      ref={toolbarRef}
+      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px] ${isDragging ? "cursor-grabbing" : ""}`}
+      style={floatingStyle}
       data-testid="editor-toolbar"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
@@ -112,6 +159,19 @@ export function EditorToolbar({
           {selectedElement ? `${selectedElement}` : "Selecciona elemento"}
         </span>
         <div className="flex gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            onPointerDown={handleDragStart}
+            onPointerMove={handleDragMove}
+            onPointerUp={handleDragEnd}
+            onPointerCancel={handleDragEnd}
+            className="text-cyan-300 hover:text-cyan-200 h-7 w-7 sm:h-8 sm:w-8 cursor-grab active:cursor-grabbing"
+            title="Arrastrar panel"
+            data-testid="button-drag-toolbar"
+          >
+            <Move className="w-4 h-4" />
+          </Button>
           <Button 
             size="icon" 
             variant="ghost" 
@@ -122,6 +182,18 @@ export function EditorToolbar({
           >
             {toolbarPosition === "bottom" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
+          {floatingPosition && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setFloatingPosition(null)}
+              className="text-cyan-400 hover:text-cyan-300 h-7 w-7 sm:h-8 sm:w-8"
+              title="Acoplar panel"
+              data-testid="button-dock-toolbar"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          )}
           <Button size="icon" variant="ghost" onClick={onSave} className="text-green-400 hover:text-green-300 h-7 w-7 sm:h-8 sm:w-8" data-testid="button-save-styles">
             <Save className="w-4 h-4" />
           </Button>
