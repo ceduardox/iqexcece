@@ -2790,6 +2790,21 @@ ${schemaContent.substring(0, 3000)}
 
   // ===== ASESOR CHAT ENDPOINTS =====
 
+  app.post("/api/asesor/lead", async (req, res) => {
+    const { sessionId, site, name, whatsapp } = req.body;
+    if (!sessionId || !name || !whatsapp) {
+      return res.status(400).json({ error: "sessionId, name and whatsapp required" });
+    }
+
+    try {
+      const content = `[LEAD] site=${site || "external"} | nombre=${name} | whatsapp=${whatsapp}`;
+      await db.insert(asesorChats).values({ sessionId, role: "user", content });
+      return res.json({ ok: true });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || "Error guardando lead" });
+    }
+  });
+
   app.post("/api/asesor/chat", async (req, res) => {
     const { message, sessionId, history } = req.body;
     if (!message || !sessionId) return res.status(400).json({ error: "message and sessionId required" });
