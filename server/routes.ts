@@ -2805,6 +2805,46 @@ ${schemaContent.substring(0, 3000)}
     }
   });
 
+  app.post("/api/asesor/upload", async (req, res) => {
+    const { sessionId, site, name, type, size, data } = req.body || {};
+    if (!sessionId || !name || !type || !size || !data) {
+      return res.status(400).json({ error: "sessionId, name, type, size and data required" });
+    }
+
+    const maxBytes = 7 * 1024 * 1024;
+    const parsedSize = Number(size);
+    if (!Number.isFinite(parsedSize) || parsedSize <= 0 || parsedSize > maxBytes) {
+      return res.status(400).json({ error: "Archivo excede 7MB" });
+    }
+
+    const allowedMimePrefixes = ["image/", "application/pdf", "text/", "application/msword", "application/vnd.openxmlformats-officedocument", "application/vnd.ms-"];
+    if (!allowedMimePrefixes.some((p) => String(type).startsWith(p))) {
+      return res.status(400).json({ error: "Tipo de archivo no permitido" });
+    }
+
+    if (typeof data !== "string" || !data.startsWith("data:")) {
+      return res.status(400).json({ error: "Formato de archivo inválido" });
+    }
+
+    try {
+      const image = await storage.saveImage({
+        name,
+        data,
+        originalSize: parsedSize,
+        compressedSize: parsedSize,
+      });
+      const fileUrl = `/api/images/${image.id}`;
+      await db.insert(asesorChats).values({
+        sessionId,
+        role: "user",
+        content: `[FILE] site=${site || "external"} | name=${name} | type=${type} | size=${parsedSize} | url=${fileUrl}`,
+      });
+      return res.json({ ok: true, id: image.id, url: fileUrl, name, type, size: parsedSize });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || "Error subiendo archivo" });
+    }
+  });
+
   app.post("/api/asesor/chat", async (req, res) => {
     const { message, sessionId, history } = req.body;
     if (!message || !sessionId) return res.status(400).json({ error: "message and sessionId required" });

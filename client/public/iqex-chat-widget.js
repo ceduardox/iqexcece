@@ -19,6 +19,10 @@
     "  70% { box-shadow: 0 0 0 15px rgba(58,123,213,0); }",
     "  100% { box-shadow: 0 0 0 0 rgba(58,123,213,0); }",
     "}",
+    "@keyframes iqexBlinkDot {",
+    "  0%, 100% { opacity: 1; }",
+    "  50% { opacity: .25; }",
+    "}",
     ".iqex-chat-root { position: fixed; bottom: 30px; z-index: 2147483000; font-family: 'Segoe UI', Roboto, sans-serif; }",
     ".iqex-chat-root.right { right: 30px; }",
     ".iqex-chat-root.left { left: 30px; }",
@@ -41,6 +45,7 @@
     ".iqex-chat-avatar { width: 40px; height: 40px; background: rgba(255,255,255,.2); border-radius: 50%; display: grid; place-items: center; font-size: 18px; }",
     ".iqex-chat-head-title { font-weight: 700; font-size: 16px; line-height: 1.1; }",
     ".iqex-chat-head-sub { font-size: 11px; opacity: .85; margin-top: 2px; }",
+    ".iqex-chat-head-sub-dot { display: inline-block; margin-right: 4px; animation: iqexBlinkDot 1.2s ease-in-out infinite; }",
     ".iqex-chat-close { background: none; border: none; color: #fff; cursor: pointer; opacity: .85; font-size: 20px; line-height: 1; }",
     ".iqex-chat-close:hover { opacity: 1; }",
     ".iqex-chat-frame-wrap { height: calc(100% - 68px); background: #fff; }",
@@ -72,7 +77,7 @@
     '  <div class="iqex-chat-avatar">🎧</div>' +
     '  <div>' +
     '    <div class="iqex-chat-head-title">' + title + '</div>' +
-    '    <div class="iqex-chat-head-sub">● En línea ahora</div>' +
+    '    <div class="iqex-chat-head-sub"><span class="iqex-chat-head-sub-dot">●</span>En línea ahora</div>' +
     "  </div>" +
     "</div>";
 
@@ -117,4 +122,3 @@
   root.appendChild(trigger);
   document.body.appendChild(root);
 })();
-

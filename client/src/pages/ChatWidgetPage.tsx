@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { MessageCircle, Send, Loader2, User, Headphones } from "lucide-react";
+import { MessageCircle, Send, Loader2, User, Headphones, Paperclip } from "lucide-react";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -26,7 +26,9 @@ export default function ChatWidgetPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const sessionId = useMemo(() => getWidgetSessionId(site), [site]);
 
   const startChat = async () => {
@@ -88,6 +90,72 @@ export default function ChatWidgetPage() {
     }
   };
 
+  const handlePickFile = () => {
+    if (!profileReady || uploadingFile) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: any) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    event.target.value = "";
+
+    const maxBytes = 7 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setMessages((prev) => [...prev, { role: "assistant", content: "El archivo supera el límite de 7MB." }]);
+      return;
+    }
+
+    const allowed = [
+      file.type.startsWith("image/"),
+      file.type === "application/pdf",
+      file.type.startsWith("text/"),
+      file.type === "application/msword",
+      file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      file.type.startsWith("application/vnd.ms-"),
+    ].some(Boolean);
+
+    if (!allowed) {
+      setMessages((prev) => [...prev, { role: "assistant", content: "Solo se permiten imágenes o documentos." }]);
+      return;
+    }
+
+    const reader = new FileReader();
+    setUploadingFile(true);
+    reader.onload = async () => {
+      try {
+        const res = await fetch("/api/asesor/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            site,
+            name: file.name,
+            type: file.type || "application/octet-stream",
+            size: file.size,
+            data: String(reader.result || ""),
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data?.url) {
+          const fullUrl = data.url.startsWith("http") ? data.url : `${window.location.origin}${data.url}`;
+          setMessages((prev) => [...prev, { role: "user", content: `Archivo adjunto: ${file.name}\n${fullUrl}` }]);
+        } else {
+          setMessages((prev) => [...prev, { role: "assistant", content: data?.error || "No se pudo subir el archivo." }]);
+        }
+      } catch {
+        setMessages((prev) => [...prev, { role: "assistant", content: "Error de conexión al subir archivo." }]);
+      } finally {
+        setUploadingFile(false);
+      }
+    };
+    reader.onerror = () => {
+      setUploadingFile(false);
+      setMessages((prev) => [...prev, { role: "assistant", content: "No se pudo leer el archivo." }]);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="h-screen w-full bg-white text-gray-900 flex flex-col">
       <header className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-cyan-500 to-violet-600 text-white flex items-center gap-2">
@@ -135,10 +203,32 @@ export default function ChatWidgetPage() {
             Pensando...
           </div>
         )}
+        {uploadingFile && (
+          <div className="mr-auto bg-white border border-gray-200 text-gray-600 rounded-xl px-3 py-2 text-sm flex items-center gap-2">
+            <Paperclip className="w-4 h-4 text-violet-500" />
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Subiendo archivo...
+          </div>
+        )}
       </main>
 
       <footer className="p-3 border-t border-gray-200 bg-white">
         <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <button
+            onClick={handlePickFile}
+            disabled={!profileReady || uploadingFile}
+            className="h-10 w-10 rounded-lg border border-gray-300 text-gray-600 grid place-items-center disabled:opacity-50"
+            title="Adjuntar archivo (máx 7MB)"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
           <input
             ref={inputRef}
             value={input}
@@ -152,7 +242,7 @@ export default function ChatWidgetPage() {
           />
           <button
             onClick={sendMessage}
-            disabled={!profileReady || loading || !input.trim()}
+            disabled={!profileReady || loading || uploadingFile || !input.trim()}
             className="h-10 px-3 rounded-lg bg-violet-600 text-white disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
