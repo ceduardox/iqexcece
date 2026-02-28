@@ -21,6 +21,25 @@ interface SelectionScreenProps {
 const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:v2:";
 const HOME_ASSET_WARM_KEY = "assets-warm:selection-screen:v2:";
 const DEFAULT_MINDMAP_BG = "https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af";
+const HERO_TITLE_CONTAINER_VARIANTS = {
+  hidden: { opacity: 1 },
+  show: {
+    opacity: 1,
+    transition: {
+      delayChildren: 0.1,
+      staggerChildren: 0.16,
+    },
+  },
+};
+const HERO_TITLE_LINE_VARIANTS = {
+  hidden: { opacity: 0, x: -120, filter: "blur(10px)" },
+  show: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
@@ -393,22 +412,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             >
               <div className="relative z-10 px-5 pb-8">
                 <div>
-                  <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                  <motion.h1
+                    variants={HERO_TITLE_CONTAINER_VARIANTS}
+                    initial="hidden"
+                    animate="show"
                     className={`text-[26px] md:text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
                     onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                     style={getElementStyle("hero-title")}
                   >
-                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
-                    <br />
-                    <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
-                    <br />
-                    <span style={{ 
+                    <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                      {t("home.heroTitle1")}
+                    </motion.span>
+                    <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                      {t("home.heroTitle2")}
+                    </motion.span>
+                    <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ 
                       background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
                       WebkitBackgroundClip: "text", 
                       WebkitTextFillColor: "transparent" 
-                    }}>eXponencial</span>
+                    }}>
+                      eXponencial
+                    </motion.span>
                   </motion.h1>
                   
                   <motion.p 
@@ -460,22 +484,27 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
           >
             <div className="relative z-10 px-5 pt-10 pb-10">
               <div>
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <motion.h1
+                  variants={HERO_TITLE_CONTAINER_VARIANTS}
+                  initial="hidden"
+                  animate="show"
                   className={`text-4xl font-black leading-[1.15] mb-4 ${getEditableClass("hero-title")}`}
                   onClick={(e) => { e.stopPropagation(); handleElementClick("hero-title", e); }}
                   style={getElementStyle("hero-title")}
                 >
-                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle1")}</span>
-                  <br />
-                  <span style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>{t("home.heroTitle2")}</span>
-                  <br />
-                  <span style={{ 
+                  <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                    {t("home.heroTitle1")}
+                  </motion.span>
+                  <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ color: styles["hero-title"]?.textColor || "#8a3ffc" }}>
+                    {t("home.heroTitle2")}
+                  </motion.span>
+                  <motion.span variants={HERO_TITLE_LINE_VARIANTS} className="block" style={{ 
                     background: "linear-gradient(90deg, #00d9ff, #8a3ffc)", 
                     WebkitBackgroundClip: "text", 
                     WebkitTextFillColor: "transparent" 
-                  }}>eXponencial</span>
+                  }}>
+                    eXponencial
+                  </motion.span>
                 </motion.h1>
                 
                 <motion.p 
