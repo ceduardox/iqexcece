@@ -45,6 +45,11 @@ export default function CerebralResultPage() {
   const rightPercent = profile.rightPercent;
   const isDominantLeft = profile.dominantSide === "izquierdo";
   const personalityTraits = profile.personalityTraits;
+  const brainTopY = 22;
+  const brainBottomY = 252;
+  const brainHeight = brainBottomY - brainTopY;
+  const leftFillY = brainBottomY - (leftPercent / 100) * brainHeight;
+  const rightFillY = brainBottomY - (rightPercent / 100) * brainHeight;
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
@@ -288,43 +293,153 @@ export default function CerebralResultPage() {
                     <clipPath id="rightHalf">
                       <rect x="120" y="0" width="120" height="260" />
                     </clipPath>
+                    <clipPath id="leftBrainShape">
+                      <path
+                        d="M120 22
+                         C104 14, 86 16, 74 28
+                         C62 23, 46 28, 39 43
+                         C23 48, 16 66, 20 83
+                         C10 98, 12 120, 27 134
+                         C20 153, 28 176, 45 186
+                         C47 208, 64 225, 85 230
+                         C96 246, 110 252, 120 252
+                         L120 22 Z"
+                      />
+                    </clipPath>
+                    <clipPath id="rightBrainShape">
+                      <path
+                        d="M120 22
+                         C136 14, 154 16, 166 28
+                         C178 23, 194 28, 201 43
+                         C217 48, 224 66, 220 83
+                         C230 98, 228 120, 213 134
+                         C220 153, 212 176, 195 186
+                         C193 208, 176 225, 155 230
+                         C144 246, 130 252, 120 252
+                         L120 22 Z"
+                      />
+                    </clipPath>
                   </defs>
                   
                   <g clipPath="url(#leftHalf)">
                     <path
-                      d="M120 18 C70 18 35 55 28 105 C20 155 32 197 49 220 C68 245 91 254 120 254 L120 18"
+                      d="M120 22
+                         C104 14, 86 16, 74 28
+                         C62 23, 46 28, 39 43
+                         C23 48, 16 66, 20 83
+                         C10 98, 12 120, 27 134
+                         C20 153, 28 176, 45 186
+                         C47 208, 64 225, 85 230
+                         C96 246, 110 252, 120 252
+                         L120 22 Z"
+                      fill="rgba(6,182,212,0.12)"
+                    />
+                    <motion.rect
+                      x="0"
+                      y={leftFillY}
+                      width="120"
+                      height={Math.max(0, brainBottomY - leftFillY) + 6}
                       fill="url(#leftBrainGrad)"
-                      stroke="rgba(14,116,144,0.75)"
+                      clipPath="url(#leftBrainShape)"
+                      animate={{ y: [leftFillY, leftFillY - 2, leftFillY] }}
+                      transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.rect
+                      x="18"
+                      y={leftFillY - 2}
+                      width="95"
+                      height="2"
+                      fill="rgba(255,255,255,0.55)"
+                      clipPath="url(#leftBrainShape)"
+                      animate={{ opacity: [0.35, 0.8, 0.35] }}
+                      transition={{ duration: 1.9, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <path
+                      d="M120 22
+                         C104 14, 86 16, 74 28
+                         C62 23, 46 28, 39 43
+                         C23 48, 16 66, 20 83
+                         C10 98, 12 120, 27 134
+                         C20 153, 28 176, 45 186
+                         C47 208, 64 225, 85 230
+                         C96 246, 110 252, 120 252
+                         L120 22 Z"
+                      fill="url(#leftBrainGrad)"
+                     stroke="rgba(14,116,144,0.75)"
                       strokeWidth="2.4"
                     />
-                    <path d="M56 74 Q80 92 69 118 Q56 138 81 158 Q95 176 76 198" fill="none" stroke="rgba(14,116,144,0.9)" strokeWidth="2.2" strokeLinecap="round" />
-                    <path d="M43 122 Q67 140 56 170 Q50 193 71 212" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+                    <path d="M86 42 C68 50, 62 66, 74 80 C84 92, 86 104, 74 116" fill="none" stroke="rgba(14,116,144,0.9)" strokeWidth="2.1" strokeLinecap="round" />
+                    <path d="M62 66 C52 78, 52 92, 64 102 C76 112, 74 126, 60 136" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.9" strokeLinecap="round" />
+                    <path d="M48 110 C62 120, 66 134, 56 146 C46 158, 50 172, 64 182" fill="none" stroke="rgba(14,116,144,0.82)" strokeWidth="1.9" strokeLinecap="round" />
+                    <path d="M84 154 C74 166, 74 182, 88 192 C98 200, 102 212, 94 224" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.8" strokeLinecap="round" />
                   </g>
                   
                   <g clipPath="url(#rightHalf)">
                     <path
-                      d="M120 18 C170 18 205 55 212 105 C220 155 208 197 191 220 C172 245 149 254 120 254 L120 18"
+                      d="M120 22
+                         C136 14, 154 16, 166 28
+                         C178 23, 194 28, 201 43
+                         C217 48, 224 66, 220 83
+                         C230 98, 228 120, 213 134
+                         C220 153, 212 176, 195 186
+                         C193 208, 176 225, 155 230
+                         C144 246, 130 252, 120 252
+                         L120 22 Z"
+                      fill="rgba(138,63,252,0.12)"
+                    />
+                    <motion.rect
+                      x="120"
+                      y={rightFillY}
+                      width="120"
+                      height={Math.max(0, brainBottomY - rightFillY) + 6}
+                      fill="url(#rightBrainGrad)"
+                      clipPath="url(#rightBrainShape)"
+                      animate={{ y: [rightFillY, rightFillY - 2, rightFillY] }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.rect
+                      x="128"
+                      y={rightFillY - 2}
+                      width="95"
+                      height="2"
+                      fill="rgba(255,255,255,0.55)"
+                      clipPath="url(#rightBrainShape)"
+                      animate={{ opacity: [0.35, 0.8, 0.35] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <path
+                      d="M120 22
+                         C136 14, 154 16, 166 28
+                         C178 23, 194 28, 201 43
+                         C217 48, 224 66, 220 83
+                         C230 98, 228 120, 213 134
+                         C220 153, 212 176, 195 186
+                         C193 208, 176 225, 155 230
+                         C144 246, 130 252, 120 252
+                         L120 22 Z"
                       fill="url(#rightBrainGrad)"
                       stroke="rgba(109,40,217,0.82)"
                       strokeWidth="2.4"
                     />
-                    <path d="M184 74 Q160 92 171 118 Q184 138 159 158 Q145 176 164 198" fill="none" stroke="rgba(109,40,217,0.9)" strokeWidth="2.2" strokeLinecap="round" />
-                    <path d="M197 122 Q173 140 184 170 Q190 193 169 212" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+                    <path d="M154 42 C172 50, 178 66, 166 80 C156 92, 154 104, 166 116" fill="none" stroke="rgba(109,40,217,0.9)" strokeWidth="2.1" strokeLinecap="round" />
+                    <path d="M178 66 C188 78, 188 92, 176 102 C164 112, 166 126, 180 136" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.9" strokeLinecap="round" />
+                    <path d="M192 110 C178 120, 174 134, 184 146 C194 158, 190 172, 176 182" fill="none" stroke="rgba(109,40,217,0.82)" strokeWidth="1.9" strokeLinecap="round" />
+                    <path d="M156 154 C166 166, 166 182, 152 192 C142 200, 138 212, 146 224" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.8" strokeLinecap="round" />
                   </g>
 
                   <path
-                    d="M120 22 C120 64 120 96 120 254"
+                    d="M120 26 C120 52, 120 88, 120 252"
                     stroke="rgba(31,41,55,0.55)"
                     strokeWidth="2.4"
                     strokeDasharray="5,6"
                   />
 
-                  <ellipse cx="120" cy="136" rx="92" ry="106" fill="url(#holoShine)" />
+                  <ellipse cx="120" cy="136" rx="98" ry="114" fill="url(#holoShine)" />
 
-                  <text x="75" y="145" textAnchor="middle" className="text-2xl font-black" fill="white">
+                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
                     {leftPercent}%
                   </text>
-                  <text x="165" y="145" textAnchor="middle" className="text-2xl font-black" fill="white">
+                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
                     {rightPercent}%
                   </text>
                 </motion.svg>
