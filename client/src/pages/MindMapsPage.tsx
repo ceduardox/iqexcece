@@ -891,9 +891,9 @@ export default function MindMapsPage() {
                             ))}
                           </div>
                           {!readonly && (
-                            <div className="mt-2 flex min-w-0 gap-1">
-                              <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 min-w-0 w-full rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
-                              <button className="h-7 px-2 rounded border border-emerald-200 text-xs text-emerald-700 bg-emerald-50" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
+                            <div className="mt-2 flex min-w-0 items-center gap-1">
+                              <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 min-w-0 flex-1 rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
+                              <button className="h-7 px-2 min-w-[72px] shrink-0 whitespace-nowrap rounded border border-emerald-200 text-[11px] font-medium text-emerald-700 bg-emerald-50" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
                             </div>
                           )}
                           {!readonly && <button className="mt-2 h-6 px-2 rounded border border-rose-200 text-xs text-rose-700 bg-rose-50" onClick={() => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.filter((x) => x.id !== t.id) }))}>Eliminar</button>}
