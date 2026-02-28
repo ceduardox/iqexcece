@@ -743,14 +743,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("title-mindmaps", e); } }}
                     style={{ color: styles["title-mindmaps"]?.textColor || "#8a3ffc", ...getElementStyle("title-mindmaps") }}
                   >
-                    {styles["title-mindmaps"]?.buttonText || "Crea mapas mentales"}
+                    {styles["title-mindmaps"]?.buttonText || t("home.cardMindmapsTitle")}
                   </h3>
                   <p
                     className={`text-xs leading-snug ${getEditableClass("desc-mindmaps")}`}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("desc-mindmaps", e); } }}
                     style={{ color: styles["desc-mindmaps"]?.textColor || "#4b5563", ...getElementStyle("desc-mindmaps") }}
                   >
-                    {styles["desc-mindmaps"]?.buttonText || "Organiza ideas clave en segundos para estudiar, recordar y explicar mejor."}
+                    {styles["desc-mindmaps"]?.buttonText || t("home.cardMindmapsDesc")}
                   </p>
                 </div>
               </div>
@@ -779,7 +779,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                       <Map style={{ width: styles["icon-btn-mindmaps"]?.iconSize || 14, height: styles["icon-btn-mindmaps"]?.iconSize || 14 }} />
                     )}
                   </span>
-                  <span className="whitespace-pre-line">{styles["btn-mindmaps"]?.buttonText || "Crear mapa mental"}</span>
+                  <span className="whitespace-pre-line">{styles["btn-mindmaps"]?.buttonText || t("home.btnMindmaps")}</span>
                 </motion.button>
               </div>
             </motion.div>
