@@ -25,6 +25,8 @@ export default function CerebralResultPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [animatedLeftPercent, setAnimatedLeftPercent] = useState(0);
+  const [animatedRightPercent, setAnimatedRightPercent] = useState(0);
   
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
@@ -48,6 +50,23 @@ export default function CerebralResultPage() {
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
+
+  useEffect(() => {
+    const durationMs = 1400;
+    const start = performance.now();
+    let rafId = 0;
+
+    const step = (now: number) => {
+      const t = Math.min((now - start) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setAnimatedLeftPercent(Math.round(leftPercent * eased));
+      setAnimatedRightPercent(Math.round(rightPercent * eased));
+      if (t < 1) rafId = requestAnimationFrame(step);
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [leftPercent, rightPercent]);
 
   const captureAndShare = async (): Promise<Blob | null> => {
     if (!captureAreaRef.current) return null;
@@ -291,7 +310,7 @@ export default function CerebralResultPage() {
                           left: "0",
                           width: "50%",
                           bottom: "0",
-                          height: `${leftPercent}%`,
+                          height: `${animatedLeftPercent}%`,
                           background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
                           boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
                         }}
@@ -303,7 +322,7 @@ export default function CerebralResultPage() {
                           position: "absolute",
                           left: "3%",
                           width: "44%",
-                          bottom: `calc(${leftPercent}% - 2px)`,
+                          bottom: `calc(${animatedLeftPercent}% - 2px)`,
                           height: "2px",
                           background: "rgba(255,255,255,0.75)",
                           borderRadius: "999px",
@@ -318,7 +337,7 @@ export default function CerebralResultPage() {
                           right: "0",
                           width: "50%",
                           bottom: "0",
-                          height: `${rightPercent}%`,
+                          height: `${animatedRightPercent}%`,
                           background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
                           boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
                         }}
@@ -330,7 +349,7 @@ export default function CerebralResultPage() {
                           position: "absolute",
                           right: "3%",
                           width: "44%",
-                          bottom: `calc(${rightPercent}% - 2px)`,
+                          bottom: `calc(${animatedRightPercent}% - 2px)`,
                           height: "2px",
                           background: "rgba(255,255,255,0.75)",
                           borderRadius: "999px",
@@ -354,10 +373,10 @@ export default function CerebralResultPage() {
                   />
 
                   <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
-                    {leftPercent}%
+                    {animatedLeftPercent}%
                   </text>
                   <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
-                    {rightPercent}%
+                    {animatedRightPercent}%
                   </text>
                 </motion.svg>
               </motion.div>
