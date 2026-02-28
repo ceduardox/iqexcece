@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList, BarChart3 } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList, BarChart3, ExternalLink, Download } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -6596,6 +6596,18 @@ function AsesorIAPanel({ token }: { token: string }) {
     setSaving(false);
   };
 
+  const parseAsesorFileMessage = (content: string): null | { site?: string; name?: string; type?: string; size?: string; url?: string } => {
+    if (!content || !content.startsWith("[FILE]")) return null;
+    const body = content.replace("[FILE]", "").trim();
+    const parts = body.split("|").map((p) => p.trim());
+    const out: { [k: string]: string } = {};
+    for (const p of parts) {
+      const idx = p.indexOf("=");
+      if (idx > 0) out[p.slice(0, idx).trim()] = p.slice(idx + 1).trim();
+    }
+    return { site: out.site, name: out.name, type: out.type, size: out.size, url: out.url };
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-black/40 border-violet-500/30">
@@ -6682,17 +6694,49 @@ function AsesorIAPanel({ token }: { token: string }) {
                   </button>
                   {expandedSession === session.sessionId && (
                     <div className="px-4 pb-3 space-y-2 border-t border-white/5 pt-2">
-                      {session.messages.map((msg: any, i: number) => (
-                        <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
-                            msg.role === "user"
-                              ? "bg-violet-600/40 text-white"
-                              : "bg-white/10 text-white/80"
-                          }`}>
-                            {msg.content}
+                      {session.messages.map((msg: any, i: number) => {
+                        const file = parseAsesorFileMessage(msg.content || "");
+                        const fileUrl = file?.url || "";
+                        const isImage = !!file?.type?.startsWith("image/");
+                        const isPdf = file?.type === "application/pdf";
+                        return (
+                          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                            <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
+                              msg.role === "user"
+                                ? "bg-violet-600/40 text-white"
+                                : "bg-white/10 text-white/80"
+                            }`}>
+                              {file ? (
+                                <div className="space-y-2">
+                                  <div className="text-[11px] opacity-90">
+                                    Archivo: {file.name || "adjunto"} {file.site ? `· ${file.site}` : ""}
+                                  </div>
+                                  {isImage && fileUrl && (
+                                    <img src={fileUrl} alt={file.name || "adjunto"} className="max-w-full max-h-40 rounded border border-white/20 bg-white" />
+                                  )}
+                                  {isPdf && fileUrl && (
+                                    <iframe src={fileUrl} title={file.name || "pdf"} className="w-full h-40 rounded border border-white/20 bg-white" />
+                                  )}
+                                  <div className="flex gap-2">
+                                    {fileUrl && (
+                                      <>
+                                        <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline">
+                                          <ExternalLink className="w-3 h-3" /> Ver
+                                        </a>
+                                        <a href={fileUrl} download={file.name || "adjunto"} className="inline-flex items-center gap-1 underline">
+                                          <Download className="w-3 h-3" /> Descargar
+                                        </a>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                msg.content
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
