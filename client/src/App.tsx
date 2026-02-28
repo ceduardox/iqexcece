@@ -48,6 +48,7 @@ import ALeerBoliviaPage from "@/pages/ALeerBoliviaPage";
 import MetodoXPage from "@/pages/MetodoXPage";
 import ContactoPage from "@/pages/ContactoPage";
 import MindMapsPage from "@/pages/MindMapsPage";
+import ChatWidgetPage from "@/pages/ChatWidgetPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -98,6 +99,7 @@ function Router() {
       <Route path="/contacto" component={ContactoPage}/>
       <Route path="/mapas-mentales" component={MindMapsPage}/>
       <Route path="/mapas-mentales/share/:token" component={MindMapsPage}/>
+      <Route path="/widget/chat" component={ChatWidgetPage}/>
       <Route component={NotFound} />
     </Switch>
   );
