@@ -45,11 +45,6 @@ export default function CerebralResultPage() {
   const rightPercent = profile.rightPercent;
   const isDominantLeft = profile.dominantSide === "izquierdo";
   const personalityTraits = profile.personalityTraits;
-  const brainTopY = 22;
-  const brainBottomY = 252;
-  const brainHeight = brainBottomY - brainTopY;
-  const leftFillY = brainBottomY - (leftPercent / 100) * brainHeight;
-  const rightFillY = brainBottomY - (rightPercent / 100) * brainHeight;
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
@@ -271,170 +266,91 @@ export default function CerebralResultPage() {
                   animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
                   transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <defs>
-                    <linearGradient id="leftBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#67E8F9" />
-                      <stop offset="55%" stopColor="#06B6D4" />
-                      <stop offset="100%" stopColor="#0E7490" />
-                    </linearGradient>
-                    <linearGradient id="rightBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#C4B5FD" />
-                      <stop offset="55%" stopColor="#8A3FFC" />
-                      <stop offset="100%" stopColor="#6D28D9" />
-                    </linearGradient>
-                    <radialGradient id="holoShine" cx="35%" cy="30%" r="70%">
-                      <stop offset="0%" stopColor="rgba(255,255,255,0.65)" />
-                      <stop offset="45%" stopColor="rgba(255,255,255,0.15)" />
-                      <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                    </radialGradient>
-                    <clipPath id="leftHalf">
-                      <rect x="0" y="0" width="120" height="260" />
-                    </clipPath>
-                    <clipPath id="rightHalf">
-                      <rect x="120" y="0" width="120" height="260" />
-                    </clipPath>
-                    <clipPath id="leftBrainShape">
-                      <path
-                        d="M120 22
-                         C104 14, 86 16, 74 28
-                         C62 23, 46 28, 39 43
-                         C23 48, 16 66, 20 83
-                         C10 98, 12 120, 27 134
-                         C20 153, 28 176, 45 186
-                         C47 208, 64 225, 85 230
-                         C96 246, 110 252, 120 252
-                         L120 22 Z"
+                  <foreignObject x="0" y="0" width="240" height="260">
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "240px",
+                        height: "260px",
+                        WebkitMaskImage: "url('/brainsvg.svg')",
+                        maskImage: "url('/brainsvg.svg')",
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskSize: "contain",
+                        maskSize: "contain",
+                        WebkitMaskPosition: "center",
+                        maskPosition: "center",
+                        background: "rgba(15,23,42,0.08)",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <motion.div
+                        style={{
+                          position: "absolute",
+                          left: "0",
+                          width: "50%",
+                          bottom: "0",
+                          height: `${leftPercent}%`,
+                          background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
+                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                        }}
+                        animate={{ y: [0, -2, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       />
-                    </clipPath>
-                    <clipPath id="rightBrainShape">
-                      <path
-                        d="M120 22
-                         C136 14, 154 16, 166 28
-                         C178 23, 194 28, 201 43
-                         C217 48, 224 66, 220 83
-                         C230 98, 228 120, 213 134
-                         C220 153, 212 176, 195 186
-                         C193 208, 176 225, 155 230
-                         C144 246, 130 252, 120 252
-                         L120 22 Z"
+                      <motion.div
+                        style={{
+                          position: "absolute",
+                          left: "3%",
+                          width: "44%",
+                          bottom: `calc(${leftPercent}% - 2px)`,
+                          height: "2px",
+                          background: "rgba(255,255,255,0.75)",
+                          borderRadius: "999px",
+                        }}
+                        animate={{ opacity: [0.35, 0.9, 0.35] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
                       />
-                    </clipPath>
-                  </defs>
-                  
-                  <g clipPath="url(#leftHalf)">
-                    <path
-                      d="M120 22
-                         C104 14, 86 16, 74 28
-                         C62 23, 46 28, 39 43
-                         C23 48, 16 66, 20 83
-                         C10 98, 12 120, 27 134
-                         C20 153, 28 176, 45 186
-                         C47 208, 64 225, 85 230
-                         C96 246, 110 252, 120 252
-                         L120 22 Z"
-                      fill="rgba(6,182,212,0.12)"
-                    />
-                    <motion.rect
-                      x="0"
-                      y={leftFillY}
-                      width="120"
-                      height={Math.max(0, brainBottomY - leftFillY) + 6}
-                      fill="url(#leftBrainGrad)"
-                      clipPath="url(#leftBrainShape)"
-                      animate={{ y: [leftFillY, leftFillY - 2, leftFillY] }}
-                      transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <motion.rect
-                      x="18"
-                      y={leftFillY - 2}
-                      width="95"
-                      height="2"
-                      fill="rgba(255,255,255,0.55)"
-                      clipPath="url(#leftBrainShape)"
-                      animate={{ opacity: [0.35, 0.8, 0.35] }}
-                      transition={{ duration: 1.9, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <path
-                      d="M120 22
-                         C104 14, 86 16, 74 28
-                         C62 23, 46 28, 39 43
-                         C23 48, 16 66, 20 83
-                         C10 98, 12 120, 27 134
-                         C20 153, 28 176, 45 186
-                         C47 208, 64 225, 85 230
-                         C96 246, 110 252, 120 252
-                         L120 22 Z"
-                      fill="url(#leftBrainGrad)"
-                     stroke="rgba(14,116,144,0.75)"
-                      strokeWidth="2.4"
-                    />
-                    <path d="M86 42 C68 50, 62 66, 74 80 C84 92, 86 104, 74 116" fill="none" stroke="rgba(14,116,144,0.9)" strokeWidth="2.1" strokeLinecap="round" />
-                    <path d="M62 66 C52 78, 52 92, 64 102 C76 112, 74 126, 60 136" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M48 110 C62 120, 66 134, 56 146 C46 158, 50 172, 64 182" fill="none" stroke="rgba(14,116,144,0.82)" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M84 154 C74 166, 74 182, 88 192 C98 200, 102 212, 94 224" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-                  </g>
-                  
-                  <g clipPath="url(#rightHalf)">
-                    <path
-                      d="M120 22
-                         C136 14, 154 16, 166 28
-                         C178 23, 194 28, 201 43
-                         C217 48, 224 66, 220 83
-                         C230 98, 228 120, 213 134
-                         C220 153, 212 176, 195 186
-                         C193 208, 176 225, 155 230
-                         C144 246, 130 252, 120 252
-                         L120 22 Z"
-                      fill="rgba(138,63,252,0.12)"
-                    />
-                    <motion.rect
-                      x="120"
-                      y={rightFillY}
-                      width="120"
-                      height={Math.max(0, brainBottomY - rightFillY) + 6}
-                      fill="url(#rightBrainGrad)"
-                      clipPath="url(#rightBrainShape)"
-                      animate={{ y: [rightFillY, rightFillY - 2, rightFillY] }}
-                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <motion.rect
-                      x="128"
-                      y={rightFillY - 2}
-                      width="95"
-                      height="2"
-                      fill="rgba(255,255,255,0.55)"
-                      clipPath="url(#rightBrainShape)"
-                      animate={{ opacity: [0.35, 0.8, 0.35] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <path
-                      d="M120 22
-                         C136 14, 154 16, 166 28
-                         C178 23, 194 28, 201 43
-                         C217 48, 224 66, 220 83
-                         C230 98, 228 120, 213 134
-                         C220 153, 212 176, 195 186
-                         C193 208, 176 225, 155 230
-                         C144 246, 130 252, 120 252
-                         L120 22 Z"
-                      fill="url(#rightBrainGrad)"
-                      stroke="rgba(109,40,217,0.82)"
-                      strokeWidth="2.4"
-                    />
-                    <path d="M154 42 C172 50, 178 66, 166 80 C156 92, 154 104, 166 116" fill="none" stroke="rgba(109,40,217,0.9)" strokeWidth="2.1" strokeLinecap="round" />
-                    <path d="M178 66 C188 78, 188 92, 176 102 C164 112, 166 126, 180 136" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M192 110 C178 120, 174 134, 184 146 C194 158, 190 172, 176 182" fill="none" stroke="rgba(109,40,217,0.82)" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M156 154 C166 166, 166 182, 152 192 C142 200, 138 212, 146 224" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-                  </g>
 
-                  <path
-                    d="M120 26 C120 52, 120 88, 120 252"
-                    stroke="rgba(31,41,55,0.55)"
-                    strokeWidth="2.4"
+                      <motion.div
+                        style={{
+                          position: "absolute",
+                          right: "0",
+                          width: "50%",
+                          bottom: "0",
+                          height: `${rightPercent}%`,
+                          background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
+                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                        }}
+                        animate={{ y: [0, -2, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                      <motion.div
+                        style={{
+                          position: "absolute",
+                          right: "3%",
+                          width: "44%",
+                          bottom: `calc(${rightPercent}% - 2px)`,
+                          height: "2px",
+                          background: "rgba(255,255,255,0.75)",
+                          borderRadius: "999px",
+                        }}
+                        animate={{ opacity: [0.35, 0.9, 0.35] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                    </div>
+                  </foreignObject>
+
+                  <image href="/brainsvg.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+
+                  <line
+                    x1="120"
+                    y1="18"
+                    x2="120"
+                    y2="248"
+                    stroke="rgba(31,41,55,0.6)"
+                    strokeWidth="2.2"
                     strokeDasharray="5,6"
                   />
-
-                  <ellipse cx="120" cy="136" rx="98" ry="114" fill="url(#holoShine)" />
 
                   <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
                     {leftPercent}%
