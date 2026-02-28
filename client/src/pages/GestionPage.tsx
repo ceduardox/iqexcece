@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, Eye, EyeOff, ClipboardList, BarChart3, ExternalLink, Download } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -6553,32 +6553,58 @@ function AsesorIAPanel({ token }: { token: string }) {
   const [saving, setSaving] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [asesorEnabled, setAsesorEnabled] = useState(true);
+  const [savingState, setSavingState] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [manualReply, setManualReply] = useState("");
+  const [sendingManual, setSendingManual] = useState(false);
   const [chatPage, setChatPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalChats, setTotalChats] = useState(0);
 
   useEffect(() => {
     fetch("/api/admin/asesor/config", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => { if (d.config?.prompt) setPrompt(d.config.prompt); })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.config?.prompt) setPrompt(d.config.prompt);
+      })
       .catch(() => {});
-    fetch("/api/admin/asesor/rules", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => { if (d.rules) setSystemRules(d.rules); })
-      .catch(() => {});
-  }, []);
 
-  useEffect(() => { loadChats(chatPage); }, [chatPage]);
+    fetch("/api/admin/asesor/rules", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.rules) setSystemRules(d.rules);
+      })
+      .catch(() => {});
+
+    fetch("/api/admin/asesor/state", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d.enabled === "boolean") setAsesorEnabled(d.enabled);
+      })
+      .catch(() => {});
+  }, [token]);
+
+  useEffect(() => {
+    loadChats(chatPage);
+  }, [chatPage, token]);
 
   const loadChats = (page = 1) => {
     setLoadingChats(true);
     fetch(`/api/admin/asesor/chats?page=${page}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => {
-        setSessions(d.sessions || []);
+      .then((r) => r.json())
+      .then((d) => {
+        const nextSessions = d.sessions || [];
+        setSessions(nextSessions);
         setTotalPages(d.totalPages || 1);
         setTotalChats(d.total || 0);
+
+        if (nextSessions.length > 0) {
+          const stillExists = selectedSessionId && nextSessions.some((s: any) => s.sessionId === selectedSessionId);
+          if (!stillExists) setSelectedSessionId(nextSessions[0].sessionId);
+        } else {
+          setSelectedSessionId(null);
+        }
       })
       .catch(() => {})
       .finally(() => setLoadingChats(false));
@@ -6596,6 +6622,37 @@ function AsesorIAPanel({ token }: { token: string }) {
     setSaving(false);
   };
 
+  const toggleAsesorState = async () => {
+    setSavingState(true);
+    const next = !asesorEnabled;
+    try {
+      const res = await fetch("/api/admin/asesor/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ enabled: next }),
+      });
+      if (res.ok) setAsesorEnabled(next);
+    } catch {}
+    setSavingState(false);
+  };
+
+  const sendManualReply = async () => {
+    if (!selectedSessionId || !manualReply.trim()) return;
+    setSendingManual(true);
+    try {
+      const res = await fetch("/api/admin/asesor/manual-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sessionId: selectedSessionId, content: manualReply.trim() }),
+      });
+      if (res.ok) {
+        setManualReply("");
+        loadChats(chatPage);
+      }
+    } catch {}
+    setSendingManual(false);
+  };
+
   const parseAsesorFileMessage = (content: string): null | { site?: string; name?: string; type?: string; size?: string; url?: string } => {
     if (!content || !content.startsWith("[FILE]")) return null;
     const body = content.replace("[FILE]", "").trim();
@@ -6608,6 +6665,8 @@ function AsesorIAPanel({ token }: { token: string }) {
     return { site: out.site, name: out.name, type: out.type, size: out.size, url: out.url };
   };
 
+  const selectedSession = sessions.find((s: any) => s.sessionId === selectedSessionId) || null;
+
   return (
     <div className="space-y-6">
       <Card className="bg-black/40 border-violet-500/30">
@@ -6617,7 +6676,7 @@ function AsesorIAPanel({ token }: { token: string }) {
             Prompt del Asesor IA
           </h3>
           <p className="text-white/50 text-xs mb-3">
-            Este prompt define cómo se comporta el chat IA cuando los usuarios hablan con el asesor desde la página de Contacto.
+            Este prompt define como se comporta el chat IA cuando los usuarios hablan con el asesor desde la pagina de Contacto.
           </p>
           <textarea
             value={prompt}
@@ -6639,7 +6698,7 @@ function AsesorIAPanel({ token }: { token: string }) {
           <div className="mt-5">
             <h4 className="text-sm font-semibold text-cyan-300 mb-2">Reglas del sistema (solo lectura)</h4>
             <p className="text-white/40 text-xs mb-2">
-              Estas reglas se aplican siempre al asesor y se anexan automáticamente al prompt.
+              Estas reglas se aplican siempre al asesor y se anexan automaticamente al prompt.
             </p>
             <textarea
               value={systemRules}
@@ -6647,6 +6706,20 @@ function AsesorIAPanel({ token }: { token: string }) {
               className="w-full h-36 bg-black/30 text-white/90 border border-cyan-500/30 rounded-lg p-3 text-xs resize-y focus:outline-none"
               data-testid="textarea-asesor-rules-readonly"
             />
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Button
+              onClick={toggleAsesorState}
+              disabled={savingState}
+              className={asesorEnabled ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}
+              data-testid="button-toggle-asesor-state"
+            >
+              {savingState ? "Guardando..." : asesorEnabled ? "Detener IA" : "Activar IA"}
+            </Button>
+            <span className={`text-xs px-2 py-1 rounded border ${asesorEnabled ? "text-emerald-300 border-emerald-500/40 bg-emerald-500/10" : "text-rose-300 border-rose-500/40 bg-rose-500/10"}`}>
+              Estado: {asesorEnabled ? "Activa" : "Pausada"}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -6658,7 +6731,13 @@ function AsesorIAPanel({ token }: { token: string }) {
               <MessageSquare className="w-5 h-5 text-violet-400" />
               Conversaciones ({totalChats})
             </h3>
-            <Button onClick={() => loadChats(chatPage)} variant="outline" size="sm" className="border-violet-500/30 text-violet-400" data-testid="button-refresh-chats">
+            <Button
+              onClick={() => loadChats(chatPage)}
+              variant="outline"
+              size="sm"
+              className="border-violet-500/30 text-violet-400"
+              data-testid="button-refresh-chats"
+            >
               <RefreshCw className={`w-4 h-4 mr-1 ${loadingChats ? "animate-spin" : ""}`} />
               Actualizar
             </Button>
@@ -6667,57 +6746,79 @@ function AsesorIAPanel({ token }: { token: string }) {
           {loadingChats && sessions.length === 0 ? (
             <div className="text-white/50 text-center py-4">Cargando conversaciones...</div>
           ) : sessions.length === 0 ? (
-            <div className="text-white/40 text-center py-6">No hay conversaciones aún</div>
+            <div className="text-white/40 text-center py-6">No hay conversaciones aun</div>
           ) : (
-            <div className="space-y-2 max-h-[500px] overflow-y-auto">
-              {sessions.map((session: any) => (
-                <div key={session.sessionId} className="bg-black/20 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setExpandedSession(expandedSession === session.sessionId ? null : session.sessionId)}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
-                    data-testid={`button-session-${session.sessionId}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
-                        <MessageSquare className="w-4 h-4 text-violet-400" />
+            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
+              <div className="space-y-2 max-h-[540px] overflow-y-auto pr-1">
+                {sessions.map((session: any) => {
+                  const isActive = selectedSessionId === session.sessionId;
+                  return (
+                    <button
+                      key={session.sessionId}
+                      onClick={() => setSelectedSessionId(session.sessionId)}
+                      className={`w-full text-left rounded-lg px-3 py-3 border transition-colors ${isActive ? "bg-violet-600/20 border-violet-500/60" : "bg-black/20 border-white/10 hover:border-violet-500/30"}`}
+                      data-testid={`button-session-${session.sessionId}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4 text-violet-300" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-white text-sm font-medium block truncate">{session.messageCount} mensajes</span>
+                          <span className="text-white/40 text-xs block truncate">
+                            {session.lastMessage ? new Date(session.lastMessage).toLocaleString() : ""}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <span className="text-white text-sm font-medium block">{session.messageCount} mensajes</span>
-                        <span className="text-white/40 text-xs">{session.lastMessage ? new Date(session.lastMessage).toLocaleString() : ""}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-black/20 p-3 flex flex-col min-h-[540px]">
+                {!selectedSession ? (
+                  <div className="text-white/40 text-sm m-auto">Selecciona una conversaci�n para ver el detalle</div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+                      <div className="text-white text-sm">
+                        Sesi�n: <span className="text-violet-300 font-mono">{selectedSession.sessionId}</span>
                       </div>
+                      <div className="text-white/50 text-xs">{selectedSession.messageCount} mensajes</div>
                     </div>
-                    {expandedSession === session.sessionId ? (
-                      <EyeOff className="w-4 h-4 text-white/40" />
-                    ) : (
-                      <Eye className="w-4 h-4 text-white/40" />
-                    )}
-                  </button>
-                  {expandedSession === session.sessionId && (
-                    <div className="px-4 pb-3 space-y-2 border-t border-white/5 pt-2">
-                      {session.messages.map((msg: any, i: number) => {
+
+                    <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+                      {selectedSession.messages.map((msg: any, i: number) => {
                         const file = parseAsesorFileMessage(msg.content || "");
                         const fileUrl = file?.url || "";
                         const isImage = !!file?.type?.startsWith("image/");
                         const isPdf = file?.type === "application/pdf";
+                        const isUser = msg.role === "user";
+                        const isAdminReply = !isUser && typeof msg.content === "string" && msg.content.startsWith("[ADMIN]");
+
                         return (
-                          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                            <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
-                              msg.role === "user"
-                                ? "bg-violet-600/40 text-white"
-                                : "bg-white/10 text-white/80"
-                            }`}>
+                          <div key={`${selectedSession.sessionId}-${i}`} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                            <div
+                              className={`max-w-[92%] md:max-w-[80%] px-3 py-2 rounded-xl text-xs ${
+                                isUser
+                                  ? "bg-violet-600/40 text-white"
+                                  : isAdminReply
+                                    ? "bg-emerald-600/30 text-emerald-100 border border-emerald-500/30"
+                                    : "bg-white/10 text-white/80"
+                              }`}
+                            >
                               {file ? (
                                 <div className="space-y-2">
                                   <div className="text-[11px] opacity-90">
-                                    Archivo: {file.name || "adjunto"} {file.site ? `· ${file.site}` : ""}
+                                    Archivo: {file.name || "adjunto"} {file.site ? `� ${file.site}` : ""}
                                   </div>
                                   {isImage && fileUrl && (
-                                    <img src={fileUrl} alt={file.name || "adjunto"} className="max-w-full max-h-40 rounded border border-white/20 bg-white" />
+                                    <img src={fileUrl} alt={file.name || "adjunto"} className="max-w-full max-h-52 rounded border border-white/20 bg-white" />
                                   )}
                                   {isPdf && fileUrl && (
-                                    <iframe src={fileUrl} title={file.name || "pdf"} className="w-full h-40 rounded border border-white/20 bg-white" />
+                                    <iframe src={fileUrl} title={file.name || "pdf"} className="w-full h-56 rounded border border-white/20 bg-white" />
                                   )}
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-3">
                                     {fileUrl && (
                                       <>
                                         <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline">
@@ -6731,23 +6832,44 @@ function AsesorIAPanel({ token }: { token: string }) {
                                   </div>
                                 </div>
                               ) : (
-                                msg.content
+                                isAdminReply ? msg.content.replace("[ADMIN]", "").trim() : msg.content
                               )}
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      <div className="text-white/60 text-xs mb-2">Intervenci�n manual de admin</div>
+                      <div className="flex gap-2">
+                        <Input
+                          value={manualReply}
+                          onChange={(e) => setManualReply(e.target.value)}
+                          placeholder="Escribe respuesta manual para esta sesi�n..."
+                          className="bg-black/30 border-white/20 text-white"
+                          data-testid="input-admin-manual-reply"
+                        />
+                        <Button
+                          onClick={sendManualReply}
+                          disabled={sendingManual || !manualReply.trim()}
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                          data-testid="button-send-admin-manual-reply"
+                        >
+                          {sendingManual ? "Enviando..." : "Responder"}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4">
               <Button
-                onClick={() => setChatPage(p => Math.max(1, p - 1))}
+                onClick={() => setChatPage((p) => Math.max(1, p - 1))}
                 disabled={chatPage <= 1 || loadingChats}
                 variant="outline"
                 size="sm"
@@ -6760,7 +6882,7 @@ function AsesorIAPanel({ token }: { token: string }) {
                 {chatPage} / {totalPages}
               </span>
               <Button
-                onClick={() => setChatPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setChatPage((p) => Math.min(totalPages, p + 1))}
                 disabled={chatPage >= totalPages || loadingChats}
                 variant="outline"
                 size="sm"
@@ -6776,7 +6898,6 @@ function AsesorIAPanel({ token }: { token: string }) {
     </div>
   );
 }
-
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -6785,3 +6906,4 @@ function FieldRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
