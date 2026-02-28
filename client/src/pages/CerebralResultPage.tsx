@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+﻿import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -46,8 +46,8 @@ export default function CerebralResultPage() {
   const isDominantLeft = profile.dominantSide === "izquierdo";
   const personalityTraits = profile.personalityTraits;
 
-  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
-  const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
+  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lÃ³gica"];
+  const rightTraits = ["imÃ¡genes", "caos", "creatividad", "intuiciÃ³n", "fantasÃ­a", "curiosidad"];
 
   const captureAndShare = async (): Promise<Blob | null> => {
     if (!captureAreaRef.current) return null;
@@ -118,7 +118,7 @@ export default function CerebralResultPage() {
           await navigator.share({
             files: [file],
             title: 'Mi resultado - IQEXPONENCIAL',
-            text: `¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
+            text: `Â¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
           });
         } catch (e) {
           console.error("Share cancelled:", e);
@@ -128,7 +128,7 @@ export default function CerebralResultPage() {
       }
     }
     
-    const text = encodeURIComponent(`¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    const text = encodeURIComponent(`Â¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
     setIsSharing(false);
   };
@@ -204,7 +204,7 @@ export default function CerebralResultPage() {
               className="text-xl font-bold"
               style={{ color: "#1f2937" }}
             >
-              ¡Felicidades!
+              Â¡Felicidades!
             </motion.h1>
           </div>
         </div>
@@ -266,97 +266,85 @@ export default function CerebralResultPage() {
                   animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
                   transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <foreignObject x="0" y="0" width="240" height="260">
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "240px",
-                        height: "260px",
-                        WebkitMaskImage: "url('/brainsvg.svg')",
-                        maskImage: "url('/brainsvg.svg')",
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        background: "rgba(15,23,42,0.08)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${leftPercent}%`,
-                          background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
-                        }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: "3%",
-                          width: "44%",
-                          bottom: `calc(${leftPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                      />
+                  <defs>
+                    <clipPath id="brainClipMain">
+                      <path d="M120 24 C84 12, 40 32, 40 78 C20 94,20 130,40 146 C38 188,66 226,106 232 C112 238,116 242,120 242 C124 242,128 238,134 232 C174 226,202 188,200 146 C220 130,220 94,200 78 C200 32,156 12,120 24 Z" />
+                    </clipPath>
+                    <linearGradient id="leftLiquid" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#67E8F9" />
+                      <stop offset="60%" stopColor="#06B6D4" />
+                      <stop offset="100%" stopColor="#0E7490" />
+                    </linearGradient>
+                    <linearGradient id="rightLiquid" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#C4B5FD" />
+                      <stop offset="60%" stopColor="#8A3FFC" />
+                      <stop offset="100%" stopColor="#6D28D9" />
+                    </linearGradient>
+                  </defs>
 
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${rightPercent}%`,
-                          background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
-                        }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "3%",
-                          width: "44%",
-                          bottom: `calc(${rightPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                    </div>
-                  </foreignObject>
+                  <g clipPath="url(#brainClipMain)">
+                    <rect x="40" y="20" width="80" height="222" fill="rgba(15,23,42,0.08)" />
+                    <rect x="120" y="20" width="80" height="222" fill="rgba(15,23,42,0.08)" />
 
-                  <image href="/brainsvg.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+                    <motion.rect
+                      x="40"
+                      y={242 - (leftPercent / 100) * 222}
+                      width="80"
+                      height={(leftPercent / 100) * 222}
+                      fill="url(#leftLiquid)"
+                      animate={{ y: [242 - (leftPercent / 100) * 222 + 6, 242 - (leftPercent / 100) * 222 - 4, 242 - (leftPercent / 100) * 222 + 6] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.rect
+                      x="120"
+                      y={242 - (rightPercent / 100) * 222}
+                      width="80"
+                      height={(rightPercent / 100) * 222}
+                      fill="url(#rightLiquid)"
+                      animate={{ y: [242 - (rightPercent / 100) * 222 + 6, 242 - (rightPercent / 100) * 222 - 4, 242 - (rightPercent / 100) * 222 + 6] }}
+                      transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+
+                    <motion.ellipse
+                      cx="80"
+                      cy={242 - (leftPercent / 100) * 222}
+                      rx="37"
+                      ry="4"
+                      fill="rgba(255,255,255,0.72)"
+                      animate={{ cx: [76, 84, 76], opacity: [0.4, 0.9, 0.4] }}
+                      transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.ellipse
+                      cx="160"
+                      cy={242 - (rightPercent / 100) * 222}
+                      rx="37"
+                      ry="4"
+                      fill="rgba(255,255,255,0.72)"
+                      animate={{ cx: [156, 164, 156], opacity: [0.4, 0.9, 0.4] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </g>
+
+                  <path
+                    d="M120 24 C84 12, 40 32, 40 78 C20 94,20 130,40 146 C38 188,66 226,106 232 C112 238,116 242,120 242 C124 242,128 238,134 232 C174 226,202 188,200 146 C220 130,220 94,200 78 C200 32,156 12,120 24 Z"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.45)"
+                    strokeWidth="2.4"
+                  />
 
                   <line
                     x1="120"
-                    y1="18"
+                    y1="24"
                     x2="120"
-                    y2="248"
+                    y2="242"
                     stroke="rgba(31,41,55,0.6)"
                     strokeWidth="2.2"
                     strokeDasharray="5,6"
                   />
 
-                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
-                    {leftPercent}%
+                  <text x="80" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">`r`n                    {leftPercent}%
                   </text>
-                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="white">
-                    {rightPercent}%
+                  <text x="160" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">`r`n                    {rightPercent}%
                   </text>
                 </motion.svg>
               </motion.div>
@@ -388,7 +376,7 @@ export default function CerebralResultPage() {
                   {isDominantLeft ? 'izquierdo' : 'derecho'}
                 </span> de tu cerebro es
               </p>
-              <p className="text-xl font-black text-gray-800">más dominante.</p>
+              <p className="text-xl font-black text-gray-800">mÃ¡s dominante.</p>
             </motion.div>
 
             {personalityTraits.length > 0 && (
@@ -488,7 +476,7 @@ export default function CerebralResultPage() {
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              Más opciones
+              MÃ¡s opciones
             </motion.button>
             
             <motion.button
@@ -519,3 +507,5 @@ export default function CerebralResultPage() {
     </div>
   );
 }
+
+
