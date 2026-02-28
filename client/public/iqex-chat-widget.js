@@ -39,6 +39,8 @@
     "  overflow: hidden; transform: translateY(20px) scale(.9); opacity: 0; pointer-events: none;",
     "  transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,.3);",
     "}",
+    ".iqex-chat-modal.right { right: 0; left: auto; }",
+    ".iqex-chat-modal.left { left: 0; right: auto; }",
     ".iqex-chat-modal.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }",
     ".iqex-chat-header { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); padding: 14px 16px; color: #fff; display: flex; align-items: center; justify-content: space-between; }",
     ".iqex-chat-head-info { display: flex; align-items: center; gap: 12px; }",
@@ -68,7 +70,8 @@
   trigger.innerHTML = '<span style="font-size:18px;">💬</span><span>Chat con Asesor</span>';
 
   var modal = document.createElement("div");
-  modal.className = "iqex-chat-modal";
+  var side = position === "left" ? "left" : "right";
+  modal.className = "iqex-chat-modal " + side;
 
   var header = document.createElement("div");
   header.className = "iqex-chat-header";
@@ -105,10 +108,37 @@
   modal.appendChild(header);
   modal.appendChild(frameWrap);
 
+  function keepModalInViewport() {
+    if (!modal.classList.contains("active")) return;
+    modal.style.left = "";
+    modal.style.right = "";
+    modal.classList.remove("left", "right");
+    modal.classList.add(side);
+    modal.style.transform = "";
+    modal.style.marginLeft = "0";
+    modal.style.marginRight = "0";
+
+    var rect = modal.getBoundingClientRect();
+    var margin = 8;
+    var shiftX = 0;
+    if (rect.right > window.innerWidth - margin) {
+      shiftX -= rect.right - (window.innerWidth - margin);
+    }
+    if (rect.left < margin) {
+      shiftX += margin - rect.left;
+    }
+    if (shiftX !== 0) {
+      modal.style.marginLeft = shiftX + "px";
+    }
+  }
+
   function toggleChat(forceOpen) {
     var open = modal.classList.contains("active");
     var next = typeof forceOpen === "boolean" ? forceOpen : !open;
     modal.classList.toggle("active", next);
+    if (next) {
+      requestAnimationFrame(keepModalInViewport);
+    }
   }
 
   trigger.addEventListener("click", function () {
@@ -116,6 +146,13 @@
   });
   closeBtn.addEventListener("click", function () {
     toggleChat(false);
+  });
+
+  window.addEventListener("resize", function () {
+    requestAnimationFrame(keepModalInViewport);
+  });
+  window.addEventListener("orientationchange", function () {
+    requestAnimationFrame(keepModalInViewport);
   });
 
   root.appendChild(modal);
