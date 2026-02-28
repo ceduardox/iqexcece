@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useEffect } from "react";
+﻿import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Brain, Dumbbell, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen, Map } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -90,7 +90,12 @@ function readCachedStyles(lang: string): PageStyles {
   }
 }
 
-function IconWithFallback({
+
+function normalizeStyleLang(lang: string): "es" | "en" | "pt" {
+  const base = (lang || "en").toLowerCase().split("-")[0];
+  if (base === "es" || base === "en" || base === "pt") return base;
+  return "en";
+}function IconWithFallback({
   src,
   alt = "",
   className,
@@ -125,7 +130,10 @@ function IconWithFallback({
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const { t, i18n } = useTranslation();
-  const lang = i18n.language || 'es';
+  const styleLang = useMemo(
+    () => normalizeStyleLang(i18n.resolvedLanguage || i18n.language || "en"),
+    [i18n.resolvedLanguage, i18n.language],
+  );
   const [, setLocation] = useLocation();
   const { userData, setUserData } = useUserData();
   const [navMoreOpen, setNavMoreOpen] = useState(false);
@@ -134,9 +142,9 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [styles, setStyles] = useState<PageStyles>(() => readCachedStyles(lang));
-  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${HOME_ASSET_WARM_KEY}${lang}`) === "1");
+  const [styles, setStyles] = useState<PageStyles>(() => readCachedStyles(styleLang));
+  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedStyles(styleLang)).length > 0);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${HOME_ASSET_WARM_KEY}${styleLang}`) === "1");
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   
@@ -160,19 +168,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   useEffect(() => {
     const controller = new AbortController();
-    const cachedStyles = readCachedStyles(lang);
+    const cachedStyles = readCachedStyles(styleLang);
     setStyles(cachedStyles);
     setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(localStorage.getItem(`${HOME_ASSET_WARM_KEY}${lang}`) === "1");
+    setAssetsReady(localStorage.getItem(`${HOME_ASSET_WARM_KEY}${styleLang}`) === "1");
 
-    fetch(`/api/page-styles/selection-screen?lang=${lang}`, { signal: controller.signal })
+    fetch(`/api/page-styles/selection-screen?lang=${styleLang}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
             setStyles(nextStyles);
-            localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+            localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${styleLang}`, JSON.stringify(nextStyles));
           } catch {
             console.log("No saved styles");
           }
@@ -185,11 +193,11 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     return () => {
       controller.abort();
     };
-  }, [lang]);
+  }, [styleLang]);
 
   useEffect(() => {
     if (!stylesReady) return;
-    const warmKey = `${HOME_ASSET_WARM_KEY}${lang}`;
+    const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
     if (localStorage.getItem(warmKey) === "1") {
       setAssetsReady(true);
       return;
@@ -206,7 +214,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     return () => {
       cancelled = true;
     };
-  }, [stylesReady, styles, lang]);
+  }, [stylesReady, styles, styleLang]);
   
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
@@ -233,14 +241,14 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
         body: JSON.stringify({
           pageName: "selection-screen",
           styles: JSON.stringify(styles),
-          lang
+          lang: styleLang
         })
       });
       
       if (!response.ok) {
         throw new Error("Failed to save");
       }
-      localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${lang}`, JSON.stringify(styles));
+      localStorage.setItem(`${HOME_STYLE_CACHE_KEY}${styleLang}`, JSON.stringify(styles));
       
       toast({ title: "Guardado", description: "Los estilos se guardaron correctamente" });
     } catch (error) {
@@ -1005,4 +1013,5 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     </div>
   );
 }
+
 
