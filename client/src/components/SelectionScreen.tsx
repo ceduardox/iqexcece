@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+﻿import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Brain, Dumbbell, MoreHorizontal, MessageCircle, Mail, ChevronRight, Play, Newspaper, BookOpen, Map } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -18,8 +18,8 @@ interface SelectionScreenProps {
   onComplete: (selection: { ageGroup: string; ageLabel: string; problems: string[]; problemTitles: string[] }) => void;
 }
 
-const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:";
-const HOME_ASSET_WARM_KEY = "assets-warm:selection-screen:";
+const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:v2:";
+const HOME_ASSET_WARM_KEY = "assets-warm:selection-screen:v2:";
 const DEFAULT_MINDMAP_BG = "https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af";
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
@@ -201,7 +201,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   const handleSaveStyles = async () => {
     if (!adminToken) {
-      toast({ title: "Error", description: "Debes iniciar sesión en el panel admin", variant: "destructive" });
+      toast({ title: "Error", description: "Debes iniciar sesiÃ³n en el panel admin", variant: "destructive" });
       return;
     }
     try {
@@ -976,3 +976,4 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     </div>
   );
 }
+
