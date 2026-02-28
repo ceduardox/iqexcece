@@ -2912,6 +2912,13 @@ ${schemaContent.substring(0, 3000)}
     res.json({ config: rows[0] || null });
   });
 
+  app.get("/api/admin/asesor/rules", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) return res.status(401).json({ error: "Unauthorized" });
+    res.json({ rules: ASESOR_RESPONSE_RULES.trim() });
+  });
+
   app.post("/api/admin/asesor/config", async (req, res) => {
     const auth = req.headers.authorization;
     const token = auth?.replace("Bearer ", "");

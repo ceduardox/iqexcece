@@ -6549,6 +6549,7 @@ function InstitutionsPanel({ token }: { token: string }) {
 
 function AsesorIAPanel({ token }: { token: string }) {
   const [prompt, setPrompt] = useState("");
+  const [systemRules, setSystemRules] = useState("");
   const [saving, setSaving] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
@@ -6561,6 +6562,10 @@ function AsesorIAPanel({ token }: { token: string }) {
     fetch("/api/admin/asesor/config", { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => { if (d.config?.prompt) setPrompt(d.config.prompt); })
+      .catch(() => {});
+    fetch("/api/admin/asesor/rules", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => { if (d.rules) setSystemRules(d.rules); })
       .catch(() => {});
   }, []);
 
@@ -6618,6 +6623,19 @@ function AsesorIAPanel({ token }: { token: string }) {
             <Save className="w-4 h-4 mr-2" />
             {saving ? "Guardando..." : "Guardar Prompt"}
           </Button>
+
+          <div className="mt-5">
+            <h4 className="text-sm font-semibold text-cyan-300 mb-2">Reglas del sistema (solo lectura)</h4>
+            <p className="text-white/40 text-xs mb-2">
+              Estas reglas se aplican siempre al asesor y se anexan automáticamente al prompt.
+            </p>
+            <textarea
+              value={systemRules}
+              readOnly
+              className="w-full h-36 bg-black/30 text-white/90 border border-cyan-500/30 rounded-lg p-3 text-xs resize-y focus:outline-none"
+              data-testid="textarea-asesor-rules-readonly"
+            />
+          </div>
         </CardContent>
       </Card>
 
