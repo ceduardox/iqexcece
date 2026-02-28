@@ -27,8 +27,8 @@
     ".iqex-chat-root.right { right: 30px; }",
     ".iqex-chat-root.left { left: 30px; }",
     ".iqex-chat-trigger {",
-    "  padding: 15px 25px; border: none; border-radius: 50px; cursor: pointer;",
-    "  display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: #fff;",
+    "  width: 58px; height: 58px; border: none; border-radius: 50%; cursor: pointer;",
+    "  display: grid; place-items: center; font-weight: 700; font-size: 22px; color: #fff;",
     "  background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);",
     "  box-shadow: 0 8px 20px rgba(58,123,213,0.4); transition: all .3s ease; animation: iqexPulse 2s infinite;",
     "}",
@@ -56,7 +56,7 @@
     "@media (max-width: 640px) {",
     "  .iqex-chat-root.right, .iqex-chat-root.left { right: 12px; left: 12px; bottom: 12px; }",
     "  .iqex-chat-modal { width: 100%; bottom: 64px; }",
-    "  .iqex-chat-trigger { width: 100%; justify-content: center; }",
+    "  .iqex-chat-trigger { width: 58px; height: 58px; }",
     "}",
   ].join("");
   document.head.appendChild(style);
@@ -68,7 +68,7 @@
   trigger.type = "button";
   trigger.className = "iqex-chat-trigger";
   trigger.setAttribute("aria-label", "Abrir chat");
-  trigger.innerHTML = '<span style="font-size:18px;">💬</span><span>Chat con Asesor</span>';
+  trigger.innerHTML = '<span style="font-size:22px; line-height:1;">💬</span>';
 
   var modal = document.createElement("div");
   var side = position === "left" ? "left" : "right";

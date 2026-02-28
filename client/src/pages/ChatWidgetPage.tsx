@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircle, Send, Loader2, User, Headphones, Paperclip, Download, ExternalLink } from "lucide-react";
+import { Send, Loader2, User, Headphones, Paperclip, Download, ExternalLink } from "lucide-react";
 
 type ChatMsg = {
   role: "user" | "assistant";
@@ -50,7 +50,6 @@ function getWidgetSessionId(site: string) {
 export default function ChatWidgetPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const site = (params.get("site") || "external").toLowerCase().replace(/[^a-z0-9_-]/g, "");
-  const title = params.get("title") || "Asesor";
 
   const [messages, setMessages] = useState<ChatMsg[]>([
     { role: "assistant", content: "Hola, soy tu asesor. ¿En qué puedo ayudarte?" },
@@ -206,11 +205,6 @@ export default function ChatWidgetPage() {
 
   return (
     <div className="h-screen w-full bg-white text-gray-900 flex flex-col">
-      <header className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-cyan-500 to-violet-600 text-white flex items-center gap-2">
-        <MessageCircle className="w-4 h-4" />
-        <div className="font-semibold text-sm">{title}</div>
-      </header>
-
       <main className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
         {!profileReady && (
           <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-2">
