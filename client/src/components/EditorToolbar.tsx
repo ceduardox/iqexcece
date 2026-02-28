@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type, Monitor, Smartphone, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -141,13 +141,34 @@ export function EditorToolbar({
     ? ({ left: floatingPosition.x, top: floatingPosition.y, transform: "none" } as const)
     : undefined;
 
+  useEffect(() => {
+    if (!floatingPosition || !toolbarRef.current) return;
+
+    const keepInViewport = () => {
+      if (!toolbarRef.current) return;
+      const rect = toolbarRef.current.getBoundingClientRect();
+      const margin = 8;
+      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+      const x = clamp(floatingPosition.x, margin, maxX);
+      const y = clamp(floatingPosition.y, margin, maxY);
+      if (x !== floatingPosition.x || y !== floatingPosition.y) {
+        setFloatingPosition({ x, y });
+      }
+    };
+
+    keepInViewport();
+    window.addEventListener("resize", keepInViewport);
+    return () => window.removeEventListener("resize", keepInViewport);
+  }, [floatingPosition]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       ref={toolbarRef}
-      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[95vw] sm:w-auto sm:min-w-[340px] max-w-[400px] ${isDragging ? "cursor-grabbing" : ""}`}
+      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[calc(100vw-16px)] sm:w-auto sm:min-w-[340px] max-w-[400px] ${isDragging ? "cursor-grabbing" : ""}`}
       style={floatingStyle}
       data-testid="editor-toolbar"
       onClick={(e) => e.stopPropagation()}
@@ -224,7 +245,7 @@ export function EditorToolbar({
           <Monitor className="w-3 h-3 mr-1" />
           PC
         </Button>
-        <span className="text-gray-500 text-[9px] ml-1">{deviceMode === "mobile" ? "Editando móvil" : "Editando PC"}</span>
+        <span className="hidden sm:inline text-gray-500 text-[9px] ml-1">{deviceMode === "mobile" ? "Editando móvil" : "Editando PC"}</span>
       </div>
 
       {selectedElement && (
