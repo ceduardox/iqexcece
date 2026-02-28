@@ -11,6 +11,8 @@ import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 import { computeCerebralProfile, isCerebralAnswerCorrect, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
 
+const LOGO_URL = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
   audio.volume = 0.6;
@@ -49,6 +51,45 @@ export default function CerebralResultPage() {
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "l\u00f3gica"];
   const rightTraits = ["im\u00e1genes", "caos", "creatividad", "intuici\u00f3n", "fantas\u00eda", "curiosidad"];
+
+  const normalize = (value: string) =>
+    (value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+  const normalizedPersonalityTraits = personalityTraits.map(normalize);
+  const leftTraitHints: Record<string, string[]> = {
+    reglas: ["regla", "orden", "norma"],
+    estrategia: ["estrateg", "plan"],
+    detalles: ["detalle", "precision", "minuc"],
+    racionalidad: ["racional", "analit", "analisis"],
+    idioma: ["idioma", "lengua", "verbal", "comunic"],
+    "l\u00f3gica": ["logica", "razon", "deduc"],
+  };
+  const rightTraitHints: Record<string, string[]> = {
+    "im\u00e1genes": ["imagen", "visual"],
+    caos: ["caos", "improvis"],
+    creatividad: ["creativ", "innov", "original"],
+    "intuici\u00f3n": ["intuic", "instint"],
+    "fantas\u00eda": ["fantas", "imagin"],
+    curiosidad: ["curios", "explor"],
+  };
+
+  const highlightedLeftTrait =
+    leftTraits.find((trait) =>
+      (leftTraitHints[trait] || []).some((hint) =>
+        normalizedPersonalityTraits.some((entry) => entry.includes(hint)),
+      ),
+    ) || null;
+
+  const highlightedRightTrait =
+    rightTraits.find((trait) =>
+      (rightTraitHints[trait] || []).some((hint) =>
+        normalizedPersonalityTraits.some((entry) => entry.includes(hint)),
+      ),
+    ) || null;
 
   useEffect(() => {
     const durationMs = 1400;
@@ -198,8 +239,33 @@ export default function CerebralResultPage() {
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       {/* Capture area - contains header and content, excludes buttons */}
       <div ref={captureAreaRef} className="bg-white">
-        <header className="relative flex items-center justify-end px-5 py-3 bg-white border-b border-gray-100 md:hidden">
-          <div className="absolute right-5"><LanguageButton /></div>
+        <header
+          className="sticky top-0 z-50 w-full md:hidden"
+          style={{
+            background: "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(255, 255, 255, 1) 100%)",
+          }}
+        >
+          <div className="relative pt-3 pb-2 px-5">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setLocation('/cerebral/seleccion')}
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{
+                  background: "rgba(255, 255, 255, 0.9)",
+                  boxShadow: "0 2px 8px rgba(138, 63, 252, 0.15)",
+                }}
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-5 h-5" style={{ color: "#8a3ffc" }} />
+              </button>
+
+              <div className="flex items-center justify-center">
+                <img src={LOGO_URL} alt="iQx" className="h-10 w-auto object-contain" />
+              </div>
+
+              <LanguageButton />
+            </div>
+          </div>
         </header>
         <div 
           className="w-full"
@@ -237,16 +303,21 @@ export default function CerebralResultPage() {
             <div className="relative flex justify-center items-center mb-6">
               <div className="absolute left-0 text-right pr-2 space-y-1 w-20">
                 {leftTraits.map((trait, idx) => (
+                  (() => {
+                    const isHighlighted = trait === highlightedLeftTrait;
+                    return (
                   <motion.p
                     key={trait}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + idx * 0.1 }}
-                    className={`text-xs ${idx === 3 ? 'font-bold text-sm' : 'text-gray-500'}`}
-                    style={idx === 3 ? { color: "#8a3ffc" } : {}}
+                    className={`text-xs ${isHighlighted ? 'font-bold text-sm' : 'text-gray-500'}`}
+                    style={isHighlighted ? { color: "#8a3ffc" } : {}}
                   >
                     {trait}
                   </motion.p>
+                    );
+                  })()
                 ))}
               </div>
 
@@ -383,16 +454,21 @@ export default function CerebralResultPage() {
 
               <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
                 {rightTraits.map((trait, idx) => (
+                  (() => {
+                    const isHighlighted = trait === highlightedRightTrait;
+                    return (
                   <motion.p
                     key={trait}
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + idx * 0.1 }}
-                    className={`text-xs ${idx === 3 ? 'font-bold text-sm' : 'text-gray-500'}`}
-                    style={idx === 3 ? { color: "#8a3ffc" } : {}}
+                    className={`text-xs ${isHighlighted ? 'font-bold text-sm' : 'text-gray-500'}`}
+                    style={isHighlighted ? { color: "#8a3ffc" } : {}}
                   >
                     {trait}
                   </motion.p>
+                    );
+                  })()
                 ))}
               </div>
             </div>
@@ -488,7 +564,11 @@ export default function CerebralResultPage() {
             <div className="flex items-center justify-between">
               <div className="w-44 text-right space-y-2">
                 {leftTraits.map((trait, idx) => (
-                  <p key={`capture-left-${trait}`} className={`text-2xl ${idx === 3 ? "font-bold" : "text-gray-500"}`} style={idx === 3 ? { color: "#8a3ffc" } : {}}>
+                  <p
+                    key={`capture-left-${trait}`}
+                    className={`text-2xl ${trait === highlightedLeftTrait ? "font-bold" : "text-gray-500"}`}
+                    style={trait === highlightedLeftTrait ? { color: "#8a3ffc" } : {}}
+                  >
                     {trait}
                   </p>
                 ))}
@@ -525,7 +605,11 @@ export default function CerebralResultPage() {
 
               <div className="w-44 text-left space-y-2">
                 {rightTraits.map((trait, idx) => (
-                  <p key={`capture-right-${trait}`} className={`text-2xl ${idx === 3 ? "font-bold" : "text-gray-500"}`} style={idx === 3 ? { color: "#8a3ffc" } : {}}>
+                  <p
+                    key={`capture-right-${trait}`}
+                    className={`text-2xl ${trait === highlightedRightTrait ? "font-bold" : "text-gray-500"}`}
+                    style={trait === highlightedRightTrait ? { color: "#8a3ffc" } : {}}
+                  >
                     {trait}
                   </p>
                 ))}
