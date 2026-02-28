@@ -22,6 +22,7 @@ export default function CerebralResultPage() {
   const [, setLocation] = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
+  const shareCaptureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [animatedLeftPercent, setAnimatedLeftPercent] = useState(0);
   const [animatedRightPercent, setAnimatedRightPercent] = useState(0);
@@ -67,14 +68,15 @@ export default function CerebralResultPage() {
   }, [leftPercent, rightPercent]);
 
   const captureAndShare = async (): Promise<Blob | null> => {
-    if (!captureAreaRef.current) return null;
+    const nodeToCapture = shareCaptureRef.current ?? captureAreaRef.current;
+    if (!nodeToCapture) return null;
     
     try {
-      const capturedCanvas = await html2canvas(captureAreaRef.current, {
+      const capturedCanvas = await html2canvas(nodeToCapture, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        foreignObjectRendering: true,
+        foreignObjectRendering: false,
         logging: false,
         allowTaint: true,
       });
@@ -374,11 +376,9 @@ export default function CerebralResultPage() {
                     {animatedRightPercent}%
                   </text>
                 </motion.svg>
-                <img
-                  src="/brain50.svg"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-85"
-                />
+                <svg viewBox="0 0 240 260" className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+                  <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+                </svg>
               </motion.div>
 
               <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
@@ -477,6 +477,70 @@ export default function CerebralResultPage() {
         </div>
       </div>
       {/* End capture area */}
+
+      <div className="fixed -left-[9999px] top-0 pointer-events-none" aria-hidden="true">
+        <div ref={shareCaptureRef} className="w-[900px] bg-white p-8">
+          <div className="text-center mb-6">
+            <p className="text-2xl font-semibold" style={{ color: "#8a3ffc" }}>Test Cerebral</p>
+            <h2 className="text-5xl font-black text-gray-800">{"\u00a1Felicidades!"}</h2>
+          </div>
+          <div className="rounded-3xl border border-gray-200 p-8 bg-white">
+            <div className="flex items-center justify-between">
+              <div className="w-44 text-right space-y-2">
+                {leftTraits.map((trait, idx) => (
+                  <p key={`capture-left-${trait}`} className={`text-2xl ${idx === 3 ? "font-bold" : "text-gray-500"}`} style={idx === 3 ? { color: "#8a3ffc" } : {}}>
+                    {trait}
+                  </p>
+                ))}
+              </div>
+
+              <div className="relative w-[340px] h-[380px]">
+                <div className="absolute inset-0 rounded-[70px] overflow-hidden border border-gray-200 bg-[#eef7fb]">
+                  <div
+                    className="absolute left-0 bottom-0 w-1/2"
+                    style={{
+                      height: `${leftPercent}%`,
+                      background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
+                    }}
+                  />
+                  <div
+                    className="absolute right-0 bottom-0 w-1/2"
+                    style={{
+                      height: `${rightPercent}%`,
+                      background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
+                    }}
+                  />
+                  <div className="absolute inset-0">
+                    <img src="/brain-colorful.png" alt="" className="w-full h-full object-contain opacity-60" />
+                  </div>
+                </div>
+                <div className="absolute inset-y-3 left-1/2 -translate-x-1/2 w-[2px] bg-gray-500/70" style={{ borderStyle: "dashed" }} />
+                <div className="absolute top-1/2 -translate-y-1/2 left-[34%] -translate-x-1/2 text-[48px] font-black" style={{ color: "#06B6D4" }}>
+                  {leftPercent}%
+                </div>
+                <div className="absolute top-1/2 -translate-y-1/2 left-[66%] -translate-x-1/2 text-[48px] font-black" style={{ color: "#8A3FFC" }}>
+                  {rightPercent}%
+                </div>
+              </div>
+
+              <div className="w-44 text-left space-y-2">
+                {rightTraits.map((trait, idx) => (
+                  <p key={`capture-right-${trait}`} className={`text-2xl ${idx === 3 ? "font-bold" : "text-gray-500"}`} style={idx === 3 ? { color: "#8a3ffc" } : {}}>
+                    {trait}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <p className="text-[42px] text-gray-700">
+                El lado <span className="font-bold" style={{ color: "#8a3ffc" }}>{isDominantLeft ? "izquierdo" : "derecho"}</span> de tu cerebro es
+              </p>
+              <p className="text-[56px] font-black text-gray-800">{"m\u00e1s dominante."}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Buttons section - excluded from capture */}
       <div className="px-4 pb-6">
