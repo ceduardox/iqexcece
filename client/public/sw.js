@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.2';
+﻿const CACHE_VERSION = 'v1.0.3';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -61,3 +61,4 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
