@@ -71,6 +71,38 @@ function readCachedStyles(lang: string): PageStyles {
   }
 }
 
+function IconWithFallback({
+  src,
+  alt = "",
+  className,
+  style,
+  fallback,
+}: {
+  src?: string;
+  alt?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  fallback: React.ReactNode;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) return <>{fallback}</>;
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const isMobile = useIsMobile();
   const { t, i18n } = useTranslation();
@@ -164,7 +196,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   };
   
   const handleStyleChange = (elementId: string, style: ElementStyle) => {
-    setStyles(prev => ({ ...prev, [elementId]: style }));
+    setStyles(prev => ({ ...prev, [elementId]: { ...prev[elementId], ...style } }));
   };
   
   const handleSaveStyles = async () => {
@@ -213,15 +245,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     const result: React.CSSProperties = {};
     
     if (style.backgroundType === "image" && style.imageUrl) {
-      result.backgroundImage = `url(${style.imageUrl})`;
-      result.backgroundSize = style.imageSize ? `${style.imageSize}%` : "cover";
-      result.backgroundPosition = "center";
-      result.backgroundRepeat = "no-repeat";
-      result.backgroundColor = "transparent";
+      const underlay = style.background || defaultBg || "transparent";
+      result.background = `url(${style.imageUrl}) center / ${style.imageSize ? `${style.imageSize}%` : "cover"} no-repeat, ${underlay}`;
     } else if (style.background) {
-      result.backgroundColor = style.background;
+      result.background = style.background;
     } else if (defaultBg) {
-      result.backgroundColor = defaultBg;
+      result.background = defaultBg;
     }
     
     if (style.boxShadow) result.boxShadow = style.boxShadow;
