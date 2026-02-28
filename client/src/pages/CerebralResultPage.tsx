@@ -11,8 +11,6 @@ import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 import { computeCerebralProfile, isCerebralAnswerCorrect, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
 
-const HEADER_LOGO = localCaptureLogo;
-
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
   audio.volume = 0.6;
@@ -25,6 +23,7 @@ export default function CerebralResultPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [captureMode, setCaptureMode] = useState(false);
   const [animatedLeftPercent, setAnimatedLeftPercent] = useState(0);
   const [animatedRightPercent, setAnimatedRightPercent] = useState(0);
   
@@ -72,6 +71,10 @@ export default function CerebralResultPage() {
     if (!captureAreaRef.current) return null;
     
     try {
+      setCaptureMode(true);
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
       const capturedCanvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
@@ -120,6 +123,8 @@ export default function CerebralResultPage() {
     } catch (e) {
       console.error("Capture error:", e);
       return null;
+    } finally {
+      setCaptureMode(false);
     }
   };
   
@@ -198,8 +203,7 @@ export default function CerebralResultPage() {
     <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
       {/* Capture area - contains header and content, excludes buttons */}
       <div ref={captureAreaRef} className="bg-white">
-        <header className="relative flex items-center justify-center px-5 py-3 bg-white border-b border-gray-100 md:hidden">
-          <img src={HEADER_LOGO} alt="iQx" className="h-10 w-auto object-contain" />
+        <header className="relative flex items-center justify-end px-5 py-3 bg-white border-b border-gray-100 md:hidden">
           <div className="absolute right-5"><LanguageButton /></div>
         </header>
         <div 
@@ -360,7 +364,7 @@ export default function CerebralResultPage() {
                     </div>
                   </foreignObject>
 
-                  <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+                  <image href={captureMode ? "/brain50.png" : "/brain50.svg"} x="0" y="0" width="240" height="260" opacity="0.22" />
 
                   <line
                     x1="120"
