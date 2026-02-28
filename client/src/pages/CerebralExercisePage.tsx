@@ -58,6 +58,7 @@ export default function CerebralExercisePage() {
   const [shouldRedirectToResults, setShouldRedirectToResults] = useState(false);
   const [selectedPreference, setSelectedPreference] = useState<{ imageUrl: string; meaning: string } | null>(null);
   const [selectedLat, setSelectedLat] = useState<string | null>(null);
+  const [exerciseStartedAt, setExerciseStartedAt] = useState<number>(() => Date.now());
 
   const { data, isLoading } = useQuery<{ content: CerebralContent | null }>({
     queryKey: ['/api/cerebral', params.categoria, params.tema, lang],
@@ -77,6 +78,7 @@ export default function CerebralExercisePage() {
     setSubmitted(false);
     setMemoriaPhase('memorize');
     setSelectedItems([]);
+    setExerciseStartedAt(Date.now());
   }, [params.tema, params.categoria]);
 
   // Timer effect
@@ -156,6 +158,32 @@ export default function CerebralExercisePage() {
   const handleReset = () => {
     setUserAnswer("");
     setSubmitted(false);
+    setExerciseStartedAt(Date.now());
+  };
+
+  const saveCerebralAnswer = (payload: { type: string; answer: string; correct: string }) => {
+    const stored = sessionStorage.getItem('cerebralAnswers');
+    const answers = stored ? JSON.parse(stored) : [];
+    const data = content?.exerciseData || {};
+    const normalizedWeight = Number.isFinite(Number(data.weight)) ? Number(data.weight) : 1;
+    const maxTimeSec = Number.isFinite(Number(data.maxTimeSec))
+      ? Number(data.maxTimeSec)
+      : (Number.isFinite(Number(data.timerSeconds)) ? Number(data.timerSeconds) : 30);
+
+    answers.push({
+      tema: params.tema,
+      type: payload.type,
+      answer: payload.answer,
+      correct: payload.correct,
+      dimension: data.dimension || undefined,
+      targetHemisphere: data.targetHemisphere || undefined,
+      weight: normalizedWeight,
+      scoringMode: data.scoringMode || "accuracy",
+      maxTimeSec,
+      timeTakenMs: Math.max(0, Date.now() - exerciseStartedAt),
+      traitTag: data.traitTag || undefined,
+    });
+    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
   };
 
   // Get answer options from exerciseData - ONLY what's saved in database
@@ -203,10 +231,7 @@ export default function CerebralExercisePage() {
                   const isRight = option.value.toLowerCase().trim() === correctAnswer;
                   setIsCorrect(isRight);
                   setSubmitted(true);
-                  const stored = sessionStorage.getItem('cerebralAnswers');
-                  const answers = stored ? JSON.parse(stored) : [];
-                  answers.push({ tema: params.tema, type: 'bailarina', answer: option.value, correct: content?.exerciseData?.correctAnswer || "" });
-                  sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                  saveCerebralAnswer({ type: 'bailarina', answer: option.value, correct: content?.exerciseData?.correctAnswer || "" });
                   setTimeout(() => handleNext(), 800);
                 }}
                 disabled={submitted}
@@ -290,10 +315,7 @@ export default function CerebralExercisePage() {
                     if (submitted) return;
                     setUserAnswer(opt);
                     // Save and auto-advance
-                    const stored = sessionStorage.getItem('cerebralAnswers');
-                    const answers = stored ? JSON.parse(stored) : [];
-                    answers.push({ tema: params.tema, type: 'secuencia', answer: opt, correct: content?.exerciseData?.correctAnswer });
-                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    saveCerebralAnswer({ type: 'secuencia', answer: opt, correct: content?.exerciseData?.correctAnswer || "" });
                     setTimeout(() => handleNext(), 500);
                   }}
                   disabled={submitted}
@@ -319,10 +341,7 @@ export default function CerebralExercisePage() {
                 data-testid="input-sequence-answer"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && userAnswer.trim()) {
-                    const stored = sessionStorage.getItem('cerebralAnswers');
-                    const answers = stored ? JSON.parse(stored) : [];
-                    answers.push({ tema: params.tema, type: 'secuencia', answer: userAnswer, correct: content?.exerciseData?.correctAnswer });
-                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    saveCerebralAnswer({ type: 'secuencia', answer: userAnswer, correct: content?.exerciseData?.correctAnswer || "" });
                     setTimeout(() => handleNext(), 500);
                   }
                 }}
@@ -412,16 +431,12 @@ export default function CerebralExercisePage() {
         {selectedItems.length > 0 && (
           <button
             onClick={() => {
-              const stored = sessionStorage.getItem('cerebralAnswers');
-              const answers = stored ? JSON.parse(stored) : [];
               const correctItems = content?.exerciseData?.memoriaItems || [];
-              answers.push({ 
-                tema: params.tema, 
-                type: 'memoria', 
-                answer: selectedItems.join(','), 
-                correct: correctItems.join(',') 
+              saveCerebralAnswer({
+                type: 'memoria',
+                answer: selectedItems.join(','),
+                correct: correctItems.join(','),
               });
-              sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
               setTimeout(() => handleNext(), 500);
             }}
             className="mt-4 px-8 py-3 rounded-xl text-white font-bold"
@@ -484,10 +499,7 @@ export default function CerebralExercisePage() {
                     if (submitted) return;
                     setUserAnswer(opt);
                     // Save and auto-advance
-                    const stored = sessionStorage.getItem('cerebralAnswers');
-                    const answers = stored ? JSON.parse(stored) : [];
-                    answers.push({ tema: params.tema, type: 'patron', answer: opt, correct: content?.exerciseData?.correctAnswer });
-                    sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                    saveCerebralAnswer({ type: 'patron', answer: opt, correct: content?.exerciseData?.correctAnswer || "" });
                     setTimeout(() => handleNext(), 500);
                   }}
                   disabled={submitted}
@@ -510,10 +522,7 @@ export default function CerebralExercisePage() {
               disabled={submitted}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && userAnswer.trim()) {
-                  const stored = sessionStorage.getItem('cerebralAnswers');
-                  const answers = stored ? JSON.parse(stored) : [];
-                  answers.push({ tema: params.tema, type: 'patron', answer: userAnswer, correct: content?.exerciseData?.correctAnswer });
-                  sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                  saveCerebralAnswer({ type: 'patron', answer: userAnswer, correct: content?.exerciseData?.correctAnswer || "" });
                   setTimeout(() => handleNext(), 500);
                 }
               }}
@@ -562,10 +571,7 @@ export default function CerebralExercisePage() {
                 if (submitted) return;
                 setUserAnswer(opt);
                 // Save and auto-advance
-                const stored = sessionStorage.getItem('cerebralAnswers');
-                const answers = stored ? JSON.parse(stored) : [];
-                answers.push({ tema: params.tema, type: 'stroop', answer: opt, correct: content?.exerciseData?.correctAnswer });
-                sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
+                saveCerebralAnswer({ type: 'stroop', answer: opt, correct: content?.exerciseData?.correctAnswer || "" });
                 setTimeout(() => handleNext(), 500);
               }}
               disabled={submitted}

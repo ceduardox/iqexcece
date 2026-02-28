@@ -3563,6 +3563,111 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 )}
               </div>
 
+              <div className="p-3 rounded-md bg-white/5 border border-white/10 space-y-3">
+                <h4 className="text-white/80 text-sm font-medium">Configuracion de scoring por ejercicio (opcional)</h4>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Dimension cognitiva</label>
+                    <select
+                      value={cerebralContent.exerciseData.dimension || ""}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, dimension: e.target.value || undefined }
+                      }))}
+                      className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                      data-testid="select-cerebral-dimension"
+                    >
+                      <option value="" className="bg-gray-800">Auto (por tipo)</option>
+                      <option value="lateralidad" className="bg-gray-800">Lateralidad</option>
+                      <option value="logico_secuencial" className="bg-gray-800">Logico secuencial</option>
+                      <option value="visoespacial" className="bg-gray-800">Visoespacial</option>
+                      <option value="memoria_trabajo" className="bg-gray-800">Memoria de trabajo</option>
+                      <option value="inhibicion" className="bg-gray-800">Inhibicion / control</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Hemisferio objetivo</label>
+                    <select
+                      value={cerebralContent.exerciseData.targetHemisphere || ""}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, targetHemisphere: e.target.value || undefined }
+                      }))}
+                      className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                      data-testid="select-cerebral-target-hemisphere"
+                    >
+                      <option value="" className="bg-gray-800">Auto (por tipo)</option>
+                      <option value="left" className="bg-gray-800">Izquierdo</option>
+                      <option value="right" className="bg-gray-800">Derecho</option>
+                      <option value="balanced" className="bg-gray-800">Balanceado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Peso (0.1 a 3.0)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0.1"
+                      max="3"
+                      value={cerebralContent.exerciseData.weight ?? 1}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, weight: Number(e.target.value) || 1 }
+                      }))}
+                      className="bg-white/10 border-white/20 text-white text-sm"
+                      data-testid="input-cerebral-weight"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Modo de scoring</label>
+                    <select
+                      value={cerebralContent.exerciseData.scoringMode || "accuracy"}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, scoringMode: e.target.value || "accuracy" }
+                      }))}
+                      className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
+                      data-testid="select-cerebral-scoring-mode"
+                    >
+                      <option value="accuracy" className="bg-gray-800">Precision</option>
+                      <option value="accuracy_time" className="bg-gray-800">Precision + tiempo</option>
+                      <option value="consistency" className="bg-gray-800">Consistencia</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Tiempo maximo para scoring (seg)</label>
+                    <Input
+                      type="number"
+                      min="5"
+                      max="300"
+                      value={cerebralContent.exerciseData.maxTimeSec ?? 30}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, maxTimeSec: Number(e.target.value) || 30 }
+                      }))}
+                      className="bg-white/10 border-white/20 text-white text-sm"
+                      data-testid="input-cerebral-max-time-sec"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/60 text-xs mb-1 block">Rasgo asociado (traitTag)</label>
+                    <Input
+                      value={cerebralContent.exerciseData.traitTag || ""}
+                      onChange={(e) => setCerebralContent(p => ({
+                        ...p,
+                        exerciseData: { ...p.exerciseData, traitTag: e.target.value }
+                      }))}
+                      placeholder="Ej: racionalidad, intuicion, creatividad"
+                      className="bg-white/10 border-white/20 text-white text-sm"
+                      data-testid="input-cerebral-trait-tag"
+                    />
+                  </div>
+                </div>
+                <p className="text-white/40 text-xs">
+                  Si dejas estos campos vacios, se mantiene el comportamiento automatico actual por tipo de ejercicio.
+                </p>
+              </div>
+
               <div className="border-t border-white/10 pt-4">
                 <h3 className="text-white font-semibold mb-3">Datos del ejercicio ({cerebralContent.exerciseType})</h3>
                 

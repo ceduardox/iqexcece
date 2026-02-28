@@ -3,6 +3,13 @@ export type CerebralAnswer = {
   type: string;
   answer: string;
   correct: string;
+  dimension?: "lateralidad" | "logico_secuencial" | "visoespacial" | "memoria_trabajo" | "inhibicion";
+  targetHemisphere?: "left" | "right" | "balanced";
+  weight?: number;
+  scoringMode?: "accuracy" | "accuracy_time" | "consistency";
+  maxTimeSec?: number;
+  timeTakenMs?: number;
+  traitTag?: string;
 };
 
 export type PreferenciaAnswer = {
@@ -55,6 +62,37 @@ function compareAnswer(answer: string, correct: string): boolean {
   return a === c;
 }
 
+function getSafeWeight(value?: number): number {
+  if (typeof value !== "number" || Number.isNaN(value)) return 1;
+  if (value < 0.1) return 0.1;
+  if (value > 3) return 3;
+  return value;
+}
+
+function inferHemisphereByType(typeValue: string): "left" | "right" | "balanced" {
+  const type = normalizeText(typeValue);
+  if (LEFT_COGNITIVE_TYPES.has(type)) return "left";
+  if (RIGHT_COGNITIVE_TYPES.has(type)) return "right";
+  return "balanced";
+}
+
+function getAnswerRawScore(answer: CerebralAnswer): number {
+  const correct = compareAnswer(answer.answer, answer.correct);
+  if (!correct) return 0;
+
+  const mode = answer.scoringMode || "accuracy";
+  if (mode === "accuracy_time") {
+    const maxMs = Math.max((answer.maxTimeSec || 30) * 1000, 1000);
+    const spentMs = Math.max(answer.timeTakenMs || maxMs, 0);
+    const ratio = Math.max(0, Math.min(1, spentMs / maxMs));
+    const speedBonus = 1 - ratio * 0.5; // 1.0 fast, 0.5 at limit
+    return Math.max(0.5, speedBonus);
+  }
+
+  // "consistency" uses accuracy fallback for now (future: cross-item consistency)
+  return 1;
+}
+
 type ProfileInput = {
   lateralidadAnswers: string[];
   preferenciaAnswers: PreferenciaAnswer[];
@@ -89,11 +127,12 @@ function getLateralidadScore(answers: string[]): BlockScore {
   return { available: true, leftRatio: left / total };
 }
 
-function getCognitiveScore(answers: CerebralAnswer[]): { block: BlockScore; correctCount: number; total: number } {
+function getCognitiveScore(answers: CerebralAnswer[]): { block: BlockScore; correctCount: number; total: number; traitTags: string[] } {
   let leftScore = 0;
   let rightScore = 0;
   let total = 0;
   let correctCount = 0;
+  const traitTags: string[] = [];
 
   for (const ans of answers || []) {
     if (!ans?.type) continue;
@@ -101,23 +140,26 @@ function getCognitiveScore(answers: CerebralAnswer[]): { block: BlockScore; corr
     const isCorrect = compareAnswer(ans.answer, ans.correct);
     if (isCorrect) correctCount += 1;
 
-    const type = normalizeText(ans.type);
-    const weight = isCorrect ? 1 : 0;
-    if (LEFT_COGNITIVE_TYPES.has(type)) {
-      leftScore += weight;
-    } else if (RIGHT_COGNITIVE_TYPES.has(type)) {
-      rightScore += weight;
-    } else {
-      leftScore += weight * 0.5;
-      rightScore += weight * 0.5;
+    const hemisphere = ans.targetHemisphere || inferHemisphereByType(ans.type);
+    const weightedScore = getAnswerRawScore(ans) * getSafeWeight(ans.weight);
+
+    if (hemisphere === "left") leftScore += weightedScore;
+    else if (hemisphere === "right") rightScore += weightedScore;
+    else {
+      leftScore += weightedScore * 0.5;
+      rightScore += weightedScore * 0.5;
+    }
+
+    if (isCorrect && ans.traitTag && ans.traitTag.trim()) {
+      traitTags.push(ans.traitTag.trim());
     }
   }
 
-  if (total === 0) return { block: { available: false, leftRatio: 0.5 }, correctCount: 0, total: 0 };
+  if (total === 0) return { block: { available: false, leftRatio: 0.5 }, correctCount: 0, total: 0, traitTags: [] };
 
   const sideTotal = leftScore + rightScore;
   const leftRatio = sideTotal > 0 ? leftScore / sideTotal : 0.5;
-  return { block: { available: true, leftRatio }, correctCount, total };
+  return { block: { available: true, leftRatio }, correctCount, total, traitTags };
 }
 
 function getPreferenciaScore(answers: PreferenciaAnswer[]): { block: BlockScore; traits: string[] } {
@@ -161,12 +203,13 @@ export function computeCerebralProfile(input: ProfileInput): CerebralProfile {
 
   const leftPercent = Math.round(leftRatio * 100);
   const rightPercent = 100 - leftPercent;
+  const mergedTraits = Array.from(new Set([...preferencia.traits, ...cognitive.traitTags]));
 
   return {
     leftPercent,
     rightPercent,
     dominantSide: leftPercent >= rightPercent ? "izquierdo" : "derecho",
-    personalityTraits: preferencia.traits,
+    personalityTraits: mergedTraits,
     correctCount: cognitive.correctCount,
     totalExercises: cognitive.total,
     isPartial: available.length < 3,
