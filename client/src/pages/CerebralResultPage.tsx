@@ -283,9 +283,6 @@ export default function CerebralResultPage() {
                   </defs>
 
                   <g clipPath="url(#brainClipMain)">
-                    <rect x="40" y="20" width="80" height="222" fill="rgba(15,23,42,0.08)" />
-                    <rect x="120" y="20" width="80" height="222" fill="rgba(15,23,42,0.08)" />
-
                     <motion.rect
                       x="40"
                       y={242 - (leftPercent / 100) * 222}
@@ -331,7 +328,15 @@ export default function CerebralResultPage() {
                     stroke="rgba(255,255,255,0.45)"
                     strokeWidth="2.4"
                   />
-                  <image href="/brainsvg.svg" x="40" y="20" width="160" height="222" opacity="0.22" />
+                  <image
+                    href="/brainsvg.svg"
+                    x="40"
+                    y="20"
+                    width="160"
+                    height="222"
+                    opacity="0.14"
+                    style={{ mixBlendMode: "multiply" }}
+                  />
 
                   <line
                     x1="120"
