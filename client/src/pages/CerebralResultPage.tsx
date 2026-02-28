@@ -76,7 +76,6 @@ export default function CerebralResultPage() {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        foreignObjectRendering: true,
         logging: false,
         allowTaint: true,
       });
@@ -313,7 +312,7 @@ export default function CerebralResultPage() {
                     stroke="rgba(255,255,255,0.45)"
                     strokeWidth="2.4"
                   />
-                  <image href="/brain50.svg" x="40" y="20" width="160" height="222" opacity="0.16" />
+                  <image href="/brain50.png" x="40" y="20" width="160" height="222" opacity="0.16" />
                   <line
                     x1="120"
                     y1="24"
