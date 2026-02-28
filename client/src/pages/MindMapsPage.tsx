@@ -812,6 +812,17 @@ export default function MindMapsPage() {
             <div className="p-3 min-h-[66vh] md:min-h-[74vh]">
               {!readonly && (
                 <div className="space-y-2 mb-3">
+                  {isCompactLayout && (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={toggleMobileLandscape}
+                        className="h-9 px-3 rounded-lg border border-indigo-200 text-sm font-semibold text-indigo-700 bg-indigo-50 inline-flex items-center gap-1.5"
+                      >
+                        <RotateCw className="w-4 h-4" />
+                        {mobileLandscape ? "Vertical" : "Horizontal"}
+                      </button>
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input value={taskText} onChange={(e) => setTaskText(e.target.value)} placeholder="Nueva tarea" className="h-9 min-w-0 flex-1 rounded-lg border border-cyan-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
                     <div className="flex gap-2">
@@ -827,11 +838,11 @@ export default function MindMapsPage() {
                   </div>
                 </div>
               )}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
                 {cols.map((c) => (
                   <div
                     key={c.id}
-                    className="relative rounded-2xl border border-cyan-100 bg-gradient-to-b from-cyan-50/80 to-white p-2 shadow-[0_8px_20px_rgba(8,145,178,0.12)]"
+                    className="relative shrink-0 w-[84vw] max-w-[300px] md:w-[320px] rounded-2xl border border-cyan-100 bg-gradient-to-b from-cyan-50/80 to-white p-2 shadow-[0_8px_20px_rgba(8,145,178,0.12)] snap-start"
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => {
                       if (dragTask.current) {
@@ -863,25 +874,25 @@ export default function MindMapsPage() {
                       </button>
                     )}
                     <div className="mb-2 flex items-center justify-between gap-2 pr-9">
-                      <p className="inline-flex max-w-full items-center rounded-md border border-cyan-200 bg-gradient-to-r from-cyan-100 to-indigo-100 px-2 py-1 text-sm font-black text-cyan-900 shadow-sm truncate">
+                      <p className="inline-flex max-w-full items-center rounded-md border border-cyan-200 bg-gradient-to-r from-cyan-100 to-indigo-100 px-2 py-1 text-xs font-semibold text-cyan-900 shadow-sm truncate">
                         {c.title}
                       </p>
                     </div>
                     <div className="space-y-2">
                       {c.tasks.map((t) => (
-                        <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className="rounded-xl border border-purple-100 bg-white p-2 shadow-sm">
-                          <p className="text-xs font-semibold text-slate-700">{t.text}</p>
+                        <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className="min-w-0 rounded-xl border border-purple-100 bg-white p-2 shadow-sm">
+                          <p className="text-xs font-semibold text-slate-700 break-words">{t.text}</p>
                           <div className="mt-2 space-y-1">
                             {(t.checklist || []).map((it) => (
-                              <label key={it.id} className="flex items-center gap-2 text-xs text-slate-700">
+                              <label key={it.id} className="min-w-0 flex items-center gap-2 text-xs text-slate-700">
                                 <input type="checkbox" className="accent-emerald-500" checked={!!it.done} onChange={(e) => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: (task.checklist || []).map((ci) => ci.id === it.id ? { ...ci, done: e.target.checked } : ci) }) }))} />
-                                <span className={`text-[11px] ${it.done ? "line-through text-slate-400" : "text-slate-700"}`}>{it.text}</span>
+                                <span className={`min-w-0 text-[11px] break-words ${it.done ? "line-through text-slate-400" : "text-slate-700"}`}>{it.text}</span>
                               </label>
                             ))}
                           </div>
                           {!readonly && (
-                            <div className="mt-2 flex gap-1">
-                              <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 flex-1 rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
+                            <div className="mt-2 flex min-w-0 gap-1">
+                              <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 min-w-0 w-full rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
                               <button className="h-7 px-2 rounded border border-emerald-200 text-xs text-emerald-700 bg-emerald-50" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
                             </div>
                           )}
