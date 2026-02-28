@@ -9,14 +9,9 @@ import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
+import { computeCerebralProfile, isCerebralAnswerCorrect, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
 
 const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
-
-interface PreferenciaAnswer {
-  tema: string;
-  imageUrl: string;
-  meaning: string;
-}
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -36,21 +31,20 @@ export default function CerebralResultPage() {
   const storedCerebral = sessionStorage.getItem('cerebralAnswers');
   const lateralidadAnswers: string[] = storedLateralidad ? JSON.parse(storedLateralidad) : [];
   const preferenciaAnswers: PreferenciaAnswer[] = storedPreferencia ? JSON.parse(storedPreferencia) : [];
-  const cerebralAnswers: { tema: string; type: string; answer: string; correct: string }[] = storedCerebral ? JSON.parse(storedCerebral) : [];
-  
-  // Calculate correct answers for other exercises
-  const correctCount = cerebralAnswers.filter(a => a.answer === a.correct).length;
-  const totalExercises = cerebralAnswers.length;
-  
-  const leftCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('izquierda') || a.toLowerCase() === 'izquierda').length;
-  const rightCount = lateralidadAnswers.filter(a => a.toLowerCase().includes('derecha') || a.toLowerCase() === 'derecha').length;
-  const total = leftCount + rightCount || 1;
-  
-  const leftPercent = Math.round((leftCount / total) * 100);
-  const rightPercent = 100 - leftPercent;
-  
-  const isDominantLeft = leftPercent >= rightPercent;
-  const personalityTraits = preferenciaAnswers.map(a => a.meaning).filter(Boolean);
+  const cerebralAnswers: CerebralAnswer[] = storedCerebral ? JSON.parse(storedCerebral) : [];
+
+  const profile = computeCerebralProfile({
+    lateralidadAnswers,
+    preferenciaAnswers,
+    cerebralAnswers,
+  });
+
+  const correctCount = profile.correctCount;
+  const totalExercises = profile.totalExercises;
+  const leftPercent = profile.leftPercent;
+  const rightPercent = profile.rightPercent;
+  const isDominantLeft = profile.dominantSide === "izquierdo";
+  const personalityTraits = profile.personalityTraits;
 
   const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
   const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
@@ -241,57 +235,99 @@ export default function CerebralResultPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
-                className="relative w-40 h-48"
+                className="relative w-48 h-56"
               >
-                <svg viewBox="0 0 200 220" className="w-full h-full drop-shadow-lg">
+                <motion.div
+                  className="absolute inset-0 rounded-[40px] blur-2xl opacity-50"
+                  style={{ background: "radial-gradient(circle at 30% 40%, rgba(6,182,212,0.5), transparent 55%), radial-gradient(circle at 70% 40%, rgba(138,63,252,0.5), transparent 55%)" }}
+                  animate={{ opacity: [0.35, 0.6, 0.35], scale: [0.96, 1.03, 0.96] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+
+                <motion.span
+                  className="absolute -top-2 left-8 w-2 h-2 rounded-full bg-cyan-300/80"
+                  animate={{ y: [0, -10, 0], opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.span
+                  className="absolute top-8 -right-1 w-2.5 h-2.5 rounded-full bg-violet-300/80"
+                  animate={{ y: [0, 8, 0], opacity: [0.35, 0.95, 0.35] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.span
+                  className="absolute bottom-8 -left-1 w-2 h-2 rounded-full bg-cyan-200/80"
+                  animate={{ y: [0, -7, 0], opacity: [0.3, 0.9, 0.3] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                />
+
+                <motion.svg
+                  viewBox="0 0 240 260"
+                  className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.22)]"
+                  animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                >
                   <defs>
                     <linearGradient id="leftBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#06b6d4" />
-                      <stop offset="100%" stopColor="#0891B2" />
+                      <stop offset="0%" stopColor="#67E8F9" />
+                      <stop offset="55%" stopColor="#06B6D4" />
+                      <stop offset="100%" stopColor="#0E7490" />
                     </linearGradient>
                     <linearGradient id="rightBrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#8a3ffc" />
-                      <stop offset="100%" stopColor="#7C3AED" />
+                      <stop offset="0%" stopColor="#C4B5FD" />
+                      <stop offset="55%" stopColor="#8A3FFC" />
+                      <stop offset="100%" stopColor="#6D28D9" />
                     </linearGradient>
+                    <radialGradient id="holoShine" cx="35%" cy="30%" r="70%">
+                      <stop offset="0%" stopColor="rgba(255,255,255,0.65)" />
+                      <stop offset="45%" stopColor="rgba(255,255,255,0.15)" />
+                      <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                    </radialGradient>
                     <clipPath id="leftHalf">
-                      <rect x="0" y="0" width="100" height="220" />
+                      <rect x="0" y="0" width="120" height="260" />
                     </clipPath>
                     <clipPath id="rightHalf">
-                      <rect x="100" y="0" width="100" height="220" />
+                      <rect x="120" y="0" width="120" height="260" />
                     </clipPath>
                   </defs>
                   
                   <g clipPath="url(#leftHalf)">
                     <path
-                      d="M100 15 C55 15 25 50 20 95 C15 140 25 170 40 190 C55 210 75 218 100 218 L100 15"
+                      d="M120 18 C70 18 35 55 28 105 C20 155 32 197 49 220 C68 245 91 254 120 254 L120 18"
                       fill="url(#leftBrainGrad)"
-                      stroke="#0E7490"
-                      strokeWidth="2"
+                      stroke="rgba(14,116,144,0.75)"
+                      strokeWidth="2.4"
                     />
-                    <path d="M45 60 Q65 75 55 95 Q45 115 65 130 Q75 145 60 165" fill="none" stroke="#0E7490" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M35 100 Q55 115 45 140 Q40 160 55 175" fill="none" stroke="#0E7490" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M56 74 Q80 92 69 118 Q56 138 81 158 Q95 176 76 198" fill="none" stroke="rgba(14,116,144,0.9)" strokeWidth="2.2" strokeLinecap="round" />
+                    <path d="M43 122 Q67 140 56 170 Q50 193 71 212" fill="none" stroke="rgba(14,116,144,0.75)" strokeWidth="1.8" strokeLinecap="round" />
                   </g>
                   
                   <g clipPath="url(#rightHalf)">
                     <path
-                      d="M100 15 C145 15 175 50 180 95 C185 140 175 170 160 190 C145 210 125 218 100 218 L100 15"
+                      d="M120 18 C170 18 205 55 212 105 C220 155 208 197 191 220 C172 245 149 254 120 254 L120 18"
                       fill="url(#rightBrainGrad)"
-                      stroke="#6D28D9"
-                      strokeWidth="2"
+                      stroke="rgba(109,40,217,0.82)"
+                      strokeWidth="2.4"
                     />
-                    <path d="M155 60 Q135 75 145 95 Q155 115 135 130 Q125 145 140 165" fill="none" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M165 100 Q145 115 155 140 Q160 160 145 175" fill="none" stroke="#6D28D9" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M184 74 Q160 92 171 118 Q184 138 159 158 Q145 176 164 198" fill="none" stroke="rgba(109,40,217,0.9)" strokeWidth="2.2" strokeLinecap="round" />
+                    <path d="M197 122 Q173 140 184 170 Q190 193 169 212" fill="none" stroke="rgba(109,40,217,0.75)" strokeWidth="1.8" strokeLinecap="round" />
                   </g>
 
-                  <line x1="100" y1="15" x2="100" y2="218" stroke="#374151" strokeWidth="2" strokeDasharray="4,4" />
+                  <path
+                    d="M120 22 C120 64 120 96 120 254"
+                    stroke="rgba(31,41,55,0.55)"
+                    strokeWidth="2.4"
+                    strokeDasharray="5,6"
+                  />
 
-                  <text x="50" y="120" textAnchor="middle" className="text-xl font-black" fill="white">
+                  <ellipse cx="120" cy="136" rx="92" ry="106" fill="url(#holoShine)" />
+
+                  <text x="75" y="145" textAnchor="middle" className="text-2xl font-black" fill="white">
                     {leftPercent}%
                   </text>
-                  <text x="150" y="120" textAnchor="middle" className="text-xl font-black" fill="white">
+                  <text x="165" y="145" textAnchor="middle" className="text-2xl font-black" fill="white">
                     {rightPercent}%
                   </text>
-                </svg>
+                </motion.svg>
               </motion.div>
 
               <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
@@ -369,15 +405,15 @@ export default function CerebralResultPage() {
                     <div 
                       key={idx} 
                       className={`flex items-center justify-between p-2 rounded-lg text-xs ${
-                        ans.answer === ans.correct ? 'bg-green-50' : 'bg-red-50'
+                        isCerebralAnswerCorrect(ans) ? 'bg-green-50' : 'bg-red-50'
                       }`}
                     >
                       <span className="text-gray-600 capitalize">{ans.type}</span>
                       <div className="flex items-center gap-2">
-                        <span className={ans.answer === ans.correct ? 'text-green-600' : 'text-red-600'}>
+                        <span className={isCerebralAnswerCorrect(ans) ? 'text-green-600' : 'text-red-600'}>
                           {ans.answer}
                         </span>
-                        {ans.answer !== ans.correct && (
+                        {!isCerebralAnswerCorrect(ans) && (
                           <span className="text-green-600">({ans.correct})</span>
                         )}
                       </div>

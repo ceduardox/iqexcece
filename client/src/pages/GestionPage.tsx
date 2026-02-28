@@ -6777,12 +6777,12 @@ function AsesorIAPanel({ token }: { token: string }) {
 
               <div className="rounded-lg border border-white/10 bg-black/20 p-3 flex flex-col min-h-[540px]">
                 {!selectedSession ? (
-                  <div className="text-white/40 text-sm m-auto">Selecciona una conversaci�n para ver el detalle</div>
+                  <div className="text-white/40 text-sm m-auto">Selecciona una conversacion para ver el detalle</div>
                 ) : (
                   <>
                     <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
                       <div className="text-white text-sm">
-                        Sesi�n: <span className="text-violet-300 font-mono">{selectedSession.sessionId}</span>
+                        Sesion: <span className="text-violet-300 font-mono">{selectedSession.sessionId}</span>
                       </div>
                       <div className="text-white/50 text-xs">{selectedSession.messageCount} mensajes</div>
                     </div>
@@ -6810,7 +6810,7 @@ function AsesorIAPanel({ token }: { token: string }) {
                               {file ? (
                                 <div className="space-y-2">
                                   <div className="text-[11px] opacity-90">
-                                    Archivo: {file.name || "adjunto"} {file.site ? `� ${file.site}` : ""}
+                                    Archivo: {file.name || "adjunto"} {file.site ? ` - ${file.site}` : ""}
                                   </div>
                                   {isImage && fileUrl && (
                                     <img src={fileUrl} alt={file.name || "adjunto"} className="max-w-full max-h-52 rounded border border-white/20 bg-white" />
@@ -6841,12 +6841,12 @@ function AsesorIAPanel({ token }: { token: string }) {
                     </div>
 
                     <div className="mt-3 border-t border-white/10 pt-3">
-                      <div className="text-white/60 text-xs mb-2">Intervenci�n manual de admin</div>
+                      <div className="text-white/60 text-xs mb-2">Intervencion manual de admin</div>
                       <div className="flex gap-2">
                         <Input
                           value={manualReply}
                           onChange={(e) => setManualReply(e.target.value)}
-                          placeholder="Escribe respuesta manual para esta sesi�n..."
+                          placeholder="Escribe respuesta manual para esta sesion..."
                           className="bg-black/30 border-white/20 text-white"
                           data-testid="input-admin-manual-reply"
                         />

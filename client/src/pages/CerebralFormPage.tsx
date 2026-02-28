@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
+import { computeCerebralProfile, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
 
 export default function CerebralFormPage() {
   const { t } = useTranslation();
@@ -19,17 +20,17 @@ export default function CerebralFormPage() {
       
       const lateralidadAnswers = sessionStorage.getItem('lateralidadAnswers');
       const preferenciaAnswers = sessionStorage.getItem('preferenciaAnswers');
+      const cerebralAnswers = sessionStorage.getItem('cerebralAnswers');
       
       const latAnswers: string[] = lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [];
-      const prefAnswers: { meaning: string }[] = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
-      
-      const leftCount = latAnswers.filter(a => a.toLowerCase().includes('izquierda')).length;
-      const rightCount = latAnswers.filter(a => a.toLowerCase().includes('derecha')).length;
-      const total = leftCount + rightCount || 1;
-      const leftPercent = Math.round((leftCount / total) * 100);
-      const rightPercent = 100 - leftPercent;
-      const dominantSide = leftPercent >= rightPercent ? 'izquierdo' : 'derecho';
-      const personalityTraits = prefAnswers.map(a => a.meaning).filter(Boolean);
+      const prefAnswers: PreferenciaAnswer[] = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
+      const cogAnswers: CerebralAnswer[] = cerebralAnswers ? JSON.parse(cerebralAnswers) : [];
+
+      const profile = computeCerebralProfile({
+        lateralidadAnswers: latAnswers,
+        preferenciaAnswers: prefAnswers,
+        cerebralAnswers: cogAnswers,
+      });
       
       await fetch("/api/cerebral-result", {
         method: "POST",
@@ -55,10 +56,10 @@ export default function CerebralFormPage() {
           categoria: params.categoria,
           lateralidadData: lateralidadAnswers || null,
           preferenciaData: preferenciaAnswers || null,
-          leftPercent,
-          rightPercent,
-          dominantSide,
-          personalityTraits: JSON.stringify(personalityTraits),
+          leftPercent: profile.leftPercent,
+          rightPercent: profile.rightPercent,
+          dominantSide: profile.dominantSide,
+          personalityTraits: JSON.stringify(profile.personalityTraits),
           isPwa: isPwa,
         }),
       });

@@ -98,10 +98,12 @@ export default function CerebralExercisePage() {
     if (!content && !isLoading) {
       const lateralidadAnswers = sessionStorage.getItem('lateralidadAnswers');
       const preferenciaAnswers = sessionStorage.getItem('preferenciaAnswers');
-      if (lateralidadAnswers || preferenciaAnswers) {
+      const cerebralAnswers = sessionStorage.getItem('cerebralAnswers');
+      if (lateralidadAnswers || preferenciaAnswers || cerebralAnswers) {
         const latAnswers = lateralidadAnswers ? JSON.parse(lateralidadAnswers) : [];
         const prefAnswers = preferenciaAnswers ? JSON.parse(preferenciaAnswers) : [];
-        if (latAnswers.length > 0 || prefAnswers.length > 0) {
+        const cogAnswers = cerebralAnswers ? JSON.parse(cerebralAnswers) : [];
+        if (latAnswers.length > 0 || prefAnswers.length > 0 || cogAnswers.length > 0) {
           setShouldRedirectToResults(true);
         }
       }
@@ -201,6 +203,10 @@ export default function CerebralExercisePage() {
                   const isRight = option.value.toLowerCase().trim() === correctAnswer;
                   setIsCorrect(isRight);
                   setSubmitted(true);
+                  const stored = sessionStorage.getItem('cerebralAnswers');
+                  const answers = stored ? JSON.parse(stored) : [];
+                  answers.push({ tema: params.tema, type: 'bailarina', answer: option.value, correct: content?.exerciseData?.correctAnswer || "" });
+                  sessionStorage.setItem('cerebralAnswers', JSON.stringify(answers));
                   setTimeout(() => handleNext(), 800);
                 }}
                 disabled={submitted}
