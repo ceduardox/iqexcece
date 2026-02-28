@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { MessageCircle, Send, Loader2, User, Headphones } from "lucide-react";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -16,9 +16,9 @@ function getWidgetSessionId(site: string) {
 export default function ChatWidgetPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const site = (params.get("site") || "external").toLowerCase().replace(/[^a-z0-9_-]/g, "");
-  const title = params.get("title") || "Asesor IA";
+  const title = params.get("title") || "Asesor";
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: "assistant", content: "Hola, soy tu asesor IA. ¿En qué puedo ayudarte?" },
+    { role: "assistant", content: "Hola, soy tu asesor. ¿En qué puedo ayudarte?" },
   ]);
   const [profileName, setProfileName] = useState("");
   const [profileWhatsapp, setProfileWhatsapp] = useState("");
@@ -121,12 +121,16 @@ export default function ChatWidgetPage() {
           </div>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={`max-w-[86%] rounded-xl px-3 py-2 text-sm ${m.role === "user" ? "ml-auto bg-violet-600 text-white" : "mr-auto bg-white border border-gray-200 text-gray-800"}`}>
-            {m.content}
+          <div key={i} className={`max-w-[90%] rounded-xl px-3 py-2 text-sm flex items-start gap-2 ${m.role === "user" ? "ml-auto bg-violet-600 text-white" : "mr-auto bg-white border border-gray-200 text-gray-800"}`}>
+            <span className={`mt-0.5 ${m.role === "user" ? "text-violet-100" : "text-violet-500"}`}>
+              {m.role === "user" ? <User className="w-4 h-4" /> : <Headphones className="w-4 h-4" />}
+            </span>
+            <span>{m.content}</span>
           </div>
         ))}
         {loading && (
           <div className="mr-auto bg-white border border-gray-200 text-gray-600 rounded-xl px-3 py-2 text-sm flex items-center gap-2">
+            <Headphones className="w-4 h-4 text-violet-500" />
             <Loader2 className="w-4 h-4 animate-spin" />
             Pensando...
           </div>
