@@ -42,6 +42,7 @@
     ".iqex-chat-modal.right { right: 0; left: auto; }",
     ".iqex-chat-modal.left { left: 0; right: auto; }",
     ".iqex-chat-modal.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }",
+    ".iqex-chat-modal.keyboard-open { transform: none !important; transition: opacity .2s ease; }",
     ".iqex-chat-header { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); padding: 14px 16px; color: #fff; display: flex; align-items: center; justify-content: space-between; }",
     ".iqex-chat-head-info { display: flex; align-items: center; gap: 12px; }",
     ".iqex-chat-avatar { width: 40px; height: 40px; background: rgba(255,255,255,.2); border-radius: 50%; display: grid; place-items: center; font-size: 18px; }",
@@ -127,8 +128,26 @@
     if (rect.left < margin) {
       shiftX += margin - rect.left;
     }
-    if (shiftX !== 0) {
-      modal.style.marginLeft = shiftX + "px";
+    if (shiftX !== 0) modal.style.marginLeft = shiftX + "px";
+  }
+
+  function isLikelyKeyboardResize() {
+    if (!window.visualViewport) return false;
+    var viewportH = window.visualViewport.height || 0;
+    var fullH = window.innerHeight || 0;
+    return fullH > 0 && viewportH > 0 && (fullH - viewportH) > 120;
+  }
+
+  function updateKeyboardMode() {
+    if (!modal.classList.contains("active")) return;
+    if (isLikelyKeyboardResize()) {
+      modal.classList.add("keyboard-open");
+      modal.style.maxHeight = "58vh";
+      modal.style.bottom = "76px";
+    } else {
+      modal.classList.remove("keyboard-open");
+      modal.style.maxHeight = "";
+      modal.style.bottom = "";
     }
   }
 
@@ -137,7 +156,10 @@
     var next = typeof forceOpen === "boolean" ? forceOpen : !open;
     modal.classList.toggle("active", next);
     if (next) {
-      requestAnimationFrame(keepModalInViewport);
+      requestAnimationFrame(function () {
+        keepModalInViewport();
+        updateKeyboardMode();
+      });
     }
   }
 
@@ -149,11 +171,22 @@
   });
 
   window.addEventListener("resize", function () {
-    requestAnimationFrame(keepModalInViewport);
+    requestAnimationFrame(function () {
+      updateKeyboardMode();
+      if (!isLikelyKeyboardResize()) keepModalInViewport();
+    });
   });
   window.addEventListener("orientationchange", function () {
-    requestAnimationFrame(keepModalInViewport);
+    requestAnimationFrame(function () {
+      keepModalInViewport();
+      updateKeyboardMode();
+    });
   });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", function () {
+      requestAnimationFrame(updateKeyboardMode);
+    });
+  }
 
   root.appendChild(modal);
   root.appendChild(trigger);
