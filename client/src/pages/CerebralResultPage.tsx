@@ -49,8 +49,8 @@ export default function CerebralResultPage() {
   const isDominantLeft = profile.dominantSide === "izquierdo";
   const personalityTraits = profile.personalityTraits;
 
-  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lÃ³gica"];
-  const rightTraits = ["imÃ¡genes", "caos", "creatividad", "intuiciÃ³n", "fantasÃ­a", "curiosidad"];
+  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "l\u00f3gica"];
+  const rightTraits = ["im\u00e1genes", "caos", "creatividad", "intuici\u00f3n", "fantas\u00eda", "curiosidad"];
 
   useEffect(() => {
     const durationMs = 1400;
@@ -146,7 +146,7 @@ export default function CerebralResultPage() {
           await navigator.share({
             files: [file],
             title: 'Mi resultado - IQEXPONENCIAL',
-            text: `Â¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
+            text: `\u00a1Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
           });
         } catch (e) {
           console.error("Share cancelled:", e);
@@ -156,7 +156,7 @@ export default function CerebralResultPage() {
       }
     }
     
-    const text = encodeURIComponent(`Â¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    const text = encodeURIComponent(`\u00a1Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
     setIsSharing(false);
   };
@@ -232,7 +232,7 @@ export default function CerebralResultPage() {
               className="text-xl font-bold"
               style={{ color: "#1f2937" }}
             >
-              Â¡Felicidades!
+              {"\u00a1Felicidades!"}
             </motion.h1>
           </div>
         </div>
@@ -467,7 +467,7 @@ export default function CerebralResultPage() {
                   {isDominantLeft ? 'izquierdo' : 'derecho'}
                 </span> de tu cerebro es
               </p>
-              <p className="text-xl font-black text-gray-800">mÃ¡s dominante.</p>
+              <p className="text-xl font-black text-gray-800">{"m\u00e1s dominante."}</p>
             </motion.div>
 
             {personalityTraits.length > 0 && (
@@ -567,7 +567,7 @@ export default function CerebralResultPage() {
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              MÃ¡s opciones
+              {"M\u00e1s opciones"}
             </motion.button>
             
             <motion.button
