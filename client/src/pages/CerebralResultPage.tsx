@@ -25,6 +25,7 @@ export default function CerebralResultPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [captureMode, setCaptureMode] = useState(false);
   const [animatedLeftPercent, setAnimatedLeftPercent] = useState(0);
   const [animatedRightPercent, setAnimatedRightPercent] = useState(0);
   
@@ -72,6 +73,11 @@ export default function CerebralResultPage() {
     if (!captureAreaRef.current) return null;
     
     try {
+      setCaptureMode(true);
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+
       const capturedCanvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
@@ -120,6 +126,8 @@ export default function CerebralResultPage() {
     } catch (e) {
       console.error("Capture error:", e);
       return null;
+    } finally {
+      setCaptureMode(false);
     }
   };
   
@@ -280,105 +288,156 @@ export default function CerebralResultPage() {
                   transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                 />
 
-                <motion.svg
-                  viewBox="0 0 240 260"
-                  className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.22)]"
-                  animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
-                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <foreignObject x="0" y="0" width="240" height="260">
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "240px",
-                        height: "260px",
-                        WebkitMaskImage: "url('/brain50.svg')",
-                        maskImage: "url('/brain50.svg')",
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        background: "rgba(15,23,42,0.08)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <motion.div
+                {!captureMode ? (
+                  <motion.svg
+                    viewBox="0 0 240 260"
+                    className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.22)]"
+                    animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
+                    transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <foreignObject x="0" y="0" width="240" height="260">
+                      <div
                         style={{
-                          position: "absolute",
-                          left: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${animatedLeftPercent}%`,
-                          background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                          position: "relative",
+                          width: "240px",
+                          height: "260px",
+                          WebkitMaskImage: "url('/brain50.svg')",
+                          maskImage: "url('/brain50.svg')",
+                          WebkitMaskRepeat: "no-repeat",
+                          maskRepeat: "no-repeat",
+                          WebkitMaskSize: "contain",
+                          maskSize: "contain",
+                          WebkitMaskPosition: "center",
+                          maskPosition: "center",
+                          background: "rgba(15,23,42,0.08)",
+                          overflow: "hidden",
                         }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: "3%",
-                          width: "44%",
-                          bottom: `calc(${animatedLeftPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                      />
+                      >
+                        <motion.div
+                          style={{
+                            position: "absolute",
+                            left: "0",
+                            width: "50%",
+                            bottom: "0",
+                            height: `${animatedLeftPercent}%`,
+                            background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
+                            boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                          }}
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <motion.div
+                          style={{
+                            position: "absolute",
+                            left: "3%",
+                            width: "44%",
+                            bottom: `calc(${animatedLeftPercent}% - 2px)`,
+                            height: "2px",
+                            background: "rgba(255,255,255,0.75)",
+                            borderRadius: "999px",
+                          }}
+                          animate={{ opacity: [0.35, 0.9, 0.35] }}
+                          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                        />
 
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${animatedRightPercent}%`,
-                          background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
-                        }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "3%",
-                          width: "44%",
-                          bottom: `calc(${animatedRightPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                    </div>
-                  </foreignObject>
+                        <motion.div
+                          style={{
+                            position: "absolute",
+                            right: "0",
+                            width: "50%",
+                            bottom: "0",
+                            height: `${animatedRightPercent}%`,
+                            background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
+                            boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                          }}
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <motion.div
+                          style={{
+                            position: "absolute",
+                            right: "3%",
+                            width: "44%",
+                            bottom: `calc(${animatedRightPercent}% - 2px)`,
+                            height: "2px",
+                            background: "rgba(255,255,255,0.75)",
+                            borderRadius: "999px",
+                          }}
+                          animate={{ opacity: [0.35, 0.9, 0.35] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      </div>
+                    </foreignObject>
 
-                  <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+                    <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
 
-                  <line
-                    x1="120"
-                    y1="18"
-                    x2="120"
-                    y2="248"
-                    stroke="rgba(31,41,55,0.6)"
-                    strokeWidth="2.2"
-                    strokeDasharray="5,6"
-                  />
+                    <line
+                      x1="120"
+                      y1="18"
+                      x2="120"
+                      y2="248"
+                      stroke="rgba(31,41,55,0.6)"
+                      strokeWidth="2.2"
+                      strokeDasharray="5,6"
+                    />
 
-                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
-                    {animatedLeftPercent}%
-                  </text>
-                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
-                    {animatedRightPercent}%
-                  </text>
-                </motion.svg>
+                    <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
+                      {animatedLeftPercent}%
+                    </text>
+                    <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
+                      {animatedRightPercent}%
+                    </text>
+                  </motion.svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 240 260"
+                    className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.22)]"
+                  >
+                    <defs>
+                      <clipPath id="brainCaptureClip">
+                        <path d="M120 24 C84 12, 40 32, 40 78 C20 94,20 130,40 146 C38 188,66 226,106 232 C112 238,116 242,120 242 C124 242,128 238,134 232 C174 226,202 188,200 146 C220 130,220 94,200 78 C200 32,156 12,120 24 Z" />
+                      </clipPath>
+                      <linearGradient id="leftCaptureLiquid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#67E8F9" />
+                        <stop offset="60%" stopColor="#06B6D4" />
+                        <stop offset="100%" stopColor="#0E7490" />
+                      </linearGradient>
+                      <linearGradient id="rightCaptureLiquid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#C4B5FD" />
+                        <stop offset="60%" stopColor="#8A3FFC" />
+                        <stop offset="100%" stopColor="#6D28D9" />
+                      </linearGradient>
+                    </defs>
+
+                    <g clipPath="url(#brainCaptureClip)">
+                      <rect x="40" width="80" height={(animatedLeftPercent / 100) * 222} y={242 - (animatedLeftPercent / 100) * 222} fill="url(#leftCaptureLiquid)" />
+                      <rect x="120" width="80" height={(animatedRightPercent / 100) * 222} y={242 - (animatedRightPercent / 100) * 222} fill="url(#rightCaptureLiquid)" />
+                    </g>
+
+                    <path
+                      d="M120 24 C84 12, 40 32, 40 78 C20 94,20 130,40 146 C38 188,66 226,106 232 C112 238,116 242,120 242 C124 242,128 238,134 232 C174 226,202 188,200 146 C220 130,220 94,200 78 C200 32,156 12,120 24 Z"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.45)"
+                      strokeWidth="2.4"
+                    />
+                    <image href="/brain50.svg" x="40" y="20" width="160" height="222" opacity="0.16" />
+                    <line
+                      x1="120"
+                      y1="24"
+                      x2="120"
+                      y2="242"
+                      stroke="rgba(31,41,55,0.6)"
+                      strokeWidth="2.2"
+                      strokeDasharray="5,6"
+                    />
+                    <text x="80" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
+                      {animatedLeftPercent}%
+                    </text>
+                    <text x="160" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
+                      {animatedRightPercent}%
+                    </text>
+                  </svg>
+                )}
               </motion.div>
 
               <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
