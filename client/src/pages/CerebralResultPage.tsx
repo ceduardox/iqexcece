@@ -331,6 +331,7 @@ export default function CerebralResultPage() {
                     stroke="rgba(255,255,255,0.45)"
                     strokeWidth="2.4"
                   />
+                  <image href="/brainsvg.svg" x="40" y="20" width="160" height="222" opacity="0.22" />
 
                   <line
                     x1="120"
@@ -342,9 +343,11 @@ export default function CerebralResultPage() {
                     strokeDasharray="5,6"
                   />
 
-                  <text x="80" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">`r`n                    {leftPercent}%
+                  <text x="80" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
+                    {leftPercent}%
                   </text>
-                  <text x="160" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">`r`n                    {rightPercent}%
+                  <text x="160" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
+                    {rightPercent}%
                   </text>
                 </motion.svg>
               </motion.div>
