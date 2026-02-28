@@ -24,6 +24,7 @@
     "  50% { opacity: .25; }",
     "}",
     ".iqex-chat-root { position: fixed; bottom: 30px; z-index: 2147483000; font-family: 'Segoe UI', Roboto, sans-serif; }",
+    ".iqex-chat-root.modal-open .iqex-chat-trigger { opacity: 0; pointer-events: none; }",
     ".iqex-chat-root.right { right: 30px; }",
     ".iqex-chat-root.left { left: 30px; }",
     ".iqex-chat-trigger {",
@@ -57,6 +58,7 @@
     "  .iqex-chat-root.right, .iqex-chat-root.left { right: 12px; left: 12px; bottom: 12px; }",
     "  .iqex-chat-modal { width: 100%; bottom: 64px; }",
     "  .iqex-chat-trigger { width: 58px; height: 58px; }",
+    "  .iqex-chat-modal, .iqex-chat-modal.active { transform: none !important; transition: opacity .2s ease; }",
     "}",
   ].join("");
   document.head.appendChild(style);
@@ -155,6 +157,7 @@
     var open = modal.classList.contains("active");
     var next = typeof forceOpen === "boolean" ? forceOpen : !open;
     modal.classList.toggle("active", next);
+    root.classList.toggle("modal-open", next);
     if (next) {
       requestAnimationFrame(function () {
         keepModalInViewport();

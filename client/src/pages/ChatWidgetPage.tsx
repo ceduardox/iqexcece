@@ -216,9 +216,8 @@ export default function ChatWidgetPage() {
                   <option key={c.iso} value={c.iso}>{c.flag} {c.dial}</option>
                 ))}
               </select>
-              <div className="h-10 rounded-lg border border-gray-200 bg-gray-50 px-3 flex items-center text-sm text-gray-600">{selectedDial.flag} {selectedDial.name} ({selectedDial.dial})</div>
+              <input value={profileWhatsapp} onChange={(e) => setProfileWhatsapp(e.target.value)} placeholder="Número de WhatsApp" className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-300" />
             </div>
-            <input value={profileWhatsapp} onChange={(e) => setProfileWhatsapp(e.target.value)} placeholder="Número de WhatsApp" className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-300" />
             <button onClick={startChat} disabled={profileSaving || !profileName.trim() || !profileWhatsapp.trim()} className="w-full h-10 rounded-lg bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">
               {profileSaving ? "Guardando..." : "Iniciar chat"}
             </button>
