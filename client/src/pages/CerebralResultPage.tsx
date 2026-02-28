@@ -440,10 +440,24 @@ export default function CerebralResultPage() {
                     strokeDasharray="5,6"
                   />
 
-                  <text x="78" y="146" textAnchor="middle" className="text-2xl font-black" fill="#06B6D4">
+                  <text
+                    x="78"
+                    y="146"
+                    textAnchor="middle"
+                    className="text-3xl font-black"
+                    fill="#06B6D4"
+                    style={{ filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.35))" }}
+                  >
                     {animatedLeftPercent}%
                   </text>
-                  <text x="162" y="146" textAnchor="middle" className="text-2xl font-black" fill="#8A3FFC">
+                  <text
+                    x="162"
+                    y="146"
+                    textAnchor="middle"
+                    className="text-3xl font-black"
+                    fill="#8A3FFC"
+                    style={{ filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.35))" }}
+                  >
                     {animatedRightPercent}%
                   </text>
                 </motion.svg>
@@ -595,10 +609,16 @@ export default function CerebralResultPage() {
                   </div>
                 </div>
                 <div className="absolute inset-y-3 left-1/2 -translate-x-1/2 w-[2px] bg-gray-500/70" style={{ borderStyle: "dashed" }} />
-                <div className="absolute top-1/2 -translate-y-1/2 left-[34%] -translate-x-1/2 text-[48px] font-black" style={{ color: "#06B6D4" }}>
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 left-[34%] -translate-x-1/2 text-[56px] font-black"
+                  style={{ color: "#06B6D4", textShadow: "0 3px 4px rgba(0,0,0,0.35)" }}
+                >
                   {leftPercent}%
                 </div>
-                <div className="absolute top-1/2 -translate-y-1/2 left-[66%] -translate-x-1/2 text-[48px] font-black" style={{ color: "#8A3FFC" }}>
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 left-[66%] -translate-x-1/2 text-[56px] font-black"
+                  style={{ color: "#8A3FFC", textShadow: "0 3px 4px rgba(0,0,0,0.35)" }}
+                >
                   {rightPercent}%
                 </div>
               </div>
