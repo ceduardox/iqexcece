@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+﻿import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -48,8 +48,8 @@ export default function CerebralResultPage() {
   const isDominantLeft = profile.dominantSide === "izquierdo";
   const personalityTraits = profile.personalityTraits;
 
-  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lógica"];
-  const rightTraits = ["imágenes", "caos", "creatividad", "intuición", "fantasía", "curiosidad"];
+  const leftTraits = ["reglas", "estrategia", "detalles", "racionalidad", "idioma", "lÃ³gica"];
+  const rightTraits = ["imÃ¡genes", "caos", "creatividad", "intuiciÃ³n", "fantasÃ­a", "curiosidad"];
 
   useEffect(() => {
     const durationMs = 1400;
@@ -138,7 +138,7 @@ export default function CerebralResultPage() {
           await navigator.share({
             files: [file],
             title: 'Mi resultado - IQEXPONENCIAL',
-            text: `¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
+            text: `Â¡Mi dominancia cerebral: ${dominance}! https://iqexponencial.app`
           });
         } catch (e) {
           console.error("Share cancelled:", e);
@@ -148,7 +148,7 @@ export default function CerebralResultPage() {
       }
     }
     
-    const text = encodeURIComponent(`¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
+    const text = encodeURIComponent(`Â¡Mi dominancia cerebral: ${dominance}!\n\nEntrena tu cerebro: https://iqexponencial.app`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
     setIsSharing(false);
   };
@@ -224,7 +224,7 @@ export default function CerebralResultPage() {
               className="text-xl font-bold"
               style={{ color: "#1f2937" }}
             >
-              ¡Felicidades!
+              Â¡Felicidades!
             </motion.h1>
           </div>
         </div>
@@ -292,8 +292,8 @@ export default function CerebralResultPage() {
                         position: "relative",
                         width: "240px",
                         height: "260px",
-                        WebkitMaskImage: "url('/brainsvg.svg')",
-                        maskImage: "url('/brainsvg.svg')",
+                        WebkitMaskImage: "url('/brain50.svg')",
+                        maskImage: "url('/brain50.svg')",
                         WebkitMaskRepeat: "no-repeat",
                         maskRepeat: "no-repeat",
                         WebkitMaskSize: "contain",
@@ -360,7 +360,7 @@ export default function CerebralResultPage() {
                     </div>
                   </foreignObject>
 
-                  <image href="/brainsvg.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
+                  <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
 
                   <line
                     x1="120"
@@ -408,7 +408,7 @@ export default function CerebralResultPage() {
                   {isDominantLeft ? 'izquierdo' : 'derecho'}
                 </span> de tu cerebro es
               </p>
-              <p className="text-xl font-black text-gray-800">más dominante.</p>
+              <p className="text-xl font-black text-gray-800">mÃ¡s dominante.</p>
             </motion.div>
 
             {personalityTraits.length > 0 && (
@@ -508,7 +508,7 @@ export default function CerebralResultPage() {
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
-              Más opciones
+              MÃ¡s opciones
             </motion.button>
             
             <motion.button
@@ -539,3 +539,4 @@ export default function CerebralResultPage() {
     </div>
   );
 }
+
