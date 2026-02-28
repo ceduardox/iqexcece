@@ -266,30 +266,36 @@ export default function MindMapsPage() {
         setBoardOffset(clampOffset(nx, ny));
         return;
       }
-      if (!dragRef.current || !boardRef.current || readonly) return;
+      const dragging = dragRef.current;
+      if (!dragging || !boardRef.current || readonly) return;
       const world = toWorldCoords(e.clientX, e.clientY);
-      const x = world.x - dragRef.current.dx;
-      const y = world.y - dragRef.current.dy;
+      const x = world.x - dragging.dx;
+      const y = world.y - dragging.dy;
+      const dragId = dragging.id;
       setNodes((prev) =>
         prev.map((n) =>
-          n.id === dragRef.current!.id
+          n.id === dragId
             ? { ...n, x: Math.max(0, Math.min(x, WORLD_W - NODE_W)), y: Math.max(0, Math.min(y, WORLD_H - NODE_H)) }
             : n,
         ),
       );
     };
-    const up = () => {
+    const clearPointers = () => {
       dragRef.current = null;
       panRef.current = null;
       drawingId.current = null;
     };
     window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
+    window.addEventListener("pointerup", clearPointers);
+    window.addEventListener("pointercancel", clearPointers as EventListener);
+    window.addEventListener("blur", clearPointers);
     return () => {
       window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointerup", clearPointers);
+      window.removeEventListener("pointercancel", clearPointers as EventListener);
+      window.removeEventListener("blur", clearPointers);
     };
-  }, [kind, readonly, boardZoom, boardOffset]);
+  }, [kind, readonly, boardZoom]);
 
   useEffect(() => {
     setBoardOffset((prev) => clampOffset(prev.x, prev.y));
