@@ -610,13 +610,13 @@ export default function CerebralResultPage() {
                 </div>
                 <div className="absolute inset-y-3 left-1/2 -translate-x-1/2 w-[2px] bg-gray-500/70" style={{ borderStyle: "dashed" }} />
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 left-[34%] -translate-x-1/2 text-[56px] font-black"
+                  className="absolute top-1/2 -translate-y-1/2 left-[24%] -translate-x-1/2 text-[50px] font-black"
                   style={{ color: "#111111", textShadow: "0 3px 4px rgba(0,0,0,0.35)" }}
                 >
                   {leftPercent}%
                 </div>
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 left-[66%] -translate-x-1/2 text-[56px] font-black"
+                  className="absolute top-1/2 -translate-y-1/2 left-[76%] -translate-x-1/2 text-[50px] font-black"
                   style={{ color: "#111111", textShadow: "0 3px 4px rgba(0,0,0,0.35)" }}
                 >
                   {rightPercent}%
