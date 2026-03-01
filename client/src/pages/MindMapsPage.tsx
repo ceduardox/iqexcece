@@ -592,7 +592,7 @@ export default function MindMapsPage() {
     <div className="mindmaps-page relative min-h-screen bg-white pb-24 md:pb-8">
       <style>{`
         .mindmaps-page {
-          --btn-radius: 12px;
+          --btn-radius: 14px;
           --btn-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
           --btn-shadow-hover: 0 10px 22px rgba(15, 23, 42, 0.16);
           --btn-shadow-press: 0 3px 8px rgba(15, 23, 42, 0.12);
@@ -623,13 +623,19 @@ export default function MindMapsPage() {
         }
         .mindmaps-page .app-btn-primary {
           color: #fff;
-          background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 45%, #06b6d4 100%);
-          border: 1px solid rgba(124, 58, 237, 0.45);
+          background-image:
+            linear-gradient(135deg, #11c6ea 0%, #09afe6 42%, #72dee6 100%),
+            radial-gradient(120% 120% at 95% -5%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 28%, transparent 56%),
+            linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, transparent 38%);
+          border: 1px solid rgba(8, 145, 178, 0.35);
         }
         .mindmaps-page .app-btn-soft {
-          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-          border: 1px solid #dbeafe;
-          color: #0f766e;
+          background-image:
+            linear-gradient(135deg, #f6f0ff 0%, #ede9fe 44%, #f3e8ff 100%),
+            radial-gradient(125% 120% at 90% -10%, rgba(139, 92, 246, 0.26) 0%, rgba(168, 85, 247, 0.10) 32%, transparent 60%),
+            linear-gradient(150deg, rgba(255, 255, 255, 0.22) 0%, transparent 36%);
+          border: 1px solid rgba(124, 58, 237, 0.28);
+          color: #5b21b6;
         }
         .mindmaps-page .app-btn-danger {
           background: linear-gradient(135deg, #fff5f5 0%, #ffe4e6 100%);
