@@ -663,6 +663,15 @@ export default function MindMapsPage() {
           pointer-events: none;
           background: linear-gradient(150deg, rgba(255,255,255,0.35) 0%, transparent 28%);
         }
+        .mindmaps-page .app-chooser-shell {
+          border: 1px solid rgba(196, 181, 253, 0.45);
+          background-image:
+            radial-gradient(52% 30% at 18% 106%, rgba(167, 111, 255, 0.40) 0%, rgba(167, 111, 255, 0.16) 42%, rgba(167, 111, 255, 0.00) 80%),
+            radial-gradient(45% 28% at 90% 104%, rgba(75, 184, 255, 0.34) 0%, rgba(75, 184, 255, 0.12) 42%, rgba(75, 184, 255, 0.00) 80%),
+            radial-gradient(34% 32% at 87% 84%, rgba(170, 222, 255, 0.20) 0%, rgba(170, 222, 255, 0.00) 76%),
+            linear-gradient(180deg, #f4f4fc 0%, #f2f2fb 64%, #f0eef8 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 14px 30px rgba(15, 23, 42, 0.08);
+        }
       `}</style>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-purple-100 px-3 py-3">
         <div className="w-full px-1 md:px-3 flex items-center gap-2">
@@ -739,7 +748,7 @@ export default function MindMapsPage() {
         </aside>
         )}
 
-        <section className="w-full rounded-2xl border border-purple-100 bg-white overflow-hidden shadow-[0_10px_30px_rgba(17,24,39,0.09)]">
+        <section className={`w-full rounded-2xl overflow-hidden ${showChooser ? "app-chooser-shell" : "border border-purple-100 bg-white shadow-[0_10px_30px_rgba(17,24,39,0.09)]"}`}>
           {showChooser ? (
             <div className="p-5 md:p-6">
               <p className="text-sm font-semibold text-gray-700 mb-2"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">1</span>{t("mindmaps.chooserProjectName")}</p>
