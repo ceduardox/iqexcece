@@ -932,6 +932,19 @@ export default function MindMapsPage() {
           letter-spacing: 0.02em;
           font-weight: 700;
         }
+        .mindmaps-page .project-open-btn {
+          border-radius: 0;
+          box-shadow: none;
+          background: transparent;
+          filter: none;
+        }
+        .mindmaps-page .project-open-btn:hover,
+        .mindmaps-page .project-open-btn:active,
+        .mindmaps-page .project-open-btn:focus-visible {
+          box-shadow: none;
+          transform: none;
+          filter: none;
+        }
         .mindmaps-page .app-empty-projects-card {
           position: relative;
           min-height: 260px;
@@ -1036,7 +1049,7 @@ export default function MindMapsPage() {
                 <p className="text-sm text-gray-600 relative z-[1]">Aun no tienes proyectos creados.</p>
               </div>
             )}
-            {!readonly && maps.map((m) => { const d = parseData(m.data); return <div key={m.id} className={`rounded-xl border p-2 ${activeId === m.id ? "border-purple-400 bg-purple-50" : "border-purple-100 bg-white"}`}><button className="w-full text-left" onClick={() => openMap(m)}><p className="text-sm font-semibold text-gray-800 truncate">{m.title}</p><p className="text-[11px] text-gray-500">{kindLabel(d.kind)} - {new Date(m.updatedAt).toLocaleString("es-BO")}</p></button><div className="mt-2 flex items-center gap-2"><button className="h-7 px-2 rounded-md border border-cyan-200 text-xs text-cyan-700 bg-white flex items-center gap-1" onClick={() => shareProject(m.id)}><Share2 className="w-3.5 h-3.5" />Compartir</button><button className="h-7 px-2 rounded-md border border-rose-200 text-xs text-rose-700 flex items-center gap-1" onClick={() => deleteProject(m.id)}><Trash2 className="w-3.5 h-3.5" />Eliminar</button></div></div>; })}
+            {!readonly && maps.map((m) => { const d = parseData(m.data); return <div key={m.id} className={`rounded-xl border p-2 ${activeId === m.id ? "border-purple-400 bg-purple-50" : "border-purple-100 bg-white"}`}><button className="project-open-btn w-full text-left" onClick={() => openMap(m)}><p className="text-sm font-semibold text-gray-800 truncate">{m.title}</p><p className="text-[11px] text-gray-500">{kindLabel(d.kind)} - {new Date(m.updatedAt).toLocaleString("es-BO")}</p></button><div className="mt-2 flex items-center gap-2"><button className="h-7 px-2 rounded-md border border-cyan-200 text-xs text-cyan-700 bg-white flex items-center gap-1" onClick={() => shareProject(m.id)}><Share2 className="w-3.5 h-3.5" />Compartir</button><button className="h-7 px-2 rounded-md border border-rose-200 text-xs text-rose-700 flex items-center gap-1" onClick={() => deleteProject(m.id)}><Trash2 className="w-3.5 h-3.5" />Eliminar</button></div></div>; })}
           </div>}
           {(!isCompactLayout || mobileSidebarOpen) && shareUrl && <div className="mt-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-2"><p className="text-[11px] text-cyan-700 break-all">{shareUrl}</p></div>}
         </aside>
