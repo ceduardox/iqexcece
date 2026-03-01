@@ -591,28 +591,68 @@ export default function MindMapsPage() {
   return (
     <div className="mindmaps-page relative min-h-screen bg-white pb-24 md:pb-8">
       <style>{`
+        .mindmaps-page {
+          --btn-radius: 12px;
+          --btn-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+          --btn-shadow-hover: 0 10px 22px rgba(15, 23, 42, 0.16);
+          --btn-shadow-press: 0 3px 8px rgba(15, 23, 42, 0.12);
+        }
         .mindmaps-page button {
-          transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease;
+          border-radius: var(--btn-radius);
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+          box-shadow: var(--btn-shadow);
+        }
+        .mindmaps-page button:hover {
+          box-shadow: var(--btn-shadow-hover);
+          filter: brightness(1.02);
         }
         .mindmaps-page button:active {
           transform: scale(0.97);
+          box-shadow: var(--btn-shadow-press);
+        }
+        .mindmaps-page button:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.24), var(--btn-shadow-hover);
+        }
+        .mindmaps-page button:disabled {
+          cursor: not-allowed;
+          box-shadow: none;
+          filter: grayscale(0.05);
+        }
+        .mindmaps-page .app-btn-primary {
+          color: #fff;
+          background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 45%, #06b6d4 100%);
+          border: 1px solid rgba(124, 58, 237, 0.45);
+        }
+        .mindmaps-page .app-btn-soft {
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border: 1px solid #dbeafe;
+          color: #0f766e;
+        }
+        .mindmaps-page .app-btn-danger {
+          background: linear-gradient(135deg, #fff5f5 0%, #ffe4e6 100%);
+          border: 1px solid #fecdd3;
+          color: #be123c;
+          box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
         }
       `}</style>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-purple-100 px-3 py-3">
         <div className="w-full px-1 md:px-3 flex items-center gap-2">
-          <button onClick={handleBack} className="p-2 rounded-lg border border-purple-100 bg-white text-purple-700"><ArrowLeft className="w-4 h-4" /></button>
+          <button onClick={handleBack} className="app-btn-soft p-2 text-purple-700"><ArrowLeft className="w-4 h-4" /></button>
           {!showChooser && <input value={title} disabled={readonly} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0 h-10 rounded-xl border border-purple-100 px-3 text-sm font-semibold text-gray-800 bg-white" />}
-          {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="h-10 px-3 rounded-xl text-white text-sm font-semibold flex items-center gap-2 shrink-0 disabled:opacity-60" style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 15px rgba(124, 58, 237, 0.35)" }}><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
+          {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
         </div>
       </header>
 
       <div className="w-full p-3 md:p-4 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 lg:gap-4">
         {!readonly && isCompactLayout && (
           <div className="rounded-2xl bg-white border border-purple-100 p-2 shadow-[0_6px_18px_rgba(17,24,39,0.08)] flex flex-wrap items-center justify-between gap-2">
-            <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-semibold text-purple-700 bg-purple-50 inline-flex items-center gap-1.5">
+            <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="app-btn-soft h-9 px-3 text-sm text-purple-700 inline-flex items-center gap-1.5">
               Proyectos {mobileSidebarOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
-            <button onClick={() => { setMobileOptionsOpen((v) => !v); setMobileSidebarOpen(false); }} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-semibold text-cyan-700 bg-cyan-50 inline-flex items-center gap-1.5">
+            <button onClick={() => { setMobileOptionsOpen((v) => !v); setMobileSidebarOpen(false); }} className="app-btn-soft h-9 px-3 text-sm text-cyan-700 inline-flex items-center gap-1.5">
               Opciones {mobileOptionsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
@@ -620,7 +660,7 @@ export default function MindMapsPage() {
 
         {(!isCompactLayout || mobileSidebarOpen || mobileOptionsOpen) && (
         <aside className="rounded-2xl bg-white border border-purple-100 p-3 shadow-[0_8px_24px_rgba(17,24,39,0.08)]">
-          {!readonly && (!isCompactLayout || mobileOptionsOpen) && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 bg-white flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button>{!showChooser && <button onClick={() => { const blob = new Blob([JSON.stringify({ title, ...payload() }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title || "proyecto"}.json`; a.click(); URL.revokeObjectURL(url); }} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 bg-white flex items-center gap-2"><Download className="w-4 h-4" />JSON</button>}</div>}
+          {!readonly && (!isCompactLayout || mobileOptionsOpen) && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="app-btn-soft h-9 px-3 text-sm text-purple-700 flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button>{!showChooser && <button onClick={() => { const blob = new Blob([JSON.stringify({ title, ...payload() }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title || "proyecto"}.json`; a.click(); URL.revokeObjectURL(url); }} className="app-btn-soft h-9 px-3 text-sm text-cyan-700 flex items-center gap-2"><Download className="w-4 h-4" />JSON</button>}</div>}
           {!readonly && !showChooser && kind === "mindmap" && (!isCompactLayout || mobileOptionsOpen) && (
             <div className="mb-3 rounded-xl border border-cyan-100 bg-gradient-to-br from-cyan-50/80 to-indigo-50/70 p-3">
               <button onClick={() => setShowAiIdeas((p) => !p)} className="w-full flex items-center justify-between">
@@ -655,7 +695,7 @@ export default function MindMapsPage() {
                       Notas
                     </label>
                   </div>
-                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="w-full h-10 rounded-full text-white text-sm font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #1fa2ff, #1668df)", boxShadow: "0 8px 20px rgba(31, 162, 255, 0.28)" }}>{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
+                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="app-btn-primary w-full h-10 rounded-full text-sm font-bold disabled:opacity-50">{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
                   {aiBusy && <div className="w-full h-2 rounded-full bg-cyan-100 overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300" style={{ width: `${aiProgress}%` }} /></div>}
                 </div>
               )}
@@ -699,7 +739,7 @@ export default function MindMapsPage() {
                   );
                 })}
               </div>
-              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="h-11 px-8 rounded-full text-white font-bold disabled:opacity-50" style={{ background: "linear-gradient(90deg, #06b6d4 0%, #3b82f6 45%, #7c3aed 100%)", boxShadow: "0 10px 24px rgba(79,70,229,0.38)" }}>{t("mindmaps.next")}</button></div>
+              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="app-btn-primary h-11 px-8 rounded-full font-bold disabled:opacity-50">{t("mindmaps.next")}</button></div>
             </div>
           ) : kind === "mindmap" ? (
             <>
@@ -829,12 +869,12 @@ export default function MindMapsPage() {
                       <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-9 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-lg border border-cyan-200 px-2 text-sm font-medium text-cyan-700 bg-white">
                         {cols.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
-                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [] }] } : c)); setTaskText(""); }} className="h-9 px-3 rounded-lg text-white text-sm font-semibold shadow-md whitespace-nowrap" style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}>Agregar</button>
+                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [] }] } : c)); setTaskText(""); }} className="app-btn-primary h-9 px-3 text-sm font-semibold whitespace-nowrap">Agregar</button>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <input value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} placeholder="Nueva columna" className="h-9 flex-1 rounded-lg border border-fuchsia-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
-                    <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="h-9 px-3 rounded-lg border border-fuchsia-200 text-sm font-semibold text-fuchsia-700 bg-fuchsia-50">+ Columna</button>
+                    <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="app-btn-soft h-9 px-3 text-sm text-fuchsia-700">+ Columna</button>
                   </div>
                 </div>
               )}
@@ -893,10 +933,10 @@ export default function MindMapsPage() {
                           {!readonly && (
                             <div className="mt-2 flex min-w-0 items-center gap-1">
                               <input value={checkDrafts[t.id] || ""} onChange={(e) => setCheckDrafts((p) => ({ ...p, [t.id]: e.target.value }))} placeholder="Checklist..." className="h-7 min-w-0 flex-1 rounded border border-cyan-100 px-2 text-xs text-gray-700 bg-cyan-50/40" />
-                              <button className="h-7 px-2 min-w-[72px] shrink-0 whitespace-nowrap rounded border border-emerald-200 text-[11px] font-medium text-emerald-700 bg-emerald-50" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
+                              <button className="app-btn-soft h-7 px-2 min-w-[72px] shrink-0 whitespace-nowrap text-[11px] font-medium text-emerald-700" onClick={() => { const txt = (checkDrafts[t.id] || "").trim(); if (!txt) return; setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.map((task) => task.id !== t.id ? task : { ...task, checklist: [...(task.checklist || []), { id: `chk_${Date.now()}`, text: txt, done: false }] }) })); setCheckDrafts((p) => ({ ...p, [t.id]: "" })); }}>+ Check</button>
                             </div>
                           )}
-                          {!readonly && <button className="mt-2 h-6 px-2 rounded border border-rose-200 text-xs text-rose-700 bg-rose-50" onClick={() => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.filter((x) => x.id !== t.id) }))}>Eliminar</button>}
+                          {!readonly && <button className="app-btn-danger mt-2 h-6 px-2 text-xs text-rose-700" onClick={() => setCols((p) => p.map((col) => col.id !== c.id ? col : { ...col, tasks: col.tasks.filter((x) => x.id !== t.id) }))}>Eliminar</button>}
                         </div>
                       ))}
                     </div>
