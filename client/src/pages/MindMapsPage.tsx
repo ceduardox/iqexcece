@@ -643,6 +643,26 @@ export default function MindMapsPage() {
           color: #be123c;
           box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
         }
+        .mindmaps-page .app-empty-projects-card {
+          position: relative;
+          min-height: 260px;
+          border-radius: 18px;
+          border: 1px solid rgba(196, 181, 253, 0.45);
+          background-image:
+            radial-gradient(52% 30% at 18% 106%, rgba(167, 111, 255, 0.40) 0%, rgba(167, 111, 255, 0.16) 42%, rgba(167, 111, 255, 0.00) 80%),
+            radial-gradient(45% 28% at 90% 104%, rgba(75, 184, 255, 0.34) 0%, rgba(75, 184, 255, 0.12) 42%, rgba(75, 184, 255, 0.00) 80%),
+            radial-gradient(34% 32% at 87% 84%, rgba(170, 222, 255, 0.20) 0%, rgba(170, 222, 255, 0.00) 76%),
+            linear-gradient(180deg, #f4f4fc 0%, #f2f2fb 64%, #f0eef8 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 14px 30px rgba(15, 23, 42, 0.08);
+          overflow: hidden;
+        }
+        .mindmaps-page .app-empty-projects-card::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(150deg, rgba(255,255,255,0.35) 0%, transparent 28%);
+        }
       `}</style>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-purple-100 px-3 py-3">
         <div className="w-full px-1 md:px-3 flex items-center gap-2">
@@ -708,7 +728,11 @@ export default function MindMapsPage() {
             </div>
           )}
           {(!isCompactLayout || mobileSidebarOpen) && <div className="space-y-2 max-h-[40vh] md:max-h-[65vh] overflow-auto pr-1">
-            {!readonly && maps.length === 0 && <p className="text-xs text-gray-500">Aun no tienes proyectos creados.</p>}
+            {!readonly && maps.length === 0 && (
+              <div className="app-empty-projects-card p-4">
+                <p className="text-sm text-gray-600 relative z-[1]">Aun no tienes proyectos creados.</p>
+              </div>
+            )}
             {!readonly && maps.map((m) => { const d = parseData(m.data); return <div key={m.id} className={`rounded-xl border p-2 ${activeId === m.id ? "border-purple-400 bg-purple-50" : "border-purple-100 bg-white"}`}><button className="w-full text-left" onClick={() => openMap(m)}><p className="text-sm font-semibold text-gray-800 truncate">{m.title}</p><p className="text-[11px] text-gray-500">{kindLabel(d.kind)} - {new Date(m.updatedAt).toLocaleString("es-BO")}</p></button><div className="mt-2 flex items-center gap-2"><button className="h-7 px-2 rounded-md border border-cyan-200 text-xs text-cyan-700 bg-white flex items-center gap-1" onClick={() => shareProject(m.id)}><Share2 className="w-3.5 h-3.5" />Compartir</button><button className="h-7 px-2 rounded-md border border-rose-200 text-xs text-rose-700 flex items-center gap-1" onClick={() => deleteProject(m.id)}><Trash2 className="w-3.5 h-3.5" />Eliminar</button></div></div>; })}
           </div>}
           {(!isCompactLayout || mobileSidebarOpen) && shareUrl && <div className="mt-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-2"><p className="text-[11px] text-cyan-700 break-all">{shareUrl}</p></div>}
