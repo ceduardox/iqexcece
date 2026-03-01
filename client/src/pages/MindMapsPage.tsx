@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, ChevronDown, ChevronUp, Columns3, Download, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Columns3, Copy, Crosshair, Download, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,7 @@ type AiIdea = { title: string; children: string[]; note?: string; imageHint?: st
 type AiMap = { centralTopic: string; ideas: AiIdea[] };
 
 const SESSION_KEY = "iq_session_id";
+const VIEW_STATE_KEY = "iq_mindmaps_view_state_v1";
 const NODE_W = 170;
 const NODE_H = 56;
 const WORLD_W = 2600;
@@ -118,6 +119,7 @@ export default function MindMapsPage() {
   const [shareUrl, setShareUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState("");
   const [readonly, setReadonly] = useState(false);
   const [showAiIdeas, setShowAiIdeas] = useState(true);
   const [aiTopic, setAiTopic] = useState("");
@@ -144,6 +146,7 @@ export default function MindMapsPage() {
   const dragRef = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const panRef = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const viewRestoredRef = useRef(false);
 
   const [cols, setCols] = useState<TaskCols>(colsDefault);
   const [taskText, setTaskText] = useState("");
@@ -212,6 +215,7 @@ export default function MindMapsPage() {
     setActiveId(record.id);
     setTitle(record.title || "Nuevo proyecto");
     setKind(parsed.kind);
+    setSavedSnapshot(JSON.stringify(parsed));
     if (parsed.kind === "mindmap") {
       setNodes(parsed.nodes || []);
       setEdges(parsed.edges || []);
@@ -336,11 +340,94 @@ export default function MindMapsPage() {
     }
   }, [isCompactLayout]);
 
+  useEffect(() => {
+    if (showChooser || kind !== "mindmap") {
+      viewRestoredRef.current = false;
+      return;
+    }
+    if (viewRestoredRef.current) return;
+    try {
+      const raw = sessionStorage.getItem(VIEW_STATE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (typeof parsed?.zoom === "number" && Number.isFinite(parsed.zoom)) {
+        setBoardZoom(Math.max(0.45, Math.min(2.2, parsed.zoom)));
+      }
+      if (typeof parsed?.offsetX === "number" && typeof parsed?.offsetY === "number") {
+        setBoardOffset(clampOffset(parsed.offsetX, parsed.offsetY));
+      }
+    } catch {
+      // ignore invalid cache
+    } finally {
+      viewRestoredRef.current = true;
+    }
+  }, [showChooser, kind]);
+
+  useEffect(() => {
+    if (showChooser || kind !== "mindmap") return;
+    sessionStorage.setItem(
+      VIEW_STATE_KEY,
+      JSON.stringify({ zoom: boardZoom, offsetX: boardOffset.x, offsetY: boardOffset.y }),
+    );
+  }, [showChooser, kind, boardZoom, boardOffset.x, boardOffset.y]);
+
   function payload(): Data | null {
     if (!kind) return null;
     if (kind === "mindmap") return { kind, nodes, edges };
     if (kind === "taskboard") return { kind, columns: cols };
     return { kind, strokes };
+  }
+
+  const currentSnapshot = useMemo(() => {
+    const data = payload();
+    return data ? JSON.stringify(data) : "";
+  }, [kind, nodes, edges, cols, strokes]);
+
+  const hasUnsavedChanges = !readonly && !showChooser && !!kind && currentSnapshot !== savedSnapshot;
+
+  function centerBoardOnNode(nodeId?: string | null) {
+    if (kind !== "mindmap") return;
+    const targetId = nodeId || selectedNodeId;
+    if (!targetId || !boardRef.current) return;
+    const node = nodes.find((n) => n.id === targetId);
+    if (!node) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    const nx = rect.width / 2 - (node.x + NODE_W / 2) * boardZoom;
+    const ny = rect.height / 2 - (node.y + NODE_H / 2) * boardZoom;
+    setBoardOffset(clampOffset(nx, ny));
+  }
+
+  function duplicateSelectedNode() {
+    if (readonly || kind !== "mindmap" || !selectedNode) return;
+    const duplicatedId = `node_${Date.now()}`;
+    const duplicatedNode: Node = {
+      ...selectedNode,
+      id: duplicatedId,
+      x: Math.max(0, Math.min(selectedNode.x + 28, WORLD_W - NODE_W)),
+      y: Math.max(0, Math.min(selectedNode.y + 28, WORLD_H - NODE_H)),
+      text: `${selectedNode.text} copia`,
+    };
+    setNodes((prev) => [...prev, duplicatedNode]);
+    setSelectedNodeId(duplicatedId);
+  }
+
+  function createNodeFromSelection(mode: "child" | "sibling") {
+    if (readonly || kind !== "mindmap" || !selectedNode) return;
+    const id = `node_${Date.now()}`;
+    const baseX = mode === "child" ? selectedNode.x + NODE_W + 44 : selectedNode.x;
+    const baseY = mode === "child" ? selectedNode.y : selectedNode.y + NODE_H + 34;
+    const node: Node = {
+      id,
+      x: Math.max(0, Math.min(baseX, WORLD_W - NODE_W)),
+      y: Math.max(0, Math.min(baseY, WORLD_H - NODE_H)),
+      text: mode === "child" ? "Subidea" : "Idea",
+    };
+    setNodes((prev) => [...prev, node]);
+    if (mode === "child") {
+      setEdges((prev) => [...prev, { id: `edge_${Date.now()}`, sourceId: selectedNode.id, targetId: id }]);
+    }
+    setSelectedNodeId(id);
+    centerBoardOnNode(id);
   }
 
   function getBoardWorldCenter() {
@@ -443,6 +530,49 @@ export default function MindMapsPage() {
     const center = getBoardWorldCenter();
     setNodes((prev) => autoLayoutNodes(prev, edges, center));
   }
+
+  useEffect(() => {
+    if (readonly || showChooser || kind !== "mindmap") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const inEditable =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+      if (inEditable) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveProject();
+        return;
+      }
+
+      if (!selectedNodeId) return;
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        setNodes((p) => p.filter((n) => n.id !== selectedNodeId));
+        setEdges((p) => p.filter((ed) => ed.sourceId !== selectedNodeId && ed.targetId !== selectedNodeId));
+        setSelectedNodeId(null);
+        return;
+      }
+
+      if (e.key === "Tab") {
+        e.preventDefault();
+        createNodeFromSelection("child");
+        return;
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        createNodeFromSelection("sibling");
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [readonly, showChooser, kind, selectedNodeId, selectedNode, boardZoom, boardOffset.x, boardOffset.y, nodes, edges]);
 
   function applyAiMapToBoard(aiMap: AiMap) {
     const rect = boardRef.current?.getBoundingClientRect();
@@ -787,6 +917,11 @@ export default function MindMapsPage() {
         <div className="w-full px-1 md:px-3 flex items-center gap-2">
           <button onClick={handleBack} className="app-btn-soft p-2 text-purple-700"><ArrowLeft className="w-4 h-4" /></button>
           {!showChooser && <input value={title} disabled={readonly} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0 h-10 rounded-xl border border-purple-100 px-3 text-sm font-semibold text-gray-800 bg-white" />}
+          {!readonly && !showChooser && kind && (
+            <span className={`hidden md:inline-flex h-8 px-3 rounded-full border text-xs font-semibold items-center ${hasUnsavedChanges ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+              {hasUnsavedChanges ? "Cambios pendientes" : "Guardado"}
+            </span>
+          )}
           {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
         </div>
       </header>
@@ -893,43 +1028,49 @@ export default function MindMapsPage() {
           ) : kind === "mindmap" ? (
             <>
               {!readonly && (
-                <div className="border-b border-purple-100 p-2 flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => {
-                      if (!boardRef.current) return;
-                      const rect = boardRef.current.getBoundingClientRect();
-                      const wx = (-boardOffset.x + rect.width / 2) / boardZoom - NODE_W / 2;
-                      const wy = (-boardOffset.y + rect.height / 2) / boardZoom - NODE_H / 2;
-                      const node = {
-                        id: `node_${Date.now()}`,
-                        x: Math.max(0, Math.min(wx, WORLD_W - NODE_W)),
-                        y: Math.max(0, Math.min(wy, WORLD_H - NODE_H)),
-                        text: `Idea ${nodes.length + 1}`,
-                      };
-                      setNodes((p) => [...p, node]);
-                      setSelectedNodeId(node.id);
-                    }}
-                    className="h-9 px-3 rounded-lg text-white text-sm font-semibold flex items-center gap-2"
-                    style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Nodo
-                  </button>
-                  <button onClick={() => setConnectFromId(selectedNodeId)} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 disabled:opacity-50">{connectFromId ? "Toca nodo destino..." : "Conectar nodos"}</button>
-                  <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.filter((n) => n.id !== selectedNodeId)); setEdges((p) => p.filter((e) => e.sourceId !== selectedNodeId && e.targetId !== selectedNodeId)); setSelectedNodeId(null); }} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-rose-200 text-sm font-medium text-rose-700 disabled:opacity-50">Eliminar nodo</button>
-                  <button onClick={() => setBoardZoom((z) => Math.max(0.45, Number((z - 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">-</button>
-                  <span className="text-xs font-semibold text-gray-600 w-12 text-center">{Math.round(boardZoom * 100)}%</span>
-                  <button onClick={() => setBoardZoom((z) => Math.min(2.2, Number((z + 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">+</button>
-                  <button onClick={reorderMindmap} disabled={!nodes.length} className="h-9 px-3 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-700 disabled:opacity-50">Ordenar</button>
-                  <button onClick={toggleMobileLandscape} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 md:hidden inline-flex items-center gap-1"><RotateCw className="w-4 h-4" />Horizontal</button>
-                  <label className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 inline-flex items-center gap-2 cursor-pointer">
-                    <ImagePlus className="w-4 h-4" />
-                    Imagen
-                    <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleNodeImageUpload(e.target.files?.[0] || null); e.currentTarget.value = ""; }} />
-                  </label>
-                  <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, imageUrl: "" } : n))); }} disabled={!selectedNodeId} className="h-9 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 disabled:opacity-50">Quitar imagen</button>
-                  <span className="text-[11px] text-gray-500">Arrastra fondo para mover el lienzo</span>
-                  <input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="h-9 min-w-[210px] flex-1 rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" placeholder="Texto del nodo" />
+                <div className="border-b border-purple-100 p-2 space-y-2">
+                  <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+                    <button
+                      onClick={() => {
+                        if (!boardRef.current) return;
+                        const rect = boardRef.current.getBoundingClientRect();
+                        const wx = (-boardOffset.x + rect.width / 2) / boardZoom - NODE_W / 2;
+                        const wy = (-boardOffset.y + rect.height / 2) / boardZoom - NODE_H / 2;
+                        const node = {
+                          id: `node_${Date.now()}`,
+                          x: Math.max(0, Math.min(wx, WORLD_W - NODE_W)),
+                          y: Math.max(0, Math.min(wy, WORLD_H - NODE_H)),
+                          text: `Idea ${nodes.length + 1}`,
+                        };
+                        setNodes((p) => [...p, node]);
+                        setSelectedNodeId(node.id);
+                      }}
+                      className="h-9 px-3 shrink-0 rounded-lg text-white text-sm font-semibold inline-flex items-center gap-2"
+                      style={{ background: "linear-gradient(135deg, #00d9ff 0%, #8a3ffc 100%)" }}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Nodo
+                    </button>
+                    <button onClick={() => setConnectFromId(selectedNodeId)} disabled={!selectedNodeId} className="h-9 px-3 shrink-0 rounded-lg border border-purple-200 text-sm font-medium text-purple-700 disabled:opacity-50">{connectFromId ? "Toca nodo destino..." : "Conectar nodos"}</button>
+                    <button onClick={duplicateSelectedNode} disabled={!selectedNodeId} className="h-9 px-3 shrink-0 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 inline-flex items-center gap-1.5 disabled:opacity-50"><Copy className="w-4 h-4" />Duplicar</button>
+                    <button onClick={() => centerBoardOnNode()} disabled={!selectedNodeId} className="h-9 px-3 shrink-0 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-700 inline-flex items-center gap-1.5 disabled:opacity-50"><Crosshair className="w-4 h-4" />Centrar</button>
+                    <button onClick={reorderMindmap} disabled={!nodes.length} className="h-9 px-3 shrink-0 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-700 disabled:opacity-50">Ordenar</button>
+                    <button onClick={() => setBoardZoom((z) => Math.max(0.45, Number((z - 0.1).toFixed(2))))} className="h-9 px-3 shrink-0 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">-</button>
+                    <span className="text-xs font-semibold text-gray-600 w-12 shrink-0 text-center">{Math.round(boardZoom * 100)}%</span>
+                    <button onClick={() => setBoardZoom((z) => Math.min(2.2, Number((z + 0.1).toFixed(2))))} className="h-9 px-3 shrink-0 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">+</button>
+                    <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.filter((n) => n.id !== selectedNodeId)); setEdges((p) => p.filter((e) => e.sourceId !== selectedNodeId && e.targetId !== selectedNodeId)); setSelectedNodeId(null); }} disabled={!selectedNodeId} className="h-9 px-3 shrink-0 rounded-lg border border-rose-200 text-sm font-medium text-rose-700 disabled:opacity-50">Eliminar nodo</button>
+                    <button onClick={toggleMobileLandscape} className="h-9 px-3 shrink-0 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 md:hidden inline-flex items-center gap-1"><RotateCw className="w-4 h-4" />Horizontal</button>
+                    <label className="h-9 px-3 shrink-0 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 inline-flex items-center gap-2 cursor-pointer">
+                      <ImagePlus className="w-4 h-4" />
+                      Imagen
+                      <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleNodeImageUpload(e.target.files?.[0] || null); e.currentTarget.value = ""; }} />
+                    </label>
+                    <button onClick={() => { if (!selectedNodeId) return; setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, imageUrl: "" } : n))); }} disabled={!selectedNodeId} className="h-9 px-3 shrink-0 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 disabled:opacity-50">Quitar imagen</button>
+                  </div>
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
+                    <span className="text-[11px] text-gray-500 shrink-0">Arrastra fondo para mover el lienzo</span>
+                    <input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="h-9 w-full rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" placeholder="Texto del nodo" />
+                  </div>
                 </div>
               )}
               <div
