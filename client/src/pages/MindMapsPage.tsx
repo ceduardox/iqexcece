@@ -343,6 +343,107 @@ export default function MindMapsPage() {
     return { kind, strokes };
   }
 
+  function getBoardWorldCenter() {
+    const rect = boardRef.current?.getBoundingClientRect();
+    const viewportW = (rect?.width || 1100) / boardZoom;
+    const viewportH = (rect?.height || 700) / boardZoom;
+    const centerX = Math.max(0, Math.min((-boardOffset.x) / boardZoom + viewportW / 2, WORLD_W));
+    const centerY = Math.max(0, Math.min((-boardOffset.y) / boardZoom + viewportH / 2, WORLD_H));
+    return { centerX, centerY };
+  }
+
+  function autoLayoutNodes(rawNodes: Node[], rawEdges: Edge[], center: { centerX: number; centerY: number }): Node[] {
+    if (!rawNodes.length) return rawNodes;
+    const clampNode = (n: Node) => ({
+      ...n,
+      x: Math.max(0, Math.min(n.x, WORLD_W - NODE_W)),
+      y: Math.max(0, Math.min(n.y, WORLD_H - NODE_H)),
+    });
+
+    const nodeMap = new Map(rawNodes.map((n) => [n.id, n]));
+    const validEdges = rawEdges.filter((e) => nodeMap.has(e.sourceId) && nodeMap.has(e.targetId));
+    if (!validEdges.length) {
+      const cols = Math.max(1, Math.ceil(Math.sqrt(rawNodes.length)));
+      const colGap = NODE_W + 42;
+      const rowGap = NODE_H + 46;
+      const rows = Math.ceil(rawNodes.length / cols);
+      const startX = center.centerX - ((cols - 1) * colGap) / 2 - NODE_W / 2;
+      const startY = center.centerY - ((rows - 1) * rowGap) / 2 - NODE_H / 2;
+      return rawNodes.map((n, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        return clampNode({ ...n, x: startX + col * colGap, y: startY + row * rowGap });
+      });
+    }
+
+    const children = new Map<string, string[]>();
+    const incoming = new Map<string, number>();
+    rawNodes.forEach((n) => {
+      children.set(n.id, []);
+      incoming.set(n.id, 0);
+    });
+    validEdges.forEach((e) => {
+      children.get(e.sourceId)?.push(e.targetId);
+      incoming.set(e.targetId, (incoming.get(e.targetId) || 0) + 1);
+    });
+
+    const roots = rawNodes.filter((n) => (incoming.get(n.id) || 0) === 0).map((n) => n.id);
+    if (!roots.length) roots.push(rawNodes[0].id);
+
+    const depthById = new Map<string, number>();
+    const queue: string[] = [...roots];
+    roots.forEach((id) => depthById.set(id, 0));
+    while (queue.length) {
+      const id = queue.shift()!;
+      const depth = depthById.get(id) || 0;
+      (children.get(id) || []).forEach((childId) => {
+        const nextDepth = depth + 1;
+        if (!depthById.has(childId) || (depthById.get(childId) || 0) > nextDepth) {
+          depthById.set(childId, nextDepth);
+          queue.push(childId);
+        }
+      });
+    }
+
+    let maxDepth = 0;
+    rawNodes.forEach((n) => {
+      if (!depthById.has(n.id)) depthById.set(n.id, 0);
+      maxDepth = Math.max(maxDepth, depthById.get(n.id) || 0);
+    });
+
+    const grouped = new Map<number, Node[]>();
+    rawNodes.forEach((n) => {
+      const d = depthById.get(n.id) || 0;
+      const arr = grouped.get(d) || [];
+      arr.push(n);
+      grouped.set(d, arr);
+    });
+    grouped.forEach((arr) => arr.sort((a, b) => (a.y === b.y ? a.x - b.x : a.y - b.y)));
+
+    const colGap = NODE_W + 86;
+    const rowGap = NODE_H + 48;
+    const baseX = center.centerX - (maxDepth * colGap) / 2 - NODE_W / 2;
+    const positioned = new Map<string, Node>();
+
+    for (let depth = 0; depth <= maxDepth; depth += 1) {
+      const col = grouped.get(depth) || [];
+      const totalHeight = (col.length - 1) * rowGap;
+      const startY = center.centerY - totalHeight / 2 - NODE_H / 2;
+      const x = baseX + depth * colGap;
+      col.forEach((n, idx) => {
+        positioned.set(n.id, clampNode({ ...n, x, y: startY + idx * rowGap }));
+      });
+    }
+
+    return rawNodes.map((n) => positioned.get(n.id) || clampNode(n));
+  }
+
+  function reorderMindmap() {
+    if (readonly || kind !== "mindmap" || !nodes.length) return;
+    const center = getBoardWorldCenter();
+    setNodes((prev) => autoLayoutNodes(prev, edges, center));
+  }
+
   function applyAiMapToBoard(aiMap: AiMap) {
     const rect = boardRef.current?.getBoundingClientRect();
     const viewportW = (rect?.width || 1100) / boardZoom;
@@ -413,7 +514,8 @@ export default function MindMapsPage() {
       }
     });
 
-    setNodes(nextNodes);
+    const arranged = autoLayoutNodes(nextNodes, nextEdges, { centerX: centerX + NODE_W / 2, centerY: centerY + NODE_H / 2 });
+    setNodes(arranged);
     setEdges(nextEdges);
     setSelectedNodeId(centralId);
   }
@@ -629,6 +731,14 @@ export default function MindMapsPage() {
             linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, transparent 38%);
           border: 1px solid rgba(8, 145, 178, 0.35);
         }
+        .mindmaps-page .app-btn-primary:disabled {
+          color: #0f4b5a;
+          background-image:
+            linear-gradient(135deg, #89d8ea 0%, #76cae6 42%, #a7e5ef 100%),
+            linear-gradient(155deg, rgba(255, 255, 255, 0.2) 0%, transparent 38%);
+          border-color: rgba(14, 116, 144, 0.3);
+          opacity: 1;
+        }
         .mindmaps-page .app-btn-soft {
           background-image:
             linear-gradient(135deg, #f6f0ff 0%, #ede9fe 44%, #f3e8ff 100%),
@@ -810,6 +920,7 @@ export default function MindMapsPage() {
                   <button onClick={() => setBoardZoom((z) => Math.max(0.45, Number((z - 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">-</button>
                   <span className="text-xs font-semibold text-gray-600 w-12 text-center">{Math.round(boardZoom * 100)}%</span>
                   <button onClick={() => setBoardZoom((z) => Math.min(2.2, Number((z + 0.1).toFixed(2))))} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700">+</button>
+                  <button onClick={reorderMindmap} disabled={!nodes.length} className="h-9 px-3 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-700 disabled:opacity-50">Ordenar</button>
                   <button onClick={toggleMobileLandscape} className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 md:hidden inline-flex items-center gap-1"><RotateCw className="w-4 h-4" />Horizontal</button>
                   <label className="h-9 px-3 rounded-lg border border-cyan-200 text-sm font-medium text-cyan-700 inline-flex items-center gap-2 cursor-pointer">
                     <ImagePlus className="w-4 h-4" />
