@@ -883,6 +883,55 @@ export default function MindMapsPage() {
           color: #be123c;
           box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
         }
+        .mindmaps-page .app-sidebar-shell {
+          background: linear-gradient(180deg, #ffffff 0%, #fcfbff 100%);
+          border: 1px solid rgba(196, 181, 253, 0.28);
+          box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+        }
+        .mindmaps-page .app-ai-card {
+          border-radius: 16px;
+          border: 1px solid rgba(14, 165, 233, 0.22);
+          background: linear-gradient(180deg, #f8fcff 0%, #f4f8ff 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+        .mindmaps-page .app-ai-input {
+          border: 1px solid rgba(125, 211, 252, 0.9);
+          background: #ffffff;
+          color: #334155;
+          border-radius: 12px;
+        }
+        .mindmaps-page .app-pill {
+          border-radius: 999px;
+          border: 1px solid rgba(203, 213, 225, 0.9);
+          background: #ffffff;
+          color: #334155;
+          height: 36px;
+          padding: 0 16px;
+          font-size: 14px;
+          font-weight: 600;
+          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+        }
+        .mindmaps-page .app-pill.is-active {
+          border-color: rgba(59, 130, 246, 0.35);
+          color: #ffffff;
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          box-shadow: 0 8px 16px rgba(37, 99, 235, 0.26);
+        }
+        .mindmaps-page .app-checkbox {
+          width: 18px;
+          height: 18px;
+          border-radius: 5px;
+          border: 1px solid rgba(148, 163, 184, 0.9);
+          accent-color: #2563eb;
+        }
+        .mindmaps-page .app-create-btn {
+          height: 48px;
+          border-radius: 14px;
+          border: 1px solid rgba(56, 189, 248, 0.45);
+          font-size: 24px;
+          letter-spacing: 0.02em;
+          font-weight: 700;
+        }
         .mindmaps-page .app-empty-projects-card {
           position: relative;
           min-height: 260px;
@@ -939,43 +988,43 @@ export default function MindMapsPage() {
         )}
 
         {(!isCompactLayout || mobileSidebarOpen || mobileOptionsOpen) && (
-        <aside className="rounded-2xl bg-white border border-purple-100 p-3 shadow-[0_8px_24px_rgba(17,24,39,0.08)]">
+        <aside className="app-sidebar-shell rounded-2xl p-3">
           {!readonly && (!isCompactLayout || mobileOptionsOpen) && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="app-btn-soft h-9 px-3 text-sm text-purple-700 flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button>{!showChooser && <button onClick={() => { const blob = new Blob([JSON.stringify({ title, ...payload() }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title || "proyecto"}.json`; a.click(); URL.revokeObjectURL(url); }} className="app-btn-soft h-9 px-3 text-sm text-cyan-700 flex items-center gap-2"><Download className="w-4 h-4" />JSON</button>}</div>}
           {!readonly && !showChooser && kind === "mindmap" && (!isCompactLayout || mobileOptionsOpen) && (
-            <div className="mb-3 rounded-xl border border-cyan-100 bg-gradient-to-br from-cyan-50/80 to-indigo-50/70 p-3">
+            <div className="app-ai-card mb-3 p-3">
               <button onClick={() => setShowAiIdeas((p) => !p)} className="w-full flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-md bg-cyan-500 text-white flex items-center justify-center"><Lightbulb className="w-4 h-4" /></span>
-                  <p className="text-sm font-bold text-gray-800">Generar ideas</p>
+                  <span className="w-7 h-7 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-[0_6px_14px_rgba(37,99,235,0.28)]"><Lightbulb className="w-4 h-4" /></span>
+                  <p className="text-[18px] font-semibold tracking-tight text-slate-800">Generar ideas</p>
                 </div>
                 {showAiIdeas ? <ChevronUp className="w-4 h-4 text-cyan-700" /> : <ChevronDown className="w-4 h-4 text-cyan-700" />}
               </button>
               {showAiIdeas && (
                 <div className="mt-3 space-y-3">
-                  <p className="text-xs text-gray-600">Comienza tu mapa mental con IA</p>
-                  <textarea value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} placeholder="Que quieres mapear mentalmente?" className="w-full min-h-[72px] resize-none rounded-xl border border-cyan-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 bg-white" />
+                  <p className="text-[15px] text-slate-600 leading-5">Comienza tu mapa mental con IA</p>
+                  <textarea value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} placeholder="Que quieres mapear mentalmente?" className="app-ai-input w-full min-h-[94px] resize-none px-3 py-3 text-[16px] leading-5 placeholder:text-slate-400" />
                   <div>
-                    <p className="text-[11px] font-semibold text-gray-500 mb-1">Resultados</p>
+                    <p className="text-[15px] font-medium text-slate-700 mb-2">Resultados</p>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => setAiResultMode("ideas")} className={`h-8 px-3 rounded-lg text-xs font-semibold border ${aiResultMode === "ideas" ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-200 text-gray-700"}`}>Ideas</button>
-                      <button onClick={() => setAiResultMode("explicar")} className={`h-8 px-3 rounded-lg text-xs font-semibold border ${aiResultMode === "explicar" ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-200 text-gray-700"}`}>Explicar</button>
+                      <button onClick={() => setAiResultMode("ideas")} className={`app-pill ${aiResultMode === "ideas" ? "is-active" : ""}`}>Ideas</button>
+                      <button onClick={() => setAiResultMode("explicar")} className={`app-pill ${aiResultMode === "explicar" ? "is-active" : ""}`}>Explicar</button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold text-gray-500 mb-1">Neuro-configuraciones</p>
-                    <button onClick={() => setAiConfigMode((p) => (p === "basico" ? "profundo" : "basico"))} className="h-8 px-3 rounded-lg text-xs font-semibold border border-gray-200 bg-white text-gray-700 inline-flex items-center gap-1"><Settings2 className="w-3.5 h-3.5 text-blue-600" />{aiConfigMode === "basico" ? "Configuracion basica" : "Configuracion profunda"}</button>
+                    <p className="text-[15px] font-medium text-slate-700 mb-2">Neuro-configuraciones</p>
+                    <button onClick={() => setAiConfigMode((p) => (p === "basico" ? "profundo" : "basico"))} className="app-pill inline-flex items-center gap-1.5"><Settings2 className="w-3.5 h-3.5 text-blue-600" />{aiConfigMode === "basico" ? "Configuracion basica" : "Configuracion profunda"}</button>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <label className="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                      <input type="checkbox" checked={aiIncludeImages} onChange={(e) => setAiIncludeImages(e.target.checked)} className="w-4 h-4 accent-cyan-500" />
+                  <div className="flex items-center gap-6">
+                    <label className="inline-flex items-center gap-2 text-[15px] text-slate-700 cursor-pointer">
+                      <input type="checkbox" checked={aiIncludeImages} onChange={(e) => setAiIncludeImages(e.target.checked)} className="app-checkbox" />
                       Imagenes
                     </label>
-                    <label className="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                      <input type="checkbox" checked={aiIncludeNotes} onChange={(e) => setAiIncludeNotes(e.target.checked)} className="w-4 h-4 accent-cyan-500" />
+                    <label className="inline-flex items-center gap-2 text-[15px] text-slate-700 cursor-pointer">
+                      <input type="checkbox" checked={aiIncludeNotes} onChange={(e) => setAiIncludeNotes(e.target.checked)} className="app-checkbox" />
                       Notas
                     </label>
                   </div>
-                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="app-btn-primary w-full h-10 rounded-full text-sm font-bold disabled:opacity-50">{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
+                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="app-btn-primary app-create-btn w-full disabled:opacity-50">{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
                   {aiBusy && <div className="w-full h-2 rounded-full bg-cyan-100 overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300" style={{ width: `${aiProgress}%` }} /></div>}
                 </div>
               )}
