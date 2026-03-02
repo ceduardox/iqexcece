@@ -16,11 +16,11 @@ import laxBlanca from "@assets/laxblanca_1771479319056.png";
 import laxVerde from "@assets/laxverde_1771479319057.png";
 
 const participarItems = [
-  { id: "p1", icon: School, title: "Camino Abierto para Escuelas de Bolivia", desc: "Extendemos una invitaci\u00f3n a todas las instituciones educativas de Bolivia para que se unan a esta iniciativa transformadora, destinada a enriquecer el panorama educativo a trav\u00e9s de la lectura." },
-  { id: "p2", icon: GraduationCap, title: "Estudiantes: Protagonistas del Cambio", desc: "Buscamos estudiantes listos para embarcarse en un viaje de descubrimiento y crecimiento personal a trav\u00e9s de actividades que despierten su pasi\u00f3n por la lectura." },
-  { id: "p3", icon: Smartphone, title: "Lectura Digital: La Aplicaci\u00f3n que Revoluciona", desc: "Incorporamos una aplicaci\u00f3n en dispositivos m\u00f3viles para realizar pruebas que no solo eval\u00faan sino que motivan, marcando un nuevo est\u00e1ndar en la educaci\u00f3n digital." },
-  { id: "p4", icon: BarChart3, title: "Resultados que Iluminan el Camino", desc: "Los resultados, enviados a padres e instituciones, ofrecen una clasificaci\u00f3n detallada de las habilidades lectoras, promoviendo un desarrollo educativo ajustado a las necesidades de cada estudiante." },
-  { id: "p5", icon: ClipboardList, title: "Requisitos para Forjar Futuros Lectores", desc: "El compromiso de las escuelas es crucial, as\u00ed como la autorizaci\u00f3n y el apoyo de un adulto responsable. Esto garantiza un entorno de apoyo total para los estudiantes seleccionados, permiti\u00e9ndoles participar plenamente en las pruebas y actividades propuestas." },
+  { id: "p1", icon: School, titleKey: "part1Title", descKey: "part1Desc" },
+  { id: "p2", icon: GraduationCap, titleKey: "part2Title", descKey: "part2Desc" },
+  { id: "p3", icon: Smartphone, titleKey: "part3Title", descKey: "part3Desc" },
+  { id: "p4", icon: BarChart3, titleKey: "part4Title", descKey: "part4Desc" },
+  { id: "p5", icon: ClipboardList, titleKey: "part5Title", descKey: "part5Desc" },
 ];
 
 const objectivesMeta = [
@@ -134,9 +134,12 @@ export default function ALeerBoliviaPage() {
         <motion.img src={laxVerde} alt="" className="absolute opacity-[0.06] w-[210px] md:w-[370px]" style={{ bottom: "12%", right: "3%" }} animate={{ rotate: [0, 6, -9, 0], x: [0, -18, 14, 0] }} transition={{ duration: 21, repeat: Infinity, ease: "easeInOut", delay: 5 }} />
         <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.04] w-[170px] md:w-[290px]" style={{ top: "58%", left: "28%" }} animate={{ rotate: [0, -9, 7, 0], scale: [1, 1.09, 0.94, 1] }} transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 8 }} />
       </div>
-      <header
+      <motion.header
         className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 md:hidden ${getEditableClass("header")}`}
         style={{ paddingTop: 10, paddingBottom: 10 }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
         onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
       >
         <button onClick={() => setLocation("/")} className="absolute left-5 p-2 text-gray-400" data-testid="button-back">
@@ -155,20 +158,30 @@ export default function ALeerBoliviaPage() {
             <tspan fill="url(#logoGrad)">x</tspan>
           </text>
         </svg>
-      </header>
+      </motion.header>
 
-      <div className="w-full sticky z-40 md:hidden" style={{ top: 56, marginTop: -4, marginBottom: -20 }}>
+      <motion.div
+        className="w-full sticky z-40 md:hidden"
+        style={{ top: 56, marginTop: -4, marginBottom: -20 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.08 }}
+      >
         <img src={menuCurveImg} alt="" className="w-full h-auto" />
-      </div>
+      </motion.div>
 
       <main className="flex-1 overflow-y-auto pb-28">
-        <section
+        <motion.section
           className={`relative px-5 pt-8 pb-10 ${getEditableClass("section-hero")}`}
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
               : styles["section-hero"]?.background || undefined,
           }}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           onClick={(e) => { if (editorMode) handleElementClick("section-hero", e); }}
         >
           {isVideoUrl(styles["section-hero"]?.imageUrl) && (
@@ -180,7 +193,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-hero", e); }}
               data-testid="badge-edit-hero-bg"
             >
-              Fondo Hero
+              {t("aleer.editHeroBg")}
             </div>
           )}
           {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
@@ -282,15 +295,19 @@ export default function ALeerBoliviaPage() {
               )}
             </div>
           </motion.div>
-        </section>
+        </motion.section>
 
-        <section
+        <motion.section
           className={`px-5 pb-10 relative ${getEditableClass("section-objectives")}`}
           style={{
             background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
               : styles["section-objectives"]?.background || undefined,
           }}
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.18 }}
+          transition={{ duration: 0.42, ease: "easeOut" }}
           onClick={(e) => { if (editorMode) handleElementClick("section-objectives", e); }}
         >
           {isVideoUrl(styles["section-objectives"]?.imageUrl) && (
@@ -302,7 +319,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-objectives", e); }}
               data-testid="badge-edit-objectives-bg"
             >
-              Fondo Objetivos
+              {t("aleer.editObjectivesBg")}
             </div>
           )}
           <motion.div
@@ -439,15 +456,19 @@ export default function ALeerBoliviaPage() {
               </button>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section
+        <motion.section
           className={`px-5 pb-12 pt-8 relative ${getEditableClass("section-participar")}`}
           style={{
             background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
               : styles["section-participar"]?.background || undefined,
           }}
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.18 }}
+          transition={{ duration: 0.42, ease: "easeOut" }}
           onClick={(e) => { if (editorMode) handleElementClick("section-participar", e); }}
         >
           {isVideoUrl(styles["section-participar"]?.imageUrl) && (
@@ -459,7 +480,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-participar", e); }}
               data-testid="badge-edit-participar-bg"
             >
-              Fondo Participar
+              {t("aleer.editParticiparBg")}
             </div>
           )}
           <motion.div
@@ -476,7 +497,7 @@ export default function ALeerBoliviaPage() {
               transition={{ repeat: Infinity, duration: 3 }}
             >
               <Users className="w-4 h-4 text-orange-600" />
-              <span className="text-xs font-bold text-orange-700">Participaci\u00f3n</span>
+              <span className="text-xs font-bold text-orange-700">{t("aleer.participationBadge")}</span>
             </motion.div>
             <h2
               className={`text-xl font-black mb-3 leading-tight ${getEditableClass("participar-title")}`}
@@ -487,7 +508,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
               data-testid="text-participar-title"
             >
-              {"\u00bfC\u00f3mo y Qui\u00e9nes pueden participar?"}
+              {t("aleer.participarTitle")}
             </h2>
             <p
               className={`text-xs leading-relaxed max-w-sm mx-auto ${getEditableClass("participar-desc")}`}
@@ -497,7 +518,7 @@ export default function ALeerBoliviaPage() {
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
             >
-              Impulsamos el futuro educativo de Bolivia con un concurso de lectura que no solo cultiva el amor por los libros entre estudiantes, sino que tambi\u00e9n afina sus habilidades anal\u00edticas y de comprensi\u00f3n.
+              {t("aleer.participarDesc")}
             </p>
           </motion.div>
 
@@ -550,8 +571,8 @@ export default function ALeerBoliviaPage() {
                       <CheckCheck className="w-3.5 h-3.5 text-white" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{item.title}</h3>
-                      <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{t(`aleer.${item.titleKey}`)}</h3>
+                      <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
                     </div>
                   </motion.div>
                 );
@@ -592,8 +613,8 @@ export default function ALeerBoliviaPage() {
                               <CheckCheck className="w-4 h-4 text-white" />
                             </motion.div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-sm font-bold text-gray-800 mb-1">{item.title}</h3>
-                              <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                              <h3 className="text-sm font-bold text-gray-800 mb-1">{t(`aleer.${item.titleKey}`)}</h3>
+                              <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
                             </div>
                           </div>
                         </motion.div>
@@ -619,10 +640,10 @@ export default function ALeerBoliviaPage() {
               whileTap={{ scale: 0.97 }}
               data-testid="button-inscribete"
             >
-              INSCR\u00cdBETE
+              {t("aleer.ctaRegister")}
             </motion.button>
           </motion.div>
-        </section>
+        </motion.section>
       </main>
 
       <BottomNavBar />
