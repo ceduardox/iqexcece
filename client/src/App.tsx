@@ -1,12 +1,10 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
-import { useEmbed } from "@/hooks/use-embed";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "@/lib/i18n";
 import Home from "@/pages/Home";
@@ -108,17 +106,6 @@ function Router() {
 
 function App() {
   usePreloadAssets();
-  const isEmbed = useEmbed();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isEmbed) {
-      root.classList.add("embed-mode");
-    } else {
-      root.classList.remove("embed-mode");
-    }
-    return () => root.classList.remove("embed-mode");
-  }, [isEmbed]);
   
   return (
     <QueryClientProvider client={queryClient}>
@@ -126,7 +113,7 @@ function App() {
         <UserProvider>
           <Toaster />
           <Router />
-          {!isEmbed && <PWAInstallPrompt />}
+          <PWAInstallPrompt />
         </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>

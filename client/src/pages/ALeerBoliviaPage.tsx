@@ -9,7 +9,6 @@ import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { CurvedHeader } from "@/components/CurvedHeader";
-import { useEmbed } from "@/hooks/use-embed";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 import participarImg from "@assets/image_1770684494294.png";
 import laxCyan from "@assets/laxcyan2_1771479429192.png";
@@ -36,7 +35,6 @@ const objectivesMeta = [
 export default function ALeerBoliviaPage() {
   const [, setLocation] = useLocation();
   const { t, i18n } = useTranslation();
-  const isEmbed = useEmbed();
   const lang = i18n.language || "es";
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -141,15 +139,13 @@ export default function ALeerBoliviaPage() {
         <motion.img src={laxVerde} alt="" className="absolute opacity-[0.06] w-[210px] md:w-[370px]" style={{ bottom: "12%", right: "3%" }} animate={{ rotate: [0, 6, -9, 0], x: [0, -18, 14, 0] }} transition={{ duration: 21, repeat: Infinity, ease: "easeInOut", delay: 5 }} />
         <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.04] w-[170px] md:w-[290px]" style={{ top: "58%", left: "28%" }} animate={{ rotate: [0, -9, 7, 0], scale: [1, 1.09, 0.94, 1] }} transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 8 }} />
       </div>
-      {!isEmbed && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        >
-          <CurvedHeader showBack onBack={() => setLocation("/")} />
-        </motion.div>
-      )}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      >
+        <CurvedHeader showBack onBack={() => setLocation("/")} />
+      </motion.div>
 
       <main className="flex-1 overflow-y-auto pb-28">
         <motion.section
@@ -627,7 +623,7 @@ export default function ALeerBoliviaPage() {
         </motion.section>
       </main>
 
-      {!isEmbed && <BottomNavBar />}
+      <BottomNavBar />
 
       {editorMode && (
         <EditorToolbar
