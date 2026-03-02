@@ -34,10 +34,13 @@ const objectivesMeta = [
 ];
 
 export default function ALeerBoliviaPage() {
+  // Toggle para desactivar temporalmente estilos remotos del Navigator en esta página.
+  // Cuando quieras reactivarlo, cambia a `true`.
+  const USE_REMOTE_PAGE_STYLES = false;
   const [, setLocation] = useLocation();
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "es";
-  const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
+  const [editorMode, setEditorMode] = useState(() => USE_REMOTE_PAGE_STYLES && localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>({});
   const [stylesLoaded, setStylesLoaded] = useState(false);
@@ -47,6 +50,11 @@ export default function ALeerBoliviaPage() {
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   useEffect(() => {
+    if (!USE_REMOTE_PAGE_STYLES) {
+      setEditorMode(false);
+      localStorage.setItem("editorMode", "false");
+      return;
+    }
     const handleStorageChange = () => {
       setEditorMode(localStorage.getItem("editorMode") === "true");
     };
@@ -56,9 +64,14 @@ export default function ALeerBoliviaPage() {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [USE_REMOTE_PAGE_STYLES]);
 
   useEffect(() => {
+    if (!USE_REMOTE_PAGE_STYLES) {
+      setStyles({});
+      setStylesLoaded(true);
+      return;
+    }
     const timeout = setTimeout(() => setStylesLoaded(true), 2000);
     fetch(`/api/page-styles/aleer-page?lang=${lang}`)
       .then(res => res.json())
@@ -71,7 +84,7 @@ export default function ALeerBoliviaPage() {
       })
       .catch(() => { clearTimeout(timeout); setStylesLoaded(true); });
     return () => clearTimeout(timeout);
-  }, [lang]);
+  }, [lang, USE_REMOTE_PAGE_STYLES]);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -82,6 +95,7 @@ export default function ALeerBoliviaPage() {
   }, [carouselApi]);
 
   const saveStyles = useCallback(async (newStyles: PageStyles) => {
+    if (!USE_REMOTE_PAGE_STYLES) return;
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) return;
     try {
@@ -91,7 +105,7 @@ export default function ALeerBoliviaPage() {
         body: JSON.stringify({ pageName: "aleer-page", styles: JSON.stringify(newStyles), lang })
       });
     } catch {}
-  }, [lang]);
+  }, [lang, USE_REMOTE_PAGE_STYLES]);
 
   const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
     if (!editorMode) return;
