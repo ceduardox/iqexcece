@@ -824,6 +824,7 @@ export default function MindMapsPage() {
 
     const byId = new Map(rawNodes.map((n) => [n.id, n]));
     const positioned = new Map<string, Node>();
+    const mainIdSet = new Set(mainIds);
     positioned.set(
       centralId,
       clamp({
@@ -837,29 +838,61 @@ export default function MindMapsPage() {
     const leftMain: string[] = [];
     mainIds.forEach((id, idx) => (idx % 2 === 0 ? rightMain.push(id) : leftMain.push(id)));
 
+    const childrenByMain = new Map<string, Node[]>();
+    mainIds.forEach((mainId) => childrenByMain.set(mainId, []));
+    rawEdges.forEach((e) => {
+      if (!mainIdSet.has(e.sourceId)) return;
+      if (e.targetId === centralId || mainIdSet.has(e.targetId)) return;
+      const child = byId.get(e.targetId);
+      if (!child) return;
+      const current = childrenByMain.get(e.sourceId) || [];
+      current.push(child);
+      childrenByMain.set(e.sourceId, current);
+    });
+    childrenByMain.forEach((arr) => {
+      // Keep text nodes first and image/note nodes below to reduce visual noise and edge crossings.
+      arr.sort((a, b) => {
+        const aW = a.imageUrl ? 2 : a.text.startsWith("Nota:") ? 1 : 0;
+        const bW = b.imageUrl ? 2 : b.text.startsWith("Nota:") ? 1 : 0;
+        return aW - bW;
+      });
+    });
+
     const placeMainSide = (ids: string[], side: "left" | "right") => {
       if (!ids.length) return;
-      const mainGapY = 124;
-      const mainOffsetX = 280;
-      const startY = centerTopLeft.y - ((ids.length - 1) * mainGapY) / 2;
-      ids.forEach((mainId, idx) => {
+      const mainOffsetX = 300;
+      const childOffsetX = 235;
+      const blockGap = 24;
+      const blockPad = 14;
+      const childGap = 18;
+      const minBlock = NODE_H + 26;
+
+      const blocks = ids.map((mainId) => {
+        const children = childrenByMain.get(mainId) || [];
+        const childrenHeight = children.reduce((sum, child) => sum + (child.imageUrl ? 130 : NODE_H), 0);
+        const childrenGaps = Math.max(0, children.length - 1) * childGap;
+        const blockHeight = Math.max(minBlock, childrenHeight + childrenGaps + blockPad * 2);
+        return { mainId, children, blockHeight };
+      });
+      const totalHeight = blocks.reduce((sum, b) => sum + b.blockHeight, 0) + Math.max(0, blocks.length - 1) * blockGap;
+      let cursorY = centerTopLeft.y + NODE_H / 2 - totalHeight / 2;
+
+      blocks.forEach((block) => {
+        const { mainId, children, blockHeight } = block;
         const main = byId.get(mainId);
         if (!main) return;
         const mainX = side === "right" ? centerTopLeft.x + mainOffsetX : centerTopLeft.x - mainOffsetX;
-        const mainY = startY + idx * mainGapY;
+        const mainY = cursorY + blockHeight / 2 - NODE_H / 2;
         positioned.set(mainId, clamp({ ...main, x: mainX, y: mainY }));
 
-        const childIds = rawEdges.filter((e) => e.sourceId === mainId).map((e) => e.targetId);
-        const childGapY = 78;
-        const childOffsetX = 230;
-        const childStartY = mainY - ((childIds.length - 1) * childGapY) / 2;
-        childIds.forEach((childId, childIdx) => {
-          const child = byId.get(childId);
-          if (!child || childId === centralId || mainIds.includes(childId)) return;
+        let childY = cursorY + blockPad;
+        children.forEach((child) => {
           const childX = side === "right" ? mainX + childOffsetX : mainX - childOffsetX;
-          const childY = childStartY + childIdx * childGapY;
-          positioned.set(childId, clamp({ ...child, x: childX, y: childY }));
+          positioned.set(child.id, clamp({ ...child, x: childX, y: childY }));
+          childY += (child.imageUrl ? 130 : NODE_H) + childGap;
         });
+
+        cursorY += blockHeight + blockGap;
       });
     };
 
