@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -56,7 +56,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios" | "roles">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "servidor" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios" | "roles">("sesiones");
   const [resultadosOpen, setResultadosOpen] = useState(false);
   const [activeRole, setActiveRole] = useState<{name: string; allowedTabs: string[]} | null>(null);
   const [roles, setRoles] = useState<{id: number; name: string; allowedTabs: string[]}[]>([]);
@@ -768,6 +768,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     { key: "contenido", label: "Contenido" },
     { key: "imagenes", label: "Imágenes" },
     { key: "entrenamiento", label: "Entrenamiento" },
+    { key: "servidor", label: "Servidor" },
     { key: "instituciones", label: "Instituciones" },
     { key: "blog", label: "Blog" },
     { key: "agente", label: "Agente IA" },
@@ -1489,6 +1490,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             Entrenamiento
           </button>
           )}
+          {isTabVisible("servidor") && (
+          <button
+            onClick={() => setActiveTab("servidor")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              activeTab === "servidor" ? "bg-sky-600 text-white" : "text-sky-400 hover:bg-white/10"
+            }`}
+            data-testid="sidebar-servidor"
+          >
+            <Server className="w-5 h-5" />
+            Servidor
+          </button>
+          )}
           {isTabVisible("instituciones") && (
           <button
             onClick={() => setActiveTab("instituciones")}
@@ -1714,6 +1727,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Zap className="w-4 h-4 mr-1" />
             Entrena
+          </Button>
+          )}
+          {isTabVisible("servidor") && (
+          <Button
+            onClick={() => setActiveTab("servidor")}
+            variant={activeTab === "servidor" ? "default" : "outline"}
+            size="sm"
+            className={activeTab === "servidor" ? "bg-sky-600" : "border-sky-500/30 text-sky-400"}
+            data-testid="mobile-tab-servidor"
+          >
+            <Server className="w-4 h-4 mr-1" />
+            Servidor
           </Button>
           )}
           {isTabVisible("instituciones") && (
@@ -6107,6 +6132,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             </div>
           )}
 
+        {activeTab === "servidor" && (
+          <ServerAdminPanel sessionsData={data} />
+        )}
+
         {activeTab === "instituciones" && (
           <InstitutionsPanel token={token} />
         )}
@@ -7008,6 +7037,238 @@ function FieldRow({ label, value }: { label: string; value: string }) {
     <div>
       <span className="text-gray-400 text-xs">{label}:</span>
       <span className="text-white text-sm ml-1">{value}</span>
+    </div>
+  );
+}
+
+function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null }) {
+  const [selectedDomain, setSelectedDomain] = useState<"iqexponencial.app" | "iqexponencial.com">("iqexponencial.app");
+  const [billingMode, setBillingMode] = useState<"mensual" | "anual">("mensual");
+
+  const activeUsers = sessionsData?.activeCount || 0;
+  const totalSessions = sessionsData?.total || 0;
+  const baseLoad = Math.min(88, 42 + Math.round(activeUsers * 0.85) + Math.round(totalSessions * 0.03));
+  const domainFactor = selectedDomain === "iqexponencial.com" ? 0.68 : 1;
+  const cpu = Math.max(8, Math.min(95, Math.round(baseLoad * domainFactor)));
+  const ram = Math.max(12, Math.min(95, Math.round((baseLoad + 8) * domainFactor)));
+  const network = Math.max(10, Math.min(95, Math.round((baseLoad - 4) * domainFactor)));
+  const disk = Math.max(14, Math.min(95, Math.round((baseLoad - 10) * domainFactor)));
+
+  const monthlyPlans = [
+    {
+      id: "starter",
+      name: "Starter Cloud",
+      price: 60,
+      yearlyPrice: 600,
+      featured: false,
+      subtitle: "Ideal para arranque y validacion",
+      features: [
+        "1 dominio principal",
+        "SSL incluido",
+        "Monitoreo basico",
+        "Backups semanales",
+        "Soporte en horario laboral",
+        "Sin correo corporativo",
+      ],
+    },
+    {
+      id: "pro",
+      name: "Pro Growth",
+      price: 90,
+      yearlyPrice: 900,
+      featured: false,
+      subtitle: "Escala estable para equipos pequenos",
+      features: [
+        "2 dominios (app + web)",
+        "SSL incluido",
+        "2 correos corporativos",
+        "Backups diarios",
+        "Alertas de uptime",
+        "Soporte prioritario",
+      ],
+    },
+    {
+      id: "elite",
+      name: "Elite Server",
+      price: 160,
+      yearlyPrice: 1250,
+      featured: true,
+      subtitle: "Recomendado para negocio activo y venta B2B",
+      features: [
+        "2 dominios + staging",
+        "SSL incluido + hardening",
+        "Correos corporativos ilimitados",
+        "Auto backup cada 6h",
+        "WAF y proteccion DDoS avanzada",
+        "Escalado de recursos prioritario",
+        "SLA premium y soporte VIP 24/7",
+        "Reportes ejecutivos semanales",
+      ],
+    },
+  ];
+
+  const extraFunctions = [
+    { title: "Estado en tiempo real", desc: "Salud de API, latencia y errores por dominio." },
+    { title: "Control de despliegues", desc: "Historial de versiones, rollback rapido y ventana de mantenimiento." },
+    { title: "Backups y restauracion", desc: "Puntos de recuperacion con restauracion por fecha." },
+    { title: "Seguridad avanzada", desc: "WAF, bloqueo de IP maliciosa y auditoria de accesos admin." },
+    { title: "Alertas inteligentes", desc: "Notificaciones por picos de CPU, RAM o caidas de servicio." },
+    { title: "Analitica comercial", desc: "Uso por plan, conversion, renovaciones y estimacion de churn." },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <Card className="bg-black/40 border-sky-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Server className="w-5 h-5 text-sky-400" />
+            Panel Servidor Admin
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {(["iqexponencial.app", "iqexponencial.com"] as const).map((domain) => (
+              <Button
+                key={domain}
+                size="sm"
+                variant={selectedDomain === domain ? "default" : "outline"}
+                onClick={() => setSelectedDomain(domain)}
+                className={selectedDomain === domain ? "bg-sky-600 hover:bg-sky-700" : "border-sky-500/30 text-sky-300"}
+                data-testid={`server-domain-${domain}`}
+              >
+                <Globe className="w-4 h-4 mr-1" />
+                {domain}
+              </Button>
+            ))}
+            <span className="text-xs text-white/60 ml-1">
+              {selectedDomain === "iqexponencial.com"
+                ? "Dominio web optimizado: 20% a 40% menos carga estimada."
+                : "Dominio app con trafico completo y carga primaria."}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "CPU", value: cpu, icon: Gauge, color: "text-cyan-300" },
+              { label: "RAM", value: ram, icon: Monitor, color: "text-purple-300" },
+              { label: "Red", value: network, icon: Globe, color: "text-emerald-300" },
+              { label: "Disco", value: disk, icon: Server, color: "text-amber-300" },
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-white/70">{metric.label}</span>
+                  <metric.icon className={`w-4 h-4 ${metric.color}`} />
+                </div>
+                <div className={`text-xl font-bold ${metric.color}`}>{metric.value}%</div>
+                <div className="w-full h-2 bg-white/10 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-cyan-500 to-violet-500" style={{ width: `${metric.value}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-white/80">
+              Sesiones activas: <span className="text-cyan-300 font-bold">{activeUsers}</span>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-white/80">
+              Total sesiones historicas: <span className="text-purple-300 font-bold">{totalSessions}</span>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-white/80">
+              Uptime estimado: <span className="text-emerald-300 font-bold">99.95%</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black/40 border-violet-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-violet-400" />
+            Funciones de servidor incluidas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {extraFunctions.map((item) => (
+              <div key={item.title} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-white font-semibold text-sm">{item.title}</p>
+                <p className="text-white/65 text-xs mt-1">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black/40 border-emerald-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Mail className="w-5 h-5 text-emerald-400" />
+            Planes y precios
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={billingMode === "mensual" ? "default" : "outline"}
+              onClick={() => setBillingMode("mensual")}
+              className={billingMode === "mensual" ? "bg-emerald-600 hover:bg-emerald-700" : "border-emerald-500/30 text-emerald-300"}
+              data-testid="server-billing-monthly"
+            >
+              Mensual
+            </Button>
+            <Button
+              size="sm"
+              variant={billingMode === "anual" ? "default" : "outline"}
+              onClick={() => setBillingMode("anual")}
+              className={billingMode === "anual" ? "bg-emerald-600 hover:bg-emerald-700" : "border-emerald-500/30 text-emerald-300"}
+              data-testid="server-billing-yearly"
+            >
+              Anual
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {monthlyPlans.map((plan) => {
+              const shownPrice = billingMode === "mensual" ? `$${plan.price}/mes` : `$${plan.yearlyPrice}/anio`;
+              return (
+                <div
+                  key={plan.id}
+                  className={`rounded-2xl border p-4 ${plan.featured ? "border-amber-400 bg-gradient-to-br from-amber-500/20 to-emerald-500/10 shadow-[0_0_0_1px_rgba(251,191,36,0.3)]" : "border-white/15 bg-white/[0.04]"}`}
+                  data-testid={`server-plan-${plan.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-white font-bold">{plan.name}</p>
+                      <p className="text-white/60 text-xs mt-1">{plan.subtitle}</p>
+                    </div>
+                    {plan.featured && (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-amber-400 text-black font-bold">
+                        RECOMENDADO
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-3xl font-black mt-4 ${plan.featured ? "text-amber-300" : "text-cyan-300"}`}>{shownPrice}</p>
+                  {plan.featured && billingMode === "anual" && (
+                    <p className="text-xs text-emerald-300 mt-1">
+                      Ahorro premium anual para cierre comercial.
+                    </p>
+                  )}
+                  <ul className="mt-4 space-y-2">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="text-sm text-white/85 flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
