@@ -1312,17 +1312,27 @@ export default function MindMapsPage() {
                     </div>
                   )}
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <input value={taskText} onChange={(e) => setTaskText(e.target.value)} placeholder="Nueva tarea" className="h-9 min-w-0 flex-1 rounded-lg border border-cyan-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
+                    <div className="relative min-w-0 flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cyan-100 text-cyan-700 inline-flex items-center justify-center">
+                        <Plus className="w-3 h-3" />
+                      </span>
+                      <input value={taskText} onChange={(e) => setTaskText(e.target.value)} placeholder="Nueva tarea" className="h-11 min-w-0 w-full rounded-xl border border-cyan-200 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
+                    </div>
                     <div className="flex gap-2">
-                      <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-9 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-lg border border-cyan-200 px-2 text-sm font-medium text-cyan-700 bg-white">
+                      <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-11 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-xl border border-cyan-200 px-3 text-sm font-medium text-cyan-700 bg-white">
                         {cols.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
-                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [], note: "", priority: "medium", dueDate: "", status: statusByColumnId(taskColId) }] } : c)); setTaskText(""); }} className="app-btn-primary h-9 px-3 text-sm font-semibold whitespace-nowrap">Agregar</button>
+                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [], note: "", priority: "medium", dueDate: "", status: statusByColumnId(taskColId) }] } : c)); setTaskText(""); }} className="app-btn-primary h-11 px-4 text-sm font-semibold whitespace-nowrap">Agregar</button>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <input value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} placeholder="Nueva columna" className="h-9 flex-1 rounded-lg border border-fuchsia-200 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
-                    <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="app-btn-soft h-9 px-3 text-sm text-fuchsia-700">+ Columna</button>
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 inline-flex items-center justify-center">
+                        <Columns3 className="w-3 h-3" />
+                      </span>
+                      <input value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} placeholder="Nueva columna" className="h-11 w-full rounded-xl border border-fuchsia-200 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white shadow-sm" />
+                    </div>
+                    <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="app-btn-soft h-11 px-4 text-sm text-fuchsia-700">+ Columna</button>
                   </div>
                 </div>
               )}
