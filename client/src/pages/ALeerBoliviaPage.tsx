@@ -174,7 +174,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
-              : styles["section-hero"]?.background || "linear-gradient(145deg, rgba(92,33,182,0.24) 0%, rgba(124,58,237,0.2) 38%, rgba(6,182,212,0.18) 100%)",
+              : styles["section-hero"]?.background || "linear-gradient(145deg, rgba(46,16,101,0.72) 0%, rgba(91,33,182,0.66) 38%, rgba(8,145,178,0.62) 100%)",
           }}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -300,7 +300,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
-              : styles["section-objectives"]?.background || "linear-gradient(155deg, rgba(79,70,229,0.16) 0%, rgba(167,139,250,0.2) 44%, rgba(34,211,238,0.18) 100%)",
+              : styles["section-objectives"]?.background || "linear-gradient(155deg, rgba(49,46,129,0.64) 0%, rgba(109,40,217,0.6) 44%, rgba(14,116,144,0.56) 100%)",
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -461,7 +461,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
-              : styles["section-participar"]?.background || "linear-gradient(145deg, rgba(91,33,182,0.16) 0%, rgba(139,92,246,0.18) 35%, rgba(6,182,212,0.16) 100%)",
+              : styles["section-participar"]?.background || "linear-gradient(145deg, rgba(59,7,100,0.64) 0%, rgba(107,33,168,0.58) 35%, rgba(8,145,178,0.52) 100%)",
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
