@@ -174,7 +174,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
-              : styles["section-hero"]?.background || "linear-gradient(145deg, rgba(46,16,101,0.72) 0%, rgba(91,33,182,0.66) 38%, rgba(8,145,178,0.62) 100%)",
+              : styles["section-hero"]?.background || undefined,
           }}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -300,7 +300,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
-              : styles["section-objectives"]?.background || "linear-gradient(155deg, rgba(49,46,129,0.64) 0%, rgba(109,40,217,0.6) 44%, rgba(14,116,144,0.56) 100%)",
+              : styles["section-objectives"]?.background || undefined,
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -461,7 +461,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
-              : styles["section-participar"]?.background || "linear-gradient(145deg, rgba(59,7,100,0.64) 0%, rgba(107,33,168,0.58) 35%, rgba(8,145,178,0.52) 100%)",
+              : styles["section-participar"]?.background || undefined,
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -655,23 +655,23 @@ export default function ALeerBoliviaPage() {
             className="rounded-3xl overflow-hidden border border-violet-300/50"
             style={{ boxShadow: "0 18px 40px rgba(109,40,217,0.22), 0 6px 14px rgba(0,0,0,0.08)" }}
           >
-            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 45%, #4c1d95 100%)" }}>
+            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(120deg, #06b6d4 0%, #14b8a6 42%, #0ea5e9 100%)" }}>
               <img src={laxPurpura} alt="" className="absolute -top-8 -left-8 w-52 md:w-72 opacity-18 pointer-events-none" />
               <img src={laxCyan} alt="" className="absolute -bottom-10 -right-8 w-56 md:w-80 opacity-20 pointer-events-none" />
               <motion.div
                 className="absolute -top-16 left-[20%] w-64 h-64 rounded-full opacity-25 pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(34,211,238,0.9) 0%, transparent 68%)" }}
+                style={{ background: "radial-gradient(circle, rgba(109,40,217,0.45) 0%, transparent 68%)" }}
                 animate={{ scale: [1, 1.08, 0.96, 1], rotate: [0, 12, -8, 0] }}
                 transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
                 className="absolute -bottom-20 right-[10%] w-72 h-72 rounded-full opacity-20 pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(167,139,250,0.95) 0%, transparent 70%)" }}
+                style={{ background: "radial-gradient(circle, rgba(76,29,149,0.45) 0%, transparent 70%)" }}
                 animate={{ scale: [1, 0.94, 1.06, 1], rotate: [0, -10, 7, 0] }}
                 transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-cyan-200 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{t("aleer.joinTitle")}</h3>
+              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.28)]">{t("aleer.joinTitle")}</h3>
               <p className="relative z-10 text-sm md:text-base text-white/95 max-w-2xl mx-auto leading-relaxed">
                 {t("aleer.joinDesc")}
               </p>
@@ -687,7 +687,7 @@ export default function ALeerBoliviaPage() {
                     <motion.button
                       key={item.key}
                       className="w-full rounded-2xl px-4 py-4 text-left flex items-center gap-3 border border-cyan-200/55"
-                      style={{ background: "linear-gradient(135deg, #22d3ee 0%, #06b6d4 42%, #0891b2 100%)", boxShadow: "0 10px 24px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.2)" }}
+                      style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0ea5e9 45%, #0284c7 100%)", boxShadow: "0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)" }}
                       initial={{ opacity: 0, y: 16, scale: 0.96 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
                       viewport={{ once: true }}
@@ -699,7 +699,7 @@ export default function ALeerBoliviaPage() {
                       <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+                      <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(76,29,149,0.48)]">
                         {item.label}
                       </span>
                     </motion.button>
