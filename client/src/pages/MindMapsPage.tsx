@@ -1518,16 +1518,24 @@ export default function MindMapsPage() {
                     <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="app-btn-soft h-11 px-4 text-sm text-fuchsia-700">+ Columna</button>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      value={taskSearch}
-                      onChange={(e) => setTaskSearch(e.target.value)}
-                      placeholder="Buscar tarea..."
-                      className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 placeholder:text-slate-400 bg-white"
-                    />
+                    <div className="relative min-w-0 flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-100 text-slate-600 inline-flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="7" />
+                          <path d="m20 20-3.5-3.5" />
+                        </svg>
+                      </span>
+                      <input
+                        value={taskSearch}
+                        onChange={(e) => setTaskSearch(e.target.value)}
+                        placeholder="Buscar tarea..."
+                        className="h-11 min-w-0 w-full rounded-xl border border-slate-200 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 bg-white shadow-sm"
+                      />
+                    </div>
                     <select
                       value={taskFilter}
                       onChange={(e) => setTaskFilter(e.target.value as "all" | "pending" | "done" | "overdue")}
-                      className="h-10 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 bg-white"
+                      className="h-11 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 bg-white"
                     >
                       <option value="all">Todas</option>
                       <option value="pending">Pendientes</option>
