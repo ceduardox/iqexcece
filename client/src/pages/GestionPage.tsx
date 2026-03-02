@@ -7050,6 +7050,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   const [creatingPlanId, setCreatingPlanId] = useState<string | null>(null);
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<"all" | "paid" | "pending" | "failed">("all");
 
 
   const monthlyPlans = [
@@ -7221,13 +7222,69 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     if (serverView === "pagos") fetchPayments();
   }, [serverView]);
 
-  const createCryptoPayment = async (planId: string) => {
+  const normalizePaymentStatus = (status: string) => {
+    const s = String(status || "").toLowerCase();
+    if (["finished", "confirmed", "paid"].includes(s)) return "paid";
+    if (["failed", "expired", "refunded"].includes(s)) return "failed";
+    return "pending";
+  };
+
+  const rawPayments = payments.length > 0 ? payments : [
+    {
+      orderId: "inv-2026-01",
+      updatedAt: "2026-01-10T12:00:00.000Z",
+      planId: "pro",
+      billingMode: "mensual",
+      amountUsd: 90,
+      paymentStatus: "finished",
+    },
+    {
+      orderId: "inv-2026-02",
+      updatedAt: "2026-02-10T12:00:00.000Z",
+      planId: "pro",
+      billingMode: "mensual",
+      amountUsd: 90,
+      paymentStatus: "waiting",
+    },
+  ];
+
+  const filteredPayments = rawPayments.filter((row: any) => {
+    if (paymentStatusFilter === "all") return true;
+    return normalizePaymentStatus(row.paymentStatus) === paymentStatusFilter;
+  });
+
+  const exportPaymentsCsv = () => {
+    const rows = filteredPayments.map((row: any) => ({
+      id: row.orderId || row.id || "",
+      fecha: row.updatedAt ? new Date(row.updatedAt).toISOString() : "",
+      plan: row.planId || "",
+      periodo: row.billingMode || "",
+      monto_usd: row.amountUsd || 0,
+      estado: normalizePaymentStatus(row.paymentStatus),
+    }));
+    const headers = ["id", "fecha", "plan", "periodo", "monto_usd", "estado"];
+    const csv = [
+      headers.join(","),
+      ...rows.map((r: any) => headers.map((h) => `"${String(r[h as keyof typeof r]).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `payments_nowpayments_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const createCryptoPayment = async (planId: string, mode: "mensual" | "anual" = billingMode) => {
     try {
       setCreatingPlanId(planId);
       const res = await fetch("/api/payments/nowpayments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, billingMode }),
+        body: JSON.stringify({ planId, billingMode: mode }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -7272,6 +7329,14 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
           >
             {serverView === "panel" ? "Ver reportes de pagos" : "Volver al panel"}
           </Button>
+          <Button
+            onClick={() => createCryptoPayment(activePlan.id, activePlan.mode)}
+            disabled={creatingPlanId === activePlan.id}
+            className="bg-violet-600 hover:bg-violet-700"
+            data-testid="server-renew-now"
+          >
+            {creatingPlanId === activePlan.id ? "Creando..." : "Renovar ahora"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -7297,7 +7362,50 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
               </div>
             </div>
 
-              <div className="rounded-xl border border-white/10 overflow-hidden">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={paymentStatusFilter === "all" ? "default" : "outline"}
+                onClick={() => setPaymentStatusFilter("all")}
+                className={paymentStatusFilter === "all" ? "bg-cyan-600" : "border-white/20 text-white/70"}
+              >
+                Todos
+              </Button>
+              <Button
+                size="sm"
+                variant={paymentStatusFilter === "paid" ? "default" : "outline"}
+                onClick={() => setPaymentStatusFilter("paid")}
+                className={paymentStatusFilter === "paid" ? "bg-emerald-600" : "border-white/20 text-white/70"}
+              >
+                Pagado
+              </Button>
+              <Button
+                size="sm"
+                variant={paymentStatusFilter === "pending" ? "default" : "outline"}
+                onClick={() => setPaymentStatusFilter("pending")}
+                className={paymentStatusFilter === "pending" ? "bg-amber-600" : "border-white/20 text-white/70"}
+              >
+                Pendiente
+              </Button>
+              <Button
+                size="sm"
+                variant={paymentStatusFilter === "failed" ? "default" : "outline"}
+                onClick={() => setPaymentStatusFilter("failed")}
+                className={paymentStatusFilter === "failed" ? "bg-rose-600" : "border-white/20 text-white/70"}
+              >
+                Fallido
+              </Button>
+              <Button
+                size="sm"
+                onClick={exportPaymentsCsv}
+                className="bg-sky-600 hover:bg-sky-700"
+                data-testid="export-payments-csv"
+              >
+                Exportar CSV
+              </Button>
+            </div>
+
+            <div className="rounded-xl border border-white/10 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-white/5 text-white/70">
                   <tr>
@@ -7310,24 +7418,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                   </tr>
                 </thead>
                 <tbody>
-                  {(payments.length > 0 ? payments : [
-                    {
-                      orderId: "inv-2026-01",
-                      updatedAt: "2026-01-10T12:00:00.000Z",
-                      planId: "pro",
-                      billingMode: "mensual",
-                      amountUsd: 90,
-                      paymentStatus: "finished",
-                    },
-                    {
-                      orderId: "inv-2026-02",
-                      updatedAt: "2026-02-10T12:00:00.000Z",
-                      planId: "pro",
-                      billingMode: "mensual",
-                      amountUsd: 90,
-                      paymentStatus: "waiting",
-                    },
-                  ]).map((row: any) => (
+                  {filteredPayments.map((row: any) => (
                     <tr key={row.orderId || row.id} className="border-t border-white/10">
                       <td className="px-3 py-2 text-cyan-300">{row.orderId || row.id}</td>
                       <td className="px-3 py-2 text-white/85">{row.updatedAt ? new Date(row.updatedAt).toLocaleString() : "-"}</td>
@@ -7335,12 +7426,19 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                       <td className="px-3 py-2 text-white/85">{row.billingMode || "-"}</td>
                       <td className="px-3 py-2 text-white font-semibold">${row.amountUsd || 0}</td>
                       <td className="px-3 py-2">
-                        <span className={`text-xs px-2 py-1 rounded-full ${row.paymentStatus === "finished" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}>
-                          {row.paymentStatus === "finished" ? "Pagado" : "Pendiente"}
+                        <span className={`text-xs px-2 py-1 rounded-full ${normalizePaymentStatus(row.paymentStatus) === "paid" ? "bg-emerald-500/20 text-emerald-300" : normalizePaymentStatus(row.paymentStatus) === "failed" ? "bg-rose-500/20 text-rose-300" : "bg-amber-500/20 text-amber-300"}`}>
+                          {normalizePaymentStatus(row.paymentStatus) === "paid" ? "Pagado" : normalizePaymentStatus(row.paymentStatus) === "failed" ? "Fallido" : "Pendiente"}
                         </span>
                       </td>
                     </tr>
                   ))}
+                  {filteredPayments.length === 0 && (
+                    <tr>
+                      <td className="px-3 py-4 text-white/50 text-sm" colSpan={6}>
+                        No hay pagos para el filtro seleccionado.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
