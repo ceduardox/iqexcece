@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
+import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
 import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
 import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
@@ -14,6 +15,7 @@ import laxCyan from "@assets/laxcyan2_1771479429192.png";
 import laxPurpura from "@assets/laxpurpura_1771479319056.png";
 import laxBlanca from "@assets/laxblanca_1771479319056.png";
 import laxVerde from "@assets/laxverde_1771479319057.png";
+const LOGO_URL = "https://iqexponencial.app/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
 
 const participarItems = [
   { id: "p1", icon: School, titleKey: "part1Title", descKey: "part1Desc" },
@@ -145,19 +147,15 @@ export default function ALeerBoliviaPage() {
         <button onClick={() => setLocation("/")} className="absolute left-5 p-2 text-gray-400" data-testid="button-back">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8a3ffc" />
-              <stop offset="100%" stopColor="#00d9ff" />
-            </linearGradient>
-          </defs>
-          <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
-            <tspan fill="#8a3ffc">i</tspan>
-            <tspan fill="#8a3ffc">Q</tspan>
-            <tspan fill="url(#logoGrad)">x</tspan>
-          </text>
-        </svg>
+        <img
+          src={LOGO_URL}
+          alt="iQx"
+          className="h-10 w-auto object-contain"
+          data-testid="header-logo-image"
+        />
+        <div className="absolute right-5">
+          <LanguageButton />
+        </div>
       </motion.header>
 
       <motion.div
