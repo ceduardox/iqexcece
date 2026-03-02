@@ -808,6 +808,67 @@ export default function MindMapsPage() {
     setNodes((prev) => autoLayoutNodes(prev, edges, center));
   }
 
+  function layoutAiBalanced(
+    rawNodes: Node[],
+    rawEdges: Edge[],
+    centralId: string,
+    mainIds: string[],
+    centerTopLeft: { x: number; y: number },
+  ): Node[] {
+    if (!rawNodes.length) return rawNodes;
+    const clamp = (n: Node) => ({
+      ...n,
+      x: Math.max(0, Math.min(n.x, WORLD_W - NODE_W)),
+      y: Math.max(0, Math.min(n.y, WORLD_H - NODE_H)),
+    });
+
+    const byId = new Map(rawNodes.map((n) => [n.id, n]));
+    const positioned = new Map<string, Node>();
+    positioned.set(
+      centralId,
+      clamp({
+        ...(byId.get(centralId) || rawNodes[0]),
+        x: centerTopLeft.x,
+        y: centerTopLeft.y,
+      }),
+    );
+
+    const rightMain: string[] = [];
+    const leftMain: string[] = [];
+    mainIds.forEach((id, idx) => (idx % 2 === 0 ? rightMain.push(id) : leftMain.push(id)));
+
+    const placeMainSide = (ids: string[], side: "left" | "right") => {
+      if (!ids.length) return;
+      const mainGapY = 124;
+      const mainOffsetX = 280;
+      const startY = centerTopLeft.y - ((ids.length - 1) * mainGapY) / 2;
+      ids.forEach((mainId, idx) => {
+        const main = byId.get(mainId);
+        if (!main) return;
+        const mainX = side === "right" ? centerTopLeft.x + mainOffsetX : centerTopLeft.x - mainOffsetX;
+        const mainY = startY + idx * mainGapY;
+        positioned.set(mainId, clamp({ ...main, x: mainX, y: mainY }));
+
+        const childIds = rawEdges.filter((e) => e.sourceId === mainId).map((e) => e.targetId);
+        const childGapY = 78;
+        const childOffsetX = 230;
+        const childStartY = mainY - ((childIds.length - 1) * childGapY) / 2;
+        childIds.forEach((childId, childIdx) => {
+          const child = byId.get(childId);
+          if (!child || childId === centralId || mainIds.includes(childId)) return;
+          const childX = side === "right" ? mainX + childOffsetX : mainX - childOffsetX;
+          const childY = childStartY + childIdx * childGapY;
+          positioned.set(childId, clamp({ ...child, x: childX, y: childY }));
+        });
+      });
+    };
+
+    placeMainSide(rightMain, "right");
+    placeMainSide(leftMain, "left");
+
+    return rawNodes.map((n) => positioned.get(n.id) || clamp(n));
+  }
+
   useEffect(() => {
     if (readonly || showChooser || kind !== "mindmap") return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -862,6 +923,7 @@ export default function MindMapsPage() {
     const centralId = `node_ai_central_${now}`;
     const nextNodes: Node[] = [{ id: centralId, x: centerX, y: centerY, text: aiMap.centralTopic || aiTopic.trim() || "Tema principal" }];
     const nextEdges: Edge[] = [];
+    const mainNodeIds: string[] = [];
 
     const mainIdeas = (aiMap.ideas || []).slice(0, 7);
     const radius = Math.max(170, Math.min(Math.min(viewportW, viewportH) * 0.32, 280));
@@ -871,6 +933,7 @@ export default function MindMapsPage() {
       const mainX = centerX + Math.cos(angle) * radius;
       const mainY = centerY + Math.sin(angle) * radius;
       const mainId = `node_ai_main_${now}_${idx}`;
+      mainNodeIds.push(mainId);
 
         nextNodes.push({
           id: mainId,
@@ -921,7 +984,7 @@ export default function MindMapsPage() {
       }
     });
 
-    const arranged = autoLayoutNodes(nextNodes, nextEdges, { centerX: centerX + NODE_W / 2, centerY: centerY + NODE_H / 2 });
+    const arranged = layoutAiBalanced(nextNodes, nextEdges, centralId, mainNodeIds, { x: centerX, y: centerY });
     setNodes(arranged);
     setEdges(nextEdges);
     setSelectedNodeId(centralId);
