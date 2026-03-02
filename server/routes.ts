@@ -5,6 +5,7 @@ import { UAParser } from "ua-parser-js";
 import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
+import { createHmac, randomUUID } from "crypto";
 import { eq, and, desc } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
@@ -30,6 +31,49 @@ Reglas obligatorias de respuesta:
 const TOKENS_FILE = path.join("/tmp", "admin_tokens.json");
 const ASESOR_STATE_FILE = path.join("/tmp", "asesor_state.json");
 const pendingManualReplies = new Map<string, string>();
+const NOWPAYMENTS_ORDERS_FILE = path.join("/tmp", "nowpayments_orders.json");
+
+type NowPaymentsOrder = {
+  id: string;
+  orderId: string;
+  planId: "starter" | "pro" | "elite";
+  billingMode: "mensual" | "anual";
+  amountUsd: number;
+  payCurrency: string;
+  invoiceId?: string | number;
+  invoiceUrl?: string;
+  paymentStatus: string;
+  paymentId?: string | number;
+  payAddress?: string;
+  createdAt: string;
+  updatedAt: string;
+  raw?: any;
+};
+
+const nowPaymentsOrders = new Map<string, NowPaymentsOrder>();
+
+function loadNowPaymentsOrders() {
+  try {
+    if (!fs.existsSync(NOWPAYMENTS_ORDERS_FILE)) return;
+    const parsed = JSON.parse(fs.readFileSync(NOWPAYMENTS_ORDERS_FILE, "utf-8"));
+    if (!Array.isArray(parsed?.orders)) return;
+    for (const row of parsed.orders) {
+      if (row?.orderId) nowPaymentsOrders.set(row.orderId, row as NowPaymentsOrder);
+    }
+  } catch {}
+}
+
+function saveNowPaymentsOrders() {
+  try {
+    fs.writeFileSync(
+      NOWPAYMENTS_ORDERS_FILE,
+      JSON.stringify({ orders: Array.from(nowPaymentsOrders.values()) }),
+      "utf-8",
+    );
+  } catch {}
+}
+
+loadNowPaymentsOrders();
 
 function loadAsesorEnabled(): boolean {
   try {
@@ -3186,6 +3230,173 @@ ${schemaContent.substring(0, 3000)}
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  // NOWPayments (isolated namespace to avoid webhook conflicts)
+  app.post("/api/payments/nowpayments/create", async (req, res) => {
+    try {
+      const apiKey = process.env.NOWPAYMENTS_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "NOWPayments no configurado (falta NOWPAYMENTS_API_KEY)" });
+      }
+
+      const { planId, billingMode = "mensual" } = req.body || {};
+      const plans: Record<string, { mensual: number; anual: number }> = {
+        starter: { mensual: 60, anual: 600 },
+        pro: { mensual: 90, anual: 900 },
+        elite: { mensual: 160, anual: 1250 },
+      };
+
+      if (!plans[planId] || !["mensual", "anual"].includes(billingMode)) {
+        return res.status(400).json({ error: "Plan o modalidad invalida" });
+      }
+
+      const amountUsd = billingMode === "anual" ? plans[planId].anual : plans[planId].mensual;
+      const orderId = `iqx_${planId}_${billingMode}_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
+      const callbackUrl =
+        process.env.NOWPAYMENTS_IPN_URL || `${process.env.APP_BASE_URL || ""}/api/payments/nowpayments/webhook`;
+
+      const body = {
+        price_amount: amountUsd,
+        price_currency: "usd",
+        pay_currency: "usdtbsc",
+        order_id: orderId,
+        order_description: `IQEx ${planId.toUpperCase()} ${billingMode}`,
+        ipn_callback_url: callbackUrl,
+        is_fixed_rate: true,
+      };
+
+      const response = await fetch("https://api.nowpayments.io/v1/invoice", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const text = await response.text();
+      let data: any = {};
+      try { data = JSON.parse(text); } catch {}
+
+      if (!response.ok) {
+        return res.status(502).json({
+          error: "Error creando factura en NOWPayments",
+          details: data?.message || text || "unknown",
+        });
+      }
+
+      const now = new Date().toISOString();
+      const record: NowPaymentsOrder = {
+        id: randomUUID(),
+        orderId,
+        planId,
+        billingMode,
+        amountUsd,
+        payCurrency: "usdtbsc",
+        invoiceId: data?.id,
+        invoiceUrl: data?.invoice_url,
+        paymentStatus: data?.payment_status || "waiting",
+        paymentId: data?.payment_id,
+        payAddress: data?.pay_address,
+        createdAt: now,
+        updatedAt: now,
+        raw: data,
+      };
+      nowPaymentsOrders.set(orderId, record);
+      saveNowPaymentsOrders();
+
+      return res.json({
+        success: true,
+        orderId,
+        paymentUrl: data?.invoice_url || null,
+        invoiceId: data?.id || null,
+        paymentStatus: record.paymentStatus,
+        payCurrency: "usdtbsc",
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Error interno" });
+    }
+  });
+
+  app.post("/api/payments/nowpayments/webhook", async (req, res) => {
+    try {
+      const forwarded = (req.headers["x-forwarded-for"] || "").toString().split(",")[0].trim();
+      const requestIp = forwarded || req.socket.remoteAddress || "";
+      const allowedIpsRaw = process.env.NOWPAYMENTS_ALLOWED_IPS || "";
+      const allowedIps = allowedIpsRaw
+        .split(",")
+        .map((ip) => ip.trim())
+        .filter(Boolean);
+      if (allowedIps.length > 0 && !allowedIps.includes(requestIp)) {
+        return res.status(403).json({ error: "IP no permitida" });
+      }
+
+      const ipnSecret = process.env.NOWPAYMENTS_IPN_SECRET;
+      const signature = (req.headers["x-nowpayments-sig"] || "").toString();
+      const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body || {});
+
+      if (ipnSecret) {
+        const calculated = createHmac("sha512", ipnSecret).update(rawBody).digest("hex");
+        if (!signature || calculated !== signature) {
+          return res.status(401).json({ error: "Firma IPN invalida" });
+        }
+      }
+
+      const payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+      const orderId = payload.order_id;
+      if (!orderId) {
+        return res.status(400).json({ error: "order_id requerido" });
+      }
+
+      const prev = nowPaymentsOrders.get(orderId);
+      const now = new Date().toISOString();
+      const next: NowPaymentsOrder = prev
+        ? {
+            ...prev,
+            paymentStatus: payload.payment_status || prev.paymentStatus,
+            paymentId: payload.payment_id || prev.paymentId,
+            payAddress: payload.pay_address || prev.payAddress,
+            invoiceId: payload.invoice_id || prev.invoiceId,
+            updatedAt: now,
+            raw: payload,
+          }
+        : {
+            id: randomUUID(),
+            orderId,
+            planId: "starter",
+            billingMode: "mensual",
+            amountUsd: Number(payload.price_amount || 0),
+            payCurrency: payload.pay_currency || "usdtbsc",
+            invoiceId: payload.invoice_id,
+            invoiceUrl: payload.invoice_url,
+            paymentStatus: payload.payment_status || "unknown",
+            paymentId: payload.payment_id,
+            payAddress: payload.pay_address,
+            createdAt: now,
+            updatedAt: now,
+            raw: payload,
+          };
+
+      nowPaymentsOrders.set(orderId, next);
+      saveNowPaymentsOrders();
+      return res.json({ received: true });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Webhook error" });
+    }
+  });
+
+  app.get("/api/admin/payments/nowpayments", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    try {
+      const items = Array.from(nowPaymentsOrders.values()).sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+      res.json({ payments: items });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || "Error listando pagos" });
     }
   });
 

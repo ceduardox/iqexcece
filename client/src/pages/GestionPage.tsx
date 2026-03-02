@@ -6133,7 +6133,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           )}
 
         {activeTab === "servidor" && (
-          <ServerAdminPanel sessionsData={data} />
+          <ServerAdminPanel sessionsData={data} adminToken={token} />
         )}
 
         {activeTab === "instituciones" && (
@@ -7041,11 +7041,15 @@ function FieldRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null }) {
+function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: SessionsData | null; adminToken: string }) {
   const [selectedDomain, setSelectedDomain] = useState<"iqexponencial.app" | "iqexponencial.com">("iqexponencial.app");
   const [billingMode, setBillingMode] = useState<"mensual" | "anual">("mensual");
+  const [serverView, setServerView] = useState<"panel" | "pagos">("panel");
   const [liveTick, setLiveTick] = useState(0);
   const [liveDrift, setLiveDrift] = useState({ cpu: 0, ram: 0, network: 0, disk: 0 });
+  const [creatingPlanId, setCreatingPlanId] = useState<string | null>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
 
   const activeUsers = sessionsData?.activeCount || 0;
   const totalSessions = sessionsData?.total || 0;
@@ -7098,6 +7102,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
         "Monitoreo basico compartido",
         "Backup manual",
         "Soporte comunitario",
+        "Logs basicos de 24h",
         "Sin correo corporativo",
       ],
     },
@@ -7109,10 +7114,10 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       featured: false,
       subtitle: "Escala estable para equipos pequenos",
       resources: {
-        vcpu: "4 vCPU",
-        ram: "8 GB RAM",
-        storage: "160 GB NVMe",
-        bandwidth: "6 TB/mes",
+        vcpu: "2 vCPU",
+        ram: "4 GB RAM",
+        storage: "100 GB NVMe",
+        bandwidth: "3 TB/mes",
       },
       features: [
         "2 dominios (app + web)",
@@ -7121,6 +7126,8 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
         "Backups diarios",
         "Alertas de uptime",
         "Soporte prioritario",
+        "Logs avanzados de 7 dias",
+        "Panel de incidencias tecnicas",
       ],
     },
     {
@@ -7132,9 +7139,9 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       subtitle: "Recomendado para negocio activo y venta B2B",
       resources: {
         vcpu: "8 vCPU",
-        ram: "16 GB RAM",
-        storage: "320 GB NVMe",
-        bandwidth: "12 TB/mes",
+        ram: "12 GB RAM",
+        storage: "240 GB NVMe",
+        bandwidth: "8 TB/mes",
       },
       features: [
         "Dominios ilimitados + staging",
@@ -7145,6 +7152,8 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
         "Escalado de recursos prioritario",
         "SLA premium y soporte VIP 24/7",
         "Reportes ejecutivos semanales",
+        "Consultoria tecnica mensual",
+        "SLA 99.99% para operacion critica",
       ],
     },
   ];
@@ -7158,8 +7167,152 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
     { title: "Analitica comercial", desc: "Uso por plan, conversion, renovaciones y estimacion de churn." },
   ];
 
+  const activePlan = {
+    name: "Pro Growth",
+    monthly: 90,
+    status: "Activo",
+  };
+
+  const fetchPayments = async () => {
+    if (!adminToken) return;
+    try {
+      setLoadingPayments(true);
+      const res = await fetch("/api/admin/payments/nowpayments", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) setPayments(Array.isArray(data?.payments) ? data.payments : []);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  useEffect(() => {
+    if (serverView === "pagos") fetchPayments();
+  }, [serverView, adminToken]);
+
+  const createCryptoPayment = async (planId: string) => {
+    try {
+      setCreatingPlanId(planId);
+      const res = await fetch("/api/payments/nowpayments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, billingMode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.error || "No se pudo crear el pago");
+        return;
+      }
+      if (data?.paymentUrl) {
+        window.open(data.paymentUrl, "_blank");
+      } else {
+        alert(`Factura creada. ID: ${data?.invoiceId || data?.orderId}`);
+      }
+    } catch (error: any) {
+      alert(error?.message || "Error creando pago");
+    } finally {
+      setCreatingPlanId(null);
+    }
+  };
+
   return (
     <div className="space-y-5">
+      <Card className="bg-black/40 border-emerald-500/30">
+        <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-white/60">Plan activo ahora</p>
+            <p className="text-white font-bold text-lg">
+              {activePlan.name} <span className="text-emerald-300">(${activePlan.monthly}/mes)</span>
+            </p>
+            <p className="text-xs text-emerald-300">{activePlan.status}</p>
+          </div>
+          <Button
+            onClick={() => setServerView(serverView === "panel" ? "pagos" : "panel")}
+            className={serverView === "panel" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-sky-600 hover:bg-sky-700"}
+            data-testid="server-toggle-payments"
+          >
+            {serverView === "panel" ? "Ver reportes de pagos" : "Volver al panel"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {serverView === "pagos" && (
+        <Card className="bg-black/40 border-emerald-500/30">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Mail className="w-5 h-5 text-emerald-400" />
+              Reportes de pagos del servidor
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-xs text-white/60">Ultimo pago confirmado</p>
+                <p className="text-white text-lg font-bold mt-1">10 de enero 2026</p>
+                <p className="text-emerald-300 text-sm">Pro Growth - $90</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-xs text-white/60">Proximo vencimiento</p>
+                <p className="text-white text-lg font-bold mt-1">10 de febrero 2026</p>
+                <p className="text-amber-300 text-sm">Pago programado - $90</p>
+              </div>
+            </div>
+
+              <div className="rounded-xl border border-white/10 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-white/5 text-white/70">
+                  <tr>
+                    <th className="text-left px-3 py-2">ID</th>
+                    <th className="text-left px-3 py-2">Fecha</th>
+                    <th className="text-left px-3 py-2">Plan</th>
+                    <th className="text-left px-3 py-2">Periodo</th>
+                    <th className="text-left px-3 py-2">Monto</th>
+                    <th className="text-left px-3 py-2">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(payments.length > 0 ? payments : [
+                    {
+                      orderId: "inv-2026-01",
+                      updatedAt: "2026-01-10T12:00:00.000Z",
+                      planId: "pro",
+                      billingMode: "mensual",
+                      amountUsd: 90,
+                      paymentStatus: "finished",
+                    },
+                    {
+                      orderId: "inv-2026-02",
+                      updatedAt: "2026-02-10T12:00:00.000Z",
+                      planId: "pro",
+                      billingMode: "mensual",
+                      amountUsd: 90,
+                      paymentStatus: "waiting",
+                    },
+                  ]).map((row: any) => (
+                    <tr key={row.orderId || row.id} className="border-t border-white/10">
+                      <td className="px-3 py-2 text-cyan-300">{row.orderId || row.id}</td>
+                      <td className="px-3 py-2 text-white/85">{row.updatedAt ? new Date(row.updatedAt).toLocaleString() : "-"}</td>
+                      <td className="px-3 py-2 text-white/85">{row.planId || "-"}</td>
+                      <td className="px-3 py-2 text-white/85">{row.billingMode || "-"}</td>
+                      <td className="px-3 py-2 text-white font-semibold">${row.amountUsd || 0}</td>
+                      <td className="px-3 py-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${row.paymentStatus === "finished" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}>
+                          {row.paymentStatus === "finished" ? "Pagado" : "Pendiente"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {loadingPayments && <p className="text-xs text-white/60">Actualizando reportes...</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      {serverView === "panel" && (
+      <>
       <Card className="bg-black/40 border-sky-500/30">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
@@ -7321,12 +7474,22 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
                       </li>
                     ))}
                   </ul>
+                  <Button
+                    onClick={() => createCryptoPayment(plan.id)}
+                    disabled={creatingPlanId === plan.id}
+                    className={`mt-4 w-full ${plan.featured ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-emerald-600 hover:bg-emerald-700 text-white"}`}
+                    data-testid={`button-pay-crypto-${plan.id}`}
+                  >
+                    {creatingPlanId === plan.id ? "Creando factura..." : "Pagar con USDT BSC"}
+                  </Button>
                 </div>
               );
             })}
           </div>
         </CardContent>
       </Card>
+      </>
+      )}
     </div>
   );
 }
