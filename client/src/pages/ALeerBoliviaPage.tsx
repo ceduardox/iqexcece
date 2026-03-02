@@ -43,6 +43,7 @@ export default function ALeerBoliviaPage() {
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [motivationalIndex, setMotivationalIndex] = useState(0);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
 
   useEffect(() => {
@@ -127,6 +128,12 @@ export default function ALeerBoliviaPage() {
   }
 
   const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
+  const motivationalVideos = [1, 2, 3].map((idx) => ({
+    id: idx,
+    title: t("aleer.videoItemTitle", { number: idx }),
+    desc: t("aleer.videoItemDesc"),
+  }));
+  const activeVideo = motivationalVideos[motivationalIndex];
 
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
@@ -715,7 +722,7 @@ export default function ALeerBoliviaPage() {
                 {t("aleer.videosDesc")}
               </p>
 
-              <div className="relative z-10 mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="relative z-10 mt-6 md:hidden grid gap-4 sm:grid-cols-2">
                 {[1, 2, 3].map((idx) => (
                   <motion.div
                     key={idx}
@@ -761,6 +768,86 @@ export default function ALeerBoliviaPage() {
                     </p>
                   </motion.div>
                 ))}
+              </div>
+
+              <div
+                className="relative z-10 mt-7 hidden md:grid md:grid-cols-[1fr_1.55fr] rounded-2xl overflow-hidden border border-cyan-200/70"
+                style={{ background: "linear-gradient(135deg, rgba(6,182,212,0.16), rgba(255,255,255,0.9))" }}
+                data-testid="desktop-video-split"
+              >
+                <div className="p-5 text-left border-r border-cyan-200/70">
+                  <h4 className="text-base font-black text-violet-700 mb-2">{activeVideo.title}</h4>
+                  <p className="text-sm text-gray-700 leading-relaxed min-h-[96px]">
+                    {activeVideo.desc}
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <button
+                      className="px-3 py-2 rounded-full text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 transition-colors"
+                      onClick={() => setMotivationalIndex((prev) => (prev === 0 ? motivationalVideos.length - 1 : prev - 1))}
+                      data-testid="button-video-prev"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        <ChevronLeft className="w-3 h-3" />
+                        {t("common.previous")}
+                      </span>
+                    </button>
+                    <button
+                      className="px-3 py-2 rounded-full text-xs font-bold text-white bg-cyan-600 hover:bg-cyan-700 transition-colors"
+                      onClick={() => setMotivationalIndex((prev) => (prev + 1) % motivationalVideos.length)}
+                      data-testid="button-video-next"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        {t("common.next")}
+                        <ChevronRight className="w-3 h-3" />
+                      </span>
+                    </button>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {motivationalVideos.map((item, idx) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setMotivationalIndex(idx)}
+                          className="transition-all"
+                          data-testid={`button-video-dot-${idx}`}
+                        >
+                          <div
+                            className="rounded-full"
+                            style={{
+                              width: motivationalIndex === idx ? 16 : 6,
+                              height: 6,
+                              background: motivationalIndex === idx
+                                ? "linear-gradient(135deg, #7c3aed, #06b6d4)"
+                                : "#cbd5e1",
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative p-4 flex items-center justify-center">
+                  <div
+                    className="relative w-full aspect-video rounded-xl overflow-hidden border border-violet-200/70"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(109,40,217,0.26), rgba(6,182,212,0.22)), url(" + laxCyan + ") center/cover no-repeat",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/10" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div
+                        animate={{ scale: [1, 1.08, 1], opacity: [0.9, 1, 0.9] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-14 h-14 rounded-full bg-white/85 border border-white/70 flex items-center justify-center shadow-lg"
+                      >
+                        <PlayCircle className="w-8 h-8 text-violet-600" />
+                      </motion.div>
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 text-left px-3 py-2 rounded-lg bg-white/80 backdrop-blur-sm">
+                      <p className="text-xs font-bold text-violet-700 truncate">{activeVideo.title}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
