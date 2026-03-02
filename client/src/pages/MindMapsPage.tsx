@@ -8,7 +8,17 @@ type Kind = "mindmap" | "taskboard" | "whiteboard";
 type Node = { id: string; x: number; y: number; text: string; imageUrl?: string };
 type Edge = { id: string; sourceId: string; targetId: string };
 type TaskChecklistItem = { id: string; text: string; done: boolean };
-type Task = { id: string; text: string; checklist?: TaskChecklistItem[] };
+type TaskPriority = "low" | "medium" | "high";
+type TaskStatus = "todo" | "doing" | "done";
+type Task = {
+  id: string;
+  text: string;
+  checklist?: TaskChecklistItem[];
+  note?: string;
+  priority?: TaskPriority;
+  dueDate?: string;
+  status?: TaskStatus;
+};
 type TaskCol = { id: string; title: string; tasks: Task[] };
 type TaskCols = TaskCol[];
 type Stroke = { id: string; color: string; width: number; points: { x: number; y: number }[] };
@@ -23,6 +33,22 @@ const NODE_W = 170;
 const NODE_H = 56;
 const WORLD_W = 2600;
 const WORLD_H = 1800;
+
+const TASK_STATUS_OPTIONS: TaskStatus[] = ["todo", "doing", "done"];
+
+function toTaskStatus(value: any): TaskStatus {
+  return TASK_STATUS_OPTIONS.includes(value) ? value : "todo";
+}
+
+function toTaskPriority(value: any): TaskPriority {
+  return value === "high" || value === "medium" || value === "low" ? value : "medium";
+}
+
+function statusByColumnId(id: string): TaskStatus {
+  if (id === "doing") return "doing";
+  if (id === "done") return "done";
+  return "todo";
+}
 
 const colsDefault = (): TaskCols => [
   { id: "todo", title: "Por hacer", tasks: [] },
@@ -41,6 +67,10 @@ function normalizeTaskColumns(input: any): TaskCols {
           ? c.tasks.map((t: any) => ({
               id: String(t.id || `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
               text: String(t.text || ""),
+              note: String(t.note || ""),
+              priority: toTaskPriority(t.priority),
+              dueDate: typeof t.dueDate === "string" ? t.dueDate : "",
+              status: toTaskStatus(t.status || statusByColumnId(c.id)),
               checklist: Array.isArray(t.checklist)
                 ? t.checklist.map((it: any) => ({
                     id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
@@ -63,6 +93,10 @@ function normalizeTaskColumns(input: any): TaskCols {
           ? input[k].map((t: any) => ({
               id: String(t.id || `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
               text: String(t.text || ""),
+              note: String(t.note || ""),
+              priority: toTaskPriority(t.priority),
+              dueDate: typeof t.dueDate === "string" ? t.dueDate : "",
+              status: toTaskStatus(t.status || statusByColumnId(k)),
               checklist: Array.isArray(t.checklist)
                 ? t.checklist.map((it: any) => ({
                     id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
@@ -153,6 +187,7 @@ export default function MindMapsPage() {
   const [newColTitle, setNewColTitle] = useState("");
   const [taskColId, setTaskColId] = useState("todo");
   const [checkDrafts, setCheckDrafts] = useState<Record<string, string>>({});
+  const [taskModal, setTaskModal] = useState<{ colId: string; taskId: string } | null>(null);
   const dragTask = useRef<{ fromColId: string; task: Task } | null>(null);
 
   const [strokes, setStrokes] = useState<Stroke[]>([]);
@@ -209,6 +244,7 @@ export default function MindMapsPage() {
 
   function openMap(record: RecordMap) {
     const parsed = parseData(record.data);
+    setTaskModal(null);
     setShowChooser(false);
     setBoardZoom(1);
     setBoardOffset({ x: 0, y: 0 });
@@ -341,6 +377,15 @@ export default function MindMapsPage() {
   }, [isCompactLayout]);
 
   useEffect(() => {
+    if (!taskModal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTaskModal(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [taskModal]);
+
+  useEffect(() => {
     if (showChooser || kind !== "mindmap") {
       viewRestoredRef.current = false;
       return;
@@ -383,7 +428,56 @@ export default function MindMapsPage() {
     return data ? JSON.stringify(data) : "";
   }, [kind, nodes, edges, cols, strokes]);
 
+  const activeTaskModal = useMemo(() => {
+    if (!taskModal) return null;
+    const col = cols.find((c) => c.id === taskModal.colId);
+    if (!col) return null;
+    const task = col.tasks.find((t) => t.id === taskModal.taskId);
+    if (!task) return null;
+    return { col, task };
+  }, [taskModal, cols]);
+
   const hasUnsavedChanges = !readonly && !showChooser && !!kind && currentSnapshot !== savedSnapshot;
+
+  function patchTask(colId: string, taskId: string, patch: Partial<Task>) {
+    setCols((prev) =>
+      prev.map((col) =>
+        col.id !== colId
+          ? col
+          : {
+              ...col,
+              tasks: col.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
+            },
+      ),
+    );
+  }
+
+  function moveTaskToStatus(colId: string, taskId: string, nextStatus: TaskStatus) {
+    const targetCol = cols.find((c) => c.id === nextStatus);
+    if (!targetCol || targetCol.id === colId) {
+      patchTask(colId, taskId, { status: nextStatus });
+      return;
+    }
+    setCols((prev) => {
+      let movedTask: Task | null = null;
+      const removed = prev.map((col) => {
+        if (col.id !== colId) return col;
+        const nextTasks = col.tasks.filter((task) => {
+          if (task.id === taskId) {
+            movedTask = { ...task, status: nextStatus };
+            return false;
+          }
+          return true;
+        });
+        return { ...col, tasks: nextTasks };
+      });
+      if (!movedTask) return prev;
+      return removed.map((col) =>
+        col.id === targetCol.id ? { ...col, tasks: [...col.tasks, movedTask as Task] } : col,
+      );
+    });
+    setTaskModal({ colId: nextStatus, taskId });
+  }
 
   function centerBoardOnNode(nodeId?: string | null) {
     if (kind !== "mindmap") return;
@@ -792,6 +886,7 @@ export default function MindMapsPage() {
 
   function newProject() {
     if (readonly) return;
+    setTaskModal(null);
     setShowChooser(true);
     setKind(null);
     setActiveId(null);
@@ -1222,7 +1317,7 @@ export default function MindMapsPage() {
                       <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-9 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-lg border border-cyan-200 px-2 text-sm font-medium text-cyan-700 bg-white">
                         {cols.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
-                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [] }] } : c)); setTaskText(""); }} className="app-btn-primary h-9 px-3 text-sm font-semibold whitespace-nowrap">Agregar</button>
+                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [], note: "", priority: "medium", dueDate: "", status: statusByColumnId(taskColId) }] } : c)); setTaskText(""); }} className="app-btn-primary h-9 px-3 text-sm font-semibold whitespace-nowrap">Agregar</button>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -1243,7 +1338,7 @@ export default function MindMapsPage() {
                         const fromColId = dragTask.current.fromColId;
                         setCols((p) => p.map((col) => {
                           if (col.id === fromColId) return { ...col, tasks: col.tasks.filter((t) => t.id !== task.id) };
-                          if (col.id === c.id) return { ...col, tasks: [...col.tasks, task] };
+                          if (col.id === c.id) return { ...col, tasks: [...col.tasks, { ...task, status: statusByColumnId(c.id) }] };
                           return col;
                         }));
                         dragTask.current = null;
@@ -1274,7 +1369,22 @@ export default function MindMapsPage() {
                     <div className="space-y-2">
                       {c.tasks.map((t) => (
                         <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className="min-w-0 rounded-xl border border-purple-100 bg-white p-2 shadow-sm">
-                          <p className="text-xs font-semibold text-slate-700 break-words">{t.text}</p>
+                          <button className="project-open-btn w-full text-left" onClick={() => setTaskModal({ colId: c.id, taskId: t.id })}>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-xs font-semibold text-slate-700 break-words">{t.text}</p>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${
+                                (t.priority || "medium") === "high"
+                                  ? "border-rose-200 bg-rose-50 text-rose-700"
+                                  : (t.priority || "medium") === "low"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                  : "border-amber-200 bg-amber-50 text-amber-700"
+                              }`}>
+                                {(t.priority || "medium") === "high" ? "Alta" : (t.priority || "medium") === "low" ? "Baja" : "Media"}
+                              </span>
+                            </div>
+                            {(t.note || "").trim() && <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 break-words">{t.note}</p>}
+                            {t.dueDate && <p className="mt-1 text-[10px] text-slate-500">Vence: {t.dueDate}</p>}
+                          </button>
                           <div className="mt-2 space-y-1">
                             {(t.checklist || []).map((it) => (
                               <label key={it.id} className="min-w-0 flex items-center gap-2 text-xs text-slate-700">
@@ -1296,6 +1406,76 @@ export default function MindMapsPage() {
                   </div>
                 ))}
               </div>
+              {taskModal && activeTaskModal && (
+                <div className="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-[1px] flex items-end md:items-center justify-center p-0 md:p-4" onClick={() => setTaskModal(null)}>
+                  <div className="w-full md:max-w-xl bg-white rounded-t-2xl md:rounded-2xl border border-purple-100 shadow-[0_24px_50px_rgba(15,23,42,0.28)] p-4 space-y-3 max-h-[86vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-base font-bold text-slate-800">Detalle de tarea</p>
+                      <button className="app-btn-soft h-8 px-2 text-xs text-slate-700" onClick={() => setTaskModal(null)}>Cerrar</button>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-600">Titulo</label>
+                      <input
+                        value={activeTaskModal.task.text}
+                        onChange={(e) => patchTask(activeTaskModal.col.id, activeTaskModal.task.id, { text: e.target.value })}
+                        disabled={readonly}
+                        className="h-10 w-full rounded-lg border border-purple-100 px-3 text-sm text-gray-800 bg-white"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600">Prioridad</label>
+                        <select
+                          value={activeTaskModal.task.priority || "medium"}
+                          disabled={readonly}
+                          onChange={(e) => patchTask(activeTaskModal.col.id, activeTaskModal.task.id, { priority: toTaskPriority(e.target.value) })}
+                          className="h-10 w-full rounded-lg border border-purple-100 px-2 text-sm text-slate-700 bg-white"
+                        >
+                          <option value="low">Baja</option>
+                          <option value="medium">Media</option>
+                          <option value="high">Alta</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600">Estado</label>
+                        <select
+                          value={activeTaskModal.task.status || statusByColumnId(activeTaskModal.col.id)}
+                          disabled={readonly}
+                          onChange={(e) => moveTaskToStatus(activeTaskModal.col.id, activeTaskModal.task.id, toTaskStatus(e.target.value))}
+                          className="h-10 w-full rounded-lg border border-purple-100 px-2 text-sm text-slate-700 bg-white"
+                        >
+                          <option value="todo">Por hacer</option>
+                          <option value="doing">En proceso</option>
+                          <option value="done">Hecho</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600">Fecha limite</label>
+                        <input
+                          type="date"
+                          value={activeTaskModal.task.dueDate || ""}
+                          disabled={readonly}
+                          onChange={(e) => patchTask(activeTaskModal.col.id, activeTaskModal.task.id, { dueDate: e.target.value })}
+                          className="h-10 w-full rounded-lg border border-purple-100 px-2 text-sm text-slate-700 bg-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-600">Nota</label>
+                      <textarea
+                        value={activeTaskModal.task.note || ""}
+                        disabled={readonly}
+                        onChange={(e) => patchTask(activeTaskModal.col.id, activeTaskModal.task.id, { note: e.target.value })}
+                        placeholder="Escribe detalles de la tarea..."
+                        className="min-h-[120px] w-full resize-y rounded-lg border border-purple-100 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 bg-white"
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button className="app-btn-primary h-10 px-4 text-sm" onClick={() => setTaskModal(null)}>Listo</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="min-h-[66vh] md:min-h-[74vh]">
