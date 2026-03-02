@@ -128,11 +128,26 @@ export default function ALeerBoliviaPage() {
   }
 
   const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
-  const motivationalVideos = [1, 2, 3].map((idx) => ({
-    id: idx,
-    title: t("aleer.videoItemTitle", { number: idx }),
-    desc: t("aleer.videoItemDesc"),
-  }));
+  const motivationalVideos = [
+    {
+      id: 1,
+      title: t("aleer.video1Title"),
+      desc: t("aleer.video1Desc"),
+      source: t("aleer.video1Source"),
+    },
+    {
+      id: 2,
+      title: t("aleer.video2Title"),
+      desc: t("aleer.video2Desc"),
+      source: t("aleer.video2Source"),
+    },
+    {
+      id: 3,
+      title: t("aleer.video3Title"),
+      desc: t("aleer.video3Desc"),
+      source: t("aleer.video3Source"),
+    },
+  ];
   const activeVideo = motivationalVideos[motivationalIndex];
 
   return (
@@ -723,9 +738,9 @@ export default function ALeerBoliviaPage() {
               </p>
 
               <div className="relative z-10 mt-6 md:hidden grid gap-4 sm:grid-cols-2">
-                {[1, 2, 3].map((idx) => (
+                {motivationalVideos.map((video, idx) => (
                   <motion.div
-                    key={idx}
+                    key={video.id}
                     className="rounded-2xl border border-violet-200/80 bg-white/90 backdrop-blur-sm p-3 text-left"
                     style={{ boxShadow: "0 8px 22px rgba(109,40,217,0.14), 0 2px 6px rgba(0,0,0,0.05)" }}
                     initial={{ opacity: 0, y: 16 }}
@@ -733,7 +748,7 @@ export default function ALeerBoliviaPage() {
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.07, duration: 0.28 }}
                     whileHover={{ y: -2 }}
-                    data-testid={`card-video-motivador-${idx}`}
+                    data-testid={`card-video-motivador-${video.id}`}
                   >
                     <div
                       className="relative w-full aspect-video rounded-xl mb-3 border border-violet-200/80 bg-white/70 overflow-hidden"
@@ -752,7 +767,7 @@ export default function ALeerBoliviaPage() {
                     </div>
 
                     <div className="flex items-center gap-2 text-violet-700 font-bold mb-1">
-                      <span className="font-sans text-sm">{t("aleer.videoItemTitle", { number: idx })}</span>
+                      <span className="font-sans text-sm">{video.title}</span>
                     </div>
                     <p
                       className="font-sans text-xs text-gray-600 leading-relaxed"
@@ -764,8 +779,9 @@ export default function ALeerBoliviaPage() {
                         minHeight: "3.6em",
                       }}
                     >
-                      {t("aleer.videoItemDesc")}
+                      {video.desc}
                     </p>
+                    <p className="font-sans text-[11px] text-gray-400 mt-2">- {video.source}</p>
                   </motion.div>
                 ))}
               </div>
@@ -780,6 +796,7 @@ export default function ALeerBoliviaPage() {
                   <p className="text-sm text-gray-700 leading-relaxed min-h-[96px]">
                     {activeVideo.desc}
                   </p>
+                  <p className="text-xs text-gray-400 mt-2">- {activeVideo.source}</p>
 
                   <div className="mt-4 flex items-center gap-2">
                     <button

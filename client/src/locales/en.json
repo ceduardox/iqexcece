@@ -369,8 +369,17 @@
     "joinIndependent": "INDEPENDENT STUDENTS REGISTRATION",
     "videosTitle": "Motivational videos",
     "videosDesc": "Join our video series to prepare and stand out in the contest “Read Bolivia for a Better Future”! Get inspired, stay motivated, and master the world of reading with us.",
+    "video1Title": "Motivational video 1",
+    "video1Desc": "iQexponencial inspiration content and practical techniques to strengthen comprehension, focus, and reading habits.",
+    "video1Source": "iQexponencial",
+    "video2Title": "Motivational video 2",
+    "video2Desc": "The Inter-school Reading Contest “Read Bolivia for a Better Future” is much more than a reading competition. It is a powerful educational tool that helps schools in Bolivia understand their students' real reading comprehension level.",
+    "video2Source": "Inter-school Reading Contest 2025",
+    "video3Title": "Motivational video 3",
+    "video3Desc": "Students selected from Berea School are ready to represent their school in the Inter-school Reading Contest “Read Bolivia for a Better Future”, organized by iQexponencial! Join us to celebrate their talent and passion for reading as they show their love for books. #InterSchoolReading #BereaSchool #ReadBoliviaForABetterFuture #iQexponencial",
+    "video3Source": "Berea School - Classified 2nd Category",
     "videoItemTitle": "Motivational video {{number}}",
-    "videoItemDesc": "Inspiration content and practical techniques to strengthen comprehension, focus, and reading habits."
+    "videoItemDesc": "iQexponencial inspiration content and practical techniques to strengthen comprehension, focus, and reading habits."
   },
   "velocidad_lectura": {
     "prepTitle": "Reading Speed",

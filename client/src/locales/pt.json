@@ -369,8 +369,17 @@
     "joinIndependent": "INSCRIÇÃO DE ESTUDANTES INDEPENDENTES",
     "videosTitle": "Vídeos motivadores",
     "videosDesc": "Junte-se à nossa série de vídeos para se preparar e se destacar no concurso “Ler Bolívia por um Futuro Melhor”! Inspire-se, motive-se e domine o mundo da leitura conosco.",
+    "video1Title": "Vídeo motivador 1",
+    "video1Desc": "Conteúdo inspirador do iQexponencial e técnicas práticas para fortalecer compreensão, foco e hábitos de leitura.",
+    "video1Source": "iQexponencial",
+    "video2Title": "Vídeo motivador 2",
+    "video2Desc": "O Intercolegial “Ler Bolívia por um Futuro Melhor” é muito mais do que um concurso de leitura. É uma ferramenta educacional poderosa que permite às unidades educacionais da Bolívia conhecer o nível real de compreensão leitora dos seus estudantes.",
+    "video2Source": "Intercolegial de Leitura 2025",
+    "video3Title": "Vídeo motivador 3",
+    "video3Desc": "Os estudantes selecionados do Colégio Berea estão prontos para representar sua escola no Intercolegial de Leitura “Ler Bolívia por um Futuro Melhor”, organizado pelo iQexponencial! Junte-se a nós para celebrar seu talento e paixão pela leitura enquanto demonstram seu amor pelos livros. #IntercolegialDeLeitura #ColegioBerea #LerBoliviaPorUmFuturoMelhor #iQexponencial",
+    "video3Source": "Colégio Berea Classificados 2ª Categoria",
     "videoItemTitle": "Vídeo motivador {{number}}",
-    "videoItemDesc": "Conteúdo inspirador e técnicas práticas para fortalecer compreensão, foco e hábitos de leitura."
+    "videoItemDesc": "Conteúdo inspirador do iQexponencial e técnicas práticas para fortalecer compreensão, foco e hábitos de leitura."
   },
   "velocidad_lectura": {
     "prepTitle": "Velocidade de Leitura",
