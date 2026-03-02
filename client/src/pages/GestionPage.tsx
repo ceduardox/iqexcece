@@ -7044,6 +7044,8 @@ function FieldRow({ label, value }: { label: string; value: string }) {
 function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null }) {
   const [selectedDomain, setSelectedDomain] = useState<"iqexponencial.app" | "iqexponencial.com">("iqexponencial.app");
   const [billingMode, setBillingMode] = useState<"mensual" | "anual">("mensual");
+  const [liveTick, setLiveTick] = useState(0);
+  const [liveDrift, setLiveDrift] = useState({ cpu: 0, ram: 0, network: 0, disk: 0 });
 
   const activeUsers = sessionsData?.activeCount || 0;
   const totalSessions = sessionsData?.total || 0;
@@ -7053,6 +7055,27 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
   const ram = Math.max(12, Math.min(95, Math.round((baseLoad + 8) * domainFactor)));
   const network = Math.max(10, Math.min(95, Math.round((baseLoad - 4) * domainFactor)));
   const disk = Math.max(14, Math.min(95, Math.round((baseLoad - 10) * domainFactor)));
+
+  useEffect(() => {
+    setLiveTick(0);
+    setLiveDrift({ cpu: 0, ram: 0, network: 0, disk: 0 });
+    const interval = setInterval(() => {
+      setLiveTick((prev) => prev + 1);
+      const rand = () => Math.floor(Math.random() * 5) - 2;
+      setLiveDrift({
+        cpu: rand(),
+        ram: rand(),
+        network: rand(),
+        disk: rand(),
+      });
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [selectedDomain, activeUsers, totalSessions]);
+
+  const liveCpu = Math.max(8, Math.min(95, cpu + liveDrift.cpu));
+  const liveRam = Math.max(12, Math.min(95, ram + liveDrift.ram));
+  const liveNetwork = Math.max(10, Math.min(95, network + liveDrift.network));
+  const liveDisk = Math.max(14, Math.min(95, disk + liveDrift.disk));
 
   const monthlyPlans = [
     {
@@ -7095,7 +7118,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       featured: true,
       subtitle: "Recomendado para negocio activo y venta B2B",
       features: [
-        "2 dominios + staging",
+        "Dominios ilimitados + staging",
         "SSL incluido + hardening",
         "Correos corporativos ilimitados",
         "Auto backup cada 6h",
@@ -7126,6 +7149,13 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-emerald-300">
+              <span className={`inline-block h-2 w-2 rounded-full bg-emerald-400 ${liveTick % 2 === 0 ? "opacity-100" : "opacity-50"}`} />
+              En vivo (simulado)
+            </span>
+            <span className="text-white/50">Actualiza cada 2.2s</span>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             {(["iqexponencial.app", "iqexponencial.com"] as const).map((domain) => (
               <Button
@@ -7149,10 +7179,10 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: "CPU", value: cpu, icon: Gauge, color: "text-cyan-300" },
-              { label: "RAM", value: ram, icon: Monitor, color: "text-purple-300" },
-              { label: "Red", value: network, icon: Globe, color: "text-emerald-300" },
-              { label: "Disco", value: disk, icon: Server, color: "text-amber-300" },
+              { label: "CPU", value: liveCpu, icon: Gauge, color: "text-cyan-300" },
+              { label: "RAM", value: liveRam, icon: Monitor, color: "text-purple-300" },
+              { label: "Red", value: liveNetwork, icon: Globe, color: "text-emerald-300" },
+              { label: "Disco", value: liveDisk, icon: Server, color: "text-amber-300" },
             ].map((metric) => (
               <div key={metric.label} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
                 <div className="flex items-center justify-between mb-2">
@@ -7231,7 +7261,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {monthlyPlans.map((plan) => {
-              const shownPrice = billingMode === "mensual" ? `$${plan.price}/mes` : `$${plan.yearlyPrice}/anio`;
+              const shownPrice = billingMode === "mensual" ? `$${plan.price}/mes` : `$${plan.yearlyPrice}/año`;
               return (
                 <div
                   key={plan.id}
