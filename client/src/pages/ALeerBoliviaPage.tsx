@@ -707,16 +707,16 @@ export default function ALeerBoliviaPage() {
             </div>
 
             <div className="px-5 py-8 text-center bg-white">
-              <h3 className="text-4xl md:text-5xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
-              <p className="text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              <h3 className="font-sans text-3xl md:text-4xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
+              <p className="font-sans text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
                 {t("aleer.videosDesc")}
               </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3].map((idx) => (
                   <motion.div
                     key={idx}
-                    className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 to-cyan-50 p-4 text-left"
+                    className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 to-cyan-50 p-3 text-left"
                     initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -724,11 +724,37 @@ export default function ALeerBoliviaPage() {
                     whileHover={{ y: -2 }}
                     data-testid={`card-video-motivador-${idx}`}
                   >
-                    <div className="flex items-center gap-2 text-violet-700 font-bold mb-2">
-                      <PlayCircle className="w-4 h-4" />
-                      <span>{t("aleer.videoItemTitle", { number: idx })}</span>
+                    <div
+                      className="relative w-full aspect-video rounded-xl mb-3 border border-violet-200/80 bg-white/70 overflow-hidden"
+                      style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5)" }}
+                    >
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(167,139,250,0.28),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(34,211,238,0.24),transparent_50%)]" />
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        animate={{ scale: [1, 1.06, 1], opacity: [0.9, 1, 0.9] }}
+                        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 }}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-white/85 border border-violet-200 flex items-center justify-center shadow-md">
+                          <PlayCircle className="w-7 h-7 text-violet-600" />
+                        </div>
+                      </motion.div>
                     </div>
-                    <p className="text-xs text-gray-600 leading-relaxed">{t("aleer.videoItemDesc")}</p>
+
+                    <div className="flex items-center gap-2 text-violet-700 font-bold mb-1">
+                      <span className="font-sans text-sm">{t("aleer.videoItemTitle", { number: idx })}</span>
+                    </div>
+                    <p
+                      className="font-sans text-xs text-gray-600 leading-relaxed"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        minHeight: "3.6em",
+                      }}
+                    >
+                      {t("aleer.videoItemDesc")}
+                    </p>
                   </motion.div>
                 ))}
               </div>
