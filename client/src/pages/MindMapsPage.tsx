@@ -215,6 +215,10 @@ export default function MindMapsPage() {
   const boardRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const panRef = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
+  const zoomRef = useRef(1);
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const touchPointsRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ id1: number; id2: number; startDist: number; startZoom: number } | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const viewRestoredRef = useRef(false);
 
@@ -340,6 +344,23 @@ export default function MindMapsPage() {
   useEffect(() => {
     const move = (e: PointerEvent) => {
       if (kind !== "mindmap") return;
+      if (e.pointerType === "touch" && touchPointsRef.current.has(e.pointerId)) {
+        touchPointsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      }
+      if (pinchRef.current) {
+        const p1 = touchPointsRef.current.get(pinchRef.current.id1);
+        const p2 = touchPointsRef.current.get(pinchRef.current.id2);
+        if (p1 && p2) {
+          const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          if (dist > 0) {
+            const centerX = (p1.x + p2.x) / 2;
+            const centerY = (p1.y + p2.y) / 2;
+            const targetZoom = pinchRef.current.startZoom * (dist / pinchRef.current.startDist);
+            applyZoomAtClientPoint(targetZoom, centerX, centerY);
+          }
+        }
+        return;
+      }
       if (panRef.current) {
         const nx = panRef.current.ox + (e.clientX - panRef.current.startX);
         const ny = panRef.current.oy + (e.clientY - panRef.current.startY);
@@ -360,22 +381,31 @@ export default function MindMapsPage() {
         ),
       );
     };
-    const clearPointers = () => {
+    const clearPointers = (e?: PointerEvent) => {
+      if (e) touchPointsRef.current.delete(e.pointerId);
+      if (pinchRef.current && touchPointsRef.current.size < 2) pinchRef.current = null;
+      if (touchPointsRef.current.size === 0) panRef.current = null;
       dragRef.current = null;
+      drawingId.current = null;
+    };
+    const hardResetPointers = () => {
+      touchPointsRef.current.clear();
+      pinchRef.current = null;
       panRef.current = null;
+      dragRef.current = null;
       drawingId.current = null;
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", clearPointers);
     window.addEventListener("pointercancel", clearPointers as EventListener);
-    window.addEventListener("blur", clearPointers);
+    window.addEventListener("blur", hardResetPointers);
     return () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", clearPointers);
       window.removeEventListener("pointercancel", clearPointers as EventListener);
-      window.removeEventListener("blur", clearPointers);
+      window.removeEventListener("blur", hardResetPointers);
     };
-  }, [kind, readonly, boardZoom]);
+  }, [kind, readonly, boardZoom, boardOffset.x, boardOffset.y]);
 
   useEffect(() => {
     setBoardOffset((prev) => clampOffset(prev.x, prev.y));
@@ -459,6 +489,11 @@ export default function MindMapsPage() {
       JSON.stringify({ zoom: boardZoom, offsetX: boardOffset.x, offsetY: boardOffset.y }),
     );
   }, [showChooser, kind, boardZoom, boardOffset.x, boardOffset.y]);
+
+  useEffect(() => {
+    zoomRef.current = boardZoom;
+    offsetRef.current = boardOffset;
+  }, [boardZoom, boardOffset]);
 
   function payload(): Data | null {
     if (!kind) return null;
@@ -732,6 +767,21 @@ export default function MindMapsPage() {
       x: Math.max(minX, Math.min(nextX, maxX)),
       y: Math.max(minY, Math.min(nextY, maxY)),
     };
+  }
+
+  function applyZoomAtClientPoint(nextZoom: number, clientX: number, clientY: number) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const boundedZoom = Math.max(0.45, Math.min(2.2, nextZoom));
+    const prevZoom = zoomRef.current;
+    const prevOffset = offsetRef.current;
+    const worldX = (clientX - rect.left - prevOffset.x) / prevZoom;
+    const worldY = (clientY - rect.top - prevOffset.y) / prevZoom;
+    const rawOffsetX = clientX - rect.left - worldX * boundedZoom;
+    const rawOffsetY = clientY - rect.top - worldY * boundedZoom;
+    const nextOffset = clampOffsetForZoom(rawOffsetX, rawOffsetY, boundedZoom);
+    setBoardZoom(Number(boundedZoom.toFixed(2)));
+    setBoardOffset(nextOffset);
   }
 
   function fitMindmapToViewport(nextNodes: Node[]) {
@@ -1597,12 +1647,31 @@ export default function MindMapsPage() {
                   if (readonly) return;
                   const target = e.target as HTMLElement;
                   if (target.closest("[data-node-card='true']")) return;
+                  if (e.pointerType === "touch") {
+                    touchPointsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                    if (touchPointsRef.current.size >= 2) {
+                      const points = Array.from(touchPointsRef.current.entries()).slice(0, 2);
+                      const [id1, p1] = points[0];
+                      const [id2, p2] = points[1];
+                      const startDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                      if (startDist > 0) {
+                        pinchRef.current = {
+                          id1,
+                          id2,
+                          startDist,
+                          startZoom: zoomRef.current,
+                        };
+                      }
+                      panRef.current = null;
+                      return;
+                    }
+                  }
                   panRef.current = { startX: e.clientX, startY: e.clientY, ox: boardOffset.x, oy: boardOffset.y };
                 }}
                 onWheel={(e) => {
                   e.preventDefault();
                   const dir = e.deltaY > 0 ? -1 : 1;
-                  setBoardZoom((z) => Math.max(0.45, Math.min(2.2, Number((z + dir * 0.08).toFixed(2)))));
+                  applyZoomAtClientPoint(zoomRef.current + dir * 0.08, e.clientX, e.clientY);
                 }}
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle,_rgba(124,58,237,0.16)_1px,_transparent_1px)] bg-[length:18px_18px]" />
