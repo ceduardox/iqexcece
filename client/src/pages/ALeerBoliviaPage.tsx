@@ -150,6 +150,25 @@ export default function ALeerBoliviaPage() {
   ];
   const activeVideo = motivationalVideos[motivationalIndex];
 
+  useEffect(() => {
+    if (motivationalVideos.length <= 1) return;
+    let direction = 1;
+    const id = window.setInterval(() => {
+      setMotivationalIndex((prev) => {
+        let next = prev + direction;
+        if (next >= motivationalVideos.length) {
+          direction = -1;
+          next = motivationalVideos.length - 2;
+        } else if (next < 0) {
+          direction = 1;
+          next = 1;
+        }
+        return next;
+      });
+    }, 5200);
+    return () => window.clearInterval(id);
+  }, [motivationalVideos.length]);
+
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -766,11 +785,10 @@ export default function ALeerBoliviaPage() {
                       </motion.div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-violet-700 font-bold mb-1">
-                      <span className="font-sans text-sm">{video.title}</span>
-                    </div>
-                    <p
-                      className="font-sans text-xs text-gray-600 leading-relaxed"
+                    <div className="flex items-start gap-2">
+                      <span className="text-5xl leading-none text-violet-200 font-black">“</span>
+                      <p
+                      className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
                       style={{
                         display: "-webkit-box",
                         WebkitLineClamp: 3,
@@ -781,6 +799,7 @@ export default function ALeerBoliviaPage() {
                     >
                       {video.desc}
                     </p>
+                    </div>
                     <p className="font-sans text-[11px] text-gray-400 mt-2">- {video.source}</p>
                   </motion.div>
                 ))}
@@ -792,10 +811,18 @@ export default function ALeerBoliviaPage() {
                 data-testid="desktop-video-split"
               >
                 <div className="p-5 text-left border-r border-cyan-200/70">
-                  <h4 className="text-base font-black text-violet-700 mb-2">{activeVideo.title}</h4>
-                  <p className="text-sm text-gray-700 leading-relaxed min-h-[96px]">
-                    {activeVideo.desc}
-                  </p>
+                  <motion.div
+                    key={`quote-${activeVideo.id}`}
+                    initial={{ opacity: 0, x: 14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="flex items-start gap-3"
+                  >
+                    <span className="text-[88px] leading-[0.7] text-violet-200 font-black">“</span>
+                    <p className="text-[20px] text-gray-700 leading-relaxed min-h-[170px] pt-2">
+                      {activeVideo.desc}
+                    </p>
+                  </motion.div>
                   <p className="text-xs text-gray-400 mt-2">- {activeVideo.source}</p>
 
                   <div className="mt-4 flex items-center gap-2">
@@ -806,7 +833,7 @@ export default function ALeerBoliviaPage() {
                     >
                       <span className="inline-flex items-center gap-1">
                         <ChevronLeft className="w-3 h-3" />
-                        {t("common.previous")}
+                        {t("tests.previous")}
                       </span>
                     </button>
                     <button
@@ -815,7 +842,7 @@ export default function ALeerBoliviaPage() {
                       data-testid="button-video-next"
                     >
                       <span className="inline-flex items-center gap-1">
-                        {t("common.next")}
+                        {t("tests.next")}
                         <ChevronRight className="w-3 h-3" />
                       </span>
                     </button>
@@ -861,7 +888,7 @@ export default function ALeerBoliviaPage() {
                       </motion.div>
                     </div>
                     <div className="absolute bottom-2 left-2 right-2 text-left px-3 py-2 rounded-lg bg-white/80 backdrop-blur-sm">
-                      <p className="text-xs font-bold text-violet-700 truncate">{activeVideo.title}</p>
+                      <p className="text-xs font-bold text-violet-700 truncate">{activeVideo.source}</p>
                     </div>
                   </div>
                 </div>
