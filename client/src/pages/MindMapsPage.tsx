@@ -222,6 +222,8 @@ export default function MindMapsPage() {
   const [taskText, setTaskText] = useState("");
   const [newColTitle, setNewColTitle] = useState("");
   const [taskColId, setTaskColId] = useState("todo");
+  const [taskSearch, setTaskSearch] = useState("");
+  const [taskFilter, setTaskFilter] = useState<"all" | "pending" | "done" | "overdue">("all");
   const [checkDrafts, setCheckDrafts] = useState<Record<string, string>>({});
   const [taskCommentDraft, setTaskCommentDraft] = useState("");
   const [taskModal, setTaskModal] = useState<{ colId: string; taskId: string } | null>(null);
@@ -492,6 +494,37 @@ export default function MindMapsPage() {
             },
       ),
     );
+  }
+
+  function isTaskOverdue(task: Task) {
+    if (!task.dueDate) return false;
+    const due = new Date(`${task.dueDate}T23:59:59`);
+    const done = (task.status || "todo") === "done";
+    return !done && due.getTime() < Date.now();
+  }
+
+  function isTaskDueSoon(task: Task) {
+    if (!task.dueDate) return false;
+    const due = new Date(`${task.dueDate}T23:59:59`);
+    const now = Date.now();
+    const diff = due.getTime() - now;
+    const twoDays = 2 * 24 * 60 * 60 * 1000;
+    const done = (task.status || "todo") === "done";
+    return !done && diff >= 0 && diff <= twoDays;
+  }
+
+  function matchTaskFilter(task: Task) {
+    const search = taskSearch.trim().toLowerCase();
+    const haystack = [task.text, task.note || "", ...(task.checklist || []).map((c) => c.text)]
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = !search || haystack.includes(search);
+    if (!matchesSearch) return false;
+    if (taskFilter === "all") return true;
+    if (taskFilter === "done") return (task.status || "todo") === "done";
+    if (taskFilter === "pending") return (task.status || "todo") !== "done";
+    if (taskFilter === "overdue") return isTaskOverdue(task);
+    return true;
   }
 
   function moveTaskToStatus(colId: string, taskId: string, nextStatus: TaskStatus) {
@@ -1484,6 +1517,24 @@ export default function MindMapsPage() {
                     </div>
                     <button onClick={() => { const name = newColTitle.trim(); if (!name) return; const id = `col_${Date.now()}`; setCols((p) => [...p, { id, title: name, tasks: [] }]); setTaskColId(id); setNewColTitle(""); }} className="app-btn-soft h-11 px-4 text-sm text-fuchsia-700">+ Columna</button>
                   </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      value={taskSearch}
+                      onChange={(e) => setTaskSearch(e.target.value)}
+                      placeholder="Buscar tarea..."
+                      className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 placeholder:text-slate-400 bg-white"
+                    />
+                    <select
+                      value={taskFilter}
+                      onChange={(e) => setTaskFilter(e.target.value as "all" | "pending" | "done" | "overdue")}
+                      className="h-10 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 bg-white"
+                    >
+                      <option value="all">Todas</option>
+                      <option value="pending">Pendientes</option>
+                      <option value="done">Hechas</option>
+                      <option value="overdue">Atrasadas</option>
+                    </select>
+                  </div>
                 </div>
               )}
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
@@ -1525,10 +1576,14 @@ export default function MindMapsPage() {
                       <p className="inline-flex max-w-full items-center rounded-md border border-cyan-200 bg-gradient-to-r from-cyan-100 to-indigo-100 px-2 py-1 text-xs font-semibold text-cyan-900 shadow-sm truncate">
                         {c.title}
                       </p>
+                      <span className="text-[10px] font-semibold text-slate-500 shrink-0">
+                        {c.tasks.filter((t) => matchTaskFilter(t) && (t.status || "todo") === "done").length}/
+                        {c.tasks.filter((t) => matchTaskFilter(t)).length}
+                      </span>
                     </div>
                     <div className="space-y-2">
-                      {c.tasks.map((t) => (
-                        <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className="min-w-0 rounded-xl border border-purple-100 bg-white p-2 shadow-sm">
+                      {c.tasks.filter((t) => matchTaskFilter(t)).map((t) => (
+                        <div key={t.id} draggable={!readonly} onDragStart={() => { dragTask.current = { fromColId: c.id, task: t }; }} className={`min-w-0 rounded-xl border bg-white p-2 shadow-sm ${isTaskOverdue(t) ? "border-rose-200" : isTaskDueSoon(t) ? "border-amber-200" : "border-purple-100"}`}>
                           <button className="project-open-btn w-full text-left" onClick={() => setTaskModal({ colId: c.id, taskId: t.id })}>
                             <div className="flex items-start justify-between gap-2">
                               <p className="text-xs font-semibold text-slate-700 break-words">{t.text}</p>
@@ -1543,7 +1598,7 @@ export default function MindMapsPage() {
                               </span>
                             </div>
                             {(t.note || "").trim() && <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 break-words">{t.note}</p>}
-                            {t.dueDate && <p className="mt-1 text-[10px] text-slate-500">Vence: {t.dueDate}</p>}
+                            {t.dueDate && <p className={`mt-1 text-[10px] ${isTaskOverdue(t) ? "text-rose-600" : isTaskDueSoon(t) ? "text-amber-600" : "text-slate-500"}`}>Vence: {t.dueDate}</p>}
                             {(((t.comments || []).length > 0) || ((t.attachments || []).length > 0)) && (
                               <p className="mt-1 text-[10px] text-slate-500">
                                 {(t.comments || []).length} comentarios · {(t.attachments || []).length} adjuntos
