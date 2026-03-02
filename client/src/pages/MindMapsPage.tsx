@@ -716,6 +716,58 @@ export default function MindMapsPage() {
     return { centerX, centerY };
   }
 
+  function clampOffsetForZoom(nextX: number, nextY: number, zoom: number) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return { x: nextX, y: nextY };
+
+    const scaledW = WORLD_W * zoom;
+    const scaledH = WORLD_H * zoom;
+
+    const minX = scaledW > rect.width ? rect.width - scaledW : (rect.width - scaledW) / 2;
+    const maxX = scaledW > rect.width ? 0 : (rect.width - scaledW) / 2;
+    const minY = scaledH > rect.height ? rect.height - scaledH : (rect.height - scaledH) / 2;
+    const maxY = scaledH > rect.height ? 0 : (rect.height - scaledH) / 2;
+
+    return {
+      x: Math.max(minX, Math.min(nextX, maxX)),
+      y: Math.max(minY, Math.min(nextY, maxY)),
+    };
+  }
+
+  function fitMindmapToViewport(nextNodes: Node[]) {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect || !nextNodes.length) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    nextNodes.forEach((n) => {
+      const h = n.imageUrl ? 130 : NODE_H;
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x + NODE_W);
+      maxY = Math.max(maxY, n.y + h);
+    });
+
+    const contentW = Math.max(1, maxX - minX);
+    const contentH = Math.max(1, maxY - minY);
+    const padX = 80;
+    const padY = 80;
+    const zoomX = (rect.width - padX) / contentW;
+    const zoomY = (rect.height - padY) / contentH;
+    const nextZoom = Math.max(0.45, Math.min(1.2, Math.min(zoomX, zoomY)));
+
+    const centerX = minX + contentW / 2;
+    const centerY = minY + contentH / 2;
+    const rawOffsetX = rect.width / 2 - centerX * nextZoom;
+    const rawOffsetY = rect.height / 2 - centerY * nextZoom;
+    const nextOffset = clampOffsetForZoom(rawOffsetX, rawOffsetY, nextZoom);
+
+    setBoardZoom(Number(nextZoom.toFixed(2)));
+    setBoardOffset(nextOffset);
+  }
+
   function autoLayoutNodes(rawNodes: Node[], rawEdges: Edge[], center: { centerX: number; centerY: number }): Node[] {
     if (!rawNodes.length) return rawNodes;
     const clampNode = (n: Node) => ({
@@ -946,11 +998,8 @@ export default function MindMapsPage() {
   }, [readonly, showChooser, kind, selectedNodeId, selectedNode, boardZoom, boardOffset.x, boardOffset.y, nodes, edges]);
 
   function applyAiMapToBoard(aiMap: AiMap) {
-    const rect = boardRef.current?.getBoundingClientRect();
-    const viewportW = (rect?.width || 1100) / boardZoom;
-    const viewportH = (rect?.height || 700) / boardZoom;
-    const centerX = Math.max(0, Math.min((-boardOffset.x) / boardZoom + viewportW / 2 - NODE_W / 2, WORLD_W - NODE_W));
-    const centerY = Math.max(0, Math.min((-boardOffset.y) / boardZoom + viewportH / 2 - NODE_H / 2, WORLD_H - NODE_H));
+    const centerX = WORLD_W / 2 - NODE_W / 2;
+    const centerY = WORLD_H / 2 - NODE_H / 2;
 
     const now = Date.now();
     const centralId = `node_ai_central_${now}`;
@@ -959,7 +1008,7 @@ export default function MindMapsPage() {
     const mainNodeIds: string[] = [];
 
     const mainIdeas = (aiMap.ideas || []).slice(0, 7);
-    const radius = Math.max(170, Math.min(Math.min(viewportW, viewportH) * 0.32, 280));
+    const radius = 260;
 
     mainIdeas.forEach((idea, idx) => {
       const angle = (Math.PI * 2 * idx) / Math.max(1, mainIdeas.length) - Math.PI / 2;
@@ -1021,6 +1070,7 @@ export default function MindMapsPage() {
     setNodes(arranged);
     setEdges(nextEdges);
     setSelectedNodeId(centralId);
+    fitMindmapToViewport(arranged);
   }
 
   async function generateAiIdeas() {
