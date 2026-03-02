@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { useTranslation } from "react-i18next";
 import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } from "@/components/EditorToolbar";
 import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
-import { CurvedHeader } from "@/components/CurvedHeader";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 import participarImg from "@assets/image_1770684494294.png";
 import laxCyan from "@assets/laxcyan2_1771479429192.png";
@@ -126,10 +125,6 @@ export default function ALeerBoliviaPage() {
   }
 
   const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
-  const decodeEscapedUnicode = useCallback((text: string) => (
-    text.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-  ), []);
-  const tt = useCallback((key: string) => decodeEscapedUnicode(t(key)), [decodeEscapedUnicode, t]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
@@ -139,12 +134,40 @@ export default function ALeerBoliviaPage() {
         <motion.img src={laxVerde} alt="" className="absolute opacity-[0.06] w-[210px] md:w-[370px]" style={{ bottom: "12%", right: "3%" }} animate={{ rotate: [0, 6, -9, 0], x: [0, -18, 14, 0] }} transition={{ duration: 21, repeat: Infinity, ease: "easeInOut", delay: 5 }} />
         <motion.img src={laxBlanca} alt="" className="absolute opacity-[0.04] w-[170px] md:w-[290px]" style={{ top: "58%", left: "28%" }} animate={{ rotate: [0, -9, 7, 0], scale: [1, 1.09, 0.94, 1] }} transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 8 }} />
       </div>
-      <motion.div
+      <motion.header
+        className={`flex items-center justify-center px-5 bg-white sticky top-0 z-50 md:hidden ${getEditableClass("header")}`}
+        style={{ paddingTop: 10, paddingBottom: 10 }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={(e) => { if (editorMode) handleElementClick("header", e); }}
       >
-        <CurvedHeader showBack onBack={() => setLocation("/")} />
+        <button onClick={() => setLocation("/")} className="absolute left-5 p-2 text-gray-400" data-testid="button-back">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <svg width="80" height="36" viewBox="0 0 80 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#8a3ffc" />
+              <stop offset="100%" stopColor="#00d9ff" />
+            </linearGradient>
+          </defs>
+          <text x="0" y="28" fontSize="32" fontWeight="900" fontFamily="Inter, sans-serif">
+            <tspan fill="#8a3ffc">i</tspan>
+            <tspan fill="#8a3ffc">Q</tspan>
+            <tspan fill="url(#logoGrad)">x</tspan>
+          </text>
+        </svg>
+      </motion.header>
+
+      <motion.div
+        className="w-full sticky z-40 md:hidden"
+        style={{ top: 56, marginTop: -4, marginBottom: -20 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.08 }}
+      >
+        <img src={menuCurveImg} alt="" className="w-full h-auto" />
       </motion.div>
 
       <main className="flex-1 overflow-y-auto pb-28">
@@ -170,7 +193,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-hero", e); }}
               data-testid="badge-edit-hero-bg"
             >
-              {tt("aleer.editHeroBg")}
+              {t("aleer.editHeroBg")}
             </div>
           )}
           {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
@@ -193,7 +216,7 @@ export default function ALeerBoliviaPage() {
               transition={{ repeat: Infinity, duration: 3 }}
             >
               <Sparkles className="w-4 h-4 text-purple-500" />
-              <span className="text-xs font-bold text-purple-600">{tt("aleer.badge")}</span>
+              <span className="text-xs font-bold text-purple-600">{t("aleer.badge")}</span>
             </motion.div>
 
             <h1
@@ -205,7 +228,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
               data-testid="text-welcome-title"
             >
-              {tt("aleer.welcome")}
+              {t("aleer.welcome")}
             </h1>
             <h2
               className={`text-lg font-bold mb-1 ${getEditableClass("hero-subtitle1")}`}
@@ -217,7 +240,7 @@ export default function ALeerBoliviaPage() {
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
             >
-              {tt("aleer.subtitle1")}
+              {t("aleer.subtitle1")}
             </h2>
             <h3
               className={`text-base font-bold mb-4 ${getEditableClass("hero-subtitle2")}`}
@@ -227,7 +250,7 @@ export default function ALeerBoliviaPage() {
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
             >
-              {tt("aleer.subtitle2")}
+              {t("aleer.subtitle2")}
             </h3>
             <p
               className={`text-sm leading-relaxed max-w-md mx-auto ${getEditableClass("hero-desc")}`}
@@ -237,7 +260,7 @@ export default function ALeerBoliviaPage() {
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
             >
-              {tt("aleer.description")}
+              {t("aleer.description")}
             </p>
           </motion.div>
 
@@ -267,7 +290,7 @@ export default function ALeerBoliviaPage() {
               ) : (
                 <div className="text-center">
                   <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
-                  <span className="text-sm text-purple-400 font-medium">{tt("aleer.placeholder")}</span>
+                  <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
                 </div>
               )}
             </div>
@@ -296,7 +319,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-objectives", e); }}
               data-testid="badge-edit-objectives-bg"
             >
-              {tt("aleer.editObjectivesBg")}
+              {t("aleer.editObjectivesBg")}
             </div>
           )}
           <motion.div
@@ -305,9 +328,9 @@ export default function ALeerBoliviaPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-xl font-black text-gray-800 mb-2" data-testid="text-objectives-title">{tt("aleer.objectivesTitle")}</h2>
+            <h2 className="text-xl font-black text-gray-800 mb-2" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
             <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
-              {tt("aleer.objectivesDesc")}
+              {t("aleer.objectivesDesc")}
             </p>
           </motion.div>
 
@@ -372,7 +395,7 @@ export default function ALeerBoliviaPage() {
                                 color: styles[`title-${obj.id}`]?.textColor || "#1f2937",
                               }}
                             >
-                              {styles[`title-${obj.id}`]?.buttonText || tt(`aleer.${obj.titleKey}`)}
+                              {styles[`title-${obj.id}`]?.buttonText || t(`aleer.${obj.titleKey}`)}
                             </h3>
                             <p
                               className={`text-xs text-gray-400 leading-relaxed ${getEditableClass(`desc-${obj.id}`)}`}
@@ -382,7 +405,7 @@ export default function ALeerBoliviaPage() {
                                 color: styles[`desc-${obj.id}`]?.textColor || "#9ca3af",
                               }}
                             >
-                              {styles[`desc-${obj.id}`]?.buttonText || tt(`aleer.${obj.descKey}`)}
+                              {styles[`desc-${obj.id}`]?.buttonText || t(`aleer.${obj.descKey}`)}
                             </p>
                           </div>
                         </div>
@@ -457,7 +480,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { e.stopPropagation(); handleElementClick("section-participar", e); }}
               data-testid="badge-edit-participar-bg"
             >
-              {tt("aleer.editParticiparBg")}
+              {t("aleer.editParticiparBg")}
             </div>
           )}
           <motion.div
@@ -474,7 +497,7 @@ export default function ALeerBoliviaPage() {
               transition={{ repeat: Infinity, duration: 3 }}
             >
               <Users className="w-4 h-4 text-orange-600" />
-              <span className="text-xs font-bold text-orange-700">{tt("aleer.participationBadge")}</span>
+              <span className="text-xs font-bold text-orange-700">{t("aleer.participationBadge")}</span>
             </motion.div>
             <h2
               className={`text-xl font-black mb-3 leading-tight ${getEditableClass("participar-title")}`}
@@ -485,7 +508,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
               data-testid="text-participar-title"
             >
-              {tt("aleer.participarTitle")}
+              {t("aleer.participarTitle")}
             </h2>
             <p
               className={`text-xs leading-relaxed max-w-sm mx-auto ${getEditableClass("participar-desc")}`}
@@ -495,7 +518,7 @@ export default function ALeerBoliviaPage() {
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
             >
-              {tt("aleer.participarDesc")}
+              {t("aleer.participarDesc")}
             </p>
           </motion.div>
 
@@ -548,8 +571,8 @@ export default function ALeerBoliviaPage() {
                       <CheckCheck className="w-3.5 h-3.5 text-white" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{tt(`aleer.${item.titleKey}`)}</h3>
-                      <p className="text-xs text-gray-400 leading-relaxed">{tt(`aleer.${item.descKey}`)}</p>
+                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{t(`aleer.${item.titleKey}`)}</h3>
+                      <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
                     </div>
                   </motion.div>
                 );
@@ -590,8 +613,8 @@ export default function ALeerBoliviaPage() {
                               <CheckCheck className="w-4 h-4 text-white" />
                             </motion.div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-sm font-bold text-gray-800 mb-1">{tt(`aleer.${item.titleKey}`)}</h3>
-                              <p className="text-xs text-gray-400 leading-relaxed">{tt(`aleer.${item.descKey}`)}</p>
+                              <h3 className="text-sm font-bold text-gray-800 mb-1">{t(`aleer.${item.titleKey}`)}</h3>
+                              <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
                             </div>
                           </div>
                         </motion.div>
@@ -617,7 +640,7 @@ export default function ALeerBoliviaPage() {
               whileTap={{ scale: 0.97 }}
               data-testid="button-inscribete"
             >
-              {tt("aleer.ctaRegister")}
+              {t("aleer.ctaRegister")}
             </motion.button>
           </motion.div>
         </motion.section>
