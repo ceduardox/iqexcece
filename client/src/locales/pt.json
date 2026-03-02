@@ -361,7 +361,16 @@
     "part4Desc": "Os resultados, enviados a famílias e instituições, oferecem uma classificação detalhada das habilidades de leitura, promovendo um desenvolvimento educacional ajustado a cada estudante.",
     "part5Title": "Requisitos para formar futuros leitores",
     "part5Desc": "O compromisso das escolas é essencial, assim como a autorização e o apoio de um adulto responsável. Isso garante um ambiente de apoio completo para que os estudantes participem plenamente das avaliações e atividades propostas.",
-    "ctaRegister": "INSCREVA-SE"
+    "ctaRegister": "INSCREVA-SE",
+    "joinTitle": "Inscreva-se",
+    "joinDesc": "Faça parte desta iniciativa transformadora, destinada a enriquecer o cenário educacional por meio da leitura.",
+    "joinSchools": "INSCRIÇÃO DE ESCOLAS",
+    "joinSponsors": "INSCRIÇÃO DE SPONSORS",
+    "joinIndependent": "INSCRIÇÃO DE ESTUDANTES INDEPENDENTES",
+    "videosTitle": "Vídeos motivadores",
+    "videosDesc": "Junte-se à nossa série de vídeos para se preparar e se destacar no concurso “Ler Bolívia por um Futuro Melhor”! Inspire-se, motive-se e domine o mundo da leitura conosco.",
+    "videoItemTitle": "Vídeo motivador {{number}}",
+    "videoItemDesc": "Conteúdo inspirador e técnicas práticas para fortalecer compreensão, foco e hábitos de leitura."
   },
   "velocidad_lectura": {
     "prepTitle": "Velocidade de Leitura",

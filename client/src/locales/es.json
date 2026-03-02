@@ -361,7 +361,16 @@
     "part4Desc": "Los resultados, enviados a padres e instituciones, ofrecen una clasificación detallada de habilidades lectoras para impulsar un desarrollo educativo ajustado a cada estudiante.",
     "part5Title": "Requisitos para forjar futuros lectores",
     "part5Desc": "El compromiso de las escuelas es crucial, así como la autorización y el apoyo de un adulto responsable. Esto garantiza un entorno de apoyo total para participar plenamente en las pruebas y actividades propuestas.",
-    "ctaRegister": "INSCRÍBETE"
+    "ctaRegister": "INSCRÍBETE",
+    "joinTitle": "Inscríbete",
+    "joinDesc": "Forma parte de esta iniciativa transformadora, destinada a enriquecer el panorama educativo a través de la lectura.",
+    "joinSchools": "INSCRIPCIÓN DE COLEGIOS",
+    "joinSponsors": "INSCRIPCIÓN DE SPONSORS",
+    "joinIndependent": "INSCRIPCIÓN DE ESTUDIANTES INDEPENDIENTES",
+    "videosTitle": "Videos motivadores",
+    "videosDesc": "¡Únete a nuestra serie de videos para prepararte y destacar en el concurso “A Leer Bolivia por un Futuro Mejor”! Inspírate, motívate y domina el mundo de la lectura con nosotros.",
+    "videoItemTitle": "Video motivador {{number}}",
+    "videoItemDesc": "Contenido de inspiración y técnicas prácticas para fortalecer comprensión, enfoque y hábitos de lectura."
   },
   "velocidad_lectura": {
     "prepTitle": "Velocidad de Lectura",

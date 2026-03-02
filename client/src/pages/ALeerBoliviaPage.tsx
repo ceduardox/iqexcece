@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
@@ -641,6 +641,99 @@ export default function ALeerBoliviaPage() {
               {t("aleer.ctaRegister")}
             </motion.button>
           </motion.div>
+        </motion.section>
+
+        <motion.section
+          className="px-5 pb-10"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.18 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          data-testid="section-inscribete-videos"
+        >
+          <div
+            className="rounded-3xl overflow-hidden border border-purple-200/60"
+            style={{ boxShadow: "0 12px 30px rgba(124,58,237,0.12), 0 2px 6px rgba(0,0,0,0.04)" }}
+          >
+            <div className="relative px-5 pt-8 pb-7 text-center" style={{ background: "linear-gradient(135deg, #7b2cbf 0%, #6d28d9 55%, #5b21b6 100%)" }}>
+              <motion.div
+                className="absolute -top-10 -left-14 w-52 h-52 rounded-full opacity-20 pointer-events-none"
+                style={{ background: "radial-gradient(circle, #22d3ee 0%, transparent 68%)" }}
+                animate={{ scale: [1, 1.08, 0.96, 1], rotate: [0, 12, -8, 0] }}
+                transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute -bottom-16 -right-20 w-56 h-56 rounded-full opacity-15 pointer-events-none"
+                style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
+                animate={{ scale: [1, 0.94, 1.06, 1], rotate: [0, -10, 7, 0] }}
+                transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+              />
+
+              <h3 className="relative z-10 text-3xl font-black text-cyan-200 mb-2">{t("aleer.joinTitle")}</h3>
+              <p className="relative z-10 text-sm text-white/90 max-w-2xl mx-auto leading-relaxed">
+                {t("aleer.joinDesc")}
+              </p>
+
+              <div className="relative z-10 mt-6 grid gap-3 md:grid-cols-3">
+                {[
+                  { key: "schools", icon: Building2, label: t("aleer.joinSchools") },
+                  { key: "sponsors", icon: Handshake, label: t("aleer.joinSponsors") },
+                  { key: "independent", icon: UserRound, label: t("aleer.joinIndependent") },
+                ].map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.button
+                      key={item.key}
+                      className="w-full rounded-full px-5 py-4 text-left flex items-center gap-3 border border-cyan-300/40"
+                      style={{ background: "linear-gradient(135deg, #67e8f9 0%, #22d3ee 35%, #14b8a6 100%)", boxShadow: "0 8px 20px rgba(0,0,0,0.22)" }}
+                      initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.06 * i, duration: 0.28 }}
+                      whileHover={{ y: -2, scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      data-testid={`button-join-${item.key}`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-white/25 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-sm md:text-base font-extrabold tracking-tight text-white leading-tight">
+                        {item.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="px-5 py-8 text-center bg-white">
+              <h3 className="text-4xl md:text-5xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
+              <p className="text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                {t("aleer.videosDesc")}
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((idx) => (
+                  <motion.div
+                    key={idx}
+                    className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 to-cyan-50 p-4 text-left"
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.07, duration: 0.28 }}
+                    whileHover={{ y: -2 }}
+                    data-testid={`card-video-motivador-${idx}`}
+                  >
+                    <div className="flex items-center gap-2 text-violet-700 font-bold mb-2">
+                      <PlayCircle className="w-4 h-4" />
+                      <span>{t("aleer.videoItemTitle", { number: idx })}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{t("aleer.videoItemDesc")}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
         </motion.section>
       </main>
 
