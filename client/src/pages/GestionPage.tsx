@@ -7051,35 +7051,6 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
 
-  const activeUsers = sessionsData?.activeCount || 0;
-  const totalSessions = sessionsData?.total || 0;
-  const baseLoad = Math.min(88, 42 + Math.round(activeUsers * 0.85) + Math.round(totalSessions * 0.03));
-  const domainFactor = selectedDomain === "iqexponencial.com" ? 0.68 : 1;
-  const cpu = Math.max(8, Math.min(95, Math.round(baseLoad * domainFactor)));
-  const ram = Math.max(12, Math.min(95, Math.round((baseLoad + 8) * domainFactor)));
-  const network = Math.max(10, Math.min(95, Math.round((baseLoad - 4) * domainFactor)));
-  const disk = Math.max(14, Math.min(95, Math.round((baseLoad - 10) * domainFactor)));
-
-  useEffect(() => {
-    setLiveTick(0);
-    setLiveDrift({ cpu: 0, ram: 0, network: 0, disk: 0 });
-    const interval = setInterval(() => {
-      setLiveTick((prev) => prev + 1);
-      const rand = () => Math.floor(Math.random() * 5) - 2;
-      setLiveDrift({
-        cpu: rand(),
-        ram: rand(),
-        network: rand(),
-        disk: rand(),
-      });
-    }, 2200);
-    return () => clearInterval(interval);
-  }, [selectedDomain, activeUsers, totalSessions]);
-
-  const liveCpu = Math.max(8, Math.min(95, cpu + liveDrift.cpu));
-  const liveRam = Math.max(12, Math.min(95, ram + liveDrift.ram));
-  const liveNetwork = Math.max(10, Math.min(95, network + liveDrift.network));
-  const liveDisk = Math.max(14, Math.min(95, disk + liveDrift.disk));
 
   const monthlyPlans = [
     {
@@ -7154,6 +7125,12 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
         "Reportes ejecutivos semanales",
         "Consultoria tecnica mensual",
         "SLA 99.99% para operacion critica",
+        "CDN global premium y cache inteligente",
+        "Ambiente QA/staging dedicado",
+        "Monitoreo avanzado APM con alertas proactivas",
+        "Restauracion de backup asistida por equipo tecnico",
+        "Prioridad alta en incidencias criticas",
+        "Asesoria de optimizacion de costos cloud",
       ],
     },
   ];
@@ -7167,10 +7144,59 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     { title: "Analitica comercial", desc: "Uso por plan, conversion, renovaciones y estimacion de churn." },
   ];
 
+  const activeUsers = sessionsData?.activeCount || 0;
+  const totalSessions = sessionsData?.total || 0;
+  const paidStatuses = new Set(["finished", "confirmed", "paid"]);
+  const latestPaid = [...payments]
+    .filter((p: any) => paidStatuses.has(String(p.paymentStatus || "").toLowerCase()))
+    .sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())[0];
+
+  const activePlanId: "starter" | "pro" | "elite" = (latestPaid?.planId === "starter" || latestPaid?.planId === "elite")
+    ? latestPaid.planId
+    : "pro";
+  const activeBilling: "mensual" | "anual" = latestPaid?.billingMode === "anual" ? "anual" : "mensual";
+
+  const planPowerById: Record<"starter" | "pro" | "elite", number> = {
+    starter: 40,
+    pro: 120,
+    elite: 300,
+  };
+  const domainFactor = selectedDomain === "iqexponencial.com" ? 0.7 : 1;
+  const trafficDemand = activeUsers * 1.8 + totalSessions * 0.06 + 16;
+  const normalized = (trafficDemand / planPowerById[activePlanId]) * 100 * domainFactor;
+  const cpu = Math.max(8, Math.min(95, Math.round(normalized + 8)));
+  const ram = Math.max(10, Math.min(95, Math.round(normalized + 12)));
+  const network = Math.max(8, Math.min(95, Math.round(normalized + 4)));
+  const disk = Math.max(6, Math.min(95, Math.round(normalized - 2)));
+
+  useEffect(() => {
+    setLiveTick(0);
+    setLiveDrift({ cpu: 0, ram: 0, network: 0, disk: 0 });
+    const interval = setInterval(() => {
+      setLiveTick((prev) => prev + 1);
+      const rand = () => Math.floor(Math.random() * 5) - 2;
+      setLiveDrift({ cpu: rand(), ram: rand(), network: rand(), disk: rand() });
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [selectedDomain, activeUsers, totalSessions, activePlanId]);
+
+  const liveCpu = Math.max(8, Math.min(95, cpu + liveDrift.cpu));
+  const liveRam = Math.max(10, Math.min(95, ram + liveDrift.ram));
+  const liveNetwork = Math.max(8, Math.min(95, network + liveDrift.network));
+  const liveDisk = Math.max(6, Math.min(95, disk + liveDrift.disk));
+
+  const planMetaById = {
+    starter: { name: "Starter Cloud", monthly: 60, yearly: 600 },
+    pro: { name: "Pro Growth", monthly: 90, yearly: 900 },
+    elite: { name: "Elite Server", monthly: 160, yearly: 1250 },
+  } as const;
   const activePlan = {
-    name: "Pro Growth",
-    monthly: 90,
-    status: "Activo",
+    id: activePlanId,
+    name: planMetaById[activePlanId].name,
+    amount: activeBilling === "anual" ? planMetaById[activePlanId].yearly : planMetaById[activePlanId].monthly,
+    mode: activeBilling,
+    status: latestPaid ? "Activo (pagado)" : "Activo por defecto",
+    paidAt: latestPaid?.updatedAt || null,
   };
 
   const fetchPayments = async () => {
@@ -7188,8 +7214,12 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   };
 
   useEffect(() => {
+    fetchPayments();
+  }, [adminToken]);
+
+  useEffect(() => {
     if (serverView === "pagos") fetchPayments();
-  }, [serverView, adminToken]);
+  }, [serverView]);
 
   const createCryptoPayment = async (planId: string) => {
     try {
@@ -7223,9 +7253,17 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
           <div>
             <p className="text-xs text-white/60">Plan activo ahora</p>
             <p className="text-white font-bold text-lg">
-              {activePlan.name} <span className="text-emerald-300">(${activePlan.monthly}/mes)</span>
+              {activePlan.name}{" "}
+              <span className="text-emerald-300">
+                ${activePlan.amount}/{activePlan.mode === "anual" ? "anual" : "mes"}
+              </span>
             </p>
             <p className="text-xs text-emerald-300">{activePlan.status}</p>
+            {activePlan.paidAt && (
+              <p className="text-[11px] text-white/60 mt-0.5">
+                Ultimo pago: {new Date(activePlan.paidAt).toLocaleString()}
+              </p>
+            )}
           </div>
           <Button
             onClick={() => setServerView(serverView === "panel" ? "pagos" : "panel")}
@@ -7433,11 +7471,12 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {monthlyPlans.map((plan) => {
-              const shownPrice = billingMode === "mensual" ? `$${plan.price}/mes` : `$${plan.yearlyPrice}/año`;
+              const shownPrice = billingMode === "mensual" ? `$${plan.price}/mes` : `$${plan.yearlyPrice}/anual`;
+              const isActivePlan = plan.id === activePlan.id;
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl border p-4 ${plan.featured ? "border-amber-400 bg-gradient-to-br from-amber-500/20 to-emerald-500/10 shadow-[0_0_0_1px_rgba(251,191,36,0.3)]" : "border-white/15 bg-white/[0.04]"}`}
+                  className={`rounded-2xl border p-4 ${isActivePlan ? "border-emerald-400 bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]" : plan.featured ? "border-amber-400 bg-gradient-to-br from-amber-500/20 to-emerald-500/10 shadow-[0_0_0_1px_rgba(251,191,36,0.3)]" : "border-white/15 bg-white/[0.04]"}`}
                   data-testid={`server-plan-${plan.id}`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -7445,7 +7484,12 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                       <p className="text-white font-bold">{plan.name}</p>
                       <p className="text-white/60 text-xs mt-1">{plan.subtitle}</p>
                     </div>
-                    {plan.featured && (
+                    {isActivePlan && (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-400 text-black font-bold">
+                        ACTIVO
+                      </span>
+                    )}
+                    {!isActivePlan && plan.featured && (
                       <span className="text-[10px] px-2 py-1 rounded-full bg-amber-400 text-black font-bold">
                         RECOMENDADO
                       </span>
