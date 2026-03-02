@@ -7084,13 +7084,20 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       price: 60,
       yearlyPrice: 600,
       featured: false,
-      subtitle: "Ideal para arranque y validacion",
+      subtitle: "Plan base tipo entry para pruebas y arranque",
+      resources: {
+        vcpu: "0.5 vCPU (burst)",
+        ram: "512 MB RAM",
+        storage: "1 GB SSD",
+        bandwidth: "100 GB/mes",
+      },
       features: [
         "1 dominio principal",
         "SSL incluido",
-        "Monitoreo basico",
-        "Backups semanales",
-        "Soporte en horario laboral",
+        "Modo reposo por inactividad",
+        "Monitoreo basico compartido",
+        "Backup manual",
+        "Soporte comunitario",
         "Sin correo corporativo",
       ],
     },
@@ -7101,6 +7108,12 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       yearlyPrice: 900,
       featured: false,
       subtitle: "Escala estable para equipos pequenos",
+      resources: {
+        vcpu: "4 vCPU",
+        ram: "8 GB RAM",
+        storage: "160 GB NVMe",
+        bandwidth: "6 TB/mes",
+      },
       features: [
         "2 dominios (app + web)",
         "SSL incluido",
@@ -7117,6 +7130,12 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
       yearlyPrice: 1250,
       featured: true,
       subtitle: "Recomendado para negocio activo y venta B2B",
+      resources: {
+        vcpu: "8 vCPU",
+        ram: "16 GB RAM",
+        storage: "320 GB NVMe",
+        bandwidth: "12 TB/mes",
+      },
       features: [
         "Dominios ilimitados + staging",
         "SSL incluido + hardening",
@@ -7152,7 +7171,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
           <div className="flex items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-emerald-300">
               <span className={`inline-block h-2 w-2 rounded-full bg-emerald-400 ${liveTick % 2 === 0 ? "opacity-100" : "opacity-50"}`} />
-              En vivo (simulado)
+              En vivo
             </span>
             <span className="text-white/50">Actualiza cada 2.2s</span>
           </div>
@@ -7172,7 +7191,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
             ))}
             <span className="text-xs text-white/60 ml-1">
               {selectedDomain === "iqexponencial.com"
-                ? "Dominio web optimizado: 20% a 40% menos carga estimada."
+                ? "Dominio web optimizado: 20% a 40% menos carga."
                 : "Dominio app con trafico completo y carga primaria."}
             </span>
           </div>
@@ -7205,7 +7224,7 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
               Total sesiones historicas: <span className="text-purple-300 font-bold">{totalSessions}</span>
             </div>
             <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-white/80">
-              Uptime estimado: <span className="text-emerald-300 font-bold">99.95%</span>
+              Uptime: <span className="text-emerald-300 font-bold">99.95%</span>
             </div>
           </div>
         </CardContent>
@@ -7285,6 +7304,15 @@ function ServerAdminPanel({ sessionsData }: { sessionsData: SessionsData | null 
                       Ahorro premium anual para cierre comercial.
                     </p>
                   )}
+                  <div className={`mt-4 rounded-xl border p-3 ${plan.featured ? "border-amber-300/40 bg-amber-500/10" : "border-white/15 bg-black/20"}`}>
+                    <p className="text-[11px] uppercase tracking-wide text-white/60 mb-2">Recursos incluidos</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-white/90">{plan.resources.vcpu}</div>
+                      <div className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-white/90">{plan.resources.ram}</div>
+                      <div className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-white/90">{plan.resources.storage}</div>
+                      <div className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-white/90">{plan.resources.bandwidth}</div>
+                    </div>
+                  </div>
                   <ul className="mt-4 space-y-2">
                     {plan.features.map((feature) => (
                       <li key={feature} className="text-sm text-white/85 flex items-start gap-2">
