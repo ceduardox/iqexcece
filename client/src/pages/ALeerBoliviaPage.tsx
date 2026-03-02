@@ -655,23 +655,23 @@ export default function ALeerBoliviaPage() {
             className="rounded-3xl overflow-hidden border border-violet-300/50"
             style={{ boxShadow: "0 18px 40px rgba(109,40,217,0.22), 0 6px 14px rgba(0,0,0,0.08)" }}
           >
-            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(120deg, #06b6d4 0%, #14b8a6 42%, #0ea5e9 100%)" }}>
+            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 45%, #4c1d95 100%)" }}>
               <img src={laxPurpura} alt="" className="absolute -top-8 -left-8 w-52 md:w-72 opacity-18 pointer-events-none" />
               <img src={laxCyan} alt="" className="absolute -bottom-10 -right-8 w-56 md:w-80 opacity-20 pointer-events-none" />
               <motion.div
                 className="absolute -top-16 left-[20%] w-64 h-64 rounded-full opacity-25 pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(109,40,217,0.45) 0%, transparent 68%)" }}
+                style={{ background: "radial-gradient(circle, rgba(34,211,238,0.9) 0%, transparent 68%)" }}
                 animate={{ scale: [1, 1.08, 0.96, 1], rotate: [0, 12, -8, 0] }}
                 transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
                 className="absolute -bottom-20 right-[10%] w-72 h-72 rounded-full opacity-20 pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(76,29,149,0.45) 0%, transparent 70%)" }}
+                style={{ background: "radial-gradient(circle, rgba(167,139,250,0.95) 0%, transparent 70%)" }}
                 animate={{ scale: [1, 0.94, 1.06, 1], rotate: [0, -10, 7, 0] }}
                 transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.28)]">{t("aleer.joinTitle")}</h3>
+              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-cyan-200 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{t("aleer.joinTitle")}</h3>
               <p className="relative z-10 text-sm md:text-base text-white/95 max-w-2xl mx-auto leading-relaxed">
                 {t("aleer.joinDesc")}
               </p>
