@@ -1385,6 +1385,17 @@ export default function MindMapsPage() {
                             {(t.note || "").trim() && <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 break-words">{t.note}</p>}
                             {t.dueDate && <p className="mt-1 text-[10px] text-slate-500">Vence: {t.dueDate}</p>}
                           </button>
+                          {!readonly && (
+                            <div className="mt-1 flex justify-end">
+                              <button
+                                className="app-btn-soft h-6 px-2 text-[10px] text-cyan-700"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onClick={() => setTaskModal({ colId: c.id, taskId: t.id })}
+                              >
+                                Editar
+                              </button>
+                            </div>
+                          )}
                           <div className="mt-2 space-y-1">
                             {(t.checklist || []).map((it) => (
                               <label key={it.id} className="min-w-0 flex items-center gap-2 text-xs text-slate-700">
