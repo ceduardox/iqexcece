@@ -8,6 +8,8 @@ type Kind = "mindmap" | "taskboard" | "whiteboard";
 type Node = { id: string; x: number; y: number; text: string; imageUrl?: string };
 type Edge = { id: string; sourceId: string; targetId: string };
 type TaskChecklistItem = { id: string; text: string; done: boolean };
+type TaskComment = { id: string; text: string; createdAt: string };
+type TaskAttachment = { id: string; name: string; mimeType: string; size: number; url: string };
 type TaskPriority = "low" | "medium" | "high";
 type TaskStatus = "todo" | "doing" | "done";
 type Task = {
@@ -18,6 +20,8 @@ type Task = {
   priority?: TaskPriority;
   dueDate?: string;
   status?: TaskStatus;
+  comments?: TaskComment[];
+  attachments?: TaskAttachment[];
 };
 type TaskCol = { id: string; title: string; tasks: Task[] };
 type TaskCols = TaskCol[];
@@ -71,6 +75,22 @@ function normalizeTaskColumns(input: any): TaskCols {
               priority: toTaskPriority(t.priority),
               dueDate: typeof t.dueDate === "string" ? t.dueDate : "",
               status: toTaskStatus(t.status || statusByColumnId(c.id)),
+              comments: Array.isArray(t.comments)
+                ? t.comments.map((cm: any) => ({
+                    id: String(cm.id || `cmt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    text: String(cm.text || ""),
+                    createdAt: String(cm.createdAt || new Date().toISOString()),
+                  }))
+                : [],
+              attachments: Array.isArray(t.attachments)
+                ? t.attachments.map((at: any) => ({
+                    id: String(at.id || `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    name: String(at.name || "archivo"),
+                    mimeType: String(at.mimeType || "application/octet-stream"),
+                    size: Number(at.size || 0),
+                    url: String(at.url || ""),
+                  }))
+                : [],
               checklist: Array.isArray(t.checklist)
                 ? t.checklist.map((it: any) => ({
                     id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
@@ -97,6 +117,22 @@ function normalizeTaskColumns(input: any): TaskCols {
               priority: toTaskPriority(t.priority),
               dueDate: typeof t.dueDate === "string" ? t.dueDate : "",
               status: toTaskStatus(t.status || statusByColumnId(k)),
+              comments: Array.isArray(t.comments)
+                ? t.comments.map((cm: any) => ({
+                    id: String(cm.id || `cmt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    text: String(cm.text || ""),
+                    createdAt: String(cm.createdAt || new Date().toISOString()),
+                  }))
+                : [],
+              attachments: Array.isArray(t.attachments)
+                ? t.attachments.map((at: any) => ({
+                    id: String(at.id || `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+                    name: String(at.name || "archivo"),
+                    mimeType: String(at.mimeType || "application/octet-stream"),
+                    size: Number(at.size || 0),
+                    url: String(at.url || ""),
+                  }))
+                : [],
               checklist: Array.isArray(t.checklist)
                 ? t.checklist.map((it: any) => ({
                     id: String(it.id || `chk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
@@ -187,7 +223,9 @@ export default function MindMapsPage() {
   const [newColTitle, setNewColTitle] = useState("");
   const [taskColId, setTaskColId] = useState("todo");
   const [checkDrafts, setCheckDrafts] = useState<Record<string, string>>({});
+  const [taskCommentDraft, setTaskCommentDraft] = useState("");
   const [taskModal, setTaskModal] = useState<{ colId: string; taskId: string } | null>(null);
+  const taskAttachmentInputRef = useRef<HTMLInputElement | null>(null);
   const dragTask = useRef<{ fromColId: string; task: Task } | null>(null);
 
   const [strokes, setStrokes] = useState<Stroke[]>([]);
@@ -386,6 +424,10 @@ export default function MindMapsPage() {
   }, [taskModal]);
 
   useEffect(() => {
+    setTaskCommentDraft("");
+  }, [taskModal?.taskId, taskModal?.colId]);
+
+  useEffect(() => {
     if (showChooser || kind !== "mindmap") {
       viewRestoredRef.current = false;
       return;
@@ -477,6 +519,114 @@ export default function MindMapsPage() {
       );
     });
     setTaskModal({ colId: nextStatus, taskId });
+  }
+
+  function addTaskComment(colId: string, taskId: string) {
+    const text = taskCommentDraft.trim();
+    if (!text) return;
+    const comment: TaskComment = {
+      id: `cmt_${Date.now()}`,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    setCols((prev) =>
+      prev.map((col) =>
+        col.id !== colId
+          ? col
+          : {
+              ...col,
+              tasks: col.tasks.map((task) =>
+                task.id !== taskId
+                  ? task
+                  : { ...task, comments: [...(task.comments || []), comment] },
+              ),
+            },
+      ),
+    );
+    setTaskCommentDraft("");
+  }
+
+  function removeTaskComment(colId: string, taskId: string, commentId: string) {
+    setCols((prev) =>
+      prev.map((col) =>
+        col.id !== colId
+          ? col
+          : {
+              ...col,
+              tasks: col.tasks.map((task) =>
+                task.id !== taskId
+                  ? task
+                  : { ...task, comments: (task.comments || []).filter((c) => c.id !== commentId) },
+              ),
+            },
+      ),
+    );
+  }
+
+  function removeTaskAttachment(colId: string, taskId: string, attachmentId: string) {
+    setCols((prev) =>
+      prev.map((col) =>
+        col.id !== colId
+          ? col
+          : {
+              ...col,
+              tasks: col.tasks.map((task) =>
+                task.id !== taskId
+                  ? task
+                  : { ...task, attachments: (task.attachments || []).filter((a) => a.id !== attachmentId) },
+              ),
+            },
+      ),
+    );
+  }
+
+  function handleTaskAttachmentUpload(file: File | null, colId: string, taskId: string) {
+    if (!file) return;
+    const maxBytes = 7 * 1024 * 1024;
+    const allowed = [
+      "image/",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ];
+    const validType = allowed.some((type) => (type.endsWith("/") ? file.type.startsWith(type) : file.type === type));
+    if (!validType) {
+      toast({ title: "Tipo no permitido", description: "Sube imagen, PDF, Word o Excel.", variant: "destructive" });
+      return;
+    }
+    if (file.size > maxBytes) {
+      toast({ title: "Archivo muy grande", description: "Maximo permitido: 7 MB.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = typeof reader.result === "string" ? reader.result : "";
+      if (!url) return;
+      const attachment: TaskAttachment = {
+        id: `att_${Date.now()}`,
+        name: file.name,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        url,
+      };
+      setCols((prev) =>
+        prev.map((col) =>
+          col.id !== colId
+            ? col
+            : {
+                ...col,
+                tasks: col.tasks.map((task) =>
+                  task.id !== taskId
+                    ? task
+                    : { ...task, attachments: [...(task.attachments || []), attachment] },
+                ),
+              },
+        ),
+      );
+    };
+    reader.readAsDataURL(file);
   }
 
   function centerBoardOnNode(nodeId?: string | null) {
@@ -1322,7 +1472,7 @@ export default function MindMapsPage() {
                       <select value={taskColId} onChange={(e) => setTaskColId(e.target.value)} className="h-11 min-w-0 flex-1 sm:flex-none sm:w-auto rounded-xl border border-cyan-200 px-3 text-sm font-medium text-cyan-700 bg-white">
                         {cols.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
-                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [], note: "", priority: "medium", dueDate: "", status: statusByColumnId(taskColId) }] } : c)); setTaskText(""); }} className="app-btn-primary h-11 px-4 text-sm font-semibold whitespace-nowrap">Agregar</button>
+                      <button onClick={() => { if (!taskText.trim()) return; setCols((p) => p.map((c) => c.id === taskColId ? { ...c, tasks: [...c.tasks, { id: `task_${Date.now()}`, text: taskText.trim(), checklist: [], note: "", priority: "medium", dueDate: "", status: statusByColumnId(taskColId), comments: [], attachments: [] }] } : c)); setTaskText(""); }} className="app-btn-primary h-11 px-4 text-sm font-semibold whitespace-nowrap">Agregar</button>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -1394,6 +1544,11 @@ export default function MindMapsPage() {
                             </div>
                             {(t.note || "").trim() && <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 break-words">{t.note}</p>}
                             {t.dueDate && <p className="mt-1 text-[10px] text-slate-500">Vence: {t.dueDate}</p>}
+                            {(((t.comments || []).length > 0) || ((t.attachments || []).length > 0)) && (
+                              <p className="mt-1 text-[10px] text-slate-500">
+                                {(t.comments || []).length} comentarios · {(t.attachments || []).length} adjuntos
+                              </p>
+                            )}
                           </button>
                           {!readonly && (
                             <div className="mt-1 flex justify-end">
@@ -1490,6 +1645,85 @@ export default function MindMapsPage() {
                         placeholder="Escribe detalles de la tarea..."
                         className="min-h-[120px] w-full resize-y rounded-lg border border-purple-100 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 bg-white"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="text-xs font-semibold text-slate-600">Adjuntos</label>
+                        {!readonly && (
+                          <button
+                            className="app-btn-soft h-8 px-3 text-xs text-cyan-700"
+                            onClick={() => taskAttachmentInputRef.current?.click()}
+                          >
+                            Subir archivo
+                          </button>
+                        )}
+                        <input
+                          ref={taskAttachmentInputRef}
+                          type="file"
+                          className="hidden"
+                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                          onChange={(e) => {
+                            handleTaskAttachmentUpload(e.target.files?.[0] || null, activeTaskModal.col.id, activeTaskModal.task.id);
+                            e.currentTarget.value = "";
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        {(activeTaskModal.task.attachments || []).length === 0 && (
+                          <p className="text-xs text-slate-400">Sin adjuntos</p>
+                        )}
+                        {(activeTaskModal.task.attachments || []).map((att) => (
+                          <div key={att.id} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <a href={att.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-cyan-700 truncate">
+                                {att.name}
+                              </a>
+                              {!readonly && (
+                                <button className="app-btn-danger h-6 px-2 text-[10px]" onClick={() => removeTaskAttachment(activeTaskModal.col.id, activeTaskModal.task.id, att.id)}>
+                                  Quitar
+                                </button>
+                              )}
+                            </div>
+                            {att.mimeType.startsWith("image/") && (
+                              <img src={att.url} alt={att.name} className="mt-2 max-h-36 w-full object-cover rounded-md border border-slate-200" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-600">Comentarios</label>
+                      <div className="space-y-2 max-h-40 overflow-auto pr-1">
+                        {(activeTaskModal.task.comments || []).length === 0 && (
+                          <p className="text-xs text-slate-400">Sin comentarios</p>
+                        )}
+                        {(activeTaskModal.task.comments || []).map((cm) => (
+                          <div key={cm.id} className="rounded-lg border border-slate-200 bg-white p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-slate-700 break-words">{cm.text}</p>
+                              {!readonly && (
+                                <button className="app-btn-danger h-6 px-2 text-[10px]" onClick={() => removeTaskComment(activeTaskModal.col.id, activeTaskModal.task.id, cm.id)}>
+                                  X
+                                </button>
+                              )}
+                            </div>
+                            <p className="mt-1 text-[10px] text-slate-400">{new Date(cm.createdAt).toLocaleString("es-BO")}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {!readonly && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={taskCommentDraft}
+                            onChange={(e) => setTaskCommentDraft(e.target.value)}
+                            placeholder="Escribe un comentario..."
+                            className="h-9 flex-1 rounded-lg border border-purple-100 px-3 text-sm text-slate-700 bg-white"
+                          />
+                          <button className="app-btn-primary h-9 px-3 text-xs" onClick={() => addTaskComment(activeTaskModal.col.id, activeTaskModal.task.id)}>
+                            Agregar
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="flex justify-end">
                       <button className="app-btn-primary h-10 px-4 text-sm" onClick={() => setTaskModal(null)}>Listo</button>
