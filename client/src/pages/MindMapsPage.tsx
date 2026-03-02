@@ -1210,6 +1210,32 @@ export default function MindMapsPage() {
           letter-spacing: 0.02em;
           font-weight: 700;
         }
+        .mindmaps-page .app-inline-input {
+          height: 44px;
+          border-radius: 12px;
+          border: 1px solid rgba(196, 181, 253, 0.65);
+          background: #ffffff;
+          color: #334155;
+        }
+        .mindmaps-page .app-inline-icon {
+          width: 20px;
+          height: 20px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(14, 165, 233, 0.12);
+          color: #0369a1;
+        }
+        .mindmaps-page .whiteboard-toolbar {
+          border-bottom: 1px solid rgba(196, 181, 253, 0.45);
+          padding: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(180deg, #fcfdff 0%, #f7faff 100%);
+        }
         .mindmaps-page .project-open-btn {
           border-radius: 0;
           box-shadow: none;
@@ -1409,7 +1435,12 @@ export default function MindMapsPage() {
                   </div>
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
                     <span className="text-[11px] text-gray-500 shrink-0">Arrastra fondo para mover el lienzo</span>
-                    <input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="h-9 w-full rounded-lg border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white" placeholder="Texto del nodo" />
+                    <div className="relative w-full">
+                      <span className="app-inline-icon absolute left-3 top-1/2 -translate-y-1/2">
+                        <PencilRuler className="w-3 h-3" />
+                      </span>
+                      <input value={selectedNode?.text || ""} disabled={!selectedNode} onChange={(e) => setNodes((p) => p.map((n) => (n.id === selectedNodeId ? { ...n, text: e.target.value } : n)))} className="app-inline-input w-full pl-10 pr-3 text-sm placeholder:text-slate-400" placeholder="Texto del nodo" />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1797,7 +1828,23 @@ export default function MindMapsPage() {
             </div>
           ) : (
             <div className="min-h-[66vh] md:min-h-[74vh]">
-              {!readonly && <div className="border-b border-purple-100 p-2 flex items-center gap-2">{["#7c3aed", "#00bcd4", "#ef4444", "#111827"].map((c) => <button key={c} onClick={() => setPenColor(c)} className={`w-7 h-7 rounded-full border ${penColor === c ? "border-gray-800" : "border-white"}`} style={{ backgroundColor: c }} />)}<input type="range" min={1} max={8} value={penWidth} onChange={(e) => setPenWidth(Number(e.target.value))} /><button onClick={() => setStrokes([])} className="h-8 px-3 rounded border border-rose-200 text-rose-700 text-sm">Limpiar</button></div>}
+              {!readonly && (
+                <div className="whiteboard-toolbar">
+                  {["#7c3aed", "#00bcd4", "#ef4444", "#111827"].map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setPenColor(c)}
+                      className={`w-8 h-8 rounded-full border-2 ${penColor === c ? "border-slate-700" : "border-white"}`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                  <div className="h-10 px-3 rounded-xl border border-cyan-200 bg-white inline-flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-600">Grosor</span>
+                    <input type="range" min={1} max={8} value={penWidth} onChange={(e) => setPenWidth(Number(e.target.value))} />
+                  </div>
+                  <button onClick={() => setStrokes([])} className="app-btn-danger h-10 px-3 text-sm text-rose-700">Limpiar</button>
+                </div>
+              )}
               <div ref={boardRef} className="relative w-full h-[66vh] md:h-[74vh] bg-white touch-none" onPointerDown={(e) => { if (readonly || !boardRef.current) return; const rect = boardRef.current.getBoundingClientRect(); const s = { id: `s_${Date.now()}`, color: penColor, width: penWidth, points: [{ x: e.clientX - rect.left, y: e.clientY - rect.top }] }; drawingId.current = s.id; setStrokes((p) => [...p, s]); }} onPointerMove={(e) => { if (readonly || !drawingId.current || !boardRef.current) return; const rect = boardRef.current.getBoundingClientRect(); const pt = { x: e.clientX - rect.left, y: e.clientY - rect.top }; setStrokes((p) => p.map((s) => (s.id === drawingId.current ? { ...s, points: [...s.points, pt] } : s))); }} onPointerUp={() => { drawingId.current = null; }}>
                 <svg className="absolute inset-0 w-full h-full">{strokes.map((s) => <polyline key={s.id} fill="none" stroke={s.color} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" points={s.points.map((p) => `${p.x},${p.y}`).join(" ")} />)}</svg>
               </div>
