@@ -644,7 +644,7 @@ export default function ALeerBoliviaPage() {
         </motion.section>
 
         <motion.section
-          className="px-5 pb-10"
+          className="px-5 pb-12"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.18 }}
@@ -652,25 +652,27 @@ export default function ALeerBoliviaPage() {
           data-testid="section-inscribete-videos"
         >
           <div
-            className="rounded-3xl overflow-hidden border border-purple-200/60"
-            style={{ boxShadow: "0 12px 30px rgba(124,58,237,0.12), 0 2px 6px rgba(0,0,0,0.04)" }}
+            className="rounded-3xl overflow-hidden border border-violet-300/50"
+            style={{ boxShadow: "0 18px 40px rgba(109,40,217,0.22), 0 6px 14px rgba(0,0,0,0.08)" }}
           >
-            <div className="relative px-5 pt-8 pb-7 text-center" style={{ background: "linear-gradient(135deg, #7b2cbf 0%, #6d28d9 55%, #5b21b6 100%)" }}>
+            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 45%, #4c1d95 100%)" }}>
+              <img src={laxPurpura} alt="" className="absolute -top-8 -left-8 w-52 md:w-72 opacity-18 pointer-events-none" />
+              <img src={laxCyan} alt="" className="absolute -bottom-10 -right-8 w-56 md:w-80 opacity-20 pointer-events-none" />
               <motion.div
-                className="absolute -top-10 -left-14 w-52 h-52 rounded-full opacity-20 pointer-events-none"
-                style={{ background: "radial-gradient(circle, #22d3ee 0%, transparent 68%)" }}
+                className="absolute -top-16 left-[20%] w-64 h-64 rounded-full opacity-25 pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(34,211,238,0.9) 0%, transparent 68%)" }}
                 animate={{ scale: [1, 1.08, 0.96, 1], rotate: [0, 12, -8, 0] }}
                 transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute -bottom-16 -right-20 w-56 h-56 rounded-full opacity-15 pointer-events-none"
-                style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
+                className="absolute -bottom-20 right-[10%] w-72 h-72 rounded-full opacity-20 pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(167,139,250,0.95) 0%, transparent 70%)" }}
                 animate={{ scale: [1, 0.94, 1.06, 1], rotate: [0, -10, 7, 0] }}
                 transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              <h3 className="relative z-10 text-3xl font-black text-cyan-200 mb-2">{t("aleer.joinTitle")}</h3>
-              <p className="relative z-10 text-sm text-white/90 max-w-2xl mx-auto leading-relaxed">
+              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-cyan-200 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{t("aleer.joinTitle")}</h3>
+              <p className="relative z-10 text-sm md:text-base text-white/95 max-w-2xl mx-auto leading-relaxed">
                 {t("aleer.joinDesc")}
               </p>
 
@@ -684,8 +686,8 @@ export default function ALeerBoliviaPage() {
                   return (
                     <motion.button
                       key={item.key}
-                      className="w-full rounded-full px-5 py-4 text-left flex items-center gap-3 border border-cyan-300/40"
-                      style={{ background: "linear-gradient(135deg, #67e8f9 0%, #22d3ee 35%, #14b8a6 100%)", boxShadow: "0 8px 20px rgba(0,0,0,0.22)" }}
+                      className="w-full rounded-2xl px-4 py-4 text-left flex items-center gap-3 border border-cyan-200/55"
+                      style={{ background: "linear-gradient(135deg, #22d3ee 0%, #06b6d4 42%, #0891b2 100%)", boxShadow: "0 10px 24px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.2)" }}
                       initial={{ opacity: 0, y: 16, scale: 0.96 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
                       viewport={{ once: true }}
@@ -694,10 +696,10 @@ export default function ALeerBoliviaPage() {
                       whileTap={{ scale: 0.98 }}
                       data-testid={`button-join-${item.key}`}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-white/25 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-sm md:text-base font-extrabold tracking-tight text-white leading-tight">
+                      <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
                         {item.label}
                       </span>
                     </motion.button>
@@ -706,17 +708,19 @@ export default function ALeerBoliviaPage() {
               </div>
             </div>
 
-            <div className="px-5 py-8 text-center bg-white">
-              <h3 className="font-sans text-3xl md:text-4xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
-              <p className="font-sans text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            <div className="relative px-5 py-8 text-center overflow-hidden" style={{ background: "linear-gradient(180deg, #f5f3ff 0%, #eefcff 100%)" }}>
+              <img src={laxBlanca} alt="" className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 md:w-[520px] opacity-35 pointer-events-none" />
+              <h3 className="relative z-10 font-sans text-3xl md:text-4xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
+              <p className="relative z-10 font-sans text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
                 {t("aleer.videosDesc")}
               </p>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="relative z-10 mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3].map((idx) => (
                   <motion.div
                     key={idx}
-                    className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 to-cyan-50 p-3 text-left"
+                    className="rounded-2xl border border-violet-200/80 bg-white/90 backdrop-blur-sm p-3 text-left"
+                    style={{ boxShadow: "0 8px 22px rgba(109,40,217,0.14), 0 2px 6px rgba(0,0,0,0.05)" }}
                     initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -726,9 +730,9 @@ export default function ALeerBoliviaPage() {
                   >
                     <div
                       className="relative w-full aspect-video rounded-xl mb-3 border border-violet-200/80 bg-white/70 overflow-hidden"
-                      style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5)" }}
+                      style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.65)" }}
                     >
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(167,139,250,0.28),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(34,211,238,0.24),transparent_50%)]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(109,40,217,0.32),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(6,182,212,0.28),transparent_50%)]" />
                       <motion.div
                         className="absolute inset-0 flex items-center justify-center"
                         animate={{ scale: [1, 1.06, 1], opacity: [0.9, 1, 0.9] }}
