@@ -529,15 +529,40 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     return list;
   }, [contactSubs, contactFilter, contactSearch, contactDateFrom, contactDateTo, contactSort]);
 
-  const exportFilteredContactSubsCsv = () => {
-    if (filteredContactSubs.length === 0) return;
+  const CONTACT_EXPORT_HEADERS = [
+    "TIPO",
+    "FECHA",
+    "ID",
+    "NOMBRES",
+    "APELLIDOS",
+    "CEDULA",
+    "TELEFONO",
+    "EMAIL",
+    "CIUDAD",
+    "PAIS",
+    "COMENTARIO",
+    "RESP_NOMBRE",
+    "RESP_CI",
+    "RESP_CARGO",
+    "RESP_PROFESION",
+    "RESP_TELEFONO",
+    "RESP_EMAIL",
+    "INST_NOMBRE",
+    "INST_RAZON_SOCIAL",
+    "INST_NIT",
+    "INST_DIRECCION",
+    "INST_TELEFONOS",
+    "INST_EMAIL",
+    "COLAB_NOMBRE",
+    "COLAB_CI",
+    "COLAB_CARGO",
+    "COLAB_PROFESION",
+    "COLAB_TELEFONO",
+    "COLAB_EMAIL",
+  ] as const;
 
-    const escapeCsv = (value: unknown) => {
-      const text = value == null ? "" : String(value);
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-
-    const rows = filteredContactSubs.map((sub: any) => {
+  const buildContactExportRows = () =>
+    filteredContactSubs.map((sub: any) => {
       const payload = parseALeerPayload(sub);
       const comentarioPlano = payload ? "" : (sub.comentario ?? "");
       return {
@@ -573,10 +598,20 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
       };
     });
 
-    const headers = Object.keys(rows[0]);
+  const exportFilteredContactSubsCsv = () => {
+    if (filteredContactSubs.length === 0) return;
+
+    const escapeCsv = (value: unknown) => {
+      const text = value == null ? "" : String(value);
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const rows = buildContactExportRows();
     const csv = [
-      headers.map(escapeCsv).join(","),
-      ...rows.map((row) => headers.map((h) => escapeCsv((row as any)[h])).join(",")),
+      CONTACT_EXPORT_HEADERS.map(escapeCsv).join(","),
+      ...rows.map((row) =>
+        CONTACT_EXPORT_HEADERS.map((h) => escapeCsv((row as any)[h])).join(","),
+      ),
     ].join("\n");
 
     const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
@@ -585,6 +620,53 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     const date = new Date().toISOString().slice(0, 10);
     a.href = url;
     a.download = `formularios_inscripciones_${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportFilteredContactSubsExcel = () => {
+    if (filteredContactSubs.length === 0) return;
+
+    const escapeHtml = (value: unknown) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const rows = buildContactExportRows();
+    const thead = `<tr>${CONTACT_EXPORT_HEADERS.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}</tr>`;
+    const tbody = rows
+      .map(
+        (row) =>
+          `<tr>${CONTACT_EXPORT_HEADERS.map((h) => `<td>${escapeHtml((row as any)[h])}</td>`).join("")}</tr>`,
+      )
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+</head>
+<body>
+  <table border="1">
+    <thead>${thead}</thead>
+    <tbody>${tbody}</tbody>
+  </table>
+</body>
+</html>`;
+
+    const blob = new Blob([`\uFEFF${html}`], {
+      type: "application/vnd.ms-excel;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `formularios_inscripciones_${date}.xls`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -6382,6 +6464,17 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 >
                   <Download className="w-4 h-4 mr-2" />
                   CSV
+                </Button>
+                <Button
+                  type="button"
+                  onClick={exportFilteredContactSubsExcel}
+                  variant="outline"
+                  className="border-emerald-500/40 text-emerald-300"
+                  disabled={filteredContactSubs.length === 0}
+                  data-testid="button-export-contact-excel"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Excel
                 </Button>
               </div>
             </div>
