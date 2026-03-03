@@ -1,0 +1,15 @@
+root = true
+
+[*.{js,jsx,ts,tsx,json,md,css,scss,html,yml,yaml}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+
+[*.{png,jpg,jpeg,gif,webp,svg,ico,ttf,otf,woff,woff2,pdf}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
