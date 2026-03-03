@@ -51,6 +51,9 @@ type NowPaymentsOrder = {
 };
 
 const nowPaymentsOrders = new Map<string, NowPaymentsOrder>();
+const aleerInscripcionRateLimit = new Map<string, number>();
+const ALEER_INSCRIPCION_MIN_MS = 3000;
+const ALEER_INSCRIPCION_RATE_MS = 45_000;
 
 function loadNowPaymentsOrders() {
   try {
@@ -3230,6 +3233,83 @@ ${schemaContent.substring(0, 3000)}
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/aleer/inscripcion", async (req, res) => {
+    try {
+      const data = req.body || {};
+      const formType = String(data.formType || "").trim();
+      const validTypes = new Set(["schools", "sponsors", "independent"]);
+      if (!validTypes.has(formType)) {
+        return res.status(400).json({ error: "Tipo de formulario no valido." });
+      }
+
+      // Honeypot: bots usually fill hidden fields.
+      if (typeof data.website === "string" && data.website.trim().length > 0) {
+        return res.json({ success: true });
+      }
+
+      const startedAt = Number(data.startedAt || 0);
+      const now = Date.now();
+      if (!startedAt || now - startedAt < ALEER_INSCRIPCION_MIN_MS) {
+        return res.status(400).json({ error: "Envio demasiado rapido. Intenta de nuevo." });
+      }
+
+      const clientIp = getClientInfo(req).ip || "unknown";
+      const rateKey = `${clientIp}:${formType}`;
+      const lastSubmit = aleerInscripcionRateLimit.get(rateKey) || 0;
+      if (now - lastSubmit < ALEER_INSCRIPCION_RATE_MS) {
+        return res.status(429).json({ error: "Espera un momento antes de enviar otro registro." });
+      }
+
+      const responsableNombre = String(data.responsableNombre || "").trim();
+      const responsableTelefono = String(data.responsableTelefono || "").trim();
+      const institucionNombre = String(data.institucionNombre || "").trim();
+      if (!responsableNombre || !responsableTelefono || !institucionNombre) {
+        return res.status(400).json({ error: "Faltan campos obligatorios." });
+      }
+
+      const payload = {
+        responsable: {
+          nombre: responsableNombre,
+          ci: String(data.responsableCi || "").trim(),
+          cargo: String(data.responsableCargo || "").trim(),
+          profesion: String(data.responsableProfesion || "").trim(),
+          telefono: responsableTelefono,
+          email: String(data.responsableEmail || "").trim(),
+        },
+        institucion: {
+          nombre: institucionNombre,
+          razonSocial: String(data.institucionRazonSocial || "").trim(),
+          nit: String(data.institucionNit || "").trim(),
+          direccion: String(data.institucionDireccion || "").trim(),
+          telefonos: String(data.institucionTelefonos || "").trim(),
+          email: String(data.institucionEmail || "").trim(),
+        },
+        colaborador: {
+          nombre: String(data.colaboradorNombre || "").trim(),
+          ci: String(data.colaboradorCi || "").trim(),
+          cargo: String(data.colaboradorCargo || "").trim(),
+          profesion: String(data.colaboradorProfesion || "").trim(),
+          telefono: String(data.colaboradorTelefono || "").trim(),
+          email: String(data.colaboradorEmail || "").trim(),
+        },
+      };
+
+      const [row] = await db.insert(contactSubmissions).values({
+        formType: `aleer_${formType}`,
+        nombres: payload.responsable.nombre || null,
+        telefono: payload.responsable.telefono || null,
+        email: payload.responsable.email || null,
+        cedula: payload.responsable.ci || null,
+        comentario: JSON.stringify(payload),
+      }).returning();
+
+      aleerInscripcionRateLimit.set(rateKey, now);
+      res.json({ success: true, id: row.id });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "No se pudo registrar la inscripcion." });
     }
   });
 

@@ -65,6 +65,7 @@ export default function GestionPage() {
   const [contactSubs, setContactSubs] = useState<any[]>([]);
   const [contactSubsLoading, setContactSubsLoading] = useState(false);
   const [expandedContactSub, setExpandedContactSub] = useState<number | null>(null);
+  const [contactFilter, setContactFilter] = useState<"all" | "contacto" | "aleer">("all");
   const [trainingResults, setTrainingResults] = useState<any[]>([]);
   const [expandedTrainingResult, setExpandedTrainingResult] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -440,6 +441,36 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       await fetch(`/api/admin/contact-submissions/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       setContactSubs(prev => prev.filter(s => s.id !== id));
     } catch {}
+  };
+
+  const getContactTypeMeta = (formType: string) => {
+    if (formType === "general") {
+      return { label: "Escribenos", className: "bg-purple-500/20 text-purple-300" };
+    }
+    if (formType === "prueba_gratuita") {
+      return { label: "Prueba Gratuita", className: "bg-teal-500/20 text-teal-300" };
+    }
+    if (formType === "aleer_schools") {
+      return { label: "A Leer - Colegios", className: "bg-cyan-500/20 text-cyan-300" };
+    }
+    if (formType === "aleer_sponsors") {
+      return { label: "A Leer - Sponsors", className: "bg-blue-500/20 text-blue-300" };
+    }
+    if (formType === "aleer_independent") {
+      return { label: "A Leer - Independientes", className: "bg-indigo-500/20 text-indigo-300" };
+    }
+    return { label: formType || "Formulario", className: "bg-white/10 text-white/80" };
+  };
+
+  const parseALeerPayload = (sub: any) => {
+    if (!String(sub?.formType || "").startsWith("aleer_")) return null;
+    try {
+      const parsed = JSON.parse(sub?.comentario || "{}");
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed;
+    } catch {
+      return null;
+    }
   };
 
   const fetchSessions = async () => {
@@ -6155,17 +6186,49 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <ClipboardList className="w-6 h-6 text-lime-400" />
-                Formularios de Contacto
+                Formularios e Inscripciones
               </h2>
               <Button onClick={fetchContactSubmissions} variant="outline" className="border-lime-500/30 text-lime-400" disabled={contactSubsLoading}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${contactSubsLoading ? "animate-spin" : ""}`} />
                 Actualizar
               </Button>
             </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant={contactFilter === "all" ? "default" : "outline"}
+                className={contactFilter === "all" ? "bg-lime-600" : "border-white/20 text-gray-300"}
+                onClick={() => setContactFilter("all")}
+              >
+                Todos
+              </Button>
+              <Button
+                size="sm"
+                variant={contactFilter === "contacto" ? "default" : "outline"}
+                className={contactFilter === "contacto" ? "bg-purple-600" : "border-white/20 text-gray-300"}
+                onClick={() => setContactFilter("contacto")}
+              >
+                Contacto
+              </Button>
+              <Button
+                size="sm"
+                variant={contactFilter === "aleer" ? "default" : "outline"}
+                className={contactFilter === "aleer" ? "bg-cyan-600" : "border-white/20 text-gray-300"}
+                onClick={() => setContactFilter("aleer")}
+              >
+                A Leer Bolivia
+              </Button>
+            </div>
             {contactSubsLoading && <p className="text-gray-400 text-sm">Cargando...</p>}
             {!contactSubsLoading && contactSubs.length === 0 && <p className="text-gray-400 text-sm">No hay envíos de formulario aún.</p>}
             <div className="space-y-3">
-              {contactSubs.map((sub: any) => (
+              {contactSubs
+                .filter((sub: any) => {
+                  if (contactFilter === "all") return true;
+                  if (contactFilter === "contacto") return !String(sub.formType || "").startsWith("aleer_");
+                  return String(sub.formType || "").startsWith("aleer_");
+                })
+                .map((sub: any) => (
                 <div key={sub.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
                   <div
                     className="flex items-center justify-between gap-2 p-4 cursor-pointer"
@@ -6174,8 +6237,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${sub.formType === "general" ? "bg-purple-500/20 text-purple-300" : "bg-teal-500/20 text-teal-300"}`}>
-                          {sub.formType === "general" ? "Escríbenos" : "Prueba Gratuita"}
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getContactTypeMeta(String(sub.formType || "")).className}`}>
+                          {getContactTypeMeta(String(sub.formType || "")).label}
                         </span>
                         <span className="text-white font-medium text-sm truncate">{sub.nombres} {sub.apellidos}</span>
                       </div>
@@ -6215,6 +6278,31 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             {sub.pruebaGratuitaEmail && <FieldRow label="Email" value={sub.pruebaGratuitaEmail} />}
                             {sub.pruebaGratuitaCiudad && <FieldRow label="Ciudad" value={sub.pruebaGratuitaCiudad} />}
                             {sub.pruebaGratuitaPais && <FieldRow label="País" value={sub.pruebaGratuitaPais} />}
+                          </div>
+                        </div>
+                      )}
+                      {parseALeerPayload(sub) && (
+                        <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
+                          <p className="text-cyan-300 font-bold text-xs">Detalle de Inscripcion A Leer Bolivia</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                            {parseALeerPayload(sub)?.responsable?.nombre && <FieldRow label="Resp. Nombre" value={parseALeerPayload(sub).responsable.nombre} />}
+                            {parseALeerPayload(sub)?.responsable?.ci && <FieldRow label="Resp. C.I." value={parseALeerPayload(sub).responsable.ci} />}
+                            {parseALeerPayload(sub)?.responsable?.cargo && <FieldRow label="Resp. Cargo" value={parseALeerPayload(sub).responsable.cargo} />}
+                            {parseALeerPayload(sub)?.responsable?.profesion && <FieldRow label="Resp. Profesion" value={parseALeerPayload(sub).responsable.profesion} />}
+                            {parseALeerPayload(sub)?.responsable?.telefono && <FieldRow label="Resp. Telefono" value={parseALeerPayload(sub).responsable.telefono} />}
+                            {parseALeerPayload(sub)?.responsable?.email && <FieldRow label="Resp. Email" value={parseALeerPayload(sub).responsable.email} />}
+                            {parseALeerPayload(sub)?.institucion?.nombre && <FieldRow label="Institucion" value={parseALeerPayload(sub).institucion.nombre} />}
+                            {parseALeerPayload(sub)?.institucion?.razonSocial && <FieldRow label="Razon social" value={parseALeerPayload(sub).institucion.razonSocial} />}
+                            {parseALeerPayload(sub)?.institucion?.nit && <FieldRow label="NIT" value={parseALeerPayload(sub).institucion.nit} />}
+                            {parseALeerPayload(sub)?.institucion?.direccion && <FieldRow label="Direccion" value={parseALeerPayload(sub).institucion.direccion} />}
+                            {parseALeerPayload(sub)?.institucion?.telefonos && <FieldRow label="Tel. institucion" value={parseALeerPayload(sub).institucion.telefonos} />}
+                            {parseALeerPayload(sub)?.institucion?.email && <FieldRow label="Email institucion" value={parseALeerPayload(sub).institucion.email} />}
+                            {parseALeerPayload(sub)?.colaborador?.nombre && <FieldRow label="Colab. Nombre" value={parseALeerPayload(sub).colaborador.nombre} />}
+                            {parseALeerPayload(sub)?.colaborador?.ci && <FieldRow label="Colab. C.I." value={parseALeerPayload(sub).colaborador.ci} />}
+                            {parseALeerPayload(sub)?.colaborador?.cargo && <FieldRow label="Colab. Cargo" value={parseALeerPayload(sub).colaborador.cargo} />}
+                            {parseALeerPayload(sub)?.colaborador?.profesion && <FieldRow label="Colab. Profesion" value={parseALeerPayload(sub).colaborador.profesion} />}
+                            {parseALeerPayload(sub)?.colaborador?.telefono && <FieldRow label="Colab. Telefono" value={parseALeerPayload(sub).colaborador.telefono} />}
+                            {parseALeerPayload(sub)?.colaborador?.email && <FieldRow label="Colab. Email" value={parseALeerPayload(sub).colaborador.email} />}
                           </div>
                         </div>
                       )}

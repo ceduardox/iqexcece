@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle, X, FileDown } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,8 @@ import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode } fr
 import { VideoBackground, isVideoUrl } from "@/components/VideoBackground";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import type { CarouselApi } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 import participarImg from "@assets/image_1770684494294.png";
 import laxCyan from "@assets/laxcyan2_1771479429192.png";
@@ -48,6 +50,31 @@ export default function ALeerBoliviaPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [motivationalIndex, setMotivationalIndex] = useState(0);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
+  const [joinModalType, setJoinModalType] = useState<"schools" | "sponsors" | "independent" | null>(null);
+  const [joinStartedAt, setJoinStartedAt] = useState<number>(0);
+  const [joinSubmitting, setJoinSubmitting] = useState(false);
+  const [joinMessage, setJoinMessage] = useState<string>("");
+  const [joinForm, setJoinForm] = useState({
+    responsableNombre: "",
+    responsableCi: "",
+    responsableCargo: "",
+    responsableProfesion: "",
+    responsableTelefono: "",
+    responsableEmail: "",
+    institucionNombre: "",
+    institucionRazonSocial: "",
+    institucionNit: "",
+    institucionDireccion: "",
+    institucionTelefonos: "",
+    institucionEmail: "",
+    colaboradorNombre: "",
+    colaboradorCi: "",
+    colaboradorCargo: "",
+    colaboradorProfesion: "",
+    colaboradorTelefono: "",
+    colaboradorEmail: "",
+    website: "",
+  });
 
   useEffect(() => {
     if (!USE_REMOTE_PAGE_STYLES) {
@@ -154,6 +181,81 @@ export default function ALeerBoliviaPage() {
     },
   ];
   const activeVideo = motivationalVideos[motivationalIndex];
+  const joinModalTitleMap = {
+    schools: "Inscripcion de Colegios",
+    sponsors: "Inscripcion de Sponsors",
+    independent: "Inscripcion de Estudiantes Independientes",
+  } as const;
+
+  const openJoinModal = (type: "schools" | "sponsors" | "independent") => {
+    setJoinModalType(type);
+    setJoinStartedAt(Date.now());
+    setJoinMessage("");
+  };
+
+  const closeJoinModal = () => {
+    setJoinModalType(null);
+    setJoinMessage("");
+    setJoinSubmitting(false);
+  };
+
+  const updateJoinField = (key: keyof typeof joinForm, value: string) => {
+    setJoinForm(prev => ({ ...prev, [key]: value }));
+  };
+
+  const submitJoinForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinModalType) return;
+    if (!joinForm.responsableNombre.trim() || !joinForm.responsableTelefono.trim() || !joinForm.institucionNombre.trim()) {
+      setJoinMessage("Completa nombre, telefono e institucion.");
+      return;
+    }
+    setJoinSubmitting(true);
+    setJoinMessage("");
+    try {
+      const res = await fetch("/api/aleer/inscripcion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formType: joinModalType,
+          startedAt: joinStartedAt,
+          ...joinForm,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setJoinMessage(data?.error || "No se pudo enviar el formulario.");
+        setJoinSubmitting(false);
+        return;
+      }
+      setJoinMessage("Registro enviado correctamente.");
+      setJoinForm({
+        responsableNombre: "",
+        responsableCi: "",
+        responsableCargo: "",
+        responsableProfesion: "",
+        responsableTelefono: "",
+        responsableEmail: "",
+        institucionNombre: "",
+        institucionRazonSocial: "",
+        institucionNit: "",
+        institucionDireccion: "",
+        institucionTelefonos: "",
+        institucionEmail: "",
+        colaboradorNombre: "",
+        colaboradorCi: "",
+        colaboradorCargo: "",
+        colaboradorProfesion: "",
+        colaboradorTelefono: "",
+        colaboradorEmail: "",
+        website: "",
+      });
+      setTimeout(() => closeJoinModal(), 700);
+    } catch {
+      setJoinMessage("Error de conexion.");
+      setJoinSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (motivationalVideos.length <= 1) return;
@@ -680,23 +782,6 @@ export default function ALeerBoliviaPage() {
             </div>
           </div>
 
-          <motion.div
-            className="mt-8 flex justify-center"
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <motion.button
-              className="px-10 py-3.5 rounded-xl text-white font-bold text-sm tracking-wide"
-              style={{ background: "linear-gradient(135deg, #ea580c, #dc2626)", boxShadow: "0 4px 15px rgba(234,88,12,0.3)" }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              data-testid="button-inscribete"
-            >
-              {t("aleer.ctaRegister")}
-            </motion.button>
-          </motion.div>
         </motion.section>
 
         <motion.section
@@ -742,6 +827,7 @@ export default function ALeerBoliviaPage() {
                   return (
                     <motion.button
                       key={item.key}
+                      type="button"
                       className="w-full rounded-2xl px-4 py-4 text-left flex items-center gap-3 border border-cyan-200/55"
                       style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0ea5e9 45%, #0284c7 100%)", boxShadow: "0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)" }}
                       initial={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -750,6 +836,7 @@ export default function ALeerBoliviaPage() {
                       transition={{ delay: 0.06 * i, duration: 0.28 }}
                       whileHover={{ y: -2, scale: 1.01 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => openJoinModal(item.key as "schools" | "sponsors" | "independent")}
                       data-testid={`button-join-${item.key}`}
                     >
                       <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
@@ -973,6 +1060,118 @@ export default function ALeerBoliviaPage() {
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
         />
+      )}
+
+      {joinModalType && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-[2px] flex items-center justify-center p-3">
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-300/40 bg-white shadow-2xl"
+          >
+            <div className="sticky top-0 z-10 bg-[#1f4a8f] text-white px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-11 h-11 rounded-full border border-white/50 flex items-center justify-center shrink-0">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-cyan-100">Formulario Oficial</p>
+                  <h3 className="text-lg sm:text-xl font-black leading-tight truncate">{joinModalTitleMap[joinModalType]}</h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+                onClick={closeJoinModal}
+                data-testid="button-close-join-modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">Completa el formulario para iniciar el registro.</p>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-gray-800 transition-colors"
+                data-testid="button-download-convocatoria"
+              >
+                <FileDown className="w-4 h-4" />
+                DESCARGA CONVOCATORIA
+              </button>
+            </div>
+
+            <form className="p-4 sm:p-5 space-y-5" onSubmit={submitJoinForm} data-testid="form-join-inscripcion">
+              <input
+                type="text"
+                autoComplete="off"
+                tabIndex={-1}
+                value={joinForm.website}
+                onChange={(e) => updateJoinField("website", e.target.value)}
+                className="hidden"
+                aria-hidden="true"
+              />
+
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Responsable del Evento</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
+                  <Input placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
+                  <Input placeholder="Cargo en la institucion" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
+                  <Input placeholder="Profesion o actividad" value={joinForm.responsableProfesion} onChange={(e) => updateJoinField("responsableProfesion", e.target.value)} />
+                  <Input placeholder="Telefono" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
+                  <Input placeholder="Email" type="email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Datos de la Institucion</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2">
+                    <Input placeholder="Nombre de la institucion" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+                  </div>
+                  <Input placeholder="Razon social" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
+                  <Input placeholder="NIT" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
+                  <div className="sm:col-span-2">
+                    <Input placeholder="Direccion" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
+                  </div>
+                  <Input placeholder="Telefonos" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
+                  <Input placeholder="Email" type="email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Colaborador Asignado</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input placeholder="Nombre completo" value={joinForm.colaboradorNombre} onChange={(e) => updateJoinField("colaboradorNombre", e.target.value)} />
+                  <Input placeholder="C.I." value={joinForm.colaboradorCi} onChange={(e) => updateJoinField("colaboradorCi", e.target.value)} />
+                  <Input placeholder="Cargo en la institucion" value={joinForm.colaboradorCargo} onChange={(e) => updateJoinField("colaboradorCargo", e.target.value)} />
+                  <Input placeholder="Profesion o actividad" value={joinForm.colaboradorProfesion} onChange={(e) => updateJoinField("colaboradorProfesion", e.target.value)} />
+                  <Input placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
+                  <Input placeholder="Email" type="email" value={joinForm.colaboradorEmail} onChange={(e) => updateJoinField("colaboradorEmail", e.target.value)} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <p className="text-xs text-gray-500">Seguridad activa: filtro anti-spam sin captcha de Google.</p>
+                <Button
+                  type="submit"
+                  disabled={joinSubmitting}
+                  className="bg-[#1f4a8f] hover:bg-[#193d75] text-white px-5"
+                  data-testid="button-submit-join-form"
+                >
+                  {joinSubmitting ? "Enviando..." : "SOLICITAR REGISTRO"}
+                </Button>
+              </div>
+              {joinMessage && (
+                <p className={`text-sm ${joinMessage.includes("correctamente") ? "text-emerald-600" : "text-red-500"}`} data-testid="text-join-form-message">
+                  {joinMessage}
+                </p>
+              )}
+            </form>
+          </motion.div>
+        </div>
       )}
     </div>
   );
