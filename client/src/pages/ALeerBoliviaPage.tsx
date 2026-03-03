@@ -771,53 +771,100 @@ export default function ALeerBoliviaPage() {
                 {t("aleer.videosDesc")}
               </p>
 
-              <div className="relative z-10 mt-6 md:hidden grid gap-4 sm:grid-cols-2">
-                {motivationalVideos.map((video, idx) => (
-                  <motion.div
-                    key={video.id}
-                    className="rounded-2xl border border-violet-200/80 bg-white/90 backdrop-blur-sm p-3 text-left"
-                    style={{ boxShadow: "0 8px 22px rgba(109,40,217,0.14), 0 2px 6px rgba(0,0,0,0.05)" }}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.07, duration: 0.28 }}
-                    whileHover={{ y: -2 }}
-                    data-testid={`card-video-motivador-${video.id}`}
-                  >
+              <div className="relative z-10 mt-6 md:hidden">
+                <motion.div
+                  key={`mobile-video-${activeVideo.id}`}
+                  className="rounded-2xl border border-violet-200/80 bg-white/90 backdrop-blur-sm p-3 text-left"
+                  style={{ boxShadow: "0 8px 22px rgba(109,40,217,0.14), 0 2px 6px rgba(0,0,0,0.05)" }}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28 }}
+                  data-testid={`card-video-motivador-${activeVideo.id}`}
+                >
+                  <div className="grid grid-cols-[1.2fr_1fr] gap-3 items-stretch">
+                    <div className="min-w-0">
+                      <div className="flex items-start gap-2">
+                        <span className="text-5xl leading-none text-violet-200 font-black">&ldquo;</span>
+                        <p
+                          className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 7,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            minHeight: "7.2em",
+                          }}
+                        >
+                          {activeVideo.desc}
+                        </p>
+                      </div>
+                      <p className="font-sans text-[11px] text-gray-400 mt-2 pl-8">- {activeVideo.source}</p>
+                    </div>
+
                     <div
-                      className="relative w-full aspect-video rounded-xl mb-3 border border-violet-200/80 bg-white/70 overflow-hidden"
-                      style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.65)" }}
+                      className="relative w-full rounded-xl border border-violet-200/80 bg-white/70 overflow-hidden"
+                      style={{
+                        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.65)",
+                        minHeight: 136,
+                      }}
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(109,40,217,0.32),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(6,182,212,0.28),transparent_50%)]" />
                       <motion.div
                         className="absolute inset-0 flex items-center justify-center"
                         animate={{ scale: [1, 1.06, 1], opacity: [0.9, 1, 0.9] }}
-                        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 }}
+                        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <div className="w-12 h-12 rounded-full bg-white/85 border border-violet-200 flex items-center justify-center shadow-md">
-                          <PlayCircle className="w-7 h-7 text-violet-600" />
+                        <div className="w-11 h-11 rounded-full bg-white/85 border border-violet-200 flex items-center justify-center shadow-md">
+                          <PlayCircle className="w-6 h-6 text-violet-600" />
                         </div>
                       </motion.div>
                     </div>
+                  </div>
 
-                    <div className="flex items-start gap-2">
-                      <span className="text-5xl leading-none text-violet-200 font-black">“</span>
-                      <p
-                      className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        minHeight: "3.6em",
-                      }}
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      className="px-3 py-2 rounded-full text-xs font-bold text-white bg-violet-600 active:scale-95 transition-transform"
+                      onClick={() => setMotivationalIndex((prev) => (prev === 0 ? motivationalVideos.length - 1 : prev - 1))}
+                      data-testid="button-video-prev-mobile"
                     >
-                      {video.desc}
-                    </p>
+                      <span className="inline-flex items-center gap-1">
+                        <ChevronLeft className="w-3 h-3" />
+                        {t("tests.previous")}
+                      </span>
+                    </button>
+                    <button
+                      className="px-3 py-2 rounded-full text-xs font-bold text-white bg-cyan-600 active:scale-95 transition-transform"
+                      onClick={() => setMotivationalIndex((prev) => (prev + 1) % motivationalVideos.length)}
+                      data-testid="button-video-next-mobile"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        {t("tests.next")}
+                        <ChevronRight className="w-3 h-3" />
+                      </span>
+                    </button>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {motivationalVideos.map((item, idx) => (
+                        <button
+                          key={`mobile-dot-${item.id}`}
+                          onClick={() => setMotivationalIndex(idx)}
+                          className="transition-all"
+                          data-testid={`button-video-dot-mobile-${idx}`}
+                        >
+                          <div
+                            className="rounded-full"
+                            style={{
+                              width: motivationalIndex === idx ? 16 : 6,
+                              height: 6,
+                              background: motivationalIndex === idx
+                                ? "linear-gradient(135deg, #7c3aed, #06b6d4)"
+                                : "#cbd5e1",
+                            }}
+                          />
+                        </button>
+                      ))}
                     </div>
-                    <p className="font-sans text-[11px] text-gray-400 mt-2">- {video.source}</p>
-                  </motion.div>
-                ))}
+                  </div>
+                </motion.div>
               </div>
 
               <div
@@ -833,7 +880,7 @@ export default function ALeerBoliviaPage() {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     className="flex items-start gap-3"
                   >
-                    <span className="text-[88px] leading-[0.7] text-violet-200 font-black">“</span>
+                    <span className="text-[88px] leading-[0.7] text-violet-200 font-black">&ldquo;</span>
                     <p className="text-[20px] text-gray-700 leading-relaxed min-h-[170px] pt-2">
                       {activeVideo.desc}
                     </p>
