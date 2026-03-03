@@ -1204,7 +1204,7 @@ export default function ALeerBoliviaPage() {
               </button>
             </div>
 
-            {joinModalType !== "sponsors" && (
+            {joinModalType === "schools" && (
               <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
                 <p className="text-sm text-gray-600">Completa el formulario para iniciar el registro.</p>
                 <a
@@ -1216,6 +1216,18 @@ export default function ALeerBoliviaPage() {
                   <FileDown className="w-4 h-4" />
                   DESCARGA CONVOCATORIA
                 </a>
+              </div>
+            )}
+
+            {joinModalType === "independent" && (
+              <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-2 border-b border-gray-100">
+                <p className="text-center text-gray-700 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto">
+                  Preparate para sumergirte en historias que despierten tu imaginacion, descubrir conocimientos que alimenten tu mente
+                  y participar en desafios que fortalezcan tu espiritu. Estamos emocionados de verte crecer y evolucionar en este viaje.
+                </p>
+                <p className="text-center text-gray-800 font-semibold text-sm sm:text-base mt-3">
+                  Completa el formulario y se parte de esta gran aventura lectora.
+                </p>
               </div>
             )}
 
