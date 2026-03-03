@@ -539,20 +539,37 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
     const rows = filteredContactSubs.map((sub: any) => {
       const payload = parseALeerPayload(sub);
+      const comentarioPlano = payload ? "" : (sub.comentario ?? "");
       return {
-        id: sub.id ?? "",
-        tipo: getContactTypeMeta(String(sub.formType || "")).label,
-        formType: sub.formType ?? "",
-        fecha: sub.createdAt ? new Date(sub.createdAt).toLocaleString() : "",
-        nombres: sub.nombres ?? "",
-        apellidos: sub.apellidos ?? "",
-        cedula: sub.cedula ?? "",
-        telefono: sub.telefono ?? "",
-        email: sub.email ?? "",
-        ciudad: sub.ciudad ?? "",
-        pais: sub.pais ?? "",
-        comentario: sub.comentario ?? "",
-        aleerJson: payload ? JSON.stringify(payload) : "",
+        TIPO: getContactTypeMeta(String(sub.formType || "")).label,
+        FECHA: sub.createdAt ? new Date(sub.createdAt).toLocaleString() : "",
+        ID: sub.id ?? "",
+        NOMBRES: sub.nombres ?? "",
+        APELLIDOS: sub.apellidos ?? "",
+        CEDULA: sub.cedula ?? "",
+        TELEFONO: sub.telefono ?? "",
+        EMAIL: sub.email ?? "",
+        CIUDAD: sub.ciudad ?? "",
+        PAIS: sub.pais ?? "",
+        COMENTARIO: comentarioPlano,
+        RESP_NOMBRE: payload?.responsable?.nombre ?? "",
+        RESP_CI: payload?.responsable?.ci ?? "",
+        RESP_CARGO: payload?.responsable?.cargo ?? "",
+        RESP_PROFESION: payload?.responsable?.profesion ?? "",
+        RESP_TELEFONO: payload?.responsable?.telefono ?? "",
+        RESP_EMAIL: payload?.responsable?.email ?? "",
+        INST_NOMBRE: payload?.institucion?.nombre ?? "",
+        INST_RAZON_SOCIAL: payload?.institucion?.razonSocial ?? "",
+        INST_NIT: payload?.institucion?.nit ?? "",
+        INST_DIRECCION: payload?.institucion?.direccion ?? "",
+        INST_TELEFONOS: payload?.institucion?.telefonos ?? "",
+        INST_EMAIL: payload?.institucion?.email ?? "",
+        COLAB_NOMBRE: payload?.colaborador?.nombre ?? "",
+        COLAB_CI: payload?.colaborador?.ci ?? "",
+        COLAB_CARGO: payload?.colaborador?.cargo ?? "",
+        COLAB_PROFESION: payload?.colaborador?.profesion ?? "",
+        COLAB_TELEFONO: payload?.colaborador?.telefono ?? "",
+        COLAB_EMAIL: payload?.colaborador?.email ?? "",
       };
     });
 
@@ -6371,7 +6388,10 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             {contactSubsLoading && <p className="text-gray-400 text-sm">Cargando...</p>}
             {!contactSubsLoading && filteredContactSubs.length === 0 && <p className="text-gray-400 text-sm">No hay envios para los filtros actuales.</p>}
             <div className="space-y-3">
-              {filteredContactSubs.map((sub: any) => (
+              {filteredContactSubs.map((sub: any) => {
+                const aLeerPayload = parseALeerPayload(sub);
+                const showRawComment = Boolean(sub.comentario) && !aLeerPayload;
+                return (
                 <div key={sub.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
                   <div
                     className="flex items-center justify-between gap-2 p-4 cursor-pointer"
@@ -6399,14 +6419,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                         {sub.nombres && <FieldRow label="Nombres" value={sub.nombres} />}
                         {sub.apellidos && <FieldRow label="Apellidos" value={sub.apellidos} />}
-                        {sub.cedula && <FieldRow label="CÃ©dula" value={sub.cedula} />}
+                        {sub.cedula && <FieldRow label="Cédula" value={sub.cedula} />}
                         {sub.fechaNacimiento && <FieldRow label="Fecha Nac." value={sub.fechaNacimiento} />}
                         {sub.edad && <FieldRow label="Edad" value={sub.edad} />}
-                        {sub.telefono && <FieldRow label="TelÃ©fono" value={sub.telefono} />}
+                        {sub.telefono && <FieldRow label="Teléfono" value={sub.telefono} />}
                         {sub.email && <FieldRow label="Email" value={sub.email} />}
                         {sub.ciudad && <FieldRow label="Ciudad" value={sub.ciudad} />}
-                        {sub.pais && <FieldRow label="PaÃ­s" value={sub.pais} />}
-                        {sub.comentario && <div className="sm:col-span-2"><FieldRow label="Comentario" value={sub.comentario} /></div>}
+                        {sub.pais && <FieldRow label="País" value={sub.pais} />}
+                        {showRawComment && <div className="sm:col-span-2"><FieldRow label="Comentario" value={sub.comentario} /></div>}
                       </div>
                       {sub.formType === "prueba_gratuita" && (sub.pruebaGratuitaNombres || sub.pruebaGratuitaApellidos) && (
                         <div className="mt-3 pt-3 border-t border-white/10">
@@ -6414,45 +6434,45 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                             {sub.pruebaGratuitaNombres && <FieldRow label="Nombres" value={sub.pruebaGratuitaNombres} />}
                             {sub.pruebaGratuitaApellidos && <FieldRow label="Apellidos" value={sub.pruebaGratuitaApellidos} />}
-                            {sub.pruebaGratuitaCedula && <FieldRow label="CÃ©dula" value={sub.pruebaGratuitaCedula} />}
+                            {sub.pruebaGratuitaCedula && <FieldRow label="Cédula" value={sub.pruebaGratuitaCedula} />}
                             {sub.pruebaGratuitaFechaNac && <FieldRow label="Fecha Nac." value={sub.pruebaGratuitaFechaNac} />}
                             {sub.pruebaGratuitaEdad && <FieldRow label="Edad" value={sub.pruebaGratuitaEdad} />}
-                            {sub.pruebaGratuitaTelefono && <FieldRow label="TelÃ©fono" value={sub.pruebaGratuitaTelefono} />}
+                            {sub.pruebaGratuitaTelefono && <FieldRow label="Teléfono" value={sub.pruebaGratuitaTelefono} />}
                             {sub.pruebaGratuitaEmail && <FieldRow label="Email" value={sub.pruebaGratuitaEmail} />}
                             {sub.pruebaGratuitaCiudad && <FieldRow label="Ciudad" value={sub.pruebaGratuitaCiudad} />}
-                            {sub.pruebaGratuitaPais && <FieldRow label="PaÃ­s" value={sub.pruebaGratuitaPais} />}
+                            {sub.pruebaGratuitaPais && <FieldRow label="País" value={sub.pruebaGratuitaPais} />}
                           </div>
                         </div>
                       )}
-                      {parseALeerPayload(sub) && (
+                      {aLeerPayload && (
                         <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
                           <p className="text-cyan-300 font-bold text-xs">Detalle de Inscripcion A Leer Bolivia</p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                            {parseALeerPayload(sub)?.responsable?.nombre && <FieldRow label="Resp. Nombre" value={parseALeerPayload(sub).responsable.nombre} />}
-                            {parseALeerPayload(sub)?.responsable?.ci && <FieldRow label="Resp. C.I." value={parseALeerPayload(sub).responsable.ci} />}
-                            {parseALeerPayload(sub)?.responsable?.cargo && <FieldRow label="Resp. Cargo" value={parseALeerPayload(sub).responsable.cargo} />}
-                            {parseALeerPayload(sub)?.responsable?.profesion && <FieldRow label="Resp. Profesion" value={parseALeerPayload(sub).responsable.profesion} />}
-                            {parseALeerPayload(sub)?.responsable?.telefono && <FieldRow label="Resp. Telefono" value={parseALeerPayload(sub).responsable.telefono} />}
-                            {parseALeerPayload(sub)?.responsable?.email && <FieldRow label="Resp. Email" value={parseALeerPayload(sub).responsable.email} />}
-                            {parseALeerPayload(sub)?.institucion?.nombre && <FieldRow label="Institucion" value={parseALeerPayload(sub).institucion.nombre} />}
-                            {parseALeerPayload(sub)?.institucion?.razonSocial && <FieldRow label="Razon social" value={parseALeerPayload(sub).institucion.razonSocial} />}
-                            {parseALeerPayload(sub)?.institucion?.nit && <FieldRow label="NIT" value={parseALeerPayload(sub).institucion.nit} />}
-                            {parseALeerPayload(sub)?.institucion?.direccion && <FieldRow label="Direccion" value={parseALeerPayload(sub).institucion.direccion} />}
-                            {parseALeerPayload(sub)?.institucion?.telefonos && <FieldRow label="Tel. institucion" value={parseALeerPayload(sub).institucion.telefonos} />}
-                            {parseALeerPayload(sub)?.institucion?.email && <FieldRow label="Email institucion" value={parseALeerPayload(sub).institucion.email} />}
-                            {parseALeerPayload(sub)?.colaborador?.nombre && <FieldRow label="Colab. Nombre" value={parseALeerPayload(sub).colaborador.nombre} />}
-                            {parseALeerPayload(sub)?.colaborador?.ci && <FieldRow label="Colab. C.I." value={parseALeerPayload(sub).colaborador.ci} />}
-                            {parseALeerPayload(sub)?.colaborador?.cargo && <FieldRow label="Colab. Cargo" value={parseALeerPayload(sub).colaborador.cargo} />}
-                            {parseALeerPayload(sub)?.colaborador?.profesion && <FieldRow label="Colab. Profesion" value={parseALeerPayload(sub).colaborador.profesion} />}
-                            {parseALeerPayload(sub)?.colaborador?.telefono && <FieldRow label="Colab. Telefono" value={parseALeerPayload(sub).colaborador.telefono} />}
-                            {parseALeerPayload(sub)?.colaborador?.email && <FieldRow label="Colab. Email" value={parseALeerPayload(sub).colaborador.email} />}
+                            {aLeerPayload?.responsable?.nombre && <FieldRow label="Resp. Nombre" value={aLeerPayload.responsable.nombre} />}
+                            {aLeerPayload?.responsable?.ci && <FieldRow label="Resp. C.I." value={aLeerPayload.responsable.ci} />}
+                            {aLeerPayload?.responsable?.cargo && <FieldRow label="Resp. Cargo" value={aLeerPayload.responsable.cargo} />}
+                            {aLeerPayload?.responsable?.profesion && <FieldRow label="Resp. Profesión" value={aLeerPayload.responsable.profesion} />}
+                            {aLeerPayload?.responsable?.telefono && <FieldRow label="Resp. Teléfono" value={aLeerPayload.responsable.telefono} />}
+                            {aLeerPayload?.responsable?.email && <FieldRow label="Resp. Email" value={aLeerPayload.responsable.email} />}
+                            {aLeerPayload?.institucion?.nombre && <FieldRow label="Institución" value={aLeerPayload.institucion.nombre} />}
+                            {aLeerPayload?.institucion?.razonSocial && <FieldRow label="Razón social" value={aLeerPayload.institucion.razonSocial} />}
+                            {aLeerPayload?.institucion?.nit && <FieldRow label="NIT" value={aLeerPayload.institucion.nit} />}
+                            {aLeerPayload?.institucion?.direccion && <FieldRow label="Dirección" value={aLeerPayload.institucion.direccion} />}
+                            {aLeerPayload?.institucion?.telefonos && <FieldRow label="Tel. institución" value={aLeerPayload.institucion.telefonos} />}
+                            {aLeerPayload?.institucion?.email && <FieldRow label="Email institución" value={aLeerPayload.institucion.email} />}
+                            {aLeerPayload?.colaborador?.nombre && <FieldRow label="Colab. Nombre" value={aLeerPayload.colaborador.nombre} />}
+                            {aLeerPayload?.colaborador?.ci && <FieldRow label="Colab. C.I." value={aLeerPayload.colaborador.ci} />}
+                            {aLeerPayload?.colaborador?.cargo && <FieldRow label="Colab. Cargo" value={aLeerPayload.colaborador.cargo} />}
+                            {aLeerPayload?.colaborador?.profesion && <FieldRow label="Colab. Profesión" value={aLeerPayload.colaborador.profesion} />}
+                            {aLeerPayload?.colaborador?.telefono && <FieldRow label="Colab. Teléfono" value={aLeerPayload.colaborador.telefono} />}
+                            {aLeerPayload?.colaborador?.email && <FieldRow label="Colab. Email" value={aLeerPayload.colaborador.email} />}
                           </div>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         )}
