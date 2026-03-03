@@ -965,7 +965,7 @@ export default function ALeerBoliviaPage() {
               </div>
             </div>
 
-            <div className="relative px-5 py-8 text-center overflow-hidden" style={{ background: "linear-gradient(180deg, #f5f3ff 0%, #eefcff 100%)" }}>
+            <div className="relative px-5 py-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #22d3ee 0%, #34d399 100%)" }}>
               <img src={laxBlanca} alt="" className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 md:w-[520px] opacity-35 pointer-events-none" />
               <h3 className="relative z-10 font-sans text-3xl md:text-4xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
               <p className="relative z-10 font-sans text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
