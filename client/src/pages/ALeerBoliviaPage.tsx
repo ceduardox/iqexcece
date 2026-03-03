@@ -551,9 +551,9 @@ export default function ALeerBoliviaPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div
-              className={`w-full rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
+              className={`w-full h-52 md:h-[360px] rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
               style={{
-                height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : 192,
+                height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : undefined,
                 background: styles["hero-image"]?.imageUrl
                   ? undefined
                   : styles["hero-image"]?.background || "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)",
