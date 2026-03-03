@@ -1207,14 +1207,15 @@ export default function ALeerBoliviaPage() {
             {joinModalType !== "sponsors" && (
               <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
                 <p className="text-sm text-gray-600">Completa el formulario para iniciar el registro.</p>
-                <button
-                  type="button"
+                <a
+                  href="/docs/concursodelectura.pdf"
+                  download="convocatoria-a-leer-bolivia.pdf"
                   className="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-gray-800 transition-colors"
                   data-testid="button-download-convocatoria"
                 >
                   <FileDown className="w-4 h-4" />
                   DESCARGA CONVOCATORIA
-                </button>
+                </a>
               </div>
             )}
 
