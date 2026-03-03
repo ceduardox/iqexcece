@@ -3157,7 +3157,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         title={theme.isActive === false ? "Activar" : "Desactivar"}
                         data-testid={`button-toggle-tema-${theme.temaNumero}`}
                       >
-                        {theme.isActive === false ? "âœ•" : "âœ“"}
+                        {theme.isActive === false ? "✕" : "✓"}
                       </button>
                     </div>
                   ))}
@@ -6137,7 +6137,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     onClick={() => { setEditingVelocidadItem(null); setVelocidadEjercicio(null); }}
                     className="text-white/60 hover:text-white"
                   >
-                    âœ•
+                    ✕
                   </Button>
                 </div>
                 
