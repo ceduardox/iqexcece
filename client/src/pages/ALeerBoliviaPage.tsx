@@ -1184,14 +1184,39 @@ export default function ALeerBoliviaPage() {
             exit={{ opacity: 0 }}
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-300/40 bg-white shadow-2xl"
           >
-            <div className={`sticky top-0 z-10 text-white px-4 py-3 flex items-center justify-between ${joinModalType === "sponsors" ? "bg-[#3A8E27]" : "bg-[#1f4a8f]"}`}>
+            <div
+              className={`sticky top-0 z-10 text-white px-4 py-3 flex items-center justify-between ${
+                joinModalType === "sponsors"
+                  ? "bg-[#3A8E27]"
+                  : joinModalType === "independent"
+                    ? "bg-[#D8510D]"
+                    : "bg-[#1f4a8f]"
+              }`}
+            >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-full border border-white/50 flex items-center justify-center shrink-0">
-                  {joinModalType === "sponsors" ? <Handshake className="w-6 h-6" /> : <Building2 className="w-6 h-6" />}
+                <div className="w-11 h-11 rounded-full border border-white/70 flex items-center justify-center shrink-0 bg-white/10">
+                  {joinModalType === "sponsors" ? (
+                    <Handshake className="w-6 h-6" />
+                  ) : joinModalType === "independent" ? (
+                    <BookOpen className="w-6 h-6" />
+                  ) : (
+                    <Building2 className="w-6 h-6" />
+                  )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-[0.08em] text-cyan-100">Formulario Oficial</p>
-                  <h3 className="text-lg sm:text-xl font-black leading-tight truncate">{joinModalTitleMap[joinModalType]}</h3>
+                  {joinModalType === "independent" ? (
+                    <>
+                      <h3 className="text-lg sm:text-[36px] font-black leading-[0.9] uppercase">Inscripcion de Estudiantes</h3>
+                      <p className="text-[11px] sm:text-sm uppercase font-bold tracking-[0.02em] text-orange-100 mt-1">
+                        ¡Hola, Joven Explorador del Conocimiento!
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[11px] uppercase tracking-[0.08em] text-cyan-100">Formulario Oficial</p>
+                      <h3 className="text-lg sm:text-xl font-black leading-tight truncate">{joinModalTitleMap[joinModalType]}</h3>
+                    </>
+                  )}
                 </div>
               </div>
               <button
