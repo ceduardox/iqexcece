@@ -64,6 +64,24 @@ const sponsorLogos = [
   { src: "/logos/sponsors/17173657221811979344.jpg", name: "Sponsor 6" },
 ];
 
+type ModalFormInputProps = React.ComponentProps<typeof Input> & {
+  icon: ComponentType<{ className?: string }>;
+};
+
+const MODAL_INPUT_CLASS =
+  "h-11 bg-[#f8fbff] border-[#d8e2f0] text-gray-700 placeholder:text-gray-400 shadow-[0_4px_14px_rgba(15,23,42,0.06)] focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:border-cyan-400";
+
+const ModalFormInput = ({
+  icon: Icon,
+  className = "",
+  ...props
+}: ModalFormInputProps) => (
+  <div className="relative">
+    <Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+    <Input {...props} className={`${MODAL_INPUT_CLASS} pl-10 ${className}`} />
+  </div>
+);
+
 export default function ALeerBoliviaPage() {
   // Toggle para desactivar temporalmente estilos remotos del Navigator en esta página.
   // Cuando quieras reactivarlo, cambia a `true`.
@@ -388,20 +406,6 @@ export default function ALeerBoliviaPage() {
     }
   };
 
-  const modalInputClass =
-    "h-11 bg-[#f8fbff] border-[#d8e2f0] text-gray-700 placeholder:text-gray-400 shadow-[0_4px_14px_rgba(15,23,42,0.06)] focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:border-cyan-400";
-
-  const FormInput = ({
-    icon: Icon,
-    className = "",
-    ...props
-  }: React.ComponentProps<typeof Input> & { icon: ComponentType<{ className?: string }> }) => (
-    <div className="relative">
-      <Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-      <Input {...props} className={`${modalInputClass} pl-10 ${className}`} />
-    </div>
-  );
-
   useEffect(() => {
     if (motivationalVideos.length <= 1) return;
     let direction = 1;
@@ -581,7 +585,7 @@ export default function ALeerBoliviaPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div
-              className={`w-full h-52 md:h-[360px] rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
+              className={`w-full h-52 md:h-[460px] lg:h-[520px] rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
               style={{
                 height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : undefined,
                 background: styles["hero-image"]?.imageUrl
@@ -1516,12 +1520,12 @@ export default function ALeerBoliviaPage() {
                     <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Identificacion del padre/madre o tutor</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="sm:col-span-2">
-                        <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
+                        <ModalFormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
                       </div>
-                      <FormInput icon={Handshake} placeholder="Parentesco" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
-                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
-                      <FormInput icon={Phone} placeholder="Telefonos" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
-                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
+                      <ModalFormInput icon={Handshake} placeholder="Parentesco" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
+                      <ModalFormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
+                      <ModalFormInput icon={Phone} placeholder="Telefonos" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
+                      <ModalFormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
                     </div>
                   </div>
 
@@ -1529,14 +1533,14 @@ export default function ALeerBoliviaPage() {
                     <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Informacion del estudiante</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="sm:col-span-2">
-                        <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+                        <ModalFormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
                       </div>
-                      <FormInput icon={CalendarDays} placeholder="Fecha de nacimiento" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
-                      <FormInput icon={Hash} placeholder="Edad" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
-                      <FormInput icon={School} placeholder="Colegio" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
-                      <FormInput icon={GraduationCap} placeholder="Grado" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
-                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
-                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
+                      <ModalFormInput icon={CalendarDays} placeholder="Fecha de nacimiento" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
+                      <ModalFormInput icon={Hash} placeholder="Edad" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
+                      <ModalFormInput icon={School} placeholder="Colegio" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
+                      <ModalFormInput icon={GraduationCap} placeholder="Grado" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
+                      <ModalFormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
+                      <ModalFormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
                     </div>
                   </div>
                 </>
@@ -1545,12 +1549,12 @@ export default function ALeerBoliviaPage() {
                   <div>
                     <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Responsable del Evento</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
-                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
-                      <FormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
-                      <FormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.responsableProfesion} onChange={(e) => updateJoinField("responsableProfesion", e.target.value)} />
-                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
-                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
+                      <ModalFormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
+                      <ModalFormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
+                      <ModalFormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
+                      <ModalFormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.responsableProfesion} onChange={(e) => updateJoinField("responsableProfesion", e.target.value)} />
+                      <ModalFormInput icon={Phone} placeholder="Telefono" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
+                      <ModalFormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
                     </div>
                   </div>
 
@@ -1558,27 +1562,27 @@ export default function ALeerBoliviaPage() {
                     <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Datos de la Institucion</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="sm:col-span-2">
-                        <FormInput icon={Building2} placeholder="Nombre de la institucion" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+                        <ModalFormInput icon={Building2} placeholder="Nombre de la institucion" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
                       </div>
-                      <FormInput icon={FileText} placeholder="Razon social" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
-                      <FormInput icon={Hash} placeholder="NIT" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
+                      <ModalFormInput icon={FileText} placeholder="Razon social" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
+                      <ModalFormInput icon={Hash} placeholder="NIT" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
                       <div className="sm:col-span-2">
-                        <FormInput icon={MapPin} placeholder="Direccion" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
+                        <ModalFormInput icon={MapPin} placeholder="Direccion" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
                       </div>
-                      <FormInput icon={Phone} placeholder="Telefonos" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
-                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
+                      <ModalFormInput icon={Phone} placeholder="Telefonos" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
+                      <ModalFormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
                     </div>
                   </div>
 
                   <div>
                     <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Colaborador Asignado</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.colaboradorNombre} onChange={(e) => updateJoinField("colaboradorNombre", e.target.value)} />
-                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.colaboradorCi} onChange={(e) => updateJoinField("colaboradorCi", e.target.value)} />
-                      <FormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.colaboradorCargo} onChange={(e) => updateJoinField("colaboradorCargo", e.target.value)} />
-                      <FormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.colaboradorProfesion} onChange={(e) => updateJoinField("colaboradorProfesion", e.target.value)} />
-                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
-                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.colaboradorEmail} onChange={(e) => updateJoinField("colaboradorEmail", e.target.value)} />
+                      <ModalFormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.colaboradorNombre} onChange={(e) => updateJoinField("colaboradorNombre", e.target.value)} />
+                      <ModalFormInput icon={IdCard} placeholder="C.I." value={joinForm.colaboradorCi} onChange={(e) => updateJoinField("colaboradorCi", e.target.value)} />
+                      <ModalFormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.colaboradorCargo} onChange={(e) => updateJoinField("colaboradorCargo", e.target.value)} />
+                      <ModalFormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.colaboradorProfesion} onChange={(e) => updateJoinField("colaboradorProfesion", e.target.value)} />
+                      <ModalFormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
+                      <ModalFormInput icon={Mail} type="email" placeholder="Email" value={joinForm.colaboradorEmail} onChange={(e) => updateJoinField("colaboradorEmail", e.target.value)} />
                     </div>
                   </div>
                 </>
