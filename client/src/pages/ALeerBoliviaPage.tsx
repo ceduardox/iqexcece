@@ -781,26 +781,7 @@ export default function ALeerBoliviaPage() {
                   transition={{ duration: 0.28 }}
                   data-testid={`card-video-motivador-${activeVideo.id}`}
                 >
-                  <div className="grid grid-cols-[1.2fr_1fr] gap-3 items-stretch">
-                    <div className="min-w-0">
-                      <div className="flex items-start gap-2">
-                        <span className="text-5xl leading-none text-violet-200 font-black">&ldquo;</span>
-                        <p
-                          className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 7,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            minHeight: "7.2em",
-                          }}
-                        >
-                          {activeVideo.desc}
-                        </p>
-                      </div>
-                      <p className="font-sans text-[11px] text-gray-400 mt-2 pl-8">- {activeVideo.source}</p>
-                    </div>
-
+                  <div className="grid grid-cols-1 gap-3 items-stretch">
                     <div
                       className="relative w-full rounded-xl border border-violet-200/80 bg-white/70 overflow-hidden"
                       style={{
@@ -818,6 +799,25 @@ export default function ALeerBoliviaPage() {
                           <PlayCircle className="w-6 h-6 text-violet-600" />
                         </div>
                       </motion.div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-start gap-2">
+                        <span className="text-5xl leading-none text-violet-200 font-black">&ldquo;</span>
+                        <p
+                          className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 7,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            minHeight: "7.2em",
+                          }}
+                        >
+                          {activeVideo.desc}
+                        </p>
+                      </div>
+                      <p className="font-sans text-[11px] text-gray-400 mt-2 pl-8">- {activeVideo.source}</p>
                     </div>
                   </div>
 
