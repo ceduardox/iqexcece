@@ -1486,6 +1486,92 @@ Reglas:
     res.json({ success: true });
   });
 
+  // Generate only words list for velocidad level (admin; does not save to DB)
+  app.post("/api/admin/velocidad/generate-words", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const categoria = String(req.body?.categoria || "ninos").trim();
+    const patron = String(req.body?.patron || "3x2").trim();
+    const velocidad = Math.max(80, Math.min(2500, Number(req.body?.velocidad) || 150));
+    const count = Math.max(4, Math.min(30, Number(req.body?.count) || 12));
+
+    const banks: Record<string, string[]> = {
+      ninos: ["gato", "luna", "sol", "casa", "flor", "rio", "juego", "amigo", "cuento", "parque", "arbol", "nube", "color", "globo", "musica", "libro", "clase", "dibujo", "sonrisa", "aventura"],
+      adolescentes: ["proyecto", "analisis", "equipo", "reto", "meta", "resumen", "lectura", "concepto", "debate", "estrategia", "sintesis", "practica", "tecnica", "memoria", "enfoque", "prioridad", "proceso", "resultado", "disciplina", "progreso"],
+      universitarios: ["hipotesis", "metodo", "criterio", "modelo", "sistema", "argumento", "inferencia", "evidencia", "variable", "matriz", "prototipo", "gestion", "teorema", "iteracion", "simulacion", "validacion", "framework", "riesgo", "escenario", "sintesis"],
+      profesionales: ["propuesta", "impacto", "metricas", "eficiencia", "operacion", "negocio", "cliente", "decision", "prioridad", "sinergia", "pipeline", "objetivo", "indicador", "consolidado", "ejecucion", "optimizacion", "rentabilidad", "proyeccion", "reporte", "estrategico"],
+      adulto_mayor: ["recuerdo", "atencion", "lectura", "claridad", "habito", "calma", "enfoque", "comprension", "aprendizaje", "constancia", "relacion", "ejercicio", "balance", "dialogo", "familia", "historia", "palabra", "emocion", "proposito", "bienestar"],
+    };
+
+    const fallbackPool = [...(banks[categoria] || banks.ninos)];
+    const shuffle = (arr: string[]) => [...arr].sort(() => Math.random() - 0.5);
+    const fallbackWords = shuffle(Array.from(new Set(fallbackPool))).slice(0, count);
+
+    let words = fallbackWords;
+    let source: "gemini" | "fallback" = "fallback";
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const systemPrompt = [
+          "You generate spanish single words for reading-speed training.",
+          "Return ONLY valid JSON.",
+          'Format: {"palabras":["w1","w2"]}',
+          "- unique words only",
+          "- no punctuation",
+          "- no numbers",
+          "- no markdown",
+        ].join("\n");
+
+        const userPrompt = [
+          `categoria: ${categoria}`,
+          `patron: ${patron}`,
+          `velocidad_ppm: ${velocidad}`,
+          `cantidad_palabras: ${count}`,
+        ].join("\n");
+
+        const aiRaw = await callGemini(apiKey, systemPrompt, [
+          { role: "user", parts: [{ text: userPrompt }] },
+        ]);
+
+        if (aiRaw) {
+          const cleaned = aiRaw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+          const parsed = JSON.parse(cleaned);
+          const aiWords: string[] = Array.from<string>(
+            new Set(
+              (Array.isArray(parsed?.palabras) ? parsed.palabras : [])
+                .map((w: any) => String(w || "").trim().toLowerCase())
+                .filter(Boolean),
+            ),
+          ).slice(0, count);
+
+          if (aiWords.length > 0) {
+            if (aiWords.length < count) {
+              const missing = count - aiWords.length;
+              const extra = shuffle(fallbackPool.filter((w) => !aiWords.includes(w))).slice(0, missing);
+              words = [...aiWords, ...extra];
+            } else {
+              words = aiWords;
+            }
+            source = "gemini";
+          }
+        }
+      }
+    } catch {
+      source = "fallback";
+    }
+
+    return res.json({
+      palabras: words,
+      palabrasCsv: words.join(", "),
+      meta: { categoria, patron, velocidad, count: words.length, source },
+    });
+  });
+
   // Public: Get velocidad exercise for an entrenamiento item
   app.get("/api/velocidad/:entrenamientoItemId", async (req, res) => {
     const ejercicios = await storage.getVelocidadEjerciciosByItem(req.params.entrenamientoItemId);

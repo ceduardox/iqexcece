@@ -192,6 +192,8 @@ export default function GestionPage() {
   const [velocidadPatternFilter, setVelocidadPatternFilter] = useState<"all" | "2x2" | "2x3" | "3x2" | "2x4" | "3x3">("all");
   const [velocidadPpmMin, setVelocidadPpmMin] = useState<string>("");
   const [velocidadPpmMax, setVelocidadPpmMax] = useState<string>("");
+  const [velocidadWordCounts, setVelocidadWordCounts] = useState<Record<number, number>>({});
+  const [generatingWordsNivelIdx, setGeneratingWordsNivelIdx] = useState<number | null>(null);
   
   // Página de introducción de Números
   const [numerosIntroData, setNumerosIntroData] = useState<{
@@ -561,6 +563,58 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       velocidadPatternFilter === "all" ? [] : SUGGESTED_PPM_VALUES.filter((v) => !existing.includes(v));
     return { existing, missing };
   }, [velocidadEjercicio, velocidadPatternFilter]);
+
+  const getDefaultWordCountForPattern = (patron?: string) => {
+    const match = String(patron || "").match(/^(\d+)x(\d+)$/i);
+    if (!match) return 12;
+    const size = Math.max(1, parseInt(match[1], 10)) * Math.max(1, parseInt(match[2], 10));
+    return Math.max(8, Math.min(20, size + 6));
+  };
+
+  const generateWordsForNivel = async (nivelIdx: number, nivel: { patron?: string; velocidad?: number }) => {
+    if (!velocidadEjercicio) return;
+    setGeneratingWordsNivelIdx(nivelIdx);
+    try {
+      const selectedCount = velocidadWordCounts[nivelIdx] || getDefaultWordCountForPattern(nivel.patron);
+      const res = await adminFetch("/api/admin/velocidad/generate-words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoria: entrenamientoCategory,
+          patron: nivel.patron || "3x2",
+          velocidad: Number(nivel.velocidad) || 150,
+          count: selectedCount,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("No se pudo generar palabras con IA");
+        return;
+      }
+
+      const data = await res.json();
+      const palabrasCsv = String(data?.palabrasCsv || "").trim();
+      if (!palabrasCsv) {
+        alert("IA no devolvio palabras en este intento");
+        return;
+      }
+
+      setVelocidadEjercicio((prev) => {
+        if (!prev) return prev;
+        const updated = [...prev.niveles];
+        if (!updated[nivelIdx]) return prev;
+        updated[nivelIdx] = {
+          ...updated[nivelIdx],
+          palabras: palabrasCsv,
+        };
+        return { ...prev, niveles: updated };
+      });
+    } catch {
+      alert("Error al generar palabras");
+    } finally {
+      setGeneratingWordsNivelIdx(null);
+    }
+  };
 
   const CONTACT_EXPORT_HEADERS = [
     "TIPO",
@@ -1567,15 +1621,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   useEffect(() => {
     if (isLoggedIn && activeTab === "entrenamiento") {
       const loadEntrenamientoData = async () => {
-        const token = localStorage.getItem("admin_token") || "";
+        const authToken = token || localStorage.getItem("adminToken") || "";
         const cat = entrenamientoCategory;
         try {
           const [cardRes, pageRes, itemsRes, prepRes, catPrepRes] = await Promise.all([
             fetch(`/api/entrenamiento/${cat}/card?lang=es`),
             fetch(`/api/entrenamiento/${cat}/page?lang=es`),
             fetch(`/api/entrenamiento/${cat}/items?lang=es`),
-            fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${token}` } }),
-            fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${token}` } })
+            fetch(`/api/admin/prep-pages`, { headers: { Authorization: `Bearer ${authToken}` } }),
+            fetch(`/api/admin/categoria-prep/${cat}`, { headers: { Authorization: `Bearer ${authToken}` } })
           ]);
           const cardData = await cardRes.json();
           const pageData = await pageRes.json();
@@ -1618,7 +1672,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       };
       loadEntrenamientoData();
     }
-  }, [isLoggedIn, activeTab, entrenamientoCategory]);
+  }, [isLoggedIn, activeTab, entrenamientoCategory, token]);
 
   const getAgeLabel = (age: string | null) => {
     const labels: Record<string, string> = {
@@ -1945,7 +1999,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         </div>
       </aside>
 
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 p-2 sm:p-4 overflow-auto">
         <div className="md:hidden flex items-center justify-between mb-4">
           <div>
             <h1 className="text-lg font-bold text-white">Panel de Gestión</h1>
@@ -2148,7 +2202,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           )}
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full max-w-none md:max-w-6xl mx-auto">
 
         {activeTab === "sesiones" && (
           <>
@@ -4937,7 +4991,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 Gestión de Entrenamientos
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 px-2 sm:px-4 md:px-6">
               <div className="flex flex-wrap gap-2 mb-4">
                 {(["ninos", "adolescentes", "universitarios", "profesionales", "adulto_mayor"] as const).map((cat) => (
                   <Button
@@ -5032,7 +5086,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <div>
                         <label className="text-white/60 text-xs">Nombre (interno)</label>
                         <Input
-                          value={editingPrepPage.nombre}
+                          value={editingPrepPage.nombre || ""}
                           onChange={(e) => setEditingPrepPage({...editingPrepPage, nombre: e.target.value})}
                           className="bg-white/10 border-purple-500/30 text-white"
                           placeholder="Ej: Preparación Lectura Rápida"
@@ -5153,7 +5207,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Imagen</label>
                     <div className="flex gap-2 mt-1">
                       <Input
-                        value={entrenamientoCard.imageUrl}
+                        value={entrenamientoCard.imageUrl || ""}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, imageUrl: e.target.value})}
                         className="bg-white/10 border-teal-500/30 text-white"
                         placeholder="URL de imagen"
@@ -5181,7 +5235,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Título</label>
                     <div className="flex gap-1 mt-1">
                       <Input
-                        value={entrenamientoCard.title}
+                        value={entrenamientoCard.title || ""}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, title: e.target.value})}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
@@ -5191,7 +5245,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
-                        value={entrenamientoCard.description}
+                        value={entrenamientoCard.description || ""}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, description: e.target.value})}
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
@@ -5202,7 +5256,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Texto del Botón</label>
                     <div className="flex gap-1 mt-1">
                       <Input
-                        value={entrenamientoCard.buttonText}
+                        value={entrenamientoCard.buttonText || ""}
                         onChange={(e) => setEntrenamientoCard({...entrenamientoCard, buttonText: e.target.value})}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
@@ -5236,7 +5290,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Banner (texto superior)</label>
                     <div className="flex gap-1 mt-1">
                       <Input
-                        value={entrenamientoPage.bannerText}
+                        value={entrenamientoPage.bannerText || ""}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, bannerText: e.target.value})}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
@@ -5246,7 +5300,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Título de Página</label>
                     <div className="flex gap-1 mt-1">
                       <Input
-                        value={entrenamientoPage.pageTitle}
+                        value={entrenamientoPage.pageTitle || ""}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageTitle: e.target.value})}
                         className="bg-white/10 border-teal-500/30 text-white flex-1"
                       />
@@ -5256,7 +5310,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
-                        value={entrenamientoPage.pageDescription}
+                        value={entrenamientoPage.pageDescription || ""}
                         onChange={(e) => setEntrenamientoPage({...entrenamientoPage, pageDescription: e.target.value})}
                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 flex-1"
                         rows={2}
@@ -5287,7 +5341,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               </div>
 
               <div className="space-y-4 p-4 bg-white/5 rounded-xl">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
                   <div>
                     <h3 className="text-white font-semibold text-lg">Secciones de Entrenamiento</h3>
                     <p className="text-white/50 text-sm">Cada sección aparecerá como una tarjeta en la app</p>
@@ -5317,7 +5371,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         }
                       } catch (e) { alert("Error al crear"); }
                     }}
-                    className="bg-gradient-to-r from-teal-500 to-cyan-500"
+                    className="bg-gradient-to-r from-teal-500 to-cyan-500 w-full sm:w-auto"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva Sección
@@ -5341,7 +5395,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                             : "bg-black/30 border-white/10 opacity-60"
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                           <div className="flex items-center gap-2">
                             <span className="bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded">
                               #{idx + 1}
@@ -5350,7 +5404,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               {item.isActive ? "Visible en la app" : "Oculto"}
                             </span>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                             <Button
                               size="sm"
                               variant="outline"
@@ -5385,8 +5439,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           </div>
                         </div>
 
-                        <div className="flex gap-4">
-                          <div className="flex-shrink-0 space-y-2">
+                        <div className="flex flex-col lg:flex-row gap-4">
+                          <div className="flex-shrink-0 space-y-2 lg:w-24">
                             <p className="text-white/60 text-xs text-center">Imagen</p>
                             <div 
                               className="w-24 h-24 bg-white/10 rounded-xl overflow-hidden cursor-pointer border-2 border-dashed border-white/30 flex items-center justify-center"
@@ -5416,30 +5470,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 updated[idx].imageUrl = e.target.value;
                                 setEntrenamientoItems(updated);
                               }}
-                              className="w-24 bg-white/10 border-teal-500/30 text-white text-xs p-1"
+                              className="w-full lg:w-24 bg-white/10 border-teal-500/30 text-white text-xs p-1"
                               placeholder="URL..."
                             />
                           </div>
 
-                          <div className="flex-1 space-y-3">
+                          <div className="flex-1 min-w-0 space-y-3">
                             <div>
                               <label className="text-white/60 text-xs mb-1 block">Título de la sección</label>
-                              <div className="flex gap-1">
+                              <div className="flex gap-1 min-w-0">
                                 <Input
-                                  value={item.title}
+                                  value={item.title || ""}
                                   onChange={(e) => {
                                     const updated = [...entrenamientoItems];
                                     updated[idx].title = e.target.value;
                                     setEntrenamientoItems(updated);
                                   }}
-                                  className="bg-white/10 border-teal-500/30 text-white font-semibold flex-1"
+                                  className="bg-white/10 border-teal-500/30 text-white font-semibold flex-1 min-w-0"
                                   placeholder="Ej: Mejora tu Velocidad de Lectura"
                                 />
                               </div>
                             </div>
                             <div>
                               <label className="text-white/60 text-xs mb-1 block">Descripción breve</label>
-                              <div className="flex gap-1">
+                              <div className="flex gap-1 min-w-0">
                                 <Input
                                   value={item.description || ""}
                                   onChange={(e) => {
@@ -5447,7 +5501,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                     updated[idx].description = e.target.value;
                                     setEntrenamientoItems(updated);
                                   }}
-                                  className="bg-white/10 border-teal-500/30 text-white/80 flex-1"
+                                  className="bg-white/10 border-teal-500/30 text-white/80 flex-1 min-w-0"
                                   placeholder="Ej: Para procesar palabras rápidamente"
                                 />
                               </div>
@@ -6082,7 +6136,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               </div>
                             </div>
                           </div>
-                          <div className="flex justify-end gap-2">
+                          <div className="flex flex-col sm:flex-row sm:justify-end gap-2 w-full">
                             <Button
                               onClick={async () => {
                                 setEditingVelocidadItem(item.id);
@@ -6128,7 +6182,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 } catch (e) { console.error(e); }
                               }}
                               variant="outline"
-                              className="border-purple-500/50 text-purple-400"
+                              className="border-purple-500/50 text-purple-400 w-full sm:w-auto"
                             >
                               <Zap className="w-4 h-4 mr-2" />
                               Ejercicios
@@ -6149,7 +6203,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   }
                                 } catch (e) { alert("Error al guardar"); }
                               }}
-                              className="bg-gradient-to-r from-teal-500 to-cyan-500"
+                              className="bg-gradient-to-r from-teal-500 to-cyan-500 w-full sm:w-auto"
                             >
                               <Save className="w-4 h-4 mr-2" />
                               Guardar Sección
@@ -6438,6 +6492,37 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               Palabras (separadas por comas) 
                               <span className="text-purple-300/60 ml-1">- Rotarán por las {nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6} posiciones del patrón</span>
                             </label>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <span className="text-white/50 text-xs">Cantidad de palabras:</span>
+                              <select
+                                value={velocidadWordCounts[nivelIdx] || getDefaultWordCountForPattern(nivel.patron)}
+                                onChange={(e) => {
+                                  const selected = parseInt(e.target.value) || getDefaultWordCountForPattern(nivel.patron);
+                                  setVelocidadWordCounts((prev) => ({ ...prev, [nivelIdx]: selected }));
+                                }}
+                                className="bg-gray-700 border border-purple-500/30 text-white rounded-md px-2 py-1 text-sm"
+                              >
+                                {[6, 8, 10, 12, 14, 16, 18, 20, 24, 28].map((n) => (
+                                  <option key={n} value={n} className="bg-gray-700 text-white">
+                                    {n}
+                                  </option>
+                                ))}
+                              </select>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-cyan-300 text-xs h-7"
+                                disabled={generatingWordsNivelIdx === nivelIdx}
+                                onClick={() => generateWordsForNivel(nivelIdx, nivel)}
+                              >
+                                {generatingWordsNivelIdx === nivelIdx ? (
+                                  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Zap className="w-3 h-3 mr-1" />
+                                )}
+                                IA generar palabras
+                              </Button>
+                            </div>
                             <textarea
                               value={nivel.palabras || ""}
                               onChange={(e) => {
