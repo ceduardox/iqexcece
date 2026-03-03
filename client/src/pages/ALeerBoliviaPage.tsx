@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ComponentType } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle, X, FileDown } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle, X, FileDown, IdCard, Briefcase, Phone, Mail, FileText, MapPin, CalendarDays, Hash } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
@@ -301,7 +301,12 @@ export default function ALeerBoliviaPage() {
   const submitJoinForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinModalType) return;
-    if (!joinForm.responsableNombre.trim() || !joinForm.responsableTelefono.trim() || !joinForm.institucionNombre.trim()) {
+    if (joinModalType === "independent") {
+      if (!joinForm.responsableNombre.trim() || !joinForm.responsableTelefono.trim() || !joinForm.institucionNombre.trim()) {
+        setJoinMessage("Completa datos de tutor y estudiante.");
+        return;
+      }
+    } else if (!joinForm.responsableNombre.trim() || !joinForm.responsableTelefono.trim() || !joinForm.institucionNombre.trim()) {
       setJoinMessage("Completa nombre, telefono e institucion.");
       return;
     }
@@ -354,6 +359,17 @@ export default function ALeerBoliviaPage() {
 
   const modalInputClass =
     "h-11 bg-[#f8fbff] border-[#d8e2f0] text-gray-700 placeholder:text-gray-400 shadow-[0_4px_14px_rgba(15,23,42,0.06)] focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:border-cyan-400";
+
+  const FormInput = ({
+    icon: Icon,
+    className = "",
+    ...props
+  }: React.ComponentProps<typeof Input> & { icon: ComponentType<{ className?: string }> }) => (
+    <div className="relative">
+      <Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      <Input {...props} className={`${modalInputClass} pl-10 ${className}`} />
+    </div>
+  );
 
   useEffect(() => {
     if (motivationalVideos.length <= 1) return;
@@ -1298,45 +1314,79 @@ export default function ALeerBoliviaPage() {
                 aria-hidden="true"
               />
 
-              <div>
-                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Responsable del Evento</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input className={modalInputClass} placeholder="👤 Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="🪪 C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="💼 Cargo en la institucion" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="🧠 Profesion o actividad" value={joinForm.responsableProfesion} onChange={(e) => updateJoinField("responsableProfesion", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="📱 Telefono" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="✉️ Email" type="email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Datos de la Institucion</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="sm:col-span-2">
-                    <Input className={modalInputClass} placeholder="🏫 Nombre de la institucion" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+              {joinModalType === "independent" ? (
+                <>
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Identificacion del padre/madre o tutor</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="sm:col-span-2">
+                        <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
+                      </div>
+                      <FormInput icon={Handshake} placeholder="Parentesco" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
+                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
+                      <FormInput icon={Phone} placeholder="Telefonos" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
+                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
+                    </div>
                   </div>
-                  <Input className={modalInputClass} placeholder="🧾 Razon social" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="🔢 NIT" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
-                  <div className="sm:col-span-2">
-                    <Input className={modalInputClass} placeholder="📍 Direccion" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
-                  </div>
-                  <Input className={modalInputClass} placeholder="☎️ Telefonos" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="✉️ Email" type="email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
-                </div>
-              </div>
 
-              <div>
-                <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Colaborador Asignado</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input className={modalInputClass} placeholder="👤 Nombre completo" value={joinForm.colaboradorNombre} onChange={(e) => updateJoinField("colaboradorNombre", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="🪪 C.I." value={joinForm.colaboradorCi} onChange={(e) => updateJoinField("colaboradorCi", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="💼 Cargo en la institucion" value={joinForm.colaboradorCargo} onChange={(e) => updateJoinField("colaboradorCargo", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="🧠 Profesion o actividad" value={joinForm.colaboradorProfesion} onChange={(e) => updateJoinField("colaboradorProfesion", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="📱 Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
-                  <Input className={modalInputClass} placeholder="✉️ Email" type="email" value={joinForm.colaboradorEmail} onChange={(e) => updateJoinField("colaboradorEmail", e.target.value)} />
-                </div>
-              </div>
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Informacion del estudiante</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="sm:col-span-2">
+                        <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+                      </div>
+                      <FormInput icon={CalendarDays} placeholder="Fecha de nacimiento" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
+                      <FormInput icon={Hash} placeholder="Edad" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
+                      <FormInput icon={School} placeholder="Colegio" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
+                      <FormInput icon={GraduationCap} placeholder="Grado" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
+                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
+                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Responsable del Evento</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.responsableNombre} onChange={(e) => updateJoinField("responsableNombre", e.target.value)} />
+                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.responsableCi} onChange={(e) => updateJoinField("responsableCi", e.target.value)} />
+                      <FormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.responsableCargo} onChange={(e) => updateJoinField("responsableCargo", e.target.value)} />
+                      <FormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.responsableProfesion} onChange={(e) => updateJoinField("responsableProfesion", e.target.value)} />
+                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.responsableTelefono} onChange={(e) => updateJoinField("responsableTelefono", e.target.value)} />
+                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.responsableEmail} onChange={(e) => updateJoinField("responsableEmail", e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Datos de la Institucion</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="sm:col-span-2">
+                        <FormInput icon={Building2} placeholder="Nombre de la institucion" value={joinForm.institucionNombre} onChange={(e) => updateJoinField("institucionNombre", e.target.value)} />
+                      </div>
+                      <FormInput icon={FileText} placeholder="Razon social" value={joinForm.institucionRazonSocial} onChange={(e) => updateJoinField("institucionRazonSocial", e.target.value)} />
+                      <FormInput icon={Hash} placeholder="NIT" value={joinForm.institucionNit} onChange={(e) => updateJoinField("institucionNit", e.target.value)} />
+                      <div className="sm:col-span-2">
+                        <FormInput icon={MapPin} placeholder="Direccion" value={joinForm.institucionDireccion} onChange={(e) => updateJoinField("institucionDireccion", e.target.value)} />
+                      </div>
+                      <FormInput icon={Phone} placeholder="Telefonos" value={joinForm.institucionTelefonos} onChange={(e) => updateJoinField("institucionTelefonos", e.target.value)} />
+                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.institucionEmail} onChange={(e) => updateJoinField("institucionEmail", e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.04em] uppercase text-gray-500 border-b border-gray-200 pb-1 mb-3">Colaborador Asignado</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <FormInput icon={UserRound} placeholder="Nombre completo" value={joinForm.colaboradorNombre} onChange={(e) => updateJoinField("colaboradorNombre", e.target.value)} />
+                      <FormInput icon={IdCard} placeholder="C.I." value={joinForm.colaboradorCi} onChange={(e) => updateJoinField("colaboradorCi", e.target.value)} />
+                      <FormInput icon={Briefcase} placeholder="Cargo en la institucion" value={joinForm.colaboradorCargo} onChange={(e) => updateJoinField("colaboradorCargo", e.target.value)} />
+                      <FormInput icon={FileText} placeholder="Profesion o actividad" value={joinForm.colaboradorProfesion} onChange={(e) => updateJoinField("colaboradorProfesion", e.target.value)} />
+                      <FormInput icon={Phone} placeholder="Telefono" value={joinForm.colaboradorTelefono} onChange={(e) => updateJoinField("colaboradorTelefono", e.target.value)} />
+                      <FormInput icon={Mail} type="email" placeholder="Email" value={joinForm.colaboradorEmail} onChange={(e) => updateJoinField("colaboradorEmail", e.target.value)} />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex items-center justify-between gap-3 pt-1">
                 <p className="text-xs text-gray-500">Seguridad activa: filtro anti-spam sin captcha de Google.</p>
