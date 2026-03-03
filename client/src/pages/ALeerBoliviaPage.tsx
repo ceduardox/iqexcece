@@ -17,6 +17,7 @@ import laxCyan from "@assets/laxcyan2_1771479429192.png";
 import laxPurpura from "@assets/laxpurpura_1771479319056.png";
 import laxBlanca from "@assets/laxblanca_1771479319056.png";
 import laxVerde from "@assets/laxverde_1771479319057.png";
+import aleerPremiosImg from "@assets/aleer-premios.jpg";
 const LOGO_URL = "https://iqexponencial.app/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
 
 const participarItems = [
@@ -446,7 +447,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
-              : styles["section-hero"]?.background || undefined,
+              : styles["section-hero"]?.background || "linear-gradient(135deg, #66c7cd 0%, #5ec3cc 55%, #6ed2cf 100%)",
           }}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -468,70 +469,79 @@ export default function ALeerBoliviaPage() {
           )}
           {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)" }} />
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }} />
+              <div className="absolute -top-28 -right-28 w-[420px] h-[420px]">
+                <div className="absolute inset-0 rotate-45 rounded-2xl bg-violet-700/75" />
+                <div className="absolute inset-0 -rotate-45 rounded-2xl bg-violet-600/65" />
+              </div>
+              <div className="absolute -bottom-28 -left-36 w-[420px] h-[420px] opacity-45">
+                <div className="absolute inset-0 rotate-45 rounded-2xl bg-cyan-300/55" />
+                <div className="absolute inset-0 -rotate-45 rounded-2xl bg-white/30" />
+              </div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_28%,rgba(255,255,255,0.18),transparent_42%),radial-gradient(circle_at_78%_72%,rgba(124,58,237,0.16),transparent_48%)]" />
             </div>
           )}
 
           <motion.div
-            className="relative z-10 text-center"
+            className="relative z-10 max-w-6xl mx-auto md:grid md:grid-cols-[0.95fr_1.25fr] gap-8 items-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4"
-              style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}
-              animate={{ scale: [1, 1.03, 1] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-            >
-              <Sparkles className="w-4 h-4 text-purple-500" />
-              <span className="text-xs font-bold text-purple-600">{t("aleer.badge")}</span>
-            </motion.div>
+            <div className="text-left">
+              <motion.div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 bg-white/20 border border-white/35 backdrop-blur-[2px]"
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+              >
+                <Sparkles className="w-4 h-4 text-white" />
+                <span className="text-xs font-extrabold text-white tracking-wide">{t("aleer.badge")}</span>
+              </motion.div>
 
-            <h1
-              className={`text-2xl font-black mb-2 leading-tight ${getEditableClass("hero-title")}`}
-              style={{
-                fontSize: styles["hero-title"]?.fontSize || undefined,
-                color: styles["hero-title"]?.textColor || "#1f2937",
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
-              data-testid="text-welcome-title"
-            >
-              {t("aleer.welcome")}
-            </h1>
-            <h2
-              className={`text-lg font-bold mb-1 ${getEditableClass("hero-subtitle1")}`}
-              style={{
-                background: styles["hero-subtitle1"]?.textColor ? undefined : "linear-gradient(135deg, #7c3aed, #06b6d4)",
-                WebkitBackgroundClip: styles["hero-subtitle1"]?.textColor ? undefined : "text",
-                WebkitTextFillColor: styles["hero-subtitle1"]?.textColor || "transparent",
-                fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
-            >
-              {t("aleer.subtitle1")}
-            </h2>
-            <h3
-              className={`text-base font-bold mb-4 ${getEditableClass("hero-subtitle2")}`}
-              style={{
-                color: styles["hero-subtitle2"]?.textColor || "#9333ea",
-                fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
-            >
-              {t("aleer.subtitle2")}
-            </h3>
-            <p
-              className={`text-sm leading-relaxed max-w-md mx-auto ${getEditableClass("hero-desc")}`}
-              style={{
-                color: styles["hero-desc"]?.textColor || "#6b7280",
-                fontSize: styles["hero-desc"]?.fontSize || undefined,
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
-            >
-              {t("aleer.description")}
-            </p>
+              <h1
+                className={`text-[36px] sm:text-[46px] md:text-[56px] font-black mb-2 leading-[0.95] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)] ${getEditableClass("hero-title")}`}
+                style={{
+                  fontSize: styles["hero-title"]?.fontSize || undefined,
+                  color: styles["hero-title"]?.textColor || "#ffffff",
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
+                data-testid="text-welcome-title"
+              >
+                {t("aleer.welcome")}
+              </h1>
+            </div>
+
+            <div className="text-left md:pt-8">
+              <h2
+                className={`text-xl md:text-3xl font-black mb-2 text-[#0b1828] ${getEditableClass("hero-subtitle1")}`}
+                style={{
+                  color: styles["hero-subtitle1"]?.textColor || "#0b1828",
+                  fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
+              >
+                {t("aleer.subtitle1")}
+              </h2>
+              <h3
+                className={`text-base md:text-xl font-bold mb-3 text-[#11263e] ${getEditableClass("hero-subtitle2")}`}
+                style={{
+                  color: styles["hero-subtitle2"]?.textColor || "#11263e",
+                  fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
+              >
+                {t("aleer.subtitle2")}
+              </h3>
+              <p
+                className={`text-sm md:text-lg leading-relaxed max-w-2xl text-black/95 ${getEditableClass("hero-desc")}`}
+                style={{
+                  color: styles["hero-desc"]?.textColor || "rgba(0,0,0,0.95)",
+                  fontSize: styles["hero-desc"]?.fontSize || undefined,
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
+              >
+                {t("aleer.description")}
+              </p>
+            </div>
           </motion.div>
 
           <motion.div
@@ -558,9 +568,24 @@ export default function ALeerBoliviaPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-center">
-                  <BookOpen className="w-16 h-16 text-purple-300 mx-auto mb-2" />
-                  <span className="text-sm text-purple-400 font-medium">{t("aleer.placeholder")}</span>
+                <div className="relative w-full h-full">
+                  <img
+                    src={aleerPremiosImg}
+                    alt="Ganadores A Leer Bolivia"
+                    className="w-full h-full object-cover object-center"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold text-white bg-cyan-600/85 border border-cyan-200/60 shadow-md">
+                      A Leer Bolivia
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-white/95 font-semibold drop-shadow">
+                      Intercolegial de Lectura
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -967,8 +992,14 @@ export default function ALeerBoliviaPage() {
 
             <div className="relative px-5 py-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #22d3ee 0%, #34d399 100%)" }}>
               <img src={laxBlanca} alt="" className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 md:w-[520px] opacity-35 pointer-events-none" />
-              <h3 className="relative z-10 font-sans text-3xl md:text-4xl font-black mb-3 text-violet-700">{t("aleer.videosTitle")}</h3>
-              <p className="relative z-10 font-sans text-sm md:text-base text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              <h3
+                className="relative z-10 font-sans text-3xl md:text-4xl font-black mb-2 text-black tracking-tight drop-shadow-[0_2px_0_rgba(255,255,255,0.25)]"
+                style={{ textShadow: "0 0 18px rgba(34,211,238,0.28)" }}
+              >
+                {t("aleer.videosTitle")}
+              </h3>
+              <div className="relative z-10 mx-auto mb-3 h-1.5 w-36 rounded-full bg-gradient-to-r from-cyan-400 via-emerald-300 to-violet-400" />
+              <p className="relative z-10 font-sans text-sm md:text-base text-black max-w-3xl mx-auto leading-relaxed">
                 {t("aleer.videosDesc")}
               </p>
 
@@ -1006,7 +1037,7 @@ export default function ALeerBoliviaPage() {
                       <div className="flex items-start gap-2">
                         <span className="text-5xl leading-none text-violet-200 font-black">&ldquo;</span>
                         <p
-                          className="font-sans text-xs text-gray-700 leading-relaxed pt-1"
+                          className="font-sans text-xs text-black leading-relaxed pt-1"
                           style={{
                             display: "-webkit-box",
                             WebkitLineClamp: 7,
@@ -1018,7 +1049,7 @@ export default function ALeerBoliviaPage() {
                           {activeVideo.desc}
                         </p>
                       </div>
-                      <p className="font-sans text-[11px] text-gray-400 mt-2 pl-8">- {activeVideo.source}</p>
+                      <p className="font-sans text-[11px] text-black mt-2 pl-8">- {activeVideo.source}</p>
                     </div>
                   </div>
 
@@ -1082,11 +1113,11 @@ export default function ALeerBoliviaPage() {
                     className="flex items-start gap-3"
                   >
                     <span className="text-[88px] leading-[0.7] text-violet-200 font-black">&ldquo;</span>
-                    <p className="text-[20px] text-gray-700 leading-relaxed min-h-[170px] pt-2">
+                    <p className="text-[20px] text-black leading-relaxed min-h-[170px] pt-2">
                       {activeVideo.desc}
                     </p>
                   </motion.div>
-                  <p className="text-xs text-gray-400 mt-2">- {activeVideo.source}</p>
+                  <p className="text-xs text-black mt-2">- {activeVideo.source}</p>
 
                   <div className="mt-4 flex items-center gap-2">
                     <button
