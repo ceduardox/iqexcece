@@ -1,6 +1,6 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown, Grid3X3 } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, Trophy, TrendingUp, Zap, BarChart3, Target, Timer, BookOpen, Eye, ChevronDown, Grid3X3, Brain } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useSounds } from "@/hooks/use-sounds";
@@ -39,7 +39,10 @@ const exerciseTypeKeys: Record<string, string> = {
   neurosync: "progress.neuroSync",
   neurolink: "progress.neuroLink",
   memoryflash: "progress.memoryFlash",
-  neurolector: "progress.neuroLector"
+  neurolector: "progress.neuroLector",
+  diagnostico_lectura: "tests.lectura",
+  diagnostico_razonamiento: "tests.razonamiento",
+  diagnostico_cerebral: "tests.cerebral",
 };
 
 const exerciseTypeColors: Record<string, string> = {
@@ -51,7 +54,10 @@ const exerciseTypeColors: Record<string, string> = {
   neurosync: "#0051ff",
   neurolink: "#0051ff",
   memoryflash: "#0051ff",
-  neurolector: "#0051ff"
+  neurolector: "#0051ff",
+  diagnostico_lectura: "#7c3aed",
+  diagnostico_razonamiento: "#06b6d4",
+  diagnostico_cerebral: "#8a3ffc",
 };
 
 const exerciseTypeIcons: Record<string, typeof Zap> = {
@@ -63,7 +69,10 @@ const exerciseTypeIcons: Record<string, typeof Zap> = {
   neurosync: Zap,
   neurolink: Target,
   memoryflash: Grid3X3,
-  neurolector: BookOpen
+  neurolector: BookOpen,
+  diagnostico_lectura: BookOpen,
+  diagnostico_razonamiento: Target,
+  diagnostico_cerebral: Brain,
 };
 
 function formatDate(dateStr: string | null): string {
@@ -240,6 +249,48 @@ function ResultDetailCard({ result, index }: { result: TrainingResult; index: nu
             <StatBox value={result.puntaje ?? 0} label={t("neurolector.score")} color="#0051ff" />
             <StatBox value={result.respuestasCorrectas ?? 0} label={t("neurolector.hits")} color="#34c759" />
             <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("neurolector.errors")} color="#ff3b30" />
+          </div>
+        );
+      case "diagnostico_lectura":
+        return (
+          <div className="space-y-2 mt-3">
+            <div className="grid grid-cols-3 gap-2">
+              <StatBox value={`${result.puntaje ?? 0}%`} label={t("tests.comprension")} color="#06b6d4" />
+              <StatBox value={result.palabrasPorMinuto ?? 0} label="PPM" color="#7c3aed" />
+              <StatBox value={formatSeconds(result.tiempoSegundos)} label={t("progress.time")} color="#22c55e" />
+            </div>
+            {(datosExtra.categoriaLector || datosExtra.testType) && (
+              <div className="text-center">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
+                  {datosExtra.categoriaLector || "Lectura"}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      case "diagnostico_razonamiento":
+        return (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <StatBox value={result.respuestasCorrectas ?? 0} label={t("progress.correct")} color="#22c55e" />
+            <StatBox value={(result.respuestasTotales ?? 0) - (result.respuestasCorrectas ?? 0)} label={t("progress.incorrect")} color="#ef4444" />
+            <StatBox value={`${result.puntaje ?? 0}%`} label={t("tests.comprension")} color="#06b6d4" />
+          </div>
+        );
+      case "diagnostico_cerebral":
+        return (
+          <div className="space-y-2 mt-3">
+            <div className="grid grid-cols-3 gap-2">
+              <StatBox value={`${datosExtra.leftPercent ?? 0}%`} label="Izq." color="#06b6d4" />
+              <StatBox value={`${datosExtra.rightPercent ?? 0}%`} label="Der." color="#8a3ffc" />
+              <StatBox value={result.puntaje ?? 0} label="Puntaje" color="#7c3aed" />
+            </div>
+            {datosExtra.dominantSide && (
+              <div className="text-center">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
+                  Dominante: {datosExtra.dominantSide}
+                </span>
+              </div>
+            )}
           </div>
         );
       default:

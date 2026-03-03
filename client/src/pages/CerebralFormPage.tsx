@@ -17,6 +17,7 @@ export default function CerebralFormPage() {
     try {
       const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
                     (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+      const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
       
       const lateralidadAnswers = sessionStorage.getItem('lateralidadAnswers');
       const preferenciaAnswers = sessionStorage.getItem('preferenciaAnswers');
@@ -63,6 +64,31 @@ export default function CerebralFormPage() {
           isPwa: isPwa,
         }),
       });
+
+      // Mirror diagnóstico data in training_results so /progreso can show it by sessionId
+      const totalAnswers = latAnswers.length + prefAnswers.length + cogAnswers.length;
+      await fetch("/api/training-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: sessionId || null,
+          categoria: params.categoria || "adolescentes",
+          tipoEjercicio: "diagnostico_cerebral",
+          ejercicioTitulo: "Diagnóstico Cerebral",
+          puntaje: Math.max(profile.leftPercent, profile.rightPercent),
+          nivelAlcanzado: 1,
+          tiempoSegundos: 0,
+          palabrasPorMinuto: null,
+          respuestasCorrectas: totalAnswers,
+          respuestasTotales: totalAnswers,
+          datosExtra: JSON.stringify({
+            leftPercent: profile.leftPercent,
+            rightPercent: profile.rightPercent,
+            dominantSide: profile.dominantSide,
+          }),
+          isPwa,
+        }),
+      }).catch(() => {});
     } catch (error) {
       console.error("Error submitting:", error);
     }

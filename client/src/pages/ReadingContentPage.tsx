@@ -198,6 +198,9 @@ export default function ReadingContentPage() {
       
       const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
         (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+      const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
+      const comprension = Math.round((correct / content.questions.length) * 100);
+      const velocidadLectura = readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0;
       
       await fetch("/api/quiz/submit", {
         method: "POST",
@@ -226,11 +229,37 @@ export default function ReadingContentPage() {
           tiempoCuestionario: questionTime,
           respuestasCorrectas: correct,
           respuestasTotales: content.questions.length,
-          comprension: Math.round((correct / content.questions.length) * 100),
-          velocidadLectura: readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0,
+          comprension,
+          velocidadLectura,
           isPwa,
         }),
       });
+
+      // Mirror diagnóstico data in training_results so /progreso can show it by sessionId
+      await fetch("/api/training-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: sessionId || null,
+          categoria: userData.childCategory || "preescolar",
+          tipoEjercicio: "diagnostico_lectura",
+          ejercicioTitulo: "Diagnóstico Lectura",
+          puntaje: comprension,
+          nivelAlcanzado: 1,
+          tiempoSegundos: (readingTime || 0) + (questionTime || 0),
+          palabrasPorMinuto: velocidadLectura,
+          respuestasCorrectas: correct,
+          respuestasTotales: content.questions.length,
+          datosExtra: JSON.stringify({
+            testType: "lectura",
+            comprension,
+            velocidadLectura,
+            tiempoLectura: readingTime,
+            tiempoCuestionario: questionTime,
+          }),
+          isPwa,
+        }),
+      }).catch(() => {});
       setShowForm(false);
       setShowResults(true);
     } catch (e) {

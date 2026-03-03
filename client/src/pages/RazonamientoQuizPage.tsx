@@ -121,6 +121,8 @@ export default function RazonamientoQuizPage() {
     try {
       const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
                     (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+      const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
+      const comprension = Math.round((correctAnswers / questions.length) * 100);
       
       await fetch("/api/quiz/submit", {
         method: "POST",
@@ -149,10 +151,34 @@ export default function RazonamientoQuizPage() {
           tiempoCuestionario: quizTime,
           respuestasCorrectas: correctAnswers,
           respuestasTotales: questions.length,
-          comprension: Math.round((correctAnswers / questions.length) * 100),
+          comprension,
           isPwa: isPwa,
         }),
       });
+
+      // Mirror diagnóstico data in training_results so /progreso can show it by sessionId
+      await fetch("/api/training-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: sessionId || null,
+          categoria: categoria,
+          tipoEjercicio: "diagnostico_razonamiento",
+          ejercicioTitulo: title || "Diagnóstico Razonamiento",
+          puntaje: comprension,
+          nivelAlcanzado: 1,
+          tiempoSegundos: quizTime || 0,
+          palabrasPorMinuto: null,
+          respuestasCorrectas: correctAnswers,
+          respuestasTotales: questions.length,
+          datosExtra: JSON.stringify({
+            testType: "razonamiento",
+            comprension,
+            tiempoCuestionario: quizTime,
+          }),
+          isPwa,
+        }),
+      }).catch(() => {});
     } catch (error) {
       console.error("Error submitting:", error);
     }
