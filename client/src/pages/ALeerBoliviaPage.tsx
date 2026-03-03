@@ -36,6 +36,34 @@ const objectivesMeta = [
   { id: "obj5", icon: Award, color: "#f43f5e", bg: "linear-gradient(135deg, #ffe4e6, #fecdd3)", titleKey: "obj5Title", descKey: "obj5Desc" },
 ];
 
+const schoolLogos = [
+  { src: "/logos/colegios/adventista.png", alt: "Colegio Adventista Santa Cruz" },
+  { src: "/logos/colegios/amadeus.png", alt: "Colegio Amadeus Mozart 1" },
+  { src: "/logos/colegios/boliviano-japones.png", alt: "Colegio Boliviano Japones" },
+  { src: "/logos/colegios/bp.jpg", alt: "Colegio Boliviano Paraguayo" },
+  { src: "/logos/colegios/cardenal-cushing.png", alt: "Colegio Cardenal Cushing" },
+  { src: "/logos/colegios/franco-boliviano.png", alt: "Colegio Franco Boliviano" },
+  { src: "/logos/colegios/las-palmas.png", alt: "Colegio Las Palmas School" },
+  { src: "/logos/colegios/latinoamericano.png", alt: "Colegio Latinoamericano" },
+  { src: "/logos/colegios/maria-goretti.png", alt: "Colegio Maria Goretti" },
+  { src: "/logos/colegios/oxford.png", alt: "Colegio Oxford English School" },
+  { src: "/logos/colegios/peniel.png", alt: "Colegio Peniel" },
+  { src: "/logos/colegios/rio-nuevo.png", alt: "Colegio Rio Nuevo" },
+  { src: "/logos/colegios/santo-tomas.png", alt: "Colegio Santo Tomas de Aquino" },
+  { src: "/logos/colegios/uboldi.png", alt: "Colegio Uboldi" },
+  { src: "/logos/colegios/bautista-brasileno.png", alt: "Colegio Bautista Boliviano Brasileno" },
+  { src: "/logos/colegios/proverbios.png", alt: "Colegio Proverbios" },
+];
+
+const sponsorLogos = [
+  { src: "/logos/sponsors/camara-libro-cochabamba.png", name: "Camara Departamental del Libro de Cochabamba" },
+  { src: "/logos/sponsors/feria-internacional-libro-scz.png", name: "Feria Internacional del Libro de Santa Cruz" },
+  { src: "/logos/sponsors/grupo-editorial-la-hoguera.png", name: "Grupo Editorial La Hoguera" },
+  { src: "/logos/sponsors/accion-derechos-humanos.png", name: "Accion por los derechos humanos" },
+  { src: "/logos/sponsors/feria-santa-cruz-logo.png", name: "Feria Internacional del Libro Santa Cruz de la Sierra" },
+  { src: "/logos/sponsors/firstclass-institute.png", name: "Firstclass Institute" },
+];
+
 export default function ALeerBoliviaPage() {
   // Toggle para desactivar temporalmente estilos remotos del Navigator en esta página.
   // Cuando quieras reactivarlo, cambia a `true`.
@@ -184,6 +212,8 @@ export default function ALeerBoliviaPage() {
     },
   ];
   const activeVideo = motivationalVideos[motivationalIndex];
+  const schoolLogosLoop = [...schoolLogos, ...schoolLogos];
+  const sponsorLogosLoop = [...sponsorLogos, ...sponsorLogos];
   const joinModalTitleMap = {
     schools: "Inscripcion de Colegios",
     sponsors: "Inscripcion de Auspiciadores",
@@ -1187,6 +1217,103 @@ export default function ALeerBoliviaPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="px-5 pb-12"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.18 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          data-testid="section-colegios-carousel"
+        >
+          <div
+            className="rounded-3xl border border-cyan-200/70 bg-white/85 backdrop-blur-sm p-5 md:p-6"
+            style={{ boxShadow: "0 14px 36px rgba(6,182,212,0.14), 0 4px 14px rgba(109,40,217,0.08)" }}
+          >
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-black text-violet-700">{t("aleer.schoolsTitle")}</h3>
+              <p className="text-sm md:text-base text-gray-700 mt-2 max-w-3xl mx-auto">{t("aleer.schoolsDesc")}</p>
+            </div>
+
+            <div className="mt-5 relative overflow-hidden rounded-2xl border border-violet-200/70 bg-white/75">
+              <motion.div
+                className="flex w-max items-center gap-4 py-4 px-2"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 36, repeat: Infinity, ease: "linear" }}
+              >
+                {schoolLogosLoop.map((logo, idx) => (
+                  <div
+                    key={`${logo.src}-${idx}`}
+                    className="w-[92px] h-[92px] sm:w-[102px] sm:h-[102px] md:w-[112px] md:h-[112px] rounded-2xl bg-white border border-cyan-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
+                  >
+                    <img
+                      src={logo.src}
+                      alt={logo.alt}
+                      loading="lazy"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="px-5 pb-12"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.18 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          data-testid="section-sponsors-carousel"
+        >
+          <div
+            className="rounded-3xl border border-violet-200/70 bg-white/85 backdrop-blur-sm p-5 md:p-6"
+            style={{ boxShadow: "0 14px 36px rgba(109,40,217,0.14), 0 4px 14px rgba(6,182,212,0.08)" }}
+          >
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-black text-cyan-700">{t("aleer.sponsorsTitle")}</h3>
+              <p className="text-sm md:text-base text-gray-700 mt-2 max-w-3xl mx-auto">{t("aleer.sponsorsDesc")}</p>
+            </div>
+
+            <div className="mt-5 relative overflow-hidden rounded-2xl border border-cyan-200/70 bg-white/75">
+              <motion.div
+                className="flex w-max items-center gap-4 py-4 px-2"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+              >
+                {sponsorLogosLoop.map((item, idx) => (
+                  <div
+                    key={`${item.name}-${idx}`}
+                    className="w-[112px] h-[112px] sm:w-[124px] sm:h-[124px] md:w-[132px] md:h-[132px] rounded-2xl bg-white border border-violet-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
+                    title={item.name}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.name}
+                      loading="lazy"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.display = "none";
+                        const parent = img.parentElement as HTMLElement | null;
+                        if (parent && !parent.querySelector(".sponsor-fallback")) {
+                          const span = document.createElement("span");
+                          span.className = "sponsor-fallback text-[10px] leading-tight text-center font-bold text-violet-700 px-1";
+                          span.textContent = item.name;
+                          parent.appendChild(span);
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              </motion.div>
             </div>
           </div>
         </motion.section>
