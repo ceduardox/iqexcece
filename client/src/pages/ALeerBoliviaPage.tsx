@@ -133,15 +133,6 @@ export default function ALeerBoliviaPage() {
       : `${base} hover:ring-2 hover:ring-purple-400 hover:ring-offset-1`;
   }, [editorMode, selectedElement]);
 
-  if (!stylesLoaded) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
   const motivationalVideos = [
     {
       id: 1,
@@ -182,6 +173,16 @@ export default function ALeerBoliviaPage() {
     }, 5200);
     return () => window.clearInterval(id);
   }, [motivationalVideos.length]);
+
+  if (!stylesLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
 
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
