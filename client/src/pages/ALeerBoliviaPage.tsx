@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle, X, FileDown } from "lucide-react";
+import { BookOpen, Lightbulb, Users, Award, Sparkles, Target, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, CheckCheck, School, GraduationCap, Smartphone, BarChart3, ClipboardList, Building2, Handshake, UserRound, PlayCircle, X, FileDown } from "lucide-react";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
@@ -54,6 +54,8 @@ export default function ALeerBoliviaPage() {
   const [joinStartedAt, setJoinStartedAt] = useState<number>(0);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
   const [joinMessage, setJoinMessage] = useState<string>("");
+  const [sponsorsTab, setSponsorsTab] = useState<"types" | "register">("types");
+  const [openSponsorTier, setOpenSponsorTier] = useState<"gran" | "mediano" | "pequeno" | null>("gran");
   const [joinForm, setJoinForm] = useState({
     responsableNombre: "",
     responsableCi: "",
@@ -183,14 +185,107 @@ export default function ALeerBoliviaPage() {
   const activeVideo = motivationalVideos[motivationalIndex];
   const joinModalTitleMap = {
     schools: "Inscripcion de Colegios",
-    sponsors: "Inscripcion de Sponsors",
+    sponsors: "Inscripcion de Auspiciadores",
     independent: "Inscripcion de Estudiantes Independientes",
   } as const;
+  const sponsorTiers = [
+    {
+      id: "gran" as const,
+      title: "GRAN AUSPICIADOR",
+      subtitle: "Lidera el cambio en la educacion y la cultura lectora",
+      benefits: [
+        {
+          title: "Convocatoria impresa al Intercolegial",
+          desc: "Su marca estara presente en el documento de convocatoria que sera entregado en cada colegio participante",
+        },
+        {
+          title: "Marca en el banner del Intercolegial",
+          desc: "Su logotipo sera destacado en el banner ubicado en el lugar donde se celebrara la gran final",
+        },
+        {
+          title: "Marca en los videos de redes sociales",
+          desc: "Su marca sera promocionada en los videos difundidos en los canales oficiales de IQExponencial, llegando a una amplia audiencia",
+        },
+        {
+          title: "Activaciones en los colegios",
+          desc: "Tendra la oportunidad de realizar activaciones y promociones de su marca en los colegios participantes, generando un mayor impacto",
+        },
+        {
+          title: "Presencia de la marca en la final",
+          desc: "Su marca estara presente promocional durante la emocionante final del Intercolegial",
+        },
+        {
+          title: "Presencia de la marca en la gala final",
+          desc: "Su producto o servicio sera exhibido y promocionado en la gala final del Intercolegial, generando visibilidad y reconocimiento",
+        },
+        {
+          title: "Video con el ganador y el producto o servicio",
+          desc: "Se realizara un video promocional con el ganador del concurso y su producto o servicio, brindandole una mayor exposicion",
+        },
+        {
+          title: "Exclusividad del producto o servicio",
+          desc: "Su marca gozara de exclusividad en su categoria de producto o servicio dentro del evento",
+        },
+      ],
+    },
+    {
+      id: "mediano" as const,
+      title: "MEDIANO AUSPICIADOR",
+      subtitle: "Fortalece tu presencia, inspira a la comunidad",
+      benefits: [
+        {
+          title: "Convocatoria impresa al Intercolegial",
+          desc: "Su marca estara presente en el documento de convocatoria que sera entregado en cada colegio participante",
+        },
+        {
+          title: "Marca en el banner del Intercolegial",
+          desc: "Su logotipo sera destacado en el banner ubicado en el lugar donde se celebrara la gran final",
+        },
+        {
+          title: "Marca en los videos de redes sociales",
+          desc: "Su marca sera promocionada en los videos difundidos en los canales oficiales de IQExponencial, llegando a una amplia audiencia",
+        },
+        {
+          title: "Activaciones en los colegios",
+          desc: "Tendra la oportunidad de realizar activaciones y promociones de su marca en los colegios participantes, generando un mayor impacto",
+        },
+        {
+          title: "Exclusividad del producto o servicio",
+          desc: "Su marca gozara de exclusividad en su categoria de producto o servicio dentro del evento",
+        },
+      ],
+    },
+    {
+      id: "pequeno" as const,
+      title: "PEQUENO AUSPICIADOR",
+      subtitle: "Haz que tu marca cuente, apoya el progreso educativo",
+      benefits: [
+        {
+          title: "Convocatoria impresa al Intercolegial",
+          desc: "Su marca estara presente en el documento de convocatoria que sera entregado en cada colegio participante",
+        },
+        {
+          title: "Marca en el banner del Intercolegial",
+          desc: "Su logotipo sera destacado en el banner ubicado en el lugar donde se celebrara la gran final",
+        },
+        {
+          title: "Marca en los videos de redes sociales",
+          desc: "Su marca sera promocionada en los videos difundidos en los canales oficiales de IQExponencial, llegando a una amplia audiencia",
+        },
+        {
+          title: "Exclusividad del producto o servicio",
+          desc: "Su marca gozara de exclusividad en su categoria de producto o servicio dentro del evento",
+        },
+      ],
+    },
+  ];
 
   const openJoinModal = (type: "schools" | "sponsors" | "independent") => {
     setJoinModalType(type);
     setJoinStartedAt(Date.now());
     setJoinMessage("");
+    setSponsorsTab(type === "sponsors" ? "types" : "register");
+    setOpenSponsorTier("gran");
   };
 
   const closeJoinModal = () => {
@@ -1070,10 +1165,10 @@ export default function ALeerBoliviaPage() {
             exit={{ opacity: 0 }}
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl border border-cyan-300/40 bg-white shadow-2xl"
           >
-            <div className="sticky top-0 z-10 bg-[#1f4a8f] text-white px-4 py-3 flex items-center justify-between">
+            <div className={`sticky top-0 z-10 text-white px-4 py-3 flex items-center justify-between ${joinModalType === "sponsors" ? "bg-[#3A8E27]" : "bg-[#1f4a8f]"}`}>
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-11 h-11 rounded-full border border-white/50 flex items-center justify-center shrink-0">
-                  <Building2 className="w-6 h-6" />
+                  {joinModalType === "sponsors" ? <Handshake className="w-6 h-6" /> : <Building2 className="w-6 h-6" />}
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] uppercase tracking-[0.08em] text-cyan-100">Formulario Oficial</p>
@@ -1090,19 +1185,106 @@ export default function ALeerBoliviaPage() {
               </button>
             </div>
 
-            <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
-              <p className="text-sm text-gray-600">Completa el formulario para iniciar el registro.</p>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-gray-800 transition-colors"
-                data-testid="button-download-convocatoria"
-              >
-                <FileDown className="w-4 h-4" />
-                DESCARGA CONVOCATORIA
-              </button>
-            </div>
+            {joinModalType !== "sponsors" && (
+              <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+                <p className="text-sm text-gray-600">Completa el formulario para iniciar el registro.</p>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-gray-800 transition-colors"
+                  data-testid="button-download-convocatoria"
+                >
+                  <FileDown className="w-4 h-4" />
+                  DESCARGA CONVOCATORIA
+                </button>
+              </div>
+            )}
 
-            <form className="p-4 sm:p-5 space-y-5" onSubmit={submitJoinForm} data-testid="form-join-inscripcion">
+            {joinModalType === "sponsors" && (
+              <div className="p-4 sm:p-6 border-b border-gray-100">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                  Estimado(a) Auspiciador, te invitamos a ser parte de un movimiento que transforma la educacion y la cultura lectora en Bolivia.
+                  Este evento intercolegial impulsa impacto real y ofrece niveles de auspicio para maximizar visibilidad y resultados de marca.
+                </p>
+                <div className="mt-4 grid grid-cols-2 border border-blue-300 rounded-lg overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setSponsorsTab("types")}
+                    className={`py-2.5 text-sm font-semibold transition-colors ${sponsorsTab === "types" ? "bg-[#2C72AC] text-white" : "bg-white text-gray-700"}`}
+                    data-testid="button-sponsors-types"
+                  >
+                    Tipos de Auspicio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSponsorsTab("register")}
+                    className={`py-2.5 text-sm font-semibold transition-colors ${sponsorsTab === "register" ? "bg-[#2C72AC] text-white" : "bg-white text-gray-700"}`}
+                    data-testid="button-sponsors-register"
+                  >
+                    Solicitar Registro
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {joinModalType === "sponsors" && sponsorsTab === "types" && (
+              <div className="p-4 sm:p-6 space-y-3">
+                {sponsorTiers.map((tier) => {
+                  const isOpen = openSponsorTier === tier.id;
+                  return (
+                    <div key={tier.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setOpenSponsorTier(isOpen ? null : tier.id)}
+                        className="w-full px-4 py-3 flex items-center justify-between text-left bg-white hover:bg-gray-50"
+                        data-testid={`button-sponsor-tier-${tier.id}`}
+                      >
+                        <div>
+                          <p className="font-bold text-gray-800 text-sm sm:text-base">{tier.title}</p>
+                          <p className="text-xs sm:text-sm text-gray-500">{tier.subtitle}</p>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      {isOpen && (
+                        <div className="p-3 sm:p-4 bg-[#f3f3f3]">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {tier.benefits.map((benefit, idx) => {
+                              const shouldCenter =
+                                tier.id === "mediano" &&
+                                tier.benefits.length % 2 === 1 &&
+                                idx === tier.benefits.length - 1;
+                              return (
+                                <div
+                                  key={`${tier.id}-${benefit.title}`}
+                                  className={`bg-white rounded-md border border-gray-200 px-4 py-4 text-center ${shouldCenter ? "md:col-span-2 md:max-w-[48%] md:mx-auto" : ""}`}
+                                >
+                                  <p className="font-semibold text-gray-800 text-[15px] leading-tight">{benefit.title}</p>
+                                  <p className="mt-2 text-[13px] text-gray-600 leading-snug">{benefit.desc}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div className="pt-2 text-center">
+                  <p className="text-sm text-gray-700 max-w-2xl mx-auto">
+                    Potencie su marca con un auspicio y contribuya significativamente a la educacion y lectura.
+                  </p>
+                  <Button
+                    type="button"
+                    className="mt-4 bg-[#2C72AC] hover:bg-[#245d8d] text-white px-8"
+                    onClick={() => setSponsorsTab("register")}
+                    data-testid="button-sponsors-contactar"
+                  >
+                    CONTACTAR
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <form className={`p-4 sm:p-5 space-y-5 ${joinModalType === "sponsors" && sponsorsTab === "types" ? "hidden" : ""}`} onSubmit={submitJoinForm} data-testid="form-join-inscripcion">
               <input
                 type="text"
                 autoComplete="off"
