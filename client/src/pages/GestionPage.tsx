@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback, Fragment, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
@@ -155,13 +155,13 @@ export default function GestionPage() {
   const [entrenamientoCard, setEntrenamientoCard] = useState({
     imageUrl: "",
     title: "Entrenamiento",
-    description: "Mejora tu velocidad de percepciÃ³n visual y fortalece tus habilidades cognitivas",
+    description: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas",
     buttonText: "Comenzar"
   });
   const [entrenamientoPage, setEntrenamientoPage] = useState({
-    bannerText: "Â¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
+    bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
     pageTitle: "Entrenamientos",
-    pageDescription: "Mejora tu velocidad de percepciÃ³n visual y fortalece tus habilidades cognitivas"
+    pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
   });
   const [entrenamientoItems, setEntrenamientoItems] = useState<{id: string; title: string; description: string; imageUrl: string; linkUrl: string; sortOrder: number; isActive: boolean; tipoEjercicio?: string; prepImage?: string; prepTitle?: string; prepSubtitle?: string; prepInstructions?: string; prepButtonText?: string}[]>([]);
   const [editingEntrenamientoItem, setEditingEntrenamientoItem] = useState<string | null>(null);
@@ -170,7 +170,7 @@ export default function GestionPage() {
   const [loadingTranslationId, setLoadingTranslationId] = useState<string | null>(null);
   const [savingTranslationId, setSavingTranslationId] = useState<string | null>(null);
   
-  // PÃ¡ginas de preparaciÃ³n
+  // Páginas de preparación
   const [prepPages, setPrepPages] = useState<{id: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string}[]>([]);
   const [selectedPrepPageId, setSelectedPrepPageId] = useState<string | null>(null);
   const [editingPrepPage, setEditingPrepPage] = useState<{id?: string; nombre: string; imagen?: string; titulo?: string; subtitulo?: string; instrucciones?: string; textoBoton?: string} | null>(null);
@@ -190,7 +190,7 @@ export default function GestionPage() {
     isActive: boolean;
   } | null>(null);
   
-  // PÃ¡gina de introducciÃ³n de NÃºmeros
+  // Página de introducción de Números
   const [numerosIntroData, setNumerosIntroData] = useState<{
     id?: string;
     entrenamientoItemId: string;
@@ -200,7 +200,7 @@ export default function GestionPage() {
     imagenCabecera: string;
   } | null>(null);
   
-  // ConfiguraciÃ³n de AceleraciÃ³n de Lectura
+  // Configuración de Aceleración de Lectura
   const [aceleracionData, setAceleracionData] = useState<{
     id?: string;
     entrenamientoItemId: string;
@@ -211,65 +211,65 @@ export default function GestionPage() {
   } | null>(null);
   
   const EXERCISE_TYPES = [
-    { value: "bailarina", label: "Bailarina (direcciÃ³n visual)" },
-    { value: "secuencia", label: "Secuencia numÃ©rica" },
+    { value: "bailarina", label: "Bailarina (dirección visual)" },
+    { value: "secuencia", label: "Secuencia numérica" },
     { value: "memoria", label: "Memoria visual" },
-    { value: "patron", label: "PatrÃ³n visual" },
+    { value: "patron", label: "Patrón visual" },
     { value: "stroop", label: "Test Stroop (color vs palabra)" },
     { value: "preferencia", label: "Preferencia visual (proyectivo)" },
     { value: "lateralidad", label: "Lateralidad (izquierda/derecha)" },
-    { value: "aceleracion_lectura", label: "AceleraciÃ³n de Lectura (PDF)" },
+    { value: "aceleracion_lectura", label: "Aceleración de Lectura (PDF)" },
   ];
   
   const defaultPreescolar = {
     title: "Paseando con mi perrito",
-    content: "Mariana tiene un perrito cafÃ© llamado Pipo. Un dÃ­a lo llevÃ³ al parque a pasear. Mientras jugaban, el perrito se escapÃ³. Mariana lo buscÃ³ mucho. Al final, lo encontrÃ³ escondido detrÃ¡s del kiosco comiendo un helado que alguien habÃ­a dejado.",
+    content: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
     imageUrl: "https://img.freepik.com/free-vector/cute-girl-walking-dog-cartoon-vector-icon-illustration_138676-2600.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
     categoryImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
     questions: [
-      { question: "Â¿quÃ© se llamaba la niÃ±a?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
-      { question: "Â¿de que color es su perrito?", options: ["Negro", "CafÃ©", "Azul"], correct: 1 },
-      { question: "Â¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
-      { question: "Â¿DÃ³nde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
+      { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
+      { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
+      { question: "¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
+      { question: "¿Dónde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
     ]
   };
   
   const defaultNinos = {
     title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
-    content: "Hace muchos aÃ±os, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en AmÃ©rica Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podÃ­a comprar un tomate con un grano de cacao, o un conejo con 30 granos. AdemÃ¡s, solo las personas importantes, como guerreros y nobles, podÃ­an tomar esa bebida.\n\nCuando los conquistadores espaÃ±oles llegaron a AmÃ©rica en el siglo XVI, llevaron el cacao a Europa. AllÃ­, las personas comenzaron a mezclarlo con azÃºcar y leche, creando una bebida caliente mÃ¡s dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en paÃ­ses tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y ademÃ¡s de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de Ã¡nimo y aportar energÃ­a, siempre que se consuma con moderaciÃ³n.",
+    content: "Hace muchos años, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en América Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podía comprar un tomate con un grano de cacao, o un conejo con 30 granos. Además, solo las personas importantes, como guerreros y nobles, podían tomar esa bebida.\n\nCuando los conquistadores españoles llegaron a América en el siglo XVI, llevaron el cacao a Europa. Allí, las personas comenzaron a mezclarlo con azúcar y leche, creando una bebida caliente más dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en países tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y además de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de ánimo y aportar energía, siempre que se consuma con moderación.",
     imageUrl: "https://img.freepik.com/free-vector/chocolate-bar-pieces-realistic-composition_1284-19023.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
     categoryImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
     questions: [
-      { question: "Â¿QuÃ© civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
-      { question: "Â¿CÃ³mo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
-      { question: "Â¿Para quÃ© usaban los aztecas los granos de cacao, ademÃ¡s de preparar bebidas?", options: ["Intercambio.", "Moneda.", "Licor.", "Medicina natural."], correct: 1 },
-      { question: "Â¿QuÃ© cambios hizo Europa en la forma de consumir el cacao?", options: ["Comercializaron.", "Mezclaron con azÃºcar y leche.", "Usaban como bebida caliente.", "Lo intercambiaron."], correct: 1 },
-      { question: "Menciona dos paÃ­ses actuales donde se cultiva el cacao.", options: ["Europa y Ãfrica.", "Centro AmÃ©rica y el caribe.", "Ecuador y Ghana.", "Brasil y Bolivia."], correct: 2 },
+      { question: "¿Qué civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
+      { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
+      { question: "¿Para qué usaban los aztecas los granos de cacao, además de preparar bebidas?", options: ["Intercambio.", "Moneda.", "Licor.", "Medicina natural."], correct: 1 },
+      { question: "¿Qué cambios hizo Europa en la forma de consumir el cacao?", options: ["Comercializaron.", "Mezclaron con azúcar y leche.", "Usaban como bebida caliente.", "Lo intercambiaron."], correct: 1 },
+      { question: "Menciona dos países actuales donde se cultiva el cacao.", options: ["Europa y África.", "Centro América y el caribe.", "Ecuador y Ghana.", "Brasil y Bolivia."], correct: 2 },
     ]
   };
 
   const defaultAdolescentes = {
     title: "EUTANASIA",
-    content: `El tÃ©rmino eutanasia es todo acto u omisiÃ³n cuya responsabilidad recae en personal mÃ©dico o en individuos cercanos al enfermo, y que ocasiona la muerte inmediata de Ã©ste. La palabra deriva del griego: eu ("bueno") y thanatos ("muerte").
+    content: `El término eutanasia es todo acto u omisión cuya responsabilidad recae en personal médico o en individuos cercanos al enfermo, y que ocasiona la muerte inmediata de éste. La palabra deriva del griego: eu ("bueno") y thanatos ("muerte").
 
-Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongaciÃ³n artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". TambiÃ©n sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
+Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongación artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". También sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
 
-Otros, en cambio, creen que los programas de eutanasia estÃ¡n en contraposiciÃ³n con los ideales con los que se defiende su implementaciÃ³n. Por ejemplo, se menciona que los mÃ©dicos durante el rÃ©gimen nazi hacÃ­an propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, segÃºn aquella propaganda, merecedoras de compasiÃ³n, para conseguir asÃ­ una opiniÃ³n pÃºblica favorable a la eliminaciÃ³n que se estaba haciendo de enfermos, considerados minusvÃ¡lidos o dÃ©biles segÃºn criterios nazis.
+Otros, en cambio, creen que los programas de eutanasia están en contraposición con los ideales con los que se defiende su implementación. Por ejemplo, se menciona que los médicos durante el régimen nazi hacían propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, según aquella propaganda, merecedoras de compasión, para conseguir así una opinión pública favorable a la eliminación que se estaba haciendo de enfermos, considerados minusválidos o débiles según criterios nazis.
 
-Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha despenalizado la eutanasia, y en ellos todavÃ­a permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. SegÃºn los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos paÃ­ses.`,
+Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despenalizado la eutanasia, y en ellos todavía permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. Según los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos países.`,
     imageUrl: "https://img.freepik.com/free-vector/teenager-student-concept-illustration_114360-1395.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/student-with-laptop-studying-online-course_74855-5293.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/reading-book-concept-illustration_114360-8503.jpg",
     categoryImage: "https://img.freepik.com/free-vector/teenager-student-concept-illustration_114360-1395.jpg",
     questions: [
-      { question: "Â¿QuÃ© es la eutanasia?", options: ["Es aquello que considera lo bueno y lo malo", "Es quitarse la vida para evitar el sufrimiento", "Es todo acto u omisiÃ³n cuya responsabilidad recae en el medico y/o familiares"], correct: 2 },
-      { question: "Â¿DÃ³nde surge la propaganda de realizar la eutanasia?", options: ["E.E.U.U.", "Alemania", "Rusia"], correct: 1 },
-      { question: "Â¿En quÃ© paÃ­ses se ha despenalizado la eutanasia?", options: ["Alemania - Italia", "BÃ©lgica - Holanda", "EspaÃ±a - Inglaterra"], correct: 1 },
-      { question: "Â¿QuiÃ©n fue juzgado como asesino por practicar la eutanasia en el gobierno nazi?", options: ["Arthun", "Nuberg", "Vemberth"], correct: 0 },
+      { question: "¿Qué es la eutanasia?", options: ["Es aquello que considera lo bueno y lo malo", "Es quitarse la vida para evitar el sufrimiento", "Es todo acto u omisión cuya responsabilidad recae en el medico y/o familiares"], correct: 2 },
+      { question: "¿Dónde surge la propaganda de realizar la eutanasia?", options: ["E.E.U.U.", "Alemania", "Rusia"], correct: 1 },
+      { question: "¿En qué países se ha despenalizado la eutanasia?", options: ["Alemania - Italia", "Bélgica - Holanda", "España - Inglaterra"], correct: 1 },
+      { question: "¿Quién fue juzgado como asesino por practicar la eutanasia en el gobierno nazi?", options: ["Arthun", "Nuberg", "Vemberth"], correct: 0 },
     ]
   };
 
@@ -279,34 +279,34 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
   
   const defaultUniversitarios = {
     title: "LECTURA UNIVERSITARIA - Tema 01",
-    content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+    content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
     imageUrl: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/college-students-concept-illustration_114360-10205.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/book-reading-concept-illustration_114360-4528.jpg",
     categoryImage: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
-    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 }],
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
   };
   const [editContentUniversitarios, setEditContentUniversitarios] = useState(defaultUniversitarios);
   
   const defaultProfesionales = {
     title: "LECTURA PROFESIONAL - Tema 01",
-    content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+    content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
     imageUrl: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/office-workers-concept-illustration_114360-2244.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/business-team-concept-illustration_114360-3628.jpg",
     categoryImage: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
-    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 }],
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
   };
   const [editContentProfesionales, setEditContentProfesionales] = useState(defaultProfesionales);
   
   const defaultAdultoMayor = {
     title: "LECTURA ADULTO MAYOR - Tema 01",
-    content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+    content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
     imageUrl: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
     pageMainImage: "https://img.freepik.com/free-vector/elderly-people-concept-illustration_114360-4195.jpg",
     pageSmallImage: "https://img.freepik.com/free-vector/reading-glasses-concept-illustration_114360-4890.jpg",
     categoryImage: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
-    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 }],
+    questions: [{ question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 }],
   };
   const [editContentAdultoMayor, setEditContentAdultoMayor] = useState(defaultAdultoMayor);
   
@@ -369,7 +369,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
         setError("Credenciales incorrectas");
       }
     } catch {
-      setError("Error de conexiÃ³n");
+      setError("Error de conexión");
     }
   };
 
@@ -1058,7 +1058,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     { key: "sesiones", label: "Sesiones" },
     { key: "resultados", label: "Resultados", children: ["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"] },
     { key: "contenido", label: "Contenido" },
-    { key: "imagenes", label: "ImÃ¡genes" },
+    { key: "imagenes", label: "Imágenes" },
     { key: "entrenamiento", label: "Entrenamiento" },
     { key: "servidor", label: "Servidor" },
     { key: "instituciones", label: "Instituciones" },
@@ -1345,7 +1345,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     
     const authToken = token || localStorage.getItem("adminToken");
     if (!authToken) {
-      setError("No autorizado. Por favor inicia sesiÃ³n de nuevo.");
+      setError("No autorizado. Por favor inicia sesión de nuevo.");
       return;
     }
     
@@ -1415,13 +1415,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
         setImagePreview("");
         setCrop(undefined);
         setImageName("");
-        alert("Imagen guardada correctamente. Usa el botÃ³n 'Copiar' para obtener el link.");
+        alert("Imagen guardada correctamente. Usa el botón 'Copiar' para obtener el link.");
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert(`Error al guardar: ${errData.error || res.statusText}. Intenta cerrar sesiÃ³n y volver a entrar.`);
+        alert(`Error al guardar: ${errData.error || res.statusText}. Intenta cerrar sesión y volver a entrar.`);
       }
     } catch (err) {
-      alert("Error al guardar la imagen. Verifica tu conexiÃ³n.");
+      alert("Error al guardar la imagen. Verifica tu conexión.");
     } finally {
       setSaving(false);
     }
@@ -1516,7 +1516,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     const map: Record<string, string> = {
       "universitario": "Universitario",
       "profesional": "Profesional",
-      "ocupacion": "OcupaciÃ³n",
+      "ocupacion": "Ocupación",
       "estudiante": "Estudiante"
     };
     return map[tipo] || tipo;
@@ -1547,7 +1547,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
           setPrepPages(prepPagesData.pages || []);
           setSelectedPrepPageId(catPrepData.mapping?.prepPageId || null);
           
-          // Cargar configuraciÃ³n de aceleraciÃ³n para items de tipo aceleracion_lectura
+          // Cargar configuración de aceleración para items de tipo aceleracion_lectura
           const aceleracionItem = (itemsData.items || []).find((i: {tipoEjercicio?: string}) => i.tipoEjercicio === "aceleracion_lectura");
           if (aceleracionItem) {
             try {
@@ -1558,7 +1558,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   id: accelData.ejercicio.id,
                   entrenamientoItemId: aceleracionItem.id,
                   imagenCabecera: accelData.ejercicio.imagenCabecera || "",
-                  titulo: accelData.ejercicio.titulo || "Acelera al mÃ¡ximo tu Lectura",
+                  titulo: accelData.ejercicio.titulo || "Acelera al máximo tu Lectura",
                   velocidadPPM: accelData.ejercicio.velocidadPPM || 200,
                   modoGolpePorcentaje: accelData.ejercicio.modoGolpePorcentaje || 50
                 });
@@ -1566,7 +1566,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 setAceleracionData({
                   entrenamientoItemId: aceleracionItem.id,
                   imagenCabecera: "",
-                  titulo: "Acelera al mÃ¡ximo tu Lectura",
+                  titulo: "Acelera al máximo tu Lectura",
                   velocidadPPM: 200,
                   modoGolpePorcentaje: 50
                 });
@@ -1581,7 +1581,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
   const getAgeLabel = (age: string | null) => {
     const labels: Record<string, string> = {
-      ninos: "NiÃ±os",
+      ninos: "Niños",
       adolescentes: "Adolescentes",
       universitarios: "Universitarios",
       profesionales: "Profesionales",
@@ -1601,7 +1601,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
           <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-xl">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-white">
-                Panel de GestiÃ³n
+                Panel de Gestión
               </CardTitle>
               <p className="text-cyan-400 text-sm">IQEXPONENCIAL</p>
             </CardHeader>
@@ -1617,7 +1617,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 />
                 <Input
                   type="password"
-                  placeholder="ContraseÃ±a"
+                  placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
@@ -1655,7 +1655,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
       <aside className="w-64 bg-black/40 border-r border-white/10 p-4 hidden md:flex flex-col">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-white">Panel de GestiÃ³n</h1>
+          <h1 className="text-xl font-bold text-white">Panel de Gestión</h1>
           <p className="text-cyan-400 text-sm">IQxponencial</p>
         </div>
         
@@ -1767,7 +1767,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             data-testid="sidebar-imagenes"
           >
             <ImageIcon className="w-5 h-5" />
-            ImÃ¡genes
+            Imágenes
           </button>
           )}
           {isTabVisible("entrenamiento") && (
@@ -1907,7 +1907,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
       <div className="flex-1 p-4 overflow-auto">
         <div className="md:hidden flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-lg font-bold text-white">Panel de GestiÃ³n</h1>
+            <h1 className="text-lg font-bold text-white">Panel de Gestión</h1>
             <p className="text-cyan-400 text-xs">IQxponencial</p>
           </div>
           <div className="flex gap-2">
@@ -2006,7 +2006,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             data-testid="mobile-tab-imagenes"
           >
             <ImageIcon className="w-4 h-4 mr-1" />
-            ImÃ¡genes
+            Imágenes
           </Button>
           )}
           {isTabVisible("entrenamiento") && (
@@ -2196,7 +2196,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               <th className="pb-3 px-2">Navegador</th>
                               <th className="pb-3 px-2">Tipo</th>
                               <th className="pb-3 px-2">Edad</th>
-                              <th className="pb-3 px-2">Ãšltima Actividad</th>
+                              <th className="pb-3 px-2">Última Actividad</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2262,7 +2262,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 <p className="text-white/60">IP: <span className="text-white/80 font-mono text-xs">{session.ip || "-"}</span></p>
                                 <p className="text-white/60">Navegador: <span className="text-white/80">{session.browser || "-"}</span></p>
                                 <p className="text-white/60">Edad: <span className="text-white/80">{getAgeLabel(session.ageGroup)}</span></p>
-                                <p className="text-white/60">Ãšltima Actividad: <span className="text-white/60">{formatDate(session.lastActivity)}</span></p>
+                                <p className="text-white/60">Última Actividad: <span className="text-white/60">{formatDate(session.lastActivity)}</span></p>
                               </div>
                             )}
                           </div>
@@ -2359,7 +2359,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   size="sm"
                   className={resultFilter === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
                 >
-                  NiÃ±os
+                  Niños
                 </Button>
                 <Button
                   onClick={() => setResultFilter("adolescentes")}
@@ -2401,8 +2401,8 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     <tr className="text-left text-white/60 border-b border-white/10">
                       <th className="pb-3 px-2"></th>
                       <th className="pb-3 px-2">Nombre</th>
-                      <th className="pb-3 px-2">CategorÃ­a</th>
-                      <th className="pb-3 px-2">ComprensiÃ³n</th>
+                      <th className="pb-3 px-2">Categoría</th>
+                      <th className="pb-3 px-2">Comprensión</th>
                       <th className="pb-3 px-2">Correctas</th>
                       <th className="pb-3 px-2">Tipo</th>
                       <th className="pb-3 px-2">Fecha</th>
@@ -2443,11 +2443,11 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           <tr className="bg-white/5">
                             <td colSpan={7} className="px-4 py-4">
                               <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-4 mb-4 border border-blue-500/20">
-                                <h4 className="text-blue-400 font-bold mb-3 text-sm">ðŸ“Š Resultados del Test</h4>
+                                <h4 className="text-blue-400 font-bold mb-3 text-sm">📊 Resultados del Test</h4>
                                 <div className="grid grid-cols-3 gap-3 text-center">
                                   <div className="bg-black/30 rounded-lg p-2">
                                     <div className="text-cyan-400 font-bold text-lg">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
-                                    <div className="text-white/50 text-xs">ComprensiÃ³n</div>
+                                    <div className="text-white/50 text-xs">Comprensión</div>
                                   </div>
                                   <div className="bg-black/30 rounded-lg p-2">
                                     <div className="text-green-400 font-bold text-lg">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
@@ -2462,15 +2462,15 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                 <div><span className="text-white/60">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                                 <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
-                                <div><span className="text-white/60">TelÃ©fono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
-                                <div><span className="text-white/60">PaÃ­s:</span> <span className="text-cyan-400">{(r as any).pais || "-"}</span></div>
+                                <div><span className="text-white/60">Teléfono:</span> <span className="text-white">{r.telefono || "-"}</span></div>
+                                <div><span className="text-white/60">País:</span> <span className="text-cyan-400">{(r as any).pais || "-"}</span></div>
                                 <div><span className="text-white/60">Estado:</span> <span className="text-cyan-400">{(r as any).estado || r.ciudad || "-"}</span></div>
                                 <div><span className="text-white/60">Grado:</span> <span className="text-yellow-400">{(r as any).grado || "-"}</span></div>
-                                <div><span className="text-white/60">InstituciÃ³n:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
+                                <div><span className="text-white/60">Institución:</span> <span className="text-cyan-400">{(r as any).institucion || "-"}</span></div>
                                 {(r as any).tipoEstudiante && <div><span className="text-white/60">Perfil:</span> <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></div>}
                                 {(r as any).semestre && <div><span className="text-white/60">Semestre:</span> <span className="text-purple-400">{(r as any).semestre}</span></div>}
-                                {(r as any).profesion && <div><span className="text-white/60">ProfesiÃ³n:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
-                                {(r as any).ocupacion && <div><span className="text-white/60">OcupaciÃ³n:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
+                                {(r as any).profesion && <div><span className="text-white/60">Profesión:</span> <span className="text-green-400">{(r as any).profesion}</span></div>}
+                                {(r as any).ocupacion && <div><span className="text-white/60">Ocupación:</span> <span className="text-green-400">{(r as any).ocupacion}</span></div>}
                                 {(r as any).lugarTrabajo && <div><span className="text-white/60">Lugar Trabajo:</span> <span className="text-green-400">{(r as any).lugarTrabajo}</span></div>}
                                 {(r as any).comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/60">Comentario:</span> <span className="text-white/80">{(r as any).comentario}</span></div>}
                               </div>
@@ -2510,11 +2510,11 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     {expandedResult === r.id && (
                       <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10">
                         <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 mt-2 border border-blue-500/20">
-                          <h4 className="text-blue-400 font-bold mb-2 text-xs">ðŸ“Š Resultados del Test</h4>
+                          <h4 className="text-blue-400 font-bold mb-2 text-xs">📊 Resultados del Test</h4>
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div className="bg-black/30 rounded p-2">
                               <div className="text-cyan-400 font-bold">{(r as any).comprension !== null ? `${(r as any).comprension}%` : "-"}</div>
-                              <div className="text-white/50 text-xs">ComprensiÃ³n</div>
+                              <div className="text-white/50 text-xs">Comprensión</div>
                             </div>
                             <div className="bg-black/30 rounded p-2">
                               <div className="text-green-400 font-bold">{(r as any).respuestasCorrectas ?? "-"}/{(r as any).respuestasTotales ?? "-"}</div>
@@ -2528,15 +2528,15 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         </div>
                         <p className="text-white/60 pt-1">Email: <span className="text-white/80">{r.email || "-"}</span></p>
                         <p className="text-white/60">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
-                        <p className="text-white/60">TelÃ©fono: <span className="text-white/80">{r.telefono || "-"}</span></p>
-                        <p className="text-white/60">PaÃ­s: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
+                        <p className="text-white/60">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
+                        <p className="text-white/60">País: <span className="text-white/80">{(r as any).pais || "-"}</span></p>
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
-                        <p className="text-white/60">InstituciÃ³n: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
+                        <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
                         {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}
                         {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
-                        {(r as any).profesion && <p className="text-white/60">ProfesiÃ³n: <span className="text-green-400">{(r as any).profesion}</span></p>}
-                        {(r as any).ocupacion && <p className="text-white/60">OcupaciÃ³n: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
+                        {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
+                        {(r as any).ocupacion && <p className="text-white/60">Ocupación: <span className="text-green-400">{(r as any).ocupacion}</span></p>}
                         {(r as any).lugarTrabajo && <p className="text-white/60">Lugar trabajo: <span className="text-green-400">{(r as any).lugarTrabajo}</span></p>}
                         {(r as any).comentario && <p className="text-white/60">Comentario: <span className="text-white/80">{(r as any).comentario}</span></p>}
                         <p className="text-white/60">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
@@ -2564,7 +2564,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             </CardHeader>
             <CardContent>
               {cerebralResults.length === 0 ? (
-                <p className="text-white/60 text-center py-8">No hay resultados de Test Cerebral aÃºn</p>
+                <p className="text-white/60 text-center py-8">No hay resultados de Test Cerebral aún</p>
               ) : (
                 <div className="space-y-3">
                   {cerebralResults.map((r) => {
@@ -2602,10 +2602,10 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               </div>
                             </div>
                             <div className="hidden md:flex gap-4 text-white/60">
-                              {r.email && <span>ðŸ“§ {r.email}</span>}
-                              {r.edad && <span>ðŸŽ‚ {r.edad} aÃ±os</span>}
-                              {r.ciudad && <span>ðŸ“ {r.ciudad}</span>}
-                              {(r as any).grado && <span className="text-yellow-400">ðŸŽ“ {(r as any).grado}</span>}
+                              {r.email && <span>📧 {r.email}</span>}
+                              {r.edad && <span>🎂 {r.edad} años</span>}
+                              {r.ciudad && <span>📍 {r.ciudad}</span>}
+                              {(r as any).grado && <span className="text-yellow-400">🎓 {(r as any).grado}</span>}
                             </div>
                             <span className="text-white/40 text-xs ml-auto">
                               {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
@@ -2617,11 +2617,11 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           <div className="border-t border-purple-500/20 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
                             <div className="grid md:grid-cols-2 gap-4">
                               <div className="md:hidden text-sm text-white/60 space-y-1">
-                                {r.email && <p>ðŸ“§ {r.email}</p>}
-                                {r.edad && <p>ðŸŽ‚ {r.edad} aÃ±os</p>}
-                                {r.ciudad && <p>ðŸ“ {r.ciudad}</p>}
-                                {r.telefono && <p>ðŸ“± {r.telefono}</p>}
-                                {(r as any).grado && <p className="text-yellow-400">ðŸŽ“ {(r as any).grado}</p>}
+                                {r.email && <p>📧 {r.email}</p>}
+                                {r.edad && <p>🎂 {r.edad} años</p>}
+                                {r.ciudad && <p>📍 {r.ciudad}</p>}
+                                {r.telefono && <p>📱 {r.telefono}</p>}
+                                {(r as any).grado && <p className="text-yellow-400">🎓 {(r as any).grado}</p>}
                               </div>
                               
                               <div>
@@ -2673,7 +2673,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                   {preferenciaAnswers.map((pref: { option: string; meaning: string }, i: number) => (
                                     <div key={i} className="bg-white/5 rounded p-2 text-center">
-                                      <span className="text-white/80 text-sm block">{pref.option || `OpciÃ³n ${i + 1}`}</span>
+                                      <span className="text-white/80 text-sm block">{pref.option || `Opción ${i + 1}`}</span>
                                       <span className="text-pink-300 text-xs">{pref.meaning}</span>
                                     </div>
                                   ))}
@@ -2690,7 +2690,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                             
                             <div className="flex justify-between items-center pt-2 border-t border-white/10">
                               <span className="text-white/40 text-xs">ID: {r.id}</span>
-                              <span className="text-white/40 text-xs">PWA: {r.isPwa ? 'SÃ­' : 'No'}</span>
+                              <span className="text-white/40 text-xs">PWA: {r.isPwa ? 'Sí' : 'No'}</span>
                             </div>
                           </div>
                         )}
@@ -2735,7 +2735,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             </CardHeader>
             <CardContent>
               {trainingResults.length === 0 ? (
-                <p className="text-white/60 text-center py-8">No hay resultados de entrenamiento aÃºn</p>
+                <p className="text-white/60 text-center py-8">No hay resultados de entrenamiento aún</p>
               ) : (
                 <div className="space-y-3">
                   {trainingResults.map((r: any) => {
@@ -2823,7 +2823,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 <p className="text-white/60">Session ID: <span className="text-white/80 font-mono text-xs">{r.sessionId || 'N/A'}</span></p>
                                 <p className="text-white/60">Nivel: <span className="text-cyan-400 font-bold">{r.nivelAlcanzado || 1}</span></p>
                                 <p className="text-white/60">Tiempo: <span className="text-purple-400">{r.tiempoSegundos || 0}s</span></p>
-                                <p className="text-white/60">PWA: <span className={r.isPwa ? "text-green-400" : "text-red-400"}>{r.isPwa ? "SÃ­" : "No"}</span></p>
+                                <p className="text-white/60">PWA: <span className={r.isPwa ? "text-green-400" : "text-red-400"}>{r.isPwa ? "Sí" : "No"}</span></p>
                               </div>
                               {Object.keys(datosExtra).length > 0 && (
                                 <div className="space-y-1">
@@ -3068,7 +3068,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </Button>
                   ))}
                   {contentLang !== 'es' && (
-                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'InglÃ©s' : 'PortuguÃ©s'}</span>
+                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
                   )}
                 </div>
               )}
@@ -3088,7 +3088,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   className={contentCategory === "ninos" ? "bg-purple-600" : "border-purple-500/30 text-purple-400"}
                   data-testid="button-content-ninos"
                 >
-                  NiÃ±os
+                  Niños
                 </Button>
                 <Button
                   onClick={() => { setContentCategory("adolescentes"); setSelectedTema(1); }}
@@ -3186,7 +3186,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
               </div>
 
               <div>
-                <label className="text-white/60 text-sm mb-1 block">TÃ­tulo de la lectura</label>
+                <label className="text-white/60 text-sm mb-1 block">Título de la lectura</label>
                 <Input
                   value={currentEditContent.title}
                   onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, title: e.target.value }))}
@@ -3218,7 +3218,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
               </div>
 
               <div className="border-t border-white/10 pt-4">
-                <h3 className="text-white font-semibold mb-3">ImÃ¡genes de pÃ¡gina de selecciÃ³n</h3>
+                <h3 className="text-white font-semibold mb-3">Imágenes de página de selección</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-white/60 text-sm mb-1 block">Imagen principal (grande)</label>
@@ -3233,7 +3233,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     )}
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm mb-1 block">Imagen pequeÃ±a (flotante)</label>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen pequeña (flotante)</label>
                     <Input
                       value={currentEditContent.pageSmallImage || ""}
                       onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, pageSmallImage: e.target.value }))}
@@ -3245,12 +3245,12 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     )}
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm mb-1 block">Imagen de categorÃ­a (selecciÃ³n)</label>
+                    <label className="text-white/60 text-sm mb-1 block">Imagen de categoría (selección)</label>
                     <Input
                       value={currentEditContent.categoryImage || ""}
                       onChange={(e) => setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, categoryImage: e.target.value }))}
                       className="bg-white/10 border-white/20 text-white"
-                      placeholder="Imagen que se muestra en la selecciÃ³n de categorÃ­a"
+                      placeholder="Imagen que se muestra en la selección de categoría"
                       data-testid="input-category-image"
                     />
                     {currentEditContent.categoryImage && (
@@ -3352,7 +3352,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               newQ[qi].options[oi] = e.target.value;
                               setCurrentEditContent((p: typeof currentEditContent) => ({ ...p, questions: newQ }));
                             }}
-                            placeholder={`OpciÃ³n ${oi + 1}...`}
+                            placeholder={`Opción ${oi + 1}...`}
                             className="bg-white/10 border-white/20 text-white flex-1"
                             data-testid={`input-option-${qi}-${oi}`}
                           />
@@ -3388,7 +3388,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         className="mt-2"
                         data-testid={`button-add-option-${qi}`}
                       >
-                        + Agregar opciÃ³n
+                        + Agregar opción
                       </Button>
                     )}
                   </div>
@@ -3404,7 +3404,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Guardando..." : `Guardar ${
                   contentCategory === "preescolar" ? "Pre-escolar" : 
-                  contentCategory === "ninos" ? "NiÃ±os" : 
+                  contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
                   contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
@@ -3431,7 +3431,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </Button>
                   ))}
                   {contentLang !== 'es' && (
-                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'InglÃ©s' : 'PortuguÃ©s'}</span>
+                    <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
                   )}
                 </div>
               )}
@@ -3467,7 +3467,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
               </div>
 
               <div>
-                <label className="text-white/60 text-sm mb-1 block">TÃ­tulo del test</label>
+                <label className="text-white/60 text-sm mb-1 block">Título del test</label>
                 <Input
                   value={razonamientoContent.title}
                   onChange={(e) => setRazonamientoContent(p => ({ ...p, title: e.target.value }))}
@@ -3489,7 +3489,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
               {razonamientoContent.imageUrl && (
                 <div>
-                  <label className="text-white/60 text-sm mb-1 block">TamaÃ±o de imagen: {razonamientoContent.imageSize}%</label>
+                  <label className="text-white/60 text-sm mb-1 block">Tamaño de imagen: {razonamientoContent.imageSize}%</label>
                   <input
                     type="range"
                     min="20"
@@ -3605,7 +3605,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               newQ[qi].options[oi] = e.target.value;
                               setRazonamientoContent(p => ({ ...p, questions: newQ }));
                             }}
-                            placeholder={`OpciÃ³n ${oi + 1}...`}
+                            placeholder={`Opción ${oi + 1}...`}
                             className="bg-white/10 border-white/20 text-white flex-1"
                             data-testid={`input-razonamiento-option-${qi}-${oi}`}
                           />
@@ -3641,7 +3641,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         className="mt-2"
                         data-testid={`button-add-razonamiento-option-${qi}`}
                       >
-                        + Agregar opciÃ³n
+                        + Agregar opción
                       </Button>
                     )}
                   </div>
@@ -3657,7 +3657,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Guardando..." : `Guardar Razonamiento ${
                   contentCategory === "preescolar" ? "Pre-escolar" : 
-                  contentCategory === "ninos" ? "NiÃ±os" : 
+                  contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
                   contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
@@ -3683,14 +3683,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   </Button>
                 ))}
                 {contentLang !== 'es' && (
-                  <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'InglÃ©s' : 'PortuguÃ©s'}</span>
+                  <span className="text-yellow-400 text-xs ml-2">Editando {contentLang === 'en' ? 'Inglés' : 'Portugués'}</span>
                 )}
               </div>
               {/* Intro Screen Configuration */}
               <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/20 space-y-4 mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
                   <Brain className="w-4 h-4" />
-                  Pantalla de IntroducciÃ³n
+                  Pantalla de Introducción
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3726,29 +3726,29 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   
                   <div className="space-y-3">
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">TÃ­tulo</label>
+                      <label className="text-white/60 text-sm mb-1 block">Título</label>
                       <input
                         type="text"
                         value={cerebralIntro.title}
                         onChange={(e) => setCerebralIntro(p => ({ ...p, title: e.target.value }))}
-                        placeholder="Â¿CuÃ¡l lado de tu cerebro es mÃ¡s dominante?"
+                        placeholder="¿Cuál lado de tu cerebro es más dominante?"
                         className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
                         data-testid="input-cerebral-intro-title"
                       />
                     </div>
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">SubtÃ­tulo</label>
+                      <label className="text-white/60 text-sm mb-1 block">Subtítulo</label>
                       <input
                         type="text"
                         value={cerebralIntro.subtitle}
                         onChange={(e) => setCerebralIntro(p => ({ ...p, subtitle: e.target.value }))}
-                        placeholder="El test tiene una duraciÃ³n de 30 segundos."
+                        placeholder="El test tiene una duración de 30 segundos."
                         className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
                         data-testid="input-cerebral-intro-subtitle"
                       />
                     </div>
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Texto del botÃ³n</label>
+                      <label className="text-white/60 text-sm mb-1 block">Texto del botón</label>
                       <input
                         type="text"
                         value={cerebralIntro.buttonText}
@@ -3769,7 +3769,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   data-testid="button-save-cerebral-intro"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Guardar IntroducciÃ³n
+                  Guardar Introducción
                 </Button>
               </div>
               
@@ -3822,18 +3822,18 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   ))}
                 </select>
                 <p className="text-white/40 text-xs mt-1">
-                  {cerebralContent.exerciseType === "bailarina" && "Usuario indica direcciÃ³n (izq/der) de una imagen"}
-                  {cerebralContent.exerciseType === "secuencia" && "Usuario completa el nÃºmero faltante en una serie"}
+                  {cerebralContent.exerciseType === "bailarina" && "Usuario indica dirección (izq/der) de una imagen"}
+                  {cerebralContent.exerciseType === "secuencia" && "Usuario completa el número faltante en una serie"}
                   {cerebralContent.exerciseType === "memoria" && "Usuario memoriza y recuerda elementos visuales"}
-                  {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrÃ³n en una secuencia visual"}
-                  {cerebralContent.exerciseType === "lateralidad" && "Usuario responde quÃ© mano usÃ³ (izquierda o derecha)"}
+                  {cerebralContent.exerciseType === "patron" && "Usuario identifica el patrón en una secuencia visual"}
+                  {cerebralContent.exerciseType === "lateralidad" && "Usuario responde qué mano usó (izquierda o derecha)"}
                   {cerebralContent.exerciseType === "stroop" && "Usuario elige el COLOR del texto, no la palabra escrita"}
                   {cerebralContent.exerciseType === "preferencia" && "Test proyectivo: usuario elige imagen que le atrae, revela personalidad"}
                 </p>
               </div>
 
               <div>
-                <label className="text-white/60 text-sm mb-1 block">TÃ­tulo del ejercicio</label>
+                <label className="text-white/60 text-sm mb-1 block">Título del ejercicio</label>
                 <Input
                   value={cerebralContent.title}
                   onChange={(e) => setCerebralContent(p => ({ ...p, title: e.target.value }))}
@@ -3856,7 +3856,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
               {cerebralContent.imageUrl && (
                 <div>
-                  <label className="text-white/60 text-sm mb-1 block">TamaÃ±o de imagen: {cerebralContent.imageSize}%</label>
+                  <label className="text-white/60 text-sm mb-1 block">Tamaño de imagen: {cerebralContent.imageSize}%</label>
                   <input
                     type="range"
                     min="20"
@@ -3890,7 +3890,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     }))}
                     className="w-4 h-4"
                   />
-                  <span className="text-white/80 text-sm">LÃ­mite de tiempo</span>
+                  <span className="text-white/80 text-sm">Límite de tiempo</span>
                 </label>
                 {cerebralContent.exerciseData.timerEnabled && (
                   <div className="flex items-center gap-2">
@@ -4021,14 +4021,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 {cerebralContent.exerciseType === "bailarina" && (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">InstrucciÃ³n</label>
+                      <label className="text-white/60 text-sm mb-1 block">Instrucción</label>
                       <Input
                         value={cerebralContent.exerciseData.instruction || ""}
                         onChange={(e) => setCerebralContent(p => ({ 
                           ...p, 
                           exerciseData: { ...p.exerciseData, instruction: e.target.value } 
                         }))}
-                        placeholder="Ej: Â¿Hacia dÃ³nde gira la bailarina?"
+                        placeholder="Ej: ¿Hacia dónde gira la bailarina?"
                         className="bg-white/10 border-white/20 text-white"
                         data-testid="input-cerebral-instruction"
                       />
@@ -4055,13 +4055,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           className="border-cyan-500/50 text-cyan-400"
                           data-testid="button-add-option"
                         >
-                          <Plus className="w-3 h-3 mr-1" /> Agregar opciÃ³n
+                          <Plus className="w-3 h-3 mr-1" /> Agregar opción
                         </Button>
                       </div>
                       
                       {(!cerebralContent.exerciseData.answerOptions || cerebralContent.exerciseData.answerOptions.length === 0) && (
                         <p className="text-white/40 text-sm text-center py-2">
-                          Sin opciones personalizadas. Se usarÃ¡n: Izquierda, Derecha, Ambos
+                          Sin opciones personalizadas. Se usarán: Izquierda, Derecha, Ambos
                         </p>
                       )}
                       
@@ -4201,7 +4201,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         placeholder="Ej: 8, 10, 12, 14"
                         className="bg-white/10 border-white/20 text-white"
                       />
-                      <p className="text-white/40 text-xs mt-1">Deja vacÃ­o para entrada de texto libre</p>
+                      <p className="text-white/40 text-xs mt-1">Deja vacío para entrada de texto libre</p>
                     </div>
                     <div>
                       <label className="text-white/60 text-sm mb-1 block">Respuesta correcta</label>
@@ -4245,7 +4245,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           ...p, 
                           exerciseData: { ...p.exerciseData, memoriaItems: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
                         }))}
-                        placeholder="Ej: ðŸŽ, ðŸŠ, ðŸ‹, ðŸ‡"
+                        placeholder="Ej: 🍎, 🍊, 🍋, 🍇"
                         className="bg-white/10 border-white/20 text-white"
                       />
                     </div>
@@ -4257,7 +4257,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           ...p, 
                           exerciseData: { ...p.exerciseData, memoriaOptions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
                         }))}
-                        placeholder="Ej: ðŸŽ, ðŸŠ, ðŸ‹, ðŸ‡, ðŸ“, ðŸ‘, ðŸ¥, ðŸ’"
+                        placeholder="Ej: 🍎, 🍊, 🍋, 🍇, 🍓, 🍑, 🥝, 🍒"
                         className="bg-white/10 border-white/20 text-white"
                       />
                       <p className="text-white/40 text-xs mt-1">Incluye los correctos + algunos extras para confundir</p>
@@ -4282,17 +4282,17 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 {cerebralContent.exerciseType === "patron" && (
                   <div className="space-y-3">
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Secuencia del patrÃ³n (emojis o texto, separados por coma)</label>
+                      <label className="text-white/60 text-sm mb-1 block">Secuencia del patrón (emojis o texto, separados por coma)</label>
                       <Input
                         value={(cerebralContent.exerciseData.patronSequence || []).join(", ")}
                         onChange={(e) => setCerebralContent(p => ({ 
                           ...p, 
                           exerciseData: { ...p.exerciseData, patronSequence: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
                         }))}
-                        placeholder="Ej: ðŸ”´, ðŸ”µ, ðŸ”´, ðŸ”µ, ?"
+                        placeholder="Ej: 🔴, 🔵, 🔴, 🔵, ?"
                         className="bg-white/10 border-white/20 text-white"
                       />
-                      <p className="text-white/40 text-xs mt-1">Usa ? para indicar dÃ³nde va la respuesta</p>
+                      <p className="text-white/40 text-xs mt-1">Usa ? para indicar dónde va la respuesta</p>
                     </div>
                     <div>
                       <label className="text-white/60 text-sm mb-1 block">Opciones de respuesta (separadas por coma)</label>
@@ -4302,7 +4302,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           ...p, 
                           exerciseData: { ...p.exerciseData, patronOptions: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) } 
                         }))}
-                        placeholder="Ej: ðŸ”´, ðŸ”µ, ðŸŸ¢, ðŸŸ¡"
+                        placeholder="Ej: 🔴, 🔵, 🟢, 🟡"
                         className="bg-white/10 border-white/20 text-white"
                       />
                     </div>
@@ -4372,11 +4372,11 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                       className="w-full py-3 px-4 rounded-lg font-bold text-white"
                       style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
                     >
-                      Generar Ejercicio AutomÃ¡tico
+                      Generar Ejercicio Automático
                     </button>
                     
                     <p className="text-white/40 text-xs text-center">
-                      El botÃ³n genera: palabra, color diferente, opciones y respuesta correcta sincronizados
+                      El botón genera: palabra, color diferente, opciones y respuesta correcta sincronizados
                     </p>
 
                     {cerebralContent.exerciseData.stroopWord && (
@@ -4408,7 +4408,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
                 {cerebralContent.exerciseType === "preferencia" && (
                   <div className="space-y-4">
-                    <p className="text-white/40 text-xs">Agrega imÃ¡genes. Cada una representa un rasgo de personalidad. No hay respuesta correcta.</p>
+                    <p className="text-white/40 text-xs">Agrega imágenes. Cada una representa un rasgo de personalidad. No hay respuesta correcta.</p>
                     
                     {/* Editable instruction texts */}
                     <div className="space-y-2">
@@ -4426,12 +4426,12 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     <div className="space-y-2">
                       <label className="text-white/60 text-sm">Texto principal (pregunta)</label>
                       <Input
-                        value={cerebralContent.exerciseData.prefTitle2 || "Â¿cuÃ¡l te atrae mÃ¡s?"}
+                        value={cerebralContent.exerciseData.prefTitle2 || "¿cuál te atrae más?"}
                         onChange={(e) => setCerebralContent(p => ({ 
                           ...p, 
                           exerciseData: { ...p.exerciseData, prefTitle2: e.target.value } 
                         }))}
-                        placeholder="Â¿cuÃ¡l te atrae mÃ¡s?"
+                        placeholder="¿cuál te atrae más?"
                         className="bg-white/10 border-white/20 text-white"
                       />
                     </div>
@@ -4440,7 +4440,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     {(cerebralContent.exerciseData.prefOptions || [{ imageUrl: "", meaning: "" }]).map((opt: any, idx: number) => (
                       <div key={idx} className="p-3 bg-white/5 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-white/60 text-sm">OpciÃ³n {idx + 1}</span>
+                          <span className="text-white/60 text-sm">Opción {idx + 1}</span>
                           {idx > 0 && (
                             <Button
                               size="sm"
@@ -4473,11 +4473,11 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                             opts[idx] = { ...opts[idx], meaning: e.target.value };
                             setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
                           }}
-                          placeholder="Significado (ej: Creatividad, ArmonÃ­a, Dinamismo...)"
+                          placeholder="Significado (ej: Creatividad, Armonía, Dinamismo...)"
                           className="bg-white/10 border-white/20 text-white"
                         />
                         {opt.imageUrl && (
-                          <img src={opt.imageUrl} alt={`OpciÃ³n ${idx + 1}`} className="w-16 h-16 object-contain rounded bg-white/10" />
+                          <img src={opt.imageUrl} alt={`Opción ${idx + 1}`} className="w-16 h-16 object-contain rounded bg-white/10" />
                         )}
                       </div>
                     ))}
@@ -4492,17 +4492,17 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         setCerebralContent(p => ({ ...p, exerciseData: { ...p.exerciseData, prefOptions: opts } }));
                       }}
                     >
-                      + Agregar opciÃ³n
+                      + Agregar opción
                     </Button>
                   </div>
                 )}
 
                 {cerebralContent.exerciseType === "lateralidad" && (
                   <div className="space-y-4">
-                    <p className="text-white/40 text-xs">Test de lateralidad: el usuario realiza una acciÃ³n y responde quÃ© mano usÃ³.</p>
+                    <p className="text-white/40 text-xs">Test de lateralidad: el usuario realiza una acción y responde qué mano usó.</p>
                     
                     <div className="space-y-2">
-                      <label className="text-white/60 text-sm">InstrucciÃ³n (acciÃ³n a realizar)</label>
+                      <label className="text-white/60 text-sm">Instrucción (acción a realizar)</label>
                       <Input
                         value={cerebralContent.exerciseData.latInstruction || "Coloca una mano sobre tu cabeza."}
                         onChange={(e) => setCerebralContent(p => ({ 
@@ -4516,17 +4516,17 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     <div className="space-y-2">
                       <label className="text-white/60 text-sm">Pregunta</label>
                       <Input
-                        value={cerebralContent.exerciseData.latQuestion || "Â¿QuÃ© mano has utilizado?"}
+                        value={cerebralContent.exerciseData.latQuestion || "¿Qué mano has utilizado?"}
                         onChange={(e) => setCerebralContent(p => ({ 
                           ...p, 
                           exerciseData: { ...p.exerciseData, latQuestion: e.target.value } 
                         }))}
-                        placeholder="Â¿QuÃ© mano has utilizado?"
+                        placeholder="¿Qué mano has utilizado?"
                         className="bg-white/10 border-white/20 text-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-white/60 text-sm">OpciÃ³n izquierda</label>
+                      <label className="text-white/60 text-sm">Opción izquierda</label>
                       <Input
                         value={cerebralContent.exerciseData.latLeft || "Izquierda"}
                         onChange={(e) => setCerebralContent(p => ({ 
@@ -4538,7 +4538,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-white/60 text-sm">OpciÃ³n derecha</label>
+                      <label className="text-white/60 text-sm">Opción derecha</label>
                       <Input
                         value={cerebralContent.exerciseData.latRight || "Derecha"}
                         onChange={(e) => setCerebralContent(p => ({ 
@@ -4575,7 +4575,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Guardando..." : `Guardar Test Cerebral ${
                   contentCategory === "preescolar" ? "Pre-escolar" : 
-                  contentCategory === "ninos" ? "NiÃ±os" : 
+                  contentCategory === "ninos" ? "Niños" : 
                   contentCategory === "adolescentes" ? "Adolescentes" :
                   contentCategory === "universitarios" ? "Universitarios" :
                   contentCategory === "profesionales" ? "Profesionales" : "Adulto Mayor"
@@ -4593,7 +4593,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <ImageIcon className="w-5 h-5" />
-                Gestor de ImÃ¡genes
+                Gestor de Imágenes
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -4618,7 +4618,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         a.download = `styles_export_${new Date().toISOString().split("T")[0]}.json`;
                         a.click();
                         URL.revokeObjectURL(url);
-                        alert(`Exportados ${data.styles?.length || 0} estilos de pÃ¡gina`);
+                        alert(`Exportados ${data.styles?.length || 0} estilos de página`);
                       } catch (e) {
                         alert("Error al exportar estilos");
                       }
@@ -4650,7 +4650,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         const lines = Array.isArray(result.summary)
                           ? result.summary.map((s: { target: string; count: number }) => `- ${s.target}: ${s.count}`)
                           : [];
-                        const detail = lines.length ? `\n\nDetalle por pÃ¡gina/idioma:\n${lines.join("\n")}` : "";
+                        const detail = lines.length ? `\n\nDetalle por página/idioma:\n${lines.join("\n")}` : "";
                         alert(`Estilos importados: ${result.imported || 0}\nErrores: ${result.errors || 0}${detail}`);
                       } catch (err) {
                         alert("Error al importar estilos: " + (err as Error).message);
@@ -4672,7 +4672,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
               
               {/* Sync Images Section */}
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-yellow-400 text-sm mb-2 font-medium">Sincronizar IMÃGENES entre Dev y Prod:</p>
+                <p className="text-yellow-400 text-sm mb-2 font-medium">Sincronizar IMÁGENES entre Dev y Prod:</p>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
@@ -4691,14 +4691,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         a.download = `images_export_${new Date().toISOString().split("T")[0]}.json`;
                         a.click();
                         URL.revokeObjectURL(url);
-                        alert(`Exportadas ${data.images?.length || 0} imÃ¡genes`);
+                        alert(`Exportadas ${data.images?.length || 0} imágenes`);
                       } catch (e) {
                         alert("Error al exportar");
                       }
                     }}
                     data-testid="button-export-images"
                   >
-                    Exportar ImÃ¡genes (JSON)
+                    Exportar Imágenes (JSON)
                   </Button>
                   <input
                     type="file"
@@ -4720,7 +4720,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           body: JSON.stringify({ images: data.images })
                         });
                         const result = await res.json();
-                        alert(`Importadas: ${result.imported}, Omitidas (ya existÃ­an): ${result.skipped}`);
+                        alert(`Importadas: ${result.imported}, Omitidas (ya existían): ${result.skipped}`);
                         fetch("/api/images").then(r => r.json()).then(d => setUploadedImages(d || []));
                       } catch (err) {
                         alert("Error al importar: " + (err as Error).message);
@@ -4735,7 +4735,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     onClick={() => document.getElementById("import-images")?.click()}
                     data-testid="button-import-images"
                   >
-                    Importar ImÃ¡genes (JSON)
+                    Importar Imágenes (JSON)
                   </Button>
                 </div>
               </div>
@@ -4767,12 +4767,12 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   
                   {imagePreview?.startsWith('data:video/') ? (
                     <div className="space-y-2">
-                      <p className="text-cyan-400 text-xs">Video .webm - se guardarÃ¡ sin compresiÃ³n</p>
+                      <p className="text-cyan-400 text-xs">Video .webm - se guardará sin compresión</p>
                       <div className="max-h-64 overflow-auto bg-gray-900 rounded p-2">
                         <video src={imagePreview} controls autoPlay loop muted playsInline className="max-w-full rounded" />
                       </div>
                       <div className="text-white/60 text-sm">
-                        TamaÃ±o: {(originalSize / 1024).toFixed(1)}KB
+                        Tamaño: {(originalSize / 1024).toFixed(1)}KB
                       </div>
                     </div>
                   ) : (
@@ -4805,14 +4805,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                       {/* Compression */}
                       <div>
                         <div className="flex justify-between text-white/60 text-sm mb-1">
-                          <span>CompresiÃ³n: {compressionQuality}%</span>
+                          <span>Compresión: {compressionQuality}%</span>
                           <span className="text-cyan-400">
                             {(originalSize / 1024).toFixed(1)}KB â†’ {(compressedSize / 1024).toFixed(1)}KB
                             {originalSize > 0 && compressedSize < originalSize && ` (${Math.round((1 - compressedSize / originalSize) * 100)}% menos)`}
                           </span>
                         </div>
                         {imagePreview?.startsWith('data:image/png') && (
-                          <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresiÃ³n con pÃ©rdida</p>
+                          <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresión con pérdida</p>
                         )}
                         <input
                           type="range"
@@ -4852,7 +4852,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 return (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-white/80 font-semibold text-sm">ImÃ¡genes ({uploadedImages.length})</h3>
+                      <h3 className="text-white/80 font-semibold text-sm">Imágenes ({uploadedImages.length})</h3>
                       {totalPages > 1 && (
                         <div className="flex items-center gap-1">
                           <Button size="sm" variant="outline" className="h-6 px-2 text-xs border-white/20 text-white/60" onClick={() => setImgPage(Math.max(0, page - 1))} disabled={page === 0}>Ant</Button>
@@ -4893,7 +4893,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Zap className="w-5 h-5 text-teal-400" />
-                GestiÃ³n de Entrenamientos
+                Gestión de Entrenamientos
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -4910,30 +4910,30 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     size="sm"
                     className={entrenamientoCategory === cat ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
                   >
-                    {cat === "ninos" ? "NiÃ±os" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
+                    {cat === "ninos" ? "Niños" : cat === "adolescentes" ? "Adolescentes" : cat === "universitarios" ? "Universitarios" : cat === "profesionales" ? "Profesionales" : "Adulto Mayor"}
                   </Button>
                 ))}
               </div>
 
               
 
-              {/* PÃ¡gina de PreparaciÃ³n */}
+              {/* Página de Preparación */}
               <div className="p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl border border-purple-500/30 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-white font-semibold flex items-center gap-2">
-                    <span>ðŸ“‹</span> PÃ¡gina de PreparaciÃ³n
+                    <span>📋</span> Página de Preparación
                   </h3>
                   <Button
                     size="sm"
                     onClick={() => setEditingPrepPage({ nombre: "", titulo: "", subtitulo: "", instrucciones: "", textoBoton: "Empezar" })}
                     className="bg-purple-600 hover:bg-purple-700"
                   >
-                    + Nueva PÃ¡gina
+                    + Nueva Página
                   </Button>
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <label className="text-white/70 text-sm">PÃ¡gina asignada a esta categorÃ­a:</label>
+                  <label className="text-white/70 text-sm">Página asignada a esta categoría:</label>
                   <select
                     value={selectedPrepPageId || ""}
                     onChange={async (e) => {
@@ -4947,7 +4947,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     }}
                     className="bg-white/10 border border-purple-500/30 text-white rounded-md px-3 py-2"
                   >
-                    <option value="" className="bg-gray-800">Sin pÃ¡gina de preparaciÃ³n</option>
+                    <option value="" className="bg-gray-800">Sin página de preparación</option>
                     {prepPages.map(p => (
                       <option key={p.id} value={p.id} className="bg-gray-800">{p.nombre}</option>
                     ))}
@@ -4966,7 +4966,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if (confirm("Â¿Eliminar esta pÃ¡gina de preparaciÃ³n?")) {
+                            if (confirm("¿Eliminar esta página de preparación?")) {
                               await fetch(`/api/admin/prep-pages/${p.id}`, {
                                 method: "DELETE",
                                 headers: { Authorization: `Bearer ${token}` }
@@ -4977,7 +4977,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           }}
                           className="text-red-400 hover:text-red-300"
                         >
-                          Ã—
+                          ×
                         </button>
                       </div>
                     ))}
@@ -4986,7 +4986,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
                 {editingPrepPage && (
                   <div className="mt-4 p-4 bg-white/5 rounded-xl border border-purple-500/20">
-                    <h4 className="text-white font-medium mb-3">{editingPrepPage.id ? "Editar" : "Nueva"} PÃ¡gina de PreparaciÃ³n</h4>
+                    <h4 className="text-white font-medium mb-3">{editingPrepPage.id ? "Editar" : "Nueva"} Página de Preparación</h4>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-white/60 text-xs">Nombre (interno)</label>
@@ -4994,7 +4994,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           value={editingPrepPage.nombre}
                           onChange={(e) => setEditingPrepPage({...editingPrepPage, nombre: e.target.value})}
                           className="bg-white/10 border-purple-500/30 text-white"
-                          placeholder="Ej: PreparaciÃ³n Lectura RÃ¡pida"
+                          placeholder="Ej: Preparación Lectura Rápida"
                         />
                       </div>
                       <div>
@@ -5023,7 +5023,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         </div>
                       </div>
                       <div>
-                        <label className="text-white/60 text-xs">TÃ­tulo</label>
+                        <label className="text-white/60 text-xs">Título</label>
                         <div className="flex gap-1">
                           <Input
                             value={editingPrepPage.titulo || ""}
@@ -5034,13 +5034,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         </div>
                       </div>
                       <div>
-                        <label className="text-white/60 text-xs">SubtÃ­tulo</label>
+                        <label className="text-white/60 text-xs">Subtítulo</label>
                         <div className="flex gap-1">
                           <Input
                             value={editingPrepPage.subtitulo || ""}
                             onChange={(e) => setEditingPrepPage({...editingPrepPage, subtitulo: e.target.value})}
                             className="bg-white/10 border-purple-500/30 text-white flex-1"
-                            placeholder="Ej: Â¡Mejora tu lectura rÃ¡pidamente!"
+                            placeholder="Ej: ¡Mejora tu lectura rápidamente!"
                           />
                         </div>
                       </div>
@@ -5057,7 +5057,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         </div>
                       </div>
                       <div>
-                        <label className="text-white/60 text-xs">Texto del BotÃ³n</label>
+                        <label className="text-white/60 text-xs">Texto del Botón</label>
                         <div className="flex gap-1">
                           <Input
                             value={editingPrepPage.textoBoton || ""}
@@ -5090,7 +5090,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               setPrepPages([data.page, ...prepPages]);
                             }
                             setEditingPrepPage(null);
-                            alert("PÃ¡gina guardada");
+                            alert("Página guardada");
                           } catch (e) { alert("Error al guardar"); }
                         }}
                         className="bg-purple-600"
@@ -5107,7 +5107,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4 p-4 bg-white/5 rounded-xl">
-                  <h3 className="text-white font-semibold">Card Principal (PÃ¡gina de SelecciÃ³n)</h3>
+                  <h3 className="text-white font-semibold">Card Principal (Página de Selección)</h3>
                   <div>
                     <label className="text-white/60 text-sm">Imagen</label>
                     <div className="flex gap-2 mt-1">
@@ -5137,7 +5137,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     )}
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">TÃ­tulo</label>
+                    <label className="text-white/60 text-sm">Título</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoCard.title}
@@ -5147,7 +5147,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">DescripciÃ³n</label>
+                    <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
                         value={entrenamientoCard.description}
@@ -5158,7 +5158,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">Texto del BotÃ³n</label>
+                    <label className="text-white/60 text-sm">Texto del Botón</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoCard.buttonText}
@@ -5178,7 +5178,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         if (res.ok) {
                           alert("Card guardado");
                         } else {
-                          alert("Error: Token invÃ¡lido o sesiÃ³n expirada");
+                          alert("Error: Token inválido o sesión expirada");
                         }
                       } catch (e) { alert("Error al guardar"); }
                     }}
@@ -5190,7 +5190,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 </div>
 
                 <div className="space-y-4 p-4 bg-white/5 rounded-xl">
-                  <h3 className="text-white font-semibold">ConfiguraciÃ³n de PÃ¡gina</h3>
+                  <h3 className="text-white font-semibold">Configuración de Página</h3>
                   <div>
                     <label className="text-white/60 text-sm">Banner (texto superior)</label>
                     <div className="flex gap-1 mt-1">
@@ -5202,7 +5202,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">TÃ­tulo de PÃ¡gina</label>
+                    <label className="text-white/60 text-sm">Título de Página</label>
                     <div className="flex gap-1 mt-1">
                       <Input
                         value={entrenamientoPage.pageTitle}
@@ -5212,7 +5212,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </div>
                   </div>
                   <div>
-                    <label className="text-white/60 text-sm">DescripciÃ³n</label>
+                    <label className="text-white/60 text-sm">Descripción</label>
                     <div className="flex gap-1 mt-1">
                       <textarea
                         value={entrenamientoPage.pageDescription}
@@ -5231,16 +5231,16 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           body: JSON.stringify({ ...entrenamientoPage, categoria: entrenamientoCategory, lang: "es" })
                         });
                         if (res.ok) {
-                          alert("PÃ¡gina guardada");
+                          alert("Página guardada");
                         } else {
-                          alert("Error: Token invÃ¡lido o sesiÃ³n expirada");
+                          alert("Error: Token inválido o sesión expirada");
                         }
                       } catch (e) { alert("Error al guardar"); }
                     }}
                     className="w-full bg-teal-600"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Guardar PÃ¡gina
+                    Guardar Página
                   </Button>
                 </div>
               </div>
@@ -5249,7 +5249,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <h3 className="text-white font-semibold text-lg">Secciones de Entrenamiento</h3>
-                    <p className="text-white/50 text-sm">Cada secciÃ³n aparecerÃ¡ como una tarjeta en la app</p>
+                    <p className="text-white/50 text-sm">Cada sección aparecerá como una tarjeta en la app</p>
                   </div>
                   <Button
                     onClick={async () => {
@@ -5260,8 +5260,8 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           body: JSON.stringify({
                             categoria: entrenamientoCategory,
                             lang: "es",
-                            title: "Nueva SecciÃ³n",
-                            description: "DescripciÃ³n de la secciÃ³n",
+                            title: "Nueva Sección",
+                            description: "Descripción de la sección",
                             imageUrl: "",
                             linkUrl: "",
                             sortOrder: entrenamientoItems.length,
@@ -5272,14 +5272,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           const data = await res.json();
                           setEntrenamientoItems([...entrenamientoItems, data.item]);
                         } else {
-                          alert("Error: Token invÃ¡lido o sesiÃ³n expirada");
+                          alert("Error: Token inválido o sesión expirada");
                         }
                       } catch (e) { alert("Error al crear"); }
                     }}
                     className="bg-gradient-to-r from-teal-500 to-cyan-500"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Nueva SecciÃ³n
+                    Nueva Sección
                   </Button>
                 </div>
 
@@ -5287,7 +5287,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                   <div className="text-center py-12 border-2 border-dashed border-white/20 rounded-xl">
                     <Zap className="w-12 h-12 text-teal-400/50 mx-auto mb-3" />
                     <p className="text-white/60 mb-2">No hay secciones creadas</p>
-                    <p className="text-white/40 text-sm">Haz clic en "Nueva SecciÃ³n" para agregar una</p>
+                    <p className="text-white/40 text-sm">Haz clic en "Nueva Sección" para agregar una</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -5327,14 +5327,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               variant="outline"
                               className="border-red-500/50 text-red-400"
                               onClick={async () => {
-                                if (confirm("Â¿Eliminar esta secciÃ³n?")) {
+                                if (confirm("¿Eliminar esta sección?")) {
                                   const res = await adminFetch(`/api/admin/entrenamiento/item/${item.id}`, {
                                     method: "DELETE"
                                   });
                                   if (res.ok) {
                                     setEntrenamientoItems(entrenamientoItems.filter(i => i.id !== item.id));
                                   } else {
-                                    alert("Error: Token invÃ¡lido o sesiÃ³n expirada");
+                                    alert("Error: Token inválido o sesión expirada");
                                   }
                                 }
                               }}
@@ -5364,7 +5364,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               ) : (
                                 <div className="text-center">
                                   <ImageIcon className="w-8 h-8 text-white/30 mx-auto" />
-                                  <span className="text-white/40 text-xs">GalerÃ­a</span>
+                                  <span className="text-white/40 text-xs">Galería</span>
                                 </div>
                               )}
                             </div>
@@ -5382,7 +5382,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
 
                           <div className="flex-1 space-y-3">
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">TÃ­tulo de la secciÃ³n</label>
+                              <label className="text-white/60 text-xs mb-1 block">Título de la sección</label>
                               <div className="flex gap-1">
                                 <Input
                                   value={item.title}
@@ -5397,7 +5397,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               </div>
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">DescripciÃ³n breve</label>
+                              <label className="text-white/60 text-xs mb-1 block">Descripción breve</label>
                               <div className="flex gap-1">
                                 <Input
                                   value={item.description || ""}
@@ -5407,7 +5407,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                     setEntrenamientoItems(updated);
                                   }}
                                   className="bg-white/10 border-teal-500/30 text-white/80 flex-1"
-                                  placeholder="Ej: Para procesar palabras rÃ¡pidamente"
+                                  placeholder="Ej: Para procesar palabras rápidamente"
                                 />
                               </div>
                             </div>
@@ -5459,7 +5459,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${lang === "en" ? "bg-blue-500/30 text-blue-300" : "bg-green-500/30 text-green-300"}`}>
                                               {lang === "en" ? "EN" : "PT"}
                                             </span>
-                                            <span className="text-white/40 text-xs">{lang === "en" ? "English" : "PortuguÃªs"}</span>
+                                            <span className="text-white/40 text-xs">{lang === "en" ? "English" : "Português"}</span>
                                           </div>
                                           <Input
                                             value={itemTranslations[item.id]?.[lang]?.title || ""}
@@ -5473,7 +5473,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                               }));
                                             }}
                                             className={`bg-white/5 text-white text-sm ${lang === "en" ? "border-blue-500/30" : "border-green-500/30"}`}
-                                            placeholder={lang === "en" ? "Title in English" : "TÃ­tulo em PortuguÃªs"}
+                                            placeholder={lang === "en" ? "Title in English" : "Título em Português"}
                                           />
                                           <Input
                                             value={itemTranslations[item.id]?.[lang]?.description || ""}
@@ -5487,7 +5487,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                               }));
                                             }}
                                             className={`bg-white/5 text-white/80 text-sm ${lang === "en" ? "border-blue-500/30" : "border-green-500/30"}`}
-                                            placeholder={lang === "en" ? "Description in English" : "DescriÃ§Ã£o em PortuguÃªs"}
+                                            placeholder={lang === "en" ? "Description in English" : "Descrição em Português"}
                                           />
                                         </div>
                                       ))}
@@ -5534,8 +5534,8 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm"
                               >
                                 <option value="velocidad" className="bg-gray-700 text-white">Velocidad de lectura</option>
-                                <option value="numeros" className="bg-gray-700 text-white">Identifica NÃºmeros y Letras</option>
-                                <option value="aceleracion_lectura" className="bg-gray-700 text-white">AceleraciÃ³n de Lectura</option>
+                                <option value="numeros" className="bg-gray-700 text-white">Identifica Números y Letras</option>
+                                <option value="aceleracion_lectura" className="bg-gray-700 text-white">Aceleración de Lectura</option>
                                 <option value="lectura" className="bg-gray-700 text-white">Test de lectura</option>
                                 <option value="memoria" className="bg-gray-700 text-white">Ejercicio de memoria</option>
                                 <option value="reconocimiento_visual" className="bg-gray-700 text-white">Reconocimiento Visual</option>
@@ -5549,14 +5549,14 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           </div>
                         </div>
 
-                        {/* SecciÃ³n especÃ­fica para tipo numeros */}
+                        {/* Sección específica para tipo numeros */}
                         {item.tipoEjercicio === "numeros" && (
                           <div className="mt-4 pt-4 border-t border-white/10">
                             <div className="mb-4">
                               <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                                <span className="text-lg">ðŸ”¢</span>
-                                PÃ¡gina de IntroducciÃ³n
-                                <span className="text-white/40 text-xs font-normal">(Identifica NÃºmeros y Letras)</span>
+                                <span className="text-lg">🔢</span>
+                                Página de Introducción
+                                <span className="text-white/40 text-xs font-normal">(Identifica Números y Letras)</span>
                               </h4>
                               <div className="grid md:grid-cols-2 gap-4 bg-teal-900/30 p-4 rounded-xl border border-teal-500/30">
                                 <div className="space-y-3">
@@ -5569,9 +5569,9 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                           setNumerosIntroData(prev => ({
                                             ...prev,
                                             entrenamientoItemId: item.id,
-                                            titulo: prev?.titulo || "Identifica rÃ¡pidamente\nNÃºmeros y Letras",
-                                            descripcion: prev?.descripcion || "Â¡Haz mÃ¡s fuerte tu vista jugando!",
-                                            subtitulo: prev?.subtitulo || "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande",
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
                                             imagenCabecera: e.target.value
                                           }));
                                         }}
@@ -5587,9 +5587,9 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                             setNumerosIntroData(prev => ({
                                               ...prev,
                                               entrenamientoItemId: item.id,
-                                              titulo: prev?.titulo || "Identifica rÃ¡pidamente\nNÃºmeros y Letras",
-                                              descripcion: prev?.descripcion || "Â¡Haz mÃ¡s fuerte tu vista jugando!",
-                                              subtitulo: prev?.subtitulo || "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande",
+                                              titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                              descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                              subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
                                               imagenCabecera: url
                                             }));
                                             setShowImagePicker(false);
@@ -5605,22 +5605,22 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                     )}
                                   </div>
                                   <div>
-                                    <label className="text-white/60 text-xs mb-1 block">TÃ­tulo principal</label>
+                                    <label className="text-white/60 text-xs mb-1 block">Título principal</label>
                                     <div className="flex gap-1">
                                       <textarea
-                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "") : "Identifica rÃ¡pidamente\nNÃºmeros y Letras"}
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.titulo || "") : "Identifica rápidamente\nNúmeros y Letras"}
                                         onChange={(e) => {
                                           setNumerosIntroData(prev => ({
                                             ...prev,
                                             entrenamientoItemId: item.id,
                                             titulo: e.target.value,
-                                            descripcion: prev?.descripcion || "Â¡Haz mÃ¡s fuerte tu vista jugando!",
-                                            subtitulo: prev?.subtitulo || "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande",
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
                                             imagenCabecera: prev?.imagenCabecera || ""
                                           }));
                                         }}
                                         className="w-full bg-gray-700 border border-teal-500/30 text-white rounded-md p-2 text-sm flex-1"
-                                        placeholder="Ej: Identifica rÃ¡pidamente\nNÃºmeros y Letras"
+                                        placeholder="Ej: Identifica rápidamente\nNúmeros y Letras"
                                         rows={2}
                                       />
                                     </div>
@@ -5628,22 +5628,22 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 </div>
                                 <div className="space-y-3">
                                   <div>
-                                    <label className="text-white/60 text-xs mb-1 block">SubtÃ­tulo destacado</label>
+                                    <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
                                     <div className="flex gap-1">
                                       <Input
-                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "") : "Â¡Haz mÃ¡s fuerte tu vista jugando!"}
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.descripcion || "") : "¡Haz más fuerte tu vista jugando!"}
                                         onChange={(e) => {
                                           setNumerosIntroData(prev => ({
                                             ...prev,
                                             entrenamientoItemId: item.id,
-                                            titulo: prev?.titulo || "Identifica rÃ¡pidamente\nNÃºmeros y Letras",
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
                                             descripcion: e.target.value,
-                                            subtitulo: prev?.subtitulo || "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande",
+                                            subtitulo: prev?.subtitulo || "Identifica el número o letra para ver el mundo más grande",
                                             imagenCabecera: prev?.imagenCabecera || ""
                                           }));
                                         }}
                                         className="bg-white/10 border-teal-500/30 text-white flex-1"
-                                        placeholder="Ej: Â¡Haz mÃ¡s fuerte tu vista jugando!"
+                                        placeholder="Ej: ¡Haz más fuerte tu vista jugando!"
                                       />
                                     </div>
                                   </div>
@@ -5651,19 +5651,19 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                     <label className="text-white/60 text-xs mb-1 block">Instrucciones</label>
                                     <div className="flex gap-1">
                                       <Input
-                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "") : "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande"}
+                                        value={numerosIntroData?.entrenamientoItemId === item.id ? (numerosIntroData?.subtitulo || "") : "Identifica el número o letra para ver el mundo más grande"}
                                         onChange={(e) => {
                                           setNumerosIntroData(prev => ({
                                             ...prev,
                                             entrenamientoItemId: item.id,
-                                            titulo: prev?.titulo || "Identifica rÃ¡pidamente\nNÃºmeros y Letras",
-                                            descripcion: prev?.descripcion || "Â¡Haz mÃ¡s fuerte tu vista jugando!",
+                                            titulo: prev?.titulo || "Identifica rápidamente\nNúmeros y Letras",
+                                            descripcion: prev?.descripcion || "¡Haz más fuerte tu vista jugando!",
                                             subtitulo: e.target.value,
                                             imagenCabecera: prev?.imagenCabecera || ""
                                           }));
                                         }}
                                         className="bg-white/10 border-teal-500/30 text-white flex-1"
-                                        placeholder="Ej: Identifica el nÃºmero o letra..."
+                                        placeholder="Ej: Identifica el número o letra..."
                                       />
                                     </div>
                                   </div>
@@ -5674,9 +5674,9 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                           ? numerosIntroData 
                                           : {
                                               entrenamientoItemId: item.id,
-                                              titulo: "Identifica rÃ¡pidamente\nNÃºmeros y Letras",
-                                              descripcion: "Â¡Haz mÃ¡s fuerte tu vista jugando!",
-                                              subtitulo: "Identifica el nÃºmero o letra para ver el mundo mÃ¡s grande",
+                                              titulo: "Identifica rápidamente\nNúmeros y Letras",
+                                              descripcion: "¡Haz más fuerte tu vista jugando!",
+                                              subtitulo: "Identifica el número o letra para ver el mundo más grande",
                                               imagenCabecera: ""
                                             };
                                         try {
@@ -5702,7 +5702,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                               })
                                             });
                                             if (res.ok) {
-                                              alert("PÃ¡gina guardada correctamente");
+                                              alert("Página guardada correctamente");
                                             } else {
                                               alert("Error al guardar");
                                             }
@@ -5720,7 +5720,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                               })
                                             });
                                             if (res.ok) {
-                                              alert("PÃ¡gina guardada correctamente");
+                                              alert("Página guardada correctamente");
                                             } else {
                                               alert("Error al guardar");
                                             }
@@ -5729,7 +5729,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                       }}
                                       className="bg-teal-600 hover:bg-teal-700 text-white"
                                     >
-                                      Guardar PÃ¡gina
+                                      Guardar Página
                                     </Button>
                                   </div>
                                 </div>
@@ -5738,13 +5738,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           </div>
                         )}
 
-                        {/* SecciÃ³n especÃ­fica para tipo aceleracion_lectura */}
+                        {/* Sección específica para tipo aceleracion_lectura */}
                         {item.tipoEjercicio === "aceleracion_lectura" && (
                           <div className="mt-4 pt-4 border-t border-white/10">
                             <div className="mb-4">
                               <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                                 <span className="text-lg">âš¡</span>
-                                ConfiguraciÃ³n de AceleraciÃ³n
+                                Configuración de Aceleración
                                 <span className="text-white/40 text-xs font-normal">(Golpe de Vista / Desplazamiento)</span>
                               </h4>
                               <div className="grid md:grid-cols-2 gap-4 bg-cyan-900/30 p-4 rounded-xl border border-cyan-500/30">
@@ -5758,7 +5758,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                           setAceleracionData(prev => ({
                                             ...prev,
                                             entrenamientoItemId: item.id,
-                                            titulo: prev?.titulo || "Acelera al mÃ¡ximo tu Lectura",
+                                            titulo: prev?.titulo || "Acelera al máximo tu Lectura",
                                             velocidadPPM: prev?.velocidadPPM || 200,
                                             modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
                                             imagenCabecera: e.target.value
@@ -5776,7 +5776,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                             setAceleracionData(prev => ({
                                               ...prev,
                                               entrenamientoItemId: item.id,
-                                              titulo: prev?.titulo || "Acelera al mÃ¡ximo tu Lectura",
+                                              titulo: prev?.titulo || "Acelera al máximo tu Lectura",
                                               velocidadPPM: prev?.velocidadPPM || 200,
                                               modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
                                               imagenCabecera: url
@@ -5794,10 +5794,10 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                     )}
                                   </div>
                                   <div>
-                                    <label className="text-white/60 text-xs mb-1 block">TÃ­tulo</label>
+                                    <label className="text-white/60 text-xs mb-1 block">Título</label>
                                     <div className="flex gap-1">
                                       <Input
-                                        value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "") : "Acelera al mÃ¡ximo tu Lectura"}
+                                        value={aceleracionData?.entrenamientoItemId === item.id ? (aceleracionData?.titulo || "") : "Acelera al máximo tu Lectura"}
                                         onChange={(e) => {
                                           setAceleracionData(prev => ({
                                             ...prev,
@@ -5809,7 +5809,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                           }));
                                         }}
                                         className="bg-white/10 border-cyan-500/30 text-white text-sm flex-1"
-                                        placeholder="Acelera al mÃ¡ximo tu Lectura"
+                                        placeholder="Acelera al máximo tu Lectura"
                                       />
                                     </div>
                                   </div>
@@ -5824,7 +5824,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                         setAceleracionData(prev => ({
                                           ...prev,
                                           entrenamientoItemId: item.id,
-                                          titulo: prev?.titulo || "Acelera al mÃ¡ximo tu Lectura",
+                                          titulo: prev?.titulo || "Acelera al máximo tu Lectura",
                                           velocidadPPM: parseInt(e.target.value) || 200,
                                           modoGolpePorcentaje: prev?.modoGolpePorcentaje || 50,
                                           imagenCabecera: prev?.imagenCabecera || ""
@@ -5844,7 +5844,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                         setAceleracionData(prev => ({
                                           ...prev,
                                           entrenamientoItemId: item.id,
-                                          titulo: prev?.titulo || "Acelera al mÃ¡ximo tu Lectura",
+                                          titulo: prev?.titulo || "Acelera al máximo tu Lectura",
                                           velocidadPPM: prev?.velocidadPPM || 200,
                                           modoGolpePorcentaje: parseInt(e.target.value) || 50,
                                           imagenCabecera: prev?.imagenCabecera || ""
@@ -5891,7 +5891,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                             });
                                             if (res.ok) {
                                               setAceleracionData(prev => prev ? { ...prev, id: existingData.ejercicio.id } : prev);
-                                              alert("ConfiguraciÃ³n guardada correctamente");
+                                              alert("Configuración guardada correctamente");
                                             } else {
                                               alert("Error al guardar");
                                             }
@@ -5912,7 +5912,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                               if (newData.ejercicio?.id) {
                                                 setAceleracionData(prev => prev ? { ...prev, id: newData.ejercicio.id } : prev);
                                               }
-                                              alert("ConfiguraciÃ³n guardada correctamente");
+                                              alert("Configuración guardada correctamente");
                                             } else {
                                               alert("Error al guardar");
                                             }
@@ -5921,7 +5921,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                       }}
                                       className="bg-cyan-600 hover:bg-cyan-700 text-white"
                                     >
-                                      Guardar ConfiguraciÃ³n
+                                      Guardar Configuración
                                     </Button>
                                   </div>
                                 </div>
@@ -5930,19 +5930,19 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           </div>
                         )}
 
-                        {/* SecciÃ³n PÃ¡gina de PreparaciÃ³n (para otros tipos) */}
+                        {/* Sección Página de Preparación (para otros tipos) */}
                         {item.tipoEjercicio !== "numeros" && item.tipoEjercicio !== "aceleracion_lectura" && (
                         <div className="mt-4 pt-4 border-t border-white/10">
                           <div className="mb-4">
                             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                              <span className="text-lg">ðŸ“‹</span>
-                              PÃ¡gina de PreparaciÃ³n
+                              <span className="text-lg">📋</span>
+                              Página de Preparación
                               <span className="text-white/40 text-xs font-normal">(antes de empezar ejercicios)</span>
                             </h4>
                             <div className="grid md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl">
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Imagen de preparaciÃ³n</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Imagen de preparación</label>
                                   <div className="flex gap-2">
                                     <Input
                                       value={item.prepImage || ""}
@@ -5976,7 +5976,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                   )}
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">TÃ­tulo</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Título</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepTitle || ""}
@@ -5993,7 +5993,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               </div>
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">SubtÃ­tulo destacado</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Subtítulo destacado</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepSubtitle || ""}
@@ -6003,7 +6003,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                         setEntrenamientoItems(updated);
                                       }}
                                       className="bg-white/10 border-purple-500/30 text-white flex-1"
-                                      placeholder="Ej: Â¡Mejora tu lectura rÃ¡pidamente!"
+                                      placeholder="Ej: ¡Mejora tu lectura rápidamente!"
                                     />
                                   </div>
                                 </div>
@@ -6024,7 +6024,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                   </div>
                                 </div>
                                 <div>
-                                  <label className="text-white/60 text-xs mb-1 block">Texto del botÃ³n</label>
+                                  <label className="text-white/60 text-xs mb-1 block">Texto del botón</label>
                                   <div className="flex gap-1">
                                     <Input
                                       value={item.prepButtonText || ""}
@@ -6102,16 +6102,16 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                     body: JSON.stringify(payload)
                                   });
                                   if (res.ok) {
-                                    alert("SecciÃ³n guardada correctamente");
+                                    alert("Sección guardada correctamente");
                                   } else {
-                                    alert("Error: Token invÃ¡lido o sesiÃ³n expirada");
+                                    alert("Error: Token inválido o sesión expirada");
                                   }
                                 } catch (e) { alert("Error al guardar"); }
                               }}
                               className="bg-gradient-to-r from-teal-500 to-cyan-500"
                             >
                               <Save className="w-4 h-4 mr-2" />
-                              Guardar SecciÃ³n
+                              Guardar Sección
                             </Button>
                           </div>
                         </div>
@@ -6144,7 +6144,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <div className="p-6 space-y-6">
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">TÃ­tulo del ejercicio</label>
+                      <label className="text-white/60 text-sm mb-1 block">Título del ejercicio</label>
                       <Input
                         value={velocidadEjercicio.titulo}
                         onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, titulo: e.target.value})}
@@ -6153,13 +6153,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                       />
                     </div>
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">DescripciÃ³n (opcional)</label>
+                      <label className="text-white/60 text-sm mb-1 block">Descripción (opcional)</label>
                       <textarea
                         value={velocidadEjercicio.descripcion}
                         onChange={(e) => setVelocidadEjercicio({...velocidadEjercicio, descripcion: e.target.value})}
                         className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                         rows={2}
-                        placeholder="Ejercita tu capacidad de percepciÃ³n visual..."
+                        placeholder="Ejercita tu capacidad de percepción visual..."
                       />
                     </div>
                     <div>
@@ -6185,8 +6185,8 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white/60 text-sm mb-1 block">DuraciÃ³n animaciÃ³n (segundos)</label>
-                        <p className="text-white/40 text-xs mb-2">CuÃ¡nto tiempo dura la animaciÃ³n del cÃ­rculo</p>
+                        <label className="text-white/60 text-sm mb-1 block">Duración animación (segundos)</label>
+                        <p className="text-white/40 text-xs mb-2">Cuánto tiempo dura la animación del círculo</p>
                         <input
                           type="number"
                           min="1"
@@ -6197,8 +6197,8 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                         />
                       </div>
                       <div>
-                        <label className="text-white/60 text-sm mb-1 block">Velocidad del cÃ­rculo (1-10)</label>
-                        <p className="text-white/40 text-xs mb-2">1=Lento, 5=Normal, 10=RÃ¡pido</p>
+                        <label className="text-white/60 text-sm mb-1 block">Velocidad del círculo (1-10)</label>
+                        <p className="text-white/40 text-xs mb-2">1=Lento, 5=Normal, 10=Rápido</p>
                         <input
                           type="number"
                           min="1"
@@ -6259,7 +6259,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           
                           <div className="grid grid-cols-3 gap-3 mb-3">
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">PatrÃ³n</label>
+                              <label className="text-white/60 text-xs mb-1 block">Patrón</label>
                               <select
                                 value={nivel.patron || "3x2"}
                                 onChange={(e) => {
@@ -6292,7 +6292,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                               />
                             </div>
                             <div>
-                              <label className="text-white/60 text-xs mb-1 block">Â¿QuÃ© posiciÃ³n preguntar?</label>
+                              <label className="text-white/60 text-xs mb-1 block">¿Qué posición preguntar?</label>
                               <select
                                 value={nivel.tipoPregunta || "primera"}
                                 onChange={(e) => {
@@ -6303,7 +6303,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                                 className="w-full bg-gray-700 border border-purple-500/30 text-white rounded-md p-2 text-sm"
                               >
                                 <option value="primera" className="bg-gray-700 text-white">Primera palabra</option>
-                                <option value="ultima" className="bg-gray-700 text-white">Ãšltima palabra</option>
+                                <option value="ultima" className="bg-gray-700 text-white">Última palabra</option>
                               </select>
                             </div>
                           </div>
@@ -6311,7 +6311,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           <div className="mb-3">
                             <label className="text-white/60 text-xs mb-1 block">
                               Palabras (separadas por comas) 
-                              <span className="text-purple-300/60 ml-1">- RotarÃ¡n por las {nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6} posiciones del patrÃ³n</span>
+                              <span className="text-purple-300/60 ml-1">- Rotarán por las {nivel.patron ? nivel.patron.split('x').reduce((a: number, b: string) => a * parseInt(b), 1) : 6} posiciones del patrón</span>
                             </label>
                             <textarea
                               value={nivel.palabras || ""}
@@ -6332,7 +6332,7 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                           <div>
                             <label className="text-white/60 text-xs mb-1 block">Opciones de respuesta (distractores)</label>
                             <p className="text-purple-300/60 text-xs mb-2">
-                              Las palabras se mezclan aleatoriamente. La respuesta correcta se agrega automÃ¡ticamente si no estÃ¡ en las opciones.
+                              Las palabras se mezclan aleatoriamente. La respuesta correcta se agrega automáticamente si no está en las opciones.
                             </p>
                             <div className="flex items-center gap-3 mb-2">
                               <span className="text-white/50 text-xs">Cantidad de opciones:</span>
@@ -6732,7 +6732,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
   };
 
   const handleDeleteRole = async (id: number) => {
-    if (!confirm("Â¿Eliminar este rol?")) return;
+    if (!confirm("¿Eliminar este rol?")) return;
     try {
       await fetch(`/api/admin/roles/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       fetchRoles();
@@ -6776,7 +6776,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
   };
 
   const handleDeleteUser = async (id: number) => {
-    if (!confirm("Â¿Eliminar este usuario?")) return;
+    if (!confirm("¿Eliminar este usuario?")) return;
     try {
       await fetch(`/api/admin/users/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       fetchUsers();
@@ -6808,9 +6808,9 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
           <Card className="bg-black/40 border-cyan-500/30">
             <CardHeader><CardTitle className="text-white text-lg">Crear Usuario</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <Input placeholder="Correo electrÃ³nico" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-email" />
+              <Input placeholder="Correo electrónico" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-email" />
               <Input placeholder="Nombre de usuario (login)" value={newUserUsername} onChange={(e) => setNewUserUsername(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-username" />
-              <Input type="password" placeholder="ContraseÃ±a" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-password" />
+              <Input type="password" placeholder="Contraseña" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-user-password" />
               <div>
                 <p className="text-sm text-gray-300 mb-1">Rol asignado:</p>
                 <select value={newUserRoleId} onChange={(e) => setNewUserRoleId(Number(e.target.value))} className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm" data-testid="select-new-user-role">
@@ -6821,7 +6821,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
               <Button onClick={handleCreateUser} disabled={saving || !newUserEmail.trim() || !newUserUsername.trim() || !newUserPassword.trim() || !newUserRoleId} className="bg-cyan-600 hover:bg-cyan-700" data-testid="button-create-user">
                 <Plus className="w-4 h-4 mr-2" /> Crear Usuario
               </Button>
-              {roles.length === 0 && <p className="text-yellow-400 text-xs">Primero crea un rol en la pestaÃ±a "Roles"</p>}
+              {roles.length === 0 && <p className="text-yellow-400 text-xs">Primero crea un rol en la pestaña "Roles"</p>}
             </CardContent>
           </Card>
 
@@ -6833,7 +6833,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
                     <div className="space-y-3">
                       <Input value={editUserEmail} onChange={(e) => setEditUserEmail(e.target.value)} placeholder="Correo" className="bg-white/10 border-white/20 text-white" data-testid={`input-edit-user-email-${user.id}`} />
                       <Input value={editUserUsername} onChange={(e) => setEditUserUsername(e.target.value)} placeholder="Usuario" className="bg-white/10 border-white/20 text-white" data-testid={`input-edit-user-username-${user.id}`} />
-                      <Input type="password" value={editUserPassword} onChange={(e) => setEditUserPassword(e.target.value)} placeholder="Nueva contraseÃ±a (dejar vacÃ­o para no cambiar)" className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid={`input-edit-user-password-${user.id}`} />
+                      <Input type="password" value={editUserPassword} onChange={(e) => setEditUserPassword(e.target.value)} placeholder="Nueva contraseña (dejar vacío para no cambiar)" className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid={`input-edit-user-password-${user.id}`} />
                       <select value={editUserRoleId} onChange={(e) => setEditUserRoleId(Number(e.target.value))} className="w-full bg-white/10 border border-white/20 text-white rounded-md px-3 py-2 text-sm" data-testid={`select-edit-user-role-${user.id}`}>
                         {roles.map(r => <option key={r.id} value={r.id} className="bg-slate-800">{r.name}</option>)}
                       </select>
@@ -6858,7 +6858,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
                 </CardContent>
               </Card>
             ))}
-            {adminUsersList.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay usuarios creados. Crea uno arriba asignÃ¡ndole un rol.</p>}
+            {adminUsersList.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay usuarios creados. Crea uno arriba asignándole un rol.</p>}
           </div>
         </div>
       )}
@@ -6870,7 +6870,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
             <CardContent className="space-y-4">
               <Input placeholder="Nombre del rol (ej: Secretaria)" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50" data-testid="input-new-role-name" />
               <div>
-                <p className="text-sm text-gray-300 mb-2">Opciones del menÃº habilitadas:</p>
+                <p className="text-sm text-gray-300 mb-2">Opciones del menú habilitadas:</p>
                 <div className="flex flex-wrap gap-2">
                   {menuOptions.map(item => (
                     <button key={item.key} onClick={() => toggleTab(item.key, newRoleTabs, setNewRoleTabs)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${newRoleTabs.includes(item.key) ? "bg-yellow-500 text-black" : "bg-white/10 text-gray-400 hover:bg-white/20"}`} data-testid={`new-role-tab-${item.key}`}>{item.label}</button>
@@ -6920,7 +6920,7 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
                 </CardContent>
               </Card>
             ))}
-            {roles.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay roles creados aÃºn.</p>}
+            {roles.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No hay roles creados aún.</p>}
           </div>
         </div>
       )}
@@ -6930,19 +6930,19 @@ function RolesPanel({ token, roles, fetchRoles, allMenuItems }: { token: string;
 
 function InstitutionsPanel({ token }: { token: string }) {
   const COUNTRY_DATA: Record<string, { flag: string; name: string; states: string[] }> = {
-    BO: { flag: "BO", name: "Bolivia", states: ["La Paz", "Santa Cruz", "Cochabamba", "Oruro", "PotosÃ­", "Chuquisaca", "Tarija", "Beni", "Pando"] },
-    AR: { flag: "AR", name: "Argentina", states: ["Buenos Aires", "CÃ³rdoba", "Santa Fe", "Mendoza", "TucumÃ¡n", "Entre RÃ­os", "Salta", "Misiones", "Chaco", "Corrientes"] },
-    PE: { flag: "PE", name: "PerÃº", states: ["Lima", "Arequipa", "La Libertad", "Piura", "Cusco", "JunÃ­n", "Lambayeque", "Cajamarca", "Puno", "Ãncash"] },
-    CO: { flag: "CO", name: "Colombia", states: ["BogotÃ¡", "Antioquia", "Valle del Cauca", "Cundinamarca", "AtlÃ¡ntico", "Santander", "BolÃ­var", "NariÃ±o"] },
-    EC: { flag: "EC", name: "Ecuador", states: ["Pichincha", "Guayas", "Azuay", "ManabÃ­", "El Oro", "Tungurahua", "Los RÃ­os", "Loja"] },
-    CL: { flag: "CL", name: "Chile", states: ["Santiago", "ValparaÃ­so", "BiobÃ­o", "Maule", "La AraucanÃ­a", "O'Higgins", "Coquimbo", "Antofagasta"] },
-    MX: { flag: "MX", name: "MÃ©xico", states: ["Ciudad de MÃ©xico", "Estado de MÃ©xico", "Jalisco", "Veracruz", "Puebla", "Guanajuato", "Nuevo LeÃ³n"] },
-    ES: { flag: "ES", name: "EspaÃ±a", states: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "MÃ¡laga", "Murcia"] },
+    BO: { flag: "BO", name: "Bolivia", states: ["La Paz", "Santa Cruz", "Cochabamba", "Oruro", "Potosí", "Chuquisaca", "Tarija", "Beni", "Pando"] },
+    AR: { flag: "AR", name: "Argentina", states: ["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes"] },
+    PE: { flag: "PE", name: "Perú", states: ["Lima", "Arequipa", "La Libertad", "Piura", "Cusco", "Junín", "Lambayeque", "Cajamarca", "Puno", "Áncash"] },
+    CO: { flag: "CO", name: "Colombia", states: ["Bogotá", "Antioquia", "Valle del Cauca", "Cundinamarca", "Atlántico", "Santander", "Bolívar", "Nariño"] },
+    EC: { flag: "EC", name: "Ecuador", states: ["Pichincha", "Guayas", "Azuay", "Manabí", "El Oro", "Tungurahua", "Los Ríos", "Loja"] },
+    CL: { flag: "CL", name: "Chile", states: ["Santiago", "Valparaíso", "Biobío", "Maule", "La Araucanía", "O'Higgins", "Coquimbo", "Antofagasta"] },
+    MX: { flag: "MX", name: "México", states: ["Ciudad de México", "Estado de México", "Jalisco", "Veracruz", "Puebla", "Guanajuato", "Nuevo León"] },
+    ES: { flag: "ES", name: "España", states: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia"] },
     US: { flag: "US", name: "Estados Unidos", states: ["California", "Texas", "Florida", "New York", "Pennsylvania", "Illinois"] },
-    BR: { flag: "BR", name: "Brasil", states: ["SÃ£o Paulo", "Rio de Janeiro", "Minas Gerais", "Bahia", "ParanÃ¡", "Rio Grande do Sul"] },
-    VE: { flag: "VE", name: "Venezuela", states: ["Distrito Capital", "Miranda", "Zulia", "Carabobo", "Lara", "Aragua", "BolÃ­var"] },
-    PY: { flag: "PY", name: "Paraguay", states: ["AsunciÃ³n", "Central", "Alto ParanÃ¡", "ItapÃºa", "CaaguazÃº", "San Pedro"] },
-    UY: { flag: "UY", name: "Uruguay", states: ["Montevideo", "Canelones", "Maldonado", "Salto", "Colonia", "PaysandÃº"] },
+    BR: { flag: "BR", name: "Brasil", states: ["São Paulo", "Rio de Janeiro", "Minas Gerais", "Bahia", "Paraná", "Rio Grande do Sul"] },
+    VE: { flag: "VE", name: "Venezuela", states: ["Distrito Capital", "Miranda", "Zulia", "Carabobo", "Lara", "Aragua", "Bolívar"] },
+    PY: { flag: "PY", name: "Paraguay", states: ["Asunción", "Central", "Alto Paraná", "Itapúa", "Caaguazú", "San Pedro"] },
+    UY: { flag: "UY", name: "Uruguay", states: ["Montevideo", "Canelones", "Maldonado", "Salto", "Colonia", "Paysandú"] },
   };
 
   const [pais, setPais] = useState("BO");
@@ -6982,7 +6982,7 @@ function InstitutionsPanel({ token }: { token: string }) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Â¿Eliminar esta instituciÃ³n?")) return;
+    if (!confirm("¿Eliminar esta institución?")) return;
     try {
       await fetch(`/api/admin/instituciones/${id}`, {
         method: "DELETE",
@@ -7000,12 +7000,12 @@ function InstitutionsPanel({ token }: { token: string }) {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Building2 className="w-5 h-5 text-amber-400" />
-          GestiÃ³n de Instituciones
+          Gestión de Instituciones
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="bg-white/5 rounded-lg p-4 border border-amber-500/20">
-          <h3 className="text-amber-400 font-bold mb-3 text-sm">Agregar InstituciÃ³n</h3>
+          <h3 className="text-amber-400 font-bold mb-3 text-sm">Agregar Institución</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <select
               value={pais}
@@ -7081,7 +7081,7 @@ function InstitutionsPanel({ token }: { token: string }) {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            <span className="text-white/50 text-sm self-center">{instituciones.length} instituciÃ³n(es)</span>
+            <span className="text-white/50 text-sm self-center">{instituciones.length} institución(es)</span>
           </div>
 
           {loading ? (
