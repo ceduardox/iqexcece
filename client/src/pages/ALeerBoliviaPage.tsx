@@ -56,12 +56,12 @@ const schoolLogos = [
 ];
 
 const sponsorLogos = [
-  { src: "/logos/sponsors/camara-libro-cochabamba.png", name: "Camara Departamental del Libro de Cochabamba" },
-  { src: "/logos/sponsors/feria-internacional-libro-scz.png", name: "Feria Internacional del Libro de Santa Cruz" },
-  { src: "/logos/sponsors/grupo-editorial-la-hoguera.png", name: "Grupo Editorial La Hoguera" },
-  { src: "/logos/sponsors/accion-derechos-humanos.png", name: "Accion por los derechos humanos" },
-  { src: "/logos/sponsors/feria-santa-cruz-logo.png", name: "Feria Internacional del Libro Santa Cruz de la Sierra" },
-  { src: "/logos/sponsors/firstclass-institute.png", name: "Firstclass Institute" },
+  { src: "/logos/sponsors/250522223524_logocuadrado.jpg", name: "Sponsor 1" },
+  { src: "/logos/sponsors/250528191832_logorectangulo.jpg", name: "Sponsor 2" },
+  { src: "/logos/sponsors/17129606091190455667.jpg", name: "Sponsor 3" },
+  { src: "/logos/sponsors/1715469284249250013.jpg", name: "Sponsor 4" },
+  { src: "/logos/sponsors/1715471147212095531.jpg", name: "Sponsor 5" },
+  { src: "/logos/sponsors/17173657221811979344.jpg", name: "Sponsor 6" },
 ];
 
 export default function ALeerBoliviaPage() {
