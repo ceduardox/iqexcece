@@ -698,6 +698,10 @@ Reglas:
   app.post("/api/quiz/submit", async (req, res) => {
     try {
       const data = { ...req.body };
+      const sessionFromHeader = req.headers["x-iq-session-id"];
+      if (!data.sessionId && typeof sessionFromHeader === "string" && sessionFromHeader.trim()) {
+        data.sessionId = sessionFromHeader.trim();
+      }
       if (data.testType === "lectura" || !data.testType) {
         const comprensionPct = data.comprension ?? 0;
         const wpm = data.velocidadLectura ?? 0;
@@ -1556,14 +1560,18 @@ Reglas:
   app.get("/api/training-results", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const categoria = req.query.categoria as string;
-    const results = await storage.getTrainingResults(sessionId, categoria);
+    const mode = ((req.query.mode as string) || "all") as "all" | "diagnostico" | "entrenamiento" | "lectura_rapida";
+    const results = await storage.getTrainingResults(sessionId, categoria, mode);
     res.json({ results });
   });
 
   app.get("/api/training-results/stats", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const categoria = req.query.categoria as string;
-    const stats = await storage.getTrainingStats(sessionId, categoria);
+    const daysParam = Number(req.query.days ?? 0);
+    const days = Number.isFinite(daysParam) && daysParam > 0 ? daysParam : undefined;
+    const mode = ((req.query.mode as string) || "all") as "all" | "diagnostico" | "entrenamiento" | "lectura_rapida";
+    const stats = await storage.getTrainingStats(sessionId, categoria, days, mode);
     res.json({ stats });
   });
 

@@ -673,6 +673,67 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     URL.revokeObjectURL(url);
   };
 
+  const exportTrainingResultsByMode = (mode: "diagnostico" | "entrenamiento") => {
+    const isDiagnostic = (tipo?: string | null) => String(tipo || "").startsWith("diagnostico_");
+    const rows = trainingResults.filter((r: any) =>
+      mode === "diagnostico" ? isDiagnostic(r.tipoEjercicio) : !isDiagnostic(r.tipoEjercicio),
+    );
+    if (rows.length === 0) return;
+
+    const headers = [
+      "FECHA",
+      "TIPO",
+      "CATEGORIA",
+      "TITULO",
+      "PUNTAJE",
+      "NIVEL",
+      "PPM",
+      "CORRECTAS",
+      "TOTALES",
+      "TIEMPO_SEGUNDOS",
+      "SESSION_ID",
+      "DATOS_EXTRA",
+    ] as const;
+
+    const escapeCsv = (value: unknown) => {
+      const text = value == null ? "" : String(value);
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const csv = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map((r: any) =>
+        [
+          r.createdAt ? new Date(r.createdAt).toLocaleString("es-ES") : "",
+          r.tipoEjercicio || "",
+          r.categoria || "",
+          r.ejercicioTitulo || "",
+          r.puntaje ?? "",
+          r.nivelAlcanzado ?? "",
+          r.palabrasPorMinuto ?? "",
+          r.respuestasCorrectas ?? "",
+          r.respuestasTotales ?? "",
+          r.tiempoSegundos ?? "",
+          r.sessionId || "",
+          r.datosExtra || "",
+        ]
+          .map(escapeCsv)
+          .join(","),
+      ),
+    ].join("\n");
+
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `resultados_${mode}_${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const fetchSessions = async () => {
     if (!token) return;
     setLoading(true);
@@ -2645,10 +2706,32 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
         {activeTab === "resultados-entrenamiento" && (
           <Card className="bg-black/40 border-rose-500/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Zap className="w-5 h-5 text-rose-400" />
-                Resultados de Entrenamiento ({trainingResults.length})
-              </CardTitle>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-rose-400" />
+                  Resultados de Entrenamiento ({trainingResults.length})
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => exportTrainingResultsByMode("diagnostico")}
+                    className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/10"
+                    data-testid="button-export-training-diagnostic"
+                  >
+                    Exportar diagnóstico
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => exportTrainingResultsByMode("entrenamiento")}
+                    className="border-rose-400/40 text-rose-300 hover:bg-rose-500/10"
+                    data-testid="button-export-training-training"
+                  >
+                    Exportar entrenamiento
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {trainingResults.length === 0 ? (
@@ -2657,20 +2740,28 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
                 <div className="space-y-3">
                   {trainingResults.map((r: any) => {
                     const isExpanded = expandedTrainingResult === r.id;
-                    const datosExtra = r.datosExtra ? JSON.parse(r.datosExtra) : {};
+                    let datosExtra: Record<string, any> = {};
+                    try {
+                      datosExtra = r.datosExtra ? JSON.parse(r.datosExtra) : {};
+                    } catch {
+                      datosExtra = {};
+                    }
                     const tipoLabels: Record<string, string> = {
                       velocidad: "Velocidad",
-                      numeros: "NÃºmeros y Letras",
+                      numeros: "Números y Letras",
                       aceleracion_golpe: "Golpe de Vista",
                       aceleracion_desplazamiento: "Desplazamiento",
                       reconocimiento_visual: "Reconocimiento Visual",
                       neurosync: "Neuro-Sync",
                       neurolink: "Neuro-Link Pro",
-                      memoryflash: "Memory Flash"
+                      memoryflash: "Memory Flash",
+                      diagnostico_lectura: "Diagnóstico Lectura",
+                      diagnostico_razonamiento: "Diagnóstico Razonamiento",
+                      diagnostico_cerebral: "Diagnóstico Cerebral",
                     };
                     const categoriaLabels: Record<string, string> = {
                       preescolar: "Pre-escolar",
-                      ninos: "NiÃ±os",
+                      ninos: "Niños",
                       adolescentes: "Adolescentes",
                       universitarios: "Universitarios",
                       profesionales: "Profesionales",

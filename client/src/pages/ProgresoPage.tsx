@@ -383,21 +383,38 @@ export default function ProgresoPage() {
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "ninos";
   const { playSound } = useSounds();
+  const [resultScope, setResultScope] = useState<"all" | "diagnostico" | "lectura_rapida">("all");
+  const [dateRangeDays, setDateRangeDays] = useState<7 | 30 | 90>(30);
 
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("iq_session_id") : null;
 
   const { data: statsData, isLoading } = useQuery<{ stats: Stats }>({
-    queryKey: ["/api/training-results/stats", sessionId],
+    queryKey: ["/api/training-results/stats", sessionId, resultScope, dateRangeDays],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (sessionId) params.append("sessionId", sessionId);
+      params.append("mode", resultScope);
+      params.append("days", String(dateRangeDays));
       const res = await fetch(`/api/training-results/stats?${params}`);
       return res.json();
     },
     enabled: !!sessionId
   });
 
+  const { data: latestDiagnosticData } = useQuery<{ results: TrainingResult[] }>({
+    queryKey: ["/api/training-results", sessionId, "diagnostico-latest"],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (sessionId) params.append("sessionId", sessionId);
+      params.append("mode", "diagnostico");
+      const res = await fetch(`/api/training-results?${params}`);
+      return res.json();
+    },
+    enabled: !!sessionId
+  });
+
   const stats = statsData?.stats;
+  const latestDiagnostic = latestDiagnosticData?.results?.[0];
 
   const handleBack = () => {
     playSound("iphone");
@@ -454,6 +471,64 @@ export default function ProgresoPage() {
               </div>
             </motion.div>
 
+            {latestDiagnostic && (
+              <motion.div
+                className="bg-white rounded-2xl p-4 shadow-sm"
+                style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-purple-500">Último diagnóstico</p>
+                    <p className="text-sm text-gray-700 mt-1">
+                      {latestDiagnostic.ejercicioTitulo || (exerciseTypeKeys[latestDiagnostic.tipoEjercicio] ? t(exerciseTypeKeys[latestDiagnostic.tipoEjercicio]) : latestDiagnostic.tipoEjercicio)}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {formatDate(latestDiagnostic.createdAt)} · {formatTime(latestDiagnostic.createdAt)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">{latestDiagnostic.puntaje ?? 0}%</p>
+                    <button
+                      onClick={() => navigate(`/age-selection/${categoria}`)}
+                      className="mt-1 text-xs font-semibold text-cyan-600 hover:text-cyan-700"
+                      data-testid="button-repeat-diagnostic"
+                    >
+                      Repetir diagnóstico
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            <motion.div
+              className="bg-white rounded-2xl p-2 shadow-sm"
+              style={{ boxShadow: "0 2px 12px rgba(124, 58, 237, 0.08)" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { key: "all" as const, label: "Todo" },
+                  { key: "diagnostico" as const, label: "Diagnóstico" },
+                  { key: "lectura_rapida" as const, label: "Entrenamiento lectura rápida" },
+                ].map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setResultScope(opt.key)}
+                    className={`px-2 py-2 rounded-xl text-[11px] font-semibold transition-colors ${
+                      resultScope === opt.key ? "text-white" : "text-gray-600 bg-gray-50"
+                    }`}
+                    style={resultScope === opt.key ? { background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" } : undefined}
+                    data-testid={`button-scope-${opt.key}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+
             <motion.div 
               className="grid grid-cols-2 gap-3"
               initial={{ opacity: 0, y: 20 }}
@@ -493,9 +568,26 @@ export default function ProgresoPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-purple-600" />
                 <span className="text-sm font-medium text-gray-700">{t("progress.weeklyActivity")}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[7, 30, 90].map((days) => (
+                    <button
+                      key={days}
+                      onClick={() => setDateRangeDays(days as 7 | 30 | 90)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
+                        dateRangeDays === days ? "text-white" : "text-gray-500 bg-gray-50"
+                      }`}
+                      style={dateRangeDays === days ? { background: "linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)" } : undefined}
+                      data-testid={`button-range-${days}`}
+                    >
+                      {days}d
+                    </button>
+                  ))}
+                </div>
               </div>
               <MiniBarChart data={stats?.dailyActivity || {}} />
             </motion.div>

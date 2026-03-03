@@ -126,8 +126,12 @@ export default function RazonamientoQuizPage() {
       
       await fetch("/api/quiz/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(sessionId ? { "x-iq-session-id": sessionId } : {})
+        },
         body: JSON.stringify({
+          sessionId: sessionId || null,
           nombre: formData.nombre,
           email: formData.email || null,
           edad: formData.edad || null,

@@ -273,8 +273,12 @@ export default function VelocidadExercisePage() {
     const puntaje = totalResp > 0 ? Math.round((correctos / totalResp) * 100) : 0;
     fetch("/api/quiz/submit", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(sessionId ? { "x-iq-session-id": sessionId } : {}),
+      },
       body: JSON.stringify({
+        sessionId: sessionId || null,
         nombre: "Entrenamiento Velocidad",
         categoria: categoria || "general",
         testType: "velocidad",

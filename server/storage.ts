@@ -104,8 +104,8 @@ export interface IStorage {
   
   // Training results
   saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult>;
-  getTrainingResults(sessionId?: string, categoria?: string): Promise<TrainingResult[]>;
-  getTrainingStats(sessionId?: string, categoria?: string): Promise<any>;
+  getTrainingResults(sessionId?: string, categoria?: string, mode?: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida"): Promise<TrainingResult[]>;
+  getTrainingStats(sessionId?: string, categoria?: string, days?: number, mode?: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida"): Promise<any>;
 
   // Instituciones
   getInstituciones(pais?: string, estado?: string, tipo?: string): Promise<Institucion[]>;
@@ -214,6 +214,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const result: QuizResult = {
       id,
+      sessionId: insertResult.sessionId || null,
       nombre: insertResult.nombre,
       email: insertResult.email || null,
       edad: insertResult.edad || null,
@@ -447,8 +448,8 @@ export class MemStorage implements IStorage {
   async saveTrainingResult(result: InsertTrainingResult): Promise<TrainingResult> {
     return { id: randomUUID(), ...result, createdAt: new Date() } as TrainingResult;
   }
-  async getTrainingResults(_sessionId?: string, _categoria?: string): Promise<TrainingResult[]> { return []; }
-  async getTrainingStats(_sessionId?: string, _categoria?: string): Promise<any> { return { totalSessions: 0, byType: {}, recentActivity: [], dailyActivity: {} }; }
+  async getTrainingResults(_sessionId?: string, _categoria?: string, _mode: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida" = "all"): Promise<TrainingResult[]> { return []; }
+  async getTrainingStats(_sessionId?: string, _categoria?: string, _days?: number, _mode: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida" = "all"): Promise<any> { return { totalSessions: 0, byType: {}, recentActivity: [], dailyActivity: {} }; }
   async getInstituciones(_pais?: string, _estado?: string, _tipo?: string): Promise<Institucion[]> { return []; }
   async saveInstitucion(inst: InsertInstitucion): Promise<Institucion> { return { id: randomUUID(), ...inst } as Institucion; }
   async deleteInstitucion(_id: string): Promise<void> {}
@@ -527,6 +528,7 @@ export class DatabaseStorage implements IStorage {
 
   async saveQuizResult(insertResult: InsertQuizResult): Promise<QuizResult> {
     const [result] = await db.insert(quizResults).values({
+      sessionId: insertResult.sessionId || null,
       nombre: insertResult.nombre,
       email: insertResult.email || null,
       edad: insertResult.edad || null,
@@ -1101,33 +1103,43 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async getTrainingResults(sessionId?: string, categoria?: string): Promise<TrainingResult[]> {
-    let query = db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
-    
-    if (sessionId && categoria) {
-      return db.select().from(trainingResults)
-        .where(and(eq(trainingResults.sessionId, sessionId), eq(trainingResults.categoria, categoria)))
-        .orderBy(desc(trainingResults.createdAt));
-    } else if (sessionId) {
-      return db.select().from(trainingResults)
-        .where(eq(trainingResults.sessionId, sessionId))
-        .orderBy(desc(trainingResults.createdAt));
-    } else if (categoria) {
-      return db.select().from(trainingResults)
-        .where(eq(trainingResults.categoria, categoria))
-        .orderBy(desc(trainingResults.createdAt));
-    }
-    
-    return db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
+  async getTrainingResults(
+    sessionId?: string,
+    categoria?: string,
+    mode: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida" = "all",
+  ): Promise<TrainingResult[]> {
+    const conditions = [];
+    if (sessionId) conditions.push(eq(trainingResults.sessionId, sessionId));
+    if (categoria) conditions.push(eq(trainingResults.categoria, categoria));
+    const rows = conditions.length > 0
+      ? await db.select().from(trainingResults).where(and(...conditions)).orderBy(desc(trainingResults.createdAt))
+      : await db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
+
+    const isDiagnostic = (tipo: string | null) => (tipo || "").startsWith("diagnostico_");
+    const isLecturaRapida = (tipo: string | null) => ["velocidad", "aceleracion_golpe", "aceleracion_desplazamiento", "neurolector"].includes(tipo || "");
+
+    if (mode === "diagnostico") return rows.filter((r) => isDiagnostic(r.tipoEjercicio));
+    if (mode === "entrenamiento") return rows.filter((r) => !isDiagnostic(r.tipoEjercicio));
+    if (mode === "lectura_rapida") return rows.filter((r) => isLecturaRapida(r.tipoEjercicio));
+    return rows;
   }
 
-  async getTrainingStats(sessionId?: string, categoria?: string): Promise<any> {
-    const results = await this.getTrainingResults(sessionId, categoria);
+  async getTrainingStats(
+    sessionId?: string,
+    categoria?: string,
+    days?: number,
+    mode: "all" | "diagnostico" | "entrenamiento" | "lectura_rapida" = "all",
+  ): Promise<any> {
+    const allResults = await this.getTrainingResults(sessionId, categoria, mode);
+    const fromDate = days && days > 0 ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null;
+    const results = fromDate
+      ? allResults.filter((r) => r.createdAt && new Date(r.createdAt) >= fromDate)
+      : allResults;
     
     const stats = {
       totalSessions: results.length,
       byType: {} as Record<string, { count: number; avgScore: number; bestScore: number }>,
-      recentActivity: results.slice(0, 10),
+      recentActivity: results.slice(0, 30),
       dailyActivity: {} as Record<string, number>
     };
     

@@ -42,6 +42,7 @@ export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
 // Quiz results table
 export const quizResults = pgTable("quiz_results", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: text("session_id"),
   nombre: text("nombre").notNull(),
   email: text("email"),
   edad: text("edad"),

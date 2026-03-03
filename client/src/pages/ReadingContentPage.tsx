@@ -204,8 +204,12 @@ export default function ReadingContentPage() {
       
       await fetch("/api/quiz/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(sessionId ? { "x-iq-session-id": sessionId } : {})
+        },
         body: JSON.stringify({
+          sessionId: sessionId || null,
           nombre: formDataUnified.nombre,
           email: formDataUnified.email || null,
           edad: formDataUnified.edad || null,
