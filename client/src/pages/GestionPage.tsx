@@ -189,6 +189,9 @@ export default function GestionPage() {
     velocidadAnimacion: number;
     isActive: boolean;
   } | null>(null);
+  const [velocidadPatternFilter, setVelocidadPatternFilter] = useState<"all" | "2x2" | "2x3" | "3x2" | "2x4" | "3x3">("all");
+  const [velocidadPpmMin, setVelocidadPpmMin] = useState<string>("");
+  const [velocidadPpmMax, setVelocidadPpmMax] = useState<string>("");
   
   // Página de introducción de Números
   const [numerosIntroData, setNumerosIntroData] = useState<{
@@ -528,6 +531,36 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
     return list;
   }, [contactSubs, contactFilter, contactSearch, contactDateFrom, contactDateTo, contactSort]);
+
+  const SPEED_PATTERN_OPTIONS = ["all", "2x2", "2x3", "3x2", "2x4", "3x3"] as const;
+  const SUGGESTED_PPM_VALUES = [100, 150, 200, 250, 300, 350, 400, 450, 500] as const;
+
+  const filteredVelocidadNiveles = useMemo(() => {
+    if (!velocidadEjercicio) return [] as { nivel: NivelConfig; nivelIdx: number }[];
+    const min = Number(velocidadPpmMin);
+    const max = Number(velocidadPpmMax);
+    return velocidadEjercicio.niveles
+      .map((nivel, nivelIdx) => ({ nivel, nivelIdx }))
+      .filter(({ nivel }) => {
+        if (velocidadPatternFilter !== "all" && (nivel.patron || "3x2") !== velocidadPatternFilter) return false;
+        if (Number.isFinite(min) && min > 0 && (nivel.velocidad || 0) < min) return false;
+        if (Number.isFinite(max) && max > 0 && (nivel.velocidad || 0) > max) return false;
+        return true;
+      });
+  }, [velocidadEjercicio, velocidadPatternFilter, velocidadPpmMin, velocidadPpmMax]);
+
+  const velocidadCoverage = useMemo(() => {
+    if (!velocidadEjercicio) return { existing: [] as number[], missing: [] as number[] };
+    const base = velocidadEjercicio.niveles.filter((n) =>
+      velocidadPatternFilter === "all" ? true : (n.patron || "3x2") === velocidadPatternFilter,
+    );
+    const existing = Array.from(
+      new Set(base.map((n) => Number(n.velocidad)).filter((v) => Number.isFinite(v) && v > 0)),
+    ).sort((a, b) => a - b);
+    const missing =
+      velocidadPatternFilter === "all" ? [] : SUGGESTED_PPM_VALUES.filter((v) => !existing.includes(v));
+    return { existing, missing };
+  }, [velocidadEjercicio, velocidadPatternFilter]);
 
   const CONTACT_EXPORT_HEADERS = [
     "TIPO",
@@ -1279,6 +1312,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         .catch(() => setUploadedImages([]));
     }
   }, [isLoggedIn, activeTab]);
+
+  useEffect(() => {
+    if (editingVelocidadItem) {
+      setVelocidadPatternFilter("all");
+      setVelocidadPpmMin("");
+      setVelocidadPpmMax("");
+    }
+  }, [editingVelocidadItem]);
 
   // Image handling functions
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -6218,12 +6259,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         size="sm"
                         onClick={() => {
                           const newNivel = velocidadEjercicio.niveles.length + 1;
+                          const defaultPattern = velocidadPatternFilter === "all" ? "3x2" : velocidadPatternFilter;
+                          const defaultSpeed = Number(velocidadPpmMin) > 0 ? Number(velocidadPpmMin) : 150;
                           setVelocidadEjercicio({
                             ...velocidadEjercicio,
                             niveles: [{ 
                               nivel: newNivel, 
-                              patron: "3x2", 
-                              velocidad: 150, 
+                              patron: defaultPattern, 
+                              velocidad: defaultSpeed, 
                               palabras: "vista, atomo, iglesia, olvido, orar, opaco",
                               opciones: "atomo, olvido, orar, vista, iglesia, opaco",
                               tipoPregunta: "ultima"
@@ -6236,9 +6279,91 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         Crear Ejercicio
                       </Button>
                     </div>
-                    
+
+                    <div className="mb-4 space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {SPEED_PATTERN_OPTIONS.map((pattern) => (
+                          <button
+                            key={pattern}
+                            type="button"
+                            onClick={() => setVelocidadPatternFilter(pattern)}
+                            className={`px-2.5 py-1 rounded-lg text-xs border transition-colors ${
+                              velocidadPatternFilter === pattern
+                                ? "bg-purple-600 border-purple-400 text-white"
+                                : "bg-white/5 border-purple-500/30 text-white/70 hover:bg-white/10"
+                            }`}
+                            data-testid={`button-velocidad-pattern-${pattern}`}
+                          >
+                            {pattern === "all" ? "Todos los patrones" : `Patrón ${pattern}`}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-end gap-3">
+                        <div>
+                          <label className="text-white/60 text-xs block mb-1">PPM mínimo</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={velocidadPpmMin}
+                            onChange={(e) => setVelocidadPpmMin(e.target.value)}
+                            className="bg-white/10 border-purple-500/30 text-white w-28"
+                            placeholder="Ej: 150"
+                            data-testid="input-velocidad-ppm-min"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-white/60 text-xs block mb-1">PPM máximo</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={velocidadPpmMax}
+                            onChange={(e) => setVelocidadPpmMax(e.target.value)}
+                            className="bg-white/10 border-purple-500/30 text-white w-28"
+                            placeholder="Ej: 300"
+                            data-testid="input-velocidad-ppm-max"
+                          />
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setVelocidadPpmMin("");
+                            setVelocidadPpmMax("");
+                            setVelocidadPatternFilter("all");
+                          }}
+                          className="border-white/20 text-white/70"
+                          data-testid="button-velocidad-clear-filters"
+                        >
+                          Limpiar filtros
+                        </Button>
+                      </div>
+                      {velocidadPatternFilter !== "all" && (
+                        <div className="rounded-lg border border-purple-500/20 bg-black/20 p-2.5">
+                          <p className="text-xs text-white/70">
+                            Cobertura patrón {velocidadPatternFilter}:{" "}
+                            <span className="text-purple-300">
+                              {velocidadCoverage.existing.length > 0 ? velocidadCoverage.existing.join(", ") : "sin PPM configurado"}
+                            </span>
+                          </p>
+                          <p className="text-xs text-white/60 mt-1">
+                            Faltantes sugeridos:{" "}
+                            <span className="text-cyan-300">
+                              {velocidadCoverage.missing.length > 0 ? velocidadCoverage.missing.join(", ") : "completo en sugeridos"}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-xs text-white/50">
+                        Mostrando {filteredVelocidadNiveles.length} de {velocidadEjercicio.niveles.length} ejercicios
+                      </p>
+                    </div>
+                     
                     <div className="space-y-4">
-                      {velocidadEjercicio.niveles.map((nivel, nivelIdx) => (
+                      {filteredVelocidadNiveles.length === 0 ? (
+                        <div className="text-center text-white/50 text-sm py-6 border border-purple-500/20 rounded-xl bg-black/20">
+                          No hay ejercicios para ese patrón/rango de PPM.
+                        </div>
+                      ) : filteredVelocidadNiveles.map(({ nivel, nivelIdx }) => (
                         <div key={nivelIdx} className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-purple-400 font-semibold">Ejercicio {nivel.nivel}</span>
