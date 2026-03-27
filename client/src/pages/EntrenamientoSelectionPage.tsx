@@ -109,7 +109,7 @@ const defaultIcons = [
   "https://cdn-icons-png.flaticon.com/512/3176/3176267.png",
 ];
 const TRAINING_SELECTION_ASSET_WARM_KEY = "assets-warm:entrenamiento-selection-page:";
-const TRAINING_SELECTION_HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const TRAINING_SELECTION_HEADER_LOGO = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)

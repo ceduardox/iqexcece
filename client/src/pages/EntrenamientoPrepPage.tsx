@@ -8,7 +8,7 @@ import { LanguageButton } from "@/components/LanguageButton";
 import { useTranslation } from "react-i18next";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 const GAME_CONFIG: Record<string, { icon: typeof Zap; gradient: string; translationKey: string; route: string }> = {
   neurosync: { icon: Zap, gradient: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)", translationKey: "neurosync", route: "neurosync" },

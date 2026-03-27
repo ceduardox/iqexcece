@@ -4,7 +4,7 @@ import menuCurveImg from "@assets/menu_1769957804819.png";
 import { LanguageButton } from "@/components/LanguageButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
+const LOGO_URL = "/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
 
 interface CurvedHeaderProps {
   showBack?: boolean;

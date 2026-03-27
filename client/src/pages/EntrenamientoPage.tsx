@@ -25,7 +25,7 @@ function readCachedTrainingPageStyles(lang: string): PageStyles {
   }
 }
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 interface EntrenamientoPageData {
   bannerText: string;

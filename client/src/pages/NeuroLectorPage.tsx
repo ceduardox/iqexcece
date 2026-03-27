@@ -6,7 +6,7 @@ import { ArrowLeft, LogOut, BookOpen } from "lucide-react";
 import { LanguageButton } from "@/components/LanguageButton";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
+const LOGO_URL = "/api/images/1382c7c2-0e84-4bdb-bdd4-687eb9732416";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');

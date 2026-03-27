@@ -10,7 +10,7 @@ import { LanguageButton } from "@/components/LanguageButton";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
-const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const HEADER_LOGO = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');

@@ -25,7 +25,7 @@ function resolveStyle(styles: PageStyles, elementId: string, isMobile: boolean):
   return { ...base, ...desktop };
 }
 
-const HERO_IMG = "https://iqexponencial.app/api/images/8892fe4f-7ef0-45f3-ab1f-04bcf6c78960";
+const HERO_IMG = "/api/images/8892fe4f-7ef0-45f3-ab1f-04bcf6c78960";
 const DEFAULT_OPERATOR_IMG = "https://cdn-icons-png.flaticon.com/512/4825/4825038.png";
 
 function getSessionId() {

@@ -647,7 +647,7 @@ export default function AceleracionExercisePage() {
             transition={{ duration: 0.5 }}
           >
             <img 
-              src="https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3" 
+              src="/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3" 
               alt="IQEXPONENCIAL" 
               className="h-20 object-contain"
             />
@@ -1178,7 +1178,7 @@ export default function AceleracionExercisePage() {
               </button>
               <div className="flex items-center gap-2">
                 <img 
-                  src="https://iqexponencial.app/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
+                  src="/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
                   alt="Ojo" 
                   className="w-6 h-6 object-contain"
                 />
@@ -1328,7 +1328,7 @@ export default function AceleracionExercisePage() {
               {/* Avatar placeholder */}
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://iqexponencial.app/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
+                  src="/api/images/fcf84e41-37bb-458c-84b1-b5f5ab016009" 
                   alt="Ojo" 
                   className="w-12 h-12 object-contain"
                 />

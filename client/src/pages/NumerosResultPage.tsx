@@ -7,7 +7,7 @@ import menuCurveImg from "@assets/menu_1769957804819.png";
 import html2canvas from "html2canvas";
 import { LanguageButton } from "@/components/LanguageButton";
 
-const LOGO_URL = "https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
+const LOGO_URL = "/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3";
 
 export default function NumerosResultPage() {
   const [, navigate] = useLocation();

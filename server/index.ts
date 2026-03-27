@@ -5,6 +5,10 @@ import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+const LEGACY_IMAGE_HOSTS = [
+  "https://iqexponencial.app/api/images/",
+  "https://iqexponencial.com/api/images/",
+];
 
 declare module "http" {
   interface IncomingMessage {
@@ -34,6 +38,29 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+function normalizeLegacyImageUrls(value: unknown): unknown {
+  if (typeof value === "string") {
+    for (const host of LEGACY_IMAGE_HOSTS) {
+      if (value.startsWith(host)) {
+        return `/api/images/${value.slice(host.length)}`;
+      }
+    }
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(normalizeLegacyImageUrls);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [key, normalizeLegacyImageUrls(child)]),
+    );
+  }
+
+  return value;
+}
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -41,8 +68,9 @@ app.use((req, res, next) => {
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    const normalizedBody = normalizeLegacyImageUrls(bodyJson);
+    capturedJsonResponse = normalizedBody as Record<string, any> | undefined;
+    return originalResJson.apply(res, [normalizedBody, ...args]);
   };
 
   res.on("finish", () => {

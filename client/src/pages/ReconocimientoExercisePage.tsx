@@ -393,7 +393,7 @@ export default function ReconocimientoExercisePage() {
             transition={{ duration: 0.5 }}
           >
             <img 
-              src="https://iqexponencial.app/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3" 
+              src="/api/images/5e3b7dfb-4bda-42bf-b454-c1fe7d5833e3" 
               alt="IQEXPONENCIAL" 
               className="h-20 object-contain"
             />

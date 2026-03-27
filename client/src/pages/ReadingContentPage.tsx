@@ -10,7 +10,7 @@ import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
-const HEADER_LOGO = "https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
+const HEADER_LOGO = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
 const playButtonSound = () => {
   const audio = new Audio('/iphone.mp3');
@@ -624,7 +624,7 @@ export default function ReadingContentPage() {
         
         <div className="flex items-center justify-center" data-testid="header-logo">
           <img 
-            src="https://iqexponencial.app/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
+            src="/api/images/e038af72-17b2-4944-a203-afa1f753b33a" 
             alt="iQx" 
             className="h-10 w-auto object-contain" 
           />

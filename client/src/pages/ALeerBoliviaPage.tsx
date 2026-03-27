@@ -18,7 +18,7 @@ import laxPurpura from "@assets/laxpurpura_1771479319056.png";
 import laxBlanca from "@assets/laxblanca_1771479319056.png";
 import laxVerde from "@assets/laxverde_1771479319057.png";
 import aleerPremiosImg from "@assets/aleer-premios.jpg";
-const LOGO_URL = "https://iqexponencial.app/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
+const LOGO_URL = "/api/images/6218ab21-88a5-4e44-9254-bd17fb7fb2bb";
 
 const participarItems = [
   { id: "p1", icon: School, titleKey: "part1Title", descKey: "part1Desc" },
@@ -861,7 +861,7 @@ export default function ALeerBoliviaPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-image", e); } }}
             >
               <img
-                src={styles["participar-image"]?.imageUrl || "https://iqexponencial.app/api/images/0ac59e05-5b57-4642-9b78-9f50eca502f1"}
+                src={styles["participar-image"]?.imageUrl || "/api/images/0ac59e05-5b57-4642-9b78-9f50eca502f1"}
                 alt="Estudiante leyendo"
                 className="w-full h-56 md:h-full object-cover rounded-2xl"
                 style={{ height: styles["participar-image"]?.iconSize ? `${styles["participar-image"].iconSize * 2}px` : undefined }}

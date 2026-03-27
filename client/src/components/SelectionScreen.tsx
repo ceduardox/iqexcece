@@ -20,7 +20,7 @@ interface SelectionScreenProps {
 
 const HOME_STYLE_CACHE_KEY = "page-style:selection-screen:v2:";
 const HOME_ASSET_WARM_KEY = "assets-warm:selection-screen:v2:";
-const DEFAULT_MINDMAP_BG = "https://iqexponencial.app/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af";
+const DEFAULT_MINDMAP_BG = "/api/images/17a02d6c-229f-4fd1-818f-8484ba4860af";
 const HERO_TITLE_CONTAINER_VARIANTS = {
   hidden: { opacity: 1 },
   show: {
