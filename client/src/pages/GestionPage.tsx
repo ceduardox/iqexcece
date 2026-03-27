@@ -7792,10 +7792,56 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
 
   const activeUsers = sessionsData?.activeCount || 0;
   const totalSessions = sessionsData?.total || 0;
+
+  const normalizePaymentStatus = (status: string) => {
+    const s = String(status || "").toLowerCase();
+    if (["finished", "confirmed", "paid"].includes(s)) return "paid";
+    if (["failed", "expired", "refunded"].includes(s)) return "failed";
+    return "pending";
+  };
+
+  const rawPayments = payments.length > 0 ? payments : [
+    {
+      orderId: "inv-2026-01",
+      updatedAt: "2026-01-10T12:00:00.000Z",
+      planId: "pro",
+      billingMode: "mensual",
+      amountUsd: 90,
+      paymentStatus: "finished",
+    },
+    {
+      orderId: "inv-2026-02",
+      updatedAt: "2026-02-10T12:00:00.000Z",
+      planId: "pro",
+      billingMode: "mensual",
+      amountUsd: 90,
+      paymentStatus: "waiting",
+    },
+    {
+      orderId: "inv-2026-03",
+      updatedAt: "2026-03-10T12:00:00.000Z",
+      planId: "pro",
+      billingMode: "mensual",
+      amountUsd: 90,
+      paymentStatus: "waiting",
+    },
+  ];
+
   const paidStatuses = new Set(["finished", "confirmed", "paid"]);
-  const latestPaid = [...payments]
+  const latestPaid = [...rawPayments]
     .filter((p: any) => paidStatuses.has(String(p.paymentStatus || "").toLowerCase()))
     .sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())[0];
+  const pendingPayments = rawPayments
+    .filter((row: any) => normalizePaymentStatus(row.paymentStatus) === "pending")
+    .sort((a: any, b: any) => new Date(a.updatedAt || 0).getTime() - new Date(b.updatedAt || 0).getTime());
+  const pendingDebt = pendingPayments.reduce((sum: number, row: any) => sum + Number(row.amountUsd || 0), 0);
+  const oldestPending = pendingPayments[0];
+  const latestPending = pendingPayments[pendingPayments.length - 1];
+
+  const formatPaymentDate = (value?: string | null) =>
+    value
+      ? new Date(value).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })
+      : "-";
 
   const activePlanId: "starter" | "pro" | "elite" = (latestPaid?.planId === "starter" || latestPaid?.planId === "elite")
     ? latestPaid.planId
@@ -7866,32 +7912,6 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   useEffect(() => {
     if (serverView === "pagos") fetchPayments();
   }, [serverView]);
-
-  const normalizePaymentStatus = (status: string) => {
-    const s = String(status || "").toLowerCase();
-    if (["finished", "confirmed", "paid"].includes(s)) return "paid";
-    if (["failed", "expired", "refunded"].includes(s)) return "failed";
-    return "pending";
-  };
-
-  const rawPayments = payments.length > 0 ? payments : [
-    {
-      orderId: "inv-2026-01",
-      updatedAt: "2026-01-10T12:00:00.000Z",
-      planId: "pro",
-      billingMode: "mensual",
-      amountUsd: 90,
-      paymentStatus: "finished",
-    },
-    {
-      orderId: "inv-2026-02",
-      updatedAt: "2026-02-10T12:00:00.000Z",
-      planId: "pro",
-      billingMode: "mensual",
-      amountUsd: 90,
-      paymentStatus: "waiting",
-    },
-  ];
 
   const filteredPayments = rawPayments.filter((row: any) => {
     if (paymentStatusFilter === "all") return true;
@@ -7994,16 +8014,29 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
                 <p className="text-xs text-white/60">Ultimo pago confirmado</p>
-                <p className="text-white text-lg font-bold mt-1">10 de enero 2026</p>
-                <p className="text-emerald-300 text-sm">Pro Growth - $90</p>
+                <p className="text-white text-lg font-bold mt-1">{formatPaymentDate(latestPaid?.updatedAt || null)}</p>
+                <p className="text-emerald-300 text-sm">
+                  {latestPaid ? `${planMetaById[activePlanId].name} - $${latestPaid.amountUsd || 0}` : "Sin pagos confirmados"}
+                </p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-                <p className="text-xs text-white/60">Proximo vencimiento</p>
-                <p className="text-white text-lg font-bold mt-1">10 de febrero 2026</p>
-                <p className="text-amber-300 text-sm">Pago programado - $90</p>
+                <p className="text-xs text-white/60">Factura vencida mas antigua</p>
+                <p className="text-white text-lg font-bold mt-1">{formatPaymentDate(oldestPending?.updatedAt || null)}</p>
+                <p className="text-amber-300 text-sm">
+                  {oldestPending ? `Pendiente desde ${formatPaymentDate(oldestPending.updatedAt)}` : "Sin vencimientos pendientes"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-xs text-white/60">Deuda pendiente acumulada</p>
+                <p className="text-white text-lg font-bold mt-1">${pendingDebt}</p>
+                <p className="text-rose-300 text-sm">
+                  {pendingPayments.length > 0
+                    ? `${pendingPayments.length} facturas vencidas hasta ${formatPaymentDate(latestPending?.updatedAt || null)}`
+                    : "Sin deuda pendiente"}
+                </p>
               </div>
             </div>
 
