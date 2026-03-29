@@ -176,7 +176,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedStyles(styleLang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedStyles(styleLang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${HOME_ASSET_WARM_KEY}${styleLang}`) === "1");
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   
@@ -203,7 +202,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     const cachedStyles = readCachedStyles(styleLang);
     setStyles(cachedStyles);
     setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(localStorage.getItem(`${HOME_ASSET_WARM_KEY}${styleLang}`) === "1");
 
     fetch(`/api/page-styles/selection-screen?lang=${styleLang}`, { signal: controller.signal })
       .then(res => res.json())
@@ -230,17 +228,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   useEffect(() => {
     if (!stylesReady) return;
     const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
-    if (localStorage.getItem(warmKey) === "1") {
-      setAssetsReady(true);
-      return;
-    }
+    if (localStorage.getItem(warmKey) === "1") return;
 
     let cancelled = false;
-    setAssetsReady(false);
     preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG]).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, "1");
-      setAssetsReady(true);
     });
 
     return () => {
@@ -349,14 +342,6 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
       setLocation("/entrenamiento");
     }
   }, [setUserData, setLocation, playCard]);
-
-  if (!stylesReady || !assetsReady) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   const handleWhatsApp = () => {
     window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank");
