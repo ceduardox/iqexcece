@@ -7696,6 +7696,11 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<"all" | "paid" | "pending" | "failed">("all");
+  const [siteAccessEnabled, setSiteAccessEnabled] = useState(false);
+  const [siteAccessIps, setSiteAccessIps] = useState("");
+  const [siteAccessCurrentIp, setSiteAccessCurrentIp] = useState("");
+  const [siteAccessSaving, setSiteAccessSaving] = useState(false);
+  const [siteAccessMessage, setSiteAccessMessage] = useState("");
 
 
   const monthlyPlans = [
@@ -7963,8 +7968,66 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     }
   };
 
+  const fetchSiteAccessSettings = async () => {
+    if (!adminToken) return;
+    try {
+      const res = await fetch("/api/admin/site-access", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSiteAccessEnabled(Boolean(data?.settings?.enabled));
+        setSiteAccessIps(Array.isArray(data?.settings?.allowedIps) ? data.settings.allowedIps.join(", ") : "");
+        setSiteAccessCurrentIp(data?.currentIp || "");
+      }
+    } catch {}
+  };
+
+  const saveSiteAccessSettings = async (enabled: boolean = siteAccessEnabled) => {
+    if (!adminToken) return;
+    setSiteAccessSaving(true);
+    setSiteAccessMessage("");
+    const allowedIps = siteAccessIps
+      .split(/[,\n]/)
+      .map((ip) => ip.trim())
+      .filter(Boolean);
+
+    try {
+      const res = await fetch("/api/admin/site-access", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ enabled, allowedIps }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSiteAccessMessage(data?.error || "No se pudo guardar el bloqueo.");
+        return;
+      }
+      setSiteAccessEnabled(Boolean(data?.settings?.enabled));
+      setSiteAccessIps(Array.isArray(data?.settings?.allowedIps) ? data.settings.allowedIps.join(", ") : "");
+      setSiteAccessCurrentIp(data?.currentIp || siteAccessCurrentIp);
+      setSiteAccessMessage(data?.settings?.enabled ? "Bloqueo activado. Solo las IP permitidas pueden ver la web." : "Bloqueo desactivado. La web vuelve a ser publica.");
+    } catch (error: any) {
+      setSiteAccessMessage(error?.message || "Error de conexion.");
+    } finally {
+      setSiteAccessSaving(false);
+    }
+  };
+
+  const addCurrentIpToAccessList = () => {
+    if (!siteAccessCurrentIp) return;
+    const ips = siteAccessIps
+      .split(/[,\n]/)
+      .map((ip) => ip.trim())
+      .filter(Boolean);
+    if (!ips.includes(siteAccessCurrentIp)) {
+      setSiteAccessIps([...ips, siteAccessCurrentIp].join(", "));
+    }
+  };
+
   useEffect(() => {
     fetchPayments();
+    fetchSiteAccessSettings();
   }, [adminToken]);
 
   useEffect(() => {
@@ -8219,6 +8282,75 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                 ? "Dominio web optimizado: 20% a 40% menos carga."
                 : "Dominio app con trafico completo y carga primaria."}
             </span>
+          </div>
+
+          <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 p-4 space-y-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-white font-semibold flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-violet-300" />
+                  Bloqueo privado por IP
+                </p>
+                <p className="text-xs text-white/60 mt-1">
+                  Cuando esta activo, la web completa queda oculta para cualquier IP fuera de la lista.
+                </p>
+                <p className="text-xs text-cyan-300 mt-1">
+                  Tu IP detectada: {siteAccessCurrentIp || "No detectada"}
+                </p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded border ${siteAccessEnabled ? "text-amber-300 border-amber-500/40 bg-amber-500/10" : "text-emerald-300 border-emerald-500/40 bg-emerald-500/10"}`}>
+                {siteAccessEnabled ? "Privado" : "Publico"}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-2">
+              <Input
+                value={siteAccessIps}
+                onChange={(event) => setSiteAccessIps(event.target.value)}
+                placeholder="Ej: 190.104.10.20, 181.115.22.9"
+                className="bg-black/30 border-white/20 text-white"
+                data-testid="input-site-access-ips"
+              />
+              <Button
+                onClick={addCurrentIpToAccessList}
+                variant="outline"
+                className="border-cyan-500/30 text-cyan-300"
+                data-testid="button-add-current-ip"
+              >
+                Usar mi IP
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => saveSiteAccessSettings(true)}
+                disabled={siteAccessSaving}
+                className="bg-amber-600 hover:bg-amber-700"
+                data-testid="button-enable-site-access"
+              >
+                Activar privado
+              </Button>
+              <Button
+                onClick={() => saveSiteAccessSettings(false)}
+                disabled={siteAccessSaving}
+                className="bg-emerald-600 hover:bg-emerald-700"
+                data-testid="button-disable-site-access"
+              >
+                Desactivar y hacer publico
+              </Button>
+              <Button
+                onClick={() => saveSiteAccessSettings(siteAccessEnabled)}
+                disabled={siteAccessSaving}
+                variant="outline"
+                className="border-white/20 text-white/80"
+                data-testid="button-save-site-access"
+              >
+                Guardar IPs
+              </Button>
+            </div>
+            {siteAccessMessage && (
+              <p className={`text-xs ${siteAccessMessage.includes("activado") || siteAccessMessage.includes("desactivado") ? "text-emerald-300" : "text-rose-300"}`}>
+                {siteAccessMessage}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -10,6 +10,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db } from "./db";
+import { getClientIp, loadSiteAccessSettings, saveSiteAccessSettings } from "./site-access";
 
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
@@ -665,6 +666,29 @@ Reglas:
         res.status(401).json({ error: "Invalid credentials" });
       }
     }
+  });
+
+  app.get("/api/admin/site-access", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    res.json({ settings: loadSiteAccessSettings(), currentIp: getClientIp(req) });
+  });
+
+  app.put("/api/admin/site-access", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+
+    const allowedIps = Array.isArray(req.body?.allowedIps)
+      ? req.body.allowedIps.map((ip: unknown) => String(ip).trim()).filter(Boolean)
+      : [];
+    const enabled = Boolean(req.body?.enabled);
+
+    if (enabled && allowedIps.length === 0) {
+      return res.status(400).json({ error: "Agrega al menos una IP antes de activar el bloqueo." });
+    }
+
+    const settings = saveSiteAccessSettings({ enabled, allowedIps });
+    res.json({ settings, currentIp: getClientIp(req) });
   });
 
   // Get all sessions (admin only)
