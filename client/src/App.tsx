@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -106,6 +107,16 @@ function Router() {
 
 function App() {
   usePreloadAssets();
+
+  useEffect(() => {
+    if (window.location.pathname === "/") return;
+
+    const readyFrame = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event("iqex-app-ready"));
+    });
+
+    return () => window.cancelAnimationFrame(readyFrame);
+  }, []);
   
   return (
     <QueryClientProvider client={queryClient}>

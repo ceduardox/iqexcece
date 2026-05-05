@@ -227,8 +227,13 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   useEffect(() => {
     if (!stylesReady) return;
+    const readyFrame = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event("iqex-app-ready"));
+    });
     const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
-    if (localStorage.getItem(warmKey) === "1") return;
+    if (localStorage.getItem(warmKey) === "1") {
+      return () => window.cancelAnimationFrame(readyFrame);
+    }
 
     let cancelled = false;
     preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG]).then(() => {
@@ -238,6 +243,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(readyFrame);
     };
   }, [stylesReady, styles, styleLang]);
   

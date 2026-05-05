@@ -96,6 +96,11 @@
         font-size: 0.9rem;
         font-weight: 500;
       }
+      .initial-loader--hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+      }
       @keyframes initial-loader-slide {
         0% { transform: translateX(-110%); }
         100% { transform: translateX(250%); }
@@ -111,14 +116,13 @@
     </style>
   </head>
   <body>
-    <div id="root">
-      <div class="initial-loader" role="status" aria-live="polite" aria-label="Cargando IQEXPONENCIAL">
-        <div class="initial-loader__content">
-          <div class="initial-loader__mark" aria-hidden="true"></div>
-          <h1 class="initial-loader__brand">IQ<span>EX</span>PONENCIAL</h1>
-          <div class="initial-loader__bar" aria-hidden="true"></div>
-          <p class="initial-loader__text">Preparando tu experiencia</p>
-        </div>
+    <div id="root"></div>
+    <div id="initial-loader" class="initial-loader" role="status" aria-live="polite" aria-label="Cargando IQEXPONENCIAL">
+      <div class="initial-loader__content">
+        <div class="initial-loader__mark" aria-hidden="true"></div>
+        <h1 class="initial-loader__brand">IQ<span>EX</span>PONENCIAL</h1>
+        <div class="initial-loader__bar" aria-hidden="true"></div>
+        <p class="initial-loader__text">Preparando tu experiencia</p>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
