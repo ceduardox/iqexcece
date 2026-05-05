@@ -16,17 +16,42 @@ const defaultSettings: SiteAccessSettings = {
 };
 
 function normalizeIp(value: string | undefined | null): string {
-  const ip = String(value || "").trim();
+  let ip = String(value || "").trim().toLowerCase();
   if (!ip) return "";
+  if (ip.startsWith("[") && ip.includes("]")) {
+    ip = ip.slice(1, ip.indexOf("]"));
+  }
   if (ip.startsWith("::ffff:")) return ip.slice(7);
   if (ip === "::1") return "127.0.0.1";
+  if (/^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(ip)) {
+    return ip.slice(0, ip.lastIndexOf(":"));
+  }
   return ip;
 }
 
+function getHeaderIps(req: Request, headerName: string): string[] {
+  const value = req.headers[headerName];
+  if (!value) return [];
+  const raw = Array.isArray(value) ? value.join(",") : String(value);
+  return raw.split(",").map((ip) => normalizeIp(ip)).filter(Boolean);
+}
+
+export function getClientIpCandidates(req: Request): string[] {
+  const candidates = [
+    ...getHeaderIps(req, "cf-connecting-ip"),
+    ...getHeaderIps(req, "true-client-ip"),
+    ...getHeaderIps(req, "x-real-ip"),
+    ...getHeaderIps(req, "x-client-ip"),
+    ...getHeaderIps(req, "x-forwarded-for"),
+    normalizeIp(req.ip),
+    normalizeIp(req.socket.remoteAddress),
+  ].filter(Boolean);
+
+  return Array.from(new Set(candidates));
+}
+
 export function getClientIp(req: Request): string {
-  const forwarded = req.headers["x-forwarded-for"]?.toString().split(",")[0];
-  const realIp = req.headers["x-real-ip"]?.toString();
-  return normalizeIp(forwarded || realIp || req.socket.remoteAddress || req.ip || "");
+  return getClientIpCandidates(req)[0] || "";
 }
 
 export function loadSiteAccessSettings(): SiteAccessSettings {
@@ -34,7 +59,7 @@ export function loadSiteAccessSettings(): SiteAccessSettings {
     if (!fs.existsSync(SITE_ACCESS_FILE)) return defaultSettings;
     const parsed = JSON.parse(fs.readFileSync(SITE_ACCESS_FILE, "utf-8"));
     return {
-      enabled: Boolean(parsed?.enabled),
+      enabled: false,
       allowedIps: Array.isArray(parsed?.allowedIps)
         ? parsed.allowedIps.map((ip: unknown) => normalizeIp(String(ip))).filter(Boolean)
         : [],
@@ -47,7 +72,7 @@ export function loadSiteAccessSettings(): SiteAccessSettings {
 
 export function saveSiteAccessSettings(settings: SiteAccessSettings): SiteAccessSettings {
   const next: SiteAccessSettings = {
-    enabled: Boolean(settings.enabled),
+    enabled: false,
     allowedIps: Array.from(new Set(settings.allowedIps.map((ip) => normalizeIp(ip)).filter(Boolean))),
     updatedAt: new Date().toISOString(),
   };
@@ -57,11 +82,5 @@ export function saveSiteAccessSettings(settings: SiteAccessSettings): SiteAccess
 }
 
 export function siteAccessMiddleware(req: Request, res: Response, next: NextFunction) {
-  const settings = loadSiteAccessSettings();
-  if (!settings.enabled) return next();
-
-  const clientIp = getClientIp(req);
-  if (settings.allowedIps.includes(clientIp)) return next();
-
-  return res.status(403).type("html").send("");
+  return next();
 }
