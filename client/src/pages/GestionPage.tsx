@@ -23,6 +23,8 @@ interface Session {
   isCurrentlyActive: boolean;
   lastActivity: string | null;
   createdAt: string | null;
+  last_activity?: string | null;
+  created_at?: string | null;
 }
 
 interface SessionsData {
@@ -98,6 +100,31 @@ export default function GestionPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [imgPage, setImgPage] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  const parseSafeDate = (value: string | Date | null | undefined): Date | null => {
+    if (!value) return null;
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const normalizeSession = (session: any): Session => ({
+    ...session,
+    sessionId: session.sessionId ?? session.session_id ?? "",
+    userAgent: session.userAgent ?? session.user_agent ?? null,
+    isPwa: session.isPwa ?? session.is_pwa ?? false,
+    ageGroup: session.ageGroup ?? session.age_group ?? null,
+    selectedProblems: session.selectedProblems ?? session.selected_problems ?? null,
+    isActive: session.isActive ?? session.is_active ?? false,
+    isCurrentlyActive: session.isCurrentlyActive ?? session.is_currently_active ?? false,
+    lastActivity: session.lastActivity ?? session.last_activity ?? null,
+    createdAt: session.createdAt ?? session.created_at ?? null,
+  });
+
+  const normalizeSessionsData = (payload: any): SessionsData => ({
+    total: Number(payload?.total || 0),
+    activeCount: Number(payload?.activeCount ?? payload?.active_count ?? 0),
+    sessions: Array.isArray(payload?.sessions) ? payload.sessions.map(normalizeSession) : [],
+  });
   
   // Razonamiento state
   const [razonamientoThemes, setRazonamientoThemes] = useState<{temaNumero: number; title: string}[]>([]);
@@ -838,12 +865,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           });
           if (retryRes.ok) {
             const data = await retryRes.json();
-            setData(data);
+            setData(normalizeSessionsData(data));
           }
         }
       } else if (res.ok) {
         const data = await res.json();
-        setData(data);
+        setData(normalizeSessionsData(data));
       }
     } catch {
       console.error("Error fetching sessions");
@@ -1613,7 +1640,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleString("es-ES");
+    const date = parseSafeDate(dateStr);
+    return date ? date.toLocaleString("es-ES") : "-";
   };
 
   const formatTime = (seconds: number | null) => {
