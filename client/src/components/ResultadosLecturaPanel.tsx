@@ -33,6 +33,7 @@ interface QuizResult {
   tiempoCuestionario: number | null;
   isPwa: boolean;
   createdAt: string | null;
+  created_at?: string | null;
 }
 
 interface Props {
@@ -91,9 +92,20 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
 
 const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "grado", "institucion", "fecha"];
 
-function formatDate(d: string | null) {
+function getCreatedAt(result: QuizResult): string | Date | null {
+  return result.createdAt || result.created_at || null;
+}
+
+function parseDate(value: string | Date | null | undefined): Date | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDate(d: string | Date | null | undefined) {
   if (!d) return "-";
-  const date = new Date(d);
+  const date = parseDate(d);
+  if (!date) return "-";
   return date.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
 }
 
@@ -313,13 +325,13 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
       if (lectorFilter !== "all" && r.categoriaLector !== lectorFilter) return false;
 
       if (dateFrom) {
-        const created = r.createdAt ? new Date(r.createdAt) : null;
+        const created = parseDate(getCreatedAt(r));
         if (!created) return false;
         const createdDateStr = `${created.getFullYear()}-${String(created.getMonth()+1).padStart(2,"0")}-${String(created.getDate()).padStart(2,"0")}`;
         if (createdDateStr < dateFrom) return false;
       }
       if (dateTo) {
-        const created = r.createdAt ? new Date(r.createdAt) : null;
+        const created = parseDate(getCreatedAt(r));
         if (!created) return false;
         const createdDateStr = `${created.getFullYear()}-${String(created.getMonth()+1).padStart(2,"0")}-${String(created.getDate()).padStart(2,"0")}`;
         if (createdDateStr > dateTo) return false;
@@ -403,7 +415,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
       case "telefono": return r.telefono || "-";
       case "pais": return r.pais || "-";
       case "estado": return r.estado || "-";
-      case "fecha": return formatDate(r.createdAt);
+      case "fecha": return formatDate(getCreatedAt(r));
       default: return "-";
     }
   };
@@ -987,7 +999,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                   {r.ocupacion && <p className="text-white/50">Ocupación: <span className="text-green-400">{r.ocupacion}</span></p>}
                   {r.lugarTrabajo && <p className="text-white/50">Lugar Trabajo: <span className="text-green-400">{r.lugarTrabajo}</span></p>}
                   {r.comentario && <p className="text-white/50">Comentario: <span className="text-white/80">{r.comentario}</span></p>}
-                  <p className="text-white/50">Fecha: <span className="text-white/60">{formatDate(r.createdAt)}</span></p>
+                  <p className="text-white/50">Fecha: <span className="text-white/60">{formatDate(getCreatedAt(r))}</span></p>
                 </div>
               )}
             </div>

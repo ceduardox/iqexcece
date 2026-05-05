@@ -202,7 +202,7 @@ export default function ReadingContentPage() {
       const comprension = Math.round((correct / content.questions.length) * 100);
       const velocidadLectura = readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0;
       
-      await fetch("/api/quiz/submit", {
+      const quizResponse = await fetch("/api/quiz/submit", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -238,6 +238,14 @@ export default function ReadingContentPage() {
           isPwa,
         }),
       });
+      if (!quizResponse.ok) {
+        let message = "No se pudo guardar el resultado.";
+        try {
+          const errorData = await quizResponse.json();
+          message = errorData?.error || message;
+        } catch {}
+        throw new Error(message);
+      }
 
       // Mirror diagnóstico data in training_results so /progreso can show it by sessionId
       await fetch("/api/training-results", {
@@ -268,6 +276,7 @@ export default function ReadingContentPage() {
       setShowResults(true);
     } catch (e) {
       console.error(e);
+      alert(e instanceof Error ? e.message : "No se pudo guardar el resultado.");
     }
     setSubmitting(false);
   };

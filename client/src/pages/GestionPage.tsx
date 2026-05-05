@@ -860,7 +860,24 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       });
       if (res.ok) {
         const { results } = await res.json();
-        setQuizResults(results);
+        setQuizResults((Array.isArray(results) ? results : []).map((row: any) => ({
+          ...row,
+          testType: row.testType ?? row.test_type ?? null,
+          nivelEducativo: row.nivelEducativo ?? row.nivel_educativo ?? null,
+          tipoEstudiante: row.tipoEstudiante ?? row.tipo_estudiante ?? null,
+          esProfesional: row.esProfesional ?? row.es_profesional ?? null,
+          lugarTrabajo: row.lugarTrabajo ?? row.lugar_trabajo ?? null,
+          codigoPais: row.codigoPais ?? row.codigo_pais ?? null,
+          tiempoLectura: row.tiempoLectura ?? row.tiempo_lectura ?? null,
+          tiempoCuestionario: row.tiempoCuestionario ?? row.tiempo_cuestionario ?? null,
+          respuestasCorrectas: row.respuestasCorrectas ?? row.respuestas_correctas ?? null,
+          respuestasTotales: row.respuestasTotales ?? row.respuestas_totales ?? null,
+          velocidadLectura: row.velocidadLectura ?? row.velocidad_lectura ?? null,
+          velocidadMaxima: row.velocidadMaxima ?? row.velocidad_maxima ?? null,
+          categoriaLector: row.categoriaLector ?? row.categoria_lector ?? null,
+          isPwa: row.isPwa ?? row.is_pwa ?? false,
+          createdAt: row.createdAt ?? row.created_at ?? null,
+        })));
       }
       
       // Also fetch cerebral results
