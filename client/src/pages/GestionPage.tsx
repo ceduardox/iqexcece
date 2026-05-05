@@ -1685,20 +1685,39 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return age ? labels[age] || age : "-";
   };
 
+  const sidebarItemClass = (active: boolean) =>
+    `w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors border ${
+      active
+        ? "bg-slate-800 text-white border-slate-700 shadow-sm"
+        : "text-slate-300 border-transparent hover:bg-slate-900 hover:text-white"
+    }`;
+
+  const sidebarSubItemClass = (active: boolean) =>
+    `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors border ${
+      active
+        ? "bg-slate-800 text-white border-slate-700"
+        : "text-slate-400 border-transparent hover:bg-slate-900 hover:text-white"
+    }`;
+
+  const mobileTabClass = (active: boolean) =>
+    active
+      ? "bg-slate-800 text-white border-slate-700 hover:bg-slate-700"
+      : "bg-slate-950/60 border-slate-700 text-slate-300 hover:bg-slate-900 hover:text-white";
+
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-xl">
+          <Card className="bg-slate-900 border-slate-800 shadow-2xl">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-white">
                 Panel de Gestión
               </CardTitle>
-              <p className="text-cyan-400 text-sm">IQEXPONENCIAL</p>
+              <p className="text-slate-400 text-sm">IQEXPONENCIAL</p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
@@ -1707,7 +1726,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   placeholder="Usuario"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="bg-slate-950 border-slate-700 text-white placeholder:text-slate-500"
                   data-testid="input-admin-username"
                 />
                 <Input
@@ -1715,7 +1734,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="bg-slate-950 border-slate-700 text-white placeholder:text-slate-500"
                   data-testid="input-admin-password"
                 />
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1723,17 +1742,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-slate-600 focus:ring-slate-500"
                     data-testid="checkbox-remember-me"
                   />
-                  <span className="text-white/70 text-sm">Guardar datos de acceso</span>
+                  <span className="text-slate-400 text-sm">Guardar datos de acceso</span>
                 </label>
                 {error && (
                   <p className="text-red-400 text-sm text-center">{error}</p>
                 )}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700"
+                  className="w-full bg-slate-100 text-slate-950 hover:bg-white"
                   data-testid="button-admin-login"
                 >
                   Ingresar
@@ -1747,25 +1766,23 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
-      <aside className="w-64 bg-black/40 border-r border-white/10 p-4 hidden md:flex flex-col">
+    <div className="min-h-screen bg-slate-950 flex text-slate-100">
+      <aside className="w-64 bg-slate-950 border-r border-slate-800 p-4 hidden md:flex flex-col">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-white">Panel de Gestión</h1>
-          <p className="text-cyan-400 text-sm">IQxponencial</p>
+          <p className="text-slate-400 text-sm">IQxponencial</p>
         </div>
         
         <nav className="flex-1 space-y-2">
           {activeRole && (
-            <div className="mb-3 px-3 py-2 bg-cyan-900/40 rounded-lg border border-cyan-500/20">
-              <p className="text-xs text-cyan-300">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
+            <div className="mb-3 px-3 py-2 bg-slate-900 rounded-lg border border-slate-800">
+              <p className="text-xs text-slate-400">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
             </div>
           )}
           {isTabVisible("sesiones") && (
           <button
             onClick={() => setActiveTab("sesiones")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "sesiones" ? "bg-cyan-600 text-white" : "text-cyan-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "sesiones")}
             data-testid="sidebar-sesiones"
           >
             <Users className="w-5 h-5" />
@@ -1776,9 +1793,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           <div>
             <button
               onClick={() => setResultadosOpen(!resultadosOpen)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                ["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "bg-green-600 text-white" : "text-green-400 hover:bg-white/10"
-              }`}
+              className={sidebarItemClass(["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab))}
               data-testid="sidebar-resultados-toggle"
             >
               <BarChart3 className="w-5 h-5" />
@@ -1786,12 +1801,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               {resultadosOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
             {resultadosOpen && (
-              <div className="ml-4 mt-1 space-y-1 border-l border-white/10 pl-3">
+              <div className="ml-4 mt-1 space-y-1 border-l border-slate-800 pl-3">
                 <button
                   onClick={() => setActiveTab("resultados")}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                    activeTab === "resultados" ? "bg-green-600/80 text-white" : "text-green-300 hover:bg-white/10"
-                  }`}
+                  className={sidebarSubItemClass(activeTab === "resultados")}
                   data-testid="sidebar-resultados"
                 >
                   <FileText className="w-4 h-4" />
@@ -1799,9 +1812,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </button>
                 <button
                   onClick={() => setActiveTab("resultados-razonamiento")}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                    activeTab === "resultados-razonamiento" ? "bg-blue-600/80 text-white" : "text-blue-300 hover:bg-white/10"
-                  }`}
+                  className={sidebarSubItemClass(activeTab === "resultados-razonamiento")}
                   data-testid="sidebar-resultados-razonamiento"
                 >
                   <Brain className="w-4 h-4" />
@@ -1809,9 +1820,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </button>
                 <button
                   onClick={() => setActiveTab("resultados-cerebral")}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                    activeTab === "resultados-cerebral" ? "bg-purple-600/80 text-white" : "text-purple-300 hover:bg-white/10"
-                  }`}
+                  className={sidebarSubItemClass(activeTab === "resultados-cerebral")}
                   data-testid="sidebar-resultados-cerebral"
                 >
                   <Brain className="w-4 h-4" />
@@ -1819,9 +1828,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </button>
                 <button
                   onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                    activeTab === "resultados-entrenamiento" ? "bg-rose-600/80 text-white" : "text-rose-300 hover:bg-white/10"
-                  }`}
+                  className={sidebarSubItemClass(activeTab === "resultados-entrenamiento")}
                   data-testid="sidebar-resultados-entrenamiento"
                 >
                   <Zap className="w-4 h-4" />
@@ -1829,9 +1836,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 </button>
                 <button
                   onClick={() => setActiveTab("resultados-velocidad")}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                    activeTab === "resultados-velocidad" ? "bg-cyan-600/80 text-white" : "text-cyan-300 hover:bg-white/10"
-                  }`}
+                  className={sidebarSubItemClass(activeTab === "resultados-velocidad")}
                   data-testid="sidebar-resultados-velocidad"
                 >
                   <Zap className="w-4 h-4" />
@@ -1844,9 +1849,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("contenido") && (
           <button
             onClick={() => setActiveTab("contenido")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "contenido" ? "bg-orange-600 text-white" : "text-orange-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "contenido")}
             data-testid="sidebar-contenido"
           >
             <BookOpen className="w-5 h-5" />
@@ -1856,9 +1859,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("imagenes") && (
           <button
             onClick={() => setActiveTab("imagenes")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "imagenes" ? "bg-pink-600 text-white" : "text-pink-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "imagenes")}
             data-testid="sidebar-imagenes"
           >
             <ImageIcon className="w-5 h-5" />
@@ -1868,9 +1869,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("entrenamiento") && (
           <button
             onClick={() => setActiveTab("entrenamiento")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "entrenamiento" ? "bg-teal-600 text-white" : "text-teal-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "entrenamiento")}
             data-testid="sidebar-entrenamiento"
           >
             <Zap className="w-5 h-5" />
@@ -1880,9 +1879,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("servidor") && (
           <button
             onClick={() => setActiveTab("servidor")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "servidor" ? "bg-sky-600 text-white" : "text-sky-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "servidor")}
             data-testid="sidebar-servidor"
           >
             <Server className="w-5 h-5" />
@@ -1892,9 +1889,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("instituciones") && (
           <button
             onClick={() => setActiveTab("instituciones")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "instituciones" ? "bg-amber-600 text-white" : "text-amber-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "instituciones")}
             data-testid="sidebar-instituciones"
           >
             <Building2 className="w-5 h-5" />
@@ -1904,9 +1899,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("blog") && (
           <button
             onClick={() => setActiveTab("blog")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "blog" ? "bg-indigo-600 text-white" : "text-indigo-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "blog")}
             data-testid="sidebar-blog"
           >
             <Newspaper className="w-5 h-5" />
@@ -1916,9 +1909,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("agente") && (
           <button
             onClick={() => setActiveTab("agente")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "agente" ? "bg-emerald-600 text-white" : "text-emerald-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "agente")}
             data-testid="sidebar-agente"
           >
             <Bot className="w-5 h-5" />
@@ -1928,9 +1919,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("asesor-ia") && (
           <button
             onClick={() => setActiveTab("asesor-ia")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "asesor-ia" ? "bg-violet-600 text-white" : "text-violet-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "asesor-ia")}
             data-testid="sidebar-asesor-ia"
           >
             <Headphones className="w-5 h-5" />
@@ -1940,9 +1929,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("formularios") && (
           <button
             onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "formularios" ? "bg-lime-600 text-white" : "text-lime-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "formularios")}
             data-testid="sidebar-formularios"
           >
             <ClipboardList className="w-5 h-5" />
@@ -1952,9 +1939,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           {isTabVisible("roles") && (
           <button
             onClick={() => setActiveTab("roles")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeTab === "roles" ? "bg-yellow-600 text-white" : "text-yellow-400 hover:bg-white/10"
-            }`}
+            className={sidebarItemClass(activeTab === "roles")}
             data-testid="sidebar-roles"
           >
             <Users className="w-5 h-5" />
@@ -1963,7 +1948,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           )}
         </nav>
 
-        <div className="mt-auto pt-4 border-t border-white/10 space-y-2">
+        <div className="mt-auto pt-4 border-t border-slate-800 space-y-2">
           <Button
             onClick={() => {
               const newState = !editorModeEnabled;
@@ -1971,7 +1956,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               localStorage.setItem("editorMode", newState.toString());
             }}
             variant={editorModeEnabled ? "default" : "outline"}
-            className={editorModeEnabled ? "w-full bg-purple-600 hover:bg-purple-700" : "w-full border-purple-500/30 text-purple-400"}
+            className={editorModeEnabled ? "w-full bg-slate-100 text-slate-950 hover:bg-white" : "w-full border-slate-700 text-slate-300 hover:bg-slate-900"}
             data-testid="button-editor-toggle"
           >
             <Pencil className="w-4 h-4 mr-2" />
@@ -1980,7 +1965,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           <Button
             onClick={() => { fetchSessions(); fetchQuizResults(); }}
             variant="outline"
-            className="w-full border-cyan-500/30 text-cyan-400"
+            className="w-full border-slate-700 text-slate-300 hover:bg-slate-900"
             disabled={loading}
             data-testid="button-refresh"
           >
@@ -1990,7 +1975,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full border-red-500/30 text-red-400"
+            className="w-full border-slate-700 text-rose-300 hover:bg-slate-900"
             data-testid="button-logout"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -2003,14 +1988,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         <div className="md:hidden flex items-center justify-between mb-4">
           <div>
             <h1 className="text-lg font-bold text-white">Panel de Gestión</h1>
-            <p className="text-cyan-400 text-xs">IQxponencial</p>
+            <p className="text-slate-400 text-xs">IQxponencial</p>
           </div>
           <div className="flex gap-2">
             <Button
               onClick={() => { fetchSessions(); fetchQuizResults(); }}
               variant="outline"
               size="icon"
-              className="border-cyan-500/30 text-cyan-400"
+              className="border-slate-700 text-slate-300 hover:bg-slate-900"
               disabled={loading}
               data-testid="button-mobile-refresh"
             >
@@ -2020,7 +2005,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               onClick={handleLogout}
               variant="outline"
               size="icon"
-              className="border-red-500/30 text-red-400"
+              className="border-slate-700 text-rose-300 hover:bg-slate-900"
               data-testid="button-mobile-logout"
             >
               <LogOut className="w-4 h-4" />
@@ -2029,8 +2014,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         </div>
 
         {activeRole && (
-          <div className="md:hidden mb-2 px-3 py-1.5 bg-cyan-900/40 rounded-lg border border-cyan-500/20">
-            <p className="text-xs text-cyan-300">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
+          <div className="md:hidden mb-2 px-3 py-1.5 bg-slate-900 rounded-lg border border-slate-800">
+            <p className="text-xs text-slate-400">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
           </div>
         )}
         <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
@@ -2039,7 +2024,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("sesiones")}
             variant={activeTab === "sesiones" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "sesiones" ? "bg-cyan-600" : "border-cyan-500/30 text-cyan-400"}
+            className={mobileTabClass(activeTab === "sesiones")}
             data-testid="mobile-tab-sesiones"
           >
             <Users className="w-4 h-4 mr-1" />
@@ -2052,7 +2037,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               onClick={() => setResultadosOpen(!resultadosOpen)}
               variant={["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "default" : "outline"}
               size="sm"
-              className={["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab) ? "bg-green-600" : "border-green-500/30 text-green-400"}
+              className={mobileTabClass(["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab))}
               data-testid="mobile-tab-resultados-toggle"
             >
               <BarChart3 className="w-4 h-4 mr-1" />
@@ -2060,20 +2045,20 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               {resultadosOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
             </Button>
             {resultadosOpen && (
-              <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-white/20 rounded-lg shadow-xl p-1 min-w-[160px]">
-                <button onClick={() => { setActiveTab("resultados"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados" ? "bg-green-600 text-white" : "text-green-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados">
+              <div className="absolute top-full left-0 mt-1 z-50 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-1 min-w-[160px]">
+                <button onClick={() => { setActiveTab("resultados"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados" ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800"}`} data-testid="mobile-tab-resultados">
                   <FileText className="w-3 h-3" /> Lectura
                 </button>
-                <button onClick={() => { setActiveTab("resultados-razonamiento"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-razonamiento" ? "bg-blue-600 text-white" : "text-blue-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-razonamiento">
+                <button onClick={() => { setActiveTab("resultados-razonamiento"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-razonamiento" ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800"}`} data-testid="mobile-tab-resultados-razonamiento">
                   <Brain className="w-3 h-3" /> Razonamiento
                 </button>
-                <button onClick={() => { setActiveTab("resultados-cerebral"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-cerebral" ? "bg-purple-600 text-white" : "text-purple-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-cerebral">
+                <button onClick={() => { setActiveTab("resultados-cerebral"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-cerebral" ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800"}`} data-testid="mobile-tab-resultados-cerebral">
                   <Brain className="w-3 h-3" /> Cerebral
                 </button>
-                <button onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-entrenamiento" ? "bg-rose-600 text-white" : "text-rose-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-entrenamiento">
+                <button onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-entrenamiento" ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800"}`} data-testid="mobile-tab-resultados-entrenamiento">
                   <Zap className="w-3 h-3" /> Entrenamiento
                 </button>
-                <button onClick={() => { setActiveTab("resultados-velocidad"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-velocidad" ? "bg-cyan-600 text-white" : "text-cyan-300 hover:bg-white/10"}`} data-testid="mobile-tab-resultados-velocidad">
+                <button onClick={() => { setActiveTab("resultados-velocidad"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-velocidad" ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800"}`} data-testid="mobile-tab-resultados-velocidad">
                   <Zap className="w-3 h-3" /> Velocidad
                 </button>
               </div>
@@ -2085,7 +2070,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("contenido")}
             variant={activeTab === "contenido" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "contenido" ? "bg-orange-600" : "border-orange-500/30 text-orange-400"}
+            className={mobileTabClass(activeTab === "contenido")}
             data-testid="mobile-tab-contenido"
           >
             <BookOpen className="w-4 h-4 mr-1" />
@@ -2097,7 +2082,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("imagenes")}
             variant={activeTab === "imagenes" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "imagenes" ? "bg-pink-600" : "border-pink-500/30 text-pink-400"}
+            className={mobileTabClass(activeTab === "imagenes")}
             data-testid="mobile-tab-imagenes"
           >
             <ImageIcon className="w-4 h-4 mr-1" />
@@ -2109,7 +2094,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("entrenamiento")}
             variant={activeTab === "entrenamiento" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "entrenamiento" ? "bg-teal-600" : "border-teal-500/30 text-teal-400"}
+            className={mobileTabClass(activeTab === "entrenamiento")}
             data-testid="mobile-tab-entrenamiento"
           >
             <Zap className="w-4 h-4 mr-1" />
@@ -2121,7 +2106,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("servidor")}
             variant={activeTab === "servidor" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "servidor" ? "bg-sky-600" : "border-sky-500/30 text-sky-400"}
+            className={mobileTabClass(activeTab === "servidor")}
             data-testid="mobile-tab-servidor"
           >
             <Server className="w-4 h-4 mr-1" />
@@ -2133,7 +2118,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("instituciones")}
             variant={activeTab === "instituciones" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "instituciones" ? "bg-amber-600" : "border-amber-500/30 text-amber-400"}
+            className={mobileTabClass(activeTab === "instituciones")}
             data-testid="mobile-tab-instituciones"
           >
             <Building2 className="w-4 h-4 mr-1" />
@@ -2145,7 +2130,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("blog")}
             variant={activeTab === "blog" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "blog" ? "bg-indigo-600" : "border-indigo-500/30 text-indigo-400"}
+            className={mobileTabClass(activeTab === "blog")}
             data-testid="mobile-tab-blog"
           >
             <Newspaper className="w-4 h-4 mr-1" />
@@ -2157,7 +2142,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("agente")}
             variant={activeTab === "agente" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "agente" ? "bg-emerald-600" : "border-emerald-500/30 text-emerald-400"}
+            className={mobileTabClass(activeTab === "agente")}
             data-testid="mobile-tab-agente"
           >
             <Bot className="w-4 h-4 mr-1" />
@@ -2169,7 +2154,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("asesor-ia")}
             variant={activeTab === "asesor-ia" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "asesor-ia" ? "bg-violet-600" : "border-violet-500/30 text-violet-400"}
+            className={mobileTabClass(activeTab === "asesor-ia")}
             data-testid="mobile-tab-asesor-ia"
           >
             <Headphones className="w-4 h-4 mr-1" />
@@ -2181,7 +2166,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); }}
             variant={activeTab === "formularios" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "formularios" ? "bg-lime-600" : "border-lime-500/30 text-lime-400"}
+            className={mobileTabClass(activeTab === "formularios")}
             data-testid="mobile-tab-formularios"
           >
             <ClipboardList className="w-4 h-4 mr-1" />
@@ -2193,7 +2178,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             onClick={() => setActiveTab("roles")}
             variant={activeTab === "roles" ? "default" : "outline"}
             size="sm"
-            className={activeTab === "roles" ? "bg-yellow-600" : "border-yellow-500/30 text-yellow-400"}
+            className={mobileTabClass(activeTab === "roles")}
             data-testid="mobile-tab-roles"
           >
             <Users className="w-4 h-4 mr-1" />
