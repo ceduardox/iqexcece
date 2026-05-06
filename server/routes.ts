@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { createHmac, randomUUID } from "crypto";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db } from "./db";
@@ -691,6 +691,38 @@ Reglas:
     res.json({ settings, currentIp: getClientIp(req) });
   });
 
+  const dateValueTests = (value: unknown) => {
+    const safeIso = (candidate: unknown) => {
+      if (!candidate) return null;
+      const date = candidate instanceof Date ? candidate : new Date(candidate as any);
+      return Number.isNaN(date.getTime()) ? null : date.toISOString();
+    };
+
+    const asString = (() => {
+      try {
+        return value == null ? null : String(value);
+      } catch {
+        return null;
+      }
+    })();
+
+    const asValueOf = (() => {
+      try {
+        const raw = (value as any)?.valueOf?.();
+        return raw === value ? null : safeIso(raw);
+      } catch {
+        return null;
+      }
+    })();
+
+    return {
+      "T1-Drizzle directo": safeIso(value),
+      "T2-Drizzle string": asString && asString !== "[object Object]" ? safeIso(asString) : null,
+      "T3-Drizzle valueOf": asValueOf,
+      "T4-Tipo recibido": value == null ? "null" : Array.isArray(value) ? "array" : typeof value,
+    };
+  };
+
   // Get all sessions (admin only)
   app.get("/api/admin/sessions", async (req, res) => {
     const auth = req.headers.authorization;
@@ -701,14 +733,35 @@ Reglas:
     
     const sessions = await storage.getAllSessions();
     const activeSessions = await storage.getActiveSessions();
+    const sessionDateRows = await db.select({
+      sessionId: userSessions.sessionId,
+      lastActivityText: sql<string | null>`last_activity::text`,
+      createdAtText: sql<string | null>`created_at::text`,
+      lastActivityIso: sql<string | null>`to_char(last_activity at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`,
+      createdAtIso: sql<string | null>`to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`,
+    }).from(userSessions);
+    const sessionDateMap = new Map(sessionDateRows.map(row => [row.sessionId, row]));
     
     res.json({
       total: sessions.length,
       activeCount: activeSessions.length,
-      sessions: sessions.map(s => ({
-        ...s,
-        isCurrentlyActive: activeSessions.some(a => a.sessionId === s.sessionId)
-      }))
+      sessions: sessions.map(s => {
+        const dateRow = sessionDateMap.get(s.sessionId);
+        return {
+          ...s,
+          lastActivityTests: {
+            ...dateValueTests(s.lastActivity),
+            "T5-Postgres texto": dateRow?.lastActivityText || null,
+            "T6-Postgres ISO": dateRow?.lastActivityIso || null,
+          },
+          createdAtTests: {
+            ...dateValueTests(s.createdAt),
+            "T5-Postgres texto": dateRow?.createdAtText || null,
+            "T6-Postgres ISO": dateRow?.createdAtIso || null,
+          },
+          isCurrentlyActive: activeSessions.some(a => a.sessionId === s.sessionId)
+        };
+      })
     });
   });
 
@@ -774,7 +827,25 @@ Reglas:
       return res.status(401).json({ error: "Unauthorized" });
     }
     const results = await storage.getAllQuizResults();
-    res.json({ results });
+    const resultDateRows = await db.select({
+      id: quizResults.id,
+      createdAtText: sql<string | null>`created_at::text`,
+      createdAtIso: sql<string | null>`to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`,
+    }).from(quizResults);
+    const resultDateMap = new Map(resultDateRows.map(row => [row.id, row]));
+    res.json({
+      results: results.map(result => {
+        const dateRow = resultDateMap.get(result.id);
+        return {
+          ...result,
+          createdAtTests: {
+            ...dateValueTests(result.createdAt),
+            "T5-Postgres texto": dateRow?.createdAtText || null,
+            "T6-Postgres ISO": dateRow?.createdAtIso || null,
+          },
+        };
+      })
+    });
   });
 
   // Instituciones - public endpoint for form autocomplete
