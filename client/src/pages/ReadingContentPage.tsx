@@ -76,6 +76,7 @@ export default function ReadingContentPage() {
   };
   const resultsRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
+  const shareCaptureRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [activeTab, setActiveTab] = useState<"lectura" | "cuestionario">("lectura");
   const [quizStarted, setQuizStarted] = useState(false);
@@ -282,49 +283,19 @@ export default function ReadingContentPage() {
   };
 
   const captureAndShare = async (): Promise<Blob | null> => {
-    if (!captureAreaRef.current) return null;
+    const nodeToCapture = shareCaptureRef.current ?? captureAreaRef.current;
+    if (!nodeToCapture) return null;
     
     try {
-      const capturedCanvas = await html2canvas(captureAreaRef.current, {
+      const canvas = await html2canvas(nodeToCapture, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
         logging: false,
         allowTaint: true,
       });
-      
-      const logoHeight = 240;
-      const padding = 20;
-      const finalWidth = capturedCanvas.width;
-      const finalHeight = capturedCanvas.height + logoHeight + padding;
-      
-      const finalCanvas = document.createElement('canvas');
-      finalCanvas.width = finalWidth;
-      finalCanvas.height = finalHeight;
-      const ctx = finalCanvas.getContext('2d');
-      if (!ctx) return null;
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, finalWidth, finalHeight);
-      
-      if (localCaptureLogo) {
-        const logoImg = new Image();
-        logoImg.src = localCaptureLogo;
-        await new Promise((resolve) => {
-          logoImg.onload = resolve;
-          logoImg.onerror = resolve;
-        });
-        const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-        const drawHeight = logoHeight - padding;
-        const drawWidth = drawHeight * aspectRatio;
-        const logoX = (finalWidth - drawWidth) / 2;
-        ctx.drawImage(logoImg, logoX, padding / 2, drawWidth, drawHeight);
-      }
-      
-      ctx.drawImage(capturedCanvas, 0, logoHeight);
-      
       return new Promise<Blob>((resolve, reject) => {
-        finalCanvas.toBlob((b) => {
+        canvas.toBlob((b) => {
           if (b) resolve(b);
           else reject(new Error('Failed to create blob'));
         }, 'image/png', 0.95);
@@ -409,6 +380,8 @@ export default function ReadingContentPage() {
 
   if (showResults) {
     const percentage = Math.round((correctAnswers / content.questions.length) * 100);
+    const circumference = 2 * Math.PI * 42;
+    const progressOffset = circumference * (1 - percentage / 100);
     return (
       <div ref={resultsRef} className="min-h-screen bg-white flex flex-col">
         {/* Capture area - contains header and content, excludes buttons */}
@@ -546,6 +519,116 @@ export default function ReadingContentPage() {
           </div>
         </div>
         {/* End capture area */}
+
+        <div
+          ref={shareCaptureRef}
+          aria-hidden="true"
+          className="fixed top-0 pointer-events-none bg-white"
+          style={{ left: "-10000px", width: 390 }}
+        >
+          <div
+            className="w-full bg-white text-center"
+            style={{
+              padding: "28px 22px 24px",
+              fontFamily: "inherit",
+              color: "#1f2937",
+            }}
+          >
+            <img
+              src={localCaptureLogo}
+              alt=""
+              className="mx-auto object-contain"
+              style={{ width: 235, height: "auto", marginBottom: 22 }}
+            />
+            <div
+              className="mx-auto rounded-full flex items-center justify-center"
+              style={{
+                width: 74,
+                height: 74,
+                marginBottom: 18,
+                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%)",
+              }}
+            >
+              <CheckCircle className="w-10 h-10" style={{ color: "#8a3ffc" }} />
+            </div>
+            <h1 className="text-3xl font-black mb-2" style={{ color: "#1f2937" }}>
+              {t("tests.excellent")}
+            </h1>
+            <p className="text-base mb-8" style={{ color: "#6b7280" }}>
+              {t("tests.completedReadingTest")}
+            </p>
+
+            <div className="relative mx-auto" style={{ width: 168, height: 168, marginBottom: 28 }}>
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="8"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="url(#shareProgressGradient)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={progressOffset}
+                  transform="rotate(-90 50 50)"
+                />
+                <defs>
+                  <linearGradient id="shareProgressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8a3ffc" />
+                    <stop offset="100%" stopColor="#00d9ff" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-black" style={{ color: "#8a3ffc" }}>
+                  {percentage}%
+                </span>
+                <span className="text-sm font-medium" style={{ color: "#6b7280" }}>
+                  {t("tests.comprension")}
+                </span>
+              </div>
+            </div>
+
+            <div
+              className="rounded-2xl overflow-hidden border p-5"
+              style={{
+                borderColor: "rgba(138, 63, 252, 0.14)",
+                background: "linear-gradient(135deg, rgba(138, 63, 252, 0.06) 0%, rgba(0, 217, 255, 0.04) 100%)",
+              }}
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.answers")}</p>
+                  <p className="text-3xl font-black" style={{ color: "#8a3ffc" }}>{correctAnswers}/{content.questions.length}</p>
+                  <p className="text-sm" style={{ color: "#6b7280" }}>{t("tests.correctAnswers")}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1" style={{ color: "#9ca3af" }}>{t("tests.speed")}</p>
+                  <p className="text-3xl font-black" style={{ color: "#00d9ff" }}>{wordsPerMinute}</p>
+                  <p className="text-sm" style={{ color: "#6b7280" }}>{t("tests.wordsPerMin")}</p>
+                </div>
+              </div>
+              <div className="mt-5 pt-5 border-t grid grid-cols-2 gap-4" style={{ borderColor: "rgba(138, 63, 252, 0.12)" }}>
+                <div>
+                  <p className="text-sm font-medium mb-2" style={{ color: "#9ca3af" }}>{t("tests.readingTimeLabel")}</p>
+                  <p className="text-2xl font-bold" style={{ color: "#1f2937" }}>{formatTime(readingTime)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2" style={{ color: "#9ca3af" }}>{t("tests.questionsTimeLabel")}</p>
+                  <p className="text-2xl font-bold" style={{ color: "#1f2937" }}>{formatTime(questionTime)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Buttons section - excluded from capture */}
         <div className="px-5 pb-6">

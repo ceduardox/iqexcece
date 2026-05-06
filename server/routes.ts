@@ -118,6 +118,39 @@ function saveAdminTokens() {
 let validAdminTokens = loadAdminTokens();
 let asesorEnabled = loadAsesorEnabled();
 
+const looksLikeMojibake = (value: string) => /(?:Ã.|Â.|â[\u0080-\u00bf]?)/.test(value);
+
+const applyReadingTextCorrections = (value: string) =>
+  value
+    .replace(/¿qué se llamaba la niña\?/g, "¿Qué se llamaba la niña?")
+    .replace(/¿de que color es su perrito\?/g, "¿De qué color es su perrito?")
+    .replace(/¿Donde lo llevaba a pasear\?/g, "¿Dónde lo llevaba a pasear?")
+    .replace(/¿Dónde lo encontro al perrito\?/g, "¿Dónde encontró al perrito?")
+    .replace(/\bJardin\b/g, "Jardín");
+
+const fixMojibakeText = (value: string) => {
+  if (!looksLikeMojibake(value)) return applyReadingTextCorrections(value);
+  try {
+    const repaired = Buffer.from(value, "latin1").toString("utf8");
+    return repaired.includes("�") ? applyReadingTextCorrections(value) : applyReadingTextCorrections(repaired);
+  } catch {
+    return applyReadingTextCorrections(value);
+  }
+};
+
+const fixMojibakeDeep = <T>(value: T): T => {
+  if (typeof value === "string") return fixMojibakeText(value) as T;
+  if (Array.isArray(value)) return value.map(item => fixMojibakeDeep(item)) as T;
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+      key,
+      fixMojibakeDeep(item),
+    ]);
+    return Object.fromEntries(entries) as T;
+  }
+  return value;
+};
+
 const defaultReadingContent: Record<string, Record<number, any>> = {
   preescolar: {
     1: {
@@ -850,7 +883,7 @@ Reglas:
       res.json({ content: null });
       return;
     }
-    res.json({ content });
+    res.json({ content: fixMojibakeDeep(content) });
   });
 
   app.get("/api/reading/:categoria/themes", async (req, res) => {
@@ -867,7 +900,7 @@ Reglas:
       : [];
     
     const isAdmin = req.query.admin === 'true';
-    const savedThemes = savedContents.map(c => ({
+    const savedThemes = savedContents.map(c => fixMojibakeDeep({
       temaNumero: c.temaNumero,
       title: c.title,
       categoryImage: c.categoryImage || c.imageUrl,
@@ -917,8 +950,8 @@ Reglas:
       return res.status(401).json({ error: "Unauthorized" });
     }
     try {
-      const content = await storage.saveReadingContent(req.body);
-      res.json({ success: true, content });
+      const content = await storage.saveReadingContent(fixMojibakeDeep(req.body));
+      res.json({ success: true, content: fixMojibakeDeep(content) });
     } catch (error) {
       res.status(500).json({ error: "Failed to save content" });
     }
