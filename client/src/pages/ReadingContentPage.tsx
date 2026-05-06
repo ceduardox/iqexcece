@@ -800,7 +800,7 @@ export default function ReadingContentPage() {
               className="rounded-2xl p-5 border border-purple-100"
               style={{ background: "linear-gradient(135deg, rgba(138, 63, 252, 0.04) 0%, rgba(0, 217, 255, 0.02) 100%)" }}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "#374151" }}>
+              <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: "#374151" }}>
                 {content.text}
               </p>
             </div>
