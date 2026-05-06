@@ -25,8 +25,6 @@ interface Session {
   createdAt: string | null;
   last_activity?: string | null;
   created_at?: string | null;
-  lastActivityTests?: Record<string, string | null>;
-  createdAtTests?: Record<string, string | null>;
 }
 
 interface SessionsData {
@@ -48,7 +46,6 @@ interface QuizResult {
   tiempoCuestionario: number | null;
   isPwa: boolean;
   createdAt: string | null;
-  createdAtTests?: Record<string, string | null>;
 }
 
 export default function GestionPage() {
@@ -121,8 +118,6 @@ export default function GestionPage() {
     isCurrentlyActive: session.isCurrentlyActive ?? session.is_currently_active ?? false,
     lastActivity: session.lastActivity ?? session.last_activity ?? null,
     createdAt: session.createdAt ?? session.created_at ?? null,
-    lastActivityTests: session.lastActivityTests ?? session.last_activity_tests ?? null,
-    createdAtTests: session.createdAtTests ?? session.created_at_tests ?? null,
   });
 
   const normalizeSessionsData = (payload: any): SessionsData => ({
@@ -909,7 +904,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           categoriaLector: row.categoriaLector ?? row.categoria_lector ?? null,
           isPwa: row.isPwa ?? row.is_pwa ?? false,
           createdAt: row.createdAt ?? row.created_at ?? null,
-          createdAtTests: row.createdAtTests ?? row.created_at_tests ?? null,
         })));
       }
       
@@ -1650,25 +1644,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return date ? date.toLocaleString("es-ES") : "-";
   };
 
-  const formatDateTest = (value: string | null) => {
-    if (!value) return "-";
-    const date = parseSafeDate(value);
-    return date ? date.toLocaleString("es-ES") : value;
-  };
-
-  const renderDateTests = (tests?: Record<string, string | null>) => {
-    if (!tests) return null;
-    return (
-      <div className="mt-1 space-y-0.5 text-[10px] leading-tight text-cyan-200/80">
-        {Object.entries(tests).map(([name, value]) => (
-          <div key={name}>
-            <span className="text-cyan-400">{name}:</span> {formatDateTest(value)}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   const formatTime = (seconds: number | null) => {
     if (!seconds) return "-";
     const mins = Math.floor(seconds / 60);
@@ -2373,10 +2348,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   </span>
                                 </td>
                                 <td className="py-3 px-2 text-white/80">{getAgeLabel(session.ageGroup)}</td>
-                                <td className="py-3 px-2 text-white/60 text-xs">
-                                  <div>{formatDate(session.lastActivity)}</div>
-                                  {renderDateTests(session.lastActivityTests)}
-                                </td>
+                                <td className="py-3 px-2 text-white/60 text-xs">{formatDate(session.lastActivity)}</td>
                               </tr>
                             ))}
                             {paginatedSessions.length === 0 && (

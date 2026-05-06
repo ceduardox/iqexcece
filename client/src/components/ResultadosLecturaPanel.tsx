@@ -34,7 +34,6 @@ interface QuizResult {
   isPwa: boolean;
   createdAt: string | null;
   created_at?: string | null;
-  createdAtTests?: Record<string, string | null>;
 }
 
 interface Props {
@@ -108,25 +107,6 @@ function formatDate(d: string | Date | null | undefined) {
   const date = parseDate(d);
   if (!date) return "-";
   return date.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
-}
-
-function formatDateTest(value: string | null) {
-  if (!value) return "-";
-  const date = parseDate(value);
-  return date ? date.toLocaleString("es-ES") : value;
-}
-
-function DateTests({ tests }: { tests?: Record<string, string | null> }) {
-  if (!tests) return null;
-  return (
-    <div className="mt-1 space-y-0.5 text-[10px] leading-tight text-cyan-200/80">
-      {Object.entries(tests).map(([name, value]) => (
-        <div key={name}>
-          <span className="text-cyan-400">{name}:</span> {formatDateTest(value)}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function formatTime(seconds: number | null) {
@@ -889,8 +869,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                     </td>
                     {visibleColumns.map(col => (
                       <td key={col} className={`py-3 px-2 text-xs ${col === "categoriaLector" ? getLectorClass(r.categoriaLector) : col === "comprension" ? "text-cyan-400 font-bold" : col === "velocidad" ? "text-purple-400 font-bold" : "text-white/80"}`}>
-                        <div>{getCellValue(r, col)}</div>
-                        {col === "fecha" && <DateTests tests={r.createdAtTests} />}
+                        {getCellValue(r, col)}
                       </td>
                     ))}
                   </tr>
@@ -1020,10 +999,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                   {r.ocupacion && <p className="text-white/50">Ocupación: <span className="text-green-400">{r.ocupacion}</span></p>}
                   {r.lugarTrabajo && <p className="text-white/50">Lugar Trabajo: <span className="text-green-400">{r.lugarTrabajo}</span></p>}
                   {r.comentario && <p className="text-white/50">Comentario: <span className="text-white/80">{r.comentario}</span></p>}
-                  <div className="text-white/50">
-                    Fecha: <span className="text-white/60">{formatDate(getCreatedAt(r))}</span>
-                    <DateTests tests={r.createdAtTests} />
-                  </div>
+                  <p className="text-white/50">Fecha: <span className="text-white/60">{formatDate(getCreatedAt(r))}</span></p>
                 </div>
               )}
             </div>
