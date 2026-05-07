@@ -7,6 +7,7 @@ import { useUserData } from "@/lib/user-context";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
+import { CognitiveSurvey, type CognitiveSurveyResult } from "@/components/CognitiveSurvey";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
@@ -85,9 +86,12 @@ export default function ReadingContentPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [pendingFormData, setPendingFormData] = useState<FormDataType | null>(null);
+  const [surveyResult, setSurveyResult] = useState<CognitiveSurveyResult | null>(null);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -185,7 +189,7 @@ export default function ReadingContentPage() {
   const wordCount = content.text.split(/\s+/).length;
   const wordsPerMinute = readingTime > 0 ? Math.round((wordCount / readingTime) * 60) : 0;
 
-  const handleUnifiedFormSubmit = async (formDataUnified: FormDataType) => {
+  const submitReadingResult = async (formDataUnified: FormDataType, survey: CognitiveSurveyResult) => {
     playButtonSound();
     setSubmitting(true);
     try {
@@ -236,6 +240,11 @@ export default function ReadingContentPage() {
           respuestasTotales: content.questions.length,
           comprension,
           velocidadLectura,
+          surveyAnswers: JSON.stringify(survey.answers),
+          surveyScore: survey.score,
+          surveyProfile: survey.profile,
+          surveyMainNeed: survey.mainNeed,
+          surveyInterest: survey.interestLevel,
           isPwa,
         }),
       });
@@ -269,17 +278,34 @@ export default function ReadingContentPage() {
             velocidadLectura,
             tiempoLectura: readingTime,
             tiempoCuestionario: questionTime,
+            surveyProfile: survey.profile,
+            surveyMainNeed: survey.mainNeed,
+            surveyInterest: survey.interestLevel,
           }),
           isPwa,
         }),
       }).catch(() => {});
       setShowForm(false);
+      setShowSurvey(false);
+      setSurveyResult(survey);
       setShowResults(true);
     } catch (e) {
       console.error(e);
       alert(e instanceof Error ? e.message : "No se pudo guardar el resultado.");
     }
     setSubmitting(false);
+  };
+
+  const handleUnifiedFormSubmit = async (formDataUnified: FormDataType) => {
+    playButtonSound();
+    setPendingFormData(formDataUnified);
+    setShowForm(false);
+    setShowSurvey(true);
+  };
+
+  const handleSurveySubmit = (survey: CognitiveSurveyResult) => {
+    if (!pendingFormData) return;
+    submitReadingResult(pendingFormData, survey);
   };
 
   const captureAndShare = async (): Promise<Blob | null> => {
@@ -516,6 +542,28 @@ export default function ReadingContentPage() {
                 </div>
               </div>
             </motion.div>
+
+            {surveyResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65 }}
+                className="rounded-2xl border border-cyan-100 p-4"
+                style={{ background: "linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(138, 63, 252, 0.06) 100%)" }}
+              >
+                <p className="text-xs font-bold mb-2" style={{ color: "#8a3ffc" }}>Perfil Cognitivo IQX</p>
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="bg-white/80 rounded-xl p-3">
+                    <p className="text-[11px] text-gray-500 mb-1">Perfil</p>
+                    <p className="text-sm font-black text-gray-800">{surveyResult.profile}</p>
+                  </div>
+                  <div className="bg-white/80 rounded-xl p-3">
+                    <p className="text-[11px] text-gray-500 mb-1">Area clave</p>
+                    <p className="text-sm font-black" style={{ color: "#06b6d4" }}>{surveyResult.mainNeed}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
         {/* End capture area */}
@@ -699,6 +747,17 @@ export default function ReadingContentPage() {
         title={t("tests.readingTestTitle")}
         subtitle={t("tests.completeData")}
         buttonText={t("tests.seeResults")}
+      />
+    );
+  }
+
+  if (showSurvey) {
+    return (
+      <CognitiveSurvey
+        categoria={categoria}
+        testType="lectura"
+        onSubmit={handleSurveySubmit}
+        submitting={submitting}
       />
     );
   }

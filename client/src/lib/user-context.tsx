@@ -6,6 +6,9 @@ interface RazonamientoResults {
   time: number;
   categoria: string;
   title: string;
+  surveyProfile?: string;
+  surveyMainNeed?: string;
+  surveyInterest?: string;
 }
 
 interface UserData {

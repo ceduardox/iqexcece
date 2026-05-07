@@ -259,6 +259,28 @@ export default function RazonamientoResultPage() {
               </div>
             </div>
           </motion.div>
+
+          {results.surveyProfile && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="rounded-2xl p-4 border border-cyan-100"
+              style={{ background: "linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(138, 63, 252, 0.06) 100%)" }}
+            >
+              <p className="text-xs font-bold mb-2" style={{ color: "#8a3ffc" }}>Perfil Cognitivo IQX</p>
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="bg-white/80 rounded-xl p-3">
+                  <p className="text-[11px] text-gray-500 mb-1">Perfil</p>
+                  <p className="text-sm font-black text-gray-800">{results.surveyProfile}</p>
+                </div>
+                <div className="bg-white/80 rounded-xl p-3">
+                  <p className="text-[11px] text-gray-500 mb-1">Area clave</p>
+                  <p className="text-sm font-black" style={{ color: "#06b6d4" }}>{results.surveyMainNeed}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
       {/* End capture area */}

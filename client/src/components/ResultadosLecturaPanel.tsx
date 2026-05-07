@@ -29,6 +29,11 @@ interface QuizResult {
   respuestasCorrectas: number | null;
   respuestasTotales: number | null;
   categoriaLector: string | null;
+  surveyAnswers?: string | null;
+  surveyScore?: number | null;
+  surveyProfile?: string | null;
+  surveyMainNeed?: string | null;
+  surveyInterest?: string | null;
   tiempoLectura: number | null;
   tiempoCuestionario: number | null;
   isPwa: boolean;
@@ -71,7 +76,7 @@ const CHART_COLORS = ["#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#e
 
 const PIE_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
 
-type ColumnKey = "nombre" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
+type ColumnKey = "nombre" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "surveyProfile" | "surveyMainNeed" | "surveyInterest" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
 
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "nombre", label: "Nombre" },
@@ -79,6 +84,9 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "velocidad", label: "Velocidad" },
   { key: "correctas", label: "Correctas" },
   { key: "categoriaLector", label: "Cat. Lector" },
+  { key: "surveyProfile", label: "Perfil IQX" },
+  { key: "surveyMainNeed", label: "Area clave" },
+  { key: "surveyInterest", label: "Interes" },
   { key: "grado", label: "Grado/Curso" },
   { key: "institucion", label: "Institución" },
   { key: "semestre", label: "Semestre" },
@@ -90,7 +98,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "fecha", label: "Fecha" },
 ];
 
-const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "grado", "institucion", "fecha"];
+const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "surveyProfile", "surveyMainNeed", "grado", "institucion", "fecha"];
 
 function getCreatedAt(result: QuizResult): string | Date | null {
   return result.createdAt || result.created_at || null;
@@ -131,6 +139,16 @@ function getLectorClass(cat: string | null): string {
   if (cat.includes("SEVERA")) return "text-red-400";
   if (cat.includes("DIFICULTAD")) return "text-orange-400";
   return "text-white/40";
+}
+
+function parseSurveyAnswers(value: string | null | undefined): { question: string; answer: string }[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 const LECTOR_ORDER = ["LECTOR COMPETENTE", "LECTOR REGULAR", "LECTOR CON DIFICULTAD", "LECTOR CON DIFICULTAD SEVERA"];
@@ -407,6 +425,9 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
       case "velocidad": return r.velocidadLectura ? `${r.velocidadLectura} p/m` : "-";
       case "correctas": return `${r.respuestasCorrectas ?? "-"}/${r.respuestasTotales ?? "-"}`;
       case "categoriaLector": return r.categoriaLector || "-";
+      case "surveyProfile": return r.surveyProfile || "-";
+      case "surveyMainNeed": return r.surveyMainNeed || "-";
+      case "surveyInterest": return r.surveyInterest || "-";
       case "grado": return r.grado || "-";
       case "institucion": return r.institucion || "-";
       case "semestre": return r.semestre || "-";
@@ -904,6 +925,37 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                             </div>
                           </div>
                         </div>
+                        {(r.surveyProfile || r.surveyMainNeed || r.surveyAnswers) && (
+                          <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-4 mb-3 border border-purple-500/20">
+                            <h4 className="text-purple-300 font-bold mb-3 text-sm">Perfil Cognitivo IQX</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-center">
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-purple-300 font-bold text-sm">{r.surveyProfile || "-"}</div>
+                                <div className="text-white/50 text-xs">Perfil</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-cyan-300 font-bold text-sm">{r.surveyMainNeed || "-"}</div>
+                                <div className="text-white/50 text-xs">Area clave</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-green-300 font-bold text-sm">{r.surveyScore ?? "-"}</div>
+                                <div className="text-white/50 text-xs">Puntaje</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-2">
+                                <div className="text-yellow-300 font-bold text-sm">{r.surveyInterest || "-"}</div>
+                                <div className="text-white/50 text-xs">Interes</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {parseSurveyAnswers(r.surveyAnswers).map((answer, idx) => (
+                                <div key={idx} className="bg-black/20 rounded px-3 py-2">
+                                  <p className="text-white/50 text-[11px]">{idx + 1}. {answer.question}</p>
+                                  <p className="text-white/85 text-xs font-semibold">{answer.answer}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                           <div><span className="text-white/50">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                           <div><span className="text-white/50">Edad:</span> <span className="text-white/80">{r.edad || "-"}</span></div>
@@ -994,6 +1046,22 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                   <p className="text-white/50">Estado: <span className="text-white/80">{r.estado || r.ciudad || "-"}</span></p>
                   <p className="text-white/50">Grado: <span className="text-yellow-400">{r.grado || "-"}</span></p>
                   <p className="text-white/50">Institución: <span className="text-cyan-400">{r.institucion || "-"}</span></p>
+                  {(r.surveyProfile || r.surveyMainNeed || r.surveyAnswers) && (
+                    <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-3 border border-purple-500/20">
+                      <p className="text-purple-300 font-bold text-xs mb-2">Perfil Cognitivo IQX</p>
+                      <div className="grid grid-cols-2 gap-2 text-center mb-2">
+                        <div className="bg-black/30 rounded p-2">
+                          <div className="text-purple-300 font-bold text-xs">{r.surveyProfile || "-"}</div>
+                          <div className="text-white/50 text-[10px]">Perfil</div>
+                        </div>
+                        <div className="bg-black/30 rounded p-2">
+                          <div className="text-cyan-300 font-bold text-xs">{r.surveyMainNeed || "-"}</div>
+                          <div className="text-white/50 text-[10px]">Area clave</div>
+                        </div>
+                      </div>
+                      <p className="text-white/60 text-xs">Interes: <span className="text-yellow-300">{r.surveyInterest || "-"}</span></p>
+                    </div>
+                  )}
                   {r.semestre && <p className="text-white/50">Semestre: <span className="text-purple-400">{r.semestre}</span></p>}
                   {r.profesion && <p className="text-white/50">Profesión: <span className="text-green-400">{r.profesion}</span></p>}
                   {r.ocupacion && <p className="text-white/50">Ocupación: <span className="text-green-400">{r.ocupacion}</span></p>}

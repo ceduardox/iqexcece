@@ -7,6 +7,7 @@ import { ArrowLeft, Brain, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
+import { CognitiveSurvey, type CognitiveSurveyResult } from "@/components/CognitiveSurvey";
 import { LanguageButton } from "@/components/LanguageButton";
 import menuCurveImg from "@assets/menu_1769957804819.png";
 
@@ -52,8 +53,10 @@ export default function RazonamientoQuizPage() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [quizFinished, setQuizFinished] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [quizTime, setQuizTime] = useState(0);
+  const [pendingFormData, setPendingFormData] = useState<FormDataType | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -115,7 +118,7 @@ export default function RazonamientoQuizPage() {
     return count + (questions[idx]?.correct === answer ? 1 : 0);
   }, 0);
 
-  const handleFormSubmit = async (formData: FormDataType) => {
+  const submitRazonamientoResult = async (formData: FormDataType, survey: CognitiveSurveyResult) => {
     setSubmitting(true);
     
     try {
@@ -156,6 +159,11 @@ export default function RazonamientoQuizPage() {
           respuestasCorrectas: correctAnswers,
           respuestasTotales: questions.length,
           comprension,
+          surveyAnswers: JSON.stringify(survey.answers),
+          surveyScore: survey.score,
+          surveyProfile: survey.profile,
+          surveyMainNeed: survey.mainNeed,
+          surveyInterest: survey.interestLevel,
           isPwa: isPwa,
         }),
       });
@@ -179,6 +187,9 @@ export default function RazonamientoQuizPage() {
             testType: "razonamiento",
             comprension,
             tiempoCuestionario: quizTime,
+            surveyProfile: survey.profile,
+            surveyMainNeed: survey.mainNeed,
+            surveyInterest: survey.interestLevel,
           }),
           isPwa,
         }),
@@ -195,10 +206,25 @@ export default function RazonamientoQuizPage() {
         time: quizTime,
         categoria: categoria,
         title: title,
+        surveyProfile: survey.profile,
+        surveyMainNeed: survey.mainNeed,
+        surveyInterest: survey.interestLevel,
       }
     });
     
     setLocation(`/razonamiento-result/${categoria}`);
+  };
+
+  const handleFormSubmit = async (formData: FormDataType) => {
+    playButtonSound();
+    setPendingFormData(formData);
+    setShowForm(false);
+    setShowSurvey(true);
+  };
+
+  const handleSurveySubmit = (survey: CognitiveSurveyResult) => {
+    if (!pendingFormData) return;
+    submitRazonamientoResult(pendingFormData, survey);
   };
 
   const categoryLabel = categoryLabels[categoria] || t("age.ninosShort");
@@ -247,6 +273,17 @@ export default function RazonamientoQuizPage() {
         title={title || t("tests.razonamiento")}
         subtitle={t("tests.completeData")}
         buttonText={t("tests.seeResults")}
+      />
+    );
+  }
+
+  if (showSurvey) {
+    return (
+      <CognitiveSurvey
+        categoria={categoria}
+        testType="razonamiento"
+        onSubmit={handleSurveySubmit}
+        submitting={submitting}
       />
     );
   }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
+import { CognitiveSurvey, type CognitiveSurveyResult } from "@/components/CognitiveSurvey";
 import { computeCerebralProfile, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
 
 export default function CerebralFormPage() {
@@ -10,8 +11,10 @@ export default function CerebralFormPage() {
   const params = useParams<{ categoria: string }>();
   const categoria = params.categoria || "adolescentes";
   const [submitting, setSubmitting] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<FormDataType | null>(null);
 
-  const handleSubmit = async (formData: FormDataType) => {
+  const submitCerebralResult = async (formData: FormDataType, survey: CognitiveSurveyResult) => {
     setSubmitting(true);
     
     try {
@@ -61,6 +64,11 @@ export default function CerebralFormPage() {
           rightPercent: profile.rightPercent,
           dominantSide: profile.dominantSide,
           personalityTraits: JSON.stringify(profile.personalityTraits),
+          surveyAnswers: JSON.stringify(survey.answers),
+          surveyScore: survey.score,
+          surveyProfile: survey.profile,
+          surveyMainNeed: survey.mainNeed,
+          surveyInterest: survey.interestLevel,
           isPwa: isPwa,
         }),
       });
@@ -85,16 +93,42 @@ export default function CerebralFormPage() {
             leftPercent: profile.leftPercent,
             rightPercent: profile.rightPercent,
             dominantSide: profile.dominantSide,
+            surveyProfile: survey.profile,
+            surveyMainNeed: survey.mainNeed,
+            surveyInterest: survey.interestLevel,
           }),
           isPwa,
         }),
       }).catch(() => {});
+
+      sessionStorage.setItem("cognitiveSurveyResult", JSON.stringify(survey));
     } catch (error) {
       console.error("Error submitting:", error);
     }
     
     setLocation(`/cerebral/resultado/${params.categoria}`);
   };
+
+  const handleSubmit = async (formData: FormDataType) => {
+    setPendingFormData(formData);
+    setShowSurvey(true);
+  };
+
+  const handleSurveySubmit = (survey: CognitiveSurveyResult) => {
+    if (!pendingFormData) return;
+    submitCerebralResult(pendingFormData, survey);
+  };
+
+  if (showSurvey) {
+    return (
+      <CognitiveSurvey
+        categoria={categoria}
+        testType="cerebral"
+        onSubmit={handleSurveySubmit}
+        submitting={submitting}
+      />
+    );
+  }
 
   return (
     <TestFormUnified

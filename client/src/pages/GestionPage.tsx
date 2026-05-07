@@ -2529,6 +2529,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       <th className="pb-3 px-2">Categoría</th>
                       <th className="pb-3 px-2">Comprensión</th>
                       <th className="pb-3 px-2">Correctas</th>
+                      <th className="pb-3 px-2">Perfil IQX</th>
                       <th className="pb-3 px-2">Tipo</th>
                       <th className="pb-3 px-2">Fecha</th>
                     </tr>
@@ -2557,6 +2558,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                               <span className="text-green-400 font-bold">{(r as any).respuestasCorrectas}/{(r as any).respuestasTotales}</span>
                             ) : "-"}
                           </td>
+                          <td className="py-3 px-2 text-purple-300 text-xs font-bold">{(r as any).surveyProfile || "-"}</td>
                           <td className="py-3 px-2">
                             <span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>
                               {r.isPwa ? "PWA" : "Web"}
@@ -2566,7 +2568,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </tr>
                         {expandedResult === r.id && (
                           <tr className="bg-white/5">
-                            <td colSpan={7} className="px-4 py-4">
+                            <td colSpan={8} className="px-4 py-4">
                               <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-4 mb-4 border border-blue-500/20">
                                 <h4 className="text-blue-400 font-bold mb-3 text-sm">📊 Resultados del Test</h4>
                                 <div className="grid grid-cols-3 gap-3 text-center">
@@ -2584,6 +2586,29 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                   </div>
                                 </div>
                               </div>
+                              {((r as any).surveyProfile || (r as any).surveyMainNeed || (r as any).surveyInterest) && (
+                                <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-4 mb-4 border border-purple-500/20">
+                                  <h4 className="text-purple-300 font-bold mb-3 text-sm">Perfil Cognitivo IQX</h4>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                                    <div className="bg-black/30 rounded-lg p-2">
+                                      <div className="text-purple-300 font-bold text-sm">{(r as any).surveyProfile || "-"}</div>
+                                      <div className="text-white/50 text-xs">Perfil</div>
+                                    </div>
+                                    <div className="bg-black/30 rounded-lg p-2">
+                                      <div className="text-cyan-300 font-bold text-sm">{(r as any).surveyMainNeed || "-"}</div>
+                                      <div className="text-white/50 text-xs">Area clave</div>
+                                    </div>
+                                    <div className="bg-black/30 rounded-lg p-2">
+                                      <div className="text-green-300 font-bold text-sm">{(r as any).surveyScore ?? "-"}</div>
+                                      <div className="text-white/50 text-xs">Puntaje</div>
+                                    </div>
+                                    <div className="bg-black/30 rounded-lg p-2">
+                                      <div className="text-yellow-300 font-bold text-sm">{(r as any).surveyInterest || "-"}</div>
+                                      <div className="text-white/50 text-xs">Interes</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                 <div><span className="text-white/60">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                                 <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
@@ -2606,7 +2631,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                     ))}
                     {filteredRazonamientoResults.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="py-8 text-center text-white/40">
+                        <td colSpan={8} className="py-8 text-center text-white/40">
                           No hay resultados de Razonamiento registrados
                         </td>
                       </tr>
@@ -2802,6 +2827,30 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       <span className="text-pink-300 text-xs">{pref.meaning}</span>
                                     </div>
                                   ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {((r as any).surveyProfile || (r as any).surveyMainNeed || (r as any).surveyInterest) && (
+                              <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-4 border border-purple-500/20">
+                                <h4 className="text-purple-300 font-bold mb-3 text-sm">Perfil Cognitivo IQX</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-purple-300 font-bold text-sm">{(r as any).surveyProfile || "-"}</div>
+                                    <div className="text-white/50 text-xs">Perfil</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-cyan-300 font-bold text-sm">{(r as any).surveyMainNeed || "-"}</div>
+                                    <div className="text-white/50 text-xs">Area clave</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-green-300 font-bold text-sm">{(r as any).surveyScore ?? "-"}</div>
+                                    <div className="text-white/50 text-xs">Puntaje</div>
+                                  </div>
+                                  <div className="bg-black/30 rounded-lg p-2">
+                                    <div className="text-yellow-300 font-bold text-sm">{(r as any).surveyInterest || "-"}</div>
+                                    <div className="text-white/50 text-xs">Interes</div>
+                                  </div>
                                 </div>
                               </div>
                             )}

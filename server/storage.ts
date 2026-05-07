@@ -243,6 +243,11 @@ export class MemStorage implements IStorage {
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
       categoriaLector: insertResult.categoriaLector || null,
+      surveyAnswers: insertResult.surveyAnswers || null,
+      surveyScore: insertResult.surveyScore ?? null,
+      surveyProfile: insertResult.surveyProfile || null,
+      surveyMainNeed: insertResult.surveyMainNeed || null,
+      surveyInterest: insertResult.surveyInterest || null,
       isPwa: insertResult.isPwa || false,
       createdAt: new Date(),
     };
@@ -556,6 +561,11 @@ export class DatabaseStorage implements IStorage {
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
       categoriaLector: insertResult.categoriaLector || null,
+      surveyAnswers: insertResult.surveyAnswers || null,
+      surveyScore: insertResult.surveyScore ?? null,
+      surveyProfile: insertResult.surveyProfile || null,
+      surveyMainNeed: insertResult.surveyMainNeed || null,
+      surveyInterest: insertResult.surveyInterest || null,
       isPwa: insertResult.isPwa || false,
     }).returning();
     return result;

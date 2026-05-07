@@ -71,6 +71,11 @@ export const quizResults = pgTable("quiz_results", {
   velocidadLectura: integer("velocidad_lectura"),
   velocidadMaxima: integer("velocidad_maxima"),
   categoriaLector: text("categoria_lector"),
+  surveyAnswers: text("survey_answers"),
+  surveyScore: integer("survey_score"),
+  surveyProfile: text("survey_profile"),
+  surveyMainNeed: text("survey_main_need"),
+  surveyInterest: text("survey_interest"),
   isPwa: boolean("is_pwa").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -165,6 +170,11 @@ export const cerebralResults = pgTable("cerebral_results", {
   rightPercent: integer("right_percent"),
   dominantSide: text("dominant_side"),
   personalityTraits: text("personality_traits"),
+  surveyAnswers: text("survey_answers"),
+  surveyScore: integer("survey_score"),
+  surveyProfile: text("survey_profile"),
+  surveyMainNeed: text("survey_main_need"),
+  surveyInterest: text("survey_interest"),
   isPwa: boolean("is_pwa").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
