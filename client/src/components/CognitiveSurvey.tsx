@@ -39,7 +39,20 @@ interface Props {
   submitting?: boolean;
 }
 
-const baseQuestion6: SurveyQuestion = {
+const baseNeedQuestion: SurveyQuestion = {
+  id: "main_need",
+  title: "Despues de esta evaluacion, considero que necesito mejorar:",
+  subtitle: "Selecciona la opcion que mas te interese mejorar ahora.",
+  options: [
+    { id: "processing", label: "Procesar informacion mas rapido", score: 2 },
+    { id: "comprehension", label: "Comprender con mayor profundidad", score: 2 },
+    { id: "focus", label: "Concentrarme mejor", score: 1 },
+    { id: "memory", label: "Recordar con mayor facilidad", score: 1 },
+    { id: "integral", label: "Optimizar mi rendimiento mental integral", score: 3 },
+  ],
+};
+
+const baseInterestQuestion: SurveyQuestion = {
   id: "interest",
   title: "Si existiera un metodo cientifico para optimizar tu rendimiento mental, te interesaria conocerlo?",
   subtitle: "Esto nos ayuda a mostrar una recomendacion mas util para ti.",
@@ -50,7 +63,20 @@ const baseQuestion6: SurveyQuestion = {
   ],
 };
 
-const kidsQuestion6: SurveyQuestion = {
+const kidsNeedQuestion: SurveyQuestion = {
+  id: "main_need",
+  title: "Que te gustaria mejorar mas?",
+  subtitle: "Selecciona lo que mas te ayudaria ahora.",
+  options: [
+    { id: "processing", label: "⚡ Leer y pensar mas rapido", score: 2 },
+    { id: "comprehension", label: "🧠 Entender mejor", score: 2 },
+    { id: "focus", label: "🎯 Concentrarme mejor", score: 1 },
+    { id: "memory", label: "💡 Recordar mas facil", score: 1 },
+    { id: "integral", label: "🌟 Mejorar mi mente en general", score: 3 },
+  ],
+};
+
+const kidsInterestQuestion: SurveyQuestion = {
   id: "interest",
   title: "Te gustaria conocer una forma divertida para entrenar tu mente?",
   subtitle: "Esto nos ayuda a mostrar una recomendacion mas util para ti.",
@@ -99,16 +125,8 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
         { id: "slow", label: "🐢 Lento", score: 1 },
       ],
     },
-    {
-      id: "recall",
-      title: "Despues de leer puede contar lo que entendio?",
-      options: [
-        { id: "yes", label: "👍 Si", score: 3 },
-        { id: "sometimes", label: "🤷 A veces", score: 2 },
-        { id: "little", label: "👎 No mucho", score: 1 },
-      ],
-    },
-    kidsQuestion6,
+    kidsNeedQuestion,
+    kidsInterestQuestion,
   ],
   ninos: [
     {
@@ -147,16 +165,8 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
         { id: "slow", label: "🐢 Lenta", score: 1 },
       ],
     },
-    {
-      id: "recall",
-      title: "Despues de leer puedo contar lo que entendi",
-      options: [
-        { id: "yes", label: "👍 Si", score: 3 },
-        { id: "sometimes", label: "🤷 A veces", score: 2 },
-        { id: "little", label: "👎 No mucho", score: 1 },
-      ],
-    },
-    kidsQuestion6,
+    kidsNeedQuestion,
+    kidsInterestQuestion,
   ],
   adolescentes: [
     {
@@ -197,17 +207,51 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
         { id: "efficient", label: "Eficiente", score: 3 },
       ],
     },
+    baseNeedQuestion,
+    baseInterestQuestion,
+  ],
+  universitarios: [
     {
-      id: "improvement_goal",
-      title: "Creo que aprenderia mejor si...",
+      id: "work_reading",
+      title: "Al leer por estudio o trabajo...",
       options: [
-        { id: "speed", label: "Leyera mas rapido", score: 2 },
-        { id: "depth", label: "Comprendiera mejor", score: 2 },
-        { id: "focus", label: "Tuviera mas concentracion", score: 1 },
-        { id: "techniques", label: "Supiera tecnicas", score: 3 },
+        { id: "distracted", label: "Me distraigo", score: 1 },
+        { id: "forget", label: "Olvido rapido", score: 1 },
+        { id: "slow", label: "Tardo mucho", score: 2 },
+        { id: "retain", label: "Retengo bien", score: 3 },
       ],
     },
-    baseQuestion6,
+    {
+      id: "main_difficulty",
+      title: "Mi mayor dificultad es...",
+      options: [
+        { id: "concentration", label: "Concentracion", score: 1 },
+        { id: "memory", label: "Memoria", score: 1 },
+        { id: "time", label: "Falta de tiempo", score: 2 },
+        { id: "method", label: "Falta de metodo", score: 2 },
+      ],
+    },
+    {
+      id: "reading_style",
+      title: "Cuando leo suelo...",
+      options: [
+        { id: "underline", label: "Subrayar sin estrategia", score: 1 },
+        { id: "reread", label: "Releer", score: 2 },
+        { id: "fast_unclear", label: "Leer rapido sin claridad", score: 1 },
+        { id: "strategic", label: "Leer estrategicamente", score: 3 },
+      ],
+    },
+    {
+      id: "current_performance",
+      title: "Mi rendimiento intelectual actual es...",
+      options: [
+        { id: "low", label: "Bajo", score: 1 },
+        { id: "medium", label: "Medio", score: 2 },
+        { id: "high", label: "Alto", score: 3 },
+      ],
+    },
+    baseNeedQuestion,
+    baseInterestQuestion,
   ],
   profesionales: [
     {
@@ -250,69 +294,8 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
         { id: "efficient", label: "Altamente eficiente", score: 3 },
       ],
     },
-    {
-      id: "optimization_interest",
-      title: "Me interesaria optimizar si...",
-      options: [
-        { id: "save_time", label: "Ahorro tiempo", score: 3 },
-        { id: "better_results", label: "Mejoro resultados", score: 3 },
-        { id: "less_effort", label: "Reduzco esfuerzo", score: 2 },
-        { id: "capacity", label: "Incremento capacidad", score: 3 },
-      ],
-    },
-    baseQuestion6,
-  ],
-  universitarios: [
-    {
-      id: "work_reading",
-      title: "Al leer por estudio o trabajo...",
-      options: [
-        { id: "distracted", label: "Me distraigo", score: 1 },
-        { id: "forget", label: "Olvido rapido", score: 1 },
-        { id: "slow", label: "Tardo mucho", score: 2 },
-        { id: "retain", label: "Retengo bien", score: 3 },
-      ],
-    },
-    {
-      id: "main_difficulty",
-      title: "Mi mayor dificultad es...",
-      options: [
-        { id: "concentration", label: "Concentracion", score: 1 },
-        { id: "memory", label: "Memoria", score: 1 },
-        { id: "time", label: "Falta de tiempo", score: 2 },
-        { id: "method", label: "Falta de metodo", score: 2 },
-      ],
-    },
-    {
-      id: "reading_style",
-      title: "Cuando leo suelo...",
-      options: [
-        { id: "underline", label: "Subrayar sin estrategia", score: 1 },
-        { id: "reread", label: "Releer", score: 2 },
-        { id: "fast_unclear", label: "Leer rapido sin claridad", score: 1 },
-        { id: "strategic", label: "Leer estrategicamente", score: 3 },
-      ],
-    },
-    {
-      id: "current_performance",
-      title: "Mi rendimiento intelectual actual es...",
-      options: [
-        { id: "low", label: "Bajo", score: 1 },
-        { id: "medium", label: "Medio", score: 2 },
-        { id: "high", label: "Alto", score: 3 },
-      ],
-    },
-    {
-      id: "improvement_style",
-      title: "Me gustaria mejorar de forma...",
-      options: [
-        { id: "fast", label: "Rapida", score: 2 },
-        { id: "scientific", label: "Cientifica", score: 3 },
-        { id: "practical", label: "Practica", score: 3 },
-        { id: "integral", label: "Integral", score: 3 },
-      ],
-    },
-    baseQuestion6,
+    baseNeedQuestion,
+    baseInterestQuestion,
   ],
   adulto_mayor: [
     {
@@ -355,17 +338,8 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
         { id: "efficient", label: "Altamente eficiente", score: 3 },
       ],
     },
-    {
-      id: "optimization_interest",
-      title: "Me interesaria optimizar si...",
-      options: [
-        { id: "save_time", label: "Ahorro tiempo", score: 3 },
-        { id: "better_results", label: "Mejoro resultados", score: 3 },
-        { id: "less_effort", label: "Reduzco esfuerzo", score: 2 },
-        { id: "capacity", label: "Incremento capacidad", score: 3 },
-      ],
-    },
-    baseQuestion6,
+    baseNeedQuestion,
+    baseInterestQuestion,
   ],
 };
 
@@ -379,8 +353,11 @@ function getProfile(score: number) {
 }
 
 function getMainNeed(answers: CognitiveSurveyAnswer[]) {
+  const declaredNeed = answers.find((answer) => answer.questionId === "main_need")?.answer;
+  if (declaredNeed) return declaredNeed;
+
   const weak = answers
-    .filter((answer) => answer.questionId !== "interest")
+    .filter((answer) => answer.questionId !== "interest" && answer.questionId !== "main_need")
     .sort((a, b) => a.score - b.score)[0];
   if (!weak) return "Optimizacion integral";
 
@@ -410,7 +387,6 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
   const currentQuestion = questions[current];
   const currentSelection = selected[currentQuestion.id];
   const progress = Math.round(((current + 1) / questions.length) * 100);
-
   const completedAnswers = useMemo(() => Object.keys(selected).length, [selected]);
 
   useEffect(() => {
@@ -418,21 +394,6 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
       if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
     };
   }, []);
-
-  const selectOption = (option: SurveyOption) => {
-    if (submitting || isAdvancing) return;
-    if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
-
-    const nextSelected = { ...selected, [currentQuestion.id]: option };
-    setSelected(nextSelected);
-    setIsAdvancing(true);
-
-    advanceTimerRef.current = window.setTimeout(() => {
-      goNext(nextSelected);
-      setIsAdvancing(false);
-      advanceTimerRef.current = null;
-    }, 430);
-  };
 
   const goNext = (answersByQuestion = selected) => {
     if (!answersByQuestion[currentQuestion.id]) return;
@@ -453,6 +414,7 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
     });
     const score = answers.reduce((sum, answer) => sum + answer.score, 0);
     const interestLevel = answers.find((answer) => answer.questionId === "interest")?.answer || "Sin respuesta";
+
     onSubmit({
       answers,
       score,
@@ -460,6 +422,21 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
       mainNeed: getMainNeed(answers),
       interestLevel,
     });
+  };
+
+  const selectOption = (option: SurveyOption) => {
+    if (submitting || isAdvancing) return;
+    if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
+
+    const nextSelected = { ...selected, [currentQuestion.id]: option };
+    setSelected(nextSelected);
+    setIsAdvancing(true);
+
+    advanceTimerRef.current = window.setTimeout(() => {
+      goNext(nextSelected);
+      setIsAdvancing(false);
+      advanceTimerRef.current = null;
+    }, 430);
   };
 
   return (
@@ -537,6 +514,7 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
               </div>
             </motion.div>
           )}
+
           <AnimatePresence mode="wait">
             <motion.div
               key={currentQuestion.id}
