@@ -76,7 +76,7 @@ const CHART_COLORS = ["#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#e
 
 const PIE_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
 
-type ColumnKey = "nombre" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "surveyProfile" | "surveyMainNeed" | "surveyInterest" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
+type ColumnKey = "nombre" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "surveyProfile" | "surveyMainNeed" | "surveyInterest" | "surveyScore" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
 
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "nombre", label: "Nombre" },
@@ -87,6 +87,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "surveyProfile", label: "Perfil IQX" },
   { key: "surveyMainNeed", label: "Area clave" },
   { key: "surveyInterest", label: "Interes" },
+  { key: "surveyScore", label: "Puntaje IQX" },
   { key: "grado", label: "Grado/Curso" },
   { key: "institucion", label: "Institución" },
   { key: "semestre", label: "Semestre" },
@@ -98,7 +99,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "fecha", label: "Fecha" },
 ];
 
-const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "surveyProfile", "surveyMainNeed", "grado", "institucion", "fecha"];
+const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "surveyProfile", "surveyMainNeed", "surveyScore", "grado", "institucion", "fecha"];
 
 function getCreatedAt(result: QuizResult): string | Date | null {
   return result.createdAt || result.created_at || null;
@@ -272,6 +273,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   const [showCharts, setShowCharts] = useState(false);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [includeSurveyAnswersExport, setIncludeSurveyAnswersExport] = useState(false);
   const columnSelectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -428,6 +430,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
       case "surveyProfile": return r.surveyProfile || "-";
       case "surveyMainNeed": return r.surveyMainNeed || "-";
       case "surveyInterest": return r.surveyInterest || "-";
+      case "surveyScore": return r.surveyScore !== null && r.surveyScore !== undefined ? String(r.surveyScore) : "-";
       case "grado": return r.grado || "-";
       case "institucion": return r.institucion || "-";
       case "semestre": return r.semestre || "-";
@@ -442,12 +445,35 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   };
 
   const downloadExcel = () => {
-    const headers = visibleColumns.map(c => ALL_COLUMNS.find(ac => ac.key === c)?.label || c);
-    const rows = filteredResults.map(r => visibleColumns.map(c => getCellValue(r, c)));
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const exportColumns = Array.from(new Set<ColumnKey>([
+      ...visibleColumns,
+      "surveyProfile",
+      "surveyMainNeed",
+      "surveyInterest",
+      "surveyScore",
+    ]));
+    const surveyAnswerCount = includeSurveyAnswersExport
+      ? Math.max(6, ...filteredResults.map((r) => parseSurveyAnswers(r.surveyAnswers).length), 0)
+      : 0;
+    const headers = exportColumns.map(c => ALL_COLUMNS.find(ac => ac.key === c)?.label || c);
+    const surveyHeaders = includeSurveyAnswersExport
+      ? Array.from({ length: surveyAnswerCount }, (_, idx) => [`Encuesta P${idx + 1}`, `Respuesta P${idx + 1}`]).flat()
+      : [];
+    const rows = filteredResults.map(r => {
+      const baseRow = exportColumns.map(c => getCellValue(r, c));
+      if (!includeSurveyAnswersExport) return baseRow;
+      const answers = parseSurveyAnswers(r.surveyAnswers);
+      const surveyRow = Array.from({ length: surveyAnswerCount }, (_, idx) => {
+        const answer = answers[idx];
+        return [answer?.question || "-", answer?.answer || "-"];
+      }).flat();
+      return [...baseRow, ...surveyRow];
+    });
+    const allHeaders = [...headers, ...surveyHeaders];
+    const ws = XLSX.utils.aoa_to_sheet([allHeaders, ...rows]);
 
-    const colWidths = headers.map((h, i) => {
-      const maxLen = Math.max(h.length, ...rows.map(row => (row[i] || "").length));
+    const colWidths = allHeaders.map((h, i) => {
+      const maxLen = Math.max(h.length, ...rows.map(row => String(row[i] || "").length));
       return { wch: Math.min(maxLen + 2, 40) };
     });
     ws["!cols"] = colWidths;
@@ -463,6 +489,8 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
     if (lectorFilter !== "all") filterInfo.push(`Cat. Lector: ${lectorFilter}`);
     if (dateFrom || dateTo) filterInfo.push(`Fecha: ${dateFrom || "..."} a ${dateTo || "..."}`);
     if (searchText) filterInfo.push(`Búsqueda: ${searchText}`);
+
+    filterInfo.push(`Encuesta completa: ${includeSurveyAnswersExport ? "Si" : "No"}`);
 
     if (filterInfo.length > 0) {
       const infoWs = XLSX.utils.aoa_to_sheet([
@@ -542,6 +570,16 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 </div>
               )}
             </div>
+            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
+              <input
+                type="checkbox"
+                checked={includeSurveyAnswersExport}
+                onChange={(e) => setIncludeSurveyAnswersExport(e.target.checked)}
+                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
+                data-testid="checkbox-include-survey-export"
+              />
+              <span>Incluir encuesta completa</span>
+            </label>
             <Button
               onClick={downloadExcel}
               variant="outline"
