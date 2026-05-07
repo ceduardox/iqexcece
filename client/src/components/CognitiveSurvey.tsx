@@ -421,6 +421,36 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
         </div>
 
         <div className="flex-1 flex flex-col justify-center">
+          {current === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 rounded-3xl border border-purple-100 p-4"
+              style={{ background: "linear-gradient(135deg, rgba(138,63,252,0.08), rgba(6,182,212,0.06))" }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white shadow-sm">
+                  <Brain className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-black leading-tight text-gray-900">
+                    Tu resultado ya esta listo
+                  </h2>
+                  <p className="text-sm text-gray-600 leading-relaxed mt-1">
+                    Responde 6 preguntas rapidas para personalizar tu Perfil Cognitivo IQX.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="px-3 py-1 rounded-full bg-white text-[11px] font-bold text-purple-600 shadow-sm">
+                      Menos de 1 minuto
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-white text-[11px] font-bold text-cyan-700 shadow-sm">
+                      Concentracion, memoria y velocidad
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentQuestion.id}
