@@ -754,7 +754,7 @@ export default function ReadingContentPage() {
   if (showSurvey) {
     return (
       <CognitiveSurvey
-        categoria={categoria}
+        categoria={pendingFormData?.tipoEstudiante === "universitario" ? "universitarios" : categoria}
         testType="lectura"
         onSubmit={handleSurveySubmit}
         submitting={submitting}

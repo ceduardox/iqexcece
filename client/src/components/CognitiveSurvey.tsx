@@ -211,6 +211,59 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
   ],
   profesionales: [
     {
+      id: "learning_limit",
+      title: "El aprendizaje se ve limitado por...",
+      options: [
+        { id: "time", label: "Falta de tiempo", score: 2 },
+        { id: "saturation", label: "Saturacion mental", score: 1 },
+        { id: "focus", label: "Dificultad de concentracion", score: 1 },
+        { id: "inefficient_reading", label: "Lectura poco eficiente", score: 2 },
+      ],
+    },
+    {
+      id: "reports",
+      title: "Al leer informes o textos importantes...",
+      options: [
+        { id: "slow", label: "Tardo mucho", score: 2 },
+        { id: "reread", label: "Debo releer", score: 2 },
+        { id: "dont_retain", label: "No retengo", score: 1 },
+        { id: "clear", label: "Proceso con claridad", score: 3 },
+      ],
+    },
+    {
+      id: "mind_state",
+      title: "Mi mente esta...",
+      options: [
+        { id: "tired", label: "Cansada", score: 1 },
+        { id: "scattered", label: "Dispersa", score: 1 },
+        { id: "functional", label: "Funcional pero no optimizada", score: 2 },
+        { id: "agile", label: "Agil", score: 3 },
+      ],
+    },
+    {
+      id: "learning_style",
+      title: "Mi forma de aprender es...",
+      options: [
+        { id: "intuitive", label: "Intuitiva", score: 2 },
+        { id: "traditional", label: "Tradicional", score: 2 },
+        { id: "strategic", label: "Estrategica", score: 3 },
+        { id: "efficient", label: "Altamente eficiente", score: 3 },
+      ],
+    },
+    {
+      id: "optimization_interest",
+      title: "Me interesaria optimizar si...",
+      options: [
+        { id: "save_time", label: "Ahorro tiempo", score: 3 },
+        { id: "better_results", label: "Mejoro resultados", score: 3 },
+        { id: "less_effort", label: "Reduzco esfuerzo", score: 2 },
+        { id: "capacity", label: "Incremento capacidad", score: 3 },
+      ],
+    },
+    baseQuestion6,
+  ],
+  universitarios: [
+    {
       id: "work_reading",
       title: "Al leer por estudio o trabajo...",
       options: [
@@ -316,9 +369,7 @@ const surveyByCategory: Record<string, SurveyQuestion[]> = {
   ],
 };
 
-const categoryFallback: Record<string, string> = {
-  universitarios: "profesionales",
-};
+const categoryFallback: Record<string, string> = {};
 
 function getProfile(score: number) {
   if (score <= 9) return "Perfil en Desarrollo";

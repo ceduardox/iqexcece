@@ -280,7 +280,7 @@ export default function RazonamientoQuizPage() {
   if (showSurvey) {
     return (
       <CognitiveSurvey
-        categoria={categoria}
+        categoria={pendingFormData?.tipoEstudiante === "universitario" ? "universitarios" : categoria}
         testType="razonamiento"
         onSubmit={handleSurveySubmit}
         submitting={submitting}

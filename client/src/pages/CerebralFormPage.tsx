@@ -122,7 +122,7 @@ export default function CerebralFormPage() {
   if (showSurvey) {
     return (
       <CognitiveSurvey
-        categoria={categoria}
+        categoria={pendingFormData?.tipoEstudiante === "universitario" ? "universitarios" : categoria}
         testType="cerebral"
         onSubmit={handleSurveySubmit}
         submitting={submitting}

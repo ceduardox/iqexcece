@@ -1662,6 +1662,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     return map[tipo] || tipo;
   };
 
+  const parseSurveyAnswers = (value: string | null | undefined): { question: string; answer: string }[] => {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   // Load entrenamiento data when tab is activated
   useEffect(() => {
     if (isLoggedIn && activeTab === "entrenamiento") {
@@ -2607,6 +2617,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                       <div className="text-white/50 text-xs">Interes</div>
                                     </div>
                                   </div>
+                                  {parseSurveyAnswers((r as any).surveyAnswers).length > 0 && (
+                                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      {parseSurveyAnswers((r as any).surveyAnswers).map((answer, idx) => (
+                                        <div key={idx} className="bg-black/20 rounded px-3 py-2">
+                                          <p className="text-white/50 text-[11px]">{idx + 1}. {answer.question}</p>
+                                          <p className="text-white/85 text-xs font-semibold">{answer.answer}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
@@ -2683,6 +2703,32 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         <p className="text-white/60">Estado/Dpto: <span className="text-white/80">{(r as any).estado || r.ciudad || "-"}</span></p>
                         <p className="text-white/60">Grado: <span className="text-yellow-400">{(r as any).grado || "-"}</span></p>
                         <p className="text-white/60">Institución: <span className="text-cyan-400">{(r as any).institucion || "-"}</span></p>
+                        {((r as any).surveyProfile || (r as any).surveyMainNeed || (r as any).surveyInterest) && (
+                          <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-3 border border-purple-500/20">
+                            <p className="text-purple-300 font-bold text-xs mb-2">Perfil Cognitivo IQX</p>
+                            <div className="grid grid-cols-2 gap-2 text-center mb-2">
+                              <div className="bg-black/30 rounded p-2">
+                                <div className="text-purple-300 font-bold text-xs">{(r as any).surveyProfile || "-"}</div>
+                                <div className="text-white/50 text-[10px]">Perfil</div>
+                              </div>
+                              <div className="bg-black/30 rounded p-2">
+                                <div className="text-cyan-300 font-bold text-xs">{(r as any).surveyMainNeed || "-"}</div>
+                                <div className="text-white/50 text-[10px]">Area clave</div>
+                              </div>
+                            </div>
+                            <p className="text-white/60 text-xs">Interes: <span className="text-yellow-300">{(r as any).surveyInterest || "-"}</span></p>
+                            {parseSurveyAnswers((r as any).surveyAnswers).length > 0 && (
+                              <div className="mt-2 space-y-1">
+                                {parseSurveyAnswers((r as any).surveyAnswers).map((answer, idx) => (
+                                  <div key={idx} className="bg-black/20 rounded px-2 py-1.5">
+                                    <p className="text-white/45 text-[10px]">{idx + 1}. {answer.question}</p>
+                                    <p className="text-white/85 text-[11px] font-semibold">{answer.answer}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {(r as any).tipoEstudiante && <p className="text-white/60">Perfil: <span className="text-purple-400">{formatTipoEstudiante((r as any).tipoEstudiante)}</span></p>}
                         {(r as any).semestre && <p className="text-white/60">Semestre: <span className="text-purple-400">{(r as any).semestre}</span></p>}
                         {(r as any).profesion && <p className="text-white/60">Profesión: <span className="text-green-400">{(r as any).profesion}</span></p>}
@@ -2852,6 +2898,16 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                     <div className="text-white/50 text-xs">Interes</div>
                                   </div>
                                 </div>
+                                {parseSurveyAnswers((r as any).surveyAnswers).length > 0 && (
+                                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {parseSurveyAnswers((r as any).surveyAnswers).map((answer, idx) => (
+                                      <div key={idx} className="bg-black/20 rounded px-3 py-2">
+                                        <p className="text-white/50 text-[11px]">{idx + 1}. {answer.question}</p>
+                                        <p className="text-white/85 text-xs font-semibold">{answer.answer}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             )}
                             
