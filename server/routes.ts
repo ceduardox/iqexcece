@@ -805,6 +805,7 @@ Reglas:
       const result = await storage.saveQuizResult(data);
       res.json({ success: true, result });
     } catch (error) {
+      console.error("Failed to save quiz result:", error);
       res.status(500).json({ error: "Failed to save result" });
     }
   });
@@ -1077,6 +1078,7 @@ Reglas:
       const result = await storage.saveCerebralResult(req.body);
       res.json({ success: true, result });
     } catch (error) {
+      console.error("Failed to save cerebral result:", error);
       res.status(500).json({ error: "Failed to save cerebral result" });
     }
   });

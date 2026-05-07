@@ -17,6 +17,91 @@ export type BlogPostSummary = {
   createdAt: Date | null;
 };
 
+function isMissingSurveyColumnError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const message = "message" in error ? String((error as { message?: unknown }).message || "") : "";
+  return message.includes("survey_") && message.includes("does not exist");
+}
+
+function mapLegacyQuizResult(row: Record<string, unknown>): QuizResult {
+  return {
+    id: String(row.id),
+    sessionId: (row.sessionId as string | null) ?? null,
+    nombre: String(row.nombre),
+    email: (row.email as string | null) ?? null,
+    edad: (row.edad as string | null) ?? null,
+    ciudad: (row.ciudad as string | null) ?? null,
+    telefono: (row.telefono as string | null) ?? null,
+    comentario: (row.comentario as string | null) ?? null,
+    categoria: (row.categoria as string | null) ?? null,
+    testType: (row.testType as string | null) ?? null,
+    nivelEducativo: (row.nivelEducativo as string | null) ?? null,
+    grado: (row.grado as string | null) ?? null,
+    institucion: (row.institucion as string | null) ?? null,
+    tipoEstudiante: (row.tipoEstudiante as string | null) ?? null,
+    semestre: (row.semestre as string | null) ?? null,
+    esProfesional: (row.esProfesional as boolean | null) ?? null,
+    profesion: (row.profesion as string | null) ?? null,
+    ocupacion: (row.ocupacion as string | null) ?? null,
+    lugarTrabajo: (row.lugarTrabajo as string | null) ?? null,
+    pais: (row.pais as string | null) ?? null,
+    codigoPais: (row.codigoPais as string | null) ?? null,
+    estado: (row.estado as string | null) ?? null,
+    tiempoLectura: (row.tiempoLectura as number | null) ?? null,
+    tiempoCuestionario: (row.tiempoCuestionario as number | null) ?? null,
+    respuestasCorrectas: (row.respuestasCorrectas as number | null) ?? null,
+    respuestasTotales: (row.respuestasTotales as number | null) ?? null,
+    comprension: (row.comprension as number | null) ?? null,
+    velocidadLectura: (row.velocidadLectura as number | null) ?? null,
+    velocidadMaxima: (row.velocidadMaxima as number | null) ?? null,
+    categoriaLector: (row.categoriaLector as string | null) ?? null,
+    surveyAnswers: null,
+    surveyScore: null,
+    surveyProfile: null,
+    surveyMainNeed: null,
+    surveyInterest: null,
+    isPwa: Boolean(row.isPwa),
+    createdAt: (row.createdAt as Date | null) ?? null,
+  };
+}
+
+function mapLegacyCerebralResult(row: Record<string, unknown>): CerebralResult {
+  return {
+    id: String(row.id),
+    nombre: String(row.nombre),
+    email: (row.email as string | null) ?? null,
+    edad: (row.edad as string | null) ?? null,
+    ciudad: (row.ciudad as string | null) ?? null,
+    telefono: (row.telefono as string | null) ?? null,
+    comentario: (row.comentario as string | null) ?? null,
+    categoria: String(row.categoria),
+    grado: (row.grado as string | null) ?? null,
+    institucion: (row.institucion as string | null) ?? null,
+    tipoEstudiante: (row.tipoEstudiante as string | null) ?? null,
+    semestre: (row.semestre as string | null) ?? null,
+    esProfesional: (row.esProfesional as boolean | null) ?? null,
+    profesion: (row.profesion as string | null) ?? null,
+    ocupacion: (row.ocupacion as string | null) ?? null,
+    lugarTrabajo: (row.lugarTrabajo as string | null) ?? null,
+    pais: (row.pais as string | null) ?? null,
+    codigoPais: (row.codigoPais as string | null) ?? null,
+    estado: (row.estado as string | null) ?? null,
+    lateralidadData: (row.lateralidadData as string | null) ?? null,
+    preferenciaData: (row.preferenciaData as string | null) ?? null,
+    leftPercent: (row.leftPercent as number | null) ?? null,
+    rightPercent: (row.rightPercent as number | null) ?? null,
+    dominantSide: (row.dominantSide as string | null) ?? null,
+    personalityTraits: (row.personalityTraits as string | null) ?? null,
+    surveyAnswers: null,
+    surveyScore: null,
+    surveyProfile: null,
+    surveyMainNeed: null,
+    surveyInterest: null,
+    isPwa: Boolean(row.isPwa),
+    createdAt: (row.createdAt as Date | null) ?? null,
+  };
+}
+
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -532,7 +617,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async saveQuizResult(insertResult: InsertQuizResult): Promise<QuizResult> {
-    const [result] = await db.insert(quizResults).values({
+    const baseValues = {
       sessionId: insertResult.sessionId || null,
       nombre: insertResult.nombre,
       email: insertResult.email || null,
@@ -561,18 +646,121 @@ export class DatabaseStorage implements IStorage {
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
       categoriaLector: insertResult.categoriaLector || null,
-      surveyAnswers: insertResult.surveyAnswers || null,
-      surveyScore: insertResult.surveyScore ?? null,
-      surveyProfile: insertResult.surveyProfile || null,
-      surveyMainNeed: insertResult.surveyMainNeed || null,
-      surveyInterest: insertResult.surveyInterest || null,
       isPwa: insertResult.isPwa || false,
-    }).returning();
-    return result;
+    };
+
+    try {
+      const [result] = await db.insert(quizResults).values({
+        ...baseValues,
+        surveyAnswers: insertResult.surveyAnswers || null,
+        surveyScore: insertResult.surveyScore ?? null,
+        surveyProfile: insertResult.surveyProfile || null,
+        surveyMainNeed: insertResult.surveyMainNeed || null,
+        surveyInterest: insertResult.surveyInterest || null,
+      }).returning();
+      return result;
+    } catch (error) {
+      if (!isMissingSurveyColumnError(error)) throw error;
+
+      const inserted = await db.execute(sql`
+        insert into quiz_results (
+          session_id, nombre, email, edad, ciudad, telefono, comentario, categoria, test_type,
+          grado, institucion, tipo_estudiante, semestre, es_profesional, profesion, ocupacion,
+          lugar_trabajo, pais, codigo_pais, estado, tiempo_lectura, tiempo_cuestionario,
+          respuestas_correctas, respuestas_totales, comprension, velocidad_lectura,
+          velocidad_maxima, categoria_lector, is_pwa
+        ) values (
+          ${baseValues.sessionId}, ${baseValues.nombre}, ${baseValues.email}, ${baseValues.edad}, ${baseValues.ciudad},
+          ${baseValues.telefono}, ${baseValues.comentario}, ${baseValues.categoria}, ${baseValues.testType},
+          ${baseValues.grado}, ${baseValues.institucion}, ${baseValues.tipoEstudiante}, ${baseValues.semestre},
+          ${baseValues.esProfesional}, ${baseValues.profesion}, ${baseValues.ocupacion}, ${baseValues.lugarTrabajo},
+          ${baseValues.pais}, ${baseValues.codigoPais}, ${baseValues.estado}, ${baseValues.tiempoLectura},
+          ${baseValues.tiempoCuestionario}, ${baseValues.respuestasCorrectas}, ${baseValues.respuestasTotales},
+          ${baseValues.comprension}, ${baseValues.velocidadLectura}, ${baseValues.velocidadMaxima},
+          ${baseValues.categoriaLector}, ${baseValues.isPwa}
+        )
+        returning
+          id,
+          session_id as "sessionId",
+          nombre,
+          email,
+          edad,
+          ciudad,
+          telefono,
+          comentario,
+          categoria,
+          test_type as "testType",
+          null::text as "nivelEducativo",
+          grado,
+          institucion,
+          tipo_estudiante as "tipoEstudiante",
+          semestre,
+          es_profesional as "esProfesional",
+          profesion,
+          ocupacion,
+          lugar_trabajo as "lugarTrabajo",
+          pais,
+          codigo_pais as "codigoPais",
+          estado,
+          tiempo_lectura as "tiempoLectura",
+          tiempo_cuestionario as "tiempoCuestionario",
+          respuestas_correctas as "respuestasCorrectas",
+          respuestas_totales as "respuestasTotales",
+          comprension,
+          velocidad_lectura as "velocidadLectura",
+          velocidad_maxima as "velocidadMaxima",
+          categoria_lector as "categoriaLector",
+          is_pwa as "isPwa",
+          created_at as "createdAt"
+      `);
+      return mapLegacyQuizResult(inserted.rows[0] as Record<string, unknown>);
+    }
   }
 
   async getAllQuizResults(): Promise<QuizResult[]> {
-    return db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
+    try {
+      return await db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
+    } catch (error) {
+      if (!isMissingSurveyColumnError(error)) throw error;
+      const results = await db.execute(sql`
+        select
+          id,
+          session_id as "sessionId",
+          nombre,
+          email,
+          edad,
+          ciudad,
+          telefono,
+          comentario,
+          categoria,
+          test_type as "testType",
+          null::text as "nivelEducativo",
+          grado,
+          institucion,
+          tipo_estudiante as "tipoEstudiante",
+          semestre,
+          es_profesional as "esProfesional",
+          profesion,
+          ocupacion,
+          lugar_trabajo as "lugarTrabajo",
+          pais,
+          codigo_pais as "codigoPais",
+          estado,
+          tiempo_lectura as "tiempoLectura",
+          tiempo_cuestionario as "tiempoCuestionario",
+          respuestas_correctas as "respuestasCorrectas",
+          respuestas_totales as "respuestasTotales",
+          comprension,
+          velocidad_lectura as "velocidadLectura",
+          velocidad_maxima as "velocidadMaxima",
+          categoria_lector as "categoriaLector",
+          is_pwa as "isPwa",
+          created_at as "createdAt"
+        from quiz_results
+        order by created_at desc
+      `);
+      return results.rows.map((row) => mapLegacyQuizResult(row as Record<string, unknown>));
+    }
   }
 
   async getReadingContent(categoria: string, temaNumero: number = 1, lang: string = "es"): Promise<ReadingContent | undefined> {
@@ -835,15 +1023,104 @@ export class DatabaseStorage implements IStorage {
 
   // Cerebral results
   async saveCerebralResult(result: InsertCerebralResult): Promise<CerebralResult> {
-    const [created] = await db.insert(cerebralResults).values(result).returning();
-    return created;
+    try {
+      const [created] = await db.insert(cerebralResults).values(result).returning();
+      return created;
+    } catch (error) {
+      if (!isMissingSurveyColumnError(error)) throw error;
+      const created = await db.execute(sql`
+        insert into cerebral_results (
+          nombre, email, edad, ciudad, telefono, comentario, categoria, grado, institucion,
+          tipo_estudiante, semestre, es_profesional, profesion, ocupacion, lugar_trabajo, pais,
+          codigo_pais, estado, lateralidad_data, preferencia_data, left_percent, right_percent,
+          dominant_side, personality_traits, is_pwa
+        ) values (
+          ${result.nombre}, ${result.email || null}, ${result.edad || null}, ${result.ciudad || null},
+          ${result.telefono || null}, ${result.comentario || null}, ${result.categoria}, ${result.grado || null},
+          ${result.institucion || null}, ${result.tipoEstudiante || null}, ${result.semestre || null},
+          ${result.esProfesional ?? null}, ${result.profesion || null}, ${result.ocupacion || null},
+          ${result.lugarTrabajo || null}, ${result.pais || null}, ${result.codigoPais || null},
+          ${result.estado || null}, ${result.lateralidadData || null}, ${result.preferenciaData || null},
+          ${result.leftPercent ?? null}, ${result.rightPercent ?? null}, ${result.dominantSide || null},
+          ${result.personalityTraits || null}, ${result.isPwa || false}
+        )
+        returning
+          id,
+          nombre,
+          email,
+          edad,
+          ciudad,
+          telefono,
+          comentario,
+          categoria,
+          grado,
+          institucion,
+          tipo_estudiante as "tipoEstudiante",
+          semestre,
+          es_profesional as "esProfesional",
+          profesion,
+          ocupacion,
+          lugar_trabajo as "lugarTrabajo",
+          pais,
+          codigo_pais as "codigoPais",
+          estado,
+          lateralidad_data as "lateralidadData",
+          preferencia_data as "preferenciaData",
+          left_percent as "leftPercent",
+          right_percent as "rightPercent",
+          dominant_side as "dominantSide",
+          personality_traits as "personalityTraits",
+          is_pwa as "isPwa",
+          created_at as "createdAt"
+      `);
+      return mapLegacyCerebralResult(created.rows[0] as Record<string, unknown>);
+    }
   }
 
   async getCerebralResults(categoria?: string): Promise<CerebralResult[]> {
-    if (categoria) {
-      return db.select().from(cerebralResults).where(eq(cerebralResults.categoria, categoria)).orderBy(desc(cerebralResults.createdAt));
+    try {
+      if (categoria) {
+        return await db.select().from(cerebralResults).where(eq(cerebralResults.categoria, categoria)).orderBy(desc(cerebralResults.createdAt));
+      }
+      return await db.select().from(cerebralResults).orderBy(desc(cerebralResults.createdAt));
+    } catch (error) {
+      if (!isMissingSurveyColumnError(error)) throw error;
+      const whereClause = categoria ? sql`where categoria = ${categoria}` : sql``;
+      const results = await db.execute(sql`
+        select
+          id,
+          nombre,
+          email,
+          edad,
+          ciudad,
+          telefono,
+          comentario,
+          categoria,
+          grado,
+          institucion,
+          tipo_estudiante as "tipoEstudiante",
+          semestre,
+          es_profesional as "esProfesional",
+          profesion,
+          ocupacion,
+          lugar_trabajo as "lugarTrabajo",
+          pais,
+          codigo_pais as "codigoPais",
+          estado,
+          lateralidad_data as "lateralidadData",
+          preferencia_data as "preferenciaData",
+          left_percent as "leftPercent",
+          right_percent as "rightPercent",
+          dominant_side as "dominantSide",
+          personality_traits as "personalityTraits",
+          is_pwa as "isPwa",
+          created_at as "createdAt"
+        from cerebral_results
+        ${whereClause}
+        order by created_at desc
+      `);
+      return results.rows.map((row) => mapLegacyCerebralResult(row as Record<string, unknown>));
     }
-    return db.select().from(cerebralResults).orderBy(desc(cerebralResults.createdAt));
   }
 
   // Entrenamiento Card
