@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Brain, Check, Gauge } from "lucide-react";
 
@@ -336,6 +336,8 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
   const questions = surveyByCategory[normalizedCategory] || surveyByCategory.profesionales;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<Record<string, SurveyOption>>({});
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const advanceTimerRef = useRef<number | null>(null);
 
   const currentQuestion = questions[current];
   const currentSelection = selected[currentQuestion.id];
@@ -343,19 +345,36 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
 
   const completedAnswers = useMemo(() => Object.keys(selected).length, [selected]);
 
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
+    };
+  }, []);
+
   const selectOption = (option: SurveyOption) => {
-    setSelected((prev) => ({ ...prev, [currentQuestion.id]: option }));
+    if (submitting || isAdvancing) return;
+    if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
+
+    const nextSelected = { ...selected, [currentQuestion.id]: option };
+    setSelected(nextSelected);
+    setIsAdvancing(true);
+
+    advanceTimerRef.current = window.setTimeout(() => {
+      goNext(nextSelected);
+      setIsAdvancing(false);
+      advanceTimerRef.current = null;
+    }, 430);
   };
 
-  const goNext = () => {
-    if (!currentSelection) return;
+  const goNext = (answersByQuestion = selected) => {
+    if (!answersByQuestion[currentQuestion.id]) return;
     if (current < questions.length - 1) {
       setCurrent((prev) => prev + 1);
       return;
     }
 
     const answers = questions.map((question) => {
-      const option = selected[question.id];
+      const option = answersByQuestion[question.id];
       return {
         questionId: question.id,
         question: question.title,
@@ -434,6 +453,7 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
                       key={option.id}
                       whileTap={{ scale: 0.985 }}
                       onClick={() => selectOption(option)}
+                      disabled={submitting || isAdvancing}
                       className="w-full text-left rounded-2xl border-2 p-4 transition-all"
                       style={{
                         borderColor: isSelected ? "#8a3ffc" : "rgba(148, 163, 184, 0.25)",
@@ -469,20 +489,24 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
         <div className="pt-5 flex gap-3">
           <button
             type="button"
-            onClick={() => setCurrent((prev) => Math.max(0, prev - 1))}
-            disabled={current === 0 || submitting}
+            onClick={() => {
+              if (advanceTimerRef.current) window.clearTimeout(advanceTimerRef.current);
+              setIsAdvancing(false);
+              setCurrent((prev) => Math.max(0, prev - 1));
+            }}
+            disabled={current === 0 || submitting || isAdvancing}
             className="w-14 h-14 rounded-full border border-purple-100 text-purple-600 flex items-center justify-center disabled:opacity-30"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button
             type="button"
-            onClick={goNext}
-            disabled={!currentSelection || submitting}
+            onClick={() => goNext()}
+            disabled={!currentSelection || submitting || isAdvancing}
             className="flex-1 h-14 rounded-full text-white font-black flex items-center justify-center gap-2 disabled:opacity-50"
             style={{ background: "linear-gradient(90deg, #8a3ffc, #06b6d4)" }}
           >
-            {submitting ? "Guardando..." : current === questions.length - 1 ? "Ver mi resultado" : "Continuar"}
+            {submitting ? "Guardando..." : isAdvancing ? "Avanzando..." : current === questions.length - 1 ? "Ver mi resultado" : "Selecciona una respuesta"}
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
