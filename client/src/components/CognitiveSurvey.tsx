@@ -342,6 +342,12 @@ function getMainNeed(answers: CognitiveSurveyAnswer[]) {
   return weak.answer;
 }
 
+function splitLeadingEmoji(label: string) {
+  const parts = label.match(/^(\S+)\s+(.+)$/);
+  if (!parts) return { emoji: "", text: label };
+  return { emoji: parts[1], text: parts[2] };
+}
+
 export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Props) {
   const normalizedCategory = categoryFallback[categoria] || categoria;
   const questions = surveyByCategory[normalizedCategory] || surveyByCategory.profesionales;
@@ -436,25 +442,43 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 rounded-3xl border border-purple-100 p-4"
-              style={{ background: "linear-gradient(135deg, rgba(138,63,252,0.08), rgba(6,182,212,0.06))" }}
+              className="relative mb-6 overflow-hidden rounded-[28px] border p-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(138,63,252,0.14) 0%, rgba(255,255,255,0.96) 48%, rgba(6,182,212,0.13) 100%)",
+                borderColor: "rgba(138,63,252,0.18)",
+                boxShadow: "0 18px 45px rgba(88,28,135,0.12)",
+              }}
             >
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white shadow-sm">
-                  <Brain className="w-6 h-6 text-purple-600" />
+              <div
+                className="absolute -right-10 -top-12 w-32 h-32 rounded-full"
+                style={{ background: "radial-gradient(circle, rgba(6,182,212,0.22), transparent 68%)" }}
+              />
+              <div
+                className="absolute -left-8 -bottom-10 w-28 h-28 rounded-full"
+                style={{ background: "radial-gradient(circle, rgba(138,63,252,0.20), transparent 70%)" }}
+              />
+              <div className="relative flex items-start gap-4">
+                <div
+                  className="w-14 h-14 rounded-3xl flex items-center justify-center bg-white shadow-md"
+                  style={{ boxShadow: "0 10px 24px rgba(138,63,252,0.18)" }}
+                >
+                  <Brain className="w-8 h-8 text-purple-600" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-black leading-tight text-gray-900">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-purple-600 mb-1">
+                    Perfil Cognitivo IQX
+                  </p>
+                  <h2 className="text-xl font-black leading-tight text-gray-950">
                     Tu resultado ya esta listo
                   </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed mt-1">
+                  <p className="text-sm text-gray-700 leading-relaxed mt-2">
                     Responde 6 preguntas rapidas para personalizar tu Perfil Cognitivo IQX.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <span className="px-3 py-1 rounded-full bg-white text-[11px] font-bold text-purple-600 shadow-sm">
+                    <span className="px-3.5 py-1.5 rounded-full bg-white text-[11px] font-black text-purple-700 shadow-sm border border-purple-100">
                       Menos de 1 minuto
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-white text-[11px] font-bold text-cyan-700 shadow-sm">
+                    <span className="px-3.5 py-1.5 rounded-full bg-white text-[11px] font-black text-cyan-700 shadow-sm border border-cyan-100">
                       Concentracion, memoria y velocidad
                     </span>
                   </div>
@@ -489,6 +513,7 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
               <div className="space-y-3">
                 {currentQuestion.options.map((option) => {
                   const isSelected = currentSelection?.id === option.id;
+                  const { emoji, text } = splitLeadingEmoji(option.label);
                   return (
                     <motion.button
                       key={option.id}
@@ -504,9 +529,9 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
                         boxShadow: isSelected ? "0 12px 28px rgba(138,63,252,0.14)" : "0 4px 14px rgba(15,23,42,0.04)",
                       }}
                     >
-                      <span className="flex items-start gap-3">
+                      <span className="flex items-center gap-3">
                         <span
-                          className="mt-0.5 w-7 h-7 rounded-full flex items-center justify-center border"
+                          className="w-8 h-8 rounded-full flex items-center justify-center border flex-shrink-0"
                           style={{
                             background: isSelected ? "linear-gradient(135deg, #8a3ffc, #06b6d4)" : "#f8fafc",
                             borderColor: isSelected ? "transparent" : "rgba(148,163,184,0.4)",
@@ -514,8 +539,13 @@ export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Pro
                         >
                           {isSelected && <Check className="w-4 h-4 text-white" />}
                         </span>
+                        {emoji && (
+                          <span className="w-10 text-center text-[28px] leading-none flex-shrink-0" aria-hidden="true">
+                            {emoji}
+                          </span>
+                        )}
                         <span className="flex-1">
-                          <span className="block text-sm font-bold text-gray-900">{option.label}</span>
+                          <span className="block text-sm font-bold text-gray-900">{text}</span>
                           {option.helper && <span className="block text-xs text-gray-500 mt-1">{option.helper}</span>}
                         </span>
                       </span>
