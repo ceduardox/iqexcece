@@ -29,6 +29,11 @@ interface QuizResult {
   respuestasCorrectas: number | null;
   respuestasTotales: number | null;
   categoriaLector: string | null;
+  readingTitle?: string | null;
+  readingWordCount?: number | null;
+  readingTemaNumero?: number | null;
+  readingLang?: string | null;
+  readingContent?: string | null;
   surveyAnswers?: string | null;
   surveyScore?: number | null;
   surveyProfile?: string | null;
@@ -76,10 +81,13 @@ const CHART_COLORS = ["#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#e
 
 const PIE_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
 
-type ColumnKey = "nombre" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "surveyProfile" | "surveyMainNeed" | "surveyInterest" | "surveyScore" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
+type ColumnKey = "nombre" | "readingTitle" | "readingWordCount" | "readingTemaNumero" | "comprension" | "velocidad" | "correctas" | "categoriaLector" | "surveyProfile" | "surveyMainNeed" | "surveyInterest" | "surveyScore" | "grado" | "institucion" | "semestre" | "edad" | "email" | "telefono" | "pais" | "estado" | "fecha";
 
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "nombre", label: "Nombre" },
+  { key: "readingTitle", label: "Texto leido" },
+  { key: "readingWordCount", label: "Palabras" },
+  { key: "readingTemaNumero", label: "Tema" },
   { key: "comprension", label: "Comprensión %" },
   { key: "velocidad", label: "Velocidad" },
   { key: "correctas", label: "Correctas" },
@@ -99,7 +107,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "fecha", label: "Fecha" },
 ];
 
-const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "comprension", "velocidad", "correctas", "categoriaLector", "surveyProfile", "surveyMainNeed", "surveyScore", "grado", "institucion", "fecha"];
+const DEFAULT_VISIBLE: ColumnKey[] = ["nombre", "readingTitle", "readingWordCount", "comprension", "velocidad", "correctas", "categoriaLector", "surveyProfile", "surveyMainNeed", "surveyScore", "grado", "institucion", "fecha"];
 
 function getCreatedAt(result: QuizResult): string | Date | null {
   return result.createdAt || result.created_at || null;
@@ -274,6 +282,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   const [showCharts, setShowCharts] = useState(false);
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [includeSurveyAnswersExport, setIncludeSurveyAnswersExport] = useState(false);
+  const [includeReadingContentExport, setIncludeReadingContentExport] = useState(false);
   const columnSelectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -359,7 +368,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
 
       if (searchText.trim()) {
         const q = searchText.toLowerCase();
-        const fields = [r.nombre, r.email, r.institucion, r.grado, r.pais, r.estado, r.telefono, r.edad, r.profesion, r.ocupacion, r.semestre];
+        const fields = [r.nombre, r.email, r.institucion, r.grado, r.pais, r.estado, r.telefono, r.edad, r.profesion, r.ocupacion, r.semestre, r.readingTitle, r.readingContent, r.readingWordCount, r.readingTemaNumero];
         return fields.some(f => f && String(f).toLowerCase().includes(q));
       }
 
@@ -423,6 +432,9 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   const getCellValue = (r: QuizResult, col: ColumnKey): string => {
     switch (col) {
       case "nombre": return r.nombre || "-";
+      case "readingTitle": return r.readingTitle || "-";
+      case "readingWordCount": return r.readingWordCount !== null && r.readingWordCount !== undefined ? String(r.readingWordCount) : "-";
+      case "readingTemaNumero": return r.readingTemaNumero !== null && r.readingTemaNumero !== undefined ? String(r.readingTemaNumero) : "-";
       case "comprension": return r.comprension !== null ? `${r.comprension}%` : "-";
       case "velocidad": return r.velocidadLectura ? `${r.velocidadLectura} p/m` : "-";
       case "correctas": return `${r.respuestasCorrectas ?? "-"}/${r.respuestasTotales ?? "-"}`;
@@ -447,6 +459,9 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   const downloadExcel = () => {
     const exportColumns = Array.from(new Set<ColumnKey>([
       ...visibleColumns,
+      "readingTitle",
+      "readingWordCount",
+      "readingTemaNumero",
       "surveyProfile",
       "surveyMainNeed",
       "surveyInterest",
@@ -459,17 +474,19 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
     const surveyHeaders = includeSurveyAnswersExport
       ? Array.from({ length: surveyAnswerCount }, (_, idx) => [`Encuesta P${idx + 1}`, `Respuesta P${idx + 1}`]).flat()
       : [];
+    const readingContentHeaders = includeReadingContentExport ? ["Texto completo leido"] : [];
     const rows = filteredResults.map(r => {
       const baseRow = exportColumns.map(c => getCellValue(r, c));
-      if (!includeSurveyAnswersExport) return baseRow;
+      if (!includeSurveyAnswersExport && !includeReadingContentExport) return baseRow;
       const answers = parseSurveyAnswers(r.surveyAnswers);
       const surveyRow = Array.from({ length: surveyAnswerCount }, (_, idx) => {
         const answer = answers[idx];
         return [answer?.question || "-", answer?.answer || "-"];
       }).flat();
-      return [...baseRow, ...surveyRow];
+      const readingContentRow = includeReadingContentExport ? [r.readingContent || "-"] : [];
+      return [...baseRow, ...surveyRow, ...readingContentRow];
     });
-    const allHeaders = [...headers, ...surveyHeaders];
+    const allHeaders = [...headers, ...surveyHeaders, ...readingContentHeaders];
     const ws = XLSX.utils.aoa_to_sheet([allHeaders, ...rows]);
 
     const colWidths = allHeaders.map((h, i) => {
@@ -491,6 +508,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
     if (searchText) filterInfo.push(`Búsqueda: ${searchText}`);
 
     filterInfo.push(`Encuesta completa: ${includeSurveyAnswersExport ? "Si" : "No"}`);
+    filterInfo.push(`Texto completo: ${includeReadingContentExport ? "Si" : "No"}`);
 
     if (filterInfo.length > 0) {
       const infoWs = XLSX.utils.aoa_to_sheet([
@@ -579,6 +597,16 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 data-testid="checkbox-include-survey-export"
               />
               <span>Incluir encuesta completa</span>
+            </label>
+            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
+              <input
+                type="checkbox"
+                checked={includeReadingContentExport}
+                onChange={(e) => setIncludeReadingContentExport(e.target.checked)}
+                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
+                data-testid="checkbox-include-reading-content-export"
+              />
+              <span>Incluir texto completo</span>
             </label>
             <Button
               onClick={downloadExcel}
@@ -995,6 +1023,10 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                           </div>
                         )}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                          <div className="col-span-2 md:col-span-4"><span className="text-white/50">Texto leido:</span> <span className="text-cyan-300">{r.readingTitle || "-"}</span></div>
+                          <div><span className="text-white/50">Tema:</span> <span className="text-white/80">{r.readingTemaNumero ?? "-"}</span></div>
+                          <div><span className="text-white/50">Palabras:</span> <span className="text-white/80">{r.readingWordCount ?? "-"}</span></div>
+                          <div><span className="text-white/50">Idioma:</span> <span className="text-white/80">{r.readingLang || "-"}</span></div>
                           <div><span className="text-white/50">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                           <div><span className="text-white/50">Edad:</span> <span className="text-white/80">{r.edad || "-"}</span></div>
                           <div><span className="text-white/50">Teléfono:</span> <span className="text-white/80">{r.telefono || "-"}</span></div>
@@ -1007,6 +1039,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                           {r.profesion && <div><span className="text-white/50">Profesión:</span> <span className="text-green-400">{r.profesion}</span></div>}
                           {r.ocupacion && <div><span className="text-white/50">Ocupación:</span> <span className="text-green-400">{r.ocupacion}</span></div>}
                           {r.lugarTrabajo && <div><span className="text-white/50">Lugar Trabajo:</span> <span className="text-green-400">{r.lugarTrabajo}</span></div>}
+                          {r.readingContent && <div className="col-span-2 md:col-span-4"><span className="text-white/50">Contenido leido:</span> <span className="text-white/80 whitespace-pre-line">{r.readingContent}</span></div>}
                           {r.comentario && <div className="col-span-2 md:col-span-4"><span className="text-white/50">Comentario:</span> <span className="text-white/80">{r.comentario}</span></div>}
                         </div>
                       </td>
@@ -1077,6 +1110,10 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                       <div className="text-white/50 text-[10px] mt-1">Categoría Lector</div>
                     </div>
                   </div>
+                  <p className="text-white/50">Texto leido: <span className="text-cyan-300">{r.readingTitle || "-"}</span></p>
+                  <p className="text-white/50">Tema: <span className="text-white/80">{r.readingTemaNumero ?? "-"}</span></p>
+                  <p className="text-white/50">Palabras: <span className="text-white/80">{r.readingWordCount ?? "-"}</span></p>
+                  <p className="text-white/50">Idioma: <span className="text-white/80">{r.readingLang || "-"}</span></p>
                   <p className="text-white/50">Email: <span className="text-white/80">{r.email || "-"}</span></p>
                   <p className="text-white/50">Edad: <span className="text-white/80">{r.edad || "-"}</span></p>
                   <p className="text-white/50">Teléfono: <span className="text-white/80">{r.telefono || "-"}</span></p>
@@ -1104,6 +1141,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                   {r.profesion && <p className="text-white/50">Profesión: <span className="text-green-400">{r.profesion}</span></p>}
                   {r.ocupacion && <p className="text-white/50">Ocupación: <span className="text-green-400">{r.ocupacion}</span></p>}
                   {r.lugarTrabajo && <p className="text-white/50">Lugar Trabajo: <span className="text-green-400">{r.lugarTrabajo}</span></p>}
+                  {r.readingContent && <p className="text-white/50">Contenido leido: <span className="text-white/80 whitespace-pre-line">{r.readingContent}</span></p>}
                   {r.comentario && <p className="text-white/50">Comentario: <span className="text-white/80">{r.comentario}</span></p>}
                   <p className="text-white/50">Fecha: <span className="text-white/60">{formatDate(getCreatedAt(r))}</span></p>
                 </div>

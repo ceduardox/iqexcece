@@ -17,10 +17,10 @@ export type BlogPostSummary = {
   createdAt: Date | null;
 };
 
-function isMissingSurveyColumnError(error: unknown) {
+function isMissingExtendedQuizColumnError(error: unknown) {
   if (!error || typeof error !== "object") return false;
   const message = "message" in error ? String((error as { message?: unknown }).message || "") : "";
-  return message.includes("survey_") && message.includes("does not exist");
+  return (message.includes("survey_") || message.includes("reading_")) && message.includes("does not exist");
 }
 
 function mapLegacyQuizResult(row: Record<string, unknown>): QuizResult {
@@ -55,6 +55,11 @@ function mapLegacyQuizResult(row: Record<string, unknown>): QuizResult {
     velocidadLectura: (row.velocidadLectura as number | null) ?? null,
     velocidadMaxima: (row.velocidadMaxima as number | null) ?? null,
     categoriaLector: (row.categoriaLector as string | null) ?? null,
+    readingTitle: (row.readingTitle as string | null) ?? null,
+    readingWordCount: (row.readingWordCount as number | null) ?? null,
+    readingTemaNumero: (row.readingTemaNumero as number | null) ?? null,
+    readingLang: (row.readingLang as string | null) ?? null,
+    readingContent: (row.readingContent as string | null) ?? null,
     surveyAnswers: null,
     surveyScore: null,
     surveyProfile: null,
@@ -328,6 +333,11 @@ export class MemStorage implements IStorage {
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
       categoriaLector: insertResult.categoriaLector || null,
+      readingTitle: insertResult.readingTitle || null,
+      readingWordCount: insertResult.readingWordCount ?? null,
+      readingTemaNumero: insertResult.readingTemaNumero ?? null,
+      readingLang: insertResult.readingLang || null,
+      readingContent: insertResult.readingContent || null,
       surveyAnswers: insertResult.surveyAnswers || null,
       surveyScore: insertResult.surveyScore ?? null,
       surveyProfile: insertResult.surveyProfile || null,
@@ -646,6 +656,11 @@ export class DatabaseStorage implements IStorage {
       velocidadLectura: insertResult.velocidadLectura ?? null,
       velocidadMaxima: insertResult.velocidadMaxima ?? null,
       categoriaLector: insertResult.categoriaLector || null,
+      readingTitle: insertResult.readingTitle || null,
+      readingWordCount: insertResult.readingWordCount ?? null,
+      readingTemaNumero: insertResult.readingTemaNumero ?? null,
+      readingLang: insertResult.readingLang || null,
+      readingContent: insertResult.readingContent || null,
       isPwa: insertResult.isPwa || false,
     };
 
@@ -660,7 +675,7 @@ export class DatabaseStorage implements IStorage {
       }).returning();
       return result;
     } catch (error) {
-      if (!isMissingSurveyColumnError(error)) throw error;
+      if (!isMissingExtendedQuizColumnError(error)) throw error;
 
       const inserted = await db.execute(sql`
         insert into quiz_results (
@@ -710,6 +725,11 @@ export class DatabaseStorage implements IStorage {
           velocidad_lectura as "velocidadLectura",
           velocidad_maxima as "velocidadMaxima",
           categoria_lector as "categoriaLector",
+          null::text as "readingTitle",
+          null::integer as "readingWordCount",
+          null::integer as "readingTemaNumero",
+          null::text as "readingLang",
+          null::text as "readingContent",
           is_pwa as "isPwa",
           created_at as "createdAt"
       `);
@@ -721,7 +741,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(quizResults).orderBy(desc(quizResults.createdAt));
     } catch (error) {
-      if (!isMissingSurveyColumnError(error)) throw error;
+      if (!isMissingExtendedQuizColumnError(error)) throw error;
       const results = await db.execute(sql`
         select
           id,
@@ -754,6 +774,11 @@ export class DatabaseStorage implements IStorage {
           velocidad_lectura as "velocidadLectura",
           velocidad_maxima as "velocidadMaxima",
           categoria_lector as "categoriaLector",
+          null::text as "readingTitle",
+          null::integer as "readingWordCount",
+          null::integer as "readingTemaNumero",
+          null::text as "readingLang",
+          null::text as "readingContent",
           is_pwa as "isPwa",
           created_at as "createdAt"
         from quiz_results
@@ -1027,7 +1052,7 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(cerebralResults).values(result).returning();
       return created;
     } catch (error) {
-      if (!isMissingSurveyColumnError(error)) throw error;
+      if (!isMissingExtendedQuizColumnError(error)) throw error;
       const created = await db.execute(sql`
         insert into cerebral_results (
           nombre, email, edad, ciudad, telefono, comentario, categoria, grado, institucion,
@@ -1084,7 +1109,7 @@ export class DatabaseStorage implements IStorage {
       }
       return await db.select().from(cerebralResults).orderBy(desc(cerebralResults.createdAt));
     } catch (error) {
-      if (!isMissingSurveyColumnError(error)) throw error;
+      if (!isMissingExtendedQuizColumnError(error)) throw error;
       const whereClause = categoria ? sql`where categoria = ${categoria}` : sql``;
       const results = await db.execute(sql`
         select
