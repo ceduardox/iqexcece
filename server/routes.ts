@@ -774,7 +774,7 @@ Reglas:
         const wpm = data.velocidadLectura ?? 0;
         const tiempoLecturaSeg = data.tiempoLectura ?? 0;
         const tiempoPreguntasSeg = data.tiempoCuestionario ?? 0;
-        const lecturaValida = tiempoLecturaSeg >= 10 && wpm <= 600;
+        const lecturaValida = tiempoLecturaSeg >= 10;
 
         let cat = "LECTOR CON DIFICULTAD";
         if (
