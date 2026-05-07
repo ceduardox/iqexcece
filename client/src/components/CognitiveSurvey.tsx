@@ -50,102 +50,113 @@ const baseQuestion6: SurveyQuestion = {
   ],
 };
 
+const kidsQuestion6: SurveyQuestion = {
+  id: "interest",
+  title: "Te gustaria conocer una forma divertida para entrenar tu mente?",
+  subtitle: "Esto nos ayuda a mostrar una recomendacion mas util para ti.",
+  options: [
+    { id: "yes", label: "🌟 Si, quiero saber mas", helper: "Quiero mejorar con juegos y ejercicios.", score: 3 },
+    { id: "later", label: "🙂 Tal vez despues", helper: "Quiero verlo con calma.", score: 2 },
+    { id: "no", label: "🙈 No por ahora", helper: "Solo quiero ver mi resultado.", score: 1 },
+  ],
+};
+
 const surveyByCategory: Record<string, SurveyQuestion[]> = {
   preescolar: [
     {
       id: "reading_understanding",
       title: "Cuando lee o escucha un texto...",
       options: [
-        { id: "understands", label: "Entiende casi todo", score: 3 },
-        { id: "partial", label: "Entiende algunas cosas", score: 2 },
-        { id: "confused", label: "Se confunde rapido", score: 1 },
+        { id: "understands", label: "😊 Entiende casi todo", score: 3 },
+        { id: "partial", label: "😐 Entiende algunas cosas", score: 2 },
+        { id: "confused", label: "😕 Se confunde rapido", score: 1 },
       ],
     },
     {
       id: "attention",
       title: "Se distrae cuando hace tareas?",
       options: [
-        { id: "rarely", label: "Casi nunca", score: 3 },
-        { id: "sometimes", label: "A veces", score: 2 },
-        { id: "often", label: "Muchas veces", score: 1 },
+        { id: "rarely", label: "🟢 Casi nunca", score: 3 },
+        { id: "sometimes", label: "🟡 A veces", score: 2 },
+        { id: "often", label: "🔴 Muchas veces", score: 1 },
       ],
     },
     {
       id: "help_response",
       title: "Cuando no entiende algo...",
       options: [
-        { id: "asks", label: "Pide ayuda", score: 3 },
-        { id: "continues", label: "Sigue intentando", score: 2 },
-        { id: "frustrated", label: "Se cansa o se enoja", score: 1 },
+        { id: "asks", label: "🤔 Pide ayuda", score: 3 },
+        { id: "continues", label: "⏭️ Sigue intentando", score: 2 },
+        { id: "frustrated", label: "😣 Se cansa o se enoja", score: 1 },
       ],
     },
     {
       id: "reading_speed",
       title: "Su ritmo al leer o aprender es...",
       options: [
-        { id: "fast", label: "Rapido", score: 3 },
-        { id: "normal", label: "Normal", score: 2 },
-        { id: "slow", label: "Lento", score: 1 },
+        { id: "fast", label: "🚀 Rapido", score: 3 },
+        { id: "normal", label: "🚶 Normal", score: 2 },
+        { id: "slow", label: "🐢 Lento", score: 1 },
       ],
     },
     {
       id: "recall",
       title: "Despues de leer puede contar lo que entendio?",
       options: [
-        { id: "yes", label: "Si", score: 3 },
-        { id: "sometimes", label: "A veces", score: 2 },
-        { id: "little", label: "No mucho", score: 1 },
+        { id: "yes", label: "👍 Si", score: 3 },
+        { id: "sometimes", label: "🤷 A veces", score: 2 },
+        { id: "little", label: "👎 No mucho", score: 1 },
       ],
     },
-    baseQuestion6,
+    kidsQuestion6,
   ],
   ninos: [
     {
       id: "reading_understanding",
       title: "Cuando leo un texto...",
       options: [
-        { id: "understands", label: "Entiendo casi todo", score: 3 },
-        { id: "partial", label: "Entiendo algunas cosas", score: 2 },
-        { id: "confused", label: "Me confundo rapido", score: 1 },
+        { id: "understands", label: "😊 Entiendo casi todo", score: 3 },
+        { id: "partial", label: "😐 Entiendo algunas cosas", score: 2 },
+        { id: "confused", label: "😕 Me confundo rapido", score: 1 },
       ],
     },
     {
       id: "attention",
       title: "Me distraigo cuando hago tareas",
       options: [
-        { id: "rarely", label: "Casi nunca", score: 3 },
-        { id: "sometimes", label: "A veces", score: 2 },
-        { id: "often", label: "Muchas veces", score: 1 },
+        { id: "rarely", label: "🟢 Casi nunca", score: 3 },
+        { id: "sometimes", label: "🟡 A veces", score: 2 },
+        { id: "often", label: "🔴 Muchas veces", score: 1 },
       ],
     },
     {
       id: "help_response",
       title: "Cuando no entiendo algo...",
       options: [
-        { id: "asks", label: "Pido ayuda", score: 3 },
-        { id: "continues", label: "Sigo leyendo", score: 2 },
-        { id: "frustrated", label: "Me enojo o me canso", score: 1 },
+        { id: "asks", label: "🤔 Pido ayuda", score: 3 },
+        { id: "continues", label: "⏭️ Sigo leyendo", score: 2 },
+        { id: "frustrated", label: "😣 Me enojo o me canso", score: 1 },
       ],
     },
     {
       id: "reading_speed",
       title: "Mi velocidad al leer es...",
       options: [
-        { id: "fast", label: "Rapida", score: 3 },
-        { id: "normal", label: "Normal", score: 2 },
-        { id: "slow", label: "Lenta", score: 1 },
+        { id: "fast", label: "🚀 Rapida", score: 3 },
+        { id: "normal", label: "🚶 Normal", score: 2 },
+        { id: "slow", label: "🐢 Lenta", score: 1 },
       ],
     },
     {
       id: "recall",
       title: "Despues de leer puedo contar lo que entendi",
       options: [
-        { id: "yes", label: "Si", score: 3 },
-        { id: "sometimes", label: "A veces", score: 2 },
-        { id: "little", label: "No mucho", score: 1 },
+        { id: "yes", label: "👍 Si", score: 3 },
+        { id: "sometimes", label: "🤷 A veces", score: 2 },
+        { id: "little", label: "👎 No mucho", score: 1 },
       ],
     },
-    baseQuestion6,
+    kidsQuestion6,
   ],
   adolescentes: [
     {
