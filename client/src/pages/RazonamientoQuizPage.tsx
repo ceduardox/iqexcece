@@ -206,6 +206,7 @@ export default function RazonamientoQuizPage() {
         time: quizTime,
         categoria: categoria,
         title: title,
+        surveyScore: survey.score,
         surveyProfile: survey.profile,
         surveyMainNeed: survey.mainNeed,
         surveyInterest: survey.interestLevel,

@@ -8,6 +8,7 @@ import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
 import { TestFormUnified, FormDataType } from "@/components/TestFormUnified";
 import { CognitiveSurvey, type CognitiveSurveyResult } from "@/components/CognitiveSurvey";
+import { CognitiveResultSummary } from "@/components/CognitiveResultSummary";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
@@ -548,20 +549,8 @@ export default function ReadingContentPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.65 }}
-                className="rounded-2xl border border-cyan-100 p-4"
-                style={{ background: "linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(138, 63, 252, 0.06) 100%)" }}
               >
-                <p className="text-xs font-bold mb-2" style={{ color: "#8a3ffc" }}>Perfil Cognitivo IQX</p>
-                <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-white/80 rounded-xl p-3">
-                    <p className="text-[11px] text-gray-500 mb-1">Perfil</p>
-                    <p className="text-sm font-black text-gray-800">{surveyResult.profile}</p>
-                  </div>
-                  <div className="bg-white/80 rounded-xl p-3">
-                    <p className="text-[11px] text-gray-500 mb-1">Area clave</p>
-                    <p className="text-sm font-black" style={{ color: "#06b6d4" }}>{surveyResult.mainNeed}</p>
-                  </div>
-                </div>
+                <CognitiveResultSummary survey={surveyResult} accent="cyan" />
               </motion.div>
             )}
           </div>
