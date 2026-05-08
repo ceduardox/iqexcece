@@ -146,6 +146,15 @@ interface Props {
   subtitle?: string;
 }
 
+const UPPERCASE_FIELDS: Array<keyof FormDataType> = [
+  "nombre",
+  "institucion",
+  "profesion",
+  "ocupacion",
+  "lugarTrabajo",
+  "comentario",
+];
+
 export function TestFormUnified({ categoria, onSubmit, submitting, buttonText, title, subtitle }: Props) {
   const { t } = useTranslation();
   const resolvedButtonText = buttonText || t("tests.seeResults");
@@ -188,8 +197,13 @@ export function TestFormUnified({ categoria, onSubmit, submitting, buttonText, t
 
 
   const handleChange = (field: keyof FormDataType, value: string | boolean | null) => {
+    const normalizedValue =
+      typeof value === "string" && UPPERCASE_FIELDS.includes(field)
+        ? value.toUpperCase()
+        : value;
+
     setFormData(prev => {
-      const newData = { ...prev, [field]: value };
+      const newData = { ...prev, [field]: normalizedValue };
       if (field === "tipoEstudiante") {
         newData.semestre = "";
         newData.institucion = "";
