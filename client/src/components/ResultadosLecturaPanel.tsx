@@ -2,7 +2,8 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { Search, Download, FileText, ChevronDown, Settings2, Calendar, Filter, X, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
 import * as XLSX from "xlsx";
 
 interface QuizResult {
@@ -529,95 +530,121 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
   return (
     <Card className="bg-black/40 border-green-500/30" data-testid="card-resultados-lectura">
       <CardContent className="pt-4 space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-green-400" />
             <h3 className="text-white font-bold text-lg">Resultados de Lectura</h3>
             <span className="text-white/50 text-sm">({filteredResults.length})</span>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              variant="outline"
-              size="sm"
-              className={`border-cyan-500/30 text-cyan-400 gap-1 ${showFilters ? "bg-cyan-500/20" : ""}`}
-              data-testid="button-toggle-filters"
-            >
-              <Filter className="w-3 h-3" />
-              Filtros
-              {hasActiveFilters && <span className="bg-cyan-500 text-black rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{[categoryFilter !== "all", institucionFilter !== "all", nivelFilter !== "all", gradoFilter !== "all", semestreFilter !== "all", lectorFilter !== "all", !!dateFrom || !!dateTo, !!searchText].filter(Boolean).length}</span>}
-            </Button>
-            <Button
-              onClick={() => setShowCharts(!showCharts)}
-              variant="outline"
-              size="sm"
-              className={`border-purple-500/30 text-purple-400 gap-1 ${showCharts ? "bg-purple-500/20" : ""}`}
-              data-testid="button-toggle-charts"
-            >
-              <BarChart3 className="w-3 h-3" />
-              Gráficos
-            </Button>
-            <div className="relative" ref={columnSelectorRef}>
+          <div className="flex items-start gap-3 flex-wrap justify-end">
+            <div className="flex items-center gap-2 flex-wrap rounded-xl border border-white/10 bg-black/20 px-2 py-2">
               <Button
-                onClick={() => setShowColumnSelector(!showColumnSelector)}
+                onClick={() => setShowFilters(!showFilters)}
                 variant="outline"
                 size="sm"
-                className="border-white/20 text-white/60 gap-1"
-                data-testid="button-toggle-columns"
+                className={`border-cyan-500/30 text-cyan-400 gap-1 ${showFilters ? "bg-cyan-500/20" : ""}`}
+                data-testid="button-toggle-filters"
               >
-                <Settings2 className="w-3 h-3" />
-                Columnas
+                <Filter className="w-3 h-3" />
+                Filtros
+                {hasActiveFilters && <span className="bg-cyan-500 text-black rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{[categoryFilter !== "all", institucionFilter !== "all", nivelFilter !== "all", gradoFilter !== "all", semestreFilter !== "all", lectorFilter !== "all", !!dateFrom || !!dateTo, !!searchText].filter(Boolean).length}</span>}
               </Button>
-              {showColumnSelector && (
-                <div className="absolute right-0 top-full mt-1 bg-gray-900 border border-white/20 rounded-lg p-3 z-50 min-w-[180px] shadow-xl">
-                  {ALL_COLUMNS.map(col => (
-                    <label key={col.key} className="flex items-center gap-2 py-1 cursor-pointer text-sm">
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns.includes(col.key)}
-                        onChange={() => toggleColumn(col.key)}
-                        disabled={col.key === "nombre"}
-                        className="rounded border-white/30 bg-black/40 text-cyan-500 focus:ring-cyan-500"
-                        data-testid={`checkbox-col-${col.key}`}
-                      />
-                      <span className={`${visibleColumns.includes(col.key) ? "text-white" : "text-white/40"} ${col.key === "nombre" ? "text-white/60" : ""}`}>
-                        {col.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
+              <Button
+                onClick={() => setShowCharts(!showCharts)}
+                variant="outline"
+                size="sm"
+                className={`border-purple-500/30 text-purple-400 gap-1 ${showCharts ? "bg-purple-500/20" : ""}`}
+                data-testid="button-toggle-charts"
+              >
+                <BarChart3 className="w-3 h-3" />
+                Graficos
+              </Button>
+              <div className="relative" ref={columnSelectorRef}>
+                <Button
+                  onClick={() => setShowColumnSelector(!showColumnSelector)}
+                  variant="outline"
+                  size="sm"
+                  className="border-white/20 text-white/60 gap-1"
+                  data-testid="button-toggle-columns"
+                >
+                  <Settings2 className="w-3 h-3" />
+                  Columnas
+                </Button>
+                {showColumnSelector && (
+                  <div className="absolute right-0 top-full mt-1 bg-gray-900 border border-white/20 rounded-lg p-3 z-50 min-w-[180px] shadow-xl">
+                    {ALL_COLUMNS.map(col => (
+                      <label key={col.key} className="flex items-center gap-2 py-1 cursor-pointer text-sm">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.includes(col.key)}
+                          onChange={() => toggleColumn(col.key)}
+                          disabled={col.key === "nombre"}
+                          className="rounded border-white/30 bg-black/40 text-cyan-500 focus:ring-cyan-500"
+                          data-testid={`checkbox-col-${col.key}`}
+                        />
+                        <span className={`${visibleColumns.includes(col.key) ? "text-white" : "text-white/40"} ${col.key === "nombre" ? "text-white/60" : ""}`}>
+                          {col.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
-              <input
-                type="checkbox"
-                checked={includeSurveyAnswersExport}
-                onChange={(e) => setIncludeSurveyAnswersExport(e.target.checked)}
-                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
-                data-testid="checkbox-include-survey-export"
-              />
-              <span>Incluir encuesta completa</span>
-            </label>
-            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
-              <input
-                type="checkbox"
-                checked={includeReadingContentExport}
-                onChange={(e) => setIncludeReadingContentExport(e.target.checked)}
-                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
-                data-testid="checkbox-include-reading-content-export"
-              />
-              <span>Incluir texto completo</span>
-            </label>
-            <Button
-              onClick={downloadExcel}
-              variant="outline"
-              size="sm"
-              className="border-green-500/30 text-green-400 gap-1"
-              data-testid="button-download-excel"
-            >
-              <Download className="w-3 h-3" />
-              Excel
-            </Button>
+
+            <div className="rounded-xl border border-green-500/20 bg-green-500/5 px-3 py-2">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-green-300/80">Exportacion</span>
+                <Button
+                  onClick={downloadExcel}
+                  variant="outline"
+                  size="sm"
+                  className="border-green-500/30 text-green-400 gap-1"
+                  data-testid="button-download-excel"
+                >
+                  <Download className="w-3 h-3" />
+                  Exportar Excel
+                </Button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <label className="flex items-center gap-2 text-xs text-white/80 px-3 py-2 rounded-lg border border-white/10 bg-black/20 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={includeSurveyAnswersExport}
+                          onChange={(e) => setIncludeSurveyAnswersExport(e.target.checked)}
+                          className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
+                          data-testid="checkbox-include-survey-export"
+                        />
+                        <span>Encuesta completa</span>
+                      </label>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs border-white/10 bg-slate-900 text-white">
+                      Agrega las preguntas y respuestas de la encuesta al archivo exportado.
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <label className="flex items-center gap-2 text-xs text-white/80 px-3 py-2 rounded-lg border border-white/10 bg-black/20 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={includeReadingContentExport}
+                          onChange={(e) => setIncludeReadingContentExport(e.target.checked)}
+                          className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
+                          data-testid="checkbox-include-reading-content-export"
+                        />
+                        <span>Texto leido completo</span>
+                      </label>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs border-white/10 bg-slate-900 text-white">
+                      Agrega el contenido completo del texto leido dentro del Excel exportado.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -828,7 +855,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 <BarChart data={chartBarData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                   <XAxis dataKey="name" tick={{ fill: "#ffffff80", fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "#ffffff80", fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
-                  <Tooltip
+                  <RechartsTooltip
                     contentStyle={{ backgroundColor: "#0e7490", border: "1px solid rgba(6,182,212,0.4)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
                     itemStyle={{ color: "#fff" }}
                     labelStyle={{ color: "#fff" }}
@@ -874,7 +901,7 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
+                  <RechartsTooltip
                     contentStyle={{ backgroundColor: "#0e7490", border: "1px solid rgba(6,182,212,0.4)", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
                     itemStyle={{ color: "#fff" }}
                     labelStyle={{ color: "#fff" }}
