@@ -2242,7 +2242,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           )}
         </div>
 
-        <div className="w-full max-w-none md:max-w-6xl mx-auto">
+        <div className="w-full min-w-0">
 
         {activeTab === "sesiones" && (
           <>
