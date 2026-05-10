@@ -1,10 +1,11 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Search, Download, FileText, ChevronDown, Settings2, Calendar, Filter, X, BarChart3 } from "lucide-react";
+import { Search, Download, FileText, ChevronDown, Settings2, Filter, X, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
 import * as XLSX from "xlsx";
+import { DateFilterInput } from "@/components/DateFilterInput";
 
 interface QuizResult {
   id: string;
@@ -808,22 +809,20 @@ export default function ResultadosLecturaPanel({ quizResults }: Props) {
                 </div>
                 <div className="flex gap-2 items-center">
                   <div className="relative flex-1">
-                    <input
-                      type="date"
+                    <DateFilterInput
+                      label="Fecha desde"
                       value={dateFrom}
-                      onChange={e => setDateFrom(e.target.value)}
-                      className="bg-black/60 border border-purple-500/40 text-white text-xs rounded-lg px-3 py-2.5 w-full focus:border-cyan-400 focus:outline-none [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                      data-testid="input-date-from"
+                      onChange={setDateFrom}
+                      inputTestId="input-date-from"
                     />
                   </div>
                   <span className="text-white/30 text-xs font-medium">a</span>
                   <div className="relative flex-1">
-                    <input
-                      type="date"
+                    <DateFilterInput
+                      label="Fecha hasta"
                       value={dateTo}
-                      onChange={e => setDateTo(e.target.value)}
-                      className="bg-black/60 border border-purple-500/40 text-white text-xs rounded-lg px-3 py-2.5 w-full focus:border-cyan-400 focus:outline-none [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                      data-testid="input-date-to"
+                      onChange={setDateTo}
+                      inputTestId="input-date-to"
                     />
                   </div>
                 </div>

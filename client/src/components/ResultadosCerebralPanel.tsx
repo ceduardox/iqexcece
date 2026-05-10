@@ -3,6 +3,7 @@ import { Brain, Download, Filter, Search, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DateFilterInput } from "@/components/DateFilterInput";
 
 type CerebralResultLike = {
   id: string;
@@ -308,12 +309,10 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
                 </select>
               </div>
               <div>
-                <label className="text-white/50 text-xs mb-1 block">Fecha desde</label>
-                <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-black/60 border border-purple-500/40 text-white text-xs rounded-lg px-3 py-2.5 w-full focus:border-cyan-400 focus:outline-none [&::-webkit-calendar-picker-indicator]:invert" />
+                <DateFilterInput label="Fecha desde" value={dateFrom} onChange={setDateFrom} />
               </div>
               <div>
-                <label className="text-white/50 text-xs mb-1 block">Fecha hasta</label>
-                <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-black/60 border border-purple-500/40 text-white text-xs rounded-lg px-3 py-2.5 w-full focus:border-cyan-400 focus:outline-none [&::-webkit-calendar-picker-indicator]:invert" />
+                <DateFilterInput label="Fecha hasta" value={dateTo} onChange={setDateTo} />
               </div>
             </div>
 
