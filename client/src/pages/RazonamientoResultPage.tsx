@@ -7,7 +7,6 @@ import { Home, RotateCcw, Share2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { LanguageButton } from "@/components/LanguageButton";
-import { CognitiveResultSummary } from "@/components/CognitiveResultSummary";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 
@@ -261,23 +260,6 @@ export default function RazonamientoResultPage() {
             </div>
           </motion.div>
 
-          {results.surveyProfile && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <CognitiveResultSummary
-                survey={{
-                  profile: results.surveyProfile,
-                  mainNeed: results.surveyMainNeed || "Optimizacion integral",
-                  interestLevel: results.surveyInterest || "Sin respuesta",
-                  score: results.surveyScore ?? null,
-                }}
-                accent="cyan"
-              />
-            </motion.div>
-          )}
         </div>
       </div>
       {/* End capture area */}

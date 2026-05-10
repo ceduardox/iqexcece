@@ -10,8 +10,6 @@ import { LanguageButton } from "@/components/LanguageButton";
 import html2canvas from "html2canvas";
 import localCaptureLogo from "@assets/logo1q_1770275527185.png";
 import { computeCerebralProfile, isCerebralAnswerCorrect, type CerebralAnswer, type PreferenciaAnswer } from "@/lib/cerebral-scoring";
-import type { CognitiveSurveyResult } from "@/components/CognitiveSurvey";
-import { CognitiveResultSummary } from "@/components/CognitiveResultSummary";
 
 const LOGO_URL = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
@@ -34,11 +32,9 @@ export default function CerebralResultPage() {
   const storedLateralidad = sessionStorage.getItem('lateralidadAnswers');
   const storedPreferencia = sessionStorage.getItem('preferenciaAnswers');
   const storedCerebral = sessionStorage.getItem('cerebralAnswers');
-  const storedSurvey = sessionStorage.getItem("cognitiveSurveyResult");
   const lateralidadAnswers: string[] = storedLateralidad ? JSON.parse(storedLateralidad) : [];
   const preferenciaAnswers: PreferenciaAnswer[] = storedPreferencia ? JSON.parse(storedPreferencia) : [];
   const cerebralAnswers: CerebralAnswer[] = storedCerebral ? JSON.parse(storedCerebral) : [];
-  const surveyResult: CognitiveSurveyResult | null = storedSurvey ? JSON.parse(storedSurvey) : null;
 
   const profile = computeCerebralProfile({
     lateralidadAnswers,
@@ -531,17 +527,6 @@ export default function CerebralResultPage() {
                     </motion.span>
                   ))}
                 </div>
-              </motion.div>
-            )}
-
-            {surveyResult && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.95 }}
-                className="pt-4 mt-4 border-t border-dashed border-gray-200"
-              >
-                <CognitiveResultSummary survey={surveyResult} accent="purple" />
               </motion.div>
             )}
 

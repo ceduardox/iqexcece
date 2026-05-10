@@ -4,8 +4,6 @@ import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type SurveyAnswer = { question: string; answer: string };
-
 type QuizResultLike = {
   id: string;
   nombre: string;
@@ -29,11 +27,6 @@ type QuizResultLike = {
   respuestasCorrectas?: number | null;
   respuestasTotales?: number | null;
   comprension?: number | null;
-  surveyAnswers?: string | null;
-  surveyScore?: number | null;
-  surveyProfile?: string | null;
-  surveyMainNeed?: string | null;
-  surveyInterest?: string | null;
   isPwa?: boolean;
   createdAt?: string | null;
 };
@@ -57,16 +50,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   profesionales: "bg-amber-600",
   adulto_mayor: "bg-rose-600",
 };
-
-function parseSurveyAnswers(value: string | null | undefined): SurveyAnswer[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((item) => item?.question && item?.answer) : [];
-  } catch {
-    return [];
-  }
-}
 
 function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return "-";
@@ -111,7 +94,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
-  const [includeSurveyAnswersExport, setIncludeSurveyAnswersExport] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [institucionFilter, setInstitucionFilter] = useState("all");
@@ -119,13 +101,11 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const columnSelectorRef = useRef<HTMLDivElement>(null);
-  const [visibleColumns, setVisibleColumns] = useState<Array<"nombre" | "categoria" | "comprension" | "correctas" | "perfilIQX" | "areaClave" | "tipo" | "fecha">>([
+  const [visibleColumns, setVisibleColumns] = useState<Array<"nombre" | "categoria" | "comprension" | "correctas" | "tipo" | "fecha">>([
     "nombre",
     "categoria",
     "comprension",
     "correctas",
-    "perfilIQX",
-    "areaClave",
     "tipo",
     "fecha",
   ]);
@@ -165,8 +145,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
         r.grado,
         r.estado,
         r.pais,
-        r.surveyProfile,
-        r.surveyMainNeed,
       ]
         .filter(Boolean)
         .join(" ")
@@ -198,10 +176,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
       "Comprension",
       "Correctas",
       "Tiempo",
-      "Perfil IQX",
-      "Area clave",
-      "Interes",
-      "Puntaje IQX",
       "Email",
       "Edad",
       "Telefono",
@@ -226,10 +200,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
         r.comprension !== null && r.comprension !== undefined ? `${r.comprension}%` : "-",
         r.respuestasCorrectas !== null && r.respuestasTotales ? `${r.respuestasCorrectas}/${r.respuestasTotales}` : "-",
         formatTime(r.tiempoCuestionario),
-        r.surveyProfile || "-",
-        r.surveyMainNeed || "-",
-        r.surveyInterest || "-",
-        r.surveyScore ?? "-",
         r.email || "-",
         r.edad || "-",
         r.telefono || "-",
@@ -246,26 +216,10 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
         r.isPwa ? "PWA" : "Web",
         formatDate(r.createdAt),
       ];
-      if (!includeSurveyAnswersExport) return base;
-
-      const answers = parseSurveyAnswers(r.surveyAnswers);
-      for (let i = 0; i < 6; i++) {
-        const answer = answers[i];
-        base.push(answer?.question || "-");
-        base.push(answer?.answer || "-");
-      }
       return base;
     });
 
-    const allHeaders = [...headers];
-    if (includeSurveyAnswersExport) {
-      for (let i = 1; i <= 6; i++) {
-        allHeaders.push(`Encuesta P${i}`);
-        allHeaders.push(`Respuesta P${i}`);
-      }
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet([allHeaders, ...rows]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Resultados Razonamiento");
 
@@ -277,7 +231,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
       ["Fecha desde", dateFrom || "-"],
       ["Fecha hasta", dateTo || "-"],
       ["Busqueda", searchText || "-"],
-      ["Encuesta completa", includeSurveyAnswersExport ? "Si" : "No"],
     ]);
     XLSX.utils.book_append_sheet(wb, infoWs, "Info Filtros");
 
@@ -290,8 +243,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
     categoria: "Categoria",
     comprension: "Comprension",
     correctas: "Correctas",
-    perfilIQX: "Perfil IQX",
-    areaClave: "Area clave",
     tipo: "Tipo",
     fecha: "Fecha",
   };
@@ -345,16 +296,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
                 </div>
               )}
             </div>
-            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
-              <input
-                type="checkbox"
-                checked={includeSurveyAnswersExport}
-                onChange={(e) => setIncludeSurveyAnswersExport(e.target.checked)}
-                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
-                data-testid="checkbox-include-survey-export-razonamiento"
-              />
-              <span>Encuesta completa</span>
-            </label>
             <Button
               onClick={downloadExcel}
               variant="outline"
@@ -462,8 +403,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
                     {visibleColumns.includes("categoria") && <td className="py-3 px-2 text-blue-400">{r.categoria || "-"}</td>}
                     {visibleColumns.includes("comprension") && <td className="py-3 px-2 text-cyan-400 font-bold">{r.comprension !== null && r.comprension !== undefined ? `${r.comprension}%` : "-"}</td>}
                     {visibleColumns.includes("correctas") && <td className="py-3 px-2 text-green-400 font-bold">{r.respuestasCorrectas !== null && r.respuestasTotales ? `${r.respuestasCorrectas}/${r.respuestasTotales}` : "-"}</td>}
-                    {visibleColumns.includes("perfilIQX") && <td className="py-3 px-2 text-purple-300 text-xs font-bold">{r.surveyProfile || "-"}</td>}
-                    {visibleColumns.includes("areaClave") && <td className="py-3 px-2 text-cyan-300 text-xs font-semibold">{r.surveyMainNeed || "-"}</td>}
                     {visibleColumns.includes("tipo") && <td className="py-3 px-2"><span className={`px-2 py-1 rounded text-xs ${r.isPwa ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"}`}>{r.isPwa ? "PWA" : "Web"}</span></td>}
                     {visibleColumns.includes("fecha") && <td className="py-3 px-2 text-white/60 text-xs">{formatDate(r.createdAt)}</td>}
                   </tr>
@@ -487,27 +426,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
                             </div>
                           </div>
                         </div>
-                        {((r.surveyProfile || r.surveyMainNeed || r.surveyInterest) && (
-                          <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-4 mb-4 border border-purple-500/20">
-                            <h4 className="text-purple-300 font-bold mb-3 text-sm">Perfil Cognitivo IQX</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                              <div className="bg-black/30 rounded-lg p-2"><div className="text-purple-300 font-bold text-sm">{r.surveyProfile || "-"}</div><div className="text-white/50 text-xs">Perfil</div></div>
-                              <div className="bg-black/30 rounded-lg p-2"><div className="text-cyan-300 font-bold text-sm">{r.surveyMainNeed || "-"}</div><div className="text-white/50 text-xs">Area clave</div></div>
-                              <div className="bg-black/30 rounded-lg p-2"><div className="text-green-300 font-bold text-sm">{r.surveyScore ?? "-"}</div><div className="text-white/50 text-xs">Puntaje</div></div>
-                              <div className="bg-black/30 rounded-lg p-2"><div className="text-yellow-300 font-bold text-sm">{r.surveyInterest || "-"}</div><div className="text-white/50 text-xs">Interes</div></div>
-                            </div>
-                            {parseSurveyAnswers(r.surveyAnswers).length > 0 && (
-                              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {parseSurveyAnswers(r.surveyAnswers).map((answer, idx) => (
-                                  <div key={idx} className="bg-black/20 rounded px-3 py-2">
-                                    <p className="text-white/50 text-[11px]">{idx + 1}. {answer.question}</p>
-                                    <p className="text-white/85 text-xs font-semibold">{answer.answer}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                           <div><span className="text-white/60">Email:</span> <span className="text-white/80">{r.email || "-"}</span></div>
                           <div><span className="text-white/60">Edad:</span> <span className="text-white">{r.edad || "-"}</span></div>
@@ -556,14 +474,6 @@ export default function ResultadosRazonamientoPanel({ quizResults }: { quizResul
                   <p className="text-white/60">Correctas: <span className="text-green-400 font-bold">{r.respuestasCorrectas ?? "-"}/{r.respuestasTotales ?? "-"}</span></p>
                   <p className="text-white/60">Tiempo: <span className="text-purple-400">{formatTime(r.tiempoCuestionario)}</span></p>
                   <p className="text-white/60">Institucion: <span className="text-cyan-400">{r.institucion || "-"}</span></p>
-                  {(r.surveyProfile || r.surveyMainNeed || r.surveyInterest) && (
-                    <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-3 border border-purple-500/20">
-                      <p className="text-purple-300 font-bold text-xs mb-2">Perfil Cognitivo IQX</p>
-                      <p className="text-white/60 text-xs">Perfil: <span className="text-purple-300">{r.surveyProfile || "-"}</span></p>
-                      <p className="text-white/60 text-xs">Area clave: <span className="text-cyan-300">{r.surveyMainNeed || "-"}</span></p>
-                      <p className="text-white/60 text-xs">Interes: <span className="text-yellow-300">{r.surveyInterest || "-"}</span></p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

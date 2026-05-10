@@ -4,8 +4,6 @@ import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type SurveyAnswer = { question: string; answer: string };
-
 type CerebralResultLike = {
   id: string;
   nombre: string;
@@ -30,11 +28,6 @@ type CerebralResultLike = {
   rightPercent?: number | null;
   dominantSide?: string | null;
   personalityTraits?: string | string[] | null;
-  surveyAnswers?: string | null;
-  surveyScore?: number | null;
-  surveyProfile?: string | null;
-  surveyMainNeed?: string | null;
-  surveyInterest?: string | null;
   isPwa?: boolean;
   createdAt?: string | null;
 };
@@ -58,16 +51,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   profesionales: "bg-amber-600",
   adulto_mayor: "bg-rose-600",
 };
-
-function parseSurveyAnswers(value: string | null | undefined): SurveyAnswer[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((item) => item?.question && item?.answer) : [];
-  } catch {
-    return [];
-  }
-}
 
 function parseArray(value: string | null | undefined): any[] {
   if (!value) return [];
@@ -117,7 +100,6 @@ function matchesDateRange(dateStr: string | null | undefined, from: string, to: 
 export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralResults: CerebralResultLike[] }) {
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [includeSurveyAnswersExport, setIncludeSurveyAnswersExport] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [institucionFilter, setInstitucionFilter] = useState("all");
@@ -145,8 +127,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
         r.grado,
         r.estado,
         r.pais,
-        r.surveyProfile,
-        r.surveyMainNeed,
         r.dominantSide,
       ]
         .filter(Boolean)
@@ -175,10 +155,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
       "Dominancia",
       "Izquierdo %",
       "Derecho %",
-      "Perfil IQX",
-      "Area clave",
-      "Interes",
-      "Puntaje IQX",
       "Rasgos",
       "Respuestas lateralidad",
       "Respuestas preferencia",
@@ -206,10 +182,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
         r.dominantSide || "-",
         r.leftPercent ?? "-",
         r.rightPercent ?? "-",
-        r.surveyProfile || "-",
-        r.surveyMainNeed || "-",
-        r.surveyInterest || "-",
-        r.surveyScore ?? "-",
         parseTraits(r.personalityTraits).join(" | ") || "-",
         parseArray(r.lateralidadData).join(" | ") || "-",
         parseArray(r.preferenciaData).map((p) => `${p.option || "-"}: ${p.meaning || "-"}`).join(" | ") || "-",
@@ -229,26 +201,10 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
         r.isPwa ? "PWA" : "Web",
         formatDate(r.createdAt),
       ];
-      if (!includeSurveyAnswersExport) return base;
-
-      const answers = parseSurveyAnswers(r.surveyAnswers);
-      for (let i = 0; i < 6; i++) {
-        const answer = answers[i];
-        base.push(answer?.question || "-");
-        base.push(answer?.answer || "-");
-      }
       return base;
     });
 
-    const allHeaders = [...headers];
-    if (includeSurveyAnswersExport) {
-      for (let i = 1; i <= 6; i++) {
-        allHeaders.push(`Encuesta P${i}`);
-        allHeaders.push(`Respuesta P${i}`);
-      }
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet([allHeaders, ...rows]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Resultados Cerebral");
 
@@ -260,7 +216,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
       ["Fecha desde", dateFrom || "-"],
       ["Fecha hasta", dateTo || "-"],
       ["Busqueda", searchText || "-"],
-      ["Encuesta completa", includeSurveyAnswersExport ? "Si" : "No"],
     ]);
     XLSX.utils.book_append_sheet(wb, infoWs, "Info Filtros");
 
@@ -289,16 +244,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
               Filtros
               {hasActiveFilters && <span className="bg-cyan-500 text-black rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{[categoryFilter !== "all", institucionFilter !== "all", dominanceFilter !== "all", !!dateFrom || !!dateTo, !!searchText].filter(Boolean).length}</span>}
             </Button>
-            <label className="flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-black/20">
-              <input
-                type="checkbox"
-                checked={includeSurveyAnswersExport}
-                onChange={(e) => setIncludeSurveyAnswersExport(e.target.checked)}
-                className="rounded border-white/30 bg-black/40 text-green-500 focus:ring-green-500"
-                data-testid="checkbox-include-survey-export-cerebral"
-              />
-              <span>Encuesta completa</span>
-            </label>
             <Button
               onClick={downloadExcel}
               variant="outline"
@@ -477,28 +422,6 @@ export default function ResultadosCerebralPanel({ cerebralResults }: { cerebralR
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
-
-                      {(r.surveyProfile || r.surveyMainNeed || r.surveyInterest) && (
-                        <div className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg p-4 border border-purple-500/20">
-                          <h4 className="text-purple-300 font-bold mb-3 text-sm">Perfil Cognitivo IQX</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                            <div className="bg-black/30 rounded-lg p-2"><div className="text-purple-300 font-bold text-sm">{r.surveyProfile || "-"}</div><div className="text-white/50 text-xs">Perfil</div></div>
-                            <div className="bg-black/30 rounded-lg p-2"><div className="text-cyan-300 font-bold text-sm">{r.surveyMainNeed || "-"}</div><div className="text-white/50 text-xs">Area clave</div></div>
-                            <div className="bg-black/30 rounded-lg p-2"><div className="text-green-300 font-bold text-sm">{r.surveyScore ?? "-"}</div><div className="text-white/50 text-xs">Puntaje</div></div>
-                            <div className="bg-black/30 rounded-lg p-2"><div className="text-yellow-300 font-bold text-sm">{r.surveyInterest || "-"}</div><div className="text-white/50 text-xs">Interes</div></div>
-                          </div>
-                          {parseSurveyAnswers(r.surveyAnswers).length > 0 && (
-                            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {parseSurveyAnswers(r.surveyAnswers).map((answer, idx) => (
-                                <div key={idx} className="bg-black/20 rounded px-3 py-2">
-                                  <p className="text-white/50 text-[11px]">{idx + 1}. {answer.question}</p>
-                                  <p className="text-white/85 text-xs font-semibold">{answer.answer}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       )}
 
