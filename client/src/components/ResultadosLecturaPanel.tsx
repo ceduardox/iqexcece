@@ -440,21 +440,23 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
             </div>
 
             <div className="rounded-[28px] bg-white border border-slate-200 p-6 shadow-sm">
-              <div className="inline-flex rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-bold px-5 py-2 mb-5">
+              <div className="inline-flex h-12 items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[15px] font-bold px-7 mb-6 align-middle">
                 RESULTADOS GENERALES
               </div>
               <div className="grid grid-cols-4 divide-x divide-slate-200">
                 {[
-                  { icon: BookOpen, label: "COMPRENSIÓN LECTORA", value: `${result.comprension ?? 0}%`, sub: `${result.respuestasCorrectas ?? 0} de ${result.respuestasTotales ?? 0}` },
-                  { icon: Gauge, label: "VELOCIDAD LECTORA", value: `${result.velocidadLectura ?? 0}`, sub: "PPM" },
-                  { icon: Clock3, label: "TIEMPO DE LECTURA", value: formatTime(result.tiempoLectura), sub: "min" },
-                  { icon: Bolt, label: "TIEMPO DE RESPUESTA", value: formatTime(result.tiempoCuestionario), sub: "seg" },
+                  { icon: BookOpen, label: "COMPRENSION LECTORA", value: `${result.comprension ?? 0}%`, sub: `${result.respuestasCorrectas ?? 0} de ${result.respuestasTotales ?? 0}`, iconClass: "text-cyan-500" },
+                  { icon: Gauge, label: "VELOCIDAD LECTORA", value: `${result.velocidadLectura ?? 0}`, sub: "PPM", iconClass: "text-blue-500" },
+                  { icon: Clock3, label: "TIEMPO DE LECTURA", value: formatTime(result.tiempoLectura), sub: "min", iconClass: "text-purple-500" },
+                  { icon: Bolt, label: "TIEMPO DE RESPUESTA", value: formatTime(result.tiempoCuestionario), sub: "seg", iconClass: "text-orange-500" },
                 ].map((item) => (
-                  <div key={item.label} className="px-5 text-center">
-                    <item.icon className="w-11 h-11 mx-auto text-cyan-500 mb-3" />
-                    <p className="text-[15px] font-black leading-tight min-h-[42px]">{item.label}</p>
-                    <p className="text-5xl font-black mt-4">{item.value}</p>
-                    <p className="text-base text-slate-500 font-medium mt-2">{item.sub}</p>
+                  <div key={item.label} className="px-5 pt-2 text-center">
+                    <div className="mb-3 flex h-16 items-center justify-center">
+                      <item.icon className={`w-12 h-12 ${item.iconClass}`} strokeWidth={2.2} />
+                    </div>
+                    <p className="min-h-[52px] flex items-end justify-center text-[15px] font-black leading-tight">{item.label}</p>
+                    <p className="mt-5 text-5xl font-black">{item.value}</p>
+                    <p className="mt-2 text-base font-medium text-slate-500">{item.sub}</p>
                   </div>
                 ))}
               </div>
