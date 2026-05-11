@@ -362,13 +362,18 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
   const profileTitleDisplay = profileTitleWords.length >= 2
     ? `${profileTitleWords[0]}\n${profileTitleWords.slice(1).join(" ")}`
     : profileTitle;
+  const profileTitleClass = profileTitleWords.length >= 2
+    ? "text-[36px]"
+    : profileTitle.length >= 10
+      ? "text-[30px]"
+      : "text-[38px]";
 
   return (
     <div className="w-[1240px] bg-white text-slate-900 p-8 font-sans">
       <div className="rounded-[28px] overflow-hidden border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
         <div className="grid grid-cols-[340px_1fr] bg-white">
           <div className="min-h-[208px] bg-white px-10 py-6 flex flex-col justify-center">
-            <img src={REPORT_LOGO_URL} alt="IQX" className="h-28 w-auto object-contain mb-4" />
+            <img src={REPORT_LOGO_URL} alt="IQX" className="h-auto w-[210px] object-contain mb-4" />
             <p className="text-[16px] tracking-[0.22em] text-slate-700 font-semibold">INTELIGENCIA EXPONENCIAL</p>
             <div className="w-[220px] h-[3px] bg-cyan-500 mt-4 mb-3" />
             <p className="text-[12px] tracking-[0.18em] text-slate-500 font-semibold">METODO X - NEUROACELERACION COGNITIVA</p>
@@ -378,7 +383,7 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
               <div className="absolute left-[-34px] top-[-18px] h-[160px] w-[48px] -skew-x-[12deg] bg-gradient-to-b from-cyan-400 to-blue-500" />
               <div className="absolute left-[-12px] top-[-18px] h-[160px] w-[18px] -skew-x-[12deg] bg-white/95" />
               <div className="pl-10">
-                <p className="text-[50px] font-black tracking-wide leading-none">REPORTE DE RESULTADOS IQX</p>
+                <p className="text-[44px] font-black tracking-wide leading-none">REPORTE DE RESULTADOS IQX</p>
                 <p className="text-[22px] font-semibold mt-2 tracking-wide text-white">EVALUACION DE COMPRENSION LECTORA</p>
               </div>
             </div>
@@ -410,12 +415,12 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
               <div className="w-32 h-32 rounded-full border-[6px] border-cyan-300 flex items-center justify-center text-slate-700 bg-white shadow-inner">
                 <UserRound className="w-16 h-16" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold tracking-wide text-slate-500">PERFIL OBTENIDO</p>
-                <p className={`mt-3 font-black leading-[0.95] whitespace-pre-line ${profileTitleWords.length >= 2 ? "text-[42px]" : "text-5xl"} ${result.categoriaLector?.includes("COMPETENTE") ? "text-green-600" : result.categoriaLector?.includes("REGULAR") ? "text-yellow-500" : result.categoriaLector?.includes("SEVERA") ? "text-red-500" : "text-orange-500"}`}>
+                <p className={`mt-3 font-black leading-[0.95] whitespace-pre-line break-words [overflow-wrap:anywhere] max-w-full ${profileTitleClass} ${result.categoriaLector?.includes("COMPETENTE") ? "text-green-600" : result.categoriaLector?.includes("REGULAR") ? "text-yellow-500" : result.categoriaLector?.includes("SEVERA") ? "text-red-500" : "text-orange-500"}`}>
                   {profileTitleDisplay}
                 </p>
-                <p className="text-slate-700 text-xl leading-relaxed mt-5">
+                <p className="text-slate-700 text-lg leading-relaxed mt-5 break-words [overflow-wrap:anywhere] max-w-full">
                   {profileDescription}.
                   {result.categoriaLector === "LECTOR COMPETENTE" ? " Potencial para alcanzar niveles superiores." : " Hay espacio claro de mejora estructurada."}
                 </p>
