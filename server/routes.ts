@@ -772,31 +772,30 @@ Reglas:
       if (data.testType === "lectura" || !data.testType) {
         const comprensionPct = data.comprension ?? 0;
         const wpm = data.velocidadLectura ?? 0;
-        const tiempoLecturaSeg = data.tiempoLectura ?? 0;
-        const tiempoPreguntasSeg = data.tiempoCuestionario ?? 0;
-        const lecturaValida = tiempoLecturaSeg >= 10;
 
-        let cat = "LECTOR CON DIFICULTAD";
-        if (
-          comprensionPct < 50 ||
-          (!lecturaValida && comprensionPct < 70) ||
-          (wpm < 140 && tiempoPreguntasSeg > 90 && comprensionPct < 70)
-        ) {
+        const ageValue = Number.parseInt(String(data.edad ?? "").trim(), 10);
+        const getBoliviaCompetentMinWpm = (age: number) => {
+          if (!Number.isFinite(age)) return Number.POSITIVE_INFINITY;
+          if (age <= 7) return 60;
+          if (age === 8) return 70;
+          if (age === 9) return 80;
+          if (age === 10) return 90;
+          if (age === 11) return 100;
+          if (age === 12) return 110;
+          if (age >= 13 && age <= 17) return 150;
+          return 200;
+        };
+
+        let cat = "LECTOR REGULAR";
+        if (comprensionPct < 40) {
           cat = "LECTOR CON DIFICULTAD SEVERA";
-        } else if (
-          (comprensionPct >= 50 && comprensionPct < 70) ||
-          (comprensionPct >= 70 && (wpm < 140 || tiempoPreguntasSeg > 90))
-        ) {
+        } else if (comprensionPct < 60) {
           cat = "LECTOR CON DIFICULTAD";
-        } else if (
-          lecturaValida && comprensionPct >= 85 && wpm >= 180 && tiempoPreguntasSeg <= 90
-        ) {
-          cat = "LECTOR COMPETENTE";
-        } else if (
-          lecturaValida && comprensionPct >= 70 && comprensionPct < 85 && wpm >= 140 && wpm < 200
-        ) {
+        } else if (comprensionPct < 80) {
           cat = "LECTOR REGULAR";
-        } else if (lecturaValida && comprensionPct >= 70) {
+        } else if (wpm >= getBoliviaCompetentMinWpm(ageValue)) {
+          cat = "LECTOR COMPETENTE";
+        } else {
           cat = "LECTOR REGULAR";
         }
 
