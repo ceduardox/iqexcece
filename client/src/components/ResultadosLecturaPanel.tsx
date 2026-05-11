@@ -232,10 +232,17 @@ function getProfileDescription(category: string | null, speed: number | null) {
   return "Requiere apoyo prioritario en comprensión y base lectora.";
 }
 
+function canInterpretReadingSpeed(result: QuizResult) {
+  return (result.comprension ?? 0) > 79;
+}
+
 function getNationalComparison(result: QuizResult) {
   const age = parseAge(result.edad);
   const ref = getBoliviaReferenceByAge(age);
   const speed = result.velocidadLectura ?? 0;
+  if (!canInterpretReadingSpeed(result)) {
+    return "No se puede valorar la velocidad lectora con la escala nacional porque la comprension presentada es menor al 80%. Primero debe priorizarse la comprension lectora.";
+  }
   if (!ref || !speed) return "Sin datos suficientes para comparar con el parámetro nacional.";
   if (speed < ref.min) {
     return `Su velocidad lectora (${speed} PPM) está por debajo del rango esperado para ${ref.label} (${ref.min}${ref.max ? ` - ${ref.max}` : "+"} PPM).`;
@@ -250,6 +257,9 @@ function getInternationalComparison(result: QuizResult) {
   const age = parseAge(result.edad);
   const ref = getUnescoReferenceByAge(age);
   const speed = result.velocidadLectura ?? 0;
+  if (!canInterpretReadingSpeed(result)) {
+    return "No se puede valorar la velocidad lectora con la escala internacional porque la comprension presentada es menor al 80%. Primero debe priorizarse la comprension lectora.";
+  }
   if (!ref || !speed) return "Sin datos suficientes para comparar con el parámetro internacional.";
   if (speed < ref.min) {
     return `Su velocidad lectora (${speed} PPM) se encuentra por debajo del estándar internacional para ${ref.label} (${ref.min}${ref.max ? ` - ${ref.max}` : "+"} PPM). Existen oportunidades para mejorar.`;
@@ -290,7 +300,7 @@ function getOpportunities(result: QuizResult) {
   const speed = result.velocidadLectura ?? 0;
   const national = getBoliviaReferenceByAge(parseAge(result.edad));
   if (comp < 80) opportunities.push("Profundizar la comprensión antes de aumentar velocidad.");
-  if (national && speed < national.min) opportunities.push("Elevar la velocidad lectora hasta el rango esperado para su edad.");
+  if (comp >= 80 && national && speed < national.min) opportunities.push("Elevar la velocidad lectora hasta el rango esperado para su edad.");
   if ((result.tiempoCuestionario ?? 0) > 60) opportunities.push("Mejorar la rapidez de análisis al responder.");
   if (result.surveyMainNeed) opportunities.push(`Trabajar el área clave detectada: ${result.surveyMainNeed}.`);
   opportunities.push("Desarrollar hábitos de lectura con mayor constancia.");
