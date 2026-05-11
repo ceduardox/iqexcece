@@ -361,31 +361,37 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
   return (
     <div className="w-[1240px] bg-white text-slate-900 p-8 font-sans">
       <div className="rounded-[28px] overflow-hidden border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
-        <div className="grid grid-cols-[300px_1fr] bg-white">
-          <div className="px-8 py-8">
-            <img src={REPORT_LOGO_URL} alt="IQX" className="h-28 w-auto object-contain mb-4" />
-            <p className="text-[15px] tracking-[0.2em] text-slate-500 font-semibold">INTELIGENCIA EXPONENCIAL</p>
-            <p className="text-[12px] tracking-[0.18em] text-slate-400 mt-2">MÉTODO X · NEUROACELERACIÓN COGNITIVA</p>
+        <div className="grid grid-cols-[340px_1fr] bg-white">
+          <div className="min-h-[240px] bg-white px-10 py-8 flex flex-col justify-center">
+            <img src={REPORT_LOGO_URL} alt="IQX" className="h-36 w-auto object-contain mb-5" />
+            <p className="text-[16px] tracking-[0.22em] text-slate-700 font-semibold">INTELIGENCIA EXPONENCIAL</p>
+            <div className="w-[220px] h-[3px] bg-cyan-500 mt-4 mb-3" />
+            <p className="text-[12px] tracking-[0.18em] text-slate-500 font-semibold">METODO X - NEUROACELERACION COGNITIVA</p>
           </div>
-          <div className="bg-[#071a3d] text-white px-10 py-8 relative">
-            <div className="absolute left-0 top-0 h-full w-6 bg-gradient-to-b from-cyan-400 to-blue-500" />
-            <div className="pl-4">
-              <p className="text-5xl font-black tracking-wide">REPORTE DE RESULTADOS IQX</p>
-              <p className="text-2xl font-semibold mt-2 tracking-wide text-cyan-100">EVALUACIÓN DE COMPRENSIÓN LECTORA</p>
-              <div className="grid grid-cols-4 gap-4 mt-7">
+          <div className="bg-white">
+            <div className="relative min-h-[128px] overflow-hidden bg-[#071a3d] px-12 py-8 text-white">
+              <div className="absolute left-[-34px] top-[-18px] h-[190px] w-[48px] -skew-x-[12deg] bg-gradient-to-b from-cyan-400 to-blue-500" />
+              <div className="absolute left-[-12px] top-[-18px] h-[190px] w-[18px] -skew-x-[12deg] bg-white/95" />
+              <div className="pl-10">
+                <p className="text-[56px] font-black tracking-wide leading-none">REPORTE DE RESULTADOS IQX</p>
+                <p className="text-[26px] font-semibold mt-3 tracking-wide text-white">EVALUACION DE COMPRENSION LECTORA</p>
+              </div>
+            </div>
+            <div className="border-b border-slate-200 bg-white px-10 py-6">
+              <div className="grid grid-cols-4 gap-5">
                 {[
                   { icon: UserRound, label: "Alumno", value: result.nombre || "-" },
-                  { icon: UserRound, label: "Edad", value: result.edad ? `${result.edad} años` : "-" },
+                  { icon: UserRound, label: "Edad", value: result.edad ? `${result.edad} anos` : "-" },
                   { icon: CalendarDays, label: "Fecha del Test", value: formattedDate },
-                  { icon: BadgeInfo, label: "ID Evaluación", value: getEvaluationId(result) },
+                  { icon: BadgeInfo, label: "ID Evaluacion", value: getEvaluationId(result) },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-400/20 flex items-center justify-center">
-                      <item.icon className="w-5 h-5 text-cyan-200" />
+                  <div key={item.label} className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-sm shrink-0">
+                      <item.icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-white/60">{item.label}</p>
-                      <p className="font-bold text-lg">{item.value}</p>
+                      <p className="text-[15px] font-bold text-slate-700">{item.label}:</p>
+                      <p className="text-[18px] font-semibold text-slate-900 leading-tight">{item.value}</p>
                     </div>
                   </div>
                 ))}
@@ -393,7 +399,6 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
             </div>
           </div>
         </div>
-
         <div className="px-8 py-6 bg-slate-50">
           <div className="grid grid-cols-[360px_1fr] gap-6">
             <div className="rounded-[28px] bg-white border border-slate-200 p-6 flex gap-5 items-center shadow-sm">
