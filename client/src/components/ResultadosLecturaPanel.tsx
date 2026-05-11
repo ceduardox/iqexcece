@@ -363,10 +363,12 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
     ? `${profileTitleWords[0]}\n${profileTitleWords.slice(1).join(" ")}`
     : profileTitle;
   const profileTitleClass = profileTitleWords.length >= 2
-    ? "text-[36px]"
-    : profileTitle.length >= 10
-      ? "text-[30px]"
-      : "text-[38px]";
+    ? "text-[28px]"
+    : profileTitle.length >= 12
+      ? "text-[24px]"
+      : profileTitle.length >= 9
+        ? "text-[28px]"
+        : "text-[34px]";
 
   return (
     <div className="w-[1240px] bg-white text-slate-900 p-8 font-sans">
@@ -415,9 +417,9 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
               <div className="w-32 h-32 rounded-full border-[6px] border-cyan-300 flex items-center justify-center text-slate-700 bg-white shadow-inner">
                 <UserRound className="w-16 h-16" />
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 max-w-[250px]">
                 <p className="text-sm font-bold tracking-wide text-slate-500">PERFIL OBTENIDO</p>
-                <p className={`mt-3 font-black leading-[0.95] whitespace-pre-line break-words [overflow-wrap:anywhere] max-w-full ${profileTitleClass} ${result.categoriaLector?.includes("COMPETENTE") ? "text-green-600" : result.categoriaLector?.includes("REGULAR") ? "text-yellow-500" : result.categoriaLector?.includes("SEVERA") ? "text-red-500" : "text-orange-500"}`}>
+                <p className={`mt-3 font-black leading-[0.95] whitespace-pre-line max-w-full ${profileTitleClass} ${result.categoriaLector?.includes("COMPETENTE") ? "text-green-600" : result.categoriaLector?.includes("REGULAR") ? "text-yellow-500" : result.categoriaLector?.includes("SEVERA") ? "text-red-500" : "text-orange-500"}`}>
                   {profileTitleDisplay}
                 </p>
                 <p className="text-slate-700 text-lg leading-relaxed mt-5 break-words [overflow-wrap:anywhere] max-w-full">
