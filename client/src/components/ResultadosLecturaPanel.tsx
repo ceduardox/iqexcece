@@ -372,8 +372,9 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
             <div className="pl-4">
               <p className="text-5xl font-black tracking-wide">REPORTE DE RESULTADOS IQX</p>
               <p className="text-2xl font-semibold mt-2 tracking-wide text-cyan-100">EVALUACIÓN DE COMPRENSIÓN LECTORA</p>
-              <div className="grid grid-cols-3 gap-4 mt-7">
+              <div className="grid grid-cols-4 gap-4 mt-7">
                 {[
+                  { icon: UserRound, label: "Alumno", value: result.nombre || "-" },
                   { icon: UserRound, label: "Edad", value: result.edad ? `${result.edad} años` : "-" },
                   { icon: CalendarDays, label: "Fecha del Test", value: formattedDate },
                   { icon: BadgeInfo, label: "ID Evaluación", value: getEvaluationId(result) },
@@ -514,9 +515,9 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
               <p className="text-2xl font-black mb-4">NIVEL IQX</p>
               <div className="relative flex items-center justify-center">
                 <ProgressRing value={iqxLevel * 20} />
-                <div className="absolute text-center">
-                  <div className="text-6xl font-black text-cyan-600">{iqxLevel}</div>
-                  <div className="text-lg font-bold text-slate-500">DE 5</div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
+                  <div className="text-6xl leading-none font-black text-cyan-600">{iqxLevel}</div>
+                  <div className="text-lg leading-none font-bold text-slate-500 mt-1">DE 5</div>
                 </div>
               </div>
               <p className="text-emerald-600 text-2xl font-black mt-4">
