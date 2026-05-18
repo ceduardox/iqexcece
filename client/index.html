@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="app-loading">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
@@ -20,13 +20,23 @@
     <style>
       :root { color-scheme: dark; }
       body { margin: 0; background: #080b1f; }
+      html.app-loading,
+      html.app-loading body {
+        background: #080b1f;
+        overflow: hidden;
+      }
+      html.app-loading #root {
+        visibility: hidden;
+      }
       .initial-loader {
         position: fixed;
         inset: 0;
+        z-index: 2147483647;
         display: grid;
         place-items: center;
         min-height: 100svh;
         overflow: hidden;
+        isolation: isolate;
         background:
           radial-gradient(circle at 50% 42%, rgba(34, 211, 238, 0.18), transparent 28rem),
           linear-gradient(145deg, #080b1f 0%, #111536 48%, #090b1d 100%);
