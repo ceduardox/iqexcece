@@ -882,9 +882,9 @@ export default function ReadingContentPage() {
               {currentQ?.options.map((option, index) => (
                 <motion.button
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.16, ease: "easeOut", delay: index * 0.035 }}
                   onClick={() => selectedAnswer === null && handleSelectAnswer(index)}
                   disabled={selectedAnswer !== null}
                   className={`w-full text-left p-4 rounded-xl border-2 transition-all ${

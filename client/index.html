@@ -52,27 +52,32 @@
       }
       .initial-loader__mark {
         position: relative;
-        width: 74px;
-        height: 74px;
-        border: 2px solid rgba(34, 211, 238, 0.42);
-        border-radius: 22px;
-        box-shadow: 0 0 34px rgba(34, 211, 238, 0.28), inset 0 0 24px rgba(124, 58, 237, 0.22);
-        animation: initial-loader-pulse 1.8s ease-in-out infinite;
+        width: 112px;
+        height: 112px;
+        display: grid;
+        place-items: center;
+        border-radius: 28px;
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.18), rgba(124, 58, 237, 0.08) 58%, transparent 72%);
+        filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.35));
+        animation: initial-loader-float 2.4s ease-in-out infinite;
       }
-      .initial-loader__mark::before,
-      .initial-loader__mark::after {
+      .initial-loader__mark::before {
         content: "";
         position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 44px;
-        height: 4px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #22d3ee, #a78bfa);
-        box-shadow: 0 0 16px rgba(34, 211, 238, 0.65);
+        inset: 8px;
+        border-radius: 26px;
+        border: 1px solid rgba(34, 211, 238, 0.35);
+        box-shadow: inset 0 0 28px rgba(124, 58, 237, 0.2);
+        animation: initial-loader-ring 1.8s ease-in-out infinite;
       }
-      .initial-loader__mark::before { transform: translate(-50%, -50%) rotate(45deg); }
-      .initial-loader__mark::after { transform: translate(-50%, -50%) rotate(-45deg); }
+      .initial-loader__logo {
+        position: relative;
+        z-index: 1;
+        width: 78px;
+        height: 78px;
+        object-fit: contain;
+        animation: initial-loader-logo 1.8s ease-in-out infinite;
+      }
       .initial-loader__brand {
         margin: 0;
         font-size: clamp(1.35rem, 5vw, 2rem);
@@ -119,8 +124,22 @@
         0%, 100% { transform: scale(1); opacity: 0.92; }
         50% { transform: scale(1.04); opacity: 1; }
       }
+      @keyframes initial-loader-float {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-5px) scale(1.03); }
+      }
+      @keyframes initial-loader-ring {
+        0%, 100% { opacity: 0.55; transform: scale(0.95) rotate(0deg); }
+        50% { opacity: 1; transform: scale(1.06) rotate(6deg); }
+      }
+      @keyframes initial-loader-logo {
+        0%, 100% { transform: scale(0.98) rotate(-2deg); filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.25)); }
+        50% { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 18px rgba(124, 58, 237, 0.42)); }
+      }
       @media (prefers-reduced-motion: reduce) {
         .initial-loader__mark,
+        .initial-loader__mark::before,
+        .initial-loader__logo,
         .initial-loader__bar::before { animation: none; }
       }
     </style>
@@ -129,7 +148,9 @@
     <div id="root"></div>
     <div id="initial-loader" class="initial-loader" role="status" aria-live="polite" aria-label="Cargando IQEXPONENCIAL">
       <div class="initial-loader__content">
-        <div class="initial-loader__mark" aria-hidden="true"></div>
+        <div class="initial-loader__mark" aria-hidden="true">
+          <img class="initial-loader__logo" src="/favicon.png" alt="" />
+        </div>
         <h1 class="initial-loader__brand">IQ<span>EX</span>PONENCIAL</h1>
         <div class="initial-loader__bar" aria-hidden="true"></div>
         <p class="initial-loader__text">Preparando tu experiencia</p>
