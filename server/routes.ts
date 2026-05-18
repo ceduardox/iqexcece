@@ -46,6 +46,8 @@ type NowPaymentsOrder = {
   paymentStatus: string;
   paymentId?: string | number;
   payAddress?: string;
+  dueAt?: string;
+  paidAt?: string;
   createdAt: string;
   updatedAt: string;
   raw?: any;
@@ -3619,13 +3621,16 @@ ${schemaContent.substring(0, 3000)}
 
       const prev = nowPaymentsOrders.get(orderId);
       const now = new Date().toISOString();
+      const nextStatus = payload.payment_status || prev?.paymentStatus || "unknown";
+      const isPaidStatus = ["finished", "confirmed", "paid"].includes(String(nextStatus).toLowerCase());
       const next: NowPaymentsOrder = prev
         ? {
             ...prev,
-            paymentStatus: payload.payment_status || prev.paymentStatus,
+            paymentStatus: nextStatus,
             paymentId: payload.payment_id || prev.paymentId,
             payAddress: payload.pay_address || prev.payAddress,
             invoiceId: payload.invoice_id || prev.invoiceId,
+            paidAt: prev.paidAt || (isPaidStatus ? now : undefined),
             updatedAt: now,
             raw: payload,
           }
@@ -3638,9 +3643,10 @@ ${schemaContent.substring(0, 3000)}
             payCurrency: payload.pay_currency || "usdtbsc",
             invoiceId: payload.invoice_id,
             invoiceUrl: payload.invoice_url,
-            paymentStatus: payload.payment_status || "unknown",
+            paymentStatus: nextStatus,
             paymentId: payload.payment_id,
             payAddress: payload.pay_address,
+            paidAt: isPaidStatus ? now : undefined,
             createdAt: now,
             updatedAt: now,
             raw: payload,

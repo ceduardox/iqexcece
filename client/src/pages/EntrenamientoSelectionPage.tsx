@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode, resolveStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
-import { VideoBackground, MediaIcon } from "@/components/VideoBackground";
+import { VideoBackground, MediaIcon, useIsVideo } from "@/components/VideoBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Minus } from "lucide-react";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -111,14 +111,25 @@ const defaultIcons = [
 const TRAINING_SELECTION_ASSET_WARM_KEY = "assets-warm:entrenamiento-selection-page:";
 const TRAINING_SELECTION_HEADER_LOGO = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
+function CardVideoLayer({ src, imageSize }: { src?: string; imageSize?: number }) {
+  const isVideo = useIsVideo(src);
+  if (!src || !isVideo) return null;
+  return <VideoBackground src={src} imageSize={imageSize} />;
+}
+
+function isKnownVideoAsset(url: string) {
+  const lower = url.toLowerCase();
+  return lower.endsWith(".webm") || lower.endsWith(".mp4") || lower.includes("video/webm") || lower.includes("video/mp4");
+}
+
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
     .map((style) => style?.imageUrl)
-    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0 && !isKnownVideoAsset(url));
 }
 
 function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
-  const unique = Array.from(new Set(urls.filter(Boolean)));
+  const unique = Array.from(new Set(urls.filter((url) => url && !isKnownVideoAsset(url))));
   if (!unique.length) return Promise.resolve();
 
   return new Promise((resolve) => {
@@ -142,11 +153,16 @@ function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
 
     unique.forEach((url) => {
       const img = new Image();
+      img.decoding = "async";
       img.onload = markDone;
       img.onerror = markDone;
       img.src = url;
     });
   });
+}
+
+function getAssetWarmSignature(urls: string[]) {
+  return Array.from(new Set(urls.filter(Boolean))).sort().join("|");
 }
 
 export default function EntrenamientoSelectionPage() {
@@ -161,7 +177,7 @@ export default function EntrenamientoSelectionPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTrainingSelectionStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTrainingSelectionStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === "1");
+  const [assetsReady, setAssetsReady] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -194,7 +210,7 @@ export default function EntrenamientoSelectionPage() {
     const cachedStyles = readCachedTrainingSelectionStyles(lang);
     setStyles(cachedStyles);
     setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === "1");
+    setAssetsReady(false);
 
     fetch(`/api/page-styles/entrenamiento-selection-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
@@ -241,16 +257,24 @@ export default function EntrenamientoSelectionPage() {
     setAssetsReady(false);
     const itemImageUrls = items
       .map((item) => (item.imageUrl || "").trim())
-      .filter((url): url is string => !!url);
+      .filter((url): url is string => !!url && !isKnownVideoAsset(url));
 
-    preloadImages([
+    const assetUrls = [
       ...extractImageUrlsFromStyles(styles),
       ...defaultIcons,
       TRAINING_SELECTION_HEADER_LOGO,
       ...itemImageUrls,
-    ]).then(() => {
+    ];
+    const assetSignature = getAssetWarmSignature(assetUrls);
+
+    if (localStorage.getItem(warmKey) === assetSignature) {
+      setAssetsReady(true);
+      return;
+    }
+
+    preloadImages(assetUrls).then(() => {
       if (cancelled) return;
-      localStorage.setItem(warmKey, "1");
+      localStorage.setItem(warmKey, assetSignature);
       setAssetsReady(true);
     });
 
@@ -531,9 +555,7 @@ export default function EntrenamientoSelectionPage() {
                     whileTap={{ scale: editorMode ? 1 : 0.98 }}
                     transition={{ duration: 0.1 }}
                   >
-                    {hasBackgroundImage && (
-                      <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
-                    )}
+                    {hasBackgroundImage && <CardVideoLayer src={cardStyle.imageUrl} imageSize={cardStyle?.imageSize} />}
                     
                     <div 
                       className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}

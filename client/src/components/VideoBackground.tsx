@@ -48,10 +48,10 @@ export function MediaIcon({ src, size, className = "" }: { src: string; size: nu
   
   if (isVideo) {
     return (
-      <video src={src} autoPlay loop muted playsInline className={`drop-shadow-md ${className}`} style={style} />
+      <video src={src} autoPlay loop muted playsInline preload="metadata" className={`drop-shadow-md ${className}`} style={style} />
     );
   }
-  return <img src={src} alt="" className={`drop-shadow-md ${className}`} style={style} />;
+  return <img src={src} alt="" loading="lazy" decoding="async" className={`drop-shadow-md ${className}`} style={style} />;
 }
 
 interface VideoBackgroundProps {
@@ -64,9 +64,22 @@ export function VideoBackground({ src, className = "", imageSize }: VideoBackgro
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { rootMargin: "120px" },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
   }, [src]);
 
   return (
@@ -77,6 +90,7 @@ export function VideoBackground({ src, className = "", imageSize }: VideoBackgro
       loop
       muted
       playsInline
+      preload="metadata"
       className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${className}`}
       style={imageSize ? { objectFit: "cover", transform: `scale(${imageSize / 100})` } : undefined}
       data-testid="video-background"
