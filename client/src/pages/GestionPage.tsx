@@ -50,6 +50,105 @@ interface QuizResult {
   createdAt: string | null;
 }
 
+const WEBP_QUALITY = 0.82;
+const MAX_IMAGE_DIMENSION = 1600;
+
+function getDataUrlByteSize(dataUrl: string) {
+  const base64 = dataUrl.split(",")[1] || "";
+  return Math.round(base64.length * 0.75);
+}
+
+function isConvertibleImageDataUrl(dataUrl: string) {
+  return (
+    dataUrl.startsWith("data:image/") &&
+    !dataUrl.startsWith("data:image/gif") &&
+    !dataUrl.startsWith("data:image/svg")
+  );
+}
+
+function imageMimeFromDataUrl(dataUrl: string) {
+  return dataUrl.match(/^data:([^;]+);base64,/)?.[1] || "";
+}
+
+function loadImageFromDataUrl(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function getCropRect(img: HTMLImageElement, crop?: Crop, renderedImg?: HTMLImageElement | null) {
+  if (!crop?.width || !crop?.height) {
+    return { x: 0, y: 0, width: img.naturalWidth || img.width, height: img.naturalHeight || img.height };
+  }
+
+  const naturalWidth = img.naturalWidth || img.width;
+  const naturalHeight = img.naturalHeight || img.height;
+
+  if (crop.unit === "%") {
+    return {
+      x: ((crop.x || 0) / 100) * naturalWidth,
+      y: ((crop.y || 0) / 100) * naturalHeight,
+      width: (crop.width / 100) * naturalWidth,
+      height: (crop.height / 100) * naturalHeight,
+    };
+  }
+
+  const renderedWidth = renderedImg?.width || naturalWidth;
+  const renderedHeight = renderedImg?.height || naturalHeight;
+  const scaleX = naturalWidth / renderedWidth;
+  const scaleY = naturalHeight / renderedHeight;
+
+  return {
+    x: (crop.x || 0) * scaleX,
+    y: (crop.y || 0) * scaleY,
+    width: crop.width * scaleX,
+    height: crop.height * scaleY,
+  };
+}
+
+async function optimizeImageDataUrl(src: string, crop?: Crop, renderedImg?: HTMLImageElement | null, quality = WEBP_QUALITY) {
+  if (!isConvertibleImageDataUrl(src)) {
+    return {
+      data: src,
+      width: 0,
+      height: 0,
+      size: getDataUrlByteSize(src),
+      mimeType: imageMimeFromDataUrl(src),
+      optimized: false,
+    };
+  }
+
+  const img = await loadImageFromDataUrl(src);
+  const source = getCropRect(img, crop, renderedImg);
+  const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(source.width, source.height));
+  const width = Math.max(1, Math.round(source.width * scale));
+  const height = Math.max(1, Math.round(source.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx?.drawImage(img, source.x, source.y, source.width, source.height, 0, 0, width, height);
+
+  const webp = canvas.toDataURL("image/webp", quality);
+  const fallbackMime = src.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+  const data = webp.startsWith("data:image/webp")
+    ? webp
+    : canvas.toDataURL(fallbackMime, quality);
+
+  return {
+    data,
+    width,
+    height,
+    size: getDataUrlByteSize(data),
+    mimeType: imageMimeFromDataUrl(data),
+    optimized: data.startsWith("data:image/webp"),
+  };
+}
+
 type AdminPaymentRow = {
   id?: string | number;
   orderId?: string | number;
@@ -119,6 +218,7 @@ export default function GestionPage() {
   const [imageName, setImageName] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [imgPage, setImgPage] = useState(0);
+  const [optimizingImages, setOptimizingImages] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const parseSafeDate = (value: string | Date | null | undefined): Date | null => {
@@ -1587,6 +1687,8 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       setImagePreview(result);
       if (file.type === "video/webm") {
         setCompressedSize(file.size);
+      } else if (!isConvertibleImageDataUrl(result)) {
+        setCompressedSize(file.size);
       } else {
         compressImage(result, compressionQuality);
       }
@@ -1595,37 +1697,9 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   const compressImage = useCallback((src: string, quality: number) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-      
-      // Apply crop if set
-      if (crop && crop.width && crop.height) {
-        canvas.width = crop.width;
-        canvas.height = crop.height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, crop.x || 0, crop.y || 0, crop.width, crop.height, 0, 0, crop.width, crop.height);
-      } else {
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
-      }
-      
-      // Check if PNG (preserve transparency) or JPEG with compression
-      const isPng = src.startsWith('data:image/png');
-      const compressed = isPng 
-        ? canvas.toDataURL('image/png')
-        : canvas.toDataURL('image/jpeg', quality / 100);
-      
-      // Calculate actual compressed size from base64
-      const base64Length = compressed.split(',')[1]?.length || 0;
-      const actualBytes = Math.round(base64Length * 0.75);
-      setCompressedSize(actualBytes);
-    };
-    img.src = src;
+    void optimizeImageDataUrl(src, crop, imgRef.current, quality / 100)
+      .then((result) => setCompressedSize(result.size))
+      .catch(() => setCompressedSize(originalSize));
   }, [crop]);
 
   useEffect(() => {
@@ -1653,41 +1727,14 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       if (isVideo) {
         data = imagePreview;
       } else {
-        const img = new Image();
-        img.src = imagePreview;
-        await new Promise(resolve => img.onload = resolve);
-        
-        const canvas = document.createElement('canvas');
-        width = img.width;
-        height = img.height;
-        
-        if (crop && crop.width && crop.height && imgRef.current) {
-          const scaleX = img.naturalWidth / imgRef.current.width;
-          const scaleY = img.naturalHeight / imgRef.current.height;
-          
-          const cropX = (crop.x || 0) * scaleX;
-          const cropY = (crop.y || 0) * scaleY;
-          const cropW = crop.width * scaleX;
-          const cropH = crop.height * scaleY;
-          
-          canvas.width = cropW;
-          canvas.height = cropH;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-          width = Math.round(cropW);
-          height = Math.round(cropH);
-        } else {
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0);
-        }
-        
-        const isPng = imagePreview.startsWith('data:image/png');
-        data = isPng 
-          ? canvas.toDataURL('image/png')
-          : canvas.toDataURL('image/jpeg', compressionQuality / 100);
+        const optimized = await optimizeImageDataUrl(imagePreview, crop, imgRef.current, compressionQuality / 100);
+        data = optimized.data;
+        width = optimized.width;
+        height = optimized.height;
+        setCompressedSize(optimized.size);
       }
+
+      const savedSize = isVideo ? originalSize : getDataUrlByteSize(data);
       
       const res = await fetch("/api/admin/images", {
         method: "POST",
@@ -1696,7 +1743,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           name: imageName, 
           data,
           originalSize,
-          compressedSize,
+          compressedSize: savedSize,
           width,
           height
         }),
@@ -1736,6 +1783,58 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const optimizeExistingImages = async (images: any[]) => {
+    const authToken = token || localStorage.getItem("adminToken");
+    if (!authToken) {
+      alert("No autorizado. Por favor inicia sesiÃ³n de nuevo.");
+      return;
+    }
+
+    const candidates = images.filter((img) =>
+      typeof img.data === "string" &&
+      isConvertibleImageDataUrl(img.data) &&
+      !img.data.startsWith("data:image/webp")
+    );
+
+    if (!candidates.length) {
+      alert("No hay imÃ¡genes convertibles en esta vista.");
+      return;
+    }
+
+    setOptimizingImages(true);
+    let converted = 0;
+
+    try {
+      for (const img of candidates) {
+        const optimized = await optimizeImageDataUrl(img.data, undefined, null, compressionQuality / 100);
+        if (!optimized.optimized) continue;
+
+        const res = await fetch(`/api/admin/images/${img.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+          body: JSON.stringify({
+            data: optimized.data,
+            compressedSize: optimized.size,
+            width: optimized.width,
+            height: optimized.height,
+          }),
+        });
+
+        if (res.ok) {
+          converted += 1;
+        }
+      }
+
+      const refreshed = await fetch("/api/images").then((r) => r.json());
+      setUploadedImages(refreshed || []);
+      alert(`Optimizadas a WebP: ${converted}`);
+    } catch {
+      alert("No se pudo completar la optimizaciÃ³n de imÃ¡genes.");
+    } finally {
+      setOptimizingImages(false);
+    }
   };
 
   useEffect(() => {
@@ -4762,15 +4861,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                       {/* Compression */}
                       <div>
                         <div className="flex justify-between text-white/60 text-sm mb-1">
-                          <span>Compresión: {compressionQuality}%</span>
+                          <span>WebP: {compressionQuality}%</span>
                           <span className="text-cyan-400">
-                            {(originalSize / 1024).toFixed(1)}KB â†’ {(compressedSize / 1024).toFixed(1)}KB
+                            {(originalSize / 1024).toFixed(1)}KB - {(compressedSize / 1024).toFixed(1)}KB
                             {originalSize > 0 && compressedSize < originalSize && ` (${Math.round((1 - compressedSize / originalSize) * 100)}% menos)`}
                           </span>
                         </div>
-                        {imagePreview?.startsWith('data:image/png') && (
-                          <p className="text-yellow-400/80 text-xs mb-2">PNG: preserva transparencia, sin compresión con pérdida</p>
-                        )}
+                        <p className="text-cyan-300/80 text-xs mb-2">
+                          Se guarda como WebP y se reduce a maximo {MAX_IMAGE_DIMENSION}px. GIF/SVG se conservan sin convertir.
+                        </p>
                         <input
                           type="range"
                           min="10"
@@ -4778,7 +4877,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           value={compressionQuality}
                           onChange={(e) => setCompressionQuality(Number(e.target.value))}
                           className="w-full"
-                          disabled={imagePreview?.startsWith('data:image/png')}
+                          disabled={!isConvertibleImageDataUrl(imagePreview)}
                         />
                       </div>
                     </>
@@ -4806,6 +4905,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 const totalPages = Math.ceil(uploadedImages.length / PER_PAGE);
                 const page = Math.min(imgPage || 0, totalPages - 1);
                 const pageImages = uploadedImages.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+                const optimizeWebpButton = (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 px-2 text-xs border-cyan-500/30 text-cyan-400"
+                    onClick={() => optimizeExistingImages(pageImages)}
+                    disabled={optimizingImages || pageImages.length === 0}
+                    data-testid="button-optimize-webp"
+                  >
+                    {optimizingImages ? "Optimizando..." : "WebP"}
+                  </Button>
+                );
                 return (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -4818,6 +4929,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         </div>
                       )}
                     </div>
+                    <div className="flex justify-end">{optimizeWebpButton}</div>
                     <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                       {pageImages.map((img) => (
                         <div key={img.id} className="bg-white/10 rounded p-1.5 space-y-1">

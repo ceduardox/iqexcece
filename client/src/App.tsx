@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
+import { waitForRenderedImages } from "@/lib/image-preload";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "@/lib/i18n";
 import Home from "@/pages/Home";
@@ -111,11 +112,17 @@ function App() {
   useEffect(() => {
     if (window.location.pathname === "/") return;
 
-    const readyFrame = window.requestAnimationFrame(() => {
-      window.dispatchEvent(new Event("iqex-app-ready"));
+    let cancelled = false;
+
+    waitForRenderedImages().finally(() => {
+      if (!cancelled) {
+        window.dispatchEvent(new Event("iqex-app-ready"));
+      }
     });
 
-    return () => window.cancelAnimationFrame(readyFrame);
+    return () => {
+      cancelled = true;
+    };
   }, []);
   
   return (

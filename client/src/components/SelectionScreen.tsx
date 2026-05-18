@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar, resolveStyle, type PageStyles, type ElementStyle, type DeviceMode } from "./EditorToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { useSounds } from "@/hooks/use-sounds";
+import { preloadImages } from "@/lib/image-preload";
 
 import avatar1Img from "@/assets/ui/avatars/avatar-1.png";
 import trainingImg from "@/assets/ui/icons/training.png";
@@ -77,38 +78,6 @@ function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
     .map((style) => style?.imageUrl)
     .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
-}
-
-function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
-  const unique = Array.from(new Set(urls.filter(Boolean)));
-  if (!unique.length) return Promise.resolve();
-
-  return new Promise((resolve) => {
-    let done = 0;
-    let finished = false;
-
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      resolve();
-    };
-
-    const timer = window.setTimeout(finish, timeoutMs);
-    const markDone = () => {
-      done += 1;
-      if (done >= unique.length) {
-        window.clearTimeout(timer);
-        finish();
-      }
-    };
-
-    unique.forEach((url) => {
-      const img = new Image();
-      img.onload = markDone;
-      img.onerror = markDone;
-      img.src = url;
-    });
-  });
 }
 
 function readCachedStyles(lang: string): PageStyles {
@@ -227,23 +196,19 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
   useEffect(() => {
     if (!stylesReady) return;
-    const readyFrame = window.requestAnimationFrame(() => {
-      window.dispatchEvent(new Event("iqex-app-ready"));
-    });
-    const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
-    if (localStorage.getItem(warmKey) === "1") {
-      return () => window.cancelAnimationFrame(readyFrame);
-    }
 
     let cancelled = false;
-    preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG]).then(() => {
+    const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
+    const timeoutMs = localStorage.getItem(warmKey) === "1" ? 1800 : 4500;
+
+    preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG], timeoutMs).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, "1");
+      window.dispatchEvent(new Event("iqex-app-ready"));
     });
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(readyFrame);
     };
   }, [stylesReady, styles, styleLang]);
   

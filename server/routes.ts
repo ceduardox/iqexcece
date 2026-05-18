@@ -1156,6 +1156,26 @@ Reglas:
     res.json(image);
   });
 
+  app.patch("/api/admin/images/:id", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { name, data, compressedSize, width, height } = req.body;
+    if (data !== undefined && (typeof data !== "string" || !data.startsWith("data:"))) {
+      return res.status(400).json({ error: "Invalid image data" });
+    }
+
+    const image = await storage.updateImage(req.params.id, { name, data, compressedSize, width, height });
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    res.json(image);
+  });
+
   app.delete("/api/admin/images/:id", async (req, res) => {
     const auth = req.headers.authorization;
     const token = auth?.replace("Bearer ", "");

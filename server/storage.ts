@@ -1033,6 +1033,14 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  async updateImage(id: string, data: { name?: string; data?: string; compressedSize?: number; width?: number; height?: number }) {
+    const [updated] = await db.update(uploadedImages)
+      .set(data)
+      .where(eq(uploadedImages.id, id))
+      .returning();
+    return updated;
+  }
+
   async getImages() {
     return db.select().from(uploadedImages).orderBy(uploadedImages.createdAt);
   }

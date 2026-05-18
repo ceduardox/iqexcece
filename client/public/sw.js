@@ -1,4 +1,4 @@
-﻿const CACHE_VERSION = 'v1.0.3';
+const CACHE_VERSION = 'v1.0.4';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -36,7 +36,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const hasRange = event.request.headers.has('range');
   const isApi = url.pathname.startsWith('/api/');
-  if (isApi || hasRange) {
+  const isStaticApiImage = url.pathname.startsWith('/api/images/');
+  if ((isApi && !isStaticApiImage) || hasRange) {
     event.respondWith(fetch(event.request));
     return;
   }
@@ -61,4 +62,3 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
