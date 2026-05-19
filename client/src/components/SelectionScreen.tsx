@@ -44,19 +44,19 @@ const HERO_TITLE_LINE_VARIANTS = {
 const HOME_CARD_ENTRANCE_VARIANTS = {
   hidden: (index: number) => {
     const from = [
-      { x: -220, y: -40, rotate: -4 },
-      { x: 220, y: -30, rotate: 4 },
-      { x: 0, y: 240, rotate: 0 },
-      { x: -200, y: 70, rotate: -3 },
-      { x: 200, y: 70, rotate: 3 },
+      { x: -28, y: 16, rotate: -1 },
+      { x: 28, y: 16, rotate: 1 },
+      { x: 0, y: 24, rotate: 0 },
+      { x: -24, y: 18, rotate: -1 },
+      { x: 24, y: 18, rotate: 1 },
     ][index % 5];
     return {
       opacity: 0,
       x: from.x,
       y: from.y,
       rotate: from.rotate,
-      scale: 0.92,
-      filter: "blur(10px)",
+      scale: 0.98,
+      filter: "blur(2px)",
     };
   },
   show: (index: number) => ({
@@ -67,8 +67,8 @@ const HOME_CARD_ENTRANCE_VARIANTS = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      delay: 1.12 + index * 0.1,
-      duration: 0.72,
+      delay: 0.22 + index * 0.06,
+      duration: 0.42,
       ease: [0.22, 1, 0.36, 1],
     },
   }),
