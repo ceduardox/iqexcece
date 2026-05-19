@@ -1274,6 +1274,30 @@ export default function MindMapsPage() {
     await loadMaps();
   }
 
+  async function copyTextToClipboard(text: string) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return copied;
+    } catch {
+      return false;
+    }
+  }
+
   async function shareProject(id?: string) {
     if (readonly) return;
     const target = id || activeId;
@@ -1284,10 +1308,15 @@ export default function MindMapsPage() {
       return;
     }
     const data = await res.json();
-    setShareUrl(data.shareUrl || "");
-    if (data.shareUrl && navigator.clipboard) {
-      await navigator.clipboard.writeText(data.shareUrl);
-      toast({ title: "Enlace copiado", description: "Se copio el enlace para compartir." });
+    const url = data.shareUrl || "";
+    setShareUrl(url);
+    if (url) {
+      const copied = await copyTextToClipboard(url);
+      toast(
+        copied
+          ? { title: "Enlace copiado", description: "Se copio el enlace para compartir." }
+          : { title: "Enlace listo", description: "No se pudo copiar automaticamente. El enlace queda visible para copiarlo." },
+      );
     }
   }
 
@@ -1511,6 +1540,16 @@ export default function MindMapsPage() {
             <span className={`hidden md:inline-flex h-8 px-3 rounded-full border text-xs font-semibold items-center ${hasUnsavedChanges ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
               {hasUnsavedChanges ? "Cambios pendientes" : "Guardado"}
             </span>
+          )}
+          {!readonly && !showChooser && kind && activeId && (
+            <button
+              onClick={() => shareProject()}
+              className="md:hidden app-btn-soft h-10 w-10 p-0 text-cyan-700 inline-flex items-center justify-center shrink-0"
+              title="Copiar enlace para compartir"
+              aria-label="Copiar enlace para compartir"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
           )}
           {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
         </div>
