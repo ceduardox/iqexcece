@@ -216,7 +216,12 @@ function TestCard({
           >
             <div className="chroma-aura" />
             <div className="chroma-icon relative z-[1]">
-              <MediaIcon src={iconStyle?.imageUrl || defaultStyle.iconUrl} size={iconSize} />
+              <MediaIcon
+                src={iconStyle?.imageUrl || defaultStyle.iconUrl}
+                size={iconSize}
+                loading="eager"
+                fetchPriority={index === 0 ? "high" : "auto"}
+              />
             </div>
           </div>
           
@@ -365,8 +370,8 @@ export default function TestsPage() {
   const [editorMode, setEditorMode] = useState(() => localStorage.getItem("editorMode") === "true");
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
-  const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTestStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => {
+  const [stylesReady, setStylesReady] = useState(true);
+  const [, setAssetsReady] = useState<boolean>(() => {
     const cachedStyles = readCachedTestStyles(lang);
     return Object.keys(cachedStyles).length > 0 && hasWarmTestAssets(lang, cachedStyles);
   });
@@ -390,12 +395,12 @@ export default function TestsPage() {
     const cachedStyles = readCachedTestStyles(lang);
     const hasCachedStyles = Object.keys(cachedStyles).length > 0;
     setStyles(cachedStyles);
-    setStylesReady(hasCachedStyles);
+    setStylesReady(true);
     setAssetsReady(hasCachedStyles && hasWarmTestAssets(lang, cachedStyles));
 
     fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
-      .then(async (data) => {
+      .then((data) => {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
@@ -403,8 +408,9 @@ export default function TestsPage() {
             const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
 
             if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
-              await preloadImages(getTestAssetUrls(nextStyles));
-              localStorage.setItem(warmKey, nextSignature);
+              preloadImages(getTestAssetUrls(nextStyles), 2500).then(() => {
+                localStorage.setItem(warmKey, nextSignature);
+              });
             }
 
             setStyles(nextStyles);
@@ -436,8 +442,7 @@ export default function TestsPage() {
       return;
     }
 
-    setAssetsReady(false);
-    preloadImages(assetUrls).then(() => {
+    preloadImages(assetUrls, 2500).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, assetSignature);
       setAssetsReady(true);
@@ -551,7 +556,7 @@ export default function TestsPage() {
     { id: "cerebral", title: t("tests.cerebral"), description: t("tests.cerebralDesc") },
   ];
 
-  if (!stylesReady || !assetsReady) {
+  if (!stylesReady) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />

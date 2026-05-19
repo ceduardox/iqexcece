@@ -114,7 +114,9 @@ function App() {
 
     let cancelled = false;
 
-    waitForRenderedImages(1800).finally(() => {
+    const imageWaitMs = window.location.pathname === "/tests" ? 250 : 1800;
+
+    waitForRenderedImages(imageWaitMs).finally(() => {
       if (!cancelled) {
         window.dispatchEvent(new Event("iqex-app-ready"));
       }

@@ -1,11 +1,12 @@
-const CACHE_VERSION = 'v1.0.4';
+const CACHE_VERSION = 'v1.0.5';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/iqxponencial-icon.png',
-  '/favicon.png'
+  '/favicon-32.png',
+  '/favicon-16.png'
 ];
 
 self.addEventListener('install', (event) => {

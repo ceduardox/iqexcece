@@ -42,16 +42,45 @@ export function useIsVideo(url: string | undefined): boolean {
   return isVideo;
 }
 
-export function MediaIcon({ src, size, className = "" }: { src: string; size: number; className?: string }) {
+type MediaIconLoading = "eager" | "lazy";
+type MediaIconFetchPriority = "high" | "low" | "auto";
+
+export function MediaIcon({
+  src,
+  size,
+  className = "",
+  loading = "lazy",
+  fetchPriority,
+}: {
+  src: string;
+  size: number;
+  className?: string;
+  loading?: MediaIconLoading;
+  fetchPriority?: MediaIconFetchPriority;
+}) {
   const isVideo = useIsVideo(src);
   const style = { width: size, height: size, objectFit: "contain" as const };
+  const roundedSize = Math.round(size);
+  const priorityProps = fetchPriority ? ({ fetchPriority } as { fetchPriority: MediaIconFetchPriority }) : {};
   
   if (isVideo) {
     return (
       <video src={src} autoPlay loop muted playsInline preload="metadata" className={`drop-shadow-md ${className}`} style={style} />
     );
   }
-  return <img src={src} alt="" loading="lazy" decoding="async" className={`drop-shadow-md ${className}`} style={style} />;
+  return (
+    <img
+      src={src}
+      alt=""
+      loading={loading}
+      decoding="async"
+      width={roundedSize}
+      height={roundedSize}
+      className={`drop-shadow-md ${className}`}
+      style={style}
+      {...priorityProps}
+    />
+  );
 }
 
 interface VideoBackgroundProps {
