@@ -14,6 +14,7 @@ import menuCurveImg from "@assets/menu_1769957804819.png";
 import { useToast } from "@/hooks/use-toast";
 
 const TRAINING_SELECTION_STYLE_CACHE_KEY = "page-style:entrenamiento-selection-page:";
+const TRAINING_SELECTION_ITEMS_CACHE_KEY = "items-cache:entrenamiento-selection-page:";
 
 function readCachedTrainingSelectionStyles(lang: string): PageStyles {
   try {
@@ -23,6 +24,17 @@ function readCachedTrainingSelectionStyles(lang: string): PageStyles {
     return parsed && typeof parsed === "object" ? parsed : {};
   } catch {
     return {};
+  }
+}
+
+function readCachedTrainingItems(lang: string): { items: EntrenamientoItem[] } | undefined {
+  try {
+    const raw = localStorage.getItem(`${TRAINING_SELECTION_ITEMS_CACHE_KEY}${lang}`);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw);
+    return parsed && Array.isArray(parsed.items) ? parsed : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -123,8 +135,9 @@ function isKnownVideoAsset(url: string) {
 }
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
-  return Object.values(styles)
-    .map((style) => style?.imageUrl)
+  return Object.entries(styles)
+    .filter(([key]) => !key.includes("icon") && !key.includes("btn"))
+    .map(([, style]) => style?.imageUrl)
     .filter((url): url is string => typeof url === "string" && url.trim().length > 0 && !isKnownVideoAsset(url));
 }
 
@@ -165,6 +178,21 @@ function getAssetWarmSignature(urls: string[]) {
   return Array.from(new Set(urls.filter(Boolean))).sort().join("|");
 }
 
+function getTrainingCriticalAssetUrls(styles: PageStyles) {
+  return [
+    ...extractImageUrlsFromStyles(styles),
+    TRAINING_SELECTION_HEADER_LOGO,
+  ];
+}
+
+function getTrainingWarmSignature(styles: PageStyles) {
+  return getAssetWarmSignature(getTrainingCriticalAssetUrls(styles));
+}
+
+function hasWarmTrainingAssets(lang: string, styles: PageStyles) {
+  return localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === getTrainingWarmSignature(styles);
+}
+
 export default function EntrenamientoSelectionPage() {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "es").startsWith("en")
@@ -177,7 +205,10 @@ export default function EntrenamientoSelectionPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTrainingSelectionStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTrainingSelectionStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState(false);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => {
+    const cachedStyles = readCachedTrainingSelectionStyles(lang);
+    return Object.keys(cachedStyles).length > 0 && hasWarmTrainingAssets(lang, cachedStyles);
+  });
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -187,8 +218,13 @@ export default function EntrenamientoSelectionPage() {
     queryKey: ["/api/entrenamiento", "ninos", "items", lang],
     queryFn: async () => {
       const res = await fetch(`/api/entrenamiento/ninos/items?lang=${lang}`);
-      return res.json();
+      const data = await res.json();
+      if (Array.isArray(data?.items)) {
+        localStorage.setItem(`${TRAINING_SELECTION_ITEMS_CACHE_KEY}${lang}`, JSON.stringify({ items: data.items }));
+      }
+      return data;
     },
+    initialData: () => readCachedTrainingItems(lang),
   });
 
   const items = itemsData?.items?.filter(i => i.isActive !== false) || [];
@@ -208,9 +244,10 @@ export default function EntrenamientoSelectionPage() {
   useEffect(() => {
     const controller = new AbortController();
     const cachedStyles = readCachedTrainingSelectionStyles(lang);
+    const hasCachedStyles = Object.keys(cachedStyles).length > 0;
     setStyles(cachedStyles);
-    setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(false);
+    setStylesReady(hasCachedStyles);
+    setAssetsReady(hasCachedStyles && hasWarmTrainingAssets(lang, cachedStyles));
 
     fetch(`/api/page-styles/entrenamiento-selection-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
@@ -218,6 +255,14 @@ export default function EntrenamientoSelectionPage() {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
+            const nextSignature = getTrainingWarmSignature(nextStyles);
+            const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
+
+            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
+              await preloadImages(getTrainingCriticalAssetUrls(nextStyles));
+              localStorage.setItem(warmKey, nextSignature);
+            }
+
             setStyles(nextStyles);
             localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
             return;
@@ -230,6 +275,14 @@ export default function EntrenamientoSelectionPage() {
         if (fallback.style?.styles) {
           try {
             const nextStyles = JSON.parse(fallback.style.styles);
+            const nextSignature = getTrainingWarmSignature(nextStyles);
+            const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
+
+            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
+              await preloadImages(getTrainingCriticalAssetUrls(nextStyles));
+              localStorage.setItem(warmKey, nextSignature);
+            }
+
             setStyles(nextStyles);
             localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
           } catch {}
@@ -248,23 +301,9 @@ export default function EntrenamientoSelectionPage() {
   useEffect(() => {
     if (!stylesReady || isLoading) return;
     const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
-    if (localStorage.getItem(warmKey) === "1") {
-      setAssetsReady(true);
-      return;
-    }
 
     let cancelled = false;
-    setAssetsReady(false);
-    const itemImageUrls = items
-      .map((item) => (item.imageUrl || "").trim())
-      .filter((url): url is string => !!url && !isKnownVideoAsset(url));
-
-    const assetUrls = [
-      ...extractImageUrlsFromStyles(styles),
-      ...defaultIcons,
-      TRAINING_SELECTION_HEADER_LOGO,
-      ...itemImageUrls,
-    ];
+    const assetUrls = getTrainingCriticalAssetUrls(styles);
     const assetSignature = getAssetWarmSignature(assetUrls);
 
     if (localStorage.getItem(warmKey) === assetSignature) {
@@ -277,6 +316,11 @@ export default function EntrenamientoSelectionPage() {
       localStorage.setItem(warmKey, assetSignature);
       setAssetsReady(true);
     });
+
+    const nonBlockingItemImages = items
+      .map((item) => (item.imageUrl || "").trim())
+      .filter((url): url is string => !!url && !isKnownVideoAsset(url));
+    preloadImages(nonBlockingItemImages, 2500).catch(() => {});
 
     return () => {
       cancelled = true;
