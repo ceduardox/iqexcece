@@ -33,6 +33,7 @@ type AiMap = { centralTopic: string; ideas: AiIdea[] };
 
 const SESSION_KEY = "iq_session_id";
 const VIEW_STATE_KEY = "iq_mindmaps_view_state_v1";
+const OPEN_AFTER_FORK_KEY = "iq_mindmaps_open_after_fork";
 const NODE_W = 170;
 const NODE_H = 56;
 const WORLD_W = 2600;
@@ -283,7 +284,9 @@ export default function MindMapsPage() {
     const res = await fetch(`/api/mindmaps?sessionId=${encodeURIComponent(sessionId)}`);
     if (!res.ok) throw new Error("No se pudieron cargar proyectos");
     const data = await res.json();
-    setMaps(data.maps || []);
+    const nextMaps = data.maps || [];
+    setMaps(nextMaps);
+    return nextMaps as RecordMap[];
   }
 
   function openMap(record: RecordMap) {
@@ -330,8 +333,17 @@ export default function MindMapsPage() {
           return;
         }
         setReadonly(false);
+        const nextMaps = await loadMaps();
+        const pendingOpenId = sessionStorage.getItem(OPEN_AFTER_FORK_KEY);
+        if (pendingOpenId) {
+          sessionStorage.removeItem(OPEN_AFTER_FORK_KEY);
+          const pendingMap = nextMaps.find((m) => m.id === pendingOpenId);
+          if (pendingMap) {
+            openMap(pendingMap);
+            return;
+          }
+        }
         setShowChooser(true);
-        await loadMaps();
       } catch (e: any) {
         toast({ title: "Error", description: e.message || "Error", variant: "destructive" });
       } finally {
@@ -1320,6 +1332,36 @@ export default function MindMapsPage() {
     }
   }
 
+  async function forkSharedProject() {
+    if (!readonly || !kind) return;
+    const data = payload();
+    if (!data) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/mindmaps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          title: `${title || "Proyecto compartido"} copia`,
+          data,
+        }),
+      });
+
+      if (!res.ok) throw new Error("No se pudo crear la copia");
+      const created = await res.json();
+      const createdId = created.map?.id;
+      if (createdId) sessionStorage.setItem(OPEN_AFTER_FORK_KEY, createdId);
+      toast({ title: "Copia creada", description: "Ahora puedes editar tu propia version del tablero." });
+      setLocation("/mapas-mentales");
+    } catch (e: any) {
+      toast({ title: "No se pudo copiar", description: e.message || "Intenta nuevamente.", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function newProject() {
     if (readonly) return;
     setTaskModal(null);
@@ -1540,6 +1582,18 @@ export default function MindMapsPage() {
             <span className={`hidden md:inline-flex h-8 px-3 rounded-full border text-xs font-semibold items-center ${hasUnsavedChanges ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
               {hasUnsavedChanges ? "Cambios pendientes" : "Guardado"}
             </span>
+          )}
+          {readonly && !showChooser && kind && (
+            <button
+              onClick={forkSharedProject}
+              disabled={saving}
+              title="Crear mi copia editable"
+              aria-label="Crear mi copia editable"
+              className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"
+            >
+              <Copy className="w-4 h-4" />
+              <span className="hidden sm:inline">{saving ? "Creando..." : "Crear mi copia"}</span>
+            </button>
           )}
           {!readonly && !showChooser && kind && activeId && (
             <button
