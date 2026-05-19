@@ -299,7 +299,7 @@ export default function MetodoXPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.35 }}
-              className={`text-purple-300/80 text-xs md:text-sm leading-relaxed max-w-sm md:max-w-lg ${getEditableClass("hero-desc")}`}
+              className={`text-purple-300/80 text-xs md:text-sm leading-relaxed max-w-sm md:max-w-3xl ${getEditableClass("hero-desc")}`}
               onClick={(e) => { if (editorMode) handleElementClick("hero-desc", e); }}
               style={getElementStyle("hero-desc")}
               data-testid="text-metodo-desc"
@@ -337,7 +337,7 @@ export default function MetodoXPage() {
           </div>
         </div>
 
-        <div className="px-5 py-8 max-w-5xl mx-auto">
+        <div className="w-full px-5 md:px-8 xl:px-10 py-8 max-w-[1500px] mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -558,7 +558,7 @@ export default function MetodoXPage() {
             <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, white, transparent)" }} />
           </div>
 
-          <div className="relative max-w-5xl mx-auto">
+          <div className="relative w-full max-w-[1500px] mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
