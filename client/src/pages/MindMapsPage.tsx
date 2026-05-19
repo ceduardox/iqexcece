@@ -589,6 +589,34 @@ export default function MindMapsPage() {
     setTaskModal({ colId: nextStatus, taskId });
   }
 
+  function moveTaskToColumn(fromColId: string, taskId: string, targetColId: string) {
+    if (fromColId === targetColId) return;
+    const targetCol = cols.find((c) => c.id === targetColId);
+    if (!targetCol) return;
+
+    setCols((prev) => {
+      let movedTask: Task | null = null;
+      const removed = prev.map((col) => {
+        if (col.id !== fromColId) return col;
+        return {
+          ...col,
+          tasks: col.tasks.filter((task) => {
+            if (task.id === taskId) {
+              movedTask = { ...task, status: statusByColumnId(targetColId) };
+              return false;
+            }
+            return true;
+          }),
+        };
+      });
+
+      if (!movedTask) return prev;
+      return removed.map((col) =>
+        col.id === targetColId ? { ...col, tasks: [...col.tasks, movedTask as Task] } : col,
+      );
+    });
+  }
+
   function addTaskComment(colId: string, taskId: string) {
     const text = taskCommentDraft.trim();
     if (!text) return;
@@ -1860,7 +1888,26 @@ export default function MindMapsPage() {
                             )}
                           </button>
                           {!readonly && (
-                            <div className="mt-1 flex justify-end">
+                            <div className="mt-2 flex flex-wrap items-center justify-end gap-1.5">
+                              {cols.length > 1 && (
+                                <label className="md:hidden inline-flex h-7 items-center gap-1 rounded-lg border border-cyan-100 bg-cyan-50/70 px-2 text-[10px] font-semibold text-cyan-800">
+                                  Mover
+                                  <select
+                                    value={c.id}
+                                    aria-label="Mover tarea a otra columna"
+                                    className="max-w-[116px] bg-transparent text-[10px] font-semibold text-cyan-800 outline-none"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => moveTaskToColumn(c.id, t.id, e.target.value)}
+                                  >
+                                    {cols.map((targetCol) => (
+                                      <option key={targetCol.id} value={targetCol.id}>
+                                        {targetCol.title}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              )}
                               <button
                                 className="app-btn-soft h-6 px-2 text-[10px] text-cyan-700"
                                 onPointerDown={(e) => e.stopPropagation()}
