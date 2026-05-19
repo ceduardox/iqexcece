@@ -382,17 +382,18 @@ export default function MetodoXPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ duration: 0.3 }}
-                  className={`rounded-2xl overflow-hidden ${getEditableClass(`step-card-${activeStep}`)}`}
-                  style={{ background: "white", boxShadow: `0 6px 25px ${STEP_COLORS[activeStep].shadow}`, border: `2px solid ${STEP_COLORS[activeStep].mid}`, ...getElementStyle(`step-card-${activeStep}`, "white") }}
+                  className={`rounded-[26px] overflow-hidden border border-white/12 bg-[#09051f] shadow-2xl ${getEditableClass(`step-card-${activeStep}`)}`}
+                  style={{ boxShadow: `0 20px 55px ${STEP_COLORS[activeStep].shadow}`, borderColor: STEP_COLORS[activeStep].mid, ...getElementStyle(`step-card-${activeStep}`) }}
                   onClick={(e) => { if (editorMode) handleElementClick(`step-card-${activeStep}`, e); }}
                 >
-                  <div className="p-4 flex items-center gap-3 relative overflow-hidden" style={{ background: STEP_COLORS[activeStep].bg }}>
-                    <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-20" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+                  <div className="p-5 flex items-center gap-4 relative overflow-hidden" style={{ background: `radial-gradient(circle at 8% 0%, ${STEP_COLORS[activeStep].accent}80, transparent 34%), linear-gradient(135deg, #13072f, #09051f 68%, ${STEP_COLORS[activeStep].accent}33)` }}>
+                    <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${STEP_COLORS[activeStep].accent}, transparent)` }} />
+                    <div className="absolute inset-0 opacity-35" style={{ background: `linear-gradient(135deg, transparent 47%, ${STEP_COLORS[activeStep].accent} 50%, transparent 53%)` }} />
                     <motion.div
                       animate={{ scale: [1, 1.1, 1], boxShadow: [`0 0 0px transparent`, `0 0 18px ${STEP_COLORS[activeStep].glow}`, `0 0 0px transparent`] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                      className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
-                      style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)", ...getElementStyle(`step-icon-${activeStep}`) }}
+                      className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${activeStep}`)}`}
+                      style={{ background: `radial-gradient(circle, ${STEP_COLORS[activeStep].accent}66, rgba(255,255,255,0.10))`, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.28)", ...getElementStyle(`step-icon-${activeStep}`) }}
                       onClick={(e) => { if (editorMode) handleElementClick(`step-icon-${activeStep}`, e); }}
                     >
                       {resolveStyle(styles, `step-icon-${activeStep}`, isMobile)?.imageUrl ? (
@@ -404,14 +405,14 @@ export default function MetodoXPage() {
                     <div className="flex-1 min-w-0 relative z-10">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-3xl font-black text-white/25 ${getEditableClass(`step-num-${activeStep}`)}`}
+                          className={`text-4xl font-black text-white/20 ${getEditableClass(`step-num-${activeStep}`)}`}
                           style={{ textShadow: "0 2px 4px rgba(0,0,0,0.1)", ...getElementStyle(`step-num-${activeStep}`) }}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-num-${activeStep}`, e); }}
                         >
                           {String(activeStep + 1).padStart(2, "0")}
                         </span>
                         <h3
-                          className={`text-base font-extrabold text-white drop-shadow-sm ${getEditableClass(`step-title-${activeStep}`)}`}
+                          className={`text-lg font-extrabold text-white drop-shadow-sm ${getEditableClass(`step-title-${activeStep}`)}`}
                           onClick={(e) => { if (editorMode) handleElementClick(`step-title-${activeStep}`, e); }}
                           style={getElementStyle(`step-title-${activeStep}`)}
                           data-testid={`text-step-title-${activeStep}`}
@@ -419,22 +420,22 @@ export default function MetodoXPage() {
                           {steps[activeStep].title}
                         </h3>
                       </div>
-                      <p className="text-white/90 text-xs font-semibold mt-0.5">{steps[activeStep].subtitle}</p>
+                      <p className="text-white/80 text-sm font-semibold mt-1">{steps[activeStep].subtitle}</p>
                     </div>
                   </div>
-                  <div className="p-4 space-y-3 relative" style={{ borderLeft: `3px solid ${STEP_COLORS[activeStep].accent}` }}>
-                    <div className="absolute top-0 right-0 w-24 h-24 opacity-[0.04] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[activeStep].accent}, transparent)` }} />
-                    <p className="text-xs font-bold italic" style={{ color: STEP_COLORS[activeStep].accent }}>{steps[activeStep].hook}</p>
+                  <div className="p-5 space-y-4 relative bg-white/[0.04]" style={{ borderLeft: `3px solid ${STEP_COLORS[activeStep].accent}` }}>
+                    <div className="absolute top-0 right-0 w-28 h-28 opacity-[0.08] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[activeStep].accent}, transparent)` }} />
+                    <p className="text-sm font-bold italic" style={{ color: STEP_COLORS[activeStep].accent }}>{steps[activeStep].hook}</p>
                     <p
-                      className={`text-xs text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${activeStep}`)}`}
+                      className={`text-sm text-white/76 leading-relaxed ${getEditableClass(`step-desc-${activeStep}`)}`}
                       onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${activeStep}`, e); }}
                       style={getElementStyle(`step-desc-${activeStep}`)}
                       data-testid={`text-step-desc-${activeStep}`}
                     >
                       {steps[activeStep].desc}
                     </p>
-                    <div className="rounded-xl p-3" style={{ background: STEP_COLORS[activeStep].light, borderLeft: `2px solid ${STEP_COLORS[activeStep].mid}` }}>
-                      <p className="text-[11px] text-gray-500 leading-relaxed italic">
+                    <div className="rounded-2xl border p-4 bg-white/[0.06] backdrop-blur-md" style={{ borderColor: STEP_COLORS[activeStep].mid }}>
+                      <p className="text-xs text-white/62 leading-relaxed italic">
                         {steps[activeStep].detail}
                       </p>
                     </div>
@@ -484,7 +485,7 @@ export default function MetodoXPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-2 gap-6">
               {steps.map((step, i) => {
                 const Icon = STEP_ICONS[i];
                 return (
@@ -494,36 +495,37 @@ export default function MetodoXPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className={`rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:shadow-xl ${getEditableClass(`step-card-${i}`)}`}
-                    style={{ background: "white", boxShadow: `0 6px 25px ${STEP_COLORS[i].shadow}`, border: `2px solid ${STEP_COLORS[i].mid}`, ...getElementStyle(`step-card-${i}`, "white") }}
+                    className={`rounded-[28px] overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:shadow-2xl border border-white/10 bg-[#09051f] ${getEditableClass(`step-card-${i}`)}`}
+                    style={{ boxShadow: `0 22px 60px ${STEP_COLORS[i].shadow}`, borderColor: STEP_COLORS[i].mid, ...getElementStyle(`step-card-${i}`) }}
                     onClick={(e: any) => { if (editorMode) handleElementClick(`step-card-${i}`, e); }}
                   >
-                    <div className="p-5 flex items-center gap-4 relative overflow-hidden" style={{ background: STEP_COLORS[i].bg }}>
-                      <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-15" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+                    <div className="p-6 flex items-center gap-5 relative overflow-hidden" style={{ background: `radial-gradient(circle at 8% 0%, ${STEP_COLORS[i].accent}80, transparent 34%), radial-gradient(circle at 92% 12%, ${STEP_COLORS[i].accent}44, transparent 32%), linear-gradient(135deg, #13072f, #09051f 68%, ${STEP_COLORS[i].accent}33)` }}>
+                      <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${STEP_COLORS[i].accent}, transparent)` }} />
+                      <div className="absolute inset-0 opacity-35" style={{ background: `linear-gradient(135deg, transparent 47%, ${STEP_COLORS[i].accent} 50%, transparent 53%)` }} />
                       <motion.div
                         animate={{ scale: [1, 1.08, 1], boxShadow: [`0 0 0px transparent`, `0 0 20px ${STEP_COLORS[i].glow}`, `0 0 0px transparent`] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
-                        className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${i}`)}`}
-                        style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)", ...getElementStyle(`step-icon-${i}`) }}
+                        className={`w-20 h-20 rounded-3xl flex items-center justify-center flex-shrink-0 ${getEditableClass(`step-icon-${i}`)}`}
+                        style={{ background: `radial-gradient(circle, ${STEP_COLORS[i].accent}66, rgba(255,255,255,0.10))`, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.28)", ...getElementStyle(`step-icon-${i}`) }}
                         onClick={(e: any) => { if (editorMode) handleElementClick(`step-icon-${i}`, e); }}
                       >
                         {resolveStyle(styles, `step-icon-${i}`, isMobile)?.imageUrl ? (
                           <img src={resolveStyle(styles, `step-icon-${i}`, isMobile)!.imageUrl} alt="" style={{ width: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 32, height: resolveStyle(styles, `step-icon-${i}`, isMobile)?.iconSize || 32 }} />
                         ) : (
-                          <Icon className="w-8 h-8 text-white drop-shadow-lg" />
+                          <Icon className="w-10 h-10 text-white drop-shadow-lg" />
                         )}
                       </motion.div>
                       <div className="flex-1 min-w-0 relative z-10">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-3xl font-black text-white/25 ${getEditableClass(`step-num-${i}`)}`}
+                            className={`text-5xl font-black text-white/18 ${getEditableClass(`step-num-${i}`)}`}
                             style={getElementStyle(`step-num-${i}`)}
                             onClick={(e) => { if (editorMode) handleElementClick(`step-num-${i}`, e); }}
                           >
                             {String(i + 1).padStart(2, "0")}
                           </span>
                           <h3
-                            className={`text-base font-bold text-white ${getEditableClass(`step-title-${i}`)}`}
+                            className={`text-xl font-bold text-white ${getEditableClass(`step-title-${i}`)}`}
                             onClick={(e) => { if (editorMode) handleElementClick(`step-title-${i}`, e); }}
                             style={getElementStyle(`step-title-${i}`)}
                             data-testid={`text-step-title-${i}`}
@@ -531,22 +533,22 @@ export default function MetodoXPage() {
                             {step.title}
                           </h3>
                         </div>
-                        <p className="text-white/90 text-sm font-semibold mt-0.5">{step.subtitle}</p>
+                        <p className="text-white/80 text-base font-semibold mt-1">{step.subtitle}</p>
                       </div>
                     </div>
-                    <div className="p-5 flex-1 flex flex-col gap-3 relative" style={{ borderLeft: `3px solid ${STEP_COLORS[i].accent}` }}>
-                      <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[i].accent}, transparent)` }} />
-                      <p className="text-sm font-bold italic" style={{ color: STEP_COLORS[i].accent }}>{step.hook}</p>
+                    <div className="p-6 flex-1 flex flex-col gap-4 relative bg-white/[0.04]" style={{ borderLeft: `3px solid ${STEP_COLORS[i].accent}` }}>
+                      <div className="absolute top-0 right-0 w-36 h-36 opacity-[0.08] pointer-events-none" style={{ background: `radial-gradient(circle, ${STEP_COLORS[i].accent}, transparent)` }} />
+                      <p className="text-base font-bold italic" style={{ color: STEP_COLORS[i].accent }}>{step.hook}</p>
                       <p
-                        className={`text-sm text-gray-600 leading-relaxed ${getEditableClass(`step-desc-${i}`)}`}
+                        className={`text-base text-white/76 leading-relaxed ${getEditableClass(`step-desc-${i}`)}`}
                         onClick={(e) => { if (editorMode) handleElementClick(`step-desc-${i}`, e); }}
                         style={getElementStyle(`step-desc-${i}`)}
                         data-testid={`text-step-desc-${i}`}
                       >
                         {step.desc}
                       </p>
-                      <div className="rounded-xl p-4 mt-auto" style={{ background: STEP_COLORS[i].light, borderLeft: `2px solid ${STEP_COLORS[i].mid}` }}>
-                        <p className="text-xs text-gray-500 leading-relaxed italic">
+                      <div className="rounded-2xl border p-4 mt-auto bg-white/[0.06] backdrop-blur-md" style={{ borderColor: STEP_COLORS[i].mid }}>
+                        <p className="text-sm text-white/62 leading-relaxed italic">
                           {step.detail}
                         </p>
                       </div>
@@ -591,28 +593,28 @@ export default function MetodoXPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4 }}
-                className={`mb-10 last:mb-0 rounded-2xl p-3 md:p-4 transition-all duration-300 hover:shadow-2xl ${getEditableClass(`prog-bg-${i}`)}`}
-                style={{ background: `rgba(255,255,255,0.07)`, border: `2px solid ${PROG_COLORS[i]}40`, boxShadow: `0 8px 30px ${PROG_COLORS[i]}20`, ...getElementStyle(`prog-bg-${i}`) }}
+                className={`mb-12 last:mb-0 rounded-[30px] p-[1px] transition-all duration-300 hover:shadow-2xl ${getEditableClass(`prog-bg-${i}`)}`}
+                style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}cc, rgba(255,255,255,0.18), ${PROG_COLORS[i]}55)`, boxShadow: `0 24px 70px ${PROG_COLORS[i]}35`, ...getElementStyle(`prog-bg-${i}`) }}
                 onClick={(e: any) => { if (editorMode) handleElementClick(`prog-bg-${i}`, e); }}
                 data-testid={`prog-bg-${i}`}
               >
               <div
-                className={`${getEditableClass(`prog-card-${i}`)}`}
+                className={`rounded-[28px] overflow-hidden bg-[#09051f] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${getEditableClass(`prog-card-${i}`)}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-card-${i}`, e); } }}
                 data-testid={`prog-card-${i}`}
               >
                 <div
-                  className={`rounded-t-2xl p-5 md:p-6 relative overflow-hidden ${getEditableClass(`prog-title-bg-${i}`)}`}
-                  style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}dd, ${PROG_COLORS[i]}99)`, ...getElementStyle(`prog-title-bg-${i}`) }}
+                  className={`p-5 md:p-8 relative overflow-hidden border-b border-white/10 ${getEditableClass(`prog-title-bg-${i}`)}`}
+                  style={{ background: `radial-gradient(circle at 8% 0%, ${PROG_COLORS[i]}55, transparent 34%), radial-gradient(circle at 92% 15%, ${PROG_COLORS[i]}40, transparent 32%), linear-gradient(135deg, #11072f, #08051d 58%, ${PROG_COLORS[i]}38)`, ...getElementStyle(`prog-title-bg-${i}`) }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-title-bg-${i}`, e); } }}
                   data-testid={`prog-title-bg-${i}`}
                 >
-                  <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full opacity-15" style={{ background: "radial-gradient(circle, white, transparent)" }} />
-                  <motion.div className="absolute right-4 bottom-2 opacity-[0.06] text-[80px] font-black text-white pointer-events-none select-none" animate={{ opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>X</motion.div>
-                  <div className="flex flex-wrap items-end justify-between gap-3 relative z-10">
-                    <div className="flex items-center gap-3">
+                  <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full opacity-20" style={{ background: `radial-gradient(circle, ${PROG_COLORS[i]}, transparent 66%)` }} />
+                  <motion.div className="absolute right-5 bottom-0 opacity-[0.09] text-[110px] md:text-[150px] font-black text-white pointer-events-none select-none leading-none" animate={{ opacity: [0.05, 0.11, 0.05], scale: [1, 1.04, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>X</motion.div>
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 relative z-10">
+                    <div className="flex flex-wrap items-center gap-3">
                       <h3
-                        className={`text-2xl md:text-4xl font-black text-white leading-none drop-shadow-lg ${getEditableClass(`prog-name-${i}`)}`}
+                        className={`text-3xl md:text-5xl font-black text-white leading-none drop-shadow-lg ${getEditableClass(`prog-name-${i}`)}`}
                         style={getElementStyle(`prog-name-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-name-${i}`, e); } }}
                       >
@@ -621,27 +623,27 @@ export default function MetodoXPage() {
                       <motion.span
                         animate={{ scale: [1, 1.2, 1], boxShadow: [`0 0 0px transparent`, `0 0 25px ${PROG_COLORS[i]}90`, `0 0 0px transparent`], rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        className="w-10 h-10 md:w-13 md:h-13 rounded-full flex items-center justify-center font-black text-white text-lg md:text-2xl"
+                        className="w-11 h-11 md:w-14 md:h-14 rounded-2xl flex items-center justify-center font-black text-white text-xl md:text-2xl"
                         style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}
                       >X</motion.span>
                       <span
-                        className={`text-sm md:text-base text-white/80 font-semibold ${getEditableClass(`prog-age-${i}`)}`}
+                        className={`rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm md:text-base text-white/90 font-semibold backdrop-blur-md ${getEditableClass(`prog-age-${i}`)}`}
                         style={getElementStyle(`prog-age-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-age-${i}`, e); } }}
                       >
                         {prog.age}
                       </span>
                     </div>
-                    <div className="text-right max-w-[220px]">
+                    <div className="md:text-right max-w-[440px] rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md">
                       <p
-                        className={`text-sm font-bold text-white drop-shadow-sm ${getEditableClass(`prog-label-${i}`)}`}
+                        className={`text-base md:text-lg font-bold text-white drop-shadow-sm ${getEditableClass(`prog-label-${i}`)}`}
                         style={getElementStyle(`prog-label-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-label-${i}`, e); } }}
                       >
                         {prog.label}
                       </p>
                       <p
-                        className={`text-[11px] text-white/70 leading-relaxed mt-1 ${getEditableClass(`prog-desc-${i}`)}`}
+                        className={`text-xs md:text-sm text-white/75 leading-relaxed mt-2 ${getEditableClass(`prog-desc-${i}`)}`}
                         style={getElementStyle(`prog-desc-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-desc-${i}`, e); } }}
                       >
@@ -652,7 +654,7 @@ export default function MetodoXPage() {
                 </div>
 
                 <div
-                  className={`w-full aspect-[16/9] bg-gray-700 flex items-center justify-center relative overflow-hidden ${getEditableClass(`prog-image-${i}`)}`}
+                  className={`w-full min-h-[330px] md:min-h-[520px] bg-gray-900 flex items-center justify-center relative overflow-hidden ${getEditableClass(`prog-image-${i}`)}`}
                   style={{
                     backgroundImage: resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl ? `url(${resolveStyle(styles, `prog-image-${i}`, isMobile)!.imageUrl})` : undefined,
                     backgroundSize: "cover",
@@ -662,6 +664,8 @@ export default function MetodoXPage() {
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-image-${i}`, e); } }}
                   data-testid={`prog-image-${i}`}
                 >
+                  <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(90deg, rgba(7,4,23,0.86) 0%, rgba(7,4,23,0.42) 44%, rgba(7,4,23,0.14) 100%), linear-gradient(180deg, transparent 45%, #09051f 100%)` }} />
+                  <div className="absolute inset-0 pointer-events-none opacity-60" style={{ background: `linear-gradient(135deg, transparent 44%, ${PROG_COLORS[i]} 49%, transparent 52%), linear-gradient(45deg, transparent 47%, ${PROG_COLORS[i]} 50%, transparent 53%)` }} />
                   {!resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl && (
                     <div className="flex flex-col items-center gap-2">
                       <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 3, repeat: Infinity }} className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `${PROG_COLORS[i]}30`, border: `2px dashed ${PROG_COLORS[i]}50` }}>
@@ -673,19 +677,19 @@ export default function MetodoXPage() {
                 </div>
 
                 <div
-                  className={`rounded-b-2xl overflow-hidden relative ${getEditableClass(`prog-detail-section-${i}`)}`}
-                  style={{ background: `linear-gradient(180deg, ${PROG_COLORS[i]}15, rgba(255,255,255,0.06))`, backdropFilter: "blur(10px)", ...getElementStyle(`prog-detail-section-${i}`) }}
+                  className={`overflow-hidden relative ${getEditableClass(`prog-detail-section-${i}`)}`}
+                  style={{ background: `linear-gradient(180deg, rgba(9,5,31,0.92), ${PROG_COLORS[i]}18 45%, rgba(9,5,31,0.98))`, backdropFilter: "blur(10px)", ...getElementStyle(`prog-detail-section-${i}`) }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-detail-section-${i}`, e); } }}
                   data-testid={`prog-detail-section-${i}`}
                 >
-                  <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${PROG_COLORS[i]}80, transparent)` }} />
-                  <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5`}>
-                    <div className="flex flex-col items-center text-center gap-2">
+                  <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${PROG_COLORS[i]}, transparent)` }} />
+                  <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-3 gap-5"} p-5 md:p-7`}>
+                    <div className="flex flex-col items-center text-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md">
                       <motion.div
                         animate={{ y: [0, -8, 0], boxShadow: [`0 0 0px transparent`, `0 0 24px ${PROG_COLORS[i]}60`, `0 0 0px transparent`] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        className={`w-16 h-16 rounded-2xl flex items-center justify-center ${getEditableClass(`prog-obj-icon-${i}`)}`}
-                        style={{ border: `2px solid ${PROG_COLORS[i]}60`, background: `${PROG_COLORS[i]}20`, ...getElementStyle(`prog-obj-icon-${i}`) }}
+                        className={`w-20 h-20 rounded-full flex items-center justify-center ${getEditableClass(`prog-obj-icon-${i}`)}`}
+                        style={{ border: `2px solid ${PROG_COLORS[i]}80`, background: `radial-gradient(circle, ${PROG_COLORS[i]}55, ${PROG_COLORS[i]}18)`, ...getElementStyle(`prog-obj-icon-${i}`) }}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-icon-${i}`, e); } }}
                         data-testid={`prog-obj-icon-${i}`}
                       >
@@ -696,7 +700,7 @@ export default function MetodoXPage() {
                         )}
                       </motion.div>
                       <h4
-                        className={`text-sm font-bold text-white ${getEditableClass(`prog-obj-title-${i}`)}`}
+                        className={`text-base md:text-lg font-bold text-white ${getEditableClass(`prog-obj-title-${i}`)}`}
                         style={getElementStyle(`prog-obj-title-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-title-${i}`, e); } }}
                       >
@@ -704,7 +708,7 @@ export default function MetodoXPage() {
                       </h4>
                       <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}><ChevronDown className="w-3.5 h-3.5" style={{ color: PROG_COLORS[i] }} /></motion.div>
                       <p
-                        className={`text-[11px] text-white/75 leading-relaxed ${getEditableClass(`prog-obj-text-${i}`)}`}
+                        className={`text-xs md:text-sm text-white/75 leading-relaxed ${getEditableClass(`prog-obj-text-${i}`)}`}
                         style={getElementStyle(`prog-obj-text-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-text-${i}`, e); } }}
                       >
@@ -712,12 +716,12 @@ export default function MetodoXPage() {
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-center text-center gap-2">
+                    <div className="flex flex-col items-center text-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md">
                       <motion.div
                         animate={{ y: [0, -8, 0], boxShadow: [`0 0 0px transparent`, `0 0 24px ${PROG_COLORS[i]}60`, `0 0 0px transparent`] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                        className={`w-16 h-16 rounded-2xl flex items-center justify-center ${getEditableClass(`prog-bases-icon-${i}`)}`}
-                        style={{ border: `2px solid ${PROG_COLORS[i]}60`, background: `${PROG_COLORS[i]}20`, ...getElementStyle(`prog-bases-icon-${i}`) }}
+                        className={`w-20 h-20 rounded-full flex items-center justify-center ${getEditableClass(`prog-bases-icon-${i}`)}`}
+                        style={{ border: `2px solid ${PROG_COLORS[i]}80`, background: `radial-gradient(circle, ${PROG_COLORS[i]}55, ${PROG_COLORS[i]}18)`, ...getElementStyle(`prog-bases-icon-${i}`) }}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-icon-${i}`, e); } }}
                         data-testid={`prog-bases-icon-${i}`}
                       >
@@ -728,7 +732,7 @@ export default function MetodoXPage() {
                         )}
                       </motion.div>
                       <h4
-                        className={`text-sm font-bold text-white ${getEditableClass(`prog-bases-title-${i}`)}`}
+                        className={`text-base md:text-lg font-bold text-white ${getEditableClass(`prog-bases-title-${i}`)}`}
                         style={getElementStyle(`prog-bases-title-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-title-${i}`, e); } }}
                       >
@@ -736,7 +740,7 @@ export default function MetodoXPage() {
                       </h4>
                       <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}><ChevronDown className="w-3.5 h-3.5" style={{ color: PROG_COLORS[i] }} /></motion.div>
                       <p
-                        className={`text-[11px] text-white/75 leading-relaxed ${getEditableClass(`prog-bases-text-${i}`)}`}
+                        className={`text-xs md:text-sm text-white/75 leading-relaxed ${getEditableClass(`prog-bases-text-${i}`)}`}
                         style={getElementStyle(`prog-bases-text-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-text-${i}`, e); } }}
                       >
@@ -744,23 +748,23 @@ export default function MetodoXPage() {
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-center text-center gap-2">
+                    <div className="flex flex-col items-center text-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md">
                       <motion.div
                         animate={{ y: [0, -8, 0], boxShadow: [`0 0 0px transparent`, `0 0 24px ${PROG_COLORS[i]}60`, `0 0 0px transparent`] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                        style={{ border: `2px solid ${PROG_COLORS[i]}60`, background: `${PROG_COLORS[i]}20` }}
+                        className="w-20 h-20 rounded-full flex items-center justify-center"
+                        style={{ border: `2px solid ${PROG_COLORS[i]}80`, background: `radial-gradient(circle, ${PROG_COLORS[i]}55, ${PROG_COLORS[i]}18)` }}
                       >
                         <CheckCircle2 className="w-8 h-8 text-white drop-shadow-lg" />
                       </motion.div>
                       <h4
-                        className={`text-sm font-bold text-white ${getEditableClass(`prog-comp-title-${i}`)}`}
+                        className={`text-base md:text-lg font-bold text-white ${getEditableClass(`prog-comp-title-${i}`)}`}
                         style={getElementStyle(`prog-comp-title-${i}`)}
                         onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-comp-title-${i}`, e); } }}
                       >
                         {t("metodoX.detailComp")}
                       </h4>
-                      <div className="space-y-2 mt-1">
+                      <div className="space-y-2 mt-1 w-full">
                         {prog.comps.map((comp, ci) => (
                           <motion.div
                             key={ci}
@@ -768,11 +772,11 @@ export default function MetodoXPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: ci * 0.1 }}
-                            className="flex items-center gap-2 text-white/85"
+                            className="flex items-center gap-2 text-white/85 justify-center md:justify-start rounded-full bg-white/[0.06] px-3 py-1.5"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: PROG_COLORS[i] }} />
                             <span
-                              className={`text-[11px] font-medium ${getEditableClass(`prog-comp-${i}-${ci}`)}`}
+                              className={`text-xs md:text-sm font-medium ${getEditableClass(`prog-comp-${i}-${ci}`)}`}
                               style={getElementStyle(`prog-comp-${i}-${ci}`)}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-comp-${i}-${ci}`, e); } }}
                             >
@@ -784,25 +788,26 @@ export default function MetodoXPage() {
                     </div>
                   </div>
 
-                  <div className="border-t p-5 relative" style={{ borderColor: `${PROG_COLORS[i]}25` }}>
+                  <div className="border-t p-5 md:p-7 relative" style={{ borderColor: `${PROG_COLORS[i]}25` }}>
                     <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${PROG_COLORS[i]}50, transparent)` }} />
                     <h4
-                      className={`text-base font-bold text-white mb-4 italic ${getEditableClass(`prog-app-title-${i}`)}`}
+                      className={`text-xl md:text-2xl font-bold text-white mb-6 italic ${getEditableClass(`prog-app-title-${i}`)}`}
                       style={getElementStyle(`prog-app-title-${i}`)}
                       onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-app-title-${i}`, e); } }}
                     >
                       {t("metodoX.detailApp")}
                     </h4>
-                    <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-3`}>
+                    <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-4 md:gap-5`}>
                       {METHOD_APPS.map((m, mi) => {
                         const MIcon = m.icon;
                         return (
-                          <motion.div key={mi} className="flex flex-col items-center gap-2" whileHover={{ scale: 1.08 }}>
+                          <motion.div key={mi} className="relative flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-5 backdrop-blur-md" whileHover={{ scale: 1.05 }}>
+                            <span className="absolute -top-3 rounded-full px-3 py-1 text-xs font-black text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}, #7c3aed)` }}>{String(mi + 1).padStart(2, "0")}</span>
                             <motion.div
                               animate={{ y: [0, -5, 0], rotate: [0, 4, -4, 0], boxShadow: [`0 0 0px transparent`, `0 0 16px ${PROG_COLORS[i]}50`, `0 0 0px transparent`] }}
                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: mi * 0.4 }}
-                              className={`w-13 h-13 rounded-xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
-                              style={{ background: `${PROG_COLORS[i]}25`, border: `1.5px solid ${PROG_COLORS[i]}40`, ...getElementStyle(`method-app-icon-${mi}`) }}
+                              className={`w-16 h-16 rounded-2xl flex items-center justify-center ${getEditableClass(`method-app-icon-${mi}`)}`}
+                              style={{ background: `${PROG_COLORS[i]}25`, border: `1.5px solid ${PROG_COLORS[i]}60`, ...getElementStyle(`method-app-icon-${mi}`) }}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`method-app-icon-${mi}`, e); } }}
                               data-testid={`method-app-icon-${mi}`}
                             >
@@ -813,7 +818,7 @@ export default function MetodoXPage() {
                               )}
                             </motion.div>
                             <span
-                              className={`text-[10px] font-semibold text-white/85 text-center ${getEditableClass(`prog-app-label-${i}-${mi}`)}`}
+                              className={`text-xs md:text-sm font-semibold text-white/85 text-center ${getEditableClass(`prog-app-label-${i}-${mi}`)}`}
                               style={getElementStyle(`prog-app-label-${i}-${mi}`)}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-app-label-${i}-${mi}`, e); } }}
                             >
