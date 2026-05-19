@@ -54,14 +54,18 @@ const testCardStyles: Record<string, { bg: string; textDark: boolean; iconUrl: s
 };
 const TESTS_ASSET_WARM_KEY = "assets-warm:tests-page:";
 
+function isKnownVideoAsset(url: string) {
+  return isVideoUrl(url);
+}
+
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
     .map((style) => style?.imageUrl)
-    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0 && !isKnownVideoAsset(url));
 }
 
 function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
-  const unique = Array.from(new Set(urls.filter(Boolean)));
+  const unique = Array.from(new Set(urls.filter((url) => url && !isKnownVideoAsset(url))));
   if (!unique.length) return Promise.resolve();
 
   return new Promise((resolve) => {
@@ -85,11 +89,16 @@ function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
 
     unique.forEach((url) => {
       const img = new Image();
+      img.decoding = "async";
       img.onload = markDone;
       img.onerror = markDone;
       img.src = url;
     });
   });
+}
+
+function getAssetWarmSignature(urls: string[]) {
+  return Array.from(new Set(urls.filter(Boolean))).sort().join("|");
 }
 
 interface TestCardProps {
@@ -146,6 +155,7 @@ function TestCard({
   const defaultStyle = testCardStyles[testId] || testCardStyles.lectura;
   const textDark = defaultStyle.textDark;
   const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
+  const bgIsKnownVideo = hasBackgroundImage ? isKnownVideoAsset(cardStyle.imageUrl!) : false;
   
   return (
     <motion.div
@@ -160,7 +170,7 @@ function TestCard({
       <motion.div
         className="relative overflow-hidden rounded-2xl p-4"
         style={{ 
-          background: (hasBackgroundImage && !bgIsVideo) 
+          background: (hasBackgroundImage && !bgIsKnownVideo && !bgIsVideo) 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : (cardStyle?.background || defaultStyle.bg),
           borderRadius: cardStyle?.borderRadius || 20,
@@ -260,6 +270,9 @@ function HeroSection({ styles, getEditableClass, handleElementClick, getElementS
 }) {
   const heroStyle = resolveStyle(styles, "hero-section", isMobile);
   const heroIsVideo = useIsVideo(heroStyle?.backgroundType === "image" ? heroStyle?.imageUrl : undefined);
+  const heroIsKnownVideo = heroStyle?.backgroundType === "image" && heroStyle?.imageUrl
+    ? isKnownVideoAsset(heroStyle.imageUrl)
+    : false;
   
   const bgStyle: React.CSSProperties = {
     paddingTop: "16px",
@@ -268,7 +281,7 @@ function HeroSection({ styles, getEditableClass, handleElementClick, getElementS
     ...getElementStyle("hero-section", "linear-gradient(180deg, rgba(138, 63, 252, 0.08) 0%, rgba(0, 217, 255, 0.04) 40%, rgba(255, 255, 255, 1) 100%)")
   };
   
-  if (heroIsVideo) {
+  if (heroIsKnownVideo || heroIsVideo) {
     delete bgStyle.backgroundImage;
     delete bgStyle.backgroundSize;
     delete bgStyle.backgroundPosition;
@@ -340,7 +353,7 @@ export default function TestsPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTestStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === "1");
+  const [assetsReady, setAssetsReady] = useState(false);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
 
@@ -361,7 +374,7 @@ export default function TestsPage() {
     const cachedStyles = readCachedTestStyles(lang);
     setStyles(cachedStyles);
     setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === "1");
+    setAssetsReady(false);
 
     fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
@@ -389,17 +402,20 @@ export default function TestsPage() {
   useEffect(() => {
     if (!stylesReady) return;
     const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
-    if (localStorage.getItem(warmKey) === "1") {
+    let cancelled = false;
+    const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
+    const assetUrls = [...extractImageUrlsFromStyles(styles), ...defaultIconUrls];
+    const assetSignature = getAssetWarmSignature(assetUrls);
+
+    if (localStorage.getItem(warmKey) === assetSignature) {
       setAssetsReady(true);
       return;
     }
 
-    let cancelled = false;
     setAssetsReady(false);
-    const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
-    preloadImages([...extractImageUrlsFromStyles(styles), ...defaultIconUrls]).then(() => {
+    preloadImages(assetUrls).then(() => {
       if (cancelled) return;
-      localStorage.setItem(warmKey, "1");
+      localStorage.setItem(warmKey, assetSignature);
       setAssetsReady(true);
     });
 
