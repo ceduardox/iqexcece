@@ -173,6 +173,7 @@ export default function MetodoXPage() {
   ];
 
   const PROG_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b"];
+  const METHOD_APP_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b"];
 
   const EDITABLE_SECTIONS = [
     { id: "hero-section", label: "Hero fondo" },
@@ -802,8 +803,13 @@ export default function MetodoXPage() {
                       {METHOD_APPS.map((m, mi) => {
                         const MIcon = m.icon;
                         return (
-                          <motion.div key={mi} className="relative flex flex-col items-center gap-3 rounded-2xl border border-purple-100 bg-white px-4 py-5 shadow-[0_14px_34px_rgba(88,28,135,0.08)]" whileHover={{ scale: 1.05 }}>
-                            <span className="absolute -top-3 rounded-full px-3 py-1 text-xs font-black text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${PROG_COLORS[i]}, #7c3aed)` }}>{String(mi + 1).padStart(2, "0")}</span>
+                          <motion.div key={mi} className="relative flex flex-col items-center gap-3 rounded-2xl border border-purple-100 bg-white px-4 pt-9 pb-5 shadow-[0_14px_34px_rgba(88,28,135,0.08)]" whileHover={{ scale: 1.05 }}>
+                            <span
+                              className="absolute -top-5 flex h-11 w-11 items-center justify-center rounded-full text-base font-black text-white shadow-[0_10px_24px_rgba(88,28,135,0.28)] ring-4 ring-white"
+                              style={{ background: `linear-gradient(135deg, ${METHOD_APP_COLORS[mi]}, ${PROG_COLORS[i]})` }}
+                            >
+                              {String(mi + 1).padStart(2, "0")}
+                            </span>
                             <motion.div
                               animate={{ y: [0, -5, 0], rotate: [0, 4, -4, 0], boxShadow: [`0 0 0px transparent`, `0 0 16px ${PROG_COLORS[i]}50`, `0 0 0px transparent`] }}
                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: mi * 0.4 }}
