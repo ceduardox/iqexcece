@@ -30,6 +30,7 @@ type RecordMap = { id: string; title: string; data: string; updatedAt: string };
 type Data = { kind: Kind; nodes?: Node[]; edges?: Edge[]; columns?: TaskCols; strokes?: Stroke[] };
 type AiIdea = { title: string; children: string[]; note?: string; imageHint?: string; imageUrl?: string };
 type AiMap = { centralTopic: string; ideas: AiIdea[] };
+type AiQuota = { limit: number; used: number; remaining: number; resetAt: string };
 
 const SESSION_KEY = "iq_session_id";
 const VIEW_STATE_KEY = "iq_mindmaps_view_state_v1";
@@ -159,6 +160,17 @@ function getSessionId() {
   return generated;
 }
 
+function formatAiCountdown(resetAt?: string) {
+  if (!resetAt) return "";
+  const remainingMs = new Date(resetAt).getTime() - Date.now();
+  if (!Number.isFinite(remainingMs) || remainingMs <= 0) return "00:00:00";
+  const totalSeconds = Math.ceil(remainingMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
+}
+
 function parseData(raw: string): Data {
   try {
     const parsed = JSON.parse(raw);
@@ -200,6 +212,8 @@ export default function MindMapsPage() {
   const [aiIncludeNotes, setAiIncludeNotes] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiProgress, setAiProgress] = useState(0);
+  const [aiQuota, setAiQuota] = useState<AiQuota | null>(null);
+  const [aiCountdown, setAiCountdown] = useState("");
   const [boardZoom, setBoardZoom] = useState(1);
   const [boardOffset, setBoardOffset] = useState({ x: 0, y: 0 });
   const [mobileLandscape, setMobileLandscape] = useState(false);
@@ -501,6 +515,37 @@ export default function MindMapsPage() {
       JSON.stringify({ zoom: boardZoom, offsetX: boardOffset.x, offsetY: boardOffset.y }),
     );
   }, [showChooser, kind, boardZoom, boardOffset.x, boardOffset.y]);
+
+  useEffect(() => {
+    if (readonly || showChooser || kind !== "mindmap") {
+      setAiQuota(null);
+      setAiCountdown("");
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/mindmaps/ideas/quota")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.quota) setAiQuota(data.quota);
+      })
+      .catch(() => {
+        // Quota is enforced by the server even if this visual read fails.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [readonly, showChooser, kind]);
+
+  useEffect(() => {
+    if (!aiQuota?.resetAt || aiQuota.remaining > 0) {
+      setAiCountdown("");
+      return;
+    }
+    const tick = () => setAiCountdown(formatAiCountdown(aiQuota.resetAt));
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [aiQuota?.resetAt, aiQuota?.remaining]);
 
   useEffect(() => {
     zoomRef.current = boardZoom;
@@ -1165,6 +1210,14 @@ export default function MindMapsPage() {
 
   async function generateAiIdeas() {
     if (!aiTopic.trim() || readonly || kind !== "mindmap") return;
+    if (aiQuota && aiQuota.remaining <= 0) {
+      toast({
+        title: "Limite diario alcanzado",
+        description: `Podras generar de nuevo en ${aiCountdown || formatAiCountdown(aiQuota.resetAt)}.`,
+        variant: "destructive",
+      });
+      return;
+    }
     let progressTimer: ReturnType<typeof setInterval> | null = null;
     try {
       setAiBusy(true);
@@ -1193,6 +1246,7 @@ export default function MindMapsPage() {
       }
 
       const data = await res.json();
+      if (data?.quota) setAiQuota(data.quota);
       if (!res.ok) throw new Error(data?.error || "No se pudo generar ideas");
       if (!data?.map?.centralTopic || !Array.isArray(data?.map?.ideas)) throw new Error("Respuesta invalida de IA");
 
@@ -1636,6 +1690,15 @@ export default function MindMapsPage() {
               {showAiIdeas && (
                 <div className="mt-3 space-y-3">
                   <p className="text-[15px] text-slate-600 leading-5">Comienza tu mapa mental con IA</p>
+                  {aiQuota && (
+                    <div className={`rounded-xl border px-3 py-2 text-[13px] leading-4 ${aiQuota.remaining <= 0 ? "border-amber-200 bg-amber-50 text-amber-800" : "border-cyan-200 bg-cyan-50 text-cyan-800"}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold">{aiQuota.remaining <= 0 ? "Limite diario alcanzado" : `${aiQuota.remaining}/${aiQuota.limit} intentos IA hoy`}</span>
+                        {aiQuota.remaining <= 0 && <span className="font-mono text-[14px]">{aiCountdown || formatAiCountdown(aiQuota.resetAt)}</span>}
+                      </div>
+                      {aiQuota.remaining <= 0 && <p className="mt-1 text-[12px]">Se habilita de nuevo cuando el contador llegue a 00:00:00.</p>}
+                    </div>
+                  )}
                   <textarea value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} placeholder="Que quieres mapear mentalmente?" className="app-ai-input w-full min-h-[94px] resize-none px-3 py-3 text-[16px] leading-5 placeholder:text-slate-400" />
                   <div>
                     <p className="text-[15px] font-medium text-slate-700 mb-2">Resultados</p>
@@ -1658,7 +1721,7 @@ export default function MindMapsPage() {
                       Notas
                     </label>
                   </div>
-                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim()} className="app-btn-primary app-create-btn w-full disabled:opacity-50">{aiBusy ? `Generando... ${aiProgress}%` : "CREAR"}</button>
+                  <button onClick={generateAiIdeas} disabled={aiBusy || !aiTopic.trim() || (aiQuota?.remaining ?? 1) <= 0} className="app-btn-primary app-create-btn w-full disabled:opacity-50">{aiBusy ? `Generando... ${aiProgress}%` : (aiQuota?.remaining ?? 1) <= 0 ? `Disponible en ${aiCountdown || formatAiCountdown(aiQuota?.resetAt) || "--:--:--"}` : "CREAR"}</button>
                   {aiBusy && <div className="w-full h-2 rounded-full bg-cyan-100 overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300" style={{ width: `${aiProgress}%` }} /></div>}
                 </div>
               )}

@@ -6,8 +6,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { createHmac, randomUUID } from "crypto";
-import { eq, and, desc } from "drizzle-orm";
-import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps } from "@shared/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
+import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps, mindMapAiUsage } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db } from "./db";
 import { getClientIp, loadSiteAccessSettings, saveSiteAccessSettings } from "./site-access";
@@ -33,6 +33,9 @@ const TOKENS_FILE = path.join("/tmp", "admin_tokens.json");
 const ASESOR_STATE_FILE = path.join("/tmp", "asesor_state.json");
 const pendingManualReplies = new Map<string, string>();
 const NOWPAYMENTS_ORDERS_FILE = path.join("/tmp", "nowpayments_orders.json");
+const MIND_MAP_AI_DAILY_LIMIT = 3;
+const BOLIVIA_UTC_OFFSET_MS = -4 * 60 * 60 * 1000;
+let mindMapAiUsageTableReady: Promise<void> | null = null;
 
 type NowPaymentsOrder = {
   id: string;
@@ -80,6 +83,84 @@ function saveNowPaymentsOrders() {
 }
 
 loadNowPaymentsOrders();
+
+function getBoliviaUsageWindow(now = new Date()) {
+  const local = new Date(now.getTime() + BOLIVIA_UTC_OFFSET_MS);
+  const year = local.getUTCFullYear();
+  const month = local.getUTCMonth();
+  const day = local.getUTCDate();
+  const usageDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const resetAt = new Date(Date.UTC(year, month, day + 1) - BOLIVIA_UTC_OFFSET_MS);
+  return { usageDate, resetAt };
+}
+
+function getMindMapAiDeviceHash(req: Request) {
+  const ip = getClientIp(req);
+  const userAgent = String(req.headers["user-agent"] || "");
+  const language = String(req.headers["accept-language"] || "");
+  const platform = String(req.headers["sec-ch-ua-platform"] || "");
+  const mobile = String(req.headers["sec-ch-ua-mobile"] || "");
+  const raw = [ip, userAgent, language, platform, mobile].join("|");
+  return createHmac("sha256", ADMIN_TOKEN_SECRET).update(raw).digest("hex");
+}
+
+async function ensureMindMapAiUsageTable() {
+  if (!mindMapAiUsageTableReady) {
+    mindMapAiUsageTableReady = db.execute(sql`
+      create table if not exists mind_map_ai_usage (
+        id varchar primary key default gen_random_uuid(),
+        device_hash text not null,
+        usage_date text not null,
+        count integer not null default 0,
+        created_at timestamp default now(),
+        updated_at timestamp default now(),
+        constraint mind_map_ai_usage_device_date unique (device_hash, usage_date)
+      )
+    `).then(() => undefined);
+  }
+  return mindMapAiUsageTableReady;
+}
+
+async function getMindMapAiQuota(req: Request) {
+  await ensureMindMapAiUsageTable();
+  const deviceHash = getMindMapAiDeviceHash(req);
+  const { usageDate, resetAt } = getBoliviaUsageWindow();
+  const [usage] = await db
+    .select()
+    .from(mindMapAiUsage)
+    .where(and(eq(mindMapAiUsage.deviceHash, deviceHash), eq(mindMapAiUsage.usageDate, usageDate)));
+  const used = Math.max(0, Number(usage?.count || 0));
+  return {
+    limit: MIND_MAP_AI_DAILY_LIMIT,
+    used,
+    remaining: Math.max(0, MIND_MAP_AI_DAILY_LIMIT - used),
+    resetAt: resetAt.toISOString(),
+  };
+}
+
+async function consumeMindMapAiQuota(req: Request) {
+  await ensureMindMapAiUsageTable();
+  const deviceHash = getMindMapAiDeviceHash(req);
+  const { usageDate, resetAt } = getBoliviaUsageWindow();
+  const { rows } = await db.execute(sql`
+    insert into mind_map_ai_usage (device_hash, usage_date, count, updated_at)
+    values (${deviceHash}, ${usageDate}, 1, now())
+    on conflict (device_hash, usage_date)
+    do update set count = mind_map_ai_usage.count + 1, updated_at = now()
+    where mind_map_ai_usage.count < ${MIND_MAP_AI_DAILY_LIMIT}
+    returning count
+  `);
+  const used = Number((rows?.[0] as any)?.count || 0);
+  return {
+    allowed: used > 0,
+    quota: {
+      limit: MIND_MAP_AI_DAILY_LIMIT,
+      used: used || MIND_MAP_AI_DAILY_LIMIT,
+      remaining: Math.max(0, MIND_MAP_AI_DAILY_LIMIT - (used || MIND_MAP_AI_DAILY_LIMIT)),
+      resetAt: resetAt.toISOString(),
+    },
+  };
+}
 
 function loadAsesorEnabled(): boolean {
   try {
@@ -481,6 +562,14 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/mindmaps/ideas/quota", async (req, res) => {
+    try {
+      res.json({ quota: await getMindMapAiQuota(req) });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "No se pudo consultar el limite de IA" });
+    }
+  });
+
   app.post("/api/mindmaps/ideas", async (req, res) => {
     try {
       const {
@@ -496,6 +585,14 @@ export async function registerRoutes(
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+
+      const quotaResult = await consumeMindMapAiQuota(req);
+      if (!quotaResult.allowed) {
+        return res.status(429).json({
+          error: "Limite diario de IA alcanzado. Podras generar de nuevo cuando termine el contador.",
+          quota: quotaResult.quota,
+        });
+      }
 
       const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
       const style =
@@ -671,7 +768,7 @@ Reglas:
         parsed = { ...parsed, ideas: ideasWithImages };
       }
 
-      res.json({ map: parsed });
+      res.json({ map: parsed, quota: quotaResult.quota });
     } catch (err: any) {
       res.status(500).json({ error: err.message || "No se pudo generar ideas" });
     }

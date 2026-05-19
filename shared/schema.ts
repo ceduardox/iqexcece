@@ -352,6 +352,17 @@ export const mindMaps = pgTable("mind_maps", {
 
 export const insertMindMapSchema = createInsertSchema(mindMaps).omit({ id: true, createdAt: true, updatedAt: true });
 
+export const mindMapAiUsage = pgTable("mind_map_ai_usage", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  deviceHash: text("device_hash").notNull(),
+  usageDate: text("usage_date").notNull(),
+  count: integer("count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("mind_map_ai_usage_device_date").on(table.deviceHash, table.usageDate),
+]);
+
 // Page styles for visual editor
 export const pageStyles = pgTable("page_styles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
