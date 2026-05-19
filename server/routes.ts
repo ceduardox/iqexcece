@@ -944,6 +944,33 @@ Reglas:
     }
   });
 
+  // Delete reading theme (admin)
+  app.delete("/api/admin/reading", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const { categoria, temaNumero } = req.body;
+      const parsedTema = Number(temaNumero);
+      if (!categoria || !Number.isFinite(parsedTema)) {
+        return res.status(400).json({ error: "categoria and temaNumero are required" });
+      }
+
+      const deleted = await db.delete(readingContents)
+        .where(and(
+          eq(readingContents.categoria, categoria),
+          eq(readingContents.temaNumero, parsedTema)
+        ))
+        .returning();
+
+      res.json({ success: true, deletedCount: deleted.length });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete reading theme" });
+    }
+  });
+
   // Save reading content (admin)
   app.post("/api/admin/reading", async (req, res) => {
     const auth = req.headers.authorization;

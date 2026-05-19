@@ -1285,6 +1285,51 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     setSaving(false);
   };
 
+  const handleDeleteReadingTheme = async (temaNumero: number) => {
+    const themeLabel = `Tema ${String(temaNumero).padStart(2, "0")}`;
+    const confirmed = window.confirm(`Eliminar ${themeLabel}? Esta accion no se puede deshacer.`);
+    if (!confirmed) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/reading", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          categoria: contentCategory,
+          temaNumero,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Error al eliminar el tema");
+        return;
+      }
+
+      const data = await res.json();
+      if (!data.deletedCount) {
+        alert("Este tema no se puede eliminar porque es un tema base del sistema. Puedes desactivarlo.");
+        return;
+      }
+
+      const remainingThemes = availableThemes.filter(t => t.temaNumero !== temaNumero);
+      setAvailableThemes(remainingThemes);
+      if (selectedTema === temaNumero) {
+        const nextTema = remainingThemes[0]?.temaNumero || 1;
+        setSelectedTema(nextTema);
+      }
+      alert("Tema eliminado correctamente");
+      loadThemes();
+    } catch {
+      alert("Error al eliminar el tema");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveRazonamiento = async () => {
     setSaving(true);
     try {
@@ -3272,6 +3317,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                         data-testid={`button-toggle-tema-${theme.temaNumero}`}
                       >
                         {theme.isActive === false ? "✕" : "✓"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteReadingTheme(theme.temaNumero);
+                        }}
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] bg-red-500/20 text-red-300 hover:bg-red-500/40"
+                        title="Eliminar tema"
+                        data-testid={`button-delete-tema-${theme.temaNumero}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   ))}
