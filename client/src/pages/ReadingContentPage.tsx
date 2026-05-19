@@ -843,7 +843,7 @@ export default function ReadingContentPage() {
 
       <main className="flex-1 overflow-y-auto px-5 py-5">
         {activeTab === "lectura" ? (
-          <div className="space-y-5">
+          <div className="space-y-5 md:max-w-[50vw] md:mx-auto">
             <div>
               <p className="text-xs font-semibold mb-1" style={{ color: "#8a3ffc" }}>{t("tests.readingLabel")}</p>
               <h2 className="text-lg font-black" style={{ color: "#1f2937" }}>{content.title}</h2>
