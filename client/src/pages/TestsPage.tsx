@@ -101,6 +101,19 @@ function getAssetWarmSignature(urls: string[]) {
   return Array.from(new Set(urls.filter(Boolean))).sort().join("|");
 }
 
+function getTestAssetUrls(styles: PageStyles) {
+  const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
+  return [...extractImageUrlsFromStyles(styles), ...defaultIconUrls];
+}
+
+function getWarmAssetSignatureForStyles(styles: PageStyles) {
+  return getAssetWarmSignature(getTestAssetUrls(styles));
+}
+
+function hasWarmTestAssets(lang: string, styles: PageStyles) {
+  return localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === getWarmAssetSignatureForStyles(styles);
+}
+
 interface TestCardProps {
   testId: string;
   title: string;
@@ -353,7 +366,10 @@ export default function TestsPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTestStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState(false);
+  const [assetsReady, setAssetsReady] = useState<boolean>(() => {
+    const cachedStyles = readCachedTestStyles(lang);
+    return Object.keys(cachedStyles).length > 0 && hasWarmTestAssets(lang, cachedStyles);
+  });
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
 
@@ -372,16 +388,25 @@ export default function TestsPage() {
   useEffect(() => {
     const controller = new AbortController();
     const cachedStyles = readCachedTestStyles(lang);
+    const hasCachedStyles = Object.keys(cachedStyles).length > 0;
     setStyles(cachedStyles);
-    setStylesReady(Object.keys(cachedStyles).length > 0);
-    setAssetsReady(false);
+    setStylesReady(hasCachedStyles);
+    setAssetsReady(hasCachedStyles && hasWarmTestAssets(lang, cachedStyles));
 
     fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
+            const nextSignature = getWarmAssetSignatureForStyles(nextStyles);
+            const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
+
+            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
+              await preloadImages(getTestAssetUrls(nextStyles));
+              localStorage.setItem(warmKey, nextSignature);
+            }
+
             setStyles(nextStyles);
             localStorage.setItem(`${TESTS_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
           } catch (e) {
@@ -403,8 +428,7 @@ export default function TestsPage() {
     if (!stylesReady) return;
     const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
     let cancelled = false;
-    const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
-    const assetUrls = [...extractImageUrlsFromStyles(styles), ...defaultIconUrls];
+    const assetUrls = getTestAssetUrls(styles);
     const assetSignature = getAssetWarmSignature(assetUrls);
 
     if (localStorage.getItem(warmKey) === assetSignature) {
