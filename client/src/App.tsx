@@ -114,7 +114,7 @@ function App() {
 
     let cancelled = false;
 
-    waitForRenderedImages().finally(() => {
+    waitForRenderedImages(1800).finally(() => {
       if (!cancelled) {
         window.dispatchEvent(new Event("iqex-app-ready"));
       }

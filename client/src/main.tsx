@@ -16,6 +16,6 @@ function removeInitialLoader() {
 }
 
 window.addEventListener("iqex-app-ready", removeInitialLoader, { once: true });
-window.setTimeout(removeInitialLoader, 6000);
+window.setTimeout(removeInitialLoader, 3000);
 
 createRoot(document.getElementById("root")!).render(<App />);

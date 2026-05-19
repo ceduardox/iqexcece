@@ -27,36 +27,34 @@ const HERO_TITLE_CONTAINER_VARIANTS = {
   show: {
     opacity: 1,
     transition: {
-      delayChildren: 0.1,
-      staggerChildren: 0.16,
+      delayChildren: 0.02,
+      staggerChildren: 0.045,
     },
   },
 };
 const HERO_TITLE_LINE_VARIANTS = {
-  hidden: { opacity: 0, x: -120, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
-    x: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    y: 0,
+    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
   },
 };
 const HOME_CARD_ENTRANCE_VARIANTS = {
   hidden: (index: number) => {
     const from = [
-      { x: -28, y: 16, rotate: -1 },
-      { x: 28, y: 16, rotate: 1 },
-      { x: 0, y: 24, rotate: 0 },
-      { x: -24, y: 18, rotate: -1 },
-      { x: 24, y: 18, rotate: 1 },
+      { x: -8, y: 8, rotate: 0 },
+      { x: 8, y: 8, rotate: 0 },
+      { x: 0, y: 10, rotate: 0 },
+      { x: -6, y: 8, rotate: 0 },
+      { x: 6, y: 8, rotate: 0 },
     ][index % 5];
     return {
       opacity: 0,
       x: from.x,
       y: from.y,
       rotate: from.rotate,
-      scale: 0.98,
-      filter: "blur(2px)",
+      scale: 0.995,
     };
   },
   show: (index: number) => ({
@@ -65,10 +63,9 @@ const HOME_CARD_ENTRANCE_VARIANTS = {
     y: 0,
     rotate: 0,
     scale: 1,
-    filter: "blur(0px)",
     transition: {
-      delay: 0.22 + index * 0.06,
-      duration: 0.42,
+      delay: 0.04 + index * 0.025,
+      duration: 0.18,
       ease: [0.22, 1, 0.36, 1],
     },
   }),
@@ -77,6 +74,13 @@ const HOME_CARD_ENTRANCE_VARIANTS = {
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
     .map((style) => style?.imageUrl)
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+}
+
+function extractCriticalHomeImageUrls(styles: PageStyles): string[] {
+  return Object.entries(styles)
+    .filter(([key]) => key === "header-logo" || key === "hero-section" || key === "hero-section-desktop")
+    .map(([, style]) => style?.imageUrl)
     .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
 }
 
@@ -199,13 +203,17 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
 
     let cancelled = false;
     const warmKey = `${HOME_ASSET_WARM_KEY}${styleLang}`;
-    const timeoutMs = localStorage.getItem(warmKey) === "1" ? 1800 : 4500;
+    const warm = localStorage.getItem(warmKey) === "1";
+    const criticalUrls = extractCriticalHomeImageUrls(styles);
+    const criticalTimeoutMs = warm ? 250 : 1200;
 
-    preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG], timeoutMs).then(() => {
+    preloadImages(criticalUrls, criticalTimeoutMs).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, "1");
       window.dispatchEvent(new Event("iqex-app-ready"));
     });
+
+    preloadImages([...extractImageUrlsFromStyles(styles), DEFAULT_MINDMAP_BG], 2500).catch(() => {});
 
     return () => {
       cancelled = true;
