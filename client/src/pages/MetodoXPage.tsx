@@ -196,10 +196,22 @@ export default function MetodoXPage() {
       { id: `prog-bg-${i}`, label: `${p.name} fondo exterior` },
       { id: `prog-title-bg-${i}`, label: `${p.name} título fondo` },
       { id: `prog-card-${i}`, label: `${p.name} card` },
+      { id: `prog-name-${i}`, label: `${p.name} nombre` },
+      { id: `prog-age-${i}`, label: `${p.name} edad` },
+      { id: `prog-label-${i}`, label: `${p.name} etiqueta` },
+      { id: `prog-desc-${i}`, label: `${p.name} desc cabecera` },
       { id: `prog-image-${i}`, label: `${p.name} imagen` },
       { id: `prog-detail-section-${i}`, label: `${p.name} detalle fondo` },
       { id: `prog-obj-icon-${i}`, label: `${p.name} icono objetivo` },
+      { id: `prog-obj-title-${i}`, label: `${p.name} objetivo titulo` },
+      { id: `prog-obj-text-${i}`, label: `${p.name} objetivo texto` },
       { id: `prog-bases-icon-${i}`, label: `${p.name} icono bases` },
+      { id: `prog-bases-title-${i}`, label: `${p.name} bases titulo` },
+      { id: `prog-bases-text-${i}`, label: `${p.name} bases texto` },
+      { id: `prog-comp-title-${i}`, label: `${p.name} competencias titulo` },
+      ...p.comps.map((_, ci) => ({ id: `prog-comp-${i}-${ci}`, label: `${p.name} competencia ${ci + 1}` })),
+      { id: `prog-app-title-${i}`, label: `${p.name} aplicacion titulo` },
+      ...METHOD_APPS.map((m, mi) => ({ id: `prog-app-label-${i}-${mi}`, label: `${p.name} ${m.label}` })),
     ]).flat(),
     ...METHOD_APPS.map((m, i) => ({ id: `method-app-icon-${i}`, label: `Método ${m.label} icono` })),
   ];
@@ -599,18 +611,42 @@ export default function MetodoXPage() {
                   <motion.div className="absolute right-4 bottom-2 opacity-[0.06] text-[80px] font-black text-white pointer-events-none select-none" animate={{ opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>X</motion.div>
                   <div className="flex flex-wrap items-end justify-between gap-3 relative z-10">
                     <div className="flex items-center gap-3">
-                      <h3 className="text-2xl md:text-4xl font-black text-white leading-none drop-shadow-lg">{prog.name}</h3>
+                      <h3
+                        className={`text-2xl md:text-4xl font-black text-white leading-none drop-shadow-lg ${getEditableClass(`prog-name-${i}`)}`}
+                        style={getElementStyle(`prog-name-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-name-${i}`, e); } }}
+                      >
+                        {prog.name}
+                      </h3>
                       <motion.span
                         animate={{ scale: [1, 1.2, 1], boxShadow: [`0 0 0px transparent`, `0 0 25px ${PROG_COLORS[i]}90`, `0 0 0px transparent`], rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         className="w-10 h-10 md:w-13 md:h-13 rounded-full flex items-center justify-center font-black text-white text-lg md:text-2xl"
                         style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}
                       >X</motion.span>
-                      <span className="text-sm md:text-base text-white/80 font-semibold">{prog.age}</span>
+                      <span
+                        className={`text-sm md:text-base text-white/80 font-semibold ${getEditableClass(`prog-age-${i}`)}`}
+                        style={getElementStyle(`prog-age-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-age-${i}`, e); } }}
+                      >
+                        {prog.age}
+                      </span>
                     </div>
                     <div className="text-right max-w-[220px]">
-                      <p className="text-sm font-bold text-white drop-shadow-sm">{prog.label}</p>
-                      <p className="text-[11px] text-white/70 leading-relaxed mt-1">{prog.desc}</p>
+                      <p
+                        className={`text-sm font-bold text-white drop-shadow-sm ${getEditableClass(`prog-label-${i}`)}`}
+                        style={getElementStyle(`prog-label-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-label-${i}`, e); } }}
+                      >
+                        {prog.label}
+                      </p>
+                      <p
+                        className={`text-[11px] text-white/70 leading-relaxed mt-1 ${getEditableClass(`prog-desc-${i}`)}`}
+                        style={getElementStyle(`prog-desc-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-desc-${i}`, e); } }}
+                      >
+                        {prog.desc}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -659,9 +695,21 @@ export default function MetodoXPage() {
                           <Target className="w-8 h-8 text-white drop-shadow-lg" />
                         )}
                       </motion.div>
-                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailObj")}</h4>
+                      <h4
+                        className={`text-sm font-bold text-white ${getEditableClass(`prog-obj-title-${i}`)}`}
+                        style={getElementStyle(`prog-obj-title-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-title-${i}`, e); } }}
+                      >
+                        {t("metodoX.detailObj")}
+                      </h4>
                       <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}><ChevronDown className="w-3.5 h-3.5" style={{ color: PROG_COLORS[i] }} /></motion.div>
-                      <p className="text-[11px] text-white/75 leading-relaxed">{prog.obj}</p>
+                      <p
+                        className={`text-[11px] text-white/75 leading-relaxed ${getEditableClass(`prog-obj-text-${i}`)}`}
+                        style={getElementStyle(`prog-obj-text-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-obj-text-${i}`, e); } }}
+                      >
+                        {prog.obj}
+                      </p>
                     </div>
 
                     <div className="flex flex-col items-center text-center gap-2">
@@ -679,9 +727,21 @@ export default function MetodoXPage() {
                           <Scan className="w-8 h-8 text-white drop-shadow-lg" />
                         )}
                       </motion.div>
-                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailBases")}</h4>
+                      <h4
+                        className={`text-sm font-bold text-white ${getEditableClass(`prog-bases-title-${i}`)}`}
+                        style={getElementStyle(`prog-bases-title-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-title-${i}`, e); } }}
+                      >
+                        {t("metodoX.detailBases")}
+                      </h4>
                       <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}><ChevronDown className="w-3.5 h-3.5" style={{ color: PROG_COLORS[i] }} /></motion.div>
-                      <p className="text-[11px] text-white/75 leading-relaxed">{prog.bases}</p>
+                      <p
+                        className={`text-[11px] text-white/75 leading-relaxed ${getEditableClass(`prog-bases-text-${i}`)}`}
+                        style={getElementStyle(`prog-bases-text-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-bases-text-${i}`, e); } }}
+                      >
+                        {prog.bases}
+                      </p>
                     </div>
 
                     <div className="flex flex-col items-center text-center gap-2">
@@ -693,7 +753,13 @@ export default function MetodoXPage() {
                       >
                         <CheckCircle2 className="w-8 h-8 text-white drop-shadow-lg" />
                       </motion.div>
-                      <h4 className="text-sm font-bold text-white">{t("metodoX.detailComp")}</h4>
+                      <h4
+                        className={`text-sm font-bold text-white ${getEditableClass(`prog-comp-title-${i}`)}`}
+                        style={getElementStyle(`prog-comp-title-${i}`)}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-comp-title-${i}`, e); } }}
+                      >
+                        {t("metodoX.detailComp")}
+                      </h4>
                       <div className="space-y-2 mt-1">
                         {prog.comps.map((comp, ci) => (
                           <motion.div
@@ -705,7 +771,13 @@ export default function MetodoXPage() {
                             className="flex items-center gap-2 text-white/85"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: PROG_COLORS[i] }} />
-                            <span className="text-[11px] font-medium">{comp}</span>
+                            <span
+                              className={`text-[11px] font-medium ${getEditableClass(`prog-comp-${i}-${ci}`)}`}
+                              style={getElementStyle(`prog-comp-${i}-${ci}`)}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-comp-${i}-${ci}`, e); } }}
+                            >
+                              {comp}
+                            </span>
                           </motion.div>
                         ))}
                       </div>
@@ -714,7 +786,13 @@ export default function MetodoXPage() {
 
                   <div className="border-t p-5 relative" style={{ borderColor: `${PROG_COLORS[i]}25` }}>
                     <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${PROG_COLORS[i]}50, transparent)` }} />
-                    <h4 className="text-base font-bold text-white mb-4 italic">{t("metodoX.detailApp")}</h4>
+                    <h4
+                      className={`text-base font-bold text-white mb-4 italic ${getEditableClass(`prog-app-title-${i}`)}`}
+                      style={getElementStyle(`prog-app-title-${i}`)}
+                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-app-title-${i}`, e); } }}
+                    >
+                      {t("metodoX.detailApp")}
+                    </h4>
                     <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-3`}>
                       {METHOD_APPS.map((m, mi) => {
                         const MIcon = m.icon;
@@ -734,7 +812,13 @@ export default function MetodoXPage() {
                                 <MIcon className="w-6 h-6 text-white drop-shadow-md" />
                               )}
                             </motion.div>
-                            <span className="text-[10px] font-semibold text-white/85 text-center">{m.label}</span>
+                            <span
+                              className={`text-[10px] font-semibold text-white/85 text-center ${getEditableClass(`prog-app-label-${i}-${mi}`)}`}
+                              style={getElementStyle(`prog-app-label-${i}-${mi}`)}
+                              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`prog-app-label-${i}-${mi}`, e); } }}
+                            >
+                              {m.label}
+                            </span>
                             <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: mi * 0.2 }}><ChevronDown className="w-3 h-3" style={{ color: `${PROG_COLORS[i]}70` }} /></motion.div>
                           </motion.div>
                         );
