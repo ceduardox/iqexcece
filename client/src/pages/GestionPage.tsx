@@ -298,6 +298,9 @@ export default function GestionPage() {
   const [adminPaymentNotice, setAdminPaymentNotice] = useState<null | {
     pendingCount: number;
     pendingDebt: number;
+    advanceAmount: number;
+    totalToPay: number;
+    advancePeriod: string;
     paidUntil: string;
     lastPaidAt: string;
     lastPaidAmount: number;
@@ -355,7 +358,7 @@ export default function GestionPage() {
   });
 
   const buildAdminPaymentNotice = (sourcePayments: AdminPaymentRow[]) => {
-    const seeded = withPaymentPeriodDates(sourcePayments.length > 0 ? sourcePayments : DEFAULT_SERVER_PAYMENT_ROWS);
+    const seeded = withPaymentPeriodDates([...DEFAULT_SERVER_PAYMENT_ROWS, ...sourcePayments]);
 
     const latestMonthlyPaid = [...seeded]
       .filter((row) => String(row.billingMode || "").toLowerCase() === "mensual" && normalizePaymentStatusValue(row.paymentStatus) === "paid" && row.periodAt)
@@ -364,7 +367,11 @@ export default function GestionPage() {
     if (latestMonthlyPaid?.periodAt) {
       const existingMonthlyKeys = new Set(
         seeded
-          .filter((row) => String(row.billingMode || "").toLowerCase() === "mensual" && row.periodAt)
+          .filter((row) =>
+            String(row.billingMode || "").toLowerCase() === "mensual" &&
+            normalizePaymentStatusValue(row.paymentStatus) !== "failed" &&
+            row.periodAt
+          )
           .map((row) => {
             const d = new Date(row.periodAt || 0);
             return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -406,9 +413,21 @@ export default function GestionPage() {
 
     if (pendingPayments.length === 0) return null;
 
+    const pendingDebt = pendingPayments.reduce((sum, row) => sum + Number(row.amountUsd || 0), 0);
+    const latestPending = pendingPayments[pendingPayments.length - 1];
+    const advanceAmount = latestMonthlyPaid ? Number(latestMonthlyPaid.amountUsd || 0) : 0;
+    const advancePeriodAt = latestPending?.periodAt && advanceAmount > 0
+      ? addMonthsKeepingDayFromDate(latestPending.periodAt, 1).toISOString()
+      : null;
+
     return {
       pendingCount: pendingPayments.length,
-      pendingDebt: pendingPayments.reduce((sum, row) => sum + Number(row.amountUsd || 0), 0),
+      pendingDebt,
+      advanceAmount,
+      totalToPay: pendingDebt + advanceAmount,
+      advancePeriod: advancePeriodAt
+        ? new Date(advancePeriodAt).toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+        : "-",
       paidUntil: latestPaid?.periodAt
         ? new Date(latestPaid.periodAt).toLocaleDateString("es-ES", { month: "long", year: "numeric" })
         : "-",
@@ -2610,7 +2629,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 <div>
                   <p className="text-amber-300 font-bold">Pago pendiente del servidor</p>
                   <p className="text-white/85 text-sm">
-                    Hay {adminPaymentNotice.pendingCount} cuota{adminPaymentNotice.pendingCount === 1 ? "" : "s"} pendiente{adminPaymentNotice.pendingCount === 1 ? "" : "s"} por ${adminPaymentNotice.pendingDebt}. El sistema figura pagado hasta {adminPaymentNotice.paidUntil}; el ultimo pago real fue el {adminPaymentNotice.lastPaidAt} por ${adminPaymentNotice.lastPaidAmount}.
+                    Hay {adminPaymentNotice.pendingCount} cuota{adminPaymentNotice.pendingCount === 1 ? "" : "s"} atrasada{adminPaymentNotice.pendingCount === 1 ? "" : "s"} por ${adminPaymentNotice.pendingDebt} y se cobrara {adminPaymentNotice.advancePeriod} adelantado por ${adminPaymentNotice.advanceAmount}. Total a pagar: ${adminPaymentNotice.totalToPay}. El sistema figura pagado hasta {adminPaymentNotice.paidUntil}; el ultimo pago real fue el {adminPaymentNotice.lastPaidAt} por ${adminPaymentNotice.lastPaidAmount}.
                   </p>
                   <p className="text-white/50 text-xs mt-1">Revisa la seccion Servidor para renovar el plan.</p>
                 </div>
@@ -8021,7 +8040,16 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     paidAt: latestPaid?.paidAt || null,
     paidUntil: latestPaid?.periodAt || null,
   };
-  const amountToPayNow = pendingDebt > 0 ? pendingDebt : activePlan.amount;
+  const advancePayment = pendingDebt > 0 && activeBilling === "mensual"
+    ? {
+        amount: activePlan.amount,
+        periodAt: latestPending?.periodAt
+          ? addMonthsKeepingDayFromDate(latestPending.periodAt, 1).toISOString()
+          : null,
+      }
+    : null;
+  const totalToPayNow = pendingDebt + (advancePayment?.amount || 0);
+  const amountToPayNow = pendingDebt > 0 ? totalToPayNow : activePlan.amount;
 
   const fetchPayments = async () => {
     if (!adminToken) return;
@@ -8178,7 +8206,8 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             <p className="text-xs text-emerald-300">{activePlan.status}</p>
             {pendingDebt > 0 && (
               <p className="text-[11px] text-amber-300 mt-0.5">
-                Debe pagar {pendingPayments.length} cuota{pendingPayments.length === 1 ? "" : "s"} juntas: ${pendingDebt} total.
+                Debe pagar {pendingPayments.length} cuota{pendingPayments.length === 1 ? "" : "s"} atrasada{pendingPayments.length === 1 ? "" : "s"} (${pendingDebt})
+                {advancePayment ? ` + ${formatPaymentDate(advancePayment.periodAt)} adelantado ($${advancePayment.amount})` : ""}: ${amountToPayNow} total.
               </p>
             )}
             {activePlan.paidAt && (
@@ -8201,7 +8230,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             className="bg-violet-600 hover:bg-violet-700"
             data-testid="server-renew-now"
           >
-            {creatingPlanId === activePlan.id ? "Creando..." : pendingDebt > 0 ? `Pagar $${pendingDebt}` : "Renovar ahora"}
+            {creatingPlanId === activePlan.id ? "Creando..." : pendingDebt > 0 ? `Pagar $${amountToPayNow}` : "Renovar ahora"}
           </Button>
         </CardContent>
       </Card>
@@ -8241,6 +8270,11 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                     ? `${pendingPayments.length} facturas vencidas hasta ${formatPaymentDate(latestPending?.periodAt || null)}`
                     : "Sin deuda pendiente"}
                 </p>
+                {advancePayment && (
+                  <p className="text-amber-300 text-xs mt-1">
+                    Se suma {formatPaymentDate(advancePayment.periodAt)} adelantado: total ${amountToPayNow}
+                  </p>
+                )}
               </div>
             </div>
 
