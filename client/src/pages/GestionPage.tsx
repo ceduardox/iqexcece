@@ -8019,6 +8019,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     paidAt: latestPaid?.paidAt || null,
     paidUntil: latestPaid?.periodAt || null,
   };
+  const amountToPayNow = pendingDebt > 0 ? pendingDebt : activePlan.amount;
 
   const fetchPayments = async () => {
     if (!adminToken) return;
@@ -8131,13 +8132,13 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     URL.revokeObjectURL(url);
   };
 
-  const createCryptoPayment = async (planId: string, mode: "mensual" | "anual" = billingMode) => {
+  const createCryptoPayment = async (planId: string, mode: "mensual" | "anual" = billingMode, amountUsd?: number) => {
     try {
       setCreatingPlanId(planId);
       const res = await fetch("/api/payments/nowpayments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, billingMode: mode }),
+        body: JSON.stringify({ planId, billingMode: mode, amountUsd }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -8169,6 +8170,11 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
               </span>
             </p>
             <p className="text-xs text-emerald-300">{activePlan.status}</p>
+            {pendingDebt > 0 && (
+              <p className="text-[11px] text-amber-300 mt-0.5">
+                Debe pagar {pendingPayments.length} cuota{pendingPayments.length === 1 ? "" : "s"} juntas: ${pendingDebt} total.
+              </p>
+            )}
             {activePlan.paidAt && (
               <p className="text-[11px] text-white/60 mt-0.5">
                 Ultimo pago real: {formatPaymentDateTime(activePlan.paidAt)}
@@ -8184,12 +8190,12 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             {serverView === "panel" ? "Ver reportes de pagos" : "Volver al panel"}
           </Button>
           <Button
-            onClick={() => createCryptoPayment(activePlan.id, activePlan.mode)}
+            onClick={() => createCryptoPayment(activePlan.id, activePlan.mode, amountToPayNow)}
             disabled={creatingPlanId === activePlan.id}
             className="bg-violet-600 hover:bg-violet-700"
             data-testid="server-renew-now"
           >
-            {creatingPlanId === activePlan.id ? "Creando..." : "Renovar ahora"}
+            {creatingPlanId === activePlan.id ? "Creando..." : pendingDebt > 0 ? `Pagar $${pendingDebt}` : "Renovar ahora"}
           </Button>
         </CardContent>
       </Card>

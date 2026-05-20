@@ -3645,7 +3645,14 @@ ${schemaContent.substring(0, 3000)}
         return res.status(400).json({ error: "Plan o modalidad invalida" });
       }
 
-      const amountUsd = billingMode === "anual" ? plans[planId].anual : plans[planId].mensual;
+      const baseAmountUsd = billingMode === "anual" ? plans[planId].anual : plans[planId].mensual;
+      const requestedAmountUsd = Number(req.body?.amountUsd);
+      const maxAllowedAmountUsd = plans[planId].anual;
+      const amountUsd = Number.isFinite(requestedAmountUsd)
+        && requestedAmountUsd >= baseAmountUsd
+        && requestedAmountUsd <= maxAllowedAmountUsd
+        ? Math.round(requestedAmountUsd * 100) / 100
+        : baseAmountUsd;
       const orderId = `iqx_${planId}_${billingMode}_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
       const callbackUrl =
         process.env.NOWPAYMENTS_IPN_URL || `${process.env.APP_BASE_URL || ""}/api/payments/nowpayments/webhook`;
@@ -3655,7 +3662,9 @@ ${schemaContent.substring(0, 3000)}
         price_currency: "usd",
         pay_currency: "usdtbsc",
         order_id: orderId,
-        order_description: `IQEx ${planId.toUpperCase()} ${billingMode}`,
+        order_description: amountUsd > baseAmountUsd
+          ? `IQEx ${planId.toUpperCase()} deuda acumulada ${billingMode}`
+          : `IQEx ${planId.toUpperCase()} ${billingMode}`,
         ipn_callback_url: callbackUrl,
         is_fixed_rate: true,
       };
