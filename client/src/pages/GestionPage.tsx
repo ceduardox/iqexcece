@@ -7890,10 +7890,8 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     return normalizePaymentStatusValue(status);
   };
 
-  const fallbackSeedPayments = payments.length > 0 ? payments : DEFAULT_SERVER_PAYMENT_ROWS;
-
   const rawPayments = useMemo(() => {
-    const seeded = withPaymentPeriodDates(fallbackSeedPayments);
+    const seeded = withPaymentPeriodDates([...DEFAULT_SERVER_PAYMENT_ROWS, ...payments]);
     const paidStatuses = new Set(["finished", "confirmed", "paid"]);
     const latestMonthlyPaid = [...seeded]
       .filter((row: any) =>
@@ -7909,7 +7907,11 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
 
     const existingMonthlyKeys = new Set(
       seeded
-        .filter((row: any) => String(row.billingMode || "").toLowerCase() === "mensual" && row.periodAt)
+        .filter((row: any) =>
+          String(row.billingMode || "").toLowerCase() === "mensual" &&
+          normalizePaymentStatus(row.paymentStatus) !== "failed" &&
+          row.periodAt,
+        )
         .map((row: any) => {
           const d = new Date(row.periodAt);
           return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -7943,7 +7945,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     }
 
     return seeded.sort((a: any, b: any) => new Date(a.periodAt || 0).getTime() - new Date(b.periodAt || 0).getTime());
-  }, [fallbackSeedPayments]);
+  }, [payments]);
 
   const paidStatuses = new Set(["finished", "confirmed", "paid"]);
   const latestPaid = [...rawPayments]
@@ -8101,7 +8103,11 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     if (serverView === "pagos") fetchPayments();
   }, [serverView]);
 
-  const filteredPayments = rawPayments.filter((row: any) => {
+  const displayPayments = paymentStatusFilter === "failed"
+    ? rawPayments.filter((row: any) => normalizePaymentStatus(row.paymentStatus) === "failed")
+    : rawPayments.filter((row: any) => normalizePaymentStatus(row.paymentStatus) !== "failed");
+
+  const filteredPayments = displayPayments.filter((row: any) => {
     if (paymentStatusFilter === "all") return true;
     return normalizePaymentStatus(row.paymentStatus) === paymentStatusFilter;
   });
