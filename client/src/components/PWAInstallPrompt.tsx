@@ -15,12 +15,14 @@ export function PWAInstallPrompt() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
+    let installTimer: number | undefined;
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       const dismissed = localStorage.getItem("pwa-install-dismissed");
       if (!dismissed) {
-        setShowInstall(true);
+        installTimer = window.setTimeout(() => setShowInstall(true), 9000);
       }
     };
 
@@ -52,6 +54,7 @@ export function PWAInstallPrompt() {
     }
 
     return () => {
+      if (installTimer) window.clearTimeout(installTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
     };
   }, []);

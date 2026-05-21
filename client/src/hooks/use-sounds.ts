@@ -17,7 +17,7 @@ function preloadSound(src: string): HTMLAudioElement {
     return audioCache.get(src)!;
   }
   const audio = new Audio(src);
-  audio.preload = "auto";
+  audio.preload = "metadata";
   audio.volume = 0.5;
   audioCache.set(src, audio);
   return audio;
@@ -29,10 +29,20 @@ export function useSounds() {
   useEffect(() => {
     if (isInitialized.current) return;
     isInitialized.current = true;
-    
-    Object.values(SOUNDS).forEach(src => {
-      preloadSound(src);
-    });
+
+    const warmSounds = () => {
+      Object.values(SOUNDS).forEach(src => {
+        preloadSound(src);
+      });
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(warmSounds, { timeout: 5000 });
+      return;
+    }
+
+    const timer = globalThis.setTimeout(warmSounds, 3000);
+    return () => globalThis.clearTimeout(timer);
   }, []);
 
   const playSound = useCallback((type: SoundType) => {

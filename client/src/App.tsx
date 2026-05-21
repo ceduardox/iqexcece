@@ -1,5 +1,5 @@
 import { Switch, Route } from "wouter";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,47 +10,67 @@ import { waitForRenderedImages } from "@/lib/image-preload";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "@/lib/i18n";
 import Home from "@/pages/Home";
-import TestsPage from "@/pages/TestsPage";
-import ReadingSelectionPage from "@/pages/ReadingSelectionPage";
-import ReadingContentPage from "@/pages/ReadingContentPage";
-import AdolescentePage from "@/pages/AdolescentePage";
-import AdolescenteReadingPage from "@/pages/AdolescenteReadingPage";
-import GestionPage from "@/pages/GestionPage";
-import RazonamientoSelectionPage from "@/pages/RazonamientoSelectionPage";
-import RazonamientoQuizPage from "@/pages/RazonamientoQuizPage";
-import RazonamientoResultPage from "@/pages/RazonamientoResultPage";
-import CerebralSelectionPage from "@/pages/CerebralSelectionPage";
-import CerebralExercisePage from "@/pages/CerebralExercisePage";
-import CerebralFormPage from "@/pages/CerebralFormPage";
-import CerebralResultPage from "@/pages/CerebralResultPage";
-import EntrenamientoSelectionPage from "@/pages/EntrenamientoSelectionPage";
-import EntrenamientoEdadPage from "@/pages/EntrenamientoEdadPage";
-import EntrenamientoPage from "@/pages/EntrenamientoPage";
-import EntrenamientoPrepPage from "@/pages/EntrenamientoPrepPage";
-import VelocidadPatronPage from "@/pages/VelocidadPatronPage";
-import VelocidadExercisePage from "@/pages/VelocidadExercisePage";
-import NumerosIntroPage from "@/pages/NumerosIntroPage";
-import NumerosNivelesPage from "@/pages/NumerosNivelesPage";
-import NumerosEjercicioPage from "@/pages/NumerosEjercicioPage";
-import NumerosResultPage from "@/pages/NumerosResultPage";
-import AgeSelectionPage from "@/pages/AgeSelectionPage";
-import AceleracionSelectionPage from "@/pages/AceleracionSelectionPage";
-import AceleracionExercisePage from "@/pages/AceleracionExercisePage";
-import ReconocimientoSelectionPage from "@/pages/ReconocimientoSelectionPage";
-import ReconocimientoExercisePage from "@/pages/ReconocimientoExercisePage";
-import NeuroSyncPage from "@/pages/NeuroSyncPage";
-import NeuroLinkPage from "@/pages/NeuroLinkPage";
-import MemoryFlashPage from "@/pages/MemoryFlashPage";
-import NeuroLectorPage from "@/pages/NeuroLectorPage";
-import ProgresoPage from "@/pages/ProgresoPage";
-import BlogPage from "@/pages/BlogPage";
-import BlogPostPage from "@/pages/BlogPostPage";
-import ALeerBoliviaPage from "@/pages/ALeerBoliviaPage";
-import MetodoXPage from "@/pages/MetodoXPage";
-import ContactoPage from "@/pages/ContactoPage";
-import MindMapsPage from "@/pages/MindMapsPage";
-import ChatWidgetPage from "@/pages/ChatWidgetPage";
-import NotFound from "@/pages/not-found";
+
+const loadTestsPage = () => import("@/pages/TestsPage");
+const loadEntrenamientoSelectionPage = () => import("@/pages/EntrenamientoSelectionPage");
+const loadProgresoPage = () => import("@/pages/ProgresoPage");
+
+const TestsPage = lazy(loadTestsPage);
+const ReadingSelectionPage = lazy(() => import("@/pages/ReadingSelectionPage"));
+const ReadingContentPage = lazy(() => import("@/pages/ReadingContentPage"));
+const AdolescentePage = lazy(() => import("@/pages/AdolescentePage"));
+const AdolescenteReadingPage = lazy(() => import("@/pages/AdolescenteReadingPage"));
+const GestionPage = lazy(() => import("@/pages/GestionPage"));
+const RazonamientoSelectionPage = lazy(() => import("@/pages/RazonamientoSelectionPage"));
+const RazonamientoQuizPage = lazy(() => import("@/pages/RazonamientoQuizPage"));
+const RazonamientoResultPage = lazy(() => import("@/pages/RazonamientoResultPage"));
+const CerebralSelectionPage = lazy(() => import("@/pages/CerebralSelectionPage"));
+const CerebralExercisePage = lazy(() => import("@/pages/CerebralExercisePage"));
+const CerebralFormPage = lazy(() => import("@/pages/CerebralFormPage"));
+const CerebralResultPage = lazy(() => import("@/pages/CerebralResultPage"));
+const EntrenamientoSelectionPage = lazy(loadEntrenamientoSelectionPage);
+const EntrenamientoEdadPage = lazy(() => import("@/pages/EntrenamientoEdadPage"));
+const EntrenamientoPage = lazy(() => import("@/pages/EntrenamientoPage"));
+const EntrenamientoPrepPage = lazy(() => import("@/pages/EntrenamientoPrepPage"));
+const VelocidadPatronPage = lazy(() => import("@/pages/VelocidadPatronPage"));
+const VelocidadExercisePage = lazy(() => import("@/pages/VelocidadExercisePage"));
+const NumerosIntroPage = lazy(() => import("@/pages/NumerosIntroPage"));
+const NumerosNivelesPage = lazy(() => import("@/pages/NumerosNivelesPage"));
+const NumerosEjercicioPage = lazy(() => import("@/pages/NumerosEjercicioPage"));
+const NumerosResultPage = lazy(() => import("@/pages/NumerosResultPage"));
+const AgeSelectionPage = lazy(() => import("@/pages/AgeSelectionPage"));
+const AceleracionSelectionPage = lazy(() => import("@/pages/AceleracionSelectionPage"));
+const AceleracionExercisePage = lazy(() => import("@/pages/AceleracionExercisePage"));
+const ReconocimientoSelectionPage = lazy(() => import("@/pages/ReconocimientoSelectionPage"));
+const ReconocimientoExercisePage = lazy(() => import("@/pages/ReconocimientoExercisePage"));
+const NeuroSyncPage = lazy(() => import("@/pages/NeuroSyncPage"));
+const NeuroLinkPage = lazy(() => import("@/pages/NeuroLinkPage"));
+const MemoryFlashPage = lazy(() => import("@/pages/MemoryFlashPage"));
+const NeuroLectorPage = lazy(() => import("@/pages/NeuroLectorPage"));
+const ProgresoPage = lazy(loadProgresoPage);
+const BlogPage = lazy(() => import("@/pages/BlogPage"));
+const BlogPostPage = lazy(() => import("@/pages/BlogPostPage"));
+const ALeerBoliviaPage = lazy(() => import("@/pages/ALeerBoliviaPage"));
+const MetodoXPage = lazy(() => import("@/pages/MetodoXPage"));
+const ContactoPage = lazy(() => import("@/pages/ContactoPage"));
+const MindMapsPage = lazy(() => import("@/pages/MindMapsPage"));
+const ChatWidgetPage = lazy(() => import("@/pages/ChatWidgetPage"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+function warmCommonRoutes() {
+  const warm = () => {
+    loadTestsPage();
+    loadEntrenamientoSelectionPage();
+    loadProgresoPage();
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(warm, { timeout: 3500 });
+    return;
+  }
+
+  globalThis.setTimeout(warm, 2500);
+}
 
 function Router() {
   return (
@@ -110,6 +130,12 @@ function App() {
   usePreloadAssets();
 
   useEffect(() => {
+    if (window.location.pathname !== "/") return;
+    const timer = window.setTimeout(warmCommonRoutes, 900);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     if (window.location.pathname === "/") return;
 
     let cancelled = false;
@@ -130,7 +156,9 @@ function App() {
       <TooltipProvider>
         <UserProvider>
           <Toaster />
-          <Router />
+          <Suspense fallback={null}>
+            <Router />
+          </Suspense>
           <PWAInstallPrompt />
         </UserProvider>
       </TooltipProvider>
