@@ -190,13 +190,24 @@ function DeferredVideoBackground({ src, imageSize, active }: { src?: string; ima
   return <VideoPosterImage src={src} className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none" />;
 }
 
-function EditorCardBackgroundMedia({ src, imageSize, active }: { src?: string; imageSize?: number; active: boolean }) {
-  const mediaKind = useMediaKind(src, !!src);
+function EditorCardBackgroundMedia({
+  src,
+  imageSize,
+  active,
+  mediaKind,
+}: {
+  src?: string;
+  imageSize?: number;
+  active: boolean;
+  mediaKind: "image" | "video" | "unknown";
+}) {
   if (!src) return null;
 
   if (mediaKind === "video") {
     return <DeferredVideoBackground src={src} imageSize={imageSize} active={active} />;
   }
+
+  if (mediaKind !== "image") return null;
 
   return (
     <img
@@ -312,8 +323,28 @@ function TrainingMediaIcon({ src, size, active }: { src: string; size: number; a
   const mediaKind = useMediaKind(src, !!src);
   const style = { width: size, height: size, objectFit: "contain" as const };
 
+  const fallback = (
+    <div
+      className="flex items-center justify-center rounded-2xl bg-white/45 text-purple-600 shadow-sm"
+      style={{ width: size, height: size }}
+    >
+      <Dumbbell className="w-1/2 h-1/2" />
+    </div>
+  );
+
+  if (mediaKind === "unknown") {
+    return fallback;
+  }
+
   if (mediaKind === "video") {
-    if (!active) return <VideoPosterImage src={src} className="drop-shadow-md rounded-2xl" style={style} />;
+    if (!active) {
+      return (
+        <div className="relative" style={{ width: size, height: size }}>
+          {fallback}
+          <VideoPosterImage src={src} className="absolute inset-0 drop-shadow-md rounded-2xl" style={style} />
+        </div>
+      );
+    }
     return <video src={src} autoPlay loop muted playsInline preload="metadata" className="drop-shadow-md" style={style} />;
   }
 
@@ -351,6 +382,8 @@ function TrainingSelectionCard({
   const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
   const cardStyle = getResolvedStyle(cardId);
   const backgroundUrl = cardStyle?.imageUrl?.trim();
+  const backgroundMediaKind = useMediaKind(backgroundUrl, !!backgroundUrl);
+  const hasPendingManagedMedia = !!backgroundUrl && backgroundMediaKind !== "image";
   const rIcon = getResolvedStyle(iconId);
   const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
   const isMd = !isMobile;
@@ -376,7 +409,9 @@ function TrainingSelectionCard({
       <motion.div
         className="relative overflow-hidden rounded-2xl p-4 md:p-8 flex flex-col items-center text-center"
         style={{
-          background: cardStyle?.background || defaultStyle.bg,
+          background: hasPendingManagedMedia
+            ? "linear-gradient(160deg, rgba(255,255,255,0.94) 0%, rgba(245,239,255,0.96) 50%, rgba(214,244,255,0.9) 100%)"
+            : (cardStyle?.background || defaultStyle.bg),
           border: "1px solid rgba(0,180,255,0.25)",
           boxShadow: cardStyle?.shadowBlur
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,180,255,0.1)"}`
@@ -386,7 +421,21 @@ function TrainingSelectionCard({
         whileTap={{ scale: editorMode ? 1 : 0.98 }}
         transition={{ duration: 0.1 }}
       >
-        <EditorCardBackgroundMedia src={backgroundUrl} imageSize={cardStyle?.imageSize} active={mediaActive} />
+        {hasPendingManagedMedia && (
+          <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 8%, rgba(139,92,246,0.2), transparent 36%), linear-gradient(180deg, transparent 45%, rgba(14,165,233,0.22) 100%)",
+            }}
+          />
+        )}
+        <EditorCardBackgroundMedia
+          src={backgroundUrl}
+          imageSize={cardStyle?.imageSize}
+          active={mediaActive}
+          mediaKind={backgroundMediaKind}
+        />
 
         <div
           className={`relative z-10 flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
