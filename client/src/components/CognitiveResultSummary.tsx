@@ -1,4 +1,5 @@
 import { Brain, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface SurveyShape {
   profile: string;
@@ -165,8 +166,10 @@ export function CognitiveResultSummary({ survey, accent = "purple" }: Props) {
             <p className="text-[11px] uppercase tracking-wide text-gray-500">Interes actual</p>
             <p className="text-sm font-bold text-yellow-600">{survey.interestLevel}</p>
           </div>
-          <button
+          <motion.button
             type="button"
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.45, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => {
               const text = encodeURIComponent("Quiero optimizar mi rendimiento con la Metodologia IQX.");
               window.open(`https://wa.me/59173600060?text=${text}`, "_blank");
@@ -175,7 +178,7 @@ export function CognitiveResultSummary({ survey, accent = "purple" }: Props) {
             style={{ background: "linear-gradient(90deg, #8a3ffc, #06b6d4)" }}
           >
             Quiero optimizar mi rendimiento
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>
