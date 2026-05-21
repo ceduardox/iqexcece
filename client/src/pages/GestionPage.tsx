@@ -4858,6 +4858,69 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </Button>
                 </div>
               </div>
+
+              {/* Recovered Content Section */}
+              <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg mb-3">
+                <p className="text-cyan-400 text-sm mb-2 font-medium">Restaurar CONTENIDO recuperado sin usuarios ni resultados:</p>
+                <p className="text-white/50 text-xs mb-2">
+                  Importa el backup completo recuperado y restaura solo imagenes, estilos, temas, lecturas y ejercicios.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    id="import-recovered-content"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const confirmed = window.confirm(
+                        "Esto reemplazara imagenes, estilos, temas, lecturas y ejercicios con el contenido del backup. No importara usuarios, sesiones, resultados, chats ni administradores. Continuar?"
+                      );
+                      if (!confirmed) {
+                        e.target.value = "";
+                        return;
+                      }
+                      try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        if (!data?.tables || typeof data.tables !== "object") {
+                          throw new Error("El archivo no tiene el formato esperado de backup completo");
+                        }
+                        const res = await fetch("/api/admin/content/import", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({ tables: data.tables }),
+                        });
+                        const result = await res.json();
+                        if (!res.ok) {
+                          throw new Error(result.error || "Error al importar contenido recuperado");
+                        }
+                        const lines = Array.isArray(result.imported)
+                          ? result.imported.map((s: { table: string; rows: number }) => `- ${s.table}: ${s.rows}`)
+                          : [];
+                        alert(`Contenido recuperado importado correctamente.\n\n${lines.join("\n")}`);
+                        fetch("/api/images").then(r => r.json()).then(d => setUploadedImages(d || []));
+                      } catch (err) {
+                        alert("Error al importar contenido recuperado: " + (err as Error).message);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+                    onClick={() => document.getElementById("import-recovered-content")?.click()}
+                    data-testid="button-import-recovered-content"
+                  >
+                    Importar Contenido Recuperado
+                  </Button>
+                </div>
+              </div>
               
               {/* Sync Images Section */}
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">

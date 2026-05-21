@@ -9,7 +9,7 @@ import { createHmac, randomUUID } from "crypto";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { readingContents, razonamientoContents, cerebralContents, quizResults, userSessions, users, blogPosts, blogCategories, pageStyles, instituciones, trainingResults, mindMaps, mindMapAiUsage } from "@shared/schema";
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { getClientIp, loadSiteAccessSettings, saveSiteAccessSettings } from "./site-access";
 
 const ADMIN_USER = "CITEX";
@@ -33,6 +33,44 @@ const TOKENS_FILE = path.join("/tmp", "admin_tokens.json");
 const ASESOR_STATE_FILE = path.join("/tmp", "asesor_state.json");
 const pendingManualReplies = new Map<string, string>();
 const NOWPAYMENTS_ORDERS_FILE = path.join("/tmp", "nowpayments_orders.json");
+
+const CONTENT_IMPORT_TABLES = [
+  "uploaded_images",
+  "page_styles",
+  "reading_contents",
+  "razonamiento_contents",
+  "cerebral_contents",
+  "cerebral_intros",
+  "entrenamiento_cards",
+  "entrenamiento_pages",
+  "entrenamiento_items",
+  "prep_pages",
+  "categoria_prep_page",
+  "velocidad_ejercicios",
+  "numeros_ejercicios",
+  "aceleracion_ejercicios",
+  "blog_categories",
+  "blog_posts",
+] as const;
+
+const CONTENT_IMPORT_EXCLUDED_TABLES = [
+  "admin_roles",
+  "admin_users",
+  "users",
+  "user_sessions",
+  "quiz_results",
+  "training_results",
+  "cerebral_results",
+  "contact_submissions",
+  "asesor_config",
+  "asesor_chats",
+  "agent_messages",
+  "instituciones",
+  "mind_maps",
+  "mind_map_ai_usage",
+] as const;
+
+const quotePgIdent = (value: string) => `"${String(value).replace(/"/g, '""')}"`;
 const MIND_MAP_AI_DAILY_LIMIT = 3;
 const BOLIVIA_UTC_OFFSET_MS = -4 * 60 * 60 * 1000;
 let mindMapAiUsageTableReady: Promise<void> | null = null;
@@ -1399,6 +1437,126 @@ Reglas:
       errors,
       summary: Object.entries(summary).map(([target, count]) => ({ target, count })),
     });
+  });
+
+  app.post("/api/admin/content/import", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const tables = req.body?.tables;
+    if (!tables || typeof tables !== "object" || Array.isArray(tables)) {
+      return res.status(400).json({ error: "Invalid content backup. Expected { tables: { ... } }" });
+    }
+
+    const availableTables = CONTENT_IMPORT_TABLES.filter((table) => Array.isArray(tables[table]));
+    if (availableTables.length === 0) {
+      return res.status(400).json({ error: "No importable content tables found" });
+    }
+
+    const client = await pool.connect();
+    try {
+      const existingResult = await client.query(`
+        select table_name
+        from information_schema.tables
+        where table_schema = 'public'
+          and table_type = 'BASE TABLE'
+      `);
+      const existingTables = new Set(existingResult.rows.map((row) => row.table_name));
+      const missingTables = availableTables.filter((table) => !existingTables.has(table));
+      if (missingTables.length > 0) {
+        return res.status(400).json({
+          error: "Missing tables in target database. Run db:push first.",
+          missingTables,
+        });
+      }
+
+      const imported: Array<{ table: string; rows: number }> = [];
+      await client.query("begin");
+      try {
+        await client.query(
+          `truncate ${availableTables.map(quotePgIdent).join(", ")} restart identity cascade`
+        );
+
+        for (const table of availableTables) {
+          const rows = tables[table] as Array<Record<string, unknown>>;
+          if (rows.length === 0) {
+            imported.push({ table, rows: 0 });
+            continue;
+          }
+
+          const columns = Object.keys(rows[0]);
+          if (columns.length === 0) {
+            imported.push({ table, rows: 0 });
+            continue;
+          }
+
+          const columnSql = columns.map(quotePgIdent).join(", ");
+          const chunkSize = 200;
+          for (let start = 0; start < rows.length; start += chunkSize) {
+            const chunk = rows.slice(start, start + chunkSize);
+            const values: unknown[] = [];
+            const placeholders = chunk.map((row, rowIndex) => {
+              const rowPlaceholders = columns.map((column, columnIndex) => {
+                values.push(row[column]);
+                return `$${rowIndex * columns.length + columnIndex + 1}`;
+              });
+              return `(${rowPlaceholders.join(", ")})`;
+            });
+
+            await client.query(
+              `insert into ${quotePgIdent(table)} (${columnSql}) values ${placeholders.join(", ")}`,
+              values
+            );
+          }
+
+          imported.push({ table, rows: rows.length });
+
+          const sequenceResult = await client.query(
+            `
+              select column_name, pg_get_serial_sequence($1, column_name) as sequence_name
+              from information_schema.columns
+              where table_schema = 'public'
+                and table_name = $2
+            `,
+            [`public.${table}`, table]
+          );
+
+          for (const sequenceRow of sequenceResult.rows) {
+            if (!sequenceRow.sequence_name) continue;
+
+            const maxResult = await client.query(
+              `select max(${quotePgIdent(sequenceRow.column_name)})::bigint as max_value from ${quotePgIdent(table)}`
+            );
+            const maxValue = maxResult.rows[0]?.max_value;
+            await client.query(
+              "select setval($1::regclass, $2::bigint, $3)",
+              [sequenceRow.sequence_name, maxValue ?? 1, maxValue != null]
+            );
+          }
+        }
+
+        await client.query("commit");
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      }
+
+      res.json({
+        success: true,
+        imported,
+        excludedTables: CONTENT_IMPORT_EXCLUDED_TABLES,
+      });
+    } catch (error) {
+      console.error("Error importing recovered content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Error importing recovered content",
+      });
+    } finally {
+      client.release();
+    }
   });
 
   // ===========================================
