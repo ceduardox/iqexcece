@@ -1417,14 +1417,15 @@ Reglas:
     const summary: Record<string, number> = {};
     for (const style of styles) {
       try {
-        if (!style?.pageName || typeof style.styles !== "string") {
+        const pageName = style?.pageName || style?.page_name;
+        if (!pageName || typeof style.styles !== "string") {
           errors++;
           continue;
         }
         const styleLang = style.lang || "es";
-        await storage.savePageStyle(style.pageName, style.styles, styleLang);
+        await storage.savePageStyle(pageName, style.styles, styleLang);
         imported++;
-        const key = `${style.pageName} [${styleLang}]`;
+        const key = `${pageName} [${styleLang}]`;
         summary[key] = (summary[key] || 0) + 1;
       } catch (e) {
         errors++;
