@@ -892,7 +892,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   }, [contactSubs, contactFilter, contactSearch, contactDateFrom, contactDateTo, contactSort]);
 
   const SPEED_PATTERN_OPTIONS = ["all", "2x2", "2x3", "3x2", "2x4", "3x3"] as const;
-  const SUGGESTED_PPM_VALUES = [100, 150, 200, 250, 300, 350, 400, 450, 500] as const;
+  const SUGGESTED_PPM_VALUES = [
+    100, 150, 200, 250, 300, 350, 400, 450, 500,
+    600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700,
+  ] as const;
 
   const filteredVelocidadNiveles = useMemo(() => {
     if (!velocidadEjercicio) return [] as { nivel: NivelConfig; nivelIdx: number }[];
@@ -925,7 +928,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     const match = String(patron || "").match(/^(\d+)x(\d+)$/i);
     if (!match) return 12;
     const size = Math.max(1, parseInt(match[1], 10)) * Math.max(1, parseInt(match[2], 10));
-    return Math.max(8, Math.min(20, size + 6));
+    return Math.max(10, Math.min(36, size + 10));
   };
 
   const generateWordsForNivel = async (nivelIdx: number, nivel: { patron?: string; velocidad?: number }) => {
@@ -6672,7 +6675,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                                 }}
                                 className="bg-gray-700 border border-purple-500/30 text-white rounded-md px-2 py-1 text-sm"
                               >
-                                {[6, 8, 10, 12, 14, 16, 18, 20, 24, 28].map((n) => (
+                                {[8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 60].map((n) => (
                                   <option key={n} value={n} className="bg-gray-700 text-white">
                                     {n}
                                   </option>

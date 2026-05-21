@@ -1898,7 +1898,7 @@ Reglas:
     const categoria = String(req.body?.categoria || "ninos").trim();
     const patron = String(req.body?.patron || "3x2").trim();
     const velocidad = Math.max(80, Math.min(2500, Number(req.body?.velocidad) || 150));
-    const count = Math.max(4, Math.min(30, Number(req.body?.count) || 12));
+    const count = Math.max(4, Math.min(60, Number(req.body?.count) || 12));
 
     const banks: Record<string, string[]> = {
       ninos: ["gato", "luna", "sol", "casa", "flor", "rio", "juego", "amigo", "cuento", "parque", "arbol", "nube", "color", "globo", "musica", "libro", "clase", "dibujo", "sonrisa", "aventura"],
@@ -1908,7 +1908,14 @@ Reglas:
       adulto_mayor: ["recuerdo", "atencion", "lectura", "claridad", "habito", "calma", "enfoque", "comprension", "aprendizaje", "constancia", "relacion", "ejercicio", "balance", "dialogo", "familia", "historia", "palabra", "emocion", "proposito", "bienestar"],
     };
 
-    const fallbackPool = [...(banks[categoria] || banks.ninos)];
+    const commonBank = [
+      "mente", "vision", "ritmo", "pulso", "senal", "foco", "energia", "impulso", "camino", "avance",
+      "logro", "orden", "mapa", "clave", "forma", "linea", "punto", "trazo", "figura", "campo",
+      "radio", "nucleo", "codigo", "frase", "sonido", "imagen", "detalle", "escena", "lectura", "pagina",
+      "texto", "idea", "nota", "dato", "serie", "grupo", "bloque", "marca", "salto", "nivel",
+      "base", "union", "valor", "mision", "talento", "avance", "control", "destreza", "agilidad", "dominio",
+    ];
+    const fallbackPool = [...(banks[categoria] || banks.ninos), ...commonBank];
     const shuffle = (arr: string[]) => [...arr].sort(() => Math.random() - 0.5);
     const fallbackWords = shuffle(Array.from(new Set(fallbackPool))).slice(0, count);
 

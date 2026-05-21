@@ -227,18 +227,19 @@ export default function VelocidadExercisePage() {
     const totalPos = getTotalPositions(patronParaUsar);
     const totalPalabras = palabrasParaUsar.length;
     const intervalMs = getIntervalMs(velocidadParaUsar);
+    const startOffset = Math.floor(Math.random() * totalPos);
     
     let wordIndex = 0;
     
     // Mostrar primera palabra inmediatamente
-    const posActual = wordIndex % totalPos;
+    const posActual = (startOffset + wordIndex) % totalPos;
     setCurrentPosition(posActual);
     setShownWords(Array(totalPos).fill("").map((_, i) => i === posActual ? palabrasParaUsar[wordIndex] : ""));
     wordIndex = 1;
     
     intervalRef.current = setInterval(() => {
       if (wordIndex < totalPalabras) {
-        const pos = wordIndex % totalPos;
+        const pos = (startOffset + wordIndex) % totalPos;
         setCurrentPosition(pos);
         setShownWords(Array(totalPos).fill("").map((_, i) => i === pos ? palabrasParaUsar[wordIndex] : ""));
         wordIndex++;
