@@ -128,10 +128,6 @@ function isKnownVideoAsset(url: string) {
   return lower.endsWith(".webm") || lower.endsWith(".mp4") || lower.includes("video/webm") || lower.includes("video/mp4");
 }
 
-function isManagedImageAsset(url?: string) {
-  return !!url && /^(?:https?:\/\/[^/]+)?\/api\/images\/[^/?#]+/i.test(url);
-}
-
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.entries(styles)
     .filter(([key]) => !key.includes("icon") && !key.includes("btn"))
@@ -279,18 +275,6 @@ function TrainingMediaIcon({ src, size, active }: { src: string; size: number; a
     return <video src={src} autoPlay loop muted playsInline preload="metadata" className="drop-shadow-md" style={style} />;
   }
 
-  if (mediaKind === "unknown" && isManagedImageAsset(src)) {
-    return (
-      <div
-        className="rounded-2xl bg-white/10 flex items-center justify-center shadow-inner"
-        style={style}
-        aria-hidden="true"
-      >
-        <Dumbbell className="w-1/2 h-1/2 text-white/70" />
-      </div>
-    );
-  }
-
   return <img src={src} alt="" loading="lazy" decoding="async" className="drop-shadow-md" style={style} />;
 }
 
@@ -326,7 +310,7 @@ function TrainingSelectionCard({
   const cardStyle = getResolvedStyle(cardId);
   const backgroundUrl = cardStyle?.imageUrl?.trim();
   const backgroundKind = useMediaKind(backgroundUrl, !!backgroundUrl);
-  const shouldUseBackgroundImage = !!backgroundUrl && backgroundKind !== "video" && !(backgroundKind === "unknown" && isManagedImageAsset(backgroundUrl));
+  const shouldUseBackgroundImage = !!backgroundUrl && backgroundKind !== "video";
   const rIcon = getResolvedStyle(iconId);
   const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
   const isMd = !isMobile;
