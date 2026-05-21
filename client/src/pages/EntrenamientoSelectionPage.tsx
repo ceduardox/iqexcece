@@ -189,8 +189,85 @@ function getTrainingWarmSignature(styles: PageStyles) {
 
 function DeferredVideoBackground({ src, imageSize, active }: { src?: string; imageSize?: number; active: boolean }) {
   const mediaKind = useMediaKind(src, !!src);
-  if (!src || mediaKind !== "video" || !active) return null;
-  return <VideoBackground src={src} imageSize={imageSize} />;
+  if (!src || mediaKind !== "video") return null;
+  if (active) return <VideoBackground src={src} imageSize={imageSize} />;
+  return <VideoPosterImage src={src} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />;
+}
+
+function getVideoPosterCacheKey(src: string) {
+  return `video-poster-webp:${src}`;
+}
+
+function VideoPosterImage({
+  src,
+  className = "",
+  style,
+}: {
+  src: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [poster, setPoster] = useState<string>(() => {
+    try {
+      return localStorage.getItem(getVideoPosterCacheKey(src)) || "";
+    } catch {
+      return "";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      setPoster(localStorage.getItem(getVideoPosterCacheKey(src)) || "");
+    } catch {
+      setPoster("");
+    }
+  }, [src]);
+
+  const capturePoster = useCallback(() => {
+    if (poster) return;
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) return;
+
+    try {
+      const canvas = document.createElement("canvas");
+      const maxWidth = 360;
+      const scale = Math.min(1, maxWidth / video.videoWidth);
+      canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+      canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/webp", 0.72);
+      setPoster(dataUrl);
+      try {
+        localStorage.setItem(getVideoPosterCacheKey(src), dataUrl);
+      } catch {
+        // The poster is an optimization. If storage is full, keep the runtime preview only.
+      }
+    } catch {
+      // Keep the paused video frame as fallback.
+    }
+  }, [poster, src]);
+
+  if (poster) {
+    return <img src={poster} alt="" className={className} style={style} loading="lazy" decoding="async" />;
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      playsInline
+      preload="metadata"
+      className={className}
+      style={style}
+      onLoadedData={capturePoster}
+      onSeeked={capturePoster}
+      aria-hidden="true"
+    />
+  );
 }
 
 function TrainingMediaIcon({ src, size, active }: { src: string; size: number; active: boolean }) {
@@ -198,17 +275,7 @@ function TrainingMediaIcon({ src, size, active }: { src: string; size: number; a
   const style = { width: size, height: size, objectFit: "contain" as const };
 
   if (mediaKind === "video") {
-    if (!active) {
-      return (
-        <div
-          className="rounded-2xl bg-white/15 text-white/85 flex items-center justify-center shadow-inner"
-          style={style}
-          aria-hidden="true"
-        >
-          <Dumbbell className="w-1/2 h-1/2" />
-        </div>
-      );
-    }
+    if (!active) return <VideoPosterImage src={src} className="drop-shadow-md rounded-2xl" style={style} />;
     return <video src={src} autoPlay loop muted playsInline preload="metadata" className="drop-shadow-md" style={style} />;
   }
 
