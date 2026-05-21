@@ -189,10 +189,6 @@ function getTrainingWarmSignature(styles: PageStyles) {
   return getAssetWarmSignature(getTrainingCriticalAssetUrls(styles));
 }
 
-function hasWarmTrainingAssets(lang: string, styles: PageStyles) {
-  return localStorage.getItem(`${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`) === getTrainingWarmSignature(styles);
-}
-
 export default function EntrenamientoSelectionPage() {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "es").startsWith("en")
@@ -205,10 +201,6 @@ export default function EntrenamientoSelectionPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTrainingSelectionStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTrainingSelectionStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => {
-    const cachedStyles = readCachedTrainingSelectionStyles(lang);
-    return Object.keys(cachedStyles).length > 0 && hasWarmTrainingAssets(lang, cachedStyles);
-  });
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -247,7 +239,6 @@ export default function EntrenamientoSelectionPage() {
     const hasCachedStyles = Object.keys(cachedStyles).length > 0;
     setStyles(cachedStyles);
     setStylesReady(hasCachedStyles);
-    setAssetsReady(hasCachedStyles && hasWarmTrainingAssets(lang, cachedStyles));
 
     fetch(`/api/page-styles/entrenamiento-selection-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
@@ -258,13 +249,14 @@ export default function EntrenamientoSelectionPage() {
             const nextSignature = getTrainingWarmSignature(nextStyles);
             const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
 
-            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
-              await preloadImages(getTrainingCriticalAssetUrls(nextStyles));
-              localStorage.setItem(warmKey, nextSignature);
-            }
-
             setStyles(nextStyles);
             localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+
+            if (localStorage.getItem(warmKey) !== nextSignature) {
+              preloadImages(getTrainingCriticalAssetUrls(nextStyles), 1800).then(() => {
+                localStorage.setItem(warmKey, nextSignature);
+              });
+            }
             return;
           } catch (e) {
             console.log("No saved styles");
@@ -278,13 +270,14 @@ export default function EntrenamientoSelectionPage() {
             const nextSignature = getTrainingWarmSignature(nextStyles);
             const warmKey = `${TRAINING_SELECTION_ASSET_WARM_KEY}${lang}`;
 
-            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
-              await preloadImages(getTrainingCriticalAssetUrls(nextStyles));
-              localStorage.setItem(warmKey, nextSignature);
-            }
-
             setStyles(nextStyles);
             localStorage.setItem(`${TRAINING_SELECTION_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+
+            if (localStorage.getItem(warmKey) !== nextSignature) {
+              preloadImages(getTrainingCriticalAssetUrls(nextStyles), 1800).then(() => {
+                localStorage.setItem(warmKey, nextSignature);
+              });
+            }
           } catch {}
         }
       })
@@ -307,14 +300,12 @@ export default function EntrenamientoSelectionPage() {
     const assetSignature = getAssetWarmSignature(assetUrls);
 
     if (localStorage.getItem(warmKey) === assetSignature) {
-      setAssetsReady(true);
       return;
     }
 
-    preloadImages(assetUrls).then(() => {
+    preloadImages(assetUrls, 1800).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, assetSignature);
-      setAssetsReady(true);
     });
 
     const nonBlockingItemImages = items
@@ -422,7 +413,7 @@ export default function EntrenamientoSelectionPage() {
     setLocation(`/entrenamiento-edad/${item.id}`);
   }, [editorMode, setLocation]);
 
-  if (isLoading || !stylesReady || !assetsReady) {
+  if (isLoading || !stylesReady) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
