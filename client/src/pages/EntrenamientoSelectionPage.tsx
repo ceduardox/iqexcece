@@ -187,7 +187,7 @@ function DeferredVideoBackground({ src, imageSize, active }: { src?: string; ima
   const mediaKind = useMediaKind(src, !!src);
   if (!src || mediaKind !== "video") return null;
   if (active) return <VideoBackground src={src} imageSize={imageSize} />;
-  return <VideoPosterImage src={src} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />;
+  return <VideoPosterImage src={src} className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none" />;
 }
 
 function EditorCardBackgroundMedia({ src, imageSize, active }: { src?: string; imageSize?: number; active: boolean }) {
@@ -214,7 +214,7 @@ function EditorCardBackgroundMedia({ src, imageSize, active }: { src?: string; i
 }
 
 function getVideoPosterCacheKey(src: string) {
-  return `video-poster-webp:${src}`;
+  return `video-poster-webp:v2:${src}`;
 }
 
 function VideoPosterImage({
@@ -227,6 +227,7 @@ function VideoPosterImage({
   style?: React.CSSProperties;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const captureRequestedRef = useRef(false);
   const [poster, setPoster] = useState<string>(() => {
     try {
       return localStorage.getItem(getVideoPosterCacheKey(src)) || "";
@@ -236,6 +237,7 @@ function VideoPosterImage({
   });
 
   useEffect(() => {
+    captureRequestedRef.current = false;
     try {
       setPoster(localStorage.getItem(getVideoPosterCacheKey(src)) || "");
     } catch {
@@ -269,6 +271,22 @@ function VideoPosterImage({
     }
   }, [poster, src]);
 
+  const seekToPreviewFrame = useCallback(() => {
+    if (poster || captureRequestedRef.current) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    captureRequestedRef.current = true;
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    const target = duration > 0 ? Math.min(Math.max(duration * 0.22, 0.18), 0.8) : 0.25;
+
+    try {
+      video.currentTime = target;
+    } catch {
+      window.setTimeout(capturePoster, 80);
+    }
+  }, [capturePoster, poster]);
+
   if (poster) {
     return <img src={poster} alt="" className={className} style={style} loading="lazy" decoding="async" />;
   }
@@ -280,9 +298,10 @@ function VideoPosterImage({
       muted
       playsInline
       preload="metadata"
-      className={className}
+      className={`${className} opacity-0`}
       style={style}
-      onLoadedData={capturePoster}
+      onLoadedMetadata={seekToPreviewFrame}
+      onLoadedData={seekToPreviewFrame}
       onSeeked={capturePoster}
       aria-hidden="true"
     />
