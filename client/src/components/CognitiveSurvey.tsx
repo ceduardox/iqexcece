@@ -371,9 +371,14 @@ function getMainNeed(answers: CognitiveSurveyAnswer[]) {
 }
 
 function splitLeadingEmoji(label: string) {
-  const parts = label.match(/^(\S+)\s+(.+)$/);
-  if (!parts) return { emoji: "", text: label };
-  return { emoji: parts[1], text: parts[2] };
+  const [firstChar] = Array.from(label.trim());
+  if (!firstChar) return { emoji: "", text: label };
+  const codePoint = firstChar.codePointAt(0) || 0;
+  const startsWithEmoji =
+    (codePoint >= 0x1F300 && codePoint <= 0x1FAFF) ||
+    (codePoint >= 0x2600 && codePoint <= 0x27BF);
+  if (!startsWithEmoji) return { emoji: "", text: label };
+  return { emoji: firstChar, text: label.trim().slice(firstChar.length).trim() };
 }
 
 export function CognitiveSurvey({ categoria, onSubmit, submitting = false }: Props) {
