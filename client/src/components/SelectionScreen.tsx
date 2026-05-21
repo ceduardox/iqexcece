@@ -70,6 +70,15 @@ const HOME_CARD_ENTRANCE_VARIANTS = {
     },
   }),
 };
+const HOME_BUTTON_PULSE_ANIMATION = {
+  scale: [1, 1.025, 1],
+};
+const HOME_BUTTON_PULSE_TRANSITION = {
+  duration: 2.2,
+  repeat: Infinity,
+  repeatDelay: 1.1,
+  ease: "easeInOut",
+};
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
   return Object.values(styles)
@@ -605,6 +614,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <div className="px-4 pb-4">
                   <motion.button
                     whileTap={{ scale: 0.98 }}
+                    animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                    transition={HOME_BUTTON_PULSE_TRANSITION}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-diagnostico", e); } else { handleOptionSelect("tests"); }}}
                     className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-diagnostico")}`}
                     style={{ 
@@ -677,6 +688,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 <div className="px-4 pb-4">
                   <motion.button
                     whileTap={{ scale: 0.98 }}
+                    animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                    transition={HOME_BUTTON_PULSE_TRANSITION}
                     onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-entrenamiento", e); } else { handleOptionSelect("training"); }}}
                     className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-entrenamiento")}`}
                     style={{ 
@@ -757,6 +770,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               <div className="relative px-4 pb-4">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
+                  animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                  transition={HOME_BUTTON_PULSE_TRANSITION}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-mindmaps", e); } else { e.stopPropagation(); setLocation("/mapas-mentales"); } }}
                   className={`mt-3 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-white font-bold shadow-md ${getEditableClass("btn-mindmaps")}`}
                   style={{ 
@@ -809,7 +824,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                 </p>
               </div>
               
-              <button 
+              <motion.button
+                animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                transition={HOME_BUTTON_PULSE_TRANSITION}
+                whileTap={{ scale: 0.98 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-metodo", e); } else { e.stopPropagation(); setLocation("/metodo-x"); }}}
                 className={`mt-3 flex items-center justify-center gap-1 max-w-[200px] mx-auto py-2 px-4 rounded-full border border-gray-200 font-medium text-gray-600 hover:bg-gray-50 transition-colors ${getEditableClass("btn-metodo")}`}
                 style={{ 
@@ -829,7 +847,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     <ChevronRight style={{ width: styles["icon-btn-metodo"]?.iconSize || 14, height: styles["icon-btn-metodo"]?.iconSize || 14 }} />
                   )}
                 </span>
-              </button>
+              </motion.button>
             </motion.div>
 
             <motion.div
@@ -848,7 +866,10 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
               </h3>
               
               <div className="flex gap-2 flex-1 items-end">
-                <button
+                <motion.button
+                  animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                  transition={HOME_BUTTON_PULSE_TRANSITION}
+                  whileTap={{ scale: 0.98 }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-whatsapp", e); } else { handleWhatsApp(); }}}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold shadow-sm ${getEditableClass("btn-whatsapp")}`}
                   style={{ 
@@ -868,9 +889,12 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     )}
                   </span>
                   <span className="whitespace-pre-line">{styles["btn-whatsapp"]?.buttonText || "WhatsApp"}</span>
-                </button>
+                </motion.button>
                 
-                <button
+                <motion.button
+                  animate={editorMode ? { scale: 1 } : HOME_BUTTON_PULSE_ANIMATION}
+                  transition={HOME_BUTTON_PULSE_TRANSITION}
+                  whileTap={{ scale: 0.98 }}
                   onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("btn-email", e); } else { handleEmail(); }}}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold shadow-sm border border-purple-200 ${getEditableClass("btn-email")}`}
                   style={{ 
@@ -890,7 +914,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
                     )}
                   </span>
                   <span className="whitespace-pre-line">{styles["btn-email"]?.buttonText || t("home.email")}</span>
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </div>
