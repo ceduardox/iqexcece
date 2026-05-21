@@ -102,16 +102,11 @@ function getAssetWarmSignature(urls: string[]) {
 }
 
 function getTestAssetUrls(styles: PageStyles) {
-  const defaultIconUrls = Object.values(testCardStyles).map((s) => s.iconUrl);
-  return [...extractImageUrlsFromStyles(styles), ...defaultIconUrls];
+  return extractImageUrlsFromStyles(styles);
 }
 
 function getWarmAssetSignatureForStyles(styles: PageStyles) {
   return getAssetWarmSignature(getTestAssetUrls(styles));
-}
-
-function hasWarmTestAssets(lang: string, styles: PageStyles) {
-  return localStorage.getItem(`${TESTS_ASSET_WARM_KEY}${lang}`) === getWarmAssetSignatureForStyles(styles);
 }
 
 interface TestCardProps {
@@ -366,10 +361,6 @@ export default function TestsPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [styles, setStyles] = useState<PageStyles>(() => readCachedTestStyles(lang));
   const [stylesReady, setStylesReady] = useState<boolean>(() => Object.keys(readCachedTestStyles(lang)).length > 0);
-  const [assetsReady, setAssetsReady] = useState<boolean>(() => {
-    const cachedStyles = readCachedTestStyles(lang);
-    return Object.keys(cachedStyles).length > 0 && hasWarmTestAssets(lang, cachedStyles);
-  });
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("mobile");
   const isMobile = useIsMobile();
 
@@ -391,24 +382,24 @@ export default function TestsPage() {
     const hasCachedStyles = Object.keys(cachedStyles).length > 0;
     setStyles(cachedStyles);
     setStylesReady(hasCachedStyles);
-    setAssetsReady(hasCachedStyles && hasWarmTestAssets(lang, cachedStyles));
 
     fetch(`/api/page-styles/tests-page?lang=${lang}`, { signal: controller.signal })
       .then(res => res.json())
-      .then(async (data) => {
+      .then((data) => {
         if (data.style?.styles) {
           try {
             const nextStyles = JSON.parse(data.style.styles);
             const nextSignature = getWarmAssetSignatureForStyles(nextStyles);
             const warmKey = `${TESTS_ASSET_WARM_KEY}${lang}`;
 
-            if (hasCachedStyles && localStorage.getItem(warmKey) !== nextSignature) {
-              await preloadImages(getTestAssetUrls(nextStyles));
-              localStorage.setItem(warmKey, nextSignature);
-            }
-
             setStyles(nextStyles);
             localStorage.setItem(`${TESTS_STYLE_CACHE_KEY}${lang}`, JSON.stringify(nextStyles));
+
+            if (localStorage.getItem(warmKey) !== nextSignature) {
+              preloadImages(getTestAssetUrls(nextStyles), 1800).then(() => {
+                localStorage.setItem(warmKey, nextSignature);
+              });
+            }
           } catch (e) {
             console.log("No saved styles");
           }
@@ -432,15 +423,12 @@ export default function TestsPage() {
     const assetSignature = getAssetWarmSignature(assetUrls);
 
     if (localStorage.getItem(warmKey) === assetSignature) {
-      setAssetsReady(true);
       return;
     }
 
-    setAssetsReady(false);
-    preloadImages(assetUrls).then(() => {
+    preloadImages(assetUrls, 1800).then(() => {
       if (cancelled) return;
       localStorage.setItem(warmKey, assetSignature);
-      setAssetsReady(true);
     });
 
     return () => {
@@ -551,7 +539,7 @@ export default function TestsPage() {
     { id: "cerebral", title: t("tests.cerebral"), description: t("tests.cerebralDesc") },
   ];
 
-  if (!stylesReady || !assetsReady) {
+  if (!stylesReady) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
