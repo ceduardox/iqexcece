@@ -190,6 +190,29 @@ function DeferredVideoBackground({ src, imageSize, active }: { src?: string; ima
   return <VideoPosterImage src={src} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />;
 }
 
+function EditorCardBackgroundMedia({ src, imageSize, active }: { src?: string; imageSize?: number; active: boolean }) {
+  const mediaKind = useMediaKind(src, !!src);
+  if (!src) return null;
+
+  if (mediaKind === "video") {
+    return <DeferredVideoBackground src={src} imageSize={imageSize} active={active} />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none"
+      style={imageSize ? { transform: `scale(${imageSize / 100})` } : undefined}
+      onError={(event) => {
+        event.currentTarget.style.display = "none";
+      }}
+    />
+  );
+}
+
 function getVideoPosterCacheKey(src: string) {
   return `video-poster-webp:${src}`;
 }
@@ -309,8 +332,6 @@ function TrainingSelectionCard({
   const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
   const cardStyle = getResolvedStyle(cardId);
   const backgroundUrl = cardStyle?.imageUrl?.trim();
-  const backgroundKind = useMediaKind(backgroundUrl, !!backgroundUrl);
-  const shouldUseBackgroundImage = !!backgroundUrl && backgroundKind !== "video";
   const rIcon = getResolvedStyle(iconId);
   const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
   const isMd = !isMobile;
@@ -336,9 +357,7 @@ function TrainingSelectionCard({
       <motion.div
         className="relative overflow-hidden rounded-2xl p-4 md:p-8 flex flex-col items-center text-center"
         style={{
-          background: shouldUseBackgroundImage
-            ? `url(${backgroundUrl}) center/cover no-repeat`
-            : (cardStyle?.background || defaultStyle.bg),
+          background: cardStyle?.background || defaultStyle.bg,
           border: "1px solid rgba(0,180,255,0.25)",
           boxShadow: cardStyle?.shadowBlur
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,180,255,0.1)"}`
@@ -348,10 +367,10 @@ function TrainingSelectionCard({
         whileTap={{ scale: editorMode ? 1 : 0.98 }}
         transition={{ duration: 0.1 }}
       >
-        <DeferredVideoBackground src={backgroundUrl} imageSize={cardStyle?.imageSize} active={mediaActive} />
+        <EditorCardBackgroundMedia src={backgroundUrl} imageSize={cardStyle?.imageSize} active={mediaActive} />
 
         <div
-          className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
+          className={`relative z-10 flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
           style={{ width: iconSize, height: iconSize }}
         >
@@ -359,7 +378,7 @@ function TrainingSelectionCard({
         </div>
 
         <h3
-          className={`text-sm md:text-lg font-bold mb-1 md:mb-2 leading-tight ${getEditableClass(titleId)}`}
+          className={`relative z-10 text-sm md:text-lg font-bold mb-1 md:mb-2 leading-tight ${getEditableClass(titleId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
           style={{
             fontSize: getResolvedStyle(titleId)?.fontSize || (isMd ? 18 : 14),
@@ -370,7 +389,7 @@ function TrainingSelectionCard({
         </h3>
         {item.description && (
           <p
-            className={`text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
+            className={`relative z-10 text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
             style={{
               fontSize: getResolvedStyle(descId)?.fontSize || 11,
@@ -383,7 +402,7 @@ function TrainingSelectionCard({
         <motion.button
           animate={{ scale: [1, 1.04, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className={`w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
+          className={`relative z-10 w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
           onClick={(e) => {
             e.stopPropagation();
             if (editorMode) {
