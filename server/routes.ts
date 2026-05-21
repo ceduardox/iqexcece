@@ -1263,6 +1263,29 @@ Reglas:
     res.json(images);
   });
 
+  app.get("/api/images/:id/meta", async (req, res) => {
+    const image = await storage.getImageById(req.params.id);
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    const matches = image.data.match(/^data:([^;]+);base64,/);
+    if (!matches) {
+      return res.status(500).json({ error: "Invalid image data" });
+    }
+
+    res.set("Cache-Control", "public, max-age=31536000");
+    res.json({
+      id: image.id,
+      name: image.name,
+      mimeType: matches[1],
+      originalSize: image.originalSize,
+      compressedSize: image.compressedSize,
+      width: image.width,
+      height: image.height,
+    });
+  });
+
   // Serve image by ID - returns actual image file
   app.get("/api/images/:id", async (req, res) => {
     const image = await storage.getImageById(req.params.id);

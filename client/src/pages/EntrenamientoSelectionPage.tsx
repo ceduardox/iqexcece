@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { EditorToolbar, type PageStyles, type ElementStyle, type DeviceMode, resolveStyle } from "@/components/EditorToolbar";
 import { LanguageButton } from "@/components/LanguageButton";
-import { VideoBackground, MediaIcon, useIsVideo } from "@/components/VideoBackground";
+import { VideoBackground, useMediaKind } from "@/components/VideoBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Minus } from "lucide-react";
 import menuCurveImg from "@assets/menu_1769957804819.png";
@@ -123,15 +123,13 @@ const defaultIcons = [
 const TRAINING_SELECTION_ASSET_WARM_KEY = "assets-warm:entrenamiento-selection-page:";
 const TRAINING_SELECTION_HEADER_LOGO = "/api/images/e038af72-17b2-4944-a203-afa1f753b33a";
 
-function CardVideoLayer({ src, imageSize }: { src?: string; imageSize?: number }) {
-  const isVideo = useIsVideo(src);
-  if (!src || !isVideo) return null;
-  return <VideoBackground src={src} imageSize={imageSize} />;
-}
-
 function isKnownVideoAsset(url: string) {
   const lower = url.toLowerCase();
   return lower.endsWith(".webm") || lower.endsWith(".mp4") || lower.includes("video/webm") || lower.includes("video/mp4");
+}
+
+function isManagedImageAsset(url?: string) {
+  return !!url && /^(?:https?:\/\/[^/]+)?\/api\/images\/[^/?#]+/i.test(url);
 }
 
 function extractImageUrlsFromStyles(styles: PageStyles): string[] {
@@ -187,6 +185,182 @@ function getTrainingCriticalAssetUrls(styles: PageStyles) {
 
 function getTrainingWarmSignature(styles: PageStyles) {
   return getAssetWarmSignature(getTrainingCriticalAssetUrls(styles));
+}
+
+function DeferredVideoBackground({ src, imageSize, active }: { src?: string; imageSize?: number; active: boolean }) {
+  const mediaKind = useMediaKind(src, !!src);
+  if (!src || mediaKind !== "video" || !active) return null;
+  return <VideoBackground src={src} imageSize={imageSize} />;
+}
+
+function TrainingMediaIcon({ src, size, active }: { src: string; size: number; active: boolean }) {
+  const mediaKind = useMediaKind(src, !!src);
+  const style = { width: size, height: size, objectFit: "contain" as const };
+
+  if (mediaKind === "video") {
+    if (!active) {
+      return (
+        <div
+          className="rounded-2xl bg-white/15 text-white/85 flex items-center justify-center shadow-inner"
+          style={style}
+          aria-hidden="true"
+        >
+          <Dumbbell className="w-1/2 h-1/2" />
+        </div>
+      );
+    }
+    return <video src={src} autoPlay loop muted playsInline preload="metadata" className="drop-shadow-md" style={style} />;
+  }
+
+  if (mediaKind === "unknown" && isManagedImageAsset(src)) {
+    return (
+      <div
+        className="rounded-2xl bg-white/10 flex items-center justify-center shadow-inner"
+        style={style}
+        aria-hidden="true"
+      >
+        <Dumbbell className="w-1/2 h-1/2 text-white/70" />
+      </div>
+    );
+  }
+
+  return <img src={src} alt="" loading="lazy" decoding="async" className="drop-shadow-md" style={style} />;
+}
+
+function TrainingSelectionCard({
+  item,
+  index,
+  editorMode,
+  isMobile,
+  t,
+  getResolvedStyle,
+  getEditableClass,
+  handleElementClick,
+  handleSelect,
+}: {
+  item: EntrenamientoItem;
+  index: number;
+  editorMode: boolean;
+  isMobile: boolean;
+  t: (key: string, options?: Record<string, unknown>) => string;
+  getResolvedStyle: (elementId: string) => ElementStyle;
+  getEditableClass: (elementId: string) => string;
+  handleElementClick: (elementId: string, e: React.MouseEvent) => void;
+  handleSelect: (item: EntrenamientoItem) => void;
+}) {
+  const [mediaActive, setMediaActive] = useState(false);
+  const cardId = `ent-card-${index}`;
+  const titleId = `ent-title-${index}`;
+  const descId = `ent-desc-${index}`;
+  const iconId = `ent-icon-${index}`;
+  const btnId = `ent-btn-${index}`;
+
+  const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
+  const cardStyle = getResolvedStyle(cardId);
+  const backgroundUrl = cardStyle?.imageUrl?.trim();
+  const backgroundKind = useMediaKind(backgroundUrl, !!backgroundUrl);
+  const shouldUseBackgroundImage = !!backgroundUrl && backgroundKind !== "video" && !(backgroundKind === "unknown" && isManagedImageAsset(backgroundUrl));
+  const rIcon = getResolvedStyle(iconId);
+  const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
+  const isMd = !isMobile;
+  const iconSize = rIcon?.iconSize || rIcon?.imageSize || (isMd ? 96 : 64);
+  const exerciseType = normalizeExerciseType(item.tipoEjercicio);
+  const armMedia = () => setMediaActive(true);
+
+  return (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 0.1 + index * 0.1, duration: 0.4, type: "spring", stiffness: 100 }}
+      whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+      onMouseEnter={() => { if (!isMobile) armMedia(); }}
+      onMouseLeave={() => { if (!isMobile) setMediaActive(false); }}
+      onFocus={armMedia}
+      onPointerDown={armMedia}
+      onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
+      className={`cursor-pointer ${getEditableClass(cardId)}`}
+      data-testid={`card-entrenamiento-${item.id}`}
+    >
+      <motion.div
+        className="relative overflow-hidden rounded-2xl p-4 md:p-8 flex flex-col items-center text-center"
+        style={{
+          background: shouldUseBackgroundImage
+            ? `url(${backgroundUrl}) center/cover no-repeat`
+            : (cardStyle?.background || defaultStyle.bg),
+          border: "1px solid rgba(0,180,255,0.25)",
+          boxShadow: cardStyle?.shadowBlur
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,180,255,0.1)"}`
+            : "0 0 20px rgba(0,180,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05)",
+          borderRadius: cardStyle?.borderRadius || 16
+        }}
+        whileTap={{ scale: editorMode ? 1 : 0.98 }}
+        transition={{ duration: 0.1 }}
+      >
+        <DeferredVideoBackground src={backgroundUrl} imageSize={cardStyle?.imageSize} active={mediaActive} />
+
+        <div
+          className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
+          style={{ width: iconSize, height: iconSize }}
+        >
+          <TrainingMediaIcon src={iconUrl} size={iconSize} active={mediaActive} />
+        </div>
+
+        <h3
+          className={`text-sm md:text-lg font-bold mb-1 md:mb-2 leading-tight ${getEditableClass(titleId)}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
+          style={{
+            fontSize: getResolvedStyle(titleId)?.fontSize || (isMd ? 18 : 14),
+            color: getResolvedStyle(titleId)?.textColor || "#ffffff"
+          }}
+        >
+          {t(`entrenamiento.cardTitle_${exerciseType}`, { defaultValue: item.title })}
+        </h3>
+        {item.description && (
+          <p
+            className={`text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
+            style={{
+              fontSize: getResolvedStyle(descId)?.fontSize || 11,
+              color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
+            }}
+          >
+            {t(`entrenamiento.cardDesc_${exerciseType}`, { defaultValue: item.description || "" })}
+          </p>
+        )}
+        <motion.button
+          animate={{ scale: [1, 1.04, 1] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className={`w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (editorMode) {
+              handleElementClick(btnId, e);
+            } else {
+              playButtonSound();
+              handleSelect(item);
+            }
+          }}
+          style={(() => { const bs = getResolvedStyle(btnId); return {
+            background: (bs?.imageUrl && bs?.backgroundType === "image")
+              ? `url(${bs.imageUrl}) center/cover no-repeat`
+              : (bs?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
+            backgroundSize: bs?.imageSize ? `${bs.imageSize}%` : "cover",
+            color: bs?.textColor || "white",
+            border: "none",
+            boxShadow: bs?.shadowBlur
+              ? `0 ${bs.shadowBlur / 2}px ${bs.shadowBlur}px ${bs?.shadowColor || "rgba(139,92,246,0.3)"}`
+              : "0 4px 15px rgba(139,92,246,0.3)"
+          };})()}
+          whileTap={{ scale: editorMode ? 1 : 0.95 }}
+        >
+          {t("entrenamiento.startBtn")}
+          <ChevronRight className="w-3.5 h-3.5" />
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
 }
 
 export default function EntrenamientoSelectionPage() {
@@ -547,114 +721,20 @@ export default function EntrenamientoSelectionPage() {
               <p className="text-gray-400">{t("training.noItems")}</p>
             </div>
           ) : (
-            items.map((item, index) => {
-              const cardId = `ent-card-${index}`;
-              const titleId = `ent-title-${index}`;
-              const descId = `ent-desc-${index}`;
-              const iconId = `ent-icon-${index}`;
-              const btnId = `ent-btn-${index}`;
-              
-              const defaultStyle = defaultCardStyles[index % defaultCardStyles.length];
-              const cardStyle = getResolvedStyle(cardId);
-              const hasBackgroundImage = cardStyle?.imageUrl;
-              const textDark = cardStyle?.textColor ? true : defaultStyle.textDark;
-              const rIcon = getResolvedStyle(iconId);
-              const iconUrl = rIcon?.imageUrl || item.imageUrl || defaultIcons[index % defaultIcons.length];
-              const isMd = !isMobile;
-              const iconSize = rIcon?.iconSize || rIcon?.imageSize || (isMd ? 96 : 64);
-              const exerciseType = normalizeExerciseType(item.tipoEjercicio);
-              
-              return (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.1 + index * 0.1, duration: 0.4, type: "spring", stiffness: 100 }}
-                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                  onClick={(e) => editorMode ? handleElementClick(cardId, e) : handleSelect(item)}
-                  className={`cursor-pointer ${getEditableClass(cardId)}`}
-                  data-testid={`card-entrenamiento-${item.id}`}
-                >
-                  <motion.div
-                    className="relative overflow-hidden rounded-2xl p-4 md:p-8 flex flex-col items-center text-center"
-                    style={{ 
-                      background: hasBackgroundImage 
-                        ? `url(${cardStyle.imageUrl}) center/cover no-repeat`
-                        : (cardStyle?.background || defaultStyle.bg),
-                      border: "1px solid rgba(0,180,255,0.25)",
-                      boxShadow: cardStyle?.shadowBlur 
-                        ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,180,255,0.1)"}` 
-                        : "0 0 20px rgba(0,180,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05)",
-                      borderRadius: cardStyle?.borderRadius || 16
-                    }}
-                    whileTap={{ scale: editorMode ? 1 : 0.98 }}
-                    transition={{ duration: 0.1 }}
-                  >
-                    {hasBackgroundImage && <CardVideoLayer src={cardStyle.imageUrl} imageSize={cardStyle?.imageSize} />}
-                    
-                    <div 
-                      className={`relative flex items-center justify-center mb-3 ${getEditableClass(iconId)}`}
-                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(iconId, e); }}}
-                      style={{ width: iconSize, height: iconSize }}
-                    >
-                      <MediaIcon src={iconUrl} size={iconSize} />
-                    </div>
-                    
-                    <h3 
-                      className={`text-sm md:text-lg font-bold mb-1 md:mb-2 leading-tight ${getEditableClass(titleId)}`}
-                      onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
-                      style={{ 
-                        fontSize: getResolvedStyle(titleId)?.fontSize || (isMd ? 18 : 14),
-                        color: getResolvedStyle(titleId)?.textColor || "#ffffff"
-                      }}
-                    >
-                      {t(`entrenamiento.cardTitle_${exerciseType}`, { defaultValue: item.title })}
-                    </h3>
-                    {item.description && (
-                      <p 
-                        className={`text-xs leading-snug mb-3 ${getEditableClass(descId)}`}
-                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
-                        style={{ 
-                          fontSize: getResolvedStyle(descId)?.fontSize || 11,
-                          color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
-                        }}
-                      >
-                        {t(`entrenamiento.cardDesc_${exerciseType}`, { defaultValue: item.description || "" })}
-                      </p>
-                    )}
-                    <motion.button
-                      animate={{ scale: [1, 1.04, 1] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                      className={`w-full px-3 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 ${getEditableClass(btnId)}`}
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        if (editorMode) {
-                          handleElementClick(btnId, e);
-                        } else {
-                          playButtonSound(); 
-                          handleSelect(item);
-                        }
-                      }}
-                      style={(() => { const bs = getResolvedStyle(btnId); return {
-                        background: (bs?.imageUrl && bs?.backgroundType === "image")
-                          ? `url(${bs.imageUrl}) center/cover no-repeat`
-                          : (bs?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
-                        backgroundSize: bs?.imageSize ? `${bs.imageSize}%` : "cover",
-                        color: bs?.textColor || "white",
-                        border: "none",
-                        boxShadow: bs?.shadowBlur 
-                          ? `0 ${bs.shadowBlur / 2}px ${bs.shadowBlur}px ${bs?.shadowColor || "rgba(139,92,246,0.3)"}`
-                          : "0 4px 15px rgba(139,92,246,0.3)"
-                      };})()}
-                      whileTap={{ scale: editorMode ? 1 : 0.95 }}
-                    >
-                      {t("entrenamiento.startBtn")}
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              );
-            })
+            items.map((item, index) => (
+              <TrainingSelectionCard
+                key={item.id}
+                item={item}
+                index={index}
+                editorMode={editorMode}
+                isMobile={isMobile}
+                t={t}
+                getResolvedStyle={getResolvedStyle}
+                getEditableClass={getEditableClass}
+                handleElementClick={handleElementClick}
+                handleSelect={handleSelect}
+              />
+            ))
           )}
         </div>
         </div>
