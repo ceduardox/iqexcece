@@ -1594,13 +1594,13 @@ Reglas:
     const card = noFallback
       ? await storage.getEntrenamientoCardExact(req.params.categoria, lang)
       : await storage.getEntrenamientoCard(req.params.categoria, lang);
-    res.json({ card: card || {
+    res.json({ card: fixMojibakeDeep(card || {
       categoria: req.params.categoria,
       title: "Entrenamiento",
-      description: "Mejora tu velocidad de percepciÃ³n visual y fortalece tus habilidades cognitivas",
+      description: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas",
       buttonText: "Comenzar",
       imageUrl: null
-    }});
+    })});
   });
 
   // Get entrenamiento page config (public)
@@ -1610,12 +1610,12 @@ Reglas:
     const page = noFallback
       ? await storage.getEntrenamientoPageExact(req.params.categoria, lang)
       : await storage.getEntrenamientoPage(req.params.categoria, lang);
-    res.json({ page: page || {
+    res.json({ page: fixMojibakeDeep(page || {
       categoria: req.params.categoria,
-      bannerText: "Â¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
+      bannerText: "¡Disfruta ahora de ejercicios de entrenamiento gratuitos por tiempo limitado!",
       pageTitle: "Entrenamientos",
-      pageDescription: "Mejora tu velocidad de percepciÃ³n visual y fortalece tus habilidades cognitivas"
-    }});
+      pageDescription: "Mejora tu velocidad de percepción visual y fortalece tus habilidades cognitivas"
+    })});
   });
 
   // Get entrenamiento items (public)
@@ -1625,7 +1625,7 @@ Reglas:
     const items = noFallback
       ? await storage.getEntrenamientoItemsExact(req.params.categoria, lang)
       : await storage.getEntrenamientoItems(req.params.categoria, lang);
-    res.json({ items });
+    res.json({ items: fixMojibakeDeep(items) });
   });
 
   // Get single entrenamiento item by ID (public)
@@ -1634,9 +1634,9 @@ Reglas:
     const item = await storage.getEntrenamientoItemById(req.params.id);
     if (item && lang && lang !== item.lang) {
       const translated = await storage.getEntrenamientoItemBySort(item.categoria, item.sortOrder ?? 0, lang);
-      if (translated) return res.json({ item: translated });
+      if (translated) return res.json({ item: fixMojibakeDeep(translated) });
     }
-    res.json({ item });
+    res.json({ item: fixMojibakeDeep(item) });
   });
 
   // Save entrenamiento card (admin)
@@ -1646,8 +1646,8 @@ Reglas:
     if (!token || !validAdminTokens.has(token)) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const card = await storage.saveEntrenamientoCard(req.body);
-    res.json({ card });
+    const card = await storage.saveEntrenamientoCard(fixMojibakeDeep(req.body));
+    res.json({ card: fixMojibakeDeep(card) });
   });
 
   // Save entrenamiento page config (admin)
@@ -1657,8 +1657,8 @@ Reglas:
     if (!token || !validAdminTokens.has(token)) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const page = await storage.saveEntrenamientoPage(req.body);
-    res.json({ page });
+    const page = await storage.saveEntrenamientoPage(fixMojibakeDeep(req.body));
+    res.json({ page: fixMojibakeDeep(page) });
   });
 
   // Create entrenamiento item (admin)
@@ -1668,8 +1668,8 @@ Reglas:
     if (!token || !validAdminTokens.has(token)) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const item = await storage.saveEntrenamientoItem(req.body);
-    res.json({ item });
+    const item = await storage.saveEntrenamientoItem(fixMojibakeDeep(req.body));
+    res.json({ item: fixMojibakeDeep(item) });
   });
 
   // Update entrenamiento item (admin)
@@ -1679,8 +1679,8 @@ Reglas:
     if (!token || !validAdminTokens.has(token)) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const item = await storage.updateEntrenamientoItem(req.params.id, req.body);
-    res.json({ item });
+    const item = await storage.updateEntrenamientoItem(req.params.id, fixMojibakeDeep(req.body));
+    res.json({ item: fixMojibakeDeep(item) });
   });
 
   // Delete entrenamiento item (admin)
