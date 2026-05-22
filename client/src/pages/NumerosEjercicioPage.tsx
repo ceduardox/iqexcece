@@ -218,15 +218,15 @@ export default function NumerosEjercicioPage() {
         </div>
       </header>
 
-      <div className="mx-4 bg-white rounded-xl shadow-lg px-4 py-3 -mt-2 relative z-10">
-        <div className="flex items-center justify-between text-xs">
+      <div className="mx-4 md:mx-8 bg-white rounded-xl shadow-lg px-4 md:px-6 py-3 md:py-4 -mt-2 md:mt-0 relative z-10">
+        <div className="flex items-center justify-between text-xs md:text-sm">
           <div className="text-center">
-            <span className="text-gray-400 block text-[10px]">NIVEL</span>
-            <span className="font-bold text-gray-800">{getNivelNombre()}</span>
+            <span className="text-gray-400 block text-[10px] md:text-xs">NIVEL</span>
+            <span className="font-bold text-gray-800 md:text-base">{getNivelNombre()}</span>
           </div>
           <div className="text-center">
-            <span className="text-gray-400 block text-[10px]">TIEMPO</span>
-            <span className="font-bold text-purple-600">{timeLeft}s</span>
+            <span className="text-gray-400 block text-[10px] md:text-xs">TIEMPO</span>
+            <span className="font-bold text-purple-600 md:text-base">{timeLeft}s</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-lg">😊</span>
@@ -239,23 +239,23 @@ export default function NumerosEjercicioPage() {
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6">
-        <p className="text-gray-600 text-center text-base mb-4 font-medium">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-8 py-6 md:py-10">
+        <p className="text-gray-600 text-center text-base md:text-xl lg:text-2xl mb-4 md:mb-6 font-medium">
           {getInstructionText()}
         </p>
 
         <motion.div
-          className="w-20 h-20 rounded-lg flex items-center justify-center mb-6 shadow-lg"
+          className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-lg md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 shadow-lg"
           style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
           animate={targetPop ? { scale: [1, 1.15, 1] } : {}}
           transition={{ duration: 0.15 }}
         >
-          <span className="text-white text-4xl font-bold" data-testid="text-target">
+          <span className="text-white text-4xl md:text-6xl lg:text-7xl font-bold" data-testid="text-target">
             {getTargetDisplay()}
           </span>
         </motion.div>
 
-        <div className="grid grid-cols-5 gap-2 mb-8">
+        <div className="grid grid-cols-5 gap-2 md:gap-3 lg:gap-4 mb-8 md:mb-10">
           {board.map((value, index) => {
             const isFlashing = flashingCell === index;
             const isCorrectFlash = isFlashing && flashType === "correct";
@@ -269,7 +269,7 @@ export default function NumerosEjercicioPage() {
                 onClick={() => handleCellClick(value, index)}
                 disabled={!isActive}
                 className={`
-                  w-14 h-14 rounded-lg text-xl font-bold flex items-center justify-center
+                  w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-lg md:rounded-xl text-xl md:text-3xl lg:text-4xl font-bold flex items-center justify-center
                   transition-all duration-150 shadow-sm border
                   ${isIdle ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" : ""}
                   ${isActive && !isFlashing ? "bg-white text-gray-800 border-gray-200 hover:border-purple-400 hover:shadow-md cursor-pointer" : ""}
@@ -291,12 +291,12 @@ export default function NumerosEjercicioPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleStart}
-              className="px-10 py-4 text-white font-bold text-xl rounded-lg shadow-lg flex items-center gap-3"
+              className="px-10 md:px-16 py-4 md:py-5 text-white font-bold text-xl md:text-2xl rounded-lg md:rounded-xl shadow-lg flex items-center gap-3"
               style={{ background: "linear-gradient(135deg, #8a3ffc 0%, #06b6d4 100%)" }}
               data-testid="button-start"
             >
               Iniciar
-              <Play className="w-5 h-5 fill-white" />
+              <Play className="w-5 h-5 md:w-6 md:h-6 fill-white" />
             </motion.button>
           )}
         </AnimatePresence>

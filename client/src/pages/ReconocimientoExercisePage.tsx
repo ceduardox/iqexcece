@@ -1,6 +1,6 @@
 import { useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Play, ThumbsUp, ThumbsDown, Share2, RotateCcw, X } from "lucide-react";
+import { ChevronLeft, Play, ThumbsUp, ThumbsDown, Share2, RotateCcw, X, Smile, Frown } from "lucide-react";
 import { useSounds } from "@/hooks/use-sounds";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,9 @@ import { LanguageButton } from "@/components/LanguageButton";
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const GAME_DURATION = 50;
 const MATCH_PROB = 0.35; // 35% probability that combo equals previous (good balance)
+
+// Textos en espanol: mantener este archivo en UTF-8.
+// No reemplazar emojis globalmente; revisar NOTAS_CODIFICACION_TEXTOS.md antes de editar textos.
 
 // Level 1 config: 7x9 grid with 4 target positions
 const LEVEL1_CONFIG = {
@@ -586,35 +589,35 @@ export default function ReconocimientoExercisePage() {
       </header>
 
       <div 
-        className="flex flex-wrap justify-center gap-2 px-2 py-3 border-b border-gray-100"
+        className="flex flex-wrap justify-center gap-2 md:gap-4 px-2 md:px-6 py-3 md:py-4 border-b border-gray-100"
         style={{ background: "#f9fafb" }}
       >
-        <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
-          <span className="text-gray-500 text-[10px] uppercase">{t("reconocimiento_visual.level")}</span>
-          <span className="text-purple-600 font-bold text-sm">{nivel}</span>
+        <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-white rounded-lg shadow-sm">
+          <span className="text-gray-500 text-[10px] md:text-xs uppercase">{t("reconocimiento_visual.level")}</span>
+          <span className="text-purple-600 font-bold text-sm md:text-lg">{nivel}</span>
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-sm">
-          <span className="text-gray-500 text-[10px] uppercase">{t("reconocimiento_visual.time")}</span>
-          <span className="text-purple-600 font-bold text-sm">{timeLeft}s</span>
+        <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-white rounded-lg shadow-sm">
+          <span className="text-gray-500 text-[10px] md:text-xs uppercase">{t("reconocimiento_visual.time")}</span>
+          <span className="text-purple-600 font-bold text-sm md:text-lg">{timeLeft}s</span>
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-lg shadow-sm border border-green-200">
-          <span className="text-base">😊</span>
-          <span className="text-green-600 font-bold text-sm">{correctCount}</span>
-          <span className="text-green-600 text-[10px]">{t("reconocimiento_visual.correct")}</span>
+        <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-green-50 rounded-lg shadow-sm border border-green-200">
+          <Smile className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+          <span className="text-green-600 font-bold text-sm md:text-lg">{correctCount}</span>
+          <span className="text-green-600 text-[10px] md:text-xs">{t("reconocimiento_visual.correct")}</span>
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-red-50 rounded-lg shadow-sm border border-red-200">
-          <span className="text-base">😟</span>
-          <span className="text-red-500 font-bold text-sm">{incorrectCount}</span>
-          <span className="text-red-500 text-[10px]">{t("reconocimiento_visual.incorrect")}</span>
+        <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-red-50 rounded-lg shadow-sm border border-red-200">
+          <Frown className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
+          <span className="text-red-500 font-bold text-sm md:text-lg">{incorrectCount}</span>
+          <span className="text-red-500 text-[10px] md:text-xs">{t("reconocimiento_visual.incorrect")}</span>
         </div>
       </div>
 
-      <main className="flex-1 px-4 pb-28 flex flex-col">
-        <div className="text-center py-4">
-          <h2 className="text-gray-800 font-bold text-base mb-1">
+      <main className="flex-1 px-4 md:px-8 lg:px-12 pb-28 flex flex-col md:items-center">
+        <div className="text-center py-4 md:py-5 lg:py-6">
+          <h2 className="text-gray-800 font-bold text-base md:text-2xl lg:text-3xl xl:text-4xl mb-1 md:mb-3">
             ¿Todas las letras marcadas son iguales?
           </h2>
-          <p className="text-gray-400 text-xs">
+          <p className="text-gray-400 text-xs md:text-base lg:text-lg">
             {nivel === 1 
               ? "Observa las 4 letras que cambian. ¿Son todas iguales o hay alguna diferente?"
               : "Observa las 8 letras en esquinas y bordes. ¿Son todas iguales o hay alguna diferente?"
@@ -623,13 +626,13 @@ export default function ReconocimientoExercisePage() {
         </div>
 
         <div 
-          className="rounded-2xl p-4 mx-auto transition-colors duration-300"
+          className="rounded-2xl md:rounded-3xl p-4 md:p-5 lg:p-6 mx-auto transition-colors duration-300"
           style={{ 
             background: gameState === "running" ? "#f5f3ff" : "#f3f4f6",
             border: "1px solid #e5e7eb"
           }}
         >
-          <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+          <div className="grid gap-1 md:gap-2" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
             {gridData.map((row, r) => 
               row.map((letter, c) => {
                 const isCenter = r === centerRow && c === centerCol;
@@ -637,16 +640,16 @@ export default function ReconocimientoExercisePage() {
                 return (
                   <div
                     key={`${r}-${c}`}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg"
+                    className="w-7 h-7 md:w-10 md:h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-lg md:rounded-xl"
                     style={{ 
                       background: isCenter ? "transparent" : "#ffffff",
                       border: isCenter ? "none" : "1px solid #e5e7eb"
                     }}
                   >
                     {isCenter ? (
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <div className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 rounded-full bg-red-500" />
                     ) : (
-                      <span className="text-gray-700 text-sm font-semibold">
+                      <span className="text-gray-700 text-sm md:text-lg lg:text-xl font-semibold">
                         {letter}
                       </span>
                     )}
@@ -657,41 +660,41 @@ export default function ReconocimientoExercisePage() {
           </div>
         </div>
 
-        <div className="flex gap-4 justify-center mt-6">
+        <div className="flex gap-4 md:gap-6 lg:gap-8 justify-center mt-6 md:mt-6 lg:mt-7 w-full">
           <motion.button
             onClick={() => handleAnswer(false)}
             disabled={gameState !== "running" || hasAnswered}
-            className="flex-1 max-w-[140px] py-4 rounded-2xl flex flex-col items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 max-w-[140px] md:max-w-[220px] lg:max-w-[260px] py-4 md:py-5 lg:py-6 rounded-2xl flex flex-col items-center justify-center gap-2 md:gap-3 disabled:opacity-50"
             style={{ background: "#fef2f2", border: "1px solid #fecaca" }}
             whileTap={{ scale: 0.95 }}
             data-testid="button-not-equal"
           >
-            <ThumbsDown className="w-8 h-8 text-red-500" />
-            <span className="text-red-600 text-xs font-medium">{t("reconocimiento_visual.notEqual")}</span>
+            <ThumbsDown className="w-8 h-8 md:w-11 md:h-11 lg:w-12 lg:h-12 text-red-500" />
+            <span className="text-red-600 text-xs md:text-sm lg:text-base font-medium">{t("reconocimiento_visual.notEqual")}</span>
           </motion.button>
 
           <motion.button
             onClick={() => handleAnswer(true)}
             disabled={gameState !== "running" || hasAnswered}
-            className="flex-1 max-w-[140px] py-4 rounded-2xl flex flex-col items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 max-w-[140px] md:max-w-[220px] lg:max-w-[260px] py-4 md:py-5 lg:py-6 rounded-2xl flex flex-col items-center justify-center gap-2 md:gap-3 disabled:opacity-50"
             style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}
             whileTap={{ scale: 0.95 }}
             data-testid="button-equal"
           >
-            <ThumbsUp className="w-8 h-8 text-green-500" />
-            <span className="text-green-600 text-xs font-medium">{t("reconocimiento_visual.yesEqual")}</span>
+            <ThumbsUp className="w-8 h-8 md:w-11 md:h-11 lg:w-12 lg:h-12 text-green-500" />
+            <span className="text-green-600 text-xs md:text-sm lg:text-base font-medium">{t("reconocimiento_visual.yesEqual")}</span>
           </motion.button>
         </div>
 
         {gameState === "idle" && (
           <motion.button
             onClick={startGame}
-            className="mt-6 mx-auto py-3 px-10 rounded-xl text-white font-semibold flex items-center gap-2 shadow-lg"
+            className="mt-6 md:mt-8 lg:mt-10 mx-auto py-3 md:py-4 lg:py-5 px-10 md:px-14 lg:px-20 rounded-xl text-white font-semibold md:text-lg lg:text-xl flex items-center gap-2 shadow-lg"
             style={{ background: "linear-gradient(135deg, #7c3aed, #6366f1)" }}
             whileTap={{ scale: 0.98 }}
             data-testid="button-start"
           >
-            {t("reconocimiento_visual.startGame")} <Play className="w-4 h-4" fill="white" />
+            {t("reconocimiento_visual.startGame")} <Play className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" fill="white" />
           </motion.button>
         )}
 
@@ -723,3 +726,4 @@ export default function ReconocimientoExercisePage() {
     </div>
   );
 }
+
