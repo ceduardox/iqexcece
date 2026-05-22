@@ -434,6 +434,11 @@ export default function ALeerBoliviaPage() {
   }
 
   const iconSize = (objId: string) => styles[`icon-${objId}`]?.iconSize || 24;
+  const subtitle1Text = t("aleer.subtitle1");
+  const subtitleHighlight = "Nueva Era Educativa";
+  const subtitleParts = subtitle1Text.includes(subtitleHighlight)
+    ? subtitle1Text.split(subtitleHighlight)
+    : [subtitle1Text];
 
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
@@ -481,7 +486,7 @@ export default function ALeerBoliviaPage() {
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
-              : styles["section-hero"]?.background || "linear-gradient(135deg, #eefcff 0%, #ffffff 44%, #f3e8ff 100%)",
+              : styles["section-hero"]?.background || "linear-gradient(145deg, #2b16d8 0%, #7427f3 48%, #8f35f7 76%, #f7f3ff 100%)",
           }}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -503,40 +508,44 @@ export default function ALeerBoliviaPage() {
           )}
           {!styles["section-hero"]?.background && !styles["section-hero"]?.imageUrl && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-28 -right-28 w-[420px] h-[420px]">
-                <div className="absolute inset-0 rotate-45 rounded-2xl bg-violet-700/75" />
-                <div className="absolute inset-0 -rotate-45 rounded-2xl bg-violet-600/65" />
+              <div className="absolute -top-28 -right-28 w-[420px] h-[420px] opacity-80">
+                <div className="absolute inset-0 rotate-45 rounded-[44px] bg-cyan-300/35 blur-[1px]" />
+                <div className="absolute inset-8 -rotate-45 rounded-[40px] bg-violet-500/50" />
               </div>
-              <div className="absolute -bottom-28 -left-36 w-[420px] h-[420px] opacity-45">
-                <div className="absolute inset-0 rotate-45 rounded-2xl bg-cyan-300/55" />
-                <div className="absolute inset-0 -rotate-45 rounded-2xl bg-white/30" />
+              <div className="absolute -bottom-40 -left-36 w-[520px] h-[520px] opacity-75">
+                <div className="absolute inset-0 rounded-[46%_54%_64%_36%] bg-white/95" />
+                <div className="absolute inset-10 rounded-[54%_46%_42%_58%] bg-cyan-200/35" />
               </div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(6,182,212,0.2),transparent_42%),radial-gradient(circle_at_78%_72%,rgba(124,58,237,0.18),transparent_48%)]" />
+              <div className="absolute -bottom-24 right-[-10%] w-[58%] h-[220px] rounded-[55%_45%_0_0] bg-white/95" />
+              <div className="absolute left-7 top-14 h-1.5 w-12 rotate-[-42deg] rounded-full bg-white/50" />
+              <div className="absolute left-14 top-20 h-1.5 w-20 rotate-[-42deg] rounded-full bg-cyan-200/55" />
+              <div className="absolute right-[9%] top-[42%] h-40 w-72 rotate-[-28deg] rounded-[42px] bg-gradient-to-br from-fuchsia-300/70 via-violet-400/80 to-cyan-300/80 shadow-[0_0_36px_rgba(255,255,255,0.45)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.18),transparent_40%),radial-gradient(circle_at_78%_22%,rgba(34,211,238,0.18),transparent_35%)]" />
             </div>
           )}
 
           <motion.div
-            className="relative z-10 mx-auto max-w-7xl md:grid md:grid-cols-[0.88fr_1.12fr] md:gap-10 lg:gap-14 md:items-center"
+            className="relative z-10 mx-auto max-w-7xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="text-left">
+            <div className="max-w-4xl text-left">
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 bg-white/85 border border-cyan-200/80 backdrop-blur-[2px] shadow-[0_10px_30px_rgba(6,182,212,0.14)]"
+                className="inline-flex items-center gap-3 rounded-full bg-white/94 px-5 py-3 mb-7 border border-violet-100 shadow-[0_14px_38px_rgba(36,16,120,0.2)]"
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ repeat: Infinity, duration: 3 }}
               >
-                <Sparkles className="w-4 h-4 text-cyan-600" />
-                <span className="text-xs font-extrabold text-violet-700 tracking-wide">{t("aleer.badge")}</span>
+                <Sparkles className="w-6 h-6 text-cyan-500" />
+                <span className="text-sm md:text-xl font-black text-violet-700 tracking-wide">{t("aleer.badge")}</span>
               </motion.div>
 
               <h1
-                className={`text-[36px] sm:text-[46px] md:text-[72px] lg:text-[86px] font-black mb-5 leading-[0.9] text-[#16003d] ${getEditableClass("hero-title")}`}
+                className={`text-[58px] sm:text-[72px] md:text-[104px] lg:text-[128px] font-black mb-5 leading-[0.82] text-white drop-shadow-[0_8px_30px_rgba(20,8,95,0.25)] ${getEditableClass("hero-title")}`}
                 style={{
                   fontSize: styles["hero-title"]?.fontSize || undefined,
                   lineHeight: styles["hero-title"]?.lineHeight,
-                  color: styles["hero-title"]?.textColor || "#16003d",
+                  color: styles["hero-title"]?.textColor || "#ffffff",
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
                 data-testid="text-welcome-title"
@@ -545,31 +554,40 @@ export default function ALeerBoliviaPage() {
               </h1>
 
               <h2
-                className={`text-xl md:text-4xl font-black mb-2 text-[#0b1828] ${getEditableClass("hero-subtitle1")}`}
+                className={`text-[31px] md:text-6xl font-black mb-6 leading-tight text-white ${getEditableClass("hero-subtitle1")}`}
                 style={{
-                  color: styles["hero-subtitle1"]?.textColor || "#0b1828",
+                  color: styles["hero-subtitle1"]?.textColor || "#ffffff",
                   fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
                   lineHeight: styles["hero-subtitle1"]?.lineHeight,
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
               >
-                {t("aleer.subtitle1")}
+                {subtitleParts.length > 1 ? (
+                  <>
+                    {subtitleParts[0]}
+                    <span className="text-cyan-300">{subtitleHighlight}</span>
+                    {subtitleParts.slice(1).join(subtitleHighlight)}
+                  </>
+                ) : subtitle1Text}
               </h2>
               <h3
-                className={`text-base md:text-2xl font-bold mb-4 text-[#11263e] ${getEditableClass("hero-subtitle2")}`}
+                className={`inline-flex items-center gap-3 rounded-full bg-white/14 border border-white/14 px-5 py-3 md:px-7 md:py-4 text-xl md:text-3xl font-black mb-6 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_12px_34px_rgba(31,12,112,0.18)] ${getEditableClass("hero-subtitle2")}`}
                 style={{
-                  color: styles["hero-subtitle2"]?.textColor || "#11263e",
+                  color: styles["hero-subtitle2"]?.textColor || "#ffffff",
                   fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
                   lineHeight: styles["hero-subtitle2"]?.lineHeight,
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
               >
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 shadow-[0_0_28px_rgba(34,211,238,0.45)]">
+                  <BookOpen className="h-7 w-7 text-white" />
+                </span>
                 {t("aleer.subtitle2")}
               </h3>
               <p
-                className={`text-sm md:text-lg lg:text-xl leading-relaxed max-w-xl text-black/95 ${getEditableClass("hero-desc")}`}
+                className={`text-lg md:text-[31px] leading-relaxed max-w-4xl text-white/95 ${getEditableClass("hero-desc")}`}
                 style={{
-                  color: styles["hero-desc"]?.textColor || "rgba(0,0,0,0.95)",
+                  color: styles["hero-desc"]?.textColor || "rgba(255,255,255,0.95)",
                   fontSize: styles["hero-desc"]?.fontSize || undefined,
                   lineHeight: styles["hero-desc"]?.lineHeight,
                 }}
@@ -578,35 +596,42 @@ export default function ALeerBoliviaPage() {
                 {t("aleer.description")}
               </p>
 
-              <div className="mt-7 flex flex-col sm:flex-row gap-3">
+              <div className="mt-9 flex flex-col gap-4 max-w-5xl">
                 <button
                   type="button"
                   onClick={() => openJoinModal("schools")}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm md:text-base font-black text-white bg-gradient-to-r from-violet-600 to-cyan-500 shadow-[0_14px_34px_rgba(109,40,217,0.28)] active:scale-95 transition-transform"
+                  className="inline-flex items-center justify-center gap-5 rounded-full px-6 py-4 md:px-10 md:py-5 text-2xl md:text-5xl font-black text-white bg-gradient-to-r from-violet-700 via-blue-500 to-cyan-400 border-2 border-white/75 shadow-[0_0_0_1px_rgba(255,255,255,0.45),0_22px_50px_rgba(20,184,166,0.28)] active:scale-95 transition-transform"
                   data-testid="button-hero-register-schools"
                 >
+                  <span className="flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl bg-white/15 border border-white/20">
+                    <FileText className="h-7 w-7 md:h-9 md:w-9" />
+                  </span>
                   {t("aleer.ctaRegister")}
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-8 h-8 md:w-11 md:h-11" />
                 </button>
                 <button
                   type="button"
                   onClick={() => openJoinModal("sponsors")}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm md:text-base font-black text-violet-700 bg-white/85 border border-violet-200 shadow-[0_10px_26px_rgba(15,23,42,0.08)] active:scale-95 transition-transform"
+                  className="inline-flex items-center justify-center gap-5 rounded-full px-6 py-4 md:px-10 md:py-5 text-lg md:text-3xl font-black text-violet-700 bg-white/94 border-2 border-violet-300 shadow-[0_16px_42px_rgba(67,24,140,0.16)] active:scale-95 transition-transform"
                   data-testid="button-hero-register-sponsors"
                 >
+                  <span className="flex h-11 w-11 md:h-14 md:w-14 items-center justify-center rounded-2xl bg-violet-50 border border-violet-200">
+                    <Users className="h-6 w-6 md:h-8 md:w-8" />
+                  </span>
                   {t("aleer.joinSponsors")}
+                  <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
                 </button>
               </div>
             </div>
 
             <motion.div
-              className="mt-8 md:mt-0 rounded-[28px] overflow-hidden"
-              initial={{ opacity: 0, scale: 0.95, x: 18 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mt-10 md:mt-12 rounded-[28px] overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
             >
               <div
-                className={`w-full h-52 md:h-[520px] lg:h-[600px] rounded-[28px] flex items-center justify-center overflow-hidden border border-white/80 shadow-[0_30px_70px_rgba(30,41,59,0.18)] ${getEditableClass("hero-image")}`}
+                className={`w-full h-64 md:h-[520px] lg:h-[640px] rounded-[28px] flex items-center justify-center overflow-hidden border-4 border-white/85 shadow-[0_0_0_1px_rgba(139,92,246,0.28),0_28px_70px_rgba(31,12,112,0.28)] ${getEditableClass("hero-image")}`}
                 style={{
                   height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : undefined,
                   background: styles["hero-image"]?.imageUrl
@@ -633,11 +658,13 @@ export default function ALeerBoliviaPage() {
                       fetchPriority="high"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-                      <span className="inline-flex items-center rounded-full px-4 py-1.5 text-xs md:text-sm font-bold text-white bg-cyan-600/90 border border-cyan-200/60 shadow-md">
+                    <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-base md:text-2xl font-bold text-white bg-cyan-500/90 border border-cyan-100/70 shadow-md">
+                        <BookOpen className="w-5 h-5 md:w-7 md:h-7" />
                         A Leer Bolivia
                       </span>
-                      <span className="text-xs md:text-sm text-white/95 font-semibold drop-shadow">
+                      <span className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-base md:text-2xl text-white font-bold bg-violet-600/90 border border-violet-200/70 shadow-md">
+                        <Sparkles className="w-5 h-5 md:w-7 md:h-7" />
                         Intercolegial de Lectura
                       </span>
                     </div>
