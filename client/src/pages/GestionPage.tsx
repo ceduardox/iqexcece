@@ -2509,10 +2509,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               onClick={() => setMobileAdminMenuOpen(true)}
               variant="outline"
               size="icon"
-              className="border-slate-700 text-cyan-200 hover:bg-cyan-500/10"
+              className="h-10 w-10 shrink-0 border-cyan-300/60 bg-cyan-500/12 text-cyan-100 shadow-[0_0_0_1px_rgba(34,211,238,0.12),0_8px_20px_rgba(8,145,178,0.16)] hover:bg-cyan-500/20 hover:border-cyan-200"
               data-testid="button-mobile-menu"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-5 h-5" />
             </Button>
             <div className="min-w-0">
               <h1 className="text-lg font-bold text-white truncate">Panel de Gestión</h1>
