@@ -370,7 +370,7 @@ export default function AceleracionExercisePage() {
   const handleSpeedIncrease = () => {
     playSound("iphone");
     if (modo === "desplazamiento") {
-      setLocalSpeed(prev => Math.min(1200, prev + 50));
+      setLocalSpeed(prev => Math.min(4000, prev + 50));
     } else {
       setLocalSpeed(prev => Math.min(920, prev + 10));
     }
@@ -485,7 +485,8 @@ export default function AceleracionExercisePage() {
     if (!resultSaved) {
       const tipoEjercicio = modo === "golpe" ? "aceleracion_golpe" : "aceleracion_desplazamiento";
       const ejercicioTitulo = modo === "golpe" ? t("aceleracion.golpeVista") : t("aceleracion.desplazamiento");
-      const performancePercent = Math.min(100, Math.round((localSpeed / 920) * 100));
+      const maxSpeed = modo === "desplazamiento" ? 4000 : 920;
+      const performancePercent = Math.min(100, Math.round((localSpeed / maxSpeed) * 100));
       
       const stars = Math.max(1, Math.min(5, Math.ceil(performancePercent / 20)));
       saveResultMutation.mutate({
@@ -615,8 +616,8 @@ export default function AceleracionExercisePage() {
     // Use the speed the user configured
     const displaySpeed = localSpeed;
     
-    // Calculate performance percentage (based on speed - max 1200 for desplazamiento, 920 for golpe)
-    const maxSpeed = modo === "desplazamiento" ? 1200 : 920;
+    // Calculate performance percentage (based on speed - max 4000 for desplazamiento, 920 for golpe)
+    const maxSpeed = modo === "desplazamiento" ? 4000 : 920;
     const performancePercent = Math.min(100, Math.round((displaySpeed / maxSpeed) * 100));
     
     // Calculate stars (1-5) based on performance
