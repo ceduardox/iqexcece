@@ -1954,12 +1954,7 @@ Reglas:
     res.json({ success: true });
   });
 
-  const velocidadTargetSpeeds = [
-    100, 150, 200, 250, 300, 350, 400, 450, 500,
-    600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400,
-    1500, 1600, 1700, 1800, 1900, 2000, 2200, 2400,
-    2600, 2800, 3000,
-  ];
+  const velocidadTargetSpeeds = Array.from({ length: 39 }, (_, index) => 100 + index * 50);
   const velocidadTargetPatterns = ["2x2", "2x3", "3x2", "2x4", "3x3"];
   const velocidadWordBanks: Record<string, string[]> = {
     ninos: ["gato", "luna", "sol", "casa", "flor", "rio", "juego", "amigo", "cuento", "parque", "arbol", "nube", "color", "globo", "musica", "libro", "clase", "dibujo", "sonrisa", "aventura", "barco", "plaza", "camino", "estrella", "bosque", "ventana", "zapato", "pelota", "familia", "colegio", "lapiz", "mesa", "silla", "pizarra", "tren", "avion", "lluvia", "playa", "montana", "jardin"],
@@ -2089,7 +2084,7 @@ Reglas:
       return res.status(400).json({ error: "El JSON de niveles actual no es valido" });
     }
 
-    const maxSpeed = Math.max(100, Math.min(3000, Number(req.body?.maxSpeed) || 3000));
+    const maxSpeed = Math.max(100, Math.min(2000, Number(req.body?.maxSpeed) || 2000));
     const targetSpeeds = velocidadTargetSpeeds.filter((speed) => speed <= maxSpeed);
     const categoria = String(req.body?.categoria || "ninos");
     const normalizedCategory = normalizeVelocidadCategory(categoria);

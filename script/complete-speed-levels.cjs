@@ -7,12 +7,7 @@ const { Client } = require("pg");
 const APPLY = process.argv.includes("--apply");
 const DRY_RUN = !APPLY;
 
-const TARGET_SPEEDS = [
-  100, 150, 200, 250, 300, 350, 400, 450, 500,
-  600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400,
-  1500, 1600, 1700, 1800, 1900, 2000, 2200, 2400,
-  2600, 2800, 3000,
-];
+const TARGET_SPEEDS = Array.from({ length: 39 }, (_, index) => 100 + index * 50);
 
 const TARGET_PATTERNS = ["2x2", "2x3", "3x2", "2x4", "3x3"];
 

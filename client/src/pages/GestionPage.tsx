@@ -893,11 +893,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   }, [contactSubs, contactFilter, contactSearch, contactDateFrom, contactDateTo, contactSort]);
 
   const SPEED_PATTERN_OPTIONS = ["all", "2x2", "2x3", "3x2", "2x4", "3x3"] as const;
-  const SUGGESTED_PPM_VALUES = [
-    100, 150, 200, 250, 300, 350, 400, 450, 500,
-    600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700,
-    1800, 1900, 2000, 2200, 2400, 2600, 2800, 3000,
-  ] as const;
+  const SUGGESTED_PPM_VALUES = Array.from({ length: 39 }, (_, index) => 100 + index * 50);
 
   const filteredVelocidadNiveles = useMemo(() => {
     if (!velocidadEjercicio) return [] as { nivel: NivelConfig; nivelIdx: number }[];
@@ -986,7 +982,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     }
 
     const confirmed = window.confirm(
-      "Esto agregara niveles faltantes hasta 3000 PPM sin modificar los niveles existentes. ¿Continuar?",
+      "Esto agregara niveles faltantes hasta 2000 PPM de 50 en 50 sin modificar los niveles existentes. ¿Continuar?",
     );
     if (!confirmed) return;
 
@@ -997,7 +993,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           categoria: entrenamientoCategory,
-          maxSpeed: 3000,
+          maxSpeed: 2000,
         }),
       });
 
@@ -6553,7 +6549,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                           ) : (
                             <Zap className="w-4 h-4 mr-1" />
                           )}
-                          Completar faltantes hasta 3000
+                          Completar faltantes hasta 2000
                         </Button>
                         <Button
                           size="sm"
