@@ -199,6 +199,36 @@ const DEFAULT_SERVER_PAYMENT_ROWS: AdminPaymentRow[] = [
     amountUsd: 60,
     paymentStatus: "finished",
   },
+  {
+    orderId: "inv-2026-04",
+    dueAt: "2026-04-10T12:00:00.000Z",
+    paidAt: "2026-05-22T12:00:00.000Z",
+    updatedAt: "2026-05-22T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "finished",
+  },
+  {
+    orderId: "inv-2026-05",
+    dueAt: "2026-05-10T12:00:00.000Z",
+    paidAt: "2026-05-22T12:00:00.000Z",
+    updatedAt: "2026-05-22T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "finished",
+  },
+  {
+    orderId: "inv-2026-06",
+    dueAt: "2026-06-10T12:00:00.000Z",
+    paidAt: "2026-05-22T12:00:00.000Z",
+    updatedAt: "2026-05-22T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "finished",
+  },
 ];
 
 function normalizePaymentStatusValue(status: string | null | undefined) {
