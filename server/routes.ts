@@ -15,6 +15,72 @@ import { getClientIp, loadSiteAccessSettings, saveSiteAccessSettings } from "./s
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
 const ADMIN_TOKEN_SECRET = "iq-admin-secret-2024";
+const VISUAL_STYLE_KEYS = new Set([
+  "background",
+  "backgroundType",
+  "boxShadow",
+  "shadowBlur",
+  "shadowColor",
+  "marginTop",
+  "marginBottom",
+  "marginLeft",
+  "marginRight",
+  "paddingTop",
+  "paddingBottom",
+  "imageUrl",
+  "imageSize",
+  "textColor",
+  "fontSize",
+  "textAlign",
+  "fontWeight",
+  "borderRadius",
+  "iconSize",
+  "cardHeight",
+  "sectionHeight",
+  "spacerHeight",
+  "visible",
+]);
+
+function copyOnlyVisualStyles(sourceStyles: unknown, targetStyles: unknown): Record<string, Record<string, unknown>> {
+  const source = sourceStyles && typeof sourceStyles === "object" && !Array.isArray(sourceStyles)
+    ? sourceStyles as Record<string, unknown>
+    : {};
+  const target = targetStyles && typeof targetStyles === "object" && !Array.isArray(targetStyles)
+    ? targetStyles as Record<string, unknown>
+    : {};
+  const next: Record<string, Record<string, unknown>> = {};
+
+  for (const [elementId, rawTargetStyle] of Object.entries(target)) {
+    next[elementId] = rawTargetStyle && typeof rawTargetStyle === "object" && !Array.isArray(rawTargetStyle)
+      ? { ...(rawTargetStyle as Record<string, unknown>) }
+      : {};
+  }
+
+  for (const [elementId, rawSourceStyle] of Object.entries(source)) {
+    if (!rawSourceStyle || typeof rawSourceStyle !== "object" || Array.isArray(rawSourceStyle)) continue;
+    const sourceStyle = rawSourceStyle as Record<string, unknown>;
+    const targetStyle = next[elementId] || {};
+    const merged = { ...targetStyle };
+    for (const [key, value] of Object.entries(sourceStyle)) {
+      if (VISUAL_STYLE_KEYS.has(key)) {
+        merged[key] = value;
+      }
+    }
+    next[elementId] = merged;
+  }
+
+  return next;
+}
+
+function parseStylesJson(raw: string | null | undefined): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 const ASESOR_RESPONSE_RULES = `
 Reglas obligatorias de respuesta:
 1) Usa el historial reciente (ultimos 10 mensajes) para evitar repetir informacion ya dada.
@@ -239,7 +305,7 @@ function saveAdminTokens() {
 let validAdminTokens = loadAdminTokens();
 let asesorEnabled = loadAsesorEnabled();
 
-const looksLikeMojibake = (value: string) => /(?:Ã.|Â.|â[\u0080-\u00bf]?)/.test(value);
+const looksLikeMojibake = (value: string) => /(?:\u00c3.|\u00c2.|\u00e2[\u0080-\u00bf]?)/.test(value);
 
 const applyReadingTextCorrections = (value: string) =>
   value
@@ -253,7 +319,7 @@ const fixMojibakeText = (value: string) => {
   if (!looksLikeMojibake(value)) return applyReadingTextCorrections(value);
   try {
     const repaired = Buffer.from(value, "latin1").toString("utf8");
-    return repaired.includes("�") ? applyReadingTextCorrections(value) : applyReadingTextCorrections(repaired);
+    return repaired.includes("\uFFFD") ? applyReadingTextCorrections(value) : applyReadingTextCorrections(repaired);
   } catch {
     return applyReadingTextCorrections(value);
   }
@@ -277,16 +343,16 @@ const defaultReadingContent: Record<string, Record<number, any>> = {
     1: {
       temaNumero: 1,
       title: "Paseando con mi perrito",
-      content: "Mariana tiene un perrito cafÃ© llamado Pipo. Un dÃ­a lo llevÃ³ al parque a pasear. Mientras jugaban, el perrito se escapÃ³. Mariana lo buscÃ³ mucho. Al final, lo encontrÃ³ escondido detrÃ¡s del kiosco comiendo un helado que alguien habÃ­a dejado.",
+      content: "Mariana tiene un perrito café llamado Pipo. Un día lo llevó al parque a pasear. Mientras jugaban, el perrito se escapó. Mariana lo buscó mucho. Al final, lo encontró escondido detrás del kiosco comiendo un helado que alguien había dejado.",
       imageUrl: "https://img.freepik.com/free-vector/cute-girl-walking-dog-cartoon-vector-icon-illustration_138676-2600.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-ready-go-school_97632-4315.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/cute-book-reading-cartoon-vector-icon-illustration-education-object-icon-concept-isolated_138676-5765.jpg",
       categoryImage: "https://img.freepik.com/free-vector/happy-cute-kid-boy-girl-smile-with-book_97632-5631.jpg",
       questions: JSON.stringify([
-        { question: "Â¿quÃ© se llamaba la niÃ±a?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
-        { question: "Â¿de que color es su perrito?", options: ["Negro", "CafÃ©", "Azul"], correct: 1 },
-        { question: "Â¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
-        { question: "Â¿DÃ³nde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
+        { question: "¿qué se llamaba la niña?", options: ["Marcela", "Matilde", "Mariana"], correct: 2 },
+        { question: "¿de que color es su perrito?", options: ["Negro", "Café", "Azul"], correct: 1 },
+        { question: "¿Donde lo llevaba a pasear?", options: ["Parque", "Jardin", "Plaza"], correct: 0 },
+        { question: "¿Dónde lo encontro al perrito?", options: ["Casa", "Calle", "Kiosco"], correct: 2 },
       ])
     }
   },
@@ -294,33 +360,33 @@ const defaultReadingContent: Record<string, Record<number, any>> = {
     1: {
       temaNumero: 1,
       title: "LA HISTORIA DEL CHOCOLATE - A Leer Bolivia 2025 - 6to. Primaria",
-      content: "Hace muchos aÃ±os, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en AmÃ©rica Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podÃ­a comprar un tomate con un grano de cacao, o un conejo con 30 granos. AdemÃ¡s, solo las personas importantes, como guerreros y nobles, podÃ­an tomar esa bebida.\n\nCuando los conquistadores espaÃ±oles llegaron a AmÃ©rica en el siglo XVI, llevaron el cacao a Europa. AllÃ­, las personas comenzaron a mezclarlo con azÃºcar y leche, creando una bebida caliente mÃ¡s dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en paÃ­ses tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y ademÃ¡s de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de Ã¡nimo y aportar energÃ­a, siempre que se consuma con moderaciÃ³n.",
+      content: "Hace muchos años, antes de que existieran las tabletas y los bombones como los conocemos hoy, el cacao era considerado un tesoro muy valioso. Los antiguos mayas y aztecas, civilizaciones que vivieron en América Central, fueron de los primeros en cultivarlo. No usaban el cacao para hacer dulces, sino como una bebida especial. Preparaban una mezcla de granos de cacao molidos con agua, chile y algunas especias. Esta bebida era amarga, pero la consideraban un regalo de los dioses. Los aztecas valoraban tanto el cacao que incluso usaban sus granos como moneda: por ejemplo, se podía comprar un tomate con un grano de cacao, o un conejo con 30 granos. Además, solo las personas importantes, como guerreros y nobles, podían tomar esa bebida.\n\nCuando los conquistadores españoles llegaron a América en el siglo XVI, llevaron el cacao a Europa. Allí, las personas comenzaron a mezclarlo con azúcar y leche, creando una bebida caliente más dulce y agradable. Con el tiempo, los chocolateros inventaron nuevas formas de disfrutar el cacao, como las tabletas y los bombones que conocemos hoy.\n\nActualmente, el chocolate se produce en muchas partes del mundo, pero el cacao sigue creciendo principalmente en países tropicales como Costa de Marfil, Ghana, Ecuador y Brasil. Y además de ser delicioso, el chocolate puede tener beneficios, como mejorar el estado de ánimo y aportar energía, siempre que se consuma con moderación.",
       imageUrl: "https://img.freepik.com/free-vector/chocolate-bar-pieces-realistic-composition_1284-19023.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
       categoryImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
       questions: JSON.stringify([
-        { question: "Â¿QuÃ© civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
-        { question: "Â¿CÃ³mo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
-        { question: "Â¿Para quÃ© usaban los aztecas los granos de cacao, ademÃ¡s de preparar bebidas?", options: ["Intercambio.", "Moneda.", "Licor.", "Medicina natural."], correct: 1 },
-        { question: "Â¿QuÃ© cambios hizo Europa en la forma de consumir el cacao?", options: ["Comercializaron.", "Mezclaron con azÃºcar y leche.", "Usaban como bebida caliente.", "Lo intercambiaron."], correct: 1 },
-        { question: "Menciona dos paÃ­ses actuales donde se cultiva el cacao.", options: ["Europa y Ãfrica.", "Centro AmÃ©rica y el caribe.", "Ecuador y Ghana.", "Brasil y Bolivia."], correct: 2 },
+        { question: "¿Qué civilizaciones fueron las primeras en cultivar el cacao?", options: ["Mayas y Aztecas.", "Quechuas y Aymaras.", "Andinos.", "Europeos."], correct: 0 },
+        { question: "¿Cómo preparaban la bebida de cacao los antiguos mayas y aztecas?", options: ["Cocinaban hasta derretir el cacao.", "una mezcla de granos de cacao molidos con agua, chile.", "Lo colocaban en hornos de barros.", "Lo colocaban al sol hasta derretir"], correct: 1 },
+        { question: "¿Para qué usaban los aztecas los granos de cacao, además de preparar bebidas?", options: ["Intercambio.", "Moneda.", "Licor.", "Medicina natural."], correct: 1 },
+        { question: "¿Qué cambios hizo Europa en la forma de consumir el cacao?", options: ["Comercializaron.", "Mezclaron con azúcar y leche.", "Usaban como bebida caliente.", "Lo intercambiaron."], correct: 1 },
+        { question: "Menciona dos países actuales donde se cultiva el cacao.", options: ["Europa y África.", "Centro América y el caribe.", "Ecuador y Ghana.", "Brasil y Bolivia."], correct: 2 },
       ])
     },
     2: {
       temaNumero: 2,
       title: "LA MEMORIA - A Leer Bolivia 2025 - 6to. Primaria",
-      content: "La Memoria es la capacidad mental de codificar, almacenar y recuperar informaciÃ³n. Es una funciÃ³n del cerebro que nos permite recordar experiencias, ideas, imÃ¡genes, sentimientos, entre otros. Hay dos tipos de memoria a largo y corto plazo.\n\nA Corto plazo recibe ese nombre en funciÃ³n del tiempo que es retenida, promedio de 15 a 20 segundos, reducida cantidad de informaciÃ³n disponible, facilidad para su alteraciÃ³n, por ejemplo si nos dictan un nÃºmero de telÃ©fono para marcar, empezamos a marcar y olvidamos los Ãºltimos dÃ­gitos. La prueba que generalmente recurren los psicÃ³logos para evaluar este tipo de memoria es a medir el tiempo que transcurre entre la presentaciÃ³n de un estÃ­mulo y su evocaciÃ³n del mismo despuÃ©s de ser retirado del campo perceptivo.\n\nMemoria a largo plazo.- Es conservada en parte y en parte tambiÃ©n es retenida indefinidamente, la capacidad de almacenar la informaciÃ³n aquÃ­ es ilimitada.\n\nEn relaciÃ³n a la memoria hablamos de Recuerdo y Olvido. Hablamos de recuerdo cuando ellos sobrevienen autÃ³nomamente y llamamos reminiscencias a lo que tenemos que extraer de nuestra mente con esfuerzo y con intencionalidad.\n\nEl olvido se produce por el tiempo, la edad, el cansancio.. El olvido se distingue de la amnesia, porque esta Ãºltima se trata de una laguna cuya causa puede ser PsicolÃ³gico debido por ejemplo a un trauma, a una enfermedad o accidente; la primera es recuperable mientras la segunda ya no.\n\nLos tipos de memoria tambiÃ©n se distinguen a partir del Ã³rgano perceptivo o sentido que interviene, asÃ­ tenemos: memoria visual, memoria auditiva, etc.\n\nLa memoria de acuerdo a las investigaciones realizadas, tiene estrategias que la desarrollan mÃ¡s, por ejemplo cuando los datos estÃ¡n organizados en estructuras, o estÃ¡n conectados con anteriores, estÃ¡n integrados en un conjunto, son significativos, hacen que la evocaciÃ³n de la informaciÃ³n sea mÃ¡s fÃ¡cil.",
+      content: "La Memoria es la capacidad mental de codificar, almacenar y recuperar información. Es una función del cerebro que nos permite recordar experiencias, ideas, imágenes, sentimientos, entre otros. Hay dos tipos de memoria a largo y corto plazo.\n\nA Corto plazo recibe ese nombre en función del tiempo que es retenida, promedio de 15 a 20 segundos, reducida cantidad de información disponible, facilidad para su alteración, por ejemplo si nos dictan un número de teléfono para marcar, empezamos a marcar y olvidamos los últimos dígitos. La prueba que generalmente recurren los psicólogos para evaluar este tipo de memoria es a medir el tiempo que transcurre entre la presentación de un estímulo y su evocación del mismo después de ser retirado del campo perceptivo.\n\nMemoria a largo plazo.- Es conservada en parte y en parte también es retenida indefinidamente, la capacidad de almacenar la información aquí es ilimitada.\n\nEn relación a la memoria hablamos de Recuerdo y Olvido. Hablamos de recuerdo cuando ellos sobrevienen autónomamente y llamamos reminiscencias a lo que tenemos que extraer de nuestra mente con esfuerzo y con intencionalidad.\n\nEl olvido se produce por el tiempo, la edad, el cansancio.. El olvido se distingue de la amnesia, porque esta última se trata de una laguna cuya causa puede ser Psicológico debido por ejemplo a un trauma, a una enfermedad o accidente; la primera es recuperable mientras la segunda ya no.\n\nLos tipos de memoria también se distinguen a partir del órgano perceptivo o sentido que interviene, así tenemos: memoria visual, memoria auditiva, etc.\n\nLa memoria de acuerdo a las investigaciones realizadas, tiene estrategias que la desarrollan más, por ejemplo cuando los datos están organizados en estructuras, o están conectados con anteriores, están integrados en un conjunto, son significativos, hacen que la evocación de la información sea más fácil.",
       imageUrl: "https://img.freepik.com/free-vector/brain-concept-illustration_114360-2815.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/cute-girl-back-school-cartoon-vector-icon-illustration-people-education-icon-concept-isolated_138676-5125.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/cute-astronaut-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5765.jpg",
       categoryImage: "https://img.freepik.com/free-vector/brain-concept-illustration_114360-2815.jpg",
       questions: JSON.stringify([
-        { question: "Â¿CuÃ¡nto tiempo aproximadamente retiene la memoria a corto plazo la informaciÃ³n?", options: ["1 a 5 segundos", "15 a 20 segundos", "1 a 2 minutos", "5 a 10 minutos"], correct: 1 },
-        { question: "Â¿CuÃ¡l es la diferencia entre recuerdo y reminiscencia?", options: ["El recuerdo es involuntario y la reminiscencia requiere esfuerzo", "Son lo mismo", "El recuerdo es a largo plazo y la reminiscencia a corto plazo", "La reminiscencia es involuntaria y el recuerdo requiere esfuerzo"], correct: 0 },
-        { question: "Â¿QuÃ© distingue al olvido de la amnesia?", options: ["El olvido es permanente y la amnesia es temporal", "El olvido es recuperable y la amnesia no", "Son exactamente lo mismo", "La amnesia es por cansancio y el olvido por trauma"], correct: 1 },
-        { question: "Â¿CuÃ¡l es la capacidad de almacenamiento de la memoria a largo plazo?", options: ["Limitada a 100 recuerdos", "Aproximadamente 1000 datos", "Ilimitada", "Solo 50 recuerdos importantes"], correct: 2 },
-        { question: "Â¿QuÃ© estrategias ayudan a mejorar la memoria segÃºn el texto?", options: ["Datos desorganizados y sin conexiÃ³n", "Datos organizados, conectados y significativos", "Memorizar sin entender", "Repetir sin parar"], correct: 1 },
+        { question: "¿Cuánto tiempo aproximadamente retiene la memoria a corto plazo la información?", options: ["1 a 5 segundos", "15 a 20 segundos", "1 a 2 minutos", "5 a 10 minutos"], correct: 1 },
+        { question: "¿Cuál es la diferencia entre recuerdo y reminiscencia?", options: ["El recuerdo es involuntario y la reminiscencia requiere esfuerzo", "Son lo mismo", "El recuerdo es a largo plazo y la reminiscencia a corto plazo", "La reminiscencia es involuntaria y el recuerdo requiere esfuerzo"], correct: 0 },
+        { question: "¿Qué distingue al olvido de la amnesia?", options: ["El olvido es permanente y la amnesia es temporal", "El olvido es recuperable y la amnesia no", "Son exactamente lo mismo", "La amnesia es por cansancio y el olvido por trauma"], correct: 1 },
+        { question: "¿Cuál es la capacidad de almacenamiento de la memoria a largo plazo?", options: ["Limitada a 100 recuerdos", "Aproximadamente 1000 datos", "Ilimitada", "Solo 50 recuerdos importantes"], correct: 2 },
+        { question: "¿Qué estrategias ayudan a mejorar la memoria según el texto?", options: ["Datos desorganizados y sin conexión", "Datos organizados, conectados y significativos", "Memorizar sin entender", "Repetir sin parar"], correct: 1 },
       ])
     }
   },
@@ -328,22 +394,22 @@ const defaultReadingContent: Record<string, Record<number, any>> = {
     1: {
       temaNumero: 1,
       title: "EUTANASIA",
-      content: `El tÃ©rmino eutanasia es todo acto u omisiÃ³n cuya responsabilidad recae en personal mÃ©dico o en individuos cercanos al enfermo, y que ocasiona la muerte inmediata de Ã©ste. La palabra deriva del griego: eu ("bueno") y thanatos ("muerte").
+      content: `El término eutanasia es todo acto u omisión cuya responsabilidad recae en personal médico o en individuos cercanos al enfermo, y que ocasiona la muerte inmediata de éste. La palabra deriva del griego: eu ("bueno") y thanatos ("muerte").
 
-Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongaciÃ³n artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". TambiÃ©n sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
+Quienes defienden la eutanasia sostienen que la finalidad del acto es evitarle sufrimientos insoportables o la prolongación artificial de la vida a un enfermo, presentando tales situaciones como "contrarias a la dignidad". También sus defensores sostienen que, para que la eutanasia sea considerada como tal, el enfermo ha de padecer, necesariamente, una enfermedad terminal o incurable y, en segundo lugar, el personal sanitario ha de contar expresamente con el consentimiento del enfermo.
 
-Otros, en cambio, creen que los programas de eutanasia estÃ¡n en contraposiciÃ³n con los ideales con los que se defiende su implementaciÃ³n. Por ejemplo, se menciona que los mÃ©dicos durante el rÃ©gimen nazi hacÃ­an propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, segÃºn aquella propaganda, merecedoras de compasiÃ³n, para conseguir asÃ­ una opiniÃ³n pÃºblica favorable a la eliminaciÃ³n que se estaba haciendo de enfermos, considerados minusvÃ¡lidos o dÃ©biles segÃºn criterios nazis.
+Otros, en cambio, creen que los programas de eutanasia están en contraposición con los ideales con los que se defiende su implementación. Por ejemplo, se menciona que los médicos durante el régimen nazi hacían propaganda en favor de la eutanasia con argumentos como la indignidad de ciertas vidas, que por tanto eran, según aquella propaganda, merecedoras de compasión, para conseguir así una opinión pública favorable a la eliminación que se estaba haciendo de enfermos, considerados minusválidos o débiles según criterios nazis.
 
-Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha despenalizado la eutanasia, y en ellos todavÃ­a permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. SegÃºn los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos paÃ­ses.`,
+Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despenalizado la eutanasia, y en ellos todavía permanece tipificado como homicidio, por ejemplo como homicidio o bien como asistencia al suicidio. Según los datos oficiales, los supuestos arriba mencionados no son cumplidos: en una tasa creciente, a miles de personas se les aplica la eutanasia en contra de su voluntad y las restricciones para aplicar la eutanasia han ido disminuyendo; por ejemplo, actualmente se la aplica a menores de edad en dichos países.`,
       imageUrl: "https://img.freepik.com/free-vector/medical-ethics-concept-illustration_114360-8456.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/young-man-with-glasses_24877-82111.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/cute-robot-reading-book-cartoon-vector-icon-illustration-science-education-icon-isolated_138676-5165.jpg",
       categoryImage: "https://img.freepik.com/free-vector/young-man-with-glasses_24877-82111.jpg",
       questions: JSON.stringify([
-        { question: "Pregunta 1 - pendiente", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
-        { question: "Pregunta 2 - pendiente", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
-        { question: "Pregunta 3 - pendiente", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
-        { question: "Pregunta 4 - pendiente", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
+        { question: "Pregunta 1 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+        { question: "Pregunta 2 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+        { question: "Pregunta 3 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
+        { question: "Pregunta 4 - pendiente", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
       ])
     }
   },
@@ -351,13 +417,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     1: {
       temaNumero: 1,
       title: "LECTURA UNIVERSITARIA - Tema 01",
-      content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+      content: "Contenido de lectura para estudiantes universitarios. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
       imageUrl: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/college-students-concept-illustration_114360-10205.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/book-reading-concept-illustration_114360-4528.jpg",
       categoryImage: "https://img.freepik.com/free-vector/university-student-concept-illustration_114360-9055.jpg",
       questions: JSON.stringify([
-        { question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
       ])
     }
   },
@@ -365,13 +431,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     1: {
       temaNumero: 1,
       title: "LECTURA PROFESIONAL - Tema 01",
-      content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+      content: "Contenido de lectura para profesionales. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
       imageUrl: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/office-workers-concept-illustration_114360-2244.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/business-team-concept-illustration_114360-3628.jpg",
       categoryImage: "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg",
       questions: JSON.stringify([
-        { question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
       ])
     }
   },
@@ -379,13 +445,13 @@ Actualmente, en muy pocos paÃ­ses (por ejemplo, Holanda y BÃ©lgica) se ha de
     1: {
       temaNumero: 1,
       title: "LECTURA ADULTO MAYOR - Tema 01",
-      content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administraciÃ³n.",
+      content: "Contenido de lectura para adultos mayores. Este es un tema de ejemplo que puede ser editado desde el panel de administración.",
       imageUrl: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
       pageMainImage: "https://img.freepik.com/free-vector/elderly-people-concept-illustration_114360-4195.jpg",
       pageSmallImage: "https://img.freepik.com/free-vector/reading-glasses-concept-illustration_114360-4890.jpg",
       categoryImage: "https://img.freepik.com/free-vector/grandparents-concept-illustration_114360-5638.jpg",
       questions: JSON.stringify([
-        { question: "Pregunta de ejemplo - editar desde admin", options: ["OpciÃ³n A", "OpciÃ³n B", "OpciÃ³n C", "OpciÃ³n D"], correct: 0 },
+        { question: "Pregunta de ejemplo - editar desde admin", options: ["Opción A", "Opción B", "Opción C", "Opción D"], correct: 0 },
       ])
     }
   }
@@ -746,7 +812,7 @@ Reglas:
                   const blob = `${title} ${tagText}`;
                   const score = tokens.reduce((acc, tk) => acc + (blob.includes(tk) ? 1 : 0), 0);
                   const url = String(r?.url || r?.thumbnail || "").trim();
-                  const isUntitled = title.includes("untitled") || title.includes("sin tÃ­tulo");
+                  const isUntitled = title.includes("untitled") || title.includes("sin título");
                   return { score, url, isUntitled };
                 })
                 .filter((x: any) => !!x.url)
@@ -1764,7 +1830,7 @@ Reglas:
     }
   });
 
-  // ============ PREP PAGES (PÃ¡ginas de PreparaciÃ³n) ============
+  // ============ PREP PAGES (Páginas de Preparación) ============
   
   // Get all prep pages (admin)
   app.get("/api/admin/prep-pages", async (req, res) => {
@@ -2270,6 +2336,55 @@ Reglas:
     res.json({ style });
   });
 
+  app.post("/api/admin/page-styles/sync-visual", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const pageNamesRaw = Array.isArray(req.body?.pageNames)
+      ? req.body.pageNames
+      : req.body?.pageName
+        ? [req.body.pageName]
+        : [];
+    const pageNames = Array.from(new Set<string>(
+      pageNamesRaw.map((p: unknown) => String(p || "").trim()).filter(Boolean)
+    ));
+    const sourceLang = String(req.body?.sourceLang || "es").trim() || "es";
+    const targetLangs = (Array.isArray(req.body?.targetLangs) ? req.body.targetLangs : ["es", "en", "pt"])
+      .map((l: unknown) => String(l || "").trim())
+      .filter((l: string) => l && l !== sourceLang);
+
+    if (pageNames.length === 0 || targetLangs.length === 0) {
+      return res.status(400).json({ error: "Missing pageNames or targetLangs" });
+    }
+
+    const summary: Array<{ pageName: string; lang: string; elements: number }> = [];
+    let updated = 0;
+    let skipped = 0;
+
+    for (const pageName of pageNames) {
+      const sourceStyle = await storage.getPageStyle(pageName, sourceLang);
+      if (!sourceStyle?.styles || sourceStyle.lang !== sourceLang) {
+        skipped += targetLangs.length;
+        continue;
+      }
+
+      const sourceStyles = parseStylesJson(sourceStyle.styles);
+      for (const targetLang of targetLangs) {
+        const targetStyle = await storage.getPageStyle(pageName, targetLang);
+        const targetStyles = targetStyle && targetStyle.lang === targetLang ? parseStylesJson(targetStyle.styles) : {};
+        const mergedStyles = copyOnlyVisualStyles(sourceStyles, targetStyles);
+        await storage.savePageStyle(pageName, JSON.stringify(mergedStyles), targetLang);
+        updated++;
+        summary.push({ pageName, lang: targetLang, elements: Object.keys(mergedStyles).length });
+      }
+    }
+
+    res.json({ success: true, updated, skipped, summary });
+  });
+
   // Blog categories (public)
   app.get("/api/blog-categories", async (req, res) => {
     const categories = await storage.getBlogCategories();
@@ -2495,13 +2610,13 @@ Reglas:
         }
         const truncated = output.length > 12000 ? output.substring(0, 12000) + '\n... (truncated)' : output;
         steps[steps.length - 1].status = "success";
-        steps[steps.length - 1].detail = startLine ? `lÃ­neas ${startLine}-${endLine || totalLines}` : `${totalLines} lÃ­neas (${fileContent.length} chars)`;
+        steps[steps.length - 1].detail = startLine ? `líneas ${startLine}-${endLine || totalLines}` : `${totalLines} líneas (${fileContent.length} chars)`;
         if (filesReadInSession) filesReadInSession.add(action.path);
-        return { result: `ðŸ“„ **${action.path}** (${totalLines} lines, ${fileContent.length} chars)${rangeLabel}:\n\`\`\`\n${truncated}\n\`\`\`` };
+        return { result: `📄 **${action.path}** (${totalLines} lines, ${fileContent.length} chars)${rangeLabel}:\n\`\`\`\n${truncated}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error reading ${action.path}: ${e.message}` };
+        return { result: `❌ Error reading ${action.path}: ${e.message}` };
       }
     } else if (action.action === "searchFiles" && action.pattern) {
       steps.push({ type: "searchFiles", description: `Buscando "${action.pattern}"`, status: "running" });
@@ -2519,16 +2634,16 @@ Reglas:
         const count = lines ? lines.split("\n").length : 0;
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = `${count} resultados`;
-        return { result: lines ? `ðŸ” Search results for "${action.pattern}":\n\`\`\`\n${lines}\n\`\`\`` : `ðŸ” No results found for "${action.pattern}"` };
+        return { result: lines ? `🔍 Search results for "${action.pattern}":\n\`\`\`\n${lines}\n\`\`\`` : `🔍 No results found for "${action.pattern}"` };
       } catch (e: any) {
         if (e.status === 1) {
           steps[steps.length - 1].status = "warning";
           steps[steps.length - 1].detail = "Sin resultados";
-          return { result: `ðŸ” No results found for "${action.pattern}"` };
+          return { result: `🔍 No results found for "${action.pattern}"` };
         }
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Search error: ${e.message}` };
+        return { result: `❌ Search error: ${e.message}` };
       }
     } else if (action.action === "writeFile" && action.path && action.content && isPathSafe(action.path)) {
       steps.push({ type: "writeFile", description: `Creando ${action.path}`, status: "running" });
@@ -2538,7 +2653,7 @@ Reglas:
         if (isProtectedFile && fs.existsSync(path.resolve(action.path))) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Protected file - use editFile instead";
-          return { result: `âŒ BLOCKED: ${action.path} is a protected file. Use editFile or replaceLines instead.` };
+          return { result: `❌ BLOCKED: ${action.path} is a protected file. Use editFile or replaceLines instead.` };
         }
         if (fs.existsSync(path.resolve(action.path))) {
           fileBackups.set(action.path, fs.readFileSync(path.resolve(action.path), "utf-8"));
@@ -2550,14 +2665,14 @@ Reglas:
         console.log(`[AGENT AUDIT] File written: ${action.path} (${action.content.length} bytes) at ${new Date().toISOString()}`);
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = `${action.content.length} bytes`;
-        return { result: `âœ… File written: ${action.path}`, fileModified: action.path };
+        return { result: `✅ File written: ${action.path}`, fileModified: action.path };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error writing ${action.path}: ${e.message}` };
+        return { result: `❌ Error writing ${action.path}: ${e.message}` };
       }
     } else if (action.action === "replaceLines" && action.path && action.startLine && action.endLine && action.newText !== undefined && isPathSafe(action.path)) {
-      steps.push({ type: "replaceLines", description: `Reemplazando lÃ­neas ${action.startLine}-${action.endLine} en ${action.path}`, status: "running" });
+      steps.push({ type: "replaceLines", description: `Reemplazando líneas ${action.startLine}-${action.endLine} en ${action.path}`, status: "running" });
       try {
         const filePath = path.resolve(action.path);
         const fileContent = fs.readFileSync(filePath, "utf-8");
@@ -2570,21 +2685,21 @@ Reglas:
         if (start > end) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "startLine > endLine";
-          return { result: `âŒ replaceLines failed: startLine (${start}) > endLine (${end})` };
+          return { result: `❌ replaceLines failed: startLine (${start}) > endLine (${end})` };
         }
         const before = lines.slice(0, start - 1);
         const after = lines.slice(end);
         const newLines = action.newText.split('\n');
         const newContent = [...before, ...newLines, ...after].join('\n');
         fs.writeFileSync(filePath, newContent, "utf-8");
-        console.log(`[AGENT AUDIT] Lines replaced: ${action.path} (lines ${start}-${end} â†’ ${newLines.length} new lines) at ${new Date().toISOString()}`);
+        console.log(`[AGENT AUDIT] Lines replaced: ${action.path} (lines ${start}-${end} → ${newLines.length} new lines) at ${new Date().toISOString()}`);
         steps[steps.length - 1].status = "success";
-        steps[steps.length - 1].detail = `lÃ­neas ${start}-${end} â†’ ${newLines.length} nuevas`;
-        return { result: `âœ… Replaced lines ${start}-${end} in ${action.path} with ${newLines.length} new lines (was ${totalLines} lines, now ${before.length + newLines.length + after.length} lines)`, fileModified: action.path };
+        steps[steps.length - 1].detail = `líneas ${start}-${end} → ${newLines.length} nuevas`;
+        return { result: `✅ Replaced lines ${start}-${end} in ${action.path} with ${newLines.length} new lines (was ${totalLines} lines, now ${before.length + newLines.length + after.length} lines)`, fileModified: action.path };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error replacing lines in ${action.path}: ${e.message}` };
+        return { result: `❌ Error replacing lines in ${action.path}: ${e.message}` };
       }
     } else if (action.action === "editFile" && action.path && action.oldText && action.newText !== undefined && isPathSafe(action.path)) {
       steps.push({ type: "editFile", description: `Editando ${action.path}`, status: "running" });
@@ -2600,11 +2715,11 @@ Reglas:
         if (occurrences === 0) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Texto no encontrado";
-          return { result: `âŒ editFile failed: Could not find the specified text in ${action.path}. TIPS: 1) Use readFile to see the current content and copy the EXACT text. 2) Check for extra spaces, tabs, or line breaks. 3) The file may have changed since you last read it - read it again. 4) Try a shorter, more unique snippet of text.` };
+          return { result: `❌ editFile failed: Could not find the specified text in ${action.path}. TIPS: 1) Use readFile to see the current content and copy the EXACT text. 2) Check for extra spaces, tabs, or line breaks. 3) The file may have changed since you last read it - read it again. 4) Try a shorter, more unique snippet of text.` };
         } else if (occurrences > 1 && !action.replaceAll) {
           steps[steps.length - 1].status = "warning";
           steps[steps.length - 1].detail = `${occurrences} ocurrencias`;
-          return { result: `âš ï¸ editFile: Found ${occurrences} occurrences in ${action.path}. Provide more context to match exactly one location, or add "replaceAll": true.` };
+          return { result: `⚠️ editFile: Found ${occurrences} occurrences in ${action.path}. Provide more context to match exactly one location, or add "replaceAll": true.` };
         } else {
           const newContent = action.replaceAll ? fileContent.split(action.oldText).join(action.newText) : fileContent.replace(action.oldText, action.newText);
 
@@ -2615,8 +2730,8 @@ Reglas:
               JSON.parse(newContent);
             } catch (jsonErr: any) {
               steps[steps.length - 1].status = "error";
-              steps[steps.length - 1].detail = "JSON invÃ¡lido despuÃ©s del edit";
-              return { result: `âŒ editFile BLOCKED: The edit would produce invalid JSON in ${action.path}. Error: ${jsonErr.message}. Please fix your newText and try again.` };
+              steps[steps.length - 1].detail = "JSON inválido después del edit";
+              return { result: `❌ editFile BLOCKED: The edit would produce invalid JSON in ${action.path}. Error: ${jsonErr.message}. Please fix your newText and try again.` };
             }
           }
 
@@ -2624,7 +2739,7 @@ Reglas:
           const newLines = newContent.split('\n').length;
           const linesRemoved = oldLines - newLines;
           if (linesRemoved > 20) {
-            warnings.push(`âš ï¸ WARNING: This edit removed ${linesRemoved} lines (${oldLines}â†’${newLines}). Make sure this was intentional.`);
+            warnings.push(`⚠️ WARNING: This edit removed ${linesRemoved} lines (${oldLines}→${newLines}). Make sure this was intentional.`);
           }
 
           if (action.path.includes("locales/") && action.path.endsWith(".json")) {
@@ -2642,10 +2757,10 @@ Reglas:
                   const missingInOther = currentKeys.filter(k => !otherKeys.includes(k));
                   const missingInCurrent = otherKeys.filter(k => !currentKeys.includes(k));
                   if (missingInOther.length > 0) {
-                    warnings.push(`âš ï¸ LOCALE SYNC: ${otherFile} is MISSING top-level keys that exist in ${currentFile}: [${missingInOther.join(", ")}]. You must add them.`);
+                    warnings.push(`⚠️ LOCALE SYNC: ${otherFile} is MISSING top-level keys that exist in ${currentFile}: [${missingInOther.join(", ")}]. You must add them.`);
                   }
                   if (missingInCurrent.length > 0) {
-                    warnings.push(`âš ï¸ LOCALE SYNC: ${currentFile} is MISSING top-level keys that exist in ${otherFile}: [${missingInCurrent.join(", ")}]. Check if you accidentally deleted them.`);
+                    warnings.push(`⚠️ LOCALE SYNC: ${currentFile} is MISSING top-level keys that exist in ${otherFile}: [${missingInCurrent.join(", ")}]. Check if you accidentally deleted them.`);
                   }
                 } catch {}
               }
@@ -2662,7 +2777,7 @@ Reglas:
                 const extensions = ["", ".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.tsx"];
                 const exists = extensions.some(ext => fs.existsSync(path.join(dir, importPath + ext)));
                 if (!exists) {
-                  warnings.push(`âš ï¸ BROKEN IMPORT: "${importPath}" in ${action.path} does not resolve to any file. This will cause a build error.`);
+                  warnings.push(`⚠️ BROKEN IMPORT: "${importPath}" in ${action.path} does not resolve to any file. This will cause a build error.`);
                 }
               }
             }
@@ -2671,28 +2786,28 @@ Reglas:
           fs.writeFileSync(filePath, newContent, "utf-8");
           console.log(`[AGENT AUDIT] File edited: ${action.path} (replaced ${occurrences} occurrence(s)) at ${new Date().toISOString()}`);
           steps[steps.length - 1].status = warnings.length > 0 ? "warning" : "success";
-          steps[steps.length - 1].detail = `${occurrences} cambio(s)${warnings.length > 0 ? ' âš ï¸' : ''}`;
+          steps[steps.length - 1].detail = `${occurrences} cambio(s)${warnings.length > 0 ? ' ⚠️' : ''}`;
           const warningText = warnings.length > 0 ? '\n' + warnings.join('\n') : '';
-          return { result: `âœ… File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})${warningText}`, fileModified: action.path };
+          return { result: `✅ File edited: ${action.path} (${occurrences} change${occurrences > 1 ? 's' : ''})${warningText}`, fileModified: action.path };
         }
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error editing ${action.path}: ${e.message}` };
+        return { result: `❌ Error editing ${action.path}: ${e.message}` };
       }
     } else if (action.action === "listFiles" && action.dir) {
       if (isPathSafe(action.dir)) {
         steps.push({ type: "listFiles", description: `Listando ${action.dir}`, status: "running" });
         try {
           const entries = fs.readdirSync(path.resolve(action.dir), { withFileTypes: true });
-          const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? 'ðŸ“' : 'ðŸ“„'} ${e.name}`).join('\n');
+          const list = entries.filter(e => !["node_modules", ".git"].includes(e.name)).map(e => `${e.isDirectory() ? '📁' : '📄'} ${e.name}`).join('\n');
           steps[steps.length - 1].status = "success";
           steps[steps.length - 1].detail = `${entries.length} items`;
-          return { result: `ðŸ“ **${action.dir}**:\n${list}` };
+          return { result: `📁 **${action.dir}**:\n${list}` };
         } catch (e: any) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = e.message;
-          return { result: `âŒ Error listing ${action.dir}: ${e.message}` };
+          return { result: `❌ Error listing ${action.dir}: ${e.message}` };
         }
       }
     } else if (action.action === "httpRequest" && action.url) {
@@ -2702,7 +2817,7 @@ Reglas:
         if (!action.url.startsWith("/api/")) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Solo rutas /api/ permitidas";
-          return { result: `âŒ httpRequest only allows /api/ paths for safety.` };
+          return { result: `❌ httpRequest only allows /api/ paths for safety.` };
         }
         const url = `http://localhost:5000${action.url}`;
         const fetchOpts: any = { method, headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(10000) };
@@ -2714,11 +2829,11 @@ Reglas:
         const truncBody = text.length > 2000 ? text.substring(0, 2000) + "... (truncated)" : text;
         steps[steps.length - 1].status = resp.ok ? "success" : "error";
         steps[steps.length - 1].detail = `${resp.status} (${elapsed}ms)`;
-        return { result: `ðŸŒ HTTP ${method} ${action.url} â†’ ${resp.status} (${elapsed}ms):\n\`\`\`\n${truncBody}\n\`\`\`` };
+        return { result: `🌐 HTTP ${method} ${action.url} → ${resp.status} (${elapsed}ms):\n\`\`\`\n${truncBody}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ HTTP error: ${e.message}` };
+        return { result: `❌ HTTP error: ${e.message}` };
       }
     } else if (action.action === "dbQuery" && action.sql) {
       steps.push({ type: "dbQuery", description: `DB: ${action.sql.substring(0, 60)}...`, status: "running" });
@@ -2732,12 +2847,12 @@ Reglas:
         if (!sqlLower.startsWith("select") || hasForbidden) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Solo SELECT permitido";
-          return { result: `âŒ dbQuery only allows safe SELECT queries. No INSERT/UPDATE/DELETE/DROP/ALTER allowed.` };
+          return { result: `❌ dbQuery only allows safe SELECT queries. No INSERT/UPDATE/DELETE/DROP/ALTER allowed.` };
         }
         if (sqlLower.includes(";")) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = "Multi-statement no permitido";
-          return { result: `âŒ dbQuery does not allow multiple statements (no semicolons except at end).` };
+          return { result: `❌ dbQuery does not allow multiple statements (no semicolons except at end).` };
         }
         const limitedSql = /\blimit\b/i.test(action.sql) ? action.sql : `${action.sql} LIMIT 50`;
         const { rows } = await db.execute(limitedSql);
@@ -2745,11 +2860,11 @@ Reglas:
         const truncResult = truncRows.length > 3000 ? truncRows.substring(0, 3000) + "... (truncated)" : truncRows;
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = `${(rows as any[]).length} filas`;
-        return { result: `ðŸ—„ï¸ Query result (${(rows as any[]).length} rows):\n\`\`\`json\n${truncResult}\n\`\`\`` };
+        return { result: `🗄️ Query result (${(rows as any[]).length} rows):\n\`\`\`json\n${truncResult}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ DB error: ${e.message}` };
+        return { result: `❌ DB error: ${e.message}` };
       }
     } else if (action.action === "undoEdit" && action.path) {
       steps.push({ type: "undoEdit", description: `Deshaciendo ${action.path}`, status: "running" });
@@ -2761,16 +2876,16 @@ Reglas:
           saveFileBackups(fileBackups);
           steps[steps.length - 1].status = "success";
           steps[steps.length - 1].detail = "Restaurado";
-          return { result: `â†©ï¸ Reverted ${action.path} to previous version`, fileModified: action.path };
+          return { result: `↩️ Reverted ${action.path} to previous version`, fileModified: action.path };
         } catch (e: any) {
           steps[steps.length - 1].status = "error";
           steps[steps.length - 1].detail = e.message;
-          return { result: `âŒ Error reverting ${action.path}: ${e.message}` };
+          return { result: `❌ Error reverting ${action.path}: ${e.message}` };
         }
       } else {
         steps[steps.length - 1].status = "warning";
         steps[steps.length - 1].detail = "Sin backup";
-        return { result: `âš ï¸ No backup found for ${action.path}. Can only undo edits from this session.` };
+        return { result: `⚠️ No backup found for ${action.path}. Can only undo edits from this session.` };
       }
     } else if (action.action === "readLogs") {
       steps.push({ type: "readLogs", description: "Leyendo logs del servidor", status: "running" });
@@ -2781,16 +2896,16 @@ Reglas:
           const lastLines = logContent.split("\n").slice(-50).join("\n");
           steps[steps.length - 1].status = "success";
           steps[steps.length - 1].detail = "Logs leidos";
-          return { result: `ðŸ“‹ Server logs (last 50 lines):\n\`\`\`\n${lastLines}\n\`\`\`` };
+          return { result: `📋 Server logs (last 50 lines):\n\`\`\`\n${lastLines}\n\`\`\`` };
         } else {
           steps[steps.length - 1].status = "warning";
           steps[steps.length - 1].detail = "No hay logs disponibles";
-          return { result: `ðŸ“‹ No server log file found at /tmp/agent-server.log. Server output goes to stdout.` };
+          return { result: `📋 No server log file found at /tmp/agent-server.log. Server output goes to stdout.` };
         }
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error reading logs: ${e.message}` };
+        return { result: `❌ Error reading logs: ${e.message}` };
       }
     } else if (action.action === "scanStructure" && action.path && isPathSafe(action.path)) {
       steps.push({ type: "scanStructure", description: `Escaneando estructura de ${action.path}`, status: "running" });
@@ -2829,11 +2944,11 @@ Reglas:
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = `${entries.length} definiciones`;
         if (filesReadInSession) filesReadInSession.add(action.path);
-        return { result: `ðŸ—ºï¸ **Structure of ${action.path}** (${lines.length} lines, ${entries.length} definitions):\n\`\`\`\n${truncResult}\n\`\`\`` };
+        return { result: `🗺️ **Structure of ${action.path}** (${lines.length} lines, ${entries.length} definitions):\n\`\`\`\n${truncResult}\n\`\`\`` };
       } catch (e: any) {
         steps[steps.length - 1].status = "error";
         steps[steps.length - 1].detail = e.message;
-        return { result: `âŒ Error scanning ${action.path}: ${e.message}` };
+        return { result: `❌ Error scanning ${action.path}: ${e.message}` };
       }
     } else if (action.action === "validateCode") {
       steps.push({ type: "validateCode", description: "Validando TypeScript...", status: "running" });
@@ -2841,7 +2956,7 @@ Reglas:
         execFileSync("npx", ["tsc", "--noEmit", "--pretty", "false"], { encoding: "utf-8", timeout: 30000, cwd: PROJECT_ROOT });
         steps[steps.length - 1].status = "success";
         steps[steps.length - 1].detail = "Sin errores";
-        return { result: `âœ… TypeScript validation passed - no errors found.` };
+        return { result: `✅ TypeScript validation passed - no errors found.` };
       } catch (e: any) {
         const stdout = (e.stdout || "").toString();
         const stderr = (e.stderr || "").toString();
@@ -2851,31 +2966,31 @@ Reglas:
         const truncOutput = allErrors.join('\n');
         steps[steps.length - 1].status = errorCount > 0 ? "error" : "warning";
         steps[steps.length - 1].detail = `${errorCount} error(es)`;
-        return { result: `âš ï¸ TypeScript validation found ${errorCount} error(s):\n\`\`\`\n${truncOutput}\n\`\`\`` };
+        return { result: `⚠️ TypeScript validation found ${errorCount} error(s):\n\`\`\`\n${truncOutput}\n\`\`\`` };
       }
     } else if (action.action === "restartServer") {
-      steps.push({ type: "restartServer", description: "Reinicio programado (se ejecutarÃ¡ al finalizar)", status: "running" });
+      steps.push({ type: "restartServer", description: "Reinicio programado (se ejecutará al finalizar)", status: "running" });
       if (!(globalThis as any).__agentPendingRestart) {
         (globalThis as any).__agentPendingRestart = true;
       }
       steps[steps.length - 1].status = "success";
-      steps[steps.length - 1].detail = "Programado para despuÃ©s de respuesta";
-      return { result: `âœ… Server restart SCHEDULED. It will execute AFTER the agent finishes responding. Do NOT call restartServer again - it's already queued. Continue with other actions or provide your final summary.` };
+      steps[steps.length - 1].detail = "Programado para después de respuesta";
+      return { result: `✅ Server restart SCHEDULED. It will execute AFTER the agent finishes responding. Do NOT call restartServer again - it's already queued. Continue with other actions or provide your final summary.` };
     } else if (action.action === "dbMigrate") {
-      steps.push({ type: "dbMigrate", description: "Ejecutando migraciÃ³n de base de datos...", status: "running" });
+      steps.push({ type: "dbMigrate", description: "Ejecutando migración de base de datos...", status: "running" });
       try {
         const output = execFileSync("npx", ["drizzle-kit", "push", "--force"], { encoding: "utf-8", timeout: 60000, cwd: PROJECT_ROOT });
         const lines = output.split('\n').filter((l: string) => l.trim().length > 0).slice(0, 25);
         steps[steps.length - 1].status = "success";
-        steps[steps.length - 1].detail = "MigraciÃ³n completada";
-        return { result: `âœ… Database migration completed successfully:\n\`\`\`\n${lines.join('\n')}\n\`\`\`` };
+        steps[steps.length - 1].detail = "Migración completada";
+        return { result: `✅ Database migration completed successfully:\n\`\`\`\n${lines.join('\n')}\n\`\`\`` };
       } catch (e: any) {
         const stdout = (e.stdout || "").toString();
         const stderr = (e.stderr || "").toString();
         const output = (stdout + "\n" + stderr).split('\n').filter((l: string) => l.trim().length > 0).slice(0, 20).join('\n');
         steps[steps.length - 1].status = "error";
-        steps[steps.length - 1].detail = "Error en migraciÃ³n";
-        return { result: `âŒ Database migration failed:\n\`\`\`\n${output}\n\`\`\`` };
+        steps[steps.length - 1].detail = "Error en migración";
+        return { result: `❌ Database migration failed:\n\`\`\`\n${output}\n\`\`\`` };
       }
     }
     return { result: "" };
@@ -3060,8 +3175,8 @@ ROUND 2-5: IMPLEMENT + VALIDATE
 - If 3 fixes fail on the same file, undoEdit and try a different approach
 
 ROUND 6-7: DEPLOY + TEST
-- If schema changed â†’ dbMigrate
-- If server files changed â†’ restartServer (ONCE, at the end)
+- If schema changed → dbMigrate
+- If server files changed → restartServer (ONCE, at the end)
 - httpRequest to test endpoints
 - dbQuery to verify data
 
@@ -3069,8 +3184,8 @@ ROUND 8: CONFIRM
 - Brief summary of what was done and verified
 
 CRITICAL DEPLOYMENT STEPS:
-- After editing shared/schema.ts â†’ ALWAYS run dbMigrate before testing
-- After editing server/*.ts or shared/*.ts â†’ ALWAYS run restartServer before testing with httpRequest
+- After editing shared/schema.ts → ALWAYS run dbMigrate before testing
+- After editing server/*.ts or shared/*.ts → ALWAYS run restartServer before testing with httpRequest
 - Frontend files (client/src/) auto-reload via Vite, no restart needed
 
 IMPACT ANALYSIS - MANDATORY before editing:
@@ -3111,7 +3226,7 @@ CLARIFICATION BEHAVIOR:
 CHAIN OF THOUGHT - MANDATORY:
 Before EVERY action block, write "PENSAMIENTO:" explaining your reasoning. This is NOT optional.
 Format:
-PENSAMIENTO: [What I know] â†’ [What I need to find out] â†’ [What I'll do next] â†’ [What could go wrong]
+PENSAMIENTO: [What I know] → [What I need to find out] → [What I'll do next] → [What could go wrong]
 
 AUTOCORRECTION RULES:
 - If editFile fails with "not found": STOP. Re-read the exact section. The file probably changed. Never retry with the same oldText.
@@ -3133,7 +3248,7 @@ FILE LOCATION MAP (quick reference):
 LARGE FILE EDITING STRATEGY (CRITICAL):
 When editing files with >200 lines:
 1. First searchFiles to find the EXACT line where the text you want to change is located
-2. Then readFile with startLine/endLine to read ONLY that section (Â±20 lines around the target)
+2. Then readFile with startLine/endLine to read ONLY that section (±20 lines around the target)
 3. Copy the EXACT text from the readFile output for your oldText
 4. Keep oldText SHORT but UNIQUE (2-5 lines max, not whole functions)
 5. If editFile fails with "not found", re-read the file section immediately and try again with exact content
@@ -3194,14 +3309,14 @@ RESPONSE FORMAT - CRITICAL:
 - NEVER include code blocks in your final response. The user does NOT want to see code.
 - NEVER include PENSAMIENTO blocks in your final response.
 - Just say WHAT you did and WHAT changed, like a task summary.
-- Example good response: "Listo. CambiÃ© el tÃ­tulo de la pÃ¡gina principal a 'Mi App' y actualicÃ© el color del fondo a azul. Los cambios ya estÃ¡n aplicados."
-- Example BAD response: "AquÃ­ estÃ¡ el cÃ³digo que cambiÃ©: [code block]" (NEVER do this)
+- Example good response: "Listo. Cambié el título de la página principal a 'Mi App' y actualicé el color del fondo a azul. Los cambios ya están aplicados."
+- Example BAD response: "Aquí está el código que cambié: [code block]" (NEVER do this)
 
 SMART RESTART DECISIONS:
 - ALWAYS call restartServer once at the end after editing ANY file (frontend or backend). This ensures all users see the changes immediately.
-- Server files (server/*.ts) â†’ YES, call restartServer once at the end
-- Schema (shared/schema.ts) â†’ YES, call dbMigrate THEN restartServer
-- Frontend files (client/src/) â†’ YES, call restartServer to force reload for all connected clients
+- Server files (server/*.ts) → YES, call restartServer once at the end
+- Schema (shared/schema.ts) → YES, call dbMigrate THEN restartServer
+- Frontend files (client/src/) → YES, call restartServer to force reload for all connected clients
 - Only exception: If you ONLY read files or searched without editing anything, no restart needed.
 
 DATABASE SCHEMA SUMMARY (shared/schema.ts):
@@ -3295,7 +3410,7 @@ ${schemaContent.substring(0, 3000)}
             }
           } catch (parseErr: any) {
             console.error(`[AGENT] Failed to parse/execute action block: ${parseErr.message}`);
-            actionResults += `\n\nâŒ ACTION PARSE ERROR: ${parseErr.message}. Fix your JSON syntax.`;
+            actionResults += `\n\n❌ ACTION PARSE ERROR: ${parseErr.message}. Fix your JSON syntax.`;
           }
         }
 
@@ -3384,12 +3499,12 @@ ${schemaContent.substring(0, 3000)}
 
       if (!finalResponse) finalResponse = "No pude generar una respuesta. Intenta de nuevo.";
 
-      if (allFilesModified.length === 0 && message && /cambia|modifica|agrega|aÃ±ade|slider|implementa|crea|haz|pon|quita|elimina|mueve|arregla|fix|add|change|update|create|implement|remove/i.test(message)) {
-        finalResponse += "\n\nâš ï¸ AVISO: No se modificÃ³ ningÃºn archivo durante esta sesiÃ³n. Si esperabas cambios, intenta ser mÃ¡s especÃ­fico o pÃ­deme que use writeFile para reescribir el archivo.";
+      if (allFilesModified.length === 0 && message && /cambia|modifica|agrega|añade|slider|implementa|crea|haz|pon|quita|elimina|mueve|arregla|fix|add|change|update|create|implement|remove/i.test(message)) {
+        finalResponse += "\n\n⚠️ AVISO: No se modificó ningún archivo durante esta sesión. Si esperabas cambios, intenta ser más específico o pídeme que use writeFile para reescribir el archivo.";
       }
 
       if (loopCount > 1) {
-        finalResponse = `ðŸ”„ *${loopCount} pasos de razonamiento*\n\n` + finalResponse;
+        finalResponse = `🔄 *${loopCount} pasos de razonamiento*\n\n` + finalResponse;
       }
 
       await db.insert(agentMessages).values({ role: "user", content: message || "(imagen)" });
@@ -3416,7 +3531,7 @@ ${schemaContent.substring(0, 3000)}
           `\n--- ASSISTANT ---`,
           finalResponse,
           allSteps.length > 0 ? `\n--- STEPS (${allSteps.length}) ---` : '',
-          ...allSteps.map((s, idx) => `${idx+1}. [${s.status}] ${s.type}: ${s.description}${s.detail ? ' â†’ ' + s.detail : ''}`),
+          ...allSteps.map((s, idx) => `${idx+1}. [${s.status}] ${s.type}: ${s.description}${s.detail ? ' → ' + s.detail : ''}`),
         ].filter(Boolean).join('\n');
         fs.writeFileSync(path.join(logsDir, `agent_${timestamp}.txt`), logContent, 'utf-8');
       } catch (logErr: any) {
@@ -3513,7 +3628,7 @@ ${schemaContent.substring(0, 3000)}
           break;
         }
       }
-      if (!translated) return res.status(429).json({ error: "LÃ­mite de API alcanzado. Intenta de nuevo en unos segundos." });
+      if (!translated) return res.status(429).json({ error: "Límite de API alcanzado. Intenta de nuevo en unos segundos." });
       res.json({ translated });
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Translation error" });
@@ -3545,7 +3660,7 @@ ${schemaContent.substring(0, 3000)}
         translated = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
         if (translated) break;
       }
-      if (!translated) return res.status(429).json({ error: "LÃ­mite de API alcanzado. Intenta de nuevo en unos segundos." });
+      if (!translated) return res.status(429).json({ error: "Límite de API alcanzado. Intenta de nuevo en unos segundos." });
       res.json({ translated });
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Translation error" });
@@ -3587,7 +3702,7 @@ ${schemaContent.substring(0, 3000)}
     }
 
     if (typeof data !== "string" || !data.startsWith("data:")) {
-      return res.status(400).json({ error: "Formato de archivo invÃ¡lido" });
+      return res.status(400).json({ error: "Formato de archivo inválido" });
     }
 
     try {

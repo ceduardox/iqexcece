@@ -483,6 +483,8 @@ export default function AgeSelectionPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["age-selection", "entrenamiento-edad"]}
+          currentLang={lang}
         />
       )}
     </div>

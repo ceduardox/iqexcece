@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type, Monitor, Smartphone, Minus } from "lucide-react";
+import { X, Save, Palette, Move, Image, Square, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Type, Monitor, Smartphone, Minus, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -56,11 +56,13 @@ interface EditorToolbarProps {
   selectedElement: string | null;
   styles: PageStyles;
   onStyleChange: (elementId: string, style: ElementStyle) => void;
-  onSave: () => void;
+  onSave: () => void | Promise<void>;
   onClose: () => void;
   onClearSelection: () => void;
   deviceMode: DeviceMode;
   onDeviceModeChange: (mode: DeviceMode) => void;
+  pageNames?: string[];
+  currentLang?: string;
 }
 
 export function EditorToolbar({ 
@@ -71,7 +73,9 @@ export function EditorToolbar({
   onClose,
   onClearSelection,
   deviceMode,
-  onDeviceModeChange
+  onDeviceModeChange,
+  pageNames,
+  currentLang
 }: EditorToolbarProps) {
   const [activeTab, setActiveTab] = useState<"background" | "shadow" | "position" | "image" | "text">("background");
   const [toolbarPosition, setToolbarPosition] = useState<"bottom" | "top">("bottom");
@@ -86,6 +90,38 @@ export function EditorToolbar({
   const updateStyle = (updates: Partial<ElementStyle>) => {
     if (!effectiveKey) return;
     onStyleChange(effectiveKey, { ...currentStyle, ...updates });
+  };
+
+  const handleSyncVisualStyles = async () => {
+    const names = pageNames?.filter(Boolean) || [];
+    const sourceLang = currentLang || "es";
+    const targetLangs = ["es", "en", "pt"].filter((lang) => lang !== sourceLang);
+    const adminToken = localStorage.getItem("adminToken");
+    if (!names.length || !adminToken) return;
+
+    const confirmed = window.confirm(
+      `Copiar solo estilos visuales de ${sourceLang.toUpperCase()} hacia ${targetLangs.map((l) => l.toUpperCase()).join(", ")}?\n\nSe copiaran colores, tamanos, imagenes, margenes y posiciones. No se copiaran textos ni traducciones.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await Promise.resolve(onSave());
+      const response = await fetch("/api/admin/page-styles/sync-visual", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({ pageNames: names, sourceLang, targetLangs }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "No se pudo sincronizar");
+      }
+      alert(`Estilos visuales sincronizados: ${result.updated || 0}\nTextos conservados por idioma.`);
+    } catch (error) {
+      alert(`Error al sincronizar estilos visuales: ${(error as Error).message}`);
+    }
   };
 
   const tabs = [
@@ -247,6 +283,25 @@ export function EditorToolbar({
         </Button>
         <span className="hidden sm:inline text-gray-500 text-[9px] ml-1">{deviceMode === "mobile" ? "Editando móvil" : "Editando PC"}</span>
       </div>
+
+      {pageNames?.length && currentLang && (
+        <div className="mb-2 sm:mb-3">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSyncVisualStyles}
+            className="w-full h-7 text-[10px] border-violet-500/40 text-violet-200 hover:bg-violet-500/20"
+            title="Copia solo estilos visuales a los otros idiomas sin tocar textos"
+            data-testid="button-sync-visual-styles"
+          >
+            <Languages className="w-3 h-3 mr-1" />
+            Reflejar estilo visual en otros idiomas
+          </Button>
+          <p className="mt-1 text-[9px] text-gray-500">
+            No copia textos manuales, solo colores, tamanos, imagenes y posiciones.
+          </p>
+        </div>
+      )}
 
       {selectedElement && (
         <>

@@ -1335,6 +1335,8 @@ export default function ALeerBoliviaPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["aleer-page"]}
+          currentLang={lang}
         />
       )}
 

@@ -404,6 +404,8 @@ export default function EntrenamientoPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["entrenamiento-page"]}
+          currentLang={lang}
         />
       )}
     </div>

@@ -890,6 +890,8 @@ export default function EntrenamientoSelectionPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["entrenamiento-selection-page"]}
+          currentLang={lang}
         />
       )}
     </div>

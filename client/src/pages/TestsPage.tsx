@@ -715,6 +715,8 @@ export default function TestsPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["tests-page"]}
+          currentLang={lang}
         />
       )}
     </div>

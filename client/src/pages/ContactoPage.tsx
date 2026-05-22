@@ -1029,6 +1029,8 @@ export default function ContactoPage() {
           onClearSelection={() => setSelectedElement(null)}
           deviceMode={deviceMode}
           onDeviceModeChange={setDeviceMode}
+          pageNames={["contacto-page"]}
+          currentLang={lang}
         />
       )}
     </div>

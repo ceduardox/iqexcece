@@ -241,7 +241,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   
   const handleSaveStyles = async () => {
     if (!adminToken) {
-      toast({ title: "Error", description: "Debes iniciar sesiÃ³n en el panel admin", variant: "destructive" });
+      toast({ title: "Error", description: "Debes iniciar sesión en el panel admin", variant: "destructive" });
       return;
     }
     try {
@@ -1032,6 +1032,8 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
             onClearSelection={() => setSelectedElement(null)}
             deviceMode={deviceMode}
             onDeviceModeChange={setDeviceMode}
+            pageNames={["selection-screen"]}
+            currentLang={styleLang}
           />
         )}
       </AnimatePresence>

@@ -917,6 +917,8 @@ export default function MetodoXPage() {
             onClearSelection={() => setSelectedElement(null)}
             deviceMode={deviceMode}
             onDeviceModeChange={setDeviceMode}
+            pageNames={["metodo-x-page"]}
+            currentLang={lang}
           />
         </>
       )}
