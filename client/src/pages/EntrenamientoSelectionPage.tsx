@@ -715,6 +715,12 @@ export default function EntrenamientoSelectionPage() {
     if (s?.marginLeft) result.marginLeft = s.marginLeft;
     if (s?.marginRight) result.marginRight = s.marginRight;
     if (s?.sectionHeight) result.minHeight = s.sectionHeight;
+    if (s?.boxShadow) result.boxShadow = s.boxShadow;
+    if (s?.borderRadius) result.borderRadius = s.borderRadius;
+    if (s?.textColor) result.color = s.textColor;
+    if (s?.fontSize) result.fontSize = `${s.fontSize}px`;
+    if (s?.textAlign) result.textAlign = s.textAlign;
+    if (s?.fontWeight) result.fontWeight = s.fontWeight;
     return result;
   }, [getResolvedStyle]);
 
