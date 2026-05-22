@@ -83,7 +83,7 @@ export function EditorToolbar({
   const [floatingPosition, setFloatingPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const toolbarRef = useRef<HTMLDivElement | null>(null);
-  const dragStartRef = useRef<{ pointerX: number; pointerY: number; startX: number; startY: number } | null>(null);
+  const dragStartRef = useRef<{ pointerX: number; pointerY: number; startX: number; startY: number; width: number; height: number } | null>(null);
   const effectiveKey = selectedElement ? getDeviceKey(selectedElement, deviceMode) : null;
   const currentStyle = effectiveKey ? (styles[effectiveKey] || {}) : {};
   const previewIsVideo = useIsVideo(currentStyle.imageUrl);
@@ -139,9 +139,21 @@ export function EditorToolbar({
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
-  const handleDragStart = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const getDragBounds = (width: number, height: number) => {
+    const margin = 8;
+    const isNarrow = window.innerWidth < 640;
+    const minY = isNarrow ? Math.min(margin, window.innerHeight - height - margin) : margin;
+    const maxX = Math.max(margin, window.innerWidth - width - margin);
+    const maxY = Math.max(minY, window.innerHeight - Math.min(height, window.innerHeight - margin * 2) - margin);
+    return { margin, minY, maxX, maxY };
+  };
+
+  const handleDragStart = (e: React.PointerEvent<HTMLElement>) => {
     e.stopPropagation();
     if (!toolbarRef.current) return;
+    const target = e.target as HTMLElement;
+    const startedFromDragButton = e.currentTarget instanceof HTMLButtonElement;
+    if (!startedFromDragButton && target.closest("button,input,textarea,select,a,[role='button']")) return;
     const rect = toolbarRef.current.getBoundingClientRect();
     setIsDragging(true);
     dragStartRef.current = {
@@ -149,23 +161,22 @@ export function EditorToolbar({
       pointerY: e.clientY,
       startX: floatingPosition?.x ?? rect.left,
       startY: floatingPosition?.y ?? rect.top,
+      width: rect.width,
+      height: rect.height,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
-  const handleDragMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const handleDragMove = (e: React.PointerEvent<HTMLElement>) => {
     if (!dragStartRef.current || !toolbarRef.current) return;
     e.stopPropagation();
-    const rect = toolbarRef.current.getBoundingClientRect();
-    const margin = 8;
-    const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-    const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+    const { margin, minY, maxX, maxY } = getDragBounds(dragStartRef.current.width, dragStartRef.current.height);
     const x = clamp(dragStartRef.current.startX + (e.clientX - dragStartRef.current.pointerX), margin, maxX);
-    const y = clamp(dragStartRef.current.startY + (e.clientY - dragStartRef.current.pointerY), margin, maxY);
+    const y = clamp(dragStartRef.current.startY + (e.clientY - dragStartRef.current.pointerY), minY, maxY);
     setFloatingPosition({ x, y });
   };
 
-  const handleDragEnd = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const handleDragEnd = (e: React.PointerEvent<HTMLElement>) => {
     e.stopPropagation();
     setIsDragging(false);
     dragStartRef.current = null;
@@ -184,11 +195,9 @@ export function EditorToolbar({
     const keepInViewport = () => {
       if (!toolbarRef.current) return;
       const rect = toolbarRef.current.getBoundingClientRect();
-      const margin = 8;
-      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+      const { margin, minY, maxX, maxY } = getDragBounds(rect.width, rect.height);
       const x = clamp(floatingPosition.x, margin, maxX);
-      const y = clamp(floatingPosition.y, margin, maxY);
+      const y = clamp(floatingPosition.y, minY, maxY);
       if (x !== floatingPosition.x || y !== floatingPosition.y) {
         setFloatingPosition({ x, y });
       }
@@ -205,14 +214,21 @@ export function EditorToolbar({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       ref={toolbarRef}
-      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-auto sm:w-[400px] sm:min-w-[340px] max-w-none sm:max-w-[400px] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain ${isDragging ? "cursor-grabbing" : ""}`}
+      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-auto sm:w-[400px] sm:min-w-[340px] max-w-none sm:max-w-[400px] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain touch-pan-y ${isDragging ? "cursor-grabbing" : ""}`}
       style={floatingStyle}
       data-testid="editor-toolbar"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between mb-1 gap-2">
+      <div
+        className={`flex items-center justify-between mb-1 gap-2 touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onPointerDown={handleDragStart}
+        onPointerMove={handleDragMove}
+        onPointerUp={handleDragEnd}
+        onPointerCancel={handleDragEnd}
+        data-testid="editor-toolbar-drag-header"
+      >
         <span className="text-white font-medium text-xs sm:text-sm truncate flex-1">
           {selectedElement ? `${selectedElement}` : "Selecciona elemento"}
         </span>
