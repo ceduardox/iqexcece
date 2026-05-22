@@ -1122,7 +1122,7 @@ export default function ALeerBoliviaPage() {
         </motion.section>
 
         <motion.section
-          className="px-5 pb-12"
+          className="px-5 pb-12 md:px-8 lg:px-10"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.18 }}
@@ -1130,12 +1130,19 @@ export default function ALeerBoliviaPage() {
           data-testid="section-inscribete-videos"
         >
           <div
-            className="rounded-3xl overflow-hidden border border-violet-300/50"
-            style={{ boxShadow: "0 18px 40px rgba(109,40,217,0.22), 0 6px 14px rgba(0,0,0,0.08)" }}
+            className="mx-auto max-w-7xl overflow-hidden rounded-[30px] md:rounded-[42px] border border-violet-300/50 bg-violet-600"
+            style={{ boxShadow: "0 28px 80px rgba(109,40,217,0.26), 0 8px 22px rgba(0,0,0,0.08)" }}
           >
-            <div className="relative px-5 pt-8 pb-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 45%, #4c1d95 100%)" }}>
+            <div className="relative px-5 pt-10 pb-10 md:px-20 md:pt-20 md:pb-18 text-center overflow-hidden" style={{ background: "linear-gradient(145deg, #5b21d9 0%, #6d28d9 36%, #42109d 100%)" }}>
               <img src={laxPurpura} alt="" className="absolute -top-8 -left-8 w-52 md:w-72 opacity-18 pointer-events-none" />
               <img src={laxCyan} alt="" className="absolute -bottom-10 -right-8 w-56 md:w-80 opacity-20 pointer-events-none" />
+              <div className="absolute left-8 top-8 h-56 w-56 rotate-45 rounded-[34px] bg-white/5 pointer-events-none" />
+              <div className="absolute right-8 top-8 grid grid-cols-8 gap-2 opacity-25 pointer-events-none">
+                {Array.from({ length: 64 }).map((_, i) => (
+                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-white" />
+                ))}
+              </div>
+              <div className="absolute bottom-14 right-14 h-12 w-12 rotate-45 border border-cyan-300/30 pointer-events-none" />
               <motion.div
                 className="absolute -top-16 left-[20%] w-64 h-64 rounded-full opacity-25 pointer-events-none"
                 style={{ background: "radial-gradient(circle, rgba(34,211,238,0.9) 0%, transparent 68%)" }}
@@ -1149,24 +1156,31 @@ export default function ALeerBoliviaPage() {
                 transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              <h3 className="relative z-10 text-3xl md:text-4xl font-black text-cyan-200 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{t("aleer.joinTitle")}</h3>
-              <p className="relative z-10 text-sm md:text-base text-white/95 max-w-2xl mx-auto leading-relaxed">
+              <div className="relative z-10 mx-auto mb-5 flex h-16 w-16 md:h-24 md:w-24 items-center justify-center rounded-full border border-cyan-300/45 bg-white/8">
+                <UserRound className="h-8 w-8 md:h-12 md:w-12 text-cyan-300" />
+              </div>
+              <h3 className="relative z-10 text-5xl md:text-8xl font-black text-cyan-200 mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{t("aleer.joinTitle")}</h3>
+              <div className="relative z-10 mx-auto mb-6 flex w-36 items-center justify-center gap-2">
+                <span className="h-2 flex-1 rounded-full bg-gradient-to-r from-cyan-300 to-violet-300" />
+                <span className="h-2 w-3 rounded-full bg-cyan-300" />
+              </div>
+              <p className="relative z-10 text-lg md:text-4xl text-white/95 max-w-4xl mx-auto leading-relaxed">
                 {t("aleer.joinDesc")}
               </p>
 
-              <div className="relative z-10 mt-6 grid gap-3 md:grid-cols-3">
+              <div className="relative z-10 mt-10 grid gap-5 md:gap-8 max-w-5xl mx-auto">
                 {[
-                  { key: "schools", icon: Building2, label: t("aleer.joinSchools") },
-                  { key: "sponsors", icon: Handshake, label: t("aleer.joinSponsors") },
-                  { key: "independent", icon: UserRound, label: t("aleer.joinIndependent") },
+                  { key: "schools", icon: Building2, label: t("aleer.joinSchools"), bg: "linear-gradient(135deg, #8b3cf6 0%, #d946ef 100%)", border: "#f0abfc" },
+                  { key: "sponsors", icon: Handshake, label: t("aleer.joinSponsors"), bg: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)", border: "#67e8f9" },
+                  { key: "independent", icon: UserRound, label: t("aleer.joinIndependent"), bg: "linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)", border: "#a5f3fc" },
                 ].map((item, i) => {
                   const Icon = item.icon;
                   return (
                     <motion.button
                       key={item.key}
                       type="button"
-                      className="w-full rounded-2xl px-4 py-4 text-left flex items-center gap-3 border border-cyan-200/55"
-                      style={{ background: "linear-gradient(135deg, #06b6d4 0%, #0ea5e9 45%, #0284c7 100%)", boxShadow: "0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)" }}
+                      className="w-full rounded-[24px] md:rounded-[30px] px-5 py-5 md:px-8 md:py-7 text-left flex items-center gap-5 md:gap-8 border"
+                      style={{ background: item.bg, borderColor: item.border, boxShadow: "0 18px 42px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.22)" }}
                       initial={{ opacity: 0, y: 16, scale: 0.96 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
                       viewport={{ once: true }}
@@ -1176,11 +1190,14 @@ export default function ALeerBoliviaPage() {
                       onClick={() => openJoinModal(item.key as "schools" | "sponsors" | "independent")}
                       data-testid={`button-join-${item.key}`}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-white" />
+                      <div className="w-16 h-16 md:w-28 md:h-28 rounded-full bg-white/18 border border-white/25 flex items-center justify-center shrink-0">
+                        <Icon className="w-8 h-8 md:w-14 md:h-14 text-white" />
                       </div>
-                      <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(76,29,149,0.48)]">
+                      <span className="flex-1 text-xl sm:text-2xl md:text-4xl font-black tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(76,29,149,0.48)]">
                         {item.label}
+                      </span>
+                      <span className="flex h-11 w-11 md:h-16 md:w-16 items-center justify-center rounded-full border-2 border-white text-white">
+                        <ChevronRight className="h-6 w-6 md:h-9 md:w-9" />
                       </span>
                     </motion.button>
                   );
@@ -1188,24 +1205,37 @@ export default function ALeerBoliviaPage() {
               </div>
             </div>
 
-            <div className="relative px-5 py-8 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #22d3ee 0%, #34d399 100%)" }}>
-              <img src={laxBlanca} alt="" className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 md:w-[520px] opacity-35 pointer-events-none" />
+            <div className="relative px-5 py-10 md:px-20 md:py-18 text-center overflow-hidden" style={{ background: "linear-gradient(135deg, #9ff7ff 0%, #29d4d7 45%, #19c3ce 100%)" }}>
+              <img src={laxBlanca} alt="" className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 md:w-[520px] opacity-25 pointer-events-none" />
+              <div className="absolute -right-28 top-8 h-96 w-96 rounded-full bg-white/18 pointer-events-none" />
+              <div className="absolute left-8 bottom-28 grid grid-cols-6 gap-2 opacity-35 pointer-events-none">
+                {Array.from({ length: 36 }).map((_, i) => (
+                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-white" />
+                ))}
+              </div>
+              <div className="relative z-10 mx-auto mb-5 flex items-center justify-center gap-8">
+                <span className="h-2 w-24 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500" />
+                <span className="flex h-16 w-16 md:h-24 md:w-24 items-center justify-center rounded-full bg-cyan-500 border-4 border-cyan-100/60 shadow-[0_18px_38px_rgba(6,182,212,0.28)]">
+                  <PlayCircle className="w-9 h-9 md:w-14 md:h-14 text-white" />
+                </span>
+                <span className="h-2 w-24 rounded-full bg-gradient-to-r from-cyan-500 to-violet-500" />
+              </div>
               <h3
-                className="relative z-10 font-sans text-3xl md:text-4xl font-black mb-2 text-black tracking-tight drop-shadow-[0_2px_0_rgba(255,255,255,0.25)]"
+                className="relative z-10 font-sans text-4xl md:text-7xl font-black mb-3 text-[#071832] tracking-tight drop-shadow-[0_2px_0_rgba(255,255,255,0.25)]"
                 style={{ textShadow: "0 0 18px rgba(34,211,238,0.28)" }}
               >
                 {t("aleer.videosTitle")}
               </h3>
-              <div className="relative z-10 mx-auto mb-3 h-1.5 w-36 rounded-full bg-gradient-to-r from-cyan-400 via-emerald-300 to-violet-400" />
-              <p className="relative z-10 font-sans text-sm md:text-base text-black max-w-3xl mx-auto leading-relaxed">
+              <div className="relative z-10 mx-auto mb-7 h-2 w-40 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-violet-400" />
+              <p className="relative z-10 font-sans text-lg md:text-3xl text-[#0c2036] max-w-4xl mx-auto leading-relaxed">
                 {t("aleer.videosDesc")}
               </p>
 
-              <div className="relative z-10 mt-6 md:hidden">
+              <div className="relative z-10 mt-8 md:hidden">
                 <motion.div
                   key={`mobile-video-${activeVideo.id}`}
-                  className="rounded-2xl border border-violet-200/80 bg-white/90 backdrop-blur-sm p-3 text-left"
-                  style={{ boxShadow: "0 8px 22px rgba(109,40,217,0.14), 0 2px 6px rgba(0,0,0,0.05)" }}
+                  className="rounded-[28px] border-4 border-white/90 bg-white/55 backdrop-blur-sm p-3 text-left"
+                  style={{ boxShadow: "0 20px 42px rgba(109,40,217,0.16), 0 2px 6px rgba(0,0,0,0.05)" }}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.28 }}
@@ -1216,7 +1246,7 @@ export default function ALeerBoliviaPage() {
                       className="relative w-full rounded-xl border border-violet-200/80 bg-white/70 overflow-hidden"
                       style={{
                         boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.65)",
-                        minHeight: 136,
+                        minHeight: 190,
                       }}
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(109,40,217,0.32),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(6,182,212,0.28),transparent_50%)]" />
@@ -1225,8 +1255,8 @@ export default function ALeerBoliviaPage() {
                         animate={{ scale: [1, 1.06, 1], opacity: [0.9, 1, 0.9] }}
                         transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <div className="w-11 h-11 rounded-full bg-white/85 border border-violet-200 flex items-center justify-center shadow-md">
-                          <PlayCircle className="w-6 h-6 text-violet-600" />
+                        <div className="w-20 h-20 rounded-full bg-white/90 border-8 border-white/50 flex items-center justify-center shadow-md">
+                          <PlayCircle className="w-12 h-12 text-violet-600" />
                         </div>
                       </motion.div>
                     </div>
@@ -1298,11 +1328,11 @@ export default function ALeerBoliviaPage() {
               </div>
 
               <div
-                className="relative z-10 mt-7 hidden md:grid md:grid-cols-[1fr_1.55fr] rounded-2xl overflow-hidden border border-cyan-200/70"
-                style={{ background: "linear-gradient(135deg, rgba(6,182,212,0.16), rgba(255,255,255,0.9))" }}
+                className="relative z-10 mt-12 hidden md:block rounded-[34px] overflow-hidden border-8 border-white/90"
+                style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0.62))", boxShadow: "0 24px 60px rgba(15,23,42,0.14)" }}
                 data-testid="desktop-video-split"
               >
-                <div className="p-5 text-left border-r border-cyan-200/70">
+                <div className="sr-only">
                   <motion.div
                     key={`quote-${activeVideo.id}`}
                     initial={{ opacity: 0, x: 14 }}
@@ -1362,25 +1392,26 @@ export default function ALeerBoliviaPage() {
                   </div>
                 </div>
 
-                <div className="relative p-4 flex items-center justify-center">
+                <div className="relative p-0 flex items-center justify-center">
                   <div
-                    className="relative w-full aspect-video rounded-xl overflow-hidden border border-violet-200/70"
+                    className="relative w-full aspect-[16/7] rounded-[24px] overflow-hidden border border-violet-200/70"
                     style={{
-                      background: "linear-gradient(135deg, rgba(109,40,217,0.26), rgba(6,182,212,0.22)), url(" + laxCyan + ") center/cover no-repeat",
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.45), rgba(109,40,217,0.14), rgba(6,182,212,0.2)), url(" + laxCyan + ") center/cover no-repeat",
                     }}
                   >
-                    <div className="absolute inset-0 bg-black/10" />
+                    <div className="absolute inset-0 bg-white/20" />
+                    <div className="absolute right-[13%] top-[20%] h-48 w-48 rounded-full border-[10px] border-white/25 border-dotted" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.08, 1], opacity: [0.9, 1, 0.9] }}
                         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                        className="w-14 h-14 rounded-full bg-white/85 border border-white/70 flex items-center justify-center shadow-lg"
+                        className="w-28 h-28 rounded-full bg-white/90 border-[14px] border-white/45 flex items-center justify-center shadow-[0_18px_38px_rgba(109,40,217,0.24)]"
                       >
-                        <PlayCircle className="w-8 h-8 text-violet-600" />
+                        <PlayCircle className="w-16 h-16 text-violet-600" />
                       </motion.div>
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2 text-left px-3 py-2 rounded-lg bg-white/80 backdrop-blur-sm">
-                      <p className="text-xs font-bold text-violet-700 truncate">{activeVideo.source}</p>
+                    <div className="absolute bottom-4 left-4 right-4 text-left px-5 py-3 rounded-2xl bg-white/75 backdrop-blur-sm">
+                      <p className="text-lg font-bold text-violet-700 truncate">{activeVideo.source}</p>
                     </div>
                   </div>
                 </div>
