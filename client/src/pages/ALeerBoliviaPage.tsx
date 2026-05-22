@@ -477,11 +477,11 @@ export default function ALeerBoliviaPage() {
 
       <main className="flex-1 overflow-y-auto pb-28">
         <motion.section
-          className={`relative px-5 pt-8 pb-10 ${getEditableClass("section-hero")}`}
+          className={`relative overflow-hidden px-5 pt-8 pb-10 md:px-8 md:pt-12 md:pb-16 lg:px-10 ${getEditableClass("section-hero")}`}
           style={{
             background: (styles["section-hero"]?.imageUrl && !isVideoUrl(styles["section-hero"]?.imageUrl))
               ? `url(${styles["section-hero"].imageUrl}) center/cover no-repeat`
-              : styles["section-hero"]?.background || "linear-gradient(135deg, #66c7cd 0%, #5ec3cc 55%, #6ed2cf 100%)",
+              : styles["section-hero"]?.background || "linear-gradient(135deg, #eefcff 0%, #ffffff 44%, #f3e8ff 100%)",
           }}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -511,43 +511,41 @@ export default function ALeerBoliviaPage() {
                 <div className="absolute inset-0 rotate-45 rounded-2xl bg-cyan-300/55" />
                 <div className="absolute inset-0 -rotate-45 rounded-2xl bg-white/30" />
               </div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_28%,rgba(255,255,255,0.18),transparent_42%),radial-gradient(circle_at_78%_72%,rgba(124,58,237,0.16),transparent_48%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(6,182,212,0.2),transparent_42%),radial-gradient(circle_at_78%_72%,rgba(124,58,237,0.18),transparent_48%)]" />
             </div>
           )}
 
           <motion.div
-            className="relative z-10 max-w-6xl mx-auto md:grid md:grid-cols-[0.95fr_1.25fr] gap-8 items-start"
+            className="relative z-10 mx-auto max-w-7xl md:grid md:grid-cols-[0.88fr_1.12fr] md:gap-10 lg:gap-14 md:items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             <div className="text-left">
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 bg-white/20 border border-white/35 backdrop-blur-[2px]"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 bg-white/85 border border-cyan-200/80 backdrop-blur-[2px] shadow-[0_10px_30px_rgba(6,182,212,0.14)]"
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ repeat: Infinity, duration: 3 }}
               >
-                <Sparkles className="w-4 h-4 text-white" />
-                <span className="text-xs font-extrabold text-white tracking-wide">{t("aleer.badge")}</span>
+                <Sparkles className="w-4 h-4 text-cyan-600" />
+                <span className="text-xs font-extrabold text-violet-700 tracking-wide">{t("aleer.badge")}</span>
               </motion.div>
 
               <h1
-                className={`text-[36px] sm:text-[46px] md:text-[56px] font-black mb-2 leading-[0.95] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)] ${getEditableClass("hero-title")}`}
+                className={`text-[36px] sm:text-[46px] md:text-[72px] lg:text-[86px] font-black mb-5 leading-[0.9] text-[#16003d] ${getEditableClass("hero-title")}`}
                 style={{
                   fontSize: styles["hero-title"]?.fontSize || undefined,
                   lineHeight: styles["hero-title"]?.lineHeight,
-                  color: styles["hero-title"]?.textColor || "#ffffff",
+                  color: styles["hero-title"]?.textColor || "#16003d",
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
                 data-testid="text-welcome-title"
               >
                 {t("aleer.welcome")}
               </h1>
-            </div>
 
-            <div className="text-left md:pt-8">
               <h2
-                className={`text-xl md:text-3xl font-black mb-2 text-[#0b1828] ${getEditableClass("hero-subtitle1")}`}
+                className={`text-xl md:text-4xl font-black mb-2 text-[#0b1828] ${getEditableClass("hero-subtitle1")}`}
                 style={{
                   color: styles["hero-subtitle1"]?.textColor || "#0b1828",
                   fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
@@ -558,7 +556,7 @@ export default function ALeerBoliviaPage() {
                 {t("aleer.subtitle1")}
               </h2>
               <h3
-                className={`text-base md:text-xl font-bold mb-3 text-[#11263e] ${getEditableClass("hero-subtitle2")}`}
+                className={`text-base md:text-2xl font-bold mb-4 text-[#11263e] ${getEditableClass("hero-subtitle2")}`}
                 style={{
                   color: styles["hero-subtitle2"]?.textColor || "#11263e",
                   fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
@@ -569,7 +567,7 @@ export default function ALeerBoliviaPage() {
                 {t("aleer.subtitle2")}
               </h3>
               <p
-                className={`text-sm md:text-lg leading-relaxed max-w-2xl text-black/95 ${getEditableClass("hero-desc")}`}
+                className={`text-sm md:text-lg lg:text-xl leading-relaxed max-w-xl text-black/95 ${getEditableClass("hero-desc")}`}
                 style={{
                   color: styles["hero-desc"]?.textColor || "rgba(0,0,0,0.95)",
                   fontSize: styles["hero-desc"]?.fontSize || undefined,
@@ -579,59 +577,79 @@ export default function ALeerBoliviaPage() {
               >
                 {t("aleer.description")}
               </p>
-            </div>
-          </motion.div>
 
-          <motion.div
-            className="mt-8 rounded-2xl overflow-hidden"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <div
-              className={`w-full h-52 md:h-[460px] lg:h-[520px] rounded-2xl flex items-center justify-center overflow-hidden ${getEditableClass("hero-image")}`}
-              style={{
-                height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : undefined,
-                background: styles["hero-image"]?.imageUrl
-                  ? undefined
-                  : styles["hero-image"]?.background || "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)",
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-image", e); } }}
-              data-testid="img-placeholder"
-            >
-              {styles["hero-image"]?.imageUrl ? (
-                <img
-                  src={styles["hero-image"].imageUrl}
-                  alt="Hero"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="relative w-full h-full">
-                  <img
-                    src={aleerPremiosImg}
-                    alt="Ganadores A Leer Bolivia"
-                    className="w-full h-full object-cover object-center"
-                    loading="eager"
-                    decoding="async"
-                    fetchPriority="high"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold text-white bg-cyan-600/85 border border-cyan-200/60 shadow-md">
-                      A Leer Bolivia
-                    </span>
-                    <span className="text-[10px] sm:text-xs text-white/95 font-semibold drop-shadow">
-                      Intercolegial de Lectura
-                    </span>
-                  </div>
-                </div>
-              )}
+              <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => openJoinModal("schools")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm md:text-base font-black text-white bg-gradient-to-r from-violet-600 to-cyan-500 shadow-[0_14px_34px_rgba(109,40,217,0.28)] active:scale-95 transition-transform"
+                  data-testid="button-hero-register-schools"
+                >
+                  {t("aleer.ctaRegister")}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openJoinModal("sponsors")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm md:text-base font-black text-violet-700 bg-white/85 border border-violet-200 shadow-[0_10px_26px_rgba(15,23,42,0.08)] active:scale-95 transition-transform"
+                  data-testid="button-hero-register-sponsors"
+                >
+                  {t("aleer.joinSponsors")}
+                </button>
+              </div>
             </div>
+
+            <motion.div
+              className="mt-8 md:mt-0 rounded-[28px] overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95, x: 18 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <div
+                className={`w-full h-52 md:h-[520px] lg:h-[600px] rounded-[28px] flex items-center justify-center overflow-hidden border border-white/80 shadow-[0_30px_70px_rgba(30,41,59,0.18)] ${getEditableClass("hero-image")}`}
+                style={{
+                  height: styles["hero-image"]?.iconSize ? `${styles["hero-image"].iconSize * 2}px` : undefined,
+                  background: styles["hero-image"]?.imageUrl
+                    ? undefined
+                    : styles["hero-image"]?.background || "linear-gradient(135deg, #ede9fe 0%, #e0f2fe 50%, #f3e8ff 100%)",
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-image", e); } }}
+                data-testid="img-placeholder"
+              >
+                {styles["hero-image"]?.imageUrl ? (
+                  <img
+                    src={styles["hero-image"].imageUrl}
+                    alt="Hero"
+                    className="w-full h-full object-cover object-center"
+                  />
+                ) : (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={aleerPremiosImg}
+                      alt="Ganadores A Leer Bolivia"
+                      className="w-full h-full object-cover object-center"
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center rounded-full px-4 py-1.5 text-xs md:text-sm font-bold text-white bg-cyan-600/90 border border-cyan-200/60 shadow-md">
+                        A Leer Bolivia
+                      </span>
+                      <span className="text-xs md:text-sm text-white/95 font-semibold drop-shadow">
+                        Intercolegial de Lectura
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         </motion.section>
 
         <motion.section
-          className={`px-5 pb-10 relative ${getEditableClass("section-objectives")}`}
+          className={`px-5 py-10 md:px-8 md:py-14 lg:px-10 relative ${getEditableClass("section-objectives")}`}
           style={{
             background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
@@ -656,18 +674,93 @@ export default function ALeerBoliviaPage() {
             </div>
           )}
           <motion.div
-            className="text-center mb-6"
+            className="mx-auto mb-7 max-w-4xl text-center md:mb-10"
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-xl font-black text-gray-800 mb-2" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto">
+            <h2 className="text-2xl md:text-5xl font-black text-gray-900 mb-3" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
+            <p className="text-sm md:text-lg text-gray-600 leading-relaxed mx-auto">
               {t("aleer.objectivesDesc")}
             </p>
           </motion.div>
 
-          <div className="relative">
+          <div className="relative mx-auto max-w-7xl">
+            <div className="hidden md:grid grid-cols-6 gap-5">
+              {objectivesMeta.map((obj, i) => {
+                const Icon = obj.icon;
+                const iSize = Math.max(iconSize(obj.id), 34);
+                return (
+                  <motion.div
+                    key={`desktop-${obj.id}`}
+                    className={`group col-span-2 rounded-[26px] bg-white p-6 min-h-[260px] border border-slate-100 ${i > 2 ? "lg:col-span-3" : ""} ${getEditableClass(`card-${obj.id}`)}`}
+                    style={{
+                      boxShadow: styles[`card-${obj.id}`]?.shadowBlur
+                        ? `0 ${(styles[`card-${obj.id}`]?.shadowBlur || 10) / 2}px ${styles[`card-${obj.id}`]?.shadowBlur || 10}px ${styles[`card-${obj.id}`]?.shadowColor || "rgba(124,58,237,0.08)"}`
+                        : "0 18px 46px rgba(15,23,42,0.08)",
+                      background: styles[`card-${obj.id}`]?.imageUrl
+                        ? `url(${styles[`card-${obj.id}`].imageUrl}) center/cover no-repeat`
+                        : styles[`card-${obj.id}`]?.background || "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+                    }}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06, duration: 0.34 }}
+                    onClick={(e) => { if (editorMode) handleElementClick(`card-${obj.id}`, e); }}
+                    data-testid={`desktop-card-objective-${i}`}
+                  >
+                    <div className="flex h-full flex-col">
+                      <motion.div
+                        className={`mb-5 rounded-2xl flex items-center justify-center shrink-0 ${getEditableClass(`icon-${obj.id}`)}`}
+                        style={{
+                          background: styles[`icon-${obj.id}`]?.imageUrl ? "transparent" : obj.bg,
+                          width: iSize + 34,
+                          height: iSize + 34,
+                        }}
+                        animate={{ y: [0, -4, 0], scale: [1, 1.04, 1] }}
+                        transition={{ repeat: Infinity, duration: 4, delay: i * 0.45 }}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`icon-${obj.id}`, e); }}}
+                      >
+                        {styles[`icon-${obj.id}`]?.imageUrl ? (
+                          <img
+                            src={styles[`icon-${obj.id}`].imageUrl}
+                            alt=""
+                            style={{ width: iSize, height: iSize, objectFit: "contain" }}
+                            className="drop-shadow-md"
+                          />
+                        ) : (
+                          <Icon style={{ color: obj.color, width: iSize, height: iSize }} />
+                        )}
+                      </motion.div>
+                      <h3
+                        className={`text-xl font-black text-gray-900 mb-3 leading-tight ${getEditableClass(`title-${obj.id}`)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`title-${obj.id}`, e); }}}
+                        style={{
+                          fontSize: styles[`title-${obj.id}`]?.fontSize || undefined,
+                          lineHeight: styles[`title-${obj.id}`]?.lineHeight,
+                          color: styles[`title-${obj.id}`]?.textColor || "#111827",
+                        }}
+                      >
+                        {styles[`title-${obj.id}`]?.buttonText || t(`aleer.${obj.titleKey}`)}
+                      </h3>
+                      <p
+                        className={`text-sm md:text-[15px] text-gray-600 leading-relaxed ${getEditableClass(`desc-${obj.id}`)}`}
+                        onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`desc-${obj.id}`, e); }}}
+                        style={{
+                          fontSize: styles[`desc-${obj.id}`]?.fontSize || undefined,
+                          lineHeight: styles[`desc-${obj.id}`]?.lineHeight,
+                          color: styles[`desc-${obj.id}`]?.textColor || "#4b5563",
+                        }}
+                      >
+                        {styles[`desc-${obj.id}`]?.buttonText || t(`aleer.${obj.descKey}`)}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="md:hidden">
             <Carousel
               opts={{ align: "start", loop: true }}
               setApi={setCarouselApi}
@@ -748,8 +841,8 @@ export default function ALeerBoliviaPage() {
                     </CarouselItem>
                   );
                 })}
-              </CarouselContent>
-            </Carousel>
+                </CarouselContent>
+              </Carousel>
 
             <div className="flex items-center justify-center gap-3 mt-5">
               <button
@@ -790,11 +883,12 @@ export default function ALeerBoliviaPage() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
+            </div>
           </div>
         </motion.section>
 
         <motion.section
-          className={`px-5 pb-12 pt-8 relative ${getEditableClass("section-participar")}`}
+          className={`px-5 pb-12 pt-8 md:px-8 md:pb-16 lg:px-10 relative ${getEditableClass("section-participar")}`}
           style={{
             background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
@@ -818,50 +912,53 @@ export default function ALeerBoliviaPage() {
               {t("aleer.editParticiparBg")}
             </div>
           )}
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="mx-auto max-w-7xl rounded-[30px] md:rounded-[36px] md:border md:border-orange-100 md:bg-gradient-to-br md:from-white md:via-orange-50/55 md:to-cyan-50/60 md:p-7 lg:p-9 md:shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
             <motion.div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3"
-              style={{ background: "linear-gradient(135deg, #fff7ed, #fed7aa)" }}
-              animate={{ scale: [1, 1.04, 1] }}
-              transition={{ repeat: Infinity, duration: 3 }}
+              className="text-center md:text-left mb-8 md:grid md:grid-cols-[0.78fr_1.22fr] md:gap-8 md:items-end"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
             >
-              <Users className="w-4 h-4 text-orange-600" />
-              <span className="text-xs font-bold text-orange-700">{t("aleer.participationBadge")}</span>
+              <div>
+                <motion.div
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3"
+                  style={{ background: "linear-gradient(135deg, #fff7ed, #fed7aa)" }}
+                  animate={{ scale: [1, 1.04, 1] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                >
+                  <Users className="w-4 h-4 text-orange-600" />
+                  <span className="text-xs font-bold text-orange-700">{t("aleer.participationBadge")}</span>
+                </motion.div>
+                <h2
+                  className={`text-xl md:text-5xl font-black mb-3 leading-tight text-gray-900 ${getEditableClass("participar-title")}`}
+                  style={{
+                    color: styles["participar-title"]?.textColor || "#111827",
+                    fontSize: styles["participar-title"]?.fontSize || undefined,
+                    lineHeight: styles["participar-title"]?.lineHeight,
+                  }}
+                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
+                  data-testid="text-participar-title"
+                >
+                  {t("aleer.participarTitle")}
+                </h2>
+              </div>
+              <p
+                className={`text-xs md:text-lg leading-relaxed max-w-sm md:max-w-none mx-auto md:mx-0 text-gray-600 ${getEditableClass("participar-desc")}`}
+                style={{
+                  color: styles["participar-desc"]?.textColor || "#4b5563",
+                  fontSize: styles["participar-desc"]?.fontSize || undefined,
+                  lineHeight: styles["participar-desc"]?.lineHeight,
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
+              >
+                {t("aleer.participarDesc")}
+              </p>
             </motion.div>
-            <h2
-              className={`text-xl font-black mb-3 leading-tight ${getEditableClass("participar-title")}`}
-              style={{
-                color: styles["participar-title"]?.textColor || "#1f2937",
-                fontSize: styles["participar-title"]?.fontSize || undefined,
-                lineHeight: styles["participar-title"]?.lineHeight,
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
-              data-testid="text-participar-title"
-            >
-              {t("aleer.participarTitle")}
-            </h2>
-            <p
-              className={`text-xs leading-relaxed max-w-sm mx-auto ${getEditableClass("participar-desc")}`}
-              style={{
-                color: styles["participar-desc"]?.textColor || "#9ca3af",
-                fontSize: styles["participar-desc"]?.fontSize || undefined,
-                lineHeight: styles["participar-desc"]?.lineHeight,
-              }}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
-            >
-              {t("aleer.participarDesc")}
-            </p>
-          </motion.div>
 
-          <div className="flex flex-col md:flex-row gap-6 items-stretch">
+          <div className="flex flex-col md:grid md:grid-cols-[0.95fr_1.05fr] gap-6 lg:gap-8 items-stretch">
             <motion.div
-              className={`md:w-1/2 rounded-2xl overflow-hidden ${getEditableClass("participar-image")}`}
+              className={`rounded-2xl md:rounded-[28px] overflow-hidden ${getEditableClass("participar-image")}`}
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -871,26 +968,27 @@ export default function ALeerBoliviaPage() {
               <img
                 src={styles["participar-image"]?.imageUrl || "/api/images/0ac59e05-5b57-4642-9b78-9f50eca502f1"}
                 alt="Estudiante leyendo"
-                className="w-full h-56 md:h-full object-cover rounded-2xl"
+                className="w-full h-56 md:h-full min-h-[520px] object-cover rounded-2xl md:rounded-[28px]"
                 style={{ height: styles["participar-image"]?.iconSize ? `${styles["participar-image"].iconSize * 2}px` : undefined }}
                 data-testid="img-participar"
               />
             </motion.div>
 
-            <div className="md:w-1/2 hidden md:flex flex-col gap-3">
+            <div className="hidden md:grid grid-cols-1 gap-4">
               {participarItems.map((item, i) => {
                 const cardKey = `pcard-${item.id}`;
+                const Icon = item.icon;
                 return (
                   <motion.div
                     key={item.id}
-                    className={`flex items-start gap-3 rounded-xl p-3 ${getEditableClass(cardKey)}`}
+                    className={`flex items-start gap-4 rounded-2xl p-4 lg:p-5 border border-white/90 bg-white/92 ${getEditableClass(cardKey)}`}
                     style={{
                       background: styles[cardKey]?.imageUrl
                         ? `url(${styles[cardKey].imageUrl}) center/cover no-repeat`
-                        : styles[cardKey]?.background || undefined,
+                        : styles[cardKey]?.background || "rgba(255,255,255,0.92)",
                       boxShadow: styles[cardKey]?.shadowBlur
                         ? `0 ${(styles[cardKey]?.shadowBlur || 6) / 2}px ${styles[cardKey]?.shadowBlur || 6}px ${styles[cardKey]?.shadowColor || "rgba(0,0,0,0.06)"}`
-                        : undefined,
+                        : "0 14px 34px rgba(15,23,42,0.07)",
                     }}
                     initial={{ opacity: 0, x: 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -900,16 +998,16 @@ export default function ALeerBoliviaPage() {
                     data-testid={`card-participar-${i}`}
                   >
                     <motion.div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ background: "linear-gradient(135deg, #ea580c, #f97316)" }}
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ background: "linear-gradient(135deg, #ea580c, #f97316)", boxShadow: "0 10px 24px rgba(234,88,12,0.22)" }}
                       animate={{ scale: [1, 1.15, 1] }}
                       transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
                     >
-                      <CheckCheck className="w-3.5 h-3.5 text-white" />
+                      <Icon className="w-6 h-6 text-white" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-gray-800 mb-0.5">{t(`aleer.${item.titleKey}`)}</h3>
-                      <p className="text-xs text-gray-400 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
+                      <h3 className="text-lg font-black text-gray-900 mb-1">{t(`aleer.${item.titleKey}`)}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">{t(`aleer.${item.descKey}`)}</p>
                     </div>
                   </motion.div>
                 );
@@ -961,6 +1059,7 @@ export default function ALeerBoliviaPage() {
                 </CarouselContent>
               </Carousel>
             </div>
+          </div>
           </div>
 
         </motion.section>
