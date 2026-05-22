@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail, AlertTriangle } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail, AlertTriangle, Menu } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -309,6 +309,7 @@ export default function GestionPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "servidor" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios" | "roles">("sesiones");
   const [resultadosOpen, setResultadosOpen] = useState(false);
+  const [mobileAdminMenuOpen, setMobileAdminMenuOpen] = useState(false);
   const [activeRole, setActiveRole] = useState<{name: string; allowedTabs: string[]} | null>(null);
   const [roles, setRoles] = useState<{id: number; name: string; allowedTabs: string[]}[]>([]);
   const [loginRoles, setLoginRoles] = useState<{id: number; name: string; allowedTabs: string[]}[]>([]);
@@ -2509,6 +2510,15 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           </div>
           <div className="flex gap-2">
             <Button
+              onClick={() => setMobileAdminMenuOpen(true)}
+              variant="outline"
+              size="icon"
+              className="border-slate-700 text-cyan-200 hover:bg-cyan-500/10"
+              data-testid="button-mobile-menu"
+            >
+              <Menu className="w-4 h-4" />
+            </Button>
+            <Button
               onClick={() => { fetchSessions(); fetchQuizResults(); }}
               variant="outline"
               size="icon"
@@ -2535,7 +2545,68 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             <p className="text-xs text-cyan-200">Rol: <span className="font-semibold text-white">{activeRole.name}</span></p>
           </div>
         )}
-        <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
+        {mobileAdminMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-[80]">
+            <button
+              className="absolute inset-0 bg-black/60"
+              aria-label="Cerrar menu"
+              onClick={() => setMobileAdminMenuOpen(false)}
+            />
+            <div className="absolute left-0 top-0 h-full w-[82vw] max-w-xs bg-slate-950 border-r border-cyan-400/20 p-4 overflow-y-auto shadow-2xl">
+              <div className="flex items-start justify-between gap-3 mb-5">
+                <div>
+                  <h2 className="text-white font-bold text-lg">Panel de Gestión</h2>
+                  <p className="text-cyan-300 text-xs">IQxponencial</p>
+                </div>
+                <button
+                  className="w-9 h-9 rounded-lg border border-slate-700 text-slate-300 flex items-center justify-center"
+                  onClick={() => setMobileAdminMenuOpen(false)}
+                  aria-label="Cerrar menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <nav className="space-y-2">
+                {isTabVisible("sesiones") && (
+                  <button onClick={() => { setActiveTab("sesiones"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "sesiones")} data-testid="mobile-sidebar-sesiones">
+                    <Users className="w-5 h-5" /> Sesiones
+                  </button>
+                )}
+                {isTabVisible("resultados") && (
+                  <div>
+                    <button onClick={() => setResultadosOpen(!resultadosOpen)} className={sidebarItemClass(["resultados", "resultados-razonamiento", "resultados-cerebral", "resultados-entrenamiento", "resultados-velocidad"].includes(activeTab))} data-testid="mobile-sidebar-resultados-toggle">
+                      <BarChart3 className="w-5 h-5" />
+                      <span className="flex-1">Resultados</span>
+                      {resultadosOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                    {resultadosOpen && (
+                      <div className="ml-4 mt-1 space-y-1 border-l border-slate-800 pl-3">
+                        <button onClick={() => { setActiveTab("resultados"); setMobileAdminMenuOpen(false); setResultadosOpen(false); }} className={sidebarSubItemClass(activeTab === "resultados")} data-testid="mobile-sidebar-resultados"><FileText className="w-4 h-4" /> Lectura</button>
+                        <button onClick={() => { setActiveTab("resultados-razonamiento"); setMobileAdminMenuOpen(false); setResultadosOpen(false); }} className={sidebarSubItemClass(activeTab === "resultados-razonamiento")} data-testid="mobile-sidebar-resultados-razonamiento"><Brain className="w-4 h-4" /> Razonamiento</button>
+                        <button onClick={() => { setActiveTab("resultados-cerebral"); setMobileAdminMenuOpen(false); setResultadosOpen(false); }} className={sidebarSubItemClass(activeTab === "resultados-cerebral")} data-testid="mobile-sidebar-resultados-cerebral"><Brain className="w-4 h-4" /> Cerebral</button>
+                        <button onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); setMobileAdminMenuOpen(false); setResultadosOpen(false); }} className={sidebarSubItemClass(activeTab === "resultados-entrenamiento")} data-testid="mobile-sidebar-resultados-entrenamiento"><Zap className="w-4 h-4" /> Entrenamiento</button>
+                        <button onClick={() => { setActiveTab("resultados-velocidad"); setMobileAdminMenuOpen(false); setResultadosOpen(false); }} className={sidebarSubItemClass(activeTab === "resultados-velocidad")} data-testid="mobile-sidebar-resultados-velocidad"><Gauge className="w-4 h-4" /> Velocidad</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {isTabVisible("contenido") && <button onClick={() => { setActiveTab("contenido"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "contenido")}><BookOpen className="w-5 h-5" /> Contenido</button>}
+                {isTabVisible("imagenes") && <button onClick={() => { setActiveTab("imagenes"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "imagenes")}><ImageIcon className="w-5 h-5" /> Imágenes</button>}
+                {isTabVisible("entrenamiento") && <button onClick={() => { setActiveTab("entrenamiento"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "entrenamiento")}><Zap className="w-5 h-5" /> Entrenamiento</button>}
+                {isTabVisible("servidor") && <button onClick={() => { setActiveTab("servidor"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "servidor")}><Server className="w-5 h-5" /> Servidor</button>}
+                {isTabVisible("instituciones") && <button onClick={() => { setActiveTab("instituciones"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "instituciones")}><Building2 className="w-5 h-5" /> Instituciones</button>}
+                {isTabVisible("blog") && <button onClick={() => { setActiveTab("blog"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "blog")}><Newspaper className="w-5 h-5" /> Blog</button>}
+                {isTabVisible("agente") && <button onClick={() => { setActiveTab("agente"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "agente")}><Bot className="w-5 h-5" /> Agente</button>}
+                {isTabVisible("asesor-ia") && <button onClick={() => { setActiveTab("asesor-ia"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "asesor-ia")}><Headphones className="w-5 h-5" /> Asesor IA</button>}
+                {isTabVisible("formularios") && <button onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "formularios")}><ClipboardList className="w-5 h-5" /> Formularios</button>}
+                {isTabVisible("roles") && <button onClick={() => { setActiveTab("roles"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "roles")}><Users className="w-5 h-5" /> Roles</button>}
+              </nav>
+            </div>
+          </div>
+        )}
+
+        <div className="hidden">
           {isTabVisible("sesiones") && (
           <Button
             onClick={() => setActiveTab("sesiones")}
@@ -2561,25 +2632,6 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
               Resultados
               {resultadosOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
             </Button>
-            {resultadosOpen && (
-              <div className="absolute top-full left-0 mt-1 z-50 bg-slate-900 border border-cyan-400/20 rounded-lg shadow-xl p-1 min-w-[160px]">
-                <button onClick={() => { setActiveTab("resultados"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados" ? "bg-cyan-500/15 text-white" : "text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-100"}`} data-testid="mobile-tab-resultados">
-                  <FileText className="w-3 h-3" /> Lectura
-                </button>
-                <button onClick={() => { setActiveTab("resultados-razonamiento"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-razonamiento" ? "bg-cyan-500/15 text-white" : "text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-100"}`} data-testid="mobile-tab-resultados-razonamiento">
-                  <Brain className="w-3 h-3" /> Razonamiento
-                </button>
-                <button onClick={() => { setActiveTab("resultados-cerebral"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-cerebral" ? "bg-cyan-500/15 text-white" : "text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-100"}`} data-testid="mobile-tab-resultados-cerebral">
-                  <Brain className="w-3 h-3" /> Cerebral
-                </button>
-                <button onClick={() => { setActiveTab("resultados-entrenamiento"); fetchTrainingResultsOnly(); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-entrenamiento" ? "bg-cyan-500/15 text-white" : "text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-100"}`} data-testid="mobile-tab-resultados-entrenamiento">
-                  <Zap className="w-3 h-3" /> Entrenamiento
-                </button>
-                <button onClick={() => { setActiveTab("resultados-velocidad"); setResultadosOpen(false); }} className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-xs transition-colors ${activeTab === "resultados-velocidad" ? "bg-cyan-500/15 text-white" : "text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-100"}`} data-testid="mobile-tab-resultados-velocidad">
-                  <Zap className="w-3 h-3" /> Velocidad
-                </button>
-              </div>
-            )}
           </div>
           )}
           {isTabVisible("contenido") && (
