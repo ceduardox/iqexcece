@@ -2504,11 +2504,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
 
       <div className="flex-1 p-2 sm:p-4 overflow-auto">
         <div className="md:hidden flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-lg font-bold text-white">Panel de Gestión</h1>
-            <p className="text-cyan-300 text-xs">IQxponencial</p>
-          </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3 min-w-0">
             <Button
               onClick={() => setMobileAdminMenuOpen(true)}
               variant="outline"
@@ -2518,6 +2514,12 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             >
               <Menu className="w-4 h-4" />
             </Button>
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-white truncate">Panel de Gestión</h1>
+              <p className="text-cyan-300 text-xs">IQxponencial</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
             <Button
               onClick={() => { fetchSessions(); fetchQuizResults(); }}
               variant="outline"
