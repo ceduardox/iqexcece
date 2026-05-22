@@ -1446,15 +1446,21 @@ export default function ALeerBoliviaPage() {
                 {schoolLogosLoop.map((logo, idx) => (
                   <div
                     key={`${logo.src}-${idx}`}
-                    className="w-[92px] h-[92px] sm:w-[102px] sm:h-[102px] md:w-[112px] md:h-[112px] rounded-2xl bg-white border border-cyan-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
+                    className="relative w-[92px] h-[92px] sm:w-[102px] sm:h-[102px] md:w-[112px] md:h-[112px] rounded-2xl bg-white border border-cyan-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
                   >
+                    <span className="absolute inset-2 flex items-center justify-center text-[10px] leading-tight text-center font-bold text-violet-700 px-1">
+                      {logo.alt.replace(/^Colegio\s+/i, "")}
+                    </span>
                     <img
                       src={logo.src}
                       alt={logo.alt}
-                      loading="lazy"
-                      className="w-full h-full object-contain"
+                      loading="eager"
+                      decoding="async"
+                      className="relative z-10 w-full h-full object-contain bg-white"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.opacity = "0";
+                        img.style.pointerEvents = "none";
                       }}
                     />
                   </div>
@@ -1490,24 +1496,22 @@ export default function ALeerBoliviaPage() {
                 {sponsorLogosLoop.map((item, idx) => (
                   <div
                     key={`${item.name}-${idx}`}
-                    className="w-[112px] h-[112px] sm:w-[124px] sm:h-[124px] md:w-[132px] md:h-[132px] rounded-2xl bg-white border border-violet-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
+                    className="relative w-[112px] h-[112px] sm:w-[124px] sm:h-[124px] md:w-[132px] md:h-[132px] rounded-2xl bg-white border border-violet-100 shadow-sm p-2 shrink-0 flex items-center justify-center"
                     title={item.name}
                   >
+                    <span className="absolute inset-2 flex items-center justify-center text-[10px] leading-tight text-center font-bold text-violet-700 px-1">
+                      {item.name}
+                    </span>
                     <img
                       src={item.src}
                       alt={item.name}
-                      loading="lazy"
-                      className="w-full h-full object-contain"
+                      loading="eager"
+                      decoding="async"
+                      className="relative z-10 w-full h-full object-contain bg-white"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
-                        img.style.display = "none";
-                        const parent = img.parentElement as HTMLElement | null;
-                        if (parent && !parent.querySelector(".sponsor-fallback")) {
-                          const span = document.createElement("span");
-                          span.className = "sponsor-fallback text-[10px] leading-tight text-center font-bold text-violet-700 px-1";
-                          span.textContent = item.name;
-                          parent.appendChild(span);
-                        }
+                        img.style.opacity = "0";
+                        img.style.pointerEvents = "none";
                       }}
                     />
                   </div>
