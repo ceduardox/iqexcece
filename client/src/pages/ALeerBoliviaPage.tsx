@@ -532,12 +532,12 @@ export default function ALeerBoliviaPage() {
           >
             <div className="max-w-4xl text-left">
               <motion.div
-                className="inline-flex items-center gap-3 rounded-full bg-white/94 px-5 py-3 mb-7 border border-violet-100 shadow-[0_14px_38px_rgba(36,16,120,0.2)]"
+                className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-violet-700 via-blue-500 to-cyan-400 px-5 py-3 mb-7 border border-white/60 shadow-[0_14px_38px_rgba(36,16,120,0.2)]"
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ repeat: Infinity, duration: 3 }}
               >
-                <Sparkles className="w-6 h-6 text-cyan-500" />
-                <span className="text-sm md:text-xl font-black text-violet-700 tracking-wide">{t("aleer.badge")}</span>
+                <Sparkles className="w-6 h-6 text-white" />
+                <span className="text-sm md:text-xl font-black text-white tracking-wide">{t("aleer.badge")}</span>
               </motion.div>
 
               <h1
@@ -612,11 +612,11 @@ export default function ALeerBoliviaPage() {
                 <button
                   type="button"
                   onClick={() => openJoinModal("sponsors")}
-                  className="inline-flex items-center justify-center gap-5 rounded-full px-6 py-4 md:px-10 md:py-5 text-lg md:text-3xl font-black text-violet-700 bg-white/94 border-2 border-violet-300 shadow-[0_16px_42px_rgba(67,24,140,0.16)] active:scale-95 transition-transform"
+                  className="inline-flex items-center justify-center gap-5 rounded-full px-6 py-4 md:px-10 md:py-5 text-lg md:text-3xl font-black text-white bg-gradient-to-r from-violet-700 via-blue-500 to-cyan-400 border-2 border-white/75 shadow-[0_16px_42px_rgba(67,24,140,0.2)] active:scale-95 transition-transform"
                   data-testid="button-hero-register-sponsors"
                 >
-                  <span className="flex h-11 w-11 md:h-14 md:w-14 items-center justify-center rounded-2xl bg-violet-50 border border-violet-200">
-                    <Users className="h-6 w-6 md:h-8 md:w-8" />
+                  <span className="flex h-11 w-11 md:h-14 md:w-14 items-center justify-center rounded-2xl bg-white/15 border border-white/20">
+                    <Users className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </span>
                   {t("aleer.joinSponsors")}
                   <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
@@ -676,11 +676,11 @@ export default function ALeerBoliviaPage() {
         </motion.section>
 
         <motion.section
-          className={`px-5 py-10 md:px-8 md:py-14 lg:px-10 relative ${getEditableClass("section-objectives")}`}
+          className={`px-5 py-14 md:px-8 md:py-20 lg:px-10 relative overflow-hidden ${getEditableClass("section-objectives")}`}
           style={{
             background: (styles["section-objectives"]?.imageUrl && !isVideoUrl(styles["section-objectives"]?.imageUrl))
               ? `url(${styles["section-objectives"].imageUrl}) center/cover no-repeat`
-              : styles["section-objectives"]?.background || undefined,
+              : styles["section-objectives"]?.background || "linear-gradient(180deg, #fbfdff 0%, #ffffff 52%, #f5f7ff 100%)",
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -690,6 +690,18 @@ export default function ALeerBoliviaPage() {
         >
           {isVideoUrl(styles["section-objectives"]?.imageUrl) && (
             <VideoBackground src={styles["section-objectives"]!.imageUrl!} imageSize={styles["section-objectives"]?.imageSize} />
+          )}
+          {!styles["section-objectives"]?.background && !styles["section-objectives"]?.imageUrl && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="absolute -top-20 -left-24 h-60 w-72 rounded-[48%_52%_62%_38%] bg-violet-200/55" />
+              <div className="absolute -top-10 right-[-84px] h-72 w-72 rounded-[54%_46%_42%_58%] bg-cyan-100/80" />
+              <div className="absolute bottom-[-120px] left-[-80px] h-72 w-72 rounded-[58%_42%_50%_50%] bg-violet-100/65" />
+              <div className="absolute right-[8%] top-16 grid grid-cols-6 gap-3 opacity-45">
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <span key={i} className="h-2 w-2 rounded-full bg-violet-300" />
+                ))}
+              </div>
+            </div>
           )}
           {editorMode && (
             <div
@@ -701,19 +713,23 @@ export default function ALeerBoliviaPage() {
             </div>
           )}
           <motion.div
-            className="mx-auto mb-7 max-w-4xl text-center md:mb-10"
+            className="relative z-10 mx-auto mb-9 max-w-4xl text-center md:mb-14"
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl md:text-5xl font-black text-gray-900 mb-3" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
-            <p className="text-sm md:text-lg text-gray-600 leading-relaxed mx-auto">
+            <h2 className="text-4xl md:text-7xl font-black text-[#070725] mb-3" data-testid="text-objectives-title">{t("aleer.objectivesTitle")}</h2>
+            <div className="mx-auto mb-8 flex w-32 items-center justify-center gap-2">
+              <span className="h-2 flex-1 rounded-full bg-gradient-to-r from-violet-700 to-cyan-400" />
+              <span className="h-2 w-5 rounded-full bg-cyan-400" />
+            </div>
+            <p className="text-lg md:text-[32px] text-[#171733] leading-relaxed mx-auto">
               {t("aleer.objectivesDesc")}
             </p>
           </motion.div>
 
-          <div className="relative mx-auto max-w-7xl">
-            <div className="hidden md:grid grid-cols-6 gap-5">
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="hidden">
               {objectivesMeta.map((obj, i) => {
                 const Icon = obj.icon;
                 const iSize = Math.max(iconSize(obj.id), 34);
@@ -787,27 +803,27 @@ export default function ALeerBoliviaPage() {
               })}
             </div>
 
-            <div className="md:hidden">
+            <div className="block">
             <Carousel
               opts={{ align: "start", loop: true }}
               setApi={setCarouselApi}
               className="w-full"
             >
-              <CarouselContent className="-ml-3">
+              <CarouselContent className="-ml-4 md:-ml-8">
                 {objectivesMeta.map((obj, i) => {
                   const Icon = obj.icon;
-                  const iSize = iconSize(obj.id);
+                  const iSize = Math.max(iconSize(obj.id), 28);
                   return (
-                    <CarouselItem key={obj.id} className="pl-3 basis-[80%] sm:basis-[45%] md:basis-[33%]">
+                    <CarouselItem key={obj.id} className="pl-4 basis-[86%] sm:basis-[62%] md:pl-8 md:basis-[64%] lg:basis-[52%]">
                       <motion.div
-                        className={`bg-white rounded-2xl p-4 h-full ${getEditableClass(`card-${obj.id}`)}`}
+                        className={`bg-white rounded-[32px] md:rounded-[56px] p-7 md:p-14 min-h-[360px] md:min-h-[620px] h-full border border-white/95 ${getEditableClass(`card-${obj.id}`)}`}
                         style={{
                           boxShadow: styles[`card-${obj.id}`]?.shadowBlur
                             ? `0 ${(styles[`card-${obj.id}`]?.shadowBlur || 10) / 2}px ${styles[`card-${obj.id}`]?.shadowBlur || 10}px ${styles[`card-${obj.id}`]?.shadowColor || "rgba(124,58,237,0.08)"}`
-                            : "0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+                            : "0 30px 90px rgba(96,72,179,0.14), 0 10px 34px rgba(15,23,42,0.06)",
                           background: styles[`card-${obj.id}`]?.imageUrl
                             ? `url(${styles[`card-${obj.id}`].imageUrl}) center/cover no-repeat`
-                            : styles[`card-${obj.id}`]?.background || undefined,
+                            : styles[`card-${obj.id}`]?.background || "rgba(255,255,255,0.94)",
                         }}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -816,13 +832,13 @@ export default function ALeerBoliviaPage() {
                         onClick={(e) => { if (editorMode) handleElementClick(`card-${obj.id}`, e); }}
                         data-testid={`card-objective-${i}`}
                       >
-                        <div className="flex flex-col items-center text-center gap-3">
+                        <div className="flex h-full flex-col items-center justify-center text-center gap-6 md:gap-9">
                           <motion.div
-                            className={`rounded-xl flex items-center justify-center shrink-0 ${getEditableClass(`icon-${obj.id}`)}`}
+                            className={`rounded-full flex items-center justify-center shrink-0 ${getEditableClass(`icon-${obj.id}`)}`}
                             style={{
-                              background: styles[`icon-${obj.id}`]?.imageUrl ? "transparent" : obj.bg,
-                              width: iSize + 24,
-                              height: iSize + 24,
+                              background: styles[`icon-${obj.id}`]?.imageUrl ? "transparent" : "linear-gradient(135deg, rgba(139,92,246,0.18), rgba(34,211,238,0.16))",
+                              width: iSize + 72,
+                              height: iSize + 72,
                             }}
                             animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
                             transition={{ repeat: Infinity, duration: 4, delay: i * 0.5 }}
@@ -836,28 +852,31 @@ export default function ALeerBoliviaPage() {
                                 className="drop-shadow-md"
                               />
                             ) : (
-                              <Icon style={{ color: obj.color, width: iSize, height: iSize }} />
+                              <span className="flex h-[68%] w-[68%] items-center justify-center rounded-full bg-gradient-to-br from-violet-700 to-cyan-500 shadow-[0_16px_38px_rgba(109,40,217,0.24)]">
+                                <Icon style={{ color: "#ffffff", width: iSize + 22, height: iSize + 22 }} />
+                              </span>
                             )}
                           </motion.div>
                           <div className="flex-1 min-w-0">
                             <h3
-                              className={`text-sm font-bold text-gray-800 mb-1 ${getEditableClass(`title-${obj.id}`)}`}
+                              className={`text-2xl md:text-5xl font-black text-[#090927] mb-5 leading-tight ${getEditableClass(`title-${obj.id}`)}`}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`title-${obj.id}`, e); }}}
                               style={{
-                                fontSize: styles[`title-${obj.id}`]?.fontSize || 14,
+                                fontSize: styles[`title-${obj.id}`]?.fontSize || undefined,
                                 lineHeight: styles[`title-${obj.id}`]?.lineHeight,
-                                color: styles[`title-${obj.id}`]?.textColor || "#1f2937",
+                                color: styles[`title-${obj.id}`]?.textColor || "#090927",
                               }}
                             >
                               {styles[`title-${obj.id}`]?.buttonText || t(`aleer.${obj.titleKey}`)}
                             </h3>
+                            <div className="mx-auto mb-6 h-2 w-28 rounded-full bg-gradient-to-r from-violet-700 to-cyan-400" />
                             <p
-                              className={`text-xs text-gray-400 leading-relaxed ${getEditableClass(`desc-${obj.id}`)}`}
+                              className={`text-base md:text-[28px] text-[#29304f] leading-relaxed ${getEditableClass(`desc-${obj.id}`)}`}
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`desc-${obj.id}`, e); }}}
                               style={{
-                                fontSize: styles[`desc-${obj.id}`]?.fontSize || 12,
+                                fontSize: styles[`desc-${obj.id}`]?.fontSize || undefined,
                                 lineHeight: styles[`desc-${obj.id}`]?.lineHeight,
-                                color: styles[`desc-${obj.id}`]?.textColor || "#9ca3af",
+                                color: styles[`desc-${obj.id}`]?.textColor || "#29304f",
                               }}
                             >
                               {styles[`desc-${obj.id}`]?.buttonText || t(`aleer.${obj.descKey}`)}
@@ -871,16 +890,16 @@ export default function ALeerBoliviaPage() {
                 </CarouselContent>
               </Carousel>
 
-            <div className="flex items-center justify-center gap-3 mt-5">
+            <div className="flex items-center justify-center gap-8 mt-8 md:mt-12">
               <button
                 onClick={() => carouselApi?.scrollPrev()}
-                className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 active:scale-95 transition-transform"
+                className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-violet-700 flex items-center justify-center text-white shadow-[0_14px_36px_rgba(109,40,217,0.28)] active:scale-95 transition-transform"
                 data-testid="button-slide-prev"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-4">
                 {objectivesMeta.map((_, i) => (
                   <button
                     key={i}
@@ -891,11 +910,11 @@ export default function ALeerBoliviaPage() {
                     <div
                       className="rounded-full transition-all duration-300"
                       style={{
-                        width: currentSlide === i ? 20 : 6,
-                        height: 6,
+                        width: currentSlide === i ? 44 : 16,
+                        height: 16,
                         background: currentSlide === i
                           ? "linear-gradient(135deg, #8b5cf6, #06b6d4)"
-                          : "#d1d5db",
+                          : "#cbd5e1",
                       }}
                     />
                   </button>
@@ -904,10 +923,10 @@ export default function ALeerBoliviaPage() {
 
               <button
                 onClick={() => carouselApi?.scrollNext()}
-                className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 active:scale-95 transition-transform"
+                className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-violet-700 flex items-center justify-center text-white shadow-[0_14px_36px_rgba(109,40,217,0.28)] active:scale-95 transition-transform"
                 data-testid="button-slide-next"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-6 h-6 md:w-10 md:h-10" />
               </button>
             </div>
             </div>
@@ -915,11 +934,11 @@ export default function ALeerBoliviaPage() {
         </motion.section>
 
         <motion.section
-          className={`px-5 pb-12 pt-8 md:px-8 md:pb-16 lg:px-10 relative ${getEditableClass("section-participar")}`}
+          className={`px-5 pb-12 pt-12 md:px-8 md:pb-16 md:pt-16 lg:px-10 relative overflow-hidden ${getEditableClass("section-participar")}`}
           style={{
             background: (styles["section-participar"]?.imageUrl && !isVideoUrl(styles["section-participar"]?.imageUrl))
               ? `url(${styles["section-participar"].imageUrl}) center/cover no-repeat`
-              : styles["section-participar"]?.background || undefined,
+              : styles["section-participar"]?.background || "linear-gradient(180deg, #ffffff 0%, #fbfdff 58%, #f7f3ff 100%)",
           }}
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -930,6 +949,16 @@ export default function ALeerBoliviaPage() {
           {isVideoUrl(styles["section-participar"]?.imageUrl) && (
             <VideoBackground src={styles["section-participar"]!.imageUrl!} imageSize={styles["section-participar"]?.imageSize} />
           )}
+          {!styles["section-participar"]?.background && !styles["section-participar"]?.imageUrl && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="absolute -bottom-24 -left-12 h-56 w-[62%] rounded-[58%_42%_0_0] bg-violet-700" />
+              <div className="absolute -bottom-20 right-[-10%] h-48 w-[66%] rounded-[52%_48%_0_0] bg-cyan-400" />
+              <div className="absolute left-[13%] top-[18%] h-8 w-2 rotate-[-28deg] rounded-full bg-cyan-400" />
+              <div className="absolute left-[17%] top-[21%] h-3 w-9 rotate-[28deg] rounded-full bg-violet-500" />
+              <div className="absolute right-[14%] top-[17%] h-8 w-2 rotate-[28deg] rounded-full bg-violet-500" />
+              <div className="absolute right-[18%] top-[21%] h-3 w-9 rotate-[-28deg] rounded-full bg-cyan-400" />
+            </div>
+          )}
           {editorMode && (
             <div
               className="absolute top-2 right-2 z-20 bg-orange-600/80 text-white text-[9px] px-2 py-0.5 rounded-full cursor-pointer"
@@ -939,41 +968,42 @@ export default function ALeerBoliviaPage() {
               {t("aleer.editParticiparBg")}
             </div>
           )}
-          <div className="mx-auto max-w-7xl rounded-[30px] md:rounded-[36px] md:border md:border-orange-100 md:bg-gradient-to-br md:from-white md:via-orange-50/55 md:to-cyan-50/60 md:p-7 lg:p-9 md:shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+          <div className="relative z-10 mx-auto max-w-7xl rounded-[30px] md:rounded-[36px] md:p-7 lg:p-9">
             <motion.div
-              className="text-center md:text-left mb-8 md:grid md:grid-cols-[0.78fr_1.22fr] md:gap-8 md:items-end"
+              className="text-center mb-10 md:mb-14"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <div>
-                <motion.div
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3"
-                  style={{ background: "linear-gradient(135deg, #fff7ed, #fed7aa)" }}
-                  animate={{ scale: [1, 1.04, 1] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                >
-                  <Users className="w-4 h-4 text-orange-600" />
-                  <span className="text-xs font-bold text-orange-700">{t("aleer.participationBadge")}</span>
-                </motion.div>
-                <h2
-                  className={`text-xl md:text-5xl font-black mb-3 leading-tight text-gray-900 ${getEditableClass("participar-title")}`}
-                  style={{
-                    color: styles["participar-title"]?.textColor || "#111827",
-                    fontSize: styles["participar-title"]?.fontSize || undefined,
-                    lineHeight: styles["participar-title"]?.lineHeight,
-                  }}
-                  onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
-                  data-testid="text-participar-title"
-                >
-                  {t("aleer.participarTitle")}
-                </h2>
+              <motion.div
+                className="inline-flex items-center gap-3 px-7 py-3 md:px-12 md:py-5 rounded-full mb-7 bg-gradient-to-r from-violet-700 to-cyan-400 shadow-[0_18px_42px_rgba(34,211,238,0.2)]"
+                animate={{ scale: [1, 1.04, 1] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+              >
+                <Users className="w-6 h-6 md:w-10 md:h-10 text-white" />
+                <span className="text-lg md:text-4xl font-black text-white">{t("aleer.participationBadge")}</span>
+              </motion.div>
+              <h2
+                className={`text-3xl md:text-6xl font-black mb-4 leading-tight text-[#070725] ${getEditableClass("participar-title")}`}
+                style={{
+                  color: styles["participar-title"]?.textColor || "#070725",
+                  fontSize: styles["participar-title"]?.fontSize || undefined,
+                  lineHeight: styles["participar-title"]?.lineHeight,
+                }}
+                onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
+                data-testid="text-participar-title"
+              >
+                {t("aleer.participarTitle")}
+              </h2>
+              <div className="mx-auto mb-7 flex w-28 items-center justify-center gap-2">
+                <span className="h-2 flex-1 rounded-full bg-gradient-to-r from-violet-700 to-cyan-400" />
+                <span className="h-2 w-4 rounded-full bg-cyan-400" />
               </div>
               <p
-                className={`text-xs md:text-lg leading-relaxed max-w-sm md:max-w-none mx-auto md:mx-0 text-gray-600 ${getEditableClass("participar-desc")}`}
+                className={`text-lg md:text-[30px] leading-relaxed max-w-5xl mx-auto text-[#29304f] ${getEditableClass("participar-desc")}`}
                 style={{
-                  color: styles["participar-desc"]?.textColor || "#4b5563",
+                  color: styles["participar-desc"]?.textColor || "#29304f",
                   fontSize: styles["participar-desc"]?.fontSize || undefined,
                   lineHeight: styles["participar-desc"]?.lineHeight,
                 }}
