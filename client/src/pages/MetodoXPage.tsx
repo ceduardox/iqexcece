@@ -612,7 +612,6 @@ export default function MetodoXPage() {
                   data-testid={`prog-title-bg-${i}`}
                 >
                   <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full opacity-20" style={{ background: `radial-gradient(circle, ${PROG_COLORS[i]}, transparent 66%)` }} />
-                  <motion.div className="absolute right-5 bottom-0 opacity-[0.08] text-[110px] md:text-[150px] font-black pointer-events-none select-none leading-none" style={{ color: PROG_COLORS[i] }} animate={{ opacity: [0.04, 0.09, 0.04], scale: [1, 1.04, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>X</motion.div>
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 relative z-10">
                     <div className="flex flex-wrap items-center gap-3">
                       <h3
@@ -667,7 +666,6 @@ export default function MetodoXPage() {
                   data-testid={`prog-image-${i}`}
                 >
                   <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.68) 0%, rgba(255,255,255,0.24) 42%, rgba(255,255,255,0.08) 100%), linear-gradient(180deg, transparent 62%, rgba(255,255,255,0.92) 100%)` }} />
-                  <div className="absolute inset-0 pointer-events-none opacity-28" style={{ background: `linear-gradient(135deg, transparent 44%, ${PROG_COLORS[i]} 49%, transparent 52%), linear-gradient(45deg, transparent 47%, ${PROG_COLORS[i]} 50%, transparent 53%)` }} />
                   {!resolveStyle(styles, `prog-image-${i}`, isMobile)?.imageUrl && (
                     <div className="flex flex-col items-center gap-2">
                       <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 3, repeat: Infinity }} className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `${PROG_COLORS[i]}30`, border: `2px dashed ${PROG_COLORS[i]}50` }}>
@@ -800,7 +798,6 @@ export default function MetodoXPage() {
 
                   <div className="border-t p-5 md:p-8 relative overflow-hidden" style={{ borderColor: `${PROG_COLORS[i]}25`, background: `linear-gradient(135deg, ${PROG_COLORS[i]}10, #ffffff 54%, ${PROG_COLORS[i]}0b)` }}>
                     <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${PROG_COLORS[i]}50, transparent)` }} />
-                    <div className="absolute left-8 bottom-2 hidden md:block text-[170px] font-black leading-none opacity-[0.035] select-none pointer-events-none" style={{ color: PROG_COLORS[i] }}>X</div>
                     <div className="relative grid grid-cols-1 md:grid-cols-[230px_1fr] gap-6 md:gap-8 items-center">
                       <div>
                         <h4
