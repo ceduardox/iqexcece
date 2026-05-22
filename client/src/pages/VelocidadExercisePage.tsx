@@ -78,7 +78,10 @@ export default function VelocidadExercisePage() {
             ? todosNiveles.filter(n => n.patron === patronDecoded)
             : todosNiveles;
           nivelesFiltrados.sort((a, b) => a.velocidad - b.velocidad);
-          setEjercicios(nivelesFiltrados);
+          const nivelesUnicosPorVelocidad = nivelesFiltrados.filter((nivel, index, niveles) =>
+            index === niveles.findIndex((item) => item.velocidad === nivel.velocidad)
+          );
+          setEjercicios(nivelesUnicosPorVelocidad);
           setTitulo(velocidadData.ejercicio.titulo || itemData.item?.title || "Velocidad Lectora");
           
           if (velocidadData.ejercicio.tiempoAnimacionInicial) {
