@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Brain, Dumbbell, MoreHorizontal, Newspaper, ChevronRight, BookOpen, Mail, Zap, BarChart3 } from "lucide-react";
+import { Home, Brain, Dumbbell, MoreHorizontal, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSounds } from "@/hooks/use-sounds";
 import { useTranslation } from "react-i18next";
 import { useEmbed } from "@/hooks/use-embed";
+import { NavMoreMenu } from "@/components/NavMoreMenu";
 
 export function BottomNavBar() {
   const isEmbed = useEmbed();
@@ -29,6 +30,7 @@ export function BottomNavBar() {
     if (location.startsWith("/progreso")) return "progreso";
     if (location.startsWith("/blog")) return "mas";
     if (location.startsWith("/metodo-x")) return "mas";
+    if (location.startsWith("/a-leer-bolivia")) return "mas";
     if (location.startsWith("/contacto")) return "mas";
     return "";
   };
@@ -86,45 +88,13 @@ export function BottomNavBar() {
             </motion.button>
 
             {moreOpen && (
-              <div
-                className="absolute bottom-full right-0 mb-3 w-48 bg-white rounded-2xl z-[9999]"
-                style={{ boxShadow: "0 8px 30px rgba(124,58,237,0.15), 0 2px 8px rgba(0,0,0,0.06)" }}
-                data-testid="dropdown-mas"
-              >
-                <button
-                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/blog"); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-t-2xl active:bg-purple-50"
-                  data-testid="dropdown-item-blog"
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f3e8ff, #e0f2fe)" }}>
-                    <Newspaper className="w-4 h-4 text-purple-500" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">{t("nav.blog")}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
-                </button>
-                <button
-                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/metodo-x"); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 active:bg-purple-50"
-                  data-testid="dropdown-item-metodox"
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #ede9fe, #e0e7ff)" }}>
-                    <Zap className="w-4 h-4 text-purple-500" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">{t("home.metodoX")}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
-                </button>
-                <button
-                  onClick={() => { setMoreOpen(false); playSound("iphone"); setLocation("/contacto"); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-b-2xl active:bg-purple-50"
-                  data-testid="dropdown-item-contacto"
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
-                    <Mail className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">{t("nav.contacto")}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto" />
-                </button>
-              </div>
+              <NavMoreMenu
+                onNavigate={(path) => {
+                  setMoreOpen(false);
+                  playSound("iphone");
+                  setLocation(path);
+                }}
+              />
             )}
           </div>
         </div>
