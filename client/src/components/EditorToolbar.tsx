@@ -132,9 +132,9 @@ export function EditorToolbar({
     { id: "text", icon: Type, label: "Texto" },
   ] as const;
 
-  const positionClasses = toolbarPosition === "bottom" 
-    ? "bottom-4 left-1/2 -translate-x-1/2" 
-    : "top-4 left-1/2 -translate-x-1/2";
+  const positionClasses = toolbarPosition === "bottom"
+    ? "bottom-3 left-2 right-2 sm:bottom-4 sm:left-auto sm:right-4"
+    : "top-3 left-2 right-2 sm:top-4 sm:left-auto sm:right-4";
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -204,7 +204,7 @@ export function EditorToolbar({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: toolbarPosition === "bottom" ? 50 : -50 }}
       ref={toolbarRef}
-      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-[calc(100vw-16px)] sm:w-auto sm:min-w-[340px] max-w-[400px] ${isDragging ? "cursor-grabbing" : ""}`}
+      className={`fixed ${floatingPosition ? "" : positionClasses} z-50 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-cyan-500/30 shadow-2xl p-3 sm:p-4 w-auto sm:w-[400px] sm:min-w-[340px] max-w-none sm:max-w-[400px] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain ${isDragging ? "cursor-grabbing" : ""}`}
       style={floatingStyle}
       data-testid="editor-toolbar"
       onClick={(e) => e.stopPropagation()}
