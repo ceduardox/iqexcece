@@ -893,7 +893,7 @@ export default function AceleracionExercisePage() {
         {/* Viewport - fixed height area where text scrolls */}
         <div 
           ref={viewportRef}
-          className="flex-1 mx-4 mb-4 rounded-2xl overflow-hidden relative"
+          className="flex-1 w-[calc(100%-2rem)] md:w-[50vw] mx-auto mb-4 rounded-2xl overflow-hidden relative"
           style={{ 
             background: "linear-gradient(180deg, #1E3A5F 0%, #0D1F33 100%)"
           }}
