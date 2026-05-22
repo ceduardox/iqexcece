@@ -138,6 +138,7 @@ export default function MetodoXPage() {
     else if (defaultBg) result.background = defaultBg;
     if (s.textColor) result.color = s.textColor;
     if (s.fontSize) result.fontSize = s.fontSize;
+    if (s.lineHeight) result.lineHeight = s.lineHeight;
     if (s.fontWeight) result.fontWeight = s.fontWeight;
     if (s.textAlign) result.textAlign = s.textAlign as any;
     if (s.shadowBlur || s.shadowColor) result.boxShadow = `0 4px ${s.shadowBlur || 10}px ${s.shadowColor || "rgba(0,0,0,0.1)"}`;

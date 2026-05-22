@@ -300,6 +300,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
     if (style.marginRight) result.marginRight = style.marginRight;
     if (style.textColor) result.color = style.textColor;
     if (style.fontSize) result.fontSize = style.fontSize;
+    if (style.lineHeight) result.lineHeight = style.lineHeight;
     if (style.textAlign) result.textAlign = style.textAlign;
     if (style.fontWeight) result.fontWeight = style.fontWeight;
     if (style.borderRadius) result.borderRadius = style.borderRadius;

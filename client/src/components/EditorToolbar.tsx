@@ -24,6 +24,7 @@ export interface ElementStyle {
   imageSize?: number;
   textColor?: string;
   fontSize?: number;
+  lineHeight?: number;
   textAlign?: "left" | "center" | "right";
   fontWeight?: "normal" | "bold";
   borderRadius?: number;
@@ -723,6 +724,19 @@ export function EditorToolbar({
                     data-testid="slider-font-size"
                   />
                   <span className="text-white text-xs w-10">{currentStyle.fontSize || 16}px</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-xs w-16">Interlineado:</span>
+                  <Slider
+                    value={[currentStyle.lineHeight || 1.2]}
+                    onValueChange={([val]) => updateStyle({ lineHeight: val })}
+                    min={0.8}
+                    max={2.5}
+                    step={0.05}
+                    className="flex-1"
+                    data-testid="slider-line-height"
+                  />
+                  <span className="text-white text-xs w-10">{(currentStyle.lineHeight || 1.2).toFixed(2)}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button

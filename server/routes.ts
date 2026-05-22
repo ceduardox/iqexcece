@@ -31,6 +31,7 @@ const VISUAL_STYLE_KEYS = new Set([
   "imageSize",
   "textColor",
   "fontSize",
+  "lineHeight",
   "textAlign",
   "fontWeight",
   "borderRadius",

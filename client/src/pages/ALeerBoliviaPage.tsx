@@ -535,6 +535,7 @@ export default function ALeerBoliviaPage() {
                 className={`text-[36px] sm:text-[46px] md:text-[56px] font-black mb-2 leading-[0.95] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)] ${getEditableClass("hero-title")}`}
                 style={{
                   fontSize: styles["hero-title"]?.fontSize || undefined,
+                  lineHeight: styles["hero-title"]?.lineHeight,
                   color: styles["hero-title"]?.textColor || "#ffffff",
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-title", e); } }}
@@ -550,6 +551,7 @@ export default function ALeerBoliviaPage() {
                 style={{
                   color: styles["hero-subtitle1"]?.textColor || "#0b1828",
                   fontSize: styles["hero-subtitle1"]?.fontSize || undefined,
+                  lineHeight: styles["hero-subtitle1"]?.lineHeight,
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle1", e); } }}
               >
@@ -560,6 +562,7 @@ export default function ALeerBoliviaPage() {
                 style={{
                   color: styles["hero-subtitle2"]?.textColor || "#11263e",
                   fontSize: styles["hero-subtitle2"]?.fontSize || undefined,
+                  lineHeight: styles["hero-subtitle2"]?.lineHeight,
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-subtitle2", e); } }}
               >
@@ -570,6 +573,7 @@ export default function ALeerBoliviaPage() {
                 style={{
                   color: styles["hero-desc"]?.textColor || "rgba(0,0,0,0.95)",
                   fontSize: styles["hero-desc"]?.fontSize || undefined,
+                  lineHeight: styles["hero-desc"]?.lineHeight,
                 }}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("hero-desc", e); } }}
               >
@@ -721,6 +725,7 @@ export default function ALeerBoliviaPage() {
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`title-${obj.id}`, e); }}}
                               style={{
                                 fontSize: styles[`title-${obj.id}`]?.fontSize || 14,
+                                lineHeight: styles[`title-${obj.id}`]?.lineHeight,
                                 color: styles[`title-${obj.id}`]?.textColor || "#1f2937",
                               }}
                             >
@@ -731,6 +736,7 @@ export default function ALeerBoliviaPage() {
                               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(`desc-${obj.id}`, e); }}}
                               style={{
                                 fontSize: styles[`desc-${obj.id}`]?.fontSize || 12,
+                                lineHeight: styles[`desc-${obj.id}`]?.lineHeight,
                                 color: styles[`desc-${obj.id}`]?.textColor || "#9ca3af",
                               }}
                             >
@@ -833,6 +839,7 @@ export default function ALeerBoliviaPage() {
               style={{
                 color: styles["participar-title"]?.textColor || "#1f2937",
                 fontSize: styles["participar-title"]?.fontSize || undefined,
+                lineHeight: styles["participar-title"]?.lineHeight,
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-title", e); } }}
               data-testid="text-participar-title"
@@ -844,6 +851,7 @@ export default function ALeerBoliviaPage() {
               style={{
                 color: styles["participar-desc"]?.textColor || "#9ca3af",
                 fontSize: styles["participar-desc"]?.fontSize || undefined,
+                lineHeight: styles["participar-desc"]?.lineHeight,
               }}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("participar-desc", e); } }}
             >

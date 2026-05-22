@@ -159,6 +159,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
             style={{
               fontSize: titleStyle.fontSize || 14,
+              lineHeight: titleStyle.lineHeight,
               color: titleStyle.textColor || "#1f2937"
             }}
           >
@@ -169,6 +170,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
               fontSize: descStyle.fontSize || 12,
+              lineHeight: descStyle.lineHeight,
               color: descStyle.textColor || "#9ca3af"
             }}
           >
@@ -299,6 +301,11 @@ export default function AgeSelectionPage() {
     if (s.sectionHeight) result.minHeight = s.sectionHeight;
     if (s.shadowBlur) result.boxShadow = `0 0 ${s.shadowBlur}px ${s.shadowColor || "rgba(0,0,0,0.3)"}`;
     if (s.borderRadius) result.borderRadius = s.borderRadius;
+    if (s.textColor) result.color = s.textColor;
+    if (s.fontSize) result.fontSize = s.fontSize;
+    if (s.lineHeight) result.lineHeight = s.lineHeight;
+    if (s.textAlign) result.textAlign = s.textAlign;
+    if (s.fontWeight) result.fontWeight = s.fontWeight;
     
     return result;
   }, [styles, isMobile]);
@@ -429,6 +436,7 @@ export default function AgeSelectionPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{
                 fontSize: resolveStyle(styles, "main-title", isMobile).fontSize || 22,
+                lineHeight: resolveStyle(styles, "main-title", isMobile).lineHeight,
                 color: resolveStyle(styles, "main-title", isMobile).textColor || "#5b21b6",
                 fontWeight: 700
               }}
@@ -440,6 +448,7 @@ export default function AgeSelectionPage() {
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{
                 fontSize: resolveStyle(styles, "main-subtitle", isMobile).fontSize || 13,
+                lineHeight: resolveStyle(styles, "main-subtitle", isMobile).lineHeight,
                 color: resolveStyle(styles, "main-subtitle", isMobile).textColor || "#9ca3af"
               }}
             >

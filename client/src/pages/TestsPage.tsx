@@ -221,6 +221,7 @@ function TestCard({
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{ 
                 fontSize: titleStyle?.fontSize || 18,
+                lineHeight: titleStyle?.lineHeight,
                 color: titleStyle?.textColor || (textDark ? "#1f2937" : "white")
               }}
             >
@@ -231,6 +232,7 @@ function TestCard({
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
               style={{ 
                 fontSize: descStyle?.fontSize || 13,
+                lineHeight: descStyle?.lineHeight,
                 color: descStyle?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
               }}
             >
@@ -514,6 +516,7 @@ export default function TestsPage() {
     if (style.marginRight) result.marginRight = style.marginRight;
     if (style.textColor) result.color = style.textColor;
     if (style.fontSize) result.fontSize = style.fontSize;
+    if (style.lineHeight) result.lineHeight = style.lineHeight;
     if (style.textAlign) result.textAlign = style.textAlign;
     if (style.fontWeight) result.fontWeight = style.fontWeight;
     if (style.borderRadius) result.borderRadius = style.borderRadius;

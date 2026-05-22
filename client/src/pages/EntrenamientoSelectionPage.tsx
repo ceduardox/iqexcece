@@ -450,6 +450,7 @@ function TrainingSelectionCard({
           onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(titleId, e); }}}
           style={{
             fontSize: getResolvedStyle(titleId)?.fontSize || (isMd ? 18 : 14),
+            lineHeight: getResolvedStyle(titleId)?.lineHeight,
             color: getResolvedStyle(titleId)?.textColor || "#ffffff"
           }}
         >
@@ -461,6 +462,7 @@ function TrainingSelectionCard({
             onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick(descId, e); }}}
             style={{
               fontSize: getResolvedStyle(descId)?.fontSize || 11,
+              lineHeight: getResolvedStyle(descId)?.lineHeight,
               color: getResolvedStyle(descId)?.textColor || "rgba(255,255,255,0.55)"
             }}
           >
@@ -486,6 +488,8 @@ function TrainingSelectionCard({
               : (bs?.background || "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)"),
             backgroundSize: bs?.imageSize ? `${bs.imageSize}%` : "cover",
             color: bs?.textColor || "white",
+            fontSize: bs?.fontSize,
+            lineHeight: bs?.lineHeight,
             border: "none",
             boxShadow: bs?.shadowBlur
               ? `0 ${bs.shadowBlur / 2}px ${bs.shadowBlur}px ${bs?.shadowColor || "rgba(139,92,246,0.3)"}`
@@ -719,6 +723,7 @@ export default function EntrenamientoSelectionPage() {
     if (s?.borderRadius) result.borderRadius = s.borderRadius;
     if (s?.textColor) result.color = s.textColor;
     if (s?.fontSize) result.fontSize = `${s.fontSize}px`;
+    if (s?.lineHeight) result.lineHeight = s.lineHeight;
     if (s?.textAlign) result.textAlign = s.textAlign;
     if (s?.fontWeight) result.fontWeight = s.fontWeight;
     return result;

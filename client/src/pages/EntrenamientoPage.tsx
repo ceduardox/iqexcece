@@ -247,7 +247,7 @@ export default function EntrenamientoPage() {
         >
           <p className="text-white text-sm font-medium text-center" style={(() => {
             const s = getResolvedStyle("bannerText");
-            return { color: s?.textColor || "#fff", fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+            return { color: s?.textColor || "#fff", fontSize: s?.fontSize ? `${s.fontSize}px` : undefined, lineHeight: s?.lineHeight };
           })()}>
             {t("entrenamiento.bannerText")}
           </p>
@@ -262,13 +262,13 @@ export default function EntrenamientoPage() {
           >
             <h1 className="text-3xl font-black text-slate-900 mb-2" style={(() => {
               const s = getResolvedStyle("pageTitle");
-              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined, lineHeight: s?.lineHeight };
             })()}>
               {t("entrenamiento.pageTitle")}
             </h1>
             <p className="text-slate-500" style={(() => {
               const s = getResolvedStyle("pageDesc");
-              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined };
+              return { color: s?.textColor, fontSize: s?.fontSize ? `${s.fontSize}px` : undefined, lineHeight: s?.lineHeight };
             })()}>
               {t("entrenamiento.pageDesc")}
             </p>
@@ -346,6 +346,7 @@ export default function EntrenamientoPage() {
                         style={{
                           color: ts?.textColor || "#fff",
                           fontSize: ts?.fontSize ? `${ts.fontSize}px` : undefined,
+                          lineHeight: ts?.lineHeight,
                           fontWeight: ts?.fontWeight || "bold",
                           textAlign: (ts?.textAlign as any) || undefined,
                         }}
@@ -359,6 +360,7 @@ export default function EntrenamientoPage() {
                           style={{
                             color: ds?.textColor || "rgba(255,255,255,0.7)",
                             fontSize: ds?.fontSize ? `${ds.fontSize}px` : undefined,
+                            lineHeight: ds?.lineHeight,
                           }}
                         >
                           {t(`entrenamiento.cardDesc_${exerciseType}`, { defaultValue: item.description })}
