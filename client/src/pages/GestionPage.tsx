@@ -550,6 +550,7 @@ export default function GestionPage() {
   const [velocidadPpmMax, setVelocidadPpmMax] = useState<string>("");
   const [velocidadWordCounts, setVelocidadWordCounts] = useState<Record<number, number>>({});
   const [generatingWordsNivelIdx, setGeneratingWordsNivelIdx] = useState<number | null>(null);
+  const [completingVelocidadLevels, setCompletingVelocidadLevels] = useState(false);
   
   // Página de introducción de Números
   const [numerosIntroData, setNumerosIntroData] = useState<{
@@ -895,6 +896,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   const SUGGESTED_PPM_VALUES = [
     100, 150, 200, 250, 300, 350, 400, 450, 500,
     600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700,
+    1800, 1900, 2000, 2200, 2400, 2600, 2800, 3000,
   ] as const;
 
   const filteredVelocidadNiveles = useMemo(() => {
@@ -973,6 +975,61 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
       alert("Error al generar palabras");
     } finally {
       setGeneratingWordsNivelIdx(null);
+    }
+  };
+
+  const completeMissingVelocidadLevels = async () => {
+    if (!velocidadEjercicio) return;
+    if (!velocidadEjercicio.id) {
+      alert("Primero guarda este ejercicio de velocidad. Luego podras completar los niveles faltantes.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Esto agregara niveles faltantes hasta 3000 PPM sin modificar los niveles existentes. ¿Continuar?",
+    );
+    if (!confirmed) return;
+
+    setCompletingVelocidadLevels(true);
+    try {
+      const res = await adminFetch(`/api/admin/velocidad/${velocidadEjercicio.id}/complete-levels`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoria: entrenamientoCategory,
+          maxSpeed: 3000,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        alert(error?.error || "No se pudieron completar los niveles faltantes");
+        return;
+      }
+
+      const data = await res.json();
+      const updatedExercise = data?.ejercicio;
+      if (updatedExercise?.niveles) {
+        setVelocidadEjercicio({
+          ...velocidadEjercicio,
+          ...updatedExercise,
+          niveles: JSON.parse(updatedExercise.niveles),
+        });
+      }
+
+      const summary = data?.summary || {};
+      alert(
+        [
+          `Niveles agregados: ${summary.added ?? 0}`,
+          `Niveles preservados: ${summary.preserved ?? velocidadEjercicio.niveles.length}`,
+          `Total: ${summary.total ?? velocidadEjercicio.niveles.length}`,
+          `Fuente de palabras: ${summary.source === "gemini" ? "Gemini IA" : "banco local"}`,
+        ].join("\n"),
+      );
+    } catch {
+      alert("Error al completar niveles faltantes");
+    } finally {
+      setCompletingVelocidadLevels(false);
     }
   };
 
@@ -6480,31 +6537,48 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                   </div>
                   
                   <div className="border-t border-purple-500/30 pt-6">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                       <h3 className="text-white font-semibold">Niveles de Dificultad</h3>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          const newNivel = velocidadEjercicio.niveles.length + 1;
-                          const defaultPattern = velocidadPatternFilter === "all" ? "3x2" : velocidadPatternFilter;
-                          const defaultSpeed = Number(velocidadPpmMin) > 0 ? Number(velocidadPpmMin) : 150;
-                          setVelocidadEjercicio({
-                            ...velocidadEjercicio,
-                            niveles: [{ 
-                              nivel: newNivel, 
-                              patron: defaultPattern, 
-                              velocidad: defaultSpeed, 
-                              palabras: "vista, atomo, iglesia, olvido, orar, opaco",
-                              opciones: "atomo, olvido, orar, vista, iglesia, opaco",
-                              tipoPregunta: "ultima"
-                            }, ...velocidadEjercicio.niveles]
-                          });
-                        }}
-                        className="bg-purple-600"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Crear Ejercicio
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={completingVelocidadLevels}
+                          onClick={completeMissingVelocidadLevels}
+                          className="border-cyan-400/40 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20"
+                          data-testid="button-velocidad-complete-levels"
+                        >
+                          {completingVelocidadLevels ? (
+                            <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <Zap className="w-4 h-4 mr-1" />
+                          )}
+                          Completar faltantes hasta 3000
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const newNivel = velocidadEjercicio.niveles.length + 1;
+                            const defaultPattern = velocidadPatternFilter === "all" ? "3x2" : velocidadPatternFilter;
+                            const defaultSpeed = Number(velocidadPpmMin) > 0 ? Number(velocidadPpmMin) : 150;
+                            setVelocidadEjercicio({
+                              ...velocidadEjercicio,
+                              niveles: [{ 
+                                nivel: newNivel, 
+                                patron: defaultPattern, 
+                                velocidad: defaultSpeed, 
+                                palabras: "vista, atomo, iglesia, olvido, orar, opaco",
+                                opciones: "atomo, olvido, orar, vista, iglesia, opaco",
+                                tipoPregunta: "ultima"
+                              }, ...velocidadEjercicio.niveles]
+                            });
+                          }}
+                          className="bg-purple-600"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Crear Ejercicio
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="mb-4 space-y-3">

@@ -1887,6 +1887,189 @@ Reglas:
     res.json({ success: true });
   });
 
+  const velocidadTargetSpeeds = [
+    100, 150, 200, 250, 300, 350, 400, 450, 500,
+    600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400,
+    1500, 1600, 1700, 1800, 1900, 2000, 2200, 2400,
+    2600, 2800, 3000,
+  ];
+  const velocidadTargetPatterns = ["2x2", "2x3", "3x2", "2x4", "3x3"];
+  const velocidadWordBanks: Record<string, string[]> = {
+    ninos: ["gato", "luna", "sol", "casa", "flor", "rio", "juego", "amigo", "cuento", "parque", "arbol", "nube", "color", "globo", "musica", "libro", "clase", "dibujo", "sonrisa", "aventura", "barco", "plaza", "camino", "estrella", "bosque", "ventana", "zapato", "pelota", "familia", "colegio", "lapiz", "mesa", "silla", "pizarra", "tren", "avion", "lluvia", "playa", "montana", "jardin"],
+    adolescentes: ["proyecto", "analisis", "equipo", "reto", "meta", "resumen", "lectura", "concepto", "debate", "estrategia", "sintesis", "practica", "tecnica", "memoria", "enfoque", "prioridad", "proceso", "resultado", "disciplina", "progreso", "identidad", "criterio", "dialogo", "energia", "habito", "talento", "creatividad", "objetivo", "decision", "contexto", "argumento", "secuencia", "atencion", "logica", "impulso", "destreza", "vision", "metodo", "avance", "desafio"],
+    universitarios: ["hipotesis", "metodo", "criterio", "modelo", "sistema", "argumento", "inferencia", "evidencia", "variable", "matriz", "prototipo", "gestion", "teorema", "iteracion", "simulacion", "validacion", "framework", "riesgo", "escenario", "sintesis", "paradigma", "algoritmo", "estructura", "proceso", "analitica", "contexto", "diagnostico", "fundamento", "conceptual", "estrategico", "derivada", "integral", "ensayo", "reporte", "fuente", "indice", "grafico", "lectura", "memoria", "cognicion"],
+    profesionales: ["propuesta", "impacto", "metricas", "eficiencia", "operacion", "negocio", "cliente", "decision", "prioridad", "sinergia", "pipeline", "objetivo", "indicador", "consolidado", "ejecucion", "optimizacion", "rentabilidad", "proyeccion", "reporte", "estrategico", "liderazgo", "innovacion", "diagnostico", "planeacion", "recurso", "agenda", "gestion", "resultado", "mercado", "calidad", "proceso", "producto", "servicio", "alianza", "control", "vision", "analisis", "criterio", "desarrollo", "conversion"],
+    adulto_mayor: ["recuerdo", "atencion", "lectura", "claridad", "habito", "calma", "enfoque", "comprension", "aprendizaje", "constancia", "relacion", "ejercicio", "balance", "dialogo", "familia", "historia", "palabra", "emocion", "proposito", "bienestar", "memoria", "ritmo", "salud", "amistad", "camino", "jardin", "musica", "vida", "mente", "orden", "energia", "cuidado", "reflexion", "relato", "imagen", "tiempo", "presente", "detalle", "sonrisa", "tranquilidad"],
+  };
+  const velocidadCommonWords = [
+    "mente", "vision", "ritmo", "pulso", "senal", "foco", "energia", "impulso", "camino", "avance",
+    "logro", "orden", "mapa", "clave", "forma", "linea", "punto", "trazo", "figura", "campo",
+    "radio", "nucleo", "codigo", "frase", "sonido", "imagen", "detalle", "escena", "lectura", "pagina",
+    "texto", "idea", "nota", "dato", "serie", "grupo", "bloque", "marca", "salto", "nivel",
+    "base", "union", "valor", "mision", "talento", "control", "destreza", "agilidad", "dominio", "respuesta",
+    "atomo", "iglesia", "olvido", "opaco", "origen", "cristal", "brillo", "enlace", "circuito", "horizonte",
+    "memoria", "sentido", "calculo", "razon", "patron", "estimulo", "objetivo", "filtro", "canal", "puente",
+    "motor", "vector", "escala", "modulo", "reflejo", "pista", "rumbo", "enfoque", "alerta", "lectura",
+  ];
+  const normalizeVelocidadCategory = (value: string) => {
+    const raw = String(value || "ninos").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (raw.includes("pre") || raw.includes("nino")) return "ninos";
+    if (raw.includes("adolesc")) return "adolescentes";
+    if (raw.includes("univers")) return "universitarios";
+    if (raw.includes("prof")) return "profesionales";
+    if (raw.includes("adult")) return "adulto_mayor";
+    return raw in velocidadWordBanks ? raw : "ninos";
+  };
+  const velocidadPatternSize = (pattern: string) => {
+    const [cols, rows] = String(pattern || "3x2").split("x").map((n) => Number(n));
+    return Math.max(4, (Number.isFinite(cols) ? cols : 3) * (Number.isFinite(rows) ? rows : 2));
+  };
+  const velocidadWordCountFor = (pattern: string, speed: number) => {
+    const size = velocidadPatternSize(pattern);
+    const tier = speed <= 500 ? 10 : speed <= 1000 ? 14 : speed <= 1700 ? 18 : speed <= 2400 ? 22 : 26;
+    let count = Math.max(size + 8, size + tier);
+    if (count % size === 0) count += 1;
+    return Math.min(60, count);
+  };
+  const velocidadLevelKey = (nivel: any) => `${String(nivel?.patron || "3x2").trim()}|${Number(nivel?.velocidad) || 0}`;
+  const velocidadHashSeed = (text: string) => {
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  };
+  const velocidadSeededShuffle = <T,>(items: T[], seedText: string) => {
+    const arr = [...items];
+    let seed = velocidadHashSeed(seedText) || 1;
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      const j = seed % (i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+  const getVelocidadWordPool = async (categoria: string) => {
+    const normalized = normalizeVelocidadCategory(categoria);
+    const fallbackPool = Array.from(new Set([...(velocidadWordBanks[normalized] || velocidadWordBanks.ninos), ...velocidadCommonWords]));
+    let pool = fallbackPool;
+    let source: "gemini" | "fallback" = "fallback";
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const systemPrompt = [
+          "Generate Spanish single words for cognitive reading-speed training.",
+          "Return ONLY valid JSON.",
+          'Format: {"palabras":["w1","w2"]}',
+          "- unique words only",
+          "- no punctuation",
+          "- no numbers",
+          "- no markdown",
+          "- use age-appropriate words for the category",
+        ].join("\n");
+        const userPrompt = `categoria: ${normalized}\ncantidad_palabras: 260`;
+        const aiRaw = await callGemini(apiKey, systemPrompt, [
+          { role: "user", parts: [{ text: userPrompt }] },
+        ]);
+        const cleaned = String(aiRaw || "").replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+        const aiWords = Array.from<string>(
+          new Set(
+            (Array.isArray(parsed?.palabras) ? parsed.palabras : [])
+              .map((w: any) => String(w || "").trim().toLowerCase())
+              .filter((w: string) => /^[a-záéíóúñü]+$/i.test(w)),
+          ),
+        );
+        if (aiWords.length >= 40) {
+          pool = Array.from(new Set([...aiWords, ...fallbackPool]));
+          source = "gemini";
+        }
+      }
+    } catch {
+      source = "fallback";
+    }
+
+    return { pool, source };
+  };
+  const makeVelocidadWords = (pool: string[], rowId: string, categoria: string, pattern: string, speed: number) =>
+    velocidadSeededShuffle(pool, `${rowId}:${categoria}:${pattern}:${speed}`).slice(0, velocidadWordCountFor(pattern, speed));
+  const makeVelocidadOptions = (words: string[], tipoPregunta: string) => {
+    const correct = tipoPregunta === "primera" ? words[0] : words[words.length - 1];
+    const distractors = words.filter((word) => word !== correct).slice(0, 7);
+    return Array.from(new Set([correct, ...distractors])).slice(0, 8).join(", ");
+  };
+
+  // Complete missing velocidad levels preserving existing admin content
+  app.post("/api/admin/velocidad/:id/complete-levels", async (req, res) => {
+    const auth = req.headers.authorization;
+    const token = auth?.replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const ejercicio = await storage.getVelocidadEjercicioById(req.params.id);
+    if (!ejercicio) {
+      return res.status(404).json({ error: "Ejercicio no encontrado" });
+    }
+
+    let currentLevels: any[] = [];
+    try {
+      const parsed = JSON.parse(ejercicio.niveles || "[]");
+      currentLevels = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return res.status(400).json({ error: "El JSON de niveles actual no es valido" });
+    }
+
+    const maxSpeed = Math.max(100, Math.min(3000, Number(req.body?.maxSpeed) || 3000));
+    const targetSpeeds = velocidadTargetSpeeds.filter((speed) => speed <= maxSpeed);
+    const categoria = String(req.body?.categoria || "ninos");
+    const normalizedCategory = normalizeVelocidadCategory(categoria);
+    const { pool, source } = await getVelocidadWordPool(normalizedCategory);
+    const keys = new Set(currentLevels.map(velocidadLevelKey));
+    const nextLevels = [...currentLevels];
+    const addedByPattern: Record<string, number> = {};
+
+    for (const pattern of velocidadTargetPatterns) {
+      for (const speed of targetSpeeds) {
+        const key = `${pattern}|${speed}`;
+        if (keys.has(key)) continue;
+        const speedIndex = targetSpeeds.indexOf(speed);
+        const tipoPregunta = (speedIndex + velocidadTargetPatterns.indexOf(pattern)) % 2 === 0 ? "ultima" : "primera";
+        const words = makeVelocidadWords(pool, ejercicio.id, normalizedCategory, pattern, speed);
+        const level = {
+          nivel: nextLevels.length + 1,
+          patron: pattern,
+          velocidad: speed,
+          palabras: words.join(", "),
+          opciones: makeVelocidadOptions(words, tipoPregunta),
+          tipoPregunta,
+        };
+        nextLevels.push(level);
+        keys.add(key);
+        addedByPattern[pattern] = (addedByPattern[pattern] || 0) + 1;
+      }
+    }
+
+    const added = nextLevels.length - currentLevels.length;
+    const updated = added > 0
+      ? await storage.updateVelocidadEjercicio(ejercicio.id, { niveles: JSON.stringify(nextLevels) })
+      : ejercicio;
+
+    res.json({
+      ejercicio: updated,
+      summary: {
+        source,
+        maxSpeed,
+        added,
+        preserved: currentLevels.length,
+        total: nextLevels.length,
+        addedByPattern,
+      },
+    });
+  });
+
   // Generate only words list for velocidad level (admin; does not save to DB)
   app.post("/api/admin/velocidad/generate-words", async (req, res) => {
     const auth = req.headers.authorization;
@@ -1897,7 +2080,7 @@ Reglas:
 
     const categoria = String(req.body?.categoria || "ninos").trim();
     const patron = String(req.body?.patron || "3x2").trim();
-    const velocidad = Math.max(80, Math.min(2500, Number(req.body?.velocidad) || 150));
+    const velocidad = Math.max(80, Math.min(3000, Number(req.body?.velocidad) || 150));
     const count = Math.max(4, Math.min(60, Number(req.body?.count) || 12));
 
     const banks: Record<string, string[]> = {
