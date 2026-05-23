@@ -209,14 +209,14 @@ export default function ChatWidgetPage() {
         {!profileReady && (
           <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-2">
             <p className="text-sm text-gray-700 font-semibold">Antes de empezar, déjanos tus datos:</p>
-            <input value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Tu nombre" className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-300" />
+            <input value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Tu nombre" className="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-violet-300" />
             <div className="grid grid-cols-[1fr_2fr] gap-2">
               <select value={selectedDialIso} onChange={(e) => setSelectedDialIso(e.target.value)} className="h-10 rounded-lg border border-gray-300 px-2 text-sm bg-white outline-none focus:ring-2 focus:ring-violet-300">
                 {AMERICAS_DIAL_CODES.map((c) => (
                   <option key={c.iso} value={c.iso}>{c.flag} {c.dial}</option>
                 ))}
               </select>
-              <input value={profileWhatsapp} onChange={(e) => setProfileWhatsapp(e.target.value)} placeholder="Número de WhatsApp" className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-300" />
+              <input value={profileWhatsapp} onChange={(e) => setProfileWhatsapp(e.target.value)} placeholder="Número de WhatsApp" className="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-violet-300" />
             </div>
             <button onClick={startChat} disabled={profileSaving || !profileName.trim() || !profileWhatsapp.trim()} className="w-full h-10 rounded-lg bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">
               {profileSaving ? "Guardando..." : "Iniciar chat"}
@@ -278,7 +278,7 @@ export default function ChatWidgetPage() {
               if (e.key === "Enter" && profileReady) sendMessage();
             }}
             placeholder="Escribe tu mensaje..."
-            className="flex-1 h-10 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-300"
+            className="flex-1 h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-violet-300"
             disabled={!profileReady}
           />
           <button onClick={sendMessage} disabled={!profileReady || loading || uploadingFile || !input.trim()} className="h-10 px-3 rounded-lg bg-violet-600 text-white disabled:opacity-50">
