@@ -8,6 +8,8 @@ import { UserProvider } from "@/lib/user-context";
 import { usePreloadAssets } from "@/hooks/use-preload";
 import { waitForRenderedImages } from "@/lib/image-preload";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { OneSignalPermissionPrompt } from "@/components/OneSignalPermissionPrompt";
+import { PWAPullToRefresh } from "@/components/PWAPullToRefresh";
 import "@/lib/i18n";
 import Home from "@/pages/Home";
 
@@ -159,7 +161,9 @@ function App() {
           <Suspense fallback={null}>
             <Router />
           </Suspense>
+          <PWAPullToRefresh />
           <PWAInstallPrompt />
+          <OneSignalPermissionPrompt />
         </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>

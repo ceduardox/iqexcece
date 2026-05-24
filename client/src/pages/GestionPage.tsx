@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail, AlertTriangle, Menu } from "lucide-react";
+import { Users, Monitor, Smartphone, Globe, Clock, LogOut, RefreshCw, FileText, BookOpen, Save, Plus, Trash2, X, Brain, Zap, ImageIcon, Upload, Copy, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Building2, Search, Newspaper, Bot, Headphones, MessageSquare, ClipboardList, BarChart3, ExternalLink, Download, Server, ShieldCheck, Gauge, Mail, AlertTriangle, Menu, Bell, Send } from "lucide-react";
 import AdminBlogPanel from "@/components/AdminBlogPanel";
 import AdminAgentChat from "@/components/AdminAgentChat";
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -307,7 +307,7 @@ export default function GestionPage() {
   const [token, setToken] = useState("");
   const [data, setData] = useState<SessionsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "servidor" | "instituciones" | "blog" | "agente" | "asesor-ia" | "formularios" | "roles">("sesiones");
+  const [activeTab, setActiveTab] = useState<"sesiones" | "resultados" | "resultados-razonamiento" | "resultados-cerebral" | "resultados-entrenamiento" | "resultados-velocidad" | "contenido" | "imagenes" | "entrenamiento" | "servidor" | "instituciones" | "blog" | "agente" | "asesor-ia" | "notificaciones" | "formularios" | "roles">("sesiones");
   const [resultadosOpen, setResultadosOpen] = useState(false);
   const [mobileAdminMenuOpen, setMobileAdminMenuOpen] = useState(false);
   const [activeRole, setActiveRole] = useState<{name: string; allowedTabs: string[]} | null>(null);
@@ -1658,6 +1658,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     { key: "blog", label: "Blog" },
     { key: "agente", label: "Agente IA" },
     { key: "asesor-ia", label: "Chat IA" },
+    { key: "notificaciones", label: "Notificaciones" },
     { key: "formularios", label: "Formularios" },
     { key: "roles", label: "Roles" },
   ];
@@ -2440,8 +2441,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
             className={sidebarItemClass(activeTab === "asesor-ia")}
             data-testid="sidebar-asesor-ia"
           >
-            <Headphones className="w-5 h-5" />
+          <Headphones className="w-5 h-5" />
             Chat IA
+          </button>
+          )}
+          {isTabVisible("notificaciones") && (
+          <button
+            onClick={() => setActiveTab("notificaciones")}
+            className={sidebarItemClass(activeTab === "notificaciones")}
+            data-testid="sidebar-notificaciones"
+          >
+            <Bell className="w-5 h-5" />
+            Notificaciones
           </button>
           )}
           {isTabVisible("formularios") && (
@@ -2601,6 +2612,7 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
                 {isTabVisible("blog") && <button onClick={() => { setActiveTab("blog"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "blog")}><Newspaper className="w-5 h-5" /> Blog</button>}
                 {isTabVisible("agente") && <button onClick={() => { setActiveTab("agente"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "agente")}><Bot className="w-5 h-5" /> Agente</button>}
                 {isTabVisible("asesor-ia") && <button onClick={() => { setActiveTab("asesor-ia"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "asesor-ia")}><Headphones className="w-5 h-5" /> Asesor IA</button>}
+                {isTabVisible("notificaciones") && <button onClick={() => { setActiveTab("notificaciones"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "notificaciones")}><Bell className="w-5 h-5" /> Notificaciones</button>}
                 {isTabVisible("formularios") && <button onClick={() => { setActiveTab("formularios"); fetchContactSubmissions(); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "formularios")}><ClipboardList className="w-5 h-5" /> Formularios</button>}
                 {isTabVisible("roles") && <button onClick={() => { setActiveTab("roles"); setMobileAdminMenuOpen(false); }} className={sidebarItemClass(activeTab === "roles")}><Users className="w-5 h-5" /> Roles</button>}
               </nav>
@@ -2730,6 +2742,18 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           >
             <Headphones className="w-4 h-4 mr-1" />
             Chat IA
+          </Button>
+          )}
+          {isTabVisible("notificaciones") && (
+          <Button
+            onClick={() => setActiveTab("notificaciones")}
+            variant={activeTab === "notificaciones" ? "default" : "outline"}
+            size="sm"
+            className={mobileTabClass(activeTab === "notificaciones")}
+            data-testid="mobile-tab-notificaciones"
+          >
+            <Bell className="w-4 h-4 mr-1" />
+            Push
           </Button>
           )}
           {isTabVisible("formularios") && (
@@ -7009,6 +7033,10 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
           <AsesorIAPanel token={token} />
         )}
 
+        {activeTab === "notificaciones" && (
+          <NotificationsPanel token={token} />
+        )}
+
         {activeTab === "formularios" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -8009,6 +8037,134 @@ function FieldRow({ label, value }: { label: string; value: string }) {
     <div>
       <span className="text-gray-400 text-xs">{label}:</span>
       <span className="text-white text-sm ml-1">{value}</span>
+    </div>
+  );
+}
+
+function NotificationsPanel({ token }: { token: string }) {
+  const [title, setTitle] = useState("IQeXponencial");
+  const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("/");
+  const [apiConfigured, setApiConfigured] = useState<boolean | null>(null);
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!token) return;
+    fetch("/api/admin/notifications/config", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setApiConfigured(Boolean(data?.apiConfigured)))
+      .catch(() => setApiConfigured(false));
+  }, [token]);
+
+  const sendNotification = async () => {
+    if (!title.trim() || !message.trim()) {
+      setError("Escribe titulo y mensaje.");
+      return;
+    }
+
+    setSending(true);
+    setError("");
+    setStatus("");
+
+    try {
+      const res = await fetch("/api/admin/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title, message, url }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error || "No se pudo enviar la notificacion.");
+        return;
+      }
+      const recipients = typeof data?.recipients === "number" ? ` Destinatarios: ${data.recipients}.` : "";
+      setStatus(`Notificacion enviada.${recipients}`);
+      setMessage("");
+    } catch (err: any) {
+      setError(err?.message || "Error de conexion.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Bell className="w-6 h-6 text-cyan-300" />
+            Notificaciones Push
+          </h2>
+          <p className="text-sm text-white/55">Envia comunicados a todos los usuarios suscritos en OneSignal.</p>
+        </div>
+        <div className={`rounded-full px-3 py-1 text-xs font-semibold ${apiConfigured ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>
+          {apiConfigured === null ? "Revisando API" : apiConfigured ? "API configurada" : "Falta API key"}
+        </div>
+      </div>
+
+      <Card className="bg-black/35 border-cyan-500/25">
+        <CardHeader>
+          <CardTitle className="text-white text-base">Enviar a todos</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-white/60">Titulo</label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+                className="mt-1 bg-white/5 border-white/15 text-white"
+                maxLength={80}
+                data-testid="input-notification-title"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-white/60">URL al tocar</label>
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="/"
+                className="mt-1 bg-white/5 border-white/15 text-white"
+                data-testid="input-notification-url"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-white/60">Mensaje</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value.slice(0, 240))}
+              placeholder="Escribe el aviso que recibiran los usuarios..."
+              className="mt-1 min-h-28 w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+              maxLength={240}
+              data-testid="textarea-notification-message"
+            />
+            <p className="mt-1 text-right text-xs text-white/40">{message.length}/240</p>
+          </div>
+          {error && <p className="rounded-md border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+          {status && <p className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">{status}</p>}
+          {!apiConfigured && (
+            <p className="rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              Configura ONESIGNAL_REST_API_KEY en el entorno del servidor para habilitar el envio desde este panel.
+            </p>
+          )}
+          <div className="flex justify-end">
+            <Button
+              onClick={sendNotification}
+              disabled={sending || !apiConfigured}
+              className="bg-cyan-600 hover:bg-cyan-500"
+              data-testid="button-send-notification"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {sending ? "Enviando..." : "Enviar notificacion"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -928,6 +928,86 @@ Reglas:
     res.json({ settings, currentIp: getClientIp(req) });
   });
 
+  app.get("/api/admin/notifications/config", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+    res.json({
+      appId: process.env.ONESIGNAL_APP_ID || "8f0ea034-551c-4bc8-b913-c500b4a80c2f",
+      apiConfigured: Boolean(process.env.ONESIGNAL_REST_API_KEY),
+    });
+  });
+
+  app.post("/api/admin/notifications/send", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+
+    const appId = process.env.ONESIGNAL_APP_ID || "8f0ea034-551c-4bc8-b913-c500b4a80c2f";
+    const apiKey = process.env.ONESIGNAL_REST_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "OneSignal no configurado. Falta ONESIGNAL_REST_API_KEY en variables de entorno." });
+    }
+
+    const title = String(req.body?.title || "").trim();
+    const message = String(req.body?.message || "").trim();
+    const url = String(req.body?.url || "").trim();
+
+    if (!title || !message) {
+      return res.status(400).json({ error: "Titulo y mensaje son requeridos." });
+    }
+
+    if (title.length > 80) {
+      return res.status(400).json({ error: "El titulo no debe superar 80 caracteres." });
+    }
+
+    if (message.length > 240) {
+      return res.status(400).json({ error: "El mensaje no debe superar 240 caracteres." });
+    }
+
+    const body: Record<string, unknown> = {
+      app_id: appId,
+      target_channel: "push",
+      included_segments: ["Subscribed Users"],
+      headings: { es: title, en: title },
+      contents: { es: message, en: message },
+    };
+
+    if (url) {
+      try {
+        const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
+        body.url = parsedUrl.toString();
+      } catch {
+        return res.status(400).json({ error: "URL invalida." });
+      }
+    }
+
+    const response = await fetch("https://api.onesignal.com/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Key ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const text = await response.text();
+    let data: any = {};
+    try { data = JSON.parse(text); } catch {}
+
+    if (!response.ok) {
+      return res.status(502).json({
+        error: "OneSignal rechazo el envio.",
+        details: data?.errors || data?.message || text || "unknown",
+      });
+    }
+
+    res.json({
+      success: true,
+      id: data?.id || null,
+      recipients: data?.recipients ?? null,
+      raw: data,
+    });
+  });
+
   const toIsoDateString = (value: unknown) => {
     if (!value) return null;
     const date = value instanceof Date ? value : new Date(value as any);
