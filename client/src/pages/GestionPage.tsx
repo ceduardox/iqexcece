@@ -50,6 +50,24 @@ interface QuizResult {
   createdAt: string | null;
 }
 
+interface NotificationHistoryItem {
+  id: string;
+  title: string;
+  message: string;
+  url: string | null;
+  status: "success" | "failed";
+  requestId: string;
+  oneSignalId: string | null;
+  includedSegment: string | null;
+  recipients: number | null;
+  httpStatus: number | null;
+  statusText: string | null;
+  error: string | null;
+  details: unknown;
+  response: unknown;
+  createdAt: string;
+}
+
 const WEBP_QUALITY = 0.82;
 const MAX_IMAGE_DIMENSION = 1600;
 
@@ -8050,6 +8068,45 @@ function NotificationsPanel({ token }: { token: string }) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const [history, setHistory] = useState<NotificationHistoryItem[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const historyLimit = 8;
+
+  const loadHistory = useCallback(async (page = 1) => {
+    if (!token) return;
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/admin/notifications/history?page=${page}&limit=${historyLimit}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "No se pudo cargar el historial.");
+      setHistory(data?.items || []);
+      setHistoryPage(data?.page || page);
+      setHistoryTotalPages(data?.totalPages || 1);
+      setHistoryTotal(data?.total || 0);
+    } catch (err: any) {
+      setError(err?.message || "No se pudo cargar el historial.");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [token]);
+
+  const formatNotificationDate = (value?: string | null) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleString("es-BO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -8060,6 +8117,11 @@ function NotificationsPanel({ token }: { token: string }) {
       .then((data) => setApiConfigured(Boolean(data?.apiConfigured)))
       .catch(() => setApiConfigured(false));
   }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    loadHistory(1);
+  }, [loadHistory, token]);
 
   const sendNotification = async () => {
     if (!title.trim() || !message.trim()) {
@@ -8089,6 +8151,7 @@ function NotificationsPanel({ token }: { token: string }) {
           response: data?.response || null,
         };
         setDebugInfo(JSON.stringify(details, null, 2));
+        loadHistory(1);
         return;
       }
       const recipients = typeof data?.recipients === "number" ? data.recipients : null;
@@ -8110,6 +8173,7 @@ function NotificationsPanel({ token }: { token: string }) {
         raw: data?.raw || data,
       }, null, 2));
       setMessage("");
+      loadHistory(1);
     } catch (err: any) {
       setError(err?.message || "Error de conexion.");
       setDebugInfo(JSON.stringify({ networkError: err?.message || String(err) }, null, 2));
@@ -8207,6 +8271,121 @@ function NotificationsPanel({ token }: { token: string }) {
               <Send className="w-4 h-4 mr-2" />
               {sending ? "Enviando..." : "Enviar notificacion"}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black/35 border-cyan-500/25">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-white text-base">Historial de envios</CardTitle>
+              <p className="mt-1 text-xs text-white/45">{historyTotal} registros guardados</p>
+            </div>
+            <Button
+              onClick={() => loadHistory(historyPage)}
+              disabled={historyLoading}
+              variant="outline"
+              size="sm"
+              className="border-white/15 bg-white/5 text-white hover:bg-white/10"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${historyLoading ? "animate-spin" : ""}`} />
+              Actualizar
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {history.length === 0 ? (
+            <div className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-4 text-sm text-white/55">
+              Aun no hay notificaciones enviadas desde este admin.
+            </div>
+          ) : (
+            <>
+              <div className="hidden overflow-x-auto rounded-lg border border-white/10 md:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-white/[0.04] text-xs uppercase text-white/45">
+                    <tr>
+                      <th className="px-3 py-2">Fecha y hora</th>
+                      <th className="px-3 py-2">Titulo</th>
+                      <th className="px-3 py-2">Estado</th>
+                      <th className="px-3 py-2">Dest.</th>
+                      <th className="px-3 py-2">Audiencia</th>
+                      <th className="px-3 py-2">OneSignal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {history.map((item) => (
+                      <tr key={item.id} className="text-white/75">
+                        <td className="px-3 py-3 text-xs text-white/55">{formatNotificationDate(item.createdAt)}</td>
+                        <td className="px-3 py-3">
+                          <p className="font-semibold text-white">{item.title}</p>
+                          <p className="mt-1 max-w-md truncate text-xs text-white/45">{item.message}</p>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.status === "success" ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
+                            {item.status === "success" ? "Enviada" : "Fallida"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-white/70">{item.recipients ?? "-"}</td>
+                        <td className="px-3 py-3 text-white/60">{item.includedSegment || "-"}</td>
+                        <td className="px-3 py-3 text-xs text-white/50">
+                          <p>{item.oneSignalId || item.requestId}</p>
+                          {item.error && <p className="mt-1 text-red-300">{item.error}</p>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="space-y-3 md:hidden">
+                {history.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.status === "success" ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
+                        {item.status === "success" ? "Enviada" : "Fallida"}
+                      </span>
+                      <span className="text-xs text-white/45">{formatNotificationDate(item.createdAt)}</span>
+                    </div>
+                    <p className="font-semibold text-white">{item.title}</p>
+                    <p className="mt-1 text-sm text-white/60">{item.message}</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/45">
+                      <p>Destinatarios: <span className="text-white/75">{item.recipients ?? "-"}</span></p>
+                      <p>Audiencia: <span className="text-white/75">{item.includedSegment || "-"}</span></p>
+                    </div>
+                    {item.error && <p className="mt-2 text-xs text-red-300">{item.error}</p>}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
+            <p className="text-xs text-white/45">
+              Pagina {historyPage} de {historyTotalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => loadHistory(Math.max(1, historyPage - 1))}
+                disabled={historyLoading || historyPage <= 1}
+                variant="outline"
+                size="sm"
+                className="border-white/15 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" />
+                Anterior
+              </Button>
+              <Button
+                onClick={() => loadHistory(Math.min(historyTotalPages, historyPage + 1))}
+                disabled={historyLoading || historyPage >= historyTotalPages}
+                variant="outline"
+                size="sm"
+                className="border-white/15 bg-white/5 text-white hover:bg-white/10 disabled:opacity-40"
+              >
+                Siguiente
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

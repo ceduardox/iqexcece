@@ -101,6 +101,79 @@ const ASESOR_STATE_FILE = path.join("/tmp", "asesor_state.json");
 const pendingManualReplies = new Map<string, string>();
 const NOWPAYMENTS_ORDERS_FILE = path.join("/tmp", "nowpayments_orders.json");
 
+type NotificationHistoryInput = {
+  title: string;
+  message: string;
+  url?: string | null;
+  status: "success" | "failed";
+  requestId: string;
+  oneSignalId?: string | null;
+  includedSegment?: string | null;
+  recipients?: number | null;
+  httpStatus?: number | null;
+  statusText?: string | null;
+  error?: string | null;
+  details?: unknown;
+  response?: unknown;
+};
+
+let notificationHistoryReady: Promise<void> | null = null;
+
+function ensureNotificationHistoryTable() {
+  if (!notificationHistoryReady) {
+    notificationHistoryReady = pool.query(`
+      CREATE TABLE IF NOT EXISTS notification_history (
+        id text PRIMARY KEY,
+        title text NOT NULL,
+        message text NOT NULL,
+        url text,
+        status text NOT NULL,
+        request_id text NOT NULL,
+        onesignal_id text,
+        included_segment text,
+        recipients integer,
+        http_status integer,
+        status_text text,
+        error text,
+        details jsonb,
+        response jsonb,
+        created_at timestamptz NOT NULL DEFAULT now()
+      )
+    `).then(() => undefined);
+  }
+  return notificationHistoryReady;
+}
+
+async function saveNotificationHistory(entry: NotificationHistoryInput) {
+  try {
+    await ensureNotificationHistoryTable();
+    await pool.query(
+      `INSERT INTO notification_history (
+        id, title, message, url, status, request_id, onesignal_id, included_segment,
+        recipients, http_status, status_text, error, details, response
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14::jsonb)`,
+      [
+        randomUUID(),
+        entry.title,
+        entry.message,
+        entry.url || null,
+        entry.status,
+        entry.requestId,
+        entry.oneSignalId || null,
+        entry.includedSegment || null,
+        typeof entry.recipients === "number" ? entry.recipients : null,
+        typeof entry.httpStatus === "number" ? entry.httpStatus : null,
+        entry.statusText || null,
+        entry.error || null,
+        JSON.stringify(entry.details ?? null),
+        JSON.stringify(entry.response ?? null),
+      ],
+    );
+  } catch (error) {
+    console.error("[notifications-history] save failed", error);
+  }
+}
+
 const CONTENT_IMPORT_TABLES = [
   "uploaded_images",
   "page_styles",
@@ -937,6 +1010,55 @@ Reglas:
     });
   });
 
+  app.get("/api/admin/notifications/history", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
+
+    const page = Math.max(1, Number(req.query.page || 1) || 1);
+    const limit = Math.min(25, Math.max(5, Number(req.query.limit || 10) || 10));
+    const offset = (page - 1) * limit;
+
+    try {
+      await ensureNotificationHistoryTable();
+      const [rowsResult, countResult] = await Promise.all([
+        pool.query(
+          `SELECT
+            id,
+            title,
+            message,
+            url,
+            status,
+            request_id AS "requestId",
+            onesignal_id AS "oneSignalId",
+            included_segment AS "includedSegment",
+            recipients,
+            http_status AS "httpStatus",
+            status_text AS "statusText",
+            error,
+            details,
+            response,
+            created_at AS "createdAt"
+          FROM notification_history
+          ORDER BY created_at DESC
+          LIMIT $1 OFFSET $2`,
+          [limit, offset],
+        ),
+        pool.query(`SELECT count(*)::int AS total FROM notification_history`),
+      ]);
+      const total = Number(countResult.rows[0]?.total || 0);
+      res.json({
+        items: rowsResult.rows,
+        total,
+        page,
+        limit,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      });
+    } catch (error: any) {
+      console.error("[notifications-history] load failed", error);
+      res.status(500).json({ error: error?.message || "No se pudo cargar el historial." });
+    }
+  });
+
   app.post("/api/admin/notifications/send", async (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });
@@ -1040,6 +1162,19 @@ Reglas:
         statusText: response.statusText,
         response: data && Object.keys(data).length > 0 ? data : text,
       });
+      await saveNotificationHistory({
+        title,
+        message,
+        url,
+        status: "failed",
+        requestId,
+        includedSegment,
+        httpStatus: response.status,
+        statusText: response.statusText,
+        error: "OneSignal rechazo el envio.",
+        details: data?.errors || data?.message || text || "unknown",
+        response: data && Object.keys(data).length > 0 ? data : text,
+      });
       return res.status(502).json({
         error: "OneSignal rechazo el envio.",
         requestId,
@@ -1052,6 +1187,19 @@ Reglas:
 
     if (!data?.id) {
       console.error(`[onesignal:${requestId}] Accepted without message id`, {
+        response: data && Object.keys(data).length > 0 ? data : text,
+      });
+      await saveNotificationHistory({
+        title,
+        message,
+        url,
+        status: "failed",
+        requestId,
+        includedSegment,
+        httpStatus: response.status,
+        statusText: response.statusText,
+        error: "OneSignal acepto la solicitud, pero no creo ningun mensaje.",
+        details: data?.errors || data?.warnings || data?.message || text || "Sin id de mensaje",
         response: data && Object.keys(data).length > 0 ? data : text,
       });
       return res.status(502).json({
@@ -1068,6 +1216,21 @@ Reglas:
       id: data?.id || null,
       recipients: data?.recipients ?? null,
       includedSegment,
+      response: data,
+    });
+
+    await saveNotificationHistory({
+      title,
+      message,
+      url,
+      status: "success",
+      requestId,
+      oneSignalId: data?.id || null,
+      includedSegment,
+      recipients: data?.recipients ?? null,
+      httpStatus: response.status,
+      statusText: response.statusText,
+      details: data?.warnings || data?.errors || null,
       response: data,
     });
 
