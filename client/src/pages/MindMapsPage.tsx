@@ -1663,7 +1663,7 @@ export default function MindMapsPage() {
         .mindmaps-page .chooser-panel {
           width: min(100%, 930px);
           border-radius: 28px;
-          padding: 40px 48px 48px;
+          padding: 30px 48px 34px;
         }
         .mindmaps-page .chooser-step-dot {
           width: 56px;
@@ -1679,7 +1679,7 @@ export default function MindMapsPage() {
           box-shadow: 0 12px 24px rgba(124, 58, 237, 0.24);
         }
         .mindmaps-page .chooser-input-wrap {
-          height: 104px;
+          height: 82px;
           border-radius: 26px;
           border: 1px solid rgba(168, 162, 255, 0.40);
           background: rgba(255,255,255,0.68);
@@ -1702,7 +1702,7 @@ export default function MindMapsPage() {
           background: linear-gradient(90deg, transparent, rgba(168, 162, 255, 0.35), transparent);
         }
         .mindmaps-page .chooser-option {
-          min-height: 148px;
+          min-height: 112px;
           border-radius: 28px;
           border: 1px solid rgba(226, 232, 240, 0.76);
           background: rgba(255,255,255,0.72);
@@ -1713,8 +1713,8 @@ export default function MindMapsPage() {
           box-shadow: 0 20px 38px rgba(124, 58, 237, 0.13), 0 0 0 1px rgba(14, 165, 233, 0.28);
         }
         .mindmaps-page .chooser-option-icon {
-          width: 96px;
-          height: 96px;
+          width: 76px;
+          height: 76px;
           border-radius: 24px;
           box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
         }
@@ -1739,7 +1739,7 @@ export default function MindMapsPage() {
           box-shadow: 0 14px 26px rgba(109, 40, 217, 0.24);
         }
         .mindmaps-page .chooser-next {
-          height: 78px;
+          height: 64px;
           border-radius: 26px;
           background: linear-gradient(100deg, #8b3ff6 0%, #7c5cf6 45%, #41d6e8 100%);
           border: 0;
@@ -1763,7 +1763,7 @@ export default function MindMapsPage() {
           }
           .mindmaps-page .chooser-panel {
             border-radius: 24px;
-            padding: 22px 18px 24px;
+            padding: 18px 18px 20px;
           }
           .mindmaps-page .chooser-step-dot {
             width: 44px;
@@ -1771,19 +1771,19 @@ export default function MindMapsPage() {
             font-size: 18px;
           }
           .mindmaps-page .chooser-input-wrap {
-            height: 76px;
+            height: 64px;
             border-radius: 20px;
           }
           .mindmaps-page .chooser-input {
             font-size: 18px;
           }
           .mindmaps-page .chooser-option {
-            min-height: 112px;
+            min-height: 96px;
             border-radius: 22px;
           }
           .mindmaps-page .chooser-option-icon {
-            width: 72px;
-            height: 72px;
+            width: 62px;
+            height: 62px;
             border-radius: 20px;
           }
           .mindmaps-page .chooser-arrow {
@@ -1791,7 +1791,7 @@ export default function MindMapsPage() {
             height: 46px;
           }
           .mindmaps-page .chooser-next {
-            height: 62px;
+            height: 56px;
             border-radius: 22px;
             font-size: 18px;
           }
@@ -1929,9 +1929,9 @@ export default function MindMapsPage() {
 
         <section className={`w-full overflow-hidden ${showChooser ? "app-chooser-shell chooser-panel mx-auto" : "rounded-2xl border border-purple-100 bg-white shadow-[0_10px_30px_rgba(17,24,39,0.09)]"}`}>
           {showChooser ? (
-            <div className="space-y-8">
+            <div className="space-y-5 sm:space-y-6">
               <div>
-                <div className="mb-6 flex items-center gap-5">
+                <div className="mb-4 flex items-center gap-4 sm:gap-5">
                   <span className="chooser-step-dot">1</span>
                   <h1 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight text-slate-950">{t("mindmaps.chooserProjectName")}</h1>
                 </div>
@@ -1942,11 +1942,11 @@ export default function MindMapsPage() {
               </div>
               <div className="chooser-divider" />
               <div>
-                <div className="mb-6 flex items-center gap-5">
+                <div className="mb-4 flex items-center gap-4 sm:gap-5">
                   <span className="chooser-step-dot">2</span>
                   <h2 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight text-slate-950">{t("mindmaps.chooserStartPoint")}</h2>
                 </div>
-                <div className="space-y-5">
+                <div className="space-y-3 sm:space-y-4">
                   {chooserOptions.map((o) => {
                   const iconClass = o.id === "mindmap"
                     ? "bg-gradient-to-br from-blue-400 to-violet-600"
@@ -1956,14 +1956,14 @@ export default function MindMapsPage() {
                   const selected = stepKind === o.id;
 
                   return (
-                    <button key={o.id} onClick={() => setStepKind(o.id)} className={`chooser-option relative flex w-full items-center gap-5 p-4 text-left sm:p-7 ${selected ? "is-selected" : ""}`}>
+                    <button key={o.id} onClick={() => setStepKind(o.id)} className={`chooser-option relative flex w-full items-center gap-4 p-4 text-left sm:gap-5 sm:p-5 ${selected ? "is-selected" : ""}`}>
                       {selected && <span className="chooser-check flex items-center justify-center"><Check className="w-8 h-8" /></span>}
                       <div className={`chooser-option-icon ${iconClass} flex shrink-0 items-center justify-center`}>
                         <o.Icon className="w-10 h-10 sm:w-11 sm:h-11 text-white" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xl sm:text-2xl font-extrabold text-slate-950">{o.label}</p>
-                        <p className="mt-2 max-w-md text-base sm:text-lg leading-relaxed text-slate-500">{o.description}</p>
+                        <p className="text-lg sm:text-xl font-extrabold text-slate-950">{o.label}</p>
+                        <p className="mt-1 max-w-md text-sm sm:text-base leading-relaxed text-slate-500">{o.description}</p>
                       </div>
                       <span className="chooser-arrow hidden sm:flex items-center justify-center">
                         <ChevronRight className="w-8 h-8" />
