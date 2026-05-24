@@ -1096,6 +1096,7 @@ Reglas:
       target_channel: "push",
       included_segments: [includedSegment],
       isAnyWeb: true,
+      web_push_topic: `iqex-${requestId}`,
       headings: { es: title, en: title },
       contents: { es: message, en: message },
       name: `Admin IQeXponencial ${new Date().toISOString()}`,
