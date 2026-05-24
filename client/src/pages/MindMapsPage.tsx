@@ -1586,6 +1586,15 @@ export default function MindMapsPage() {
           gap: 8px;
           background: linear-gradient(180deg, #fcfdff 0%, #f7faff 100%);
         }
+        .mindmaps-page .mindmap-editor-panel {
+          margin: 18px 12px 12px;
+          padding: 12px;
+          border-radius: 20px;
+          border: 1px solid rgba(196, 181, 253, 0.42);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.92) 100%);
+          box-shadow: 0 14px 28px rgba(91, 33, 182, 0.08);
+        }
         .mindmaps-page .mindmap-action-bar {
           min-height: 44px;
           display: flex;
@@ -1600,6 +1609,16 @@ export default function MindMapsPage() {
         .mindmaps-page .mindmap-action-bar > button,
         .mindmaps-page .mindmap-action-bar > label {
           flex: 0 0 auto;
+        }
+        .mindmaps-page .mindmap-action-bar > span {
+          flex: 0 0 auto;
+        }
+        .mindmaps-page .mindmap-canvas-shell {
+          margin: 0 12px 12px;
+          width: calc(100% - 24px);
+          border-radius: 20px;
+          border: 1px solid rgba(196, 181, 253, 0.32);
+          box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
         }
         .mindmaps-page .project-open-btn {
           border-radius: 0;
@@ -1814,15 +1833,45 @@ export default function MindMapsPage() {
             font-size: 18px;
           }
           .mindmaps-page .mindmap-action-bar {
-            margin: -2px -2px 0;
-            padding: 4px 2px 10px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: stretch;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            overflow: visible;
           }
           .mindmaps-page .mindmap-action-bar > button,
           .mindmaps-page .mindmap-action-bar > label {
             height: 38px;
+            min-width: 0;
+            width: 100%;
+            justify-content: center;
             padding-left: 10px;
             padding-right: 10px;
-            font-size: 12px;
+            font-size: 11.5px;
+            text-align: center;
+            white-space: normal;
+          }
+          .mindmaps-page .mindmap-action-bar > span {
+            width: 100%;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid rgba(196, 181, 253, 0.45);
+            background: rgba(255,255,255,0.72);
+          }
+          .mindmaps-page .mindmap-editor-panel {
+            margin: 14px 8px 8px;
+            padding: 10px;
+            border-radius: 18px;
+          }
+          .mindmaps-page .mindmap-canvas-shell {
+            margin: 0 8px 8px;
+            width: calc(100% - 16px);
+            border-radius: 18px;
           }
         }
       `}</style>
@@ -1881,7 +1930,7 @@ export default function MindMapsPage() {
       </header>
 
       <div className={`w-full p-3 md:p-4 grid grid-cols-1 gap-3 lg:gap-4 ${showChooser ? "mx-auto max-w-[980px]" : "lg:grid-cols-[320px_1fr]"}`}>
-        {!readonly && !showChooser && isCompactLayout && (
+        {!readonly && !showChooser && isCompactLayout && kind !== "mindmap" && (
           <div className="rounded-2xl bg-white border border-purple-100 p-2 shadow-[0_6px_18px_rgba(17,24,39,0.08)] flex flex-wrap items-center justify-between gap-2">
             <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="app-btn-soft h-9 px-3 text-sm text-purple-700 inline-flex items-center gap-1.5">
               Proyectos {mobileSidebarOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -2011,7 +2060,7 @@ export default function MindMapsPage() {
           ) : kind === "mindmap" ? (
             <>
               {!readonly && (
-                <div className="border-b border-purple-100 p-2 space-y-2">
+                <div className="mindmap-editor-panel space-y-3">
                   <div className="mindmap-action-bar whitespace-nowrap">
                     <button
                       onClick={() => {
@@ -2063,7 +2112,7 @@ export default function MindMapsPage() {
               )}
               <div
                 ref={boardRef}
-                className="relative w-full h-[66vh] md:h-[74vh] bg-white touch-none overflow-hidden"
+                className="mindmap-canvas-shell relative w-full h-[66vh] md:h-[74vh] bg-white touch-none overflow-hidden"
                 onPointerDown={(e) => {
                   if (readonly) return;
                   const target = e.target as HTMLElement;
