@@ -984,7 +984,6 @@ Reglas:
     if (url) {
       try {
         const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
-        body.url = parsedUrl.toString();
         body.web_url = parsedUrl.toString();
       } catch {
         return res.status(400).json({ error: "URL invalida.", requestId });
@@ -998,7 +997,7 @@ Reglas:
         messageLength: message.length,
         includedSegment,
         isAnyWeb: true,
-        url: payload.url || null,
+        url: payload.web_url || null,
       });
 
       const response = await fetch("https://api.onesignal.com/notifications?c=push", {
@@ -1027,7 +1026,6 @@ Reglas:
       body = createBody("All");
       if (url) {
         const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
-        body.url = parsedUrl.toString();
         body.web_url = parsedUrl.toString();
       }
       console.info(`[onesignal:${requestId}] Retrying with All segment`);
