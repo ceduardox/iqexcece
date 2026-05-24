@@ -968,18 +968,22 @@ Reglas:
       return res.status(400).json({ error: "El mensaje no debe superar 240 caracteres." });
     }
 
+    const includedSegment = process.env.ONESIGNAL_INCLUDED_SEGMENT || "Subscribed Users";
     const body: Record<string, unknown> = {
       app_id: appId,
       target_channel: "push",
-      included_segments: ["Subscribed Users"],
+      included_segments: [includedSegment],
+      isAnyWeb: true,
       headings: { es: title, en: title },
       contents: { es: message, en: message },
+      name: `Admin IQeXponencial ${new Date().toISOString()}`,
     };
 
     if (url) {
       try {
         const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
         body.url = parsedUrl.toString();
+        body.web_url = parsedUrl.toString();
       } catch {
         return res.status(400).json({ error: "URL invalida.", requestId });
       }
@@ -989,10 +993,12 @@ Reglas:
       appId,
       titleLength: title.length,
       messageLength: message.length,
+      includedSegment,
+      isAnyWeb: true,
       url: body.url || null,
     });
 
-    const response = await fetch("https://api.onesignal.com/notifications", {
+    const response = await fetch("https://api.onesignal.com/notifications?c=push", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1017,6 +1023,20 @@ Reglas:
         status: response.status,
         statusText: response.statusText,
         details: data?.errors || data?.message || text || "unknown",
+        response: data && Object.keys(data).length > 0 ? data : text,
+      });
+    }
+
+    if (!data?.id) {
+      console.error(`[onesignal:${requestId}] Accepted without message id`, {
+        response: data && Object.keys(data).length > 0 ? data : text,
+      });
+      return res.status(502).json({
+        error: "OneSignal acepto la solicitud, pero no creo ningun mensaje. La audiencia no tiene suscripciones validas para este envio.",
+        requestId,
+        status: response.status,
+        statusText: response.statusText,
+        details: data?.errors || data?.warnings || data?.message || text || "Sin id de mensaje",
         response: data && Object.keys(data).length > 0 ? data : text,
       });
     }
