@@ -1455,6 +1455,7 @@ export default function MindMapsPage() {
           --btn-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
           --btn-shadow-hover: 0 10px 22px rgba(15, 23, 42, 0.16);
           --btn-shadow-press: 0 3px 8px rgba(15, 23, 42, 0.12);
+          font-family: 'Gilroy', 'Myriad Pro', 'Montserrat', sans-serif;
         }
         .mindmaps-page button {
           border-radius: var(--btn-radius);
@@ -1691,11 +1692,12 @@ export default function MindMapsPage() {
           border: 0;
           color: #0f172a;
           font-size: 24px;
-          font-weight: 600;
+          font-weight: 400;
+          font-family: 'Gilroy', 'Myriad Pro', 'Montserrat', sans-serif;
         }
         .mindmaps-page .chooser-input::placeholder {
           color: #6b7280;
-          font-weight: 500;
+          font-weight: 400;
         }
         .mindmaps-page .chooser-divider {
           height: 1px;
@@ -1707,6 +1709,7 @@ export default function MindMapsPage() {
           border: 1px solid rgba(226, 232, 240, 0.76);
           background: rgba(255,255,255,0.72);
           box-shadow: 0 18px 34px rgba(91, 33, 182, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+          font-family: 'Gilroy', 'Myriad Pro', 'Montserrat', sans-serif;
         }
         .mindmaps-page .chooser-option.is-selected {
           border-color: rgba(168, 85, 247, 0.62);
@@ -1963,7 +1966,7 @@ export default function MindMapsPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-lg sm:text-xl font-extrabold text-slate-950">{o.label}</p>
-                        <p className="mt-1 max-w-md text-sm sm:text-base leading-relaxed text-slate-500">{o.description}</p>
+                        <p className="mt-1 max-w-md text-sm sm:text-base font-normal leading-relaxed text-slate-500">{o.description}</p>
                       </div>
                       <span className="chooser-arrow hidden sm:flex items-center justify-center">
                         <ChevronRight className="w-8 h-8" />
