@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, ChevronDown, ChevronUp, Columns3, Copy, Crosshair, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, ChevronRight, ChevronUp, Columns3, Copy, Crosshair, FileText, ImagePlus, Lightbulb, Network, PencilRuler, Plus, RotateCw, Save, Settings2, Share2, Sparkles, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -198,7 +198,7 @@ export default function MindMapsPage() {
   const [kind, setKind] = useState<Kind | null>(null);
   const [showChooser, setShowChooser] = useState(true);
   const [stepName, setStepName] = useState("");
-  const [stepKind, setStepKind] = useState<Kind | null>(null);
+  const [stepKind, setStepKind] = useState<Kind | null>("mindmap");
   const [shareUrl, setShareUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -260,9 +260,9 @@ export default function MindMapsPage() {
   };
 
   const chooserOptions = [
-    { id: "mindmap" as const, label: t("mindmaps.typeMindmap"), Icon: Network },
-    { id: "taskboard" as const, label: t("mindmaps.typeTaskboard"), Icon: Columns3 },
-    { id: "whiteboard" as const, label: t("mindmaps.typeWhiteboard"), Icon: PencilRuler },
+    { id: "mindmap" as const, label: t("mindmaps.typeMindmap"), description: "Organiza ideas y conceptos de forma visual.", Icon: Network },
+    { id: "taskboard" as const, label: t("mindmaps.typeTaskboard"), description: "Gestiona tareas y actividades de manera eficiente.", Icon: Columns3 },
+    { id: "whiteboard" as const, label: t("mindmaps.typeWhiteboard"), description: "Colabora y comparte ideas en un espacio libre.", Icon: PencilRuler },
   ];
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) || null, [nodes, selectedNodeId]);
@@ -1448,7 +1448,7 @@ export default function MindMapsPage() {
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="mindmaps-page relative min-h-screen bg-white pb-24 md:pb-8">
+    <div className={`mindmaps-page relative min-h-screen pb-24 md:pb-8 ${showChooser ? "mindmaps-chooser-page" : "bg-white"}`}>
       <style>{`
         .mindmaps-page {
           --btn-radius: 14px;
@@ -1619,52 +1619,240 @@ export default function MindMapsPage() {
           background: linear-gradient(150deg, rgba(255,255,255,0.35) 0%, transparent 28%);
         }
         .mindmaps-page .app-chooser-shell {
-          border: 1px solid rgba(196, 181, 253, 0.45);
-          background-image:
-            radial-gradient(52% 30% at 18% 106%, rgba(167, 111, 255, 0.40) 0%, rgba(167, 111, 255, 0.16) 42%, rgba(167, 111, 255, 0.00) 80%),
-            radial-gradient(45% 28% at 90% 104%, rgba(75, 184, 255, 0.34) 0%, rgba(75, 184, 255, 0.12) 42%, rgba(75, 184, 255, 0.00) 80%),
-            radial-gradient(34% 32% at 87% 84%, rgba(170, 222, 255, 0.20) 0%, rgba(170, 222, 255, 0.00) 76%),
-            linear-gradient(180deg, #f4f4fc 0%, #f2f2fb 64%, #f0eef8 100%);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 14px 30px rgba(15, 23, 42, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.86) 0%, rgba(246,247,255,0.76) 48%, rgba(240,252,255,0.82) 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.92),
+            0 26px 56px rgba(91, 33, 182, 0.13),
+            0 10px 26px rgba(14, 165, 233, 0.08);
+          backdrop-filter: blur(18px);
+        }
+        .mindmaps-page.mindmaps-chooser-page {
+          background:
+            radial-gradient(44rem 34rem at 8% -4%, rgba(233, 213, 255, 0.78), transparent 66%),
+            radial-gradient(42rem 30rem at 98% 14%, rgba(186, 230, 253, 0.78), transparent 68%),
+            linear-gradient(135deg, #f7efff 0%, #f7f7ff 48%, #e8f8ff 100%);
+        }
+        .mindmaps-page .chooser-topbar {
+          background: transparent;
+          border-color: transparent;
+        }
+        .mindmaps-page .chooser-nav-btn {
+          width: 70px;
+          height: 70px;
+          border-radius: 24px;
+          border: 1px solid rgba(255,255,255,0.80);
+          background: rgba(255,255,255,0.58);
+          color: #5b21b6;
+          box-shadow: 0 18px 34px rgba(91, 33, 182, 0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+          backdrop-filter: blur(12px);
+        }
+        .mindmaps-page .chooser-menu-btn {
+          height: 70px;
+          border-radius: 24px;
+          border: 1px solid rgba(255,255,255,0.82);
+          background: rgba(255,255,255,0.62);
+          color: #2e1065;
+          box-shadow: 0 18px 34px rgba(91, 33, 182, 0.11), inset 0 1px 0 rgba(255,255,255,0.9);
+          backdrop-filter: blur(12px);
+          padding: 0 26px;
+          font-size: 17px;
+          font-weight: 800;
+        }
+        .mindmaps-page .chooser-panel {
+          width: min(100%, 930px);
+          border-radius: 28px;
+          padding: 40px 48px 48px;
+        }
+        .mindmaps-page .chooser-step-dot {
+          width: 56px;
+          height: 56px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 24px;
+          font-weight: 900;
+          background: linear-gradient(135deg, #7c3aed 0%, #5b5cf6 100%);
+          box-shadow: 0 12px 24px rgba(124, 58, 237, 0.24);
+        }
+        .mindmaps-page .chooser-input-wrap {
+          height: 104px;
+          border-radius: 26px;
+          border: 1px solid rgba(168, 162, 255, 0.40);
+          background: rgba(255,255,255,0.68);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), 0 18px 30px rgba(91, 33, 182, 0.06);
+        }
+        .mindmaps-page .chooser-input {
+          background: transparent;
+          box-shadow: none;
+          border: 0;
+          color: #0f172a;
+          font-size: 24px;
+          font-weight: 600;
+        }
+        .mindmaps-page .chooser-input::placeholder {
+          color: #6b7280;
+          font-weight: 500;
+        }
+        .mindmaps-page .chooser-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(168, 162, 255, 0.35), transparent);
+        }
+        .mindmaps-page .chooser-option {
+          min-height: 148px;
+          border-radius: 28px;
+          border: 1px solid rgba(226, 232, 240, 0.76);
+          background: rgba(255,255,255,0.72);
+          box-shadow: 0 18px 34px rgba(91, 33, 182, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .mindmaps-page .chooser-option.is-selected {
+          border-color: rgba(168, 85, 247, 0.62);
+          box-shadow: 0 20px 38px rgba(124, 58, 237, 0.13), 0 0 0 1px rgba(14, 165, 233, 0.28);
+        }
+        .mindmaps-page .chooser-option-icon {
+          width: 96px;
+          height: 96px;
+          border-radius: 24px;
+          box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
+        }
+        .mindmaps-page .chooser-arrow {
+          width: 58px;
+          height: 58px;
+          border-radius: 999px;
+          border: 1px solid rgba(226, 232, 240, 0.72);
+          background: rgba(255,255,255,0.64);
+          color: #6d28d9;
+          box-shadow: 0 10px 22px rgba(91, 33, 182, 0.08);
+        }
+        .mindmaps-page .chooser-check {
+          position: absolute;
+          top: -17px;
+          right: 16px;
+          width: 54px;
+          height: 54px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #8b5cf6 0%, #6d5dfc 100%);
+          color: white;
+          box-shadow: 0 14px 26px rgba(109, 40, 217, 0.24);
+        }
+        .mindmaps-page .chooser-next {
+          height: 78px;
+          border-radius: 26px;
+          background: linear-gradient(100deg, #8b3ff6 0%, #7c5cf6 45%, #41d6e8 100%);
+          border: 0;
+          box-shadow: 0 22px 36px rgba(124, 58, 237, 0.22), 0 14px 26px rgba(14, 165, 233, 0.18);
+          color: white;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+        }
+        @media (max-width: 640px) {
+          .mindmaps-page .chooser-nav-btn {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+          }
+          .mindmaps-page .chooser-menu-btn {
+            height: 54px;
+            border-radius: 18px;
+            padding: 0 14px;
+            font-size: 14px;
+          }
+          .mindmaps-page .chooser-panel {
+            border-radius: 24px;
+            padding: 22px 18px 24px;
+          }
+          .mindmaps-page .chooser-step-dot {
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+          }
+          .mindmaps-page .chooser-input-wrap {
+            height: 76px;
+            border-radius: 20px;
+          }
+          .mindmaps-page .chooser-input {
+            font-size: 18px;
+          }
+          .mindmaps-page .chooser-option {
+            min-height: 112px;
+            border-radius: 22px;
+          }
+          .mindmaps-page .chooser-option-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+          }
+          .mindmaps-page .chooser-arrow {
+            width: 46px;
+            height: 46px;
+          }
+          .mindmaps-page .chooser-next {
+            height: 62px;
+            border-radius: 22px;
+            font-size: 18px;
+          }
         }
       `}</style>
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-purple-100 px-3 py-3">
-        <div className="w-full px-1 md:px-3 flex items-center gap-2">
-          <button onClick={handleBack} className="app-btn-soft p-2 text-purple-700"><ArrowLeft className="w-4 h-4" /></button>
-          {!showChooser && <input value={title} disabled={readonly} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0 h-10 rounded-xl border border-purple-100 px-3 text-sm font-semibold text-gray-800 bg-white" />}
-          {!readonly && !showChooser && kind && (
-            <span className={`hidden md:inline-flex h-8 px-3 rounded-full border text-xs font-semibold items-center ${hasUnsavedChanges ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
-              {hasUnsavedChanges ? "Cambios pendientes" : "Guardado"}
-            </span>
+      <header className={`sticky top-0 z-40 px-3 py-4 ${showChooser ? "chooser-topbar" : "bg-white/90 backdrop-blur-lg border-b border-purple-100"}`}>
+        <div className={`w-full px-1 md:px-3 flex items-center gap-2 ${showChooser ? "mx-auto max-w-[980px] justify-between" : ""}`}>
+          <button onClick={handleBack} className={showChooser ? "chooser-nav-btn inline-flex items-center justify-center" : "app-btn-soft p-2 text-purple-700"}>
+            <ArrowLeft className={showChooser ? "w-7 h-7" : "w-4 h-4"} />
+          </button>
+          {showChooser ? (
+            <div className="flex items-center gap-3 sm:gap-5">
+              <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="chooser-menu-btn inline-flex items-center gap-3">
+                <Columns3 className="w-5 h-5 text-purple-700" />
+                <span className="hidden sm:inline">Proyectos</span>
+                {mobileSidebarOpen ? <ChevronUp className="w-5 h-5 text-purple-700" /> : <ChevronDown className="w-5 h-5 text-purple-700" />}
+              </button>
+              <button onClick={() => { setMobileOptionsOpen((v) => !v); setMobileSidebarOpen(false); }} className="chooser-menu-btn inline-flex items-center gap-3">
+                <Settings2 className="w-5 h-5 text-purple-700" />
+                <span className="hidden sm:inline">Opciones</span>
+                {mobileOptionsOpen ? <ChevronUp className="w-5 h-5 text-purple-700" /> : <ChevronDown className="w-5 h-5 text-purple-700" />}
+              </button>
+            </div>
+          ) : (
+            <>
+              <input value={title} disabled={readonly} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0 h-10 rounded-xl border border-purple-100 px-3 text-sm font-semibold text-gray-800 bg-white" />
+              {!readonly && kind && (
+                <span className={`hidden md:inline-flex h-8 px-3 rounded-full border text-xs font-semibold items-center ${hasUnsavedChanges ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+                  {hasUnsavedChanges ? "Cambios pendientes" : "Guardado"}
+                </span>
+              )}
+              {readonly && kind && (
+                <button
+                  onClick={forkSharedProject}
+                  disabled={saving}
+                  title="Crear mi copia editable"
+                  aria-label="Crear mi copia editable"
+                  className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"
+                >
+                  <Copy className="w-4 h-4" />
+                  <span className="hidden sm:inline">{saving ? "Creando..." : "Crear mi copia"}</span>
+                </button>
+              )}
+              {!readonly && kind && activeId && (
+                <button
+                  onClick={() => shareProject()}
+                  className="md:hidden app-btn-soft h-10 w-10 p-0 text-cyan-700 inline-flex items-center justify-center shrink-0"
+                  title="Copiar enlace para compartir"
+                  aria-label="Copiar enlace para compartir"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              )}
+              {!readonly && <button onClick={saveProject} disabled={saving} className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
+            </>
           )}
-          {readonly && !showChooser && kind && (
-            <button
-              onClick={forkSharedProject}
-              disabled={saving}
-              title="Crear mi copia editable"
-              aria-label="Crear mi copia editable"
-              className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"
-            >
-              <Copy className="w-4 h-4" />
-              <span className="hidden sm:inline">{saving ? "Creando..." : "Crear mi copia"}</span>
-            </button>
-          )}
-          {!readonly && !showChooser && kind && activeId && (
-            <button
-              onClick={() => shareProject()}
-              className="md:hidden app-btn-soft h-10 w-10 p-0 text-cyan-700 inline-flex items-center justify-center shrink-0"
-              title="Copiar enlace para compartir"
-              aria-label="Copiar enlace para compartir"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-          )}
-          {!readonly && !showChooser && <button onClick={saveProject} disabled={saving} className="app-btn-primary h-10 px-3 text-sm flex items-center gap-2 shrink-0 disabled:opacity-60"><Save className="w-4 h-4" /><span className="hidden sm:inline">{saving ? "Guardando..." : "Guardar"}</span></button>}
         </div>
       </header>
 
-      <div className="w-full p-3 md:p-4 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 lg:gap-4">
-        {!readonly && isCompactLayout && (
+      <div className={`w-full p-3 md:p-4 grid grid-cols-1 gap-3 lg:gap-4 ${showChooser ? "mx-auto max-w-[980px]" : "lg:grid-cols-[320px_1fr]"}`}>
+        {!readonly && !showChooser && isCompactLayout && (
           <div className="rounded-2xl bg-white border border-purple-100 p-2 shadow-[0_6px_18px_rgba(17,24,39,0.08)] flex flex-wrap items-center justify-between gap-2">
             <button onClick={() => { setMobileSidebarOpen((v) => !v); setMobileOptionsOpen(false); }} className="app-btn-soft h-9 px-3 text-sm text-purple-700 inline-flex items-center gap-1.5">
               Proyectos {mobileSidebarOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -1675,7 +1863,7 @@ export default function MindMapsPage() {
           </div>
         )}
 
-        {(!isCompactLayout || mobileSidebarOpen || mobileOptionsOpen) && (
+        {((!showChooser && (!isCompactLayout || mobileSidebarOpen || mobileOptionsOpen)) || (showChooser && (mobileSidebarOpen || mobileOptionsOpen))) && (
         <aside className="app-sidebar-shell rounded-2xl p-3">
           {!readonly && (!isCompactLayout || mobileOptionsOpen) && <div className="flex items-center gap-2 mb-3"><button onClick={newProject} className="app-btn-soft h-9 px-3 text-sm text-purple-700 flex items-center gap-2"><Plus className="w-4 h-4" />Nuevo</button></div>}
           {!readonly && !showChooser && kind === "mindmap" && (!isCompactLayout || mobileOptionsOpen) && (
@@ -1739,37 +1927,57 @@ export default function MindMapsPage() {
         </aside>
         )}
 
-        <section className={`w-full rounded-2xl overflow-hidden ${showChooser ? "app-chooser-shell" : "border border-purple-100 bg-white shadow-[0_10px_30px_rgba(17,24,39,0.09)]"}`}>
+        <section className={`w-full overflow-hidden ${showChooser ? "app-chooser-shell chooser-panel mx-auto" : "rounded-2xl border border-purple-100 bg-white shadow-[0_10px_30px_rgba(17,24,39,0.09)]"}`}>
           {showChooser ? (
-            <div className="p-5 md:p-6">
-              <p className="text-sm font-semibold text-gray-700 mb-2"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">1</span>{t("mindmaps.chooserProjectName")}</p>
-              <input value={stepName} onChange={(e) => setStepName(e.target.value)} className="w-full h-11 rounded-xl border border-purple-100 px-3 text-sm text-gray-800 placeholder:text-gray-500 bg-white mb-5" placeholder={t("mindmaps.chooserProjectPlaceholder")} />
-              <p className="text-sm font-semibold text-gray-700 mb-3"><span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs mr-2">2</span>{t("mindmaps.chooserStartPoint")}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {chooserOptions.map((o) => {
-                  const selectedClass = o.id === "mindmap"
-                    ? "border-cyan-400 bg-gradient-to-br from-cyan-200/80 to-sky-200/80 shadow-[0_10px_24px_rgba(6,182,212,0.28)]"
-                    : o.id === "taskboard"
-                    ? "border-amber-400 bg-gradient-to-br from-amber-100 to-orange-200/80 shadow-[0_10px_24px_rgba(245,158,11,0.26)]"
-                    : "border-violet-400 bg-gradient-to-br from-violet-100 to-fuchsia-200/80 shadow-[0_10px_24px_rgba(139,92,246,0.26)]";
-
+            <div className="space-y-8">
+              <div>
+                <div className="mb-6 flex items-center gap-5">
+                  <span className="chooser-step-dot">1</span>
+                  <h1 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight text-slate-950">{t("mindmaps.chooserProjectName")}</h1>
+                </div>
+                <div className="chooser-input-wrap flex items-center gap-4 px-5 sm:px-8">
+                  <FileText className="h-7 w-7 shrink-0 text-violet-600" />
+                  <input value={stepName} onChange={(e) => setStepName(e.target.value)} className="chooser-input h-full min-w-0 flex-1 outline-none placeholder:text-slate-400" placeholder={t("mindmaps.chooserProjectPlaceholder")} />
+                </div>
+              </div>
+              <div className="chooser-divider" />
+              <div>
+                <div className="mb-6 flex items-center gap-5">
+                  <span className="chooser-step-dot">2</span>
+                  <h2 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight text-slate-950">{t("mindmaps.chooserStartPoint")}</h2>
+                </div>
+                <div className="space-y-5">
+                  {chooserOptions.map((o) => {
                   const iconClass = o.id === "mindmap"
-                    ? "bg-gradient-to-br from-cyan-500 to-sky-600"
+                    ? "bg-gradient-to-br from-blue-400 to-violet-600"
                     : o.id === "taskboard"
-                    ? "bg-gradient-to-br from-amber-500 to-orange-600"
-                    : "bg-gradient-to-br from-violet-500 to-fuchsia-600";
+                    ? "bg-gradient-to-br from-amber-400 to-orange-500"
+                    : "bg-gradient-to-br from-teal-300 to-cyan-500";
+                  const selected = stepKind === o.id;
 
                   return (
-                    <button key={o.id} onClick={() => setStepKind(o.id)} className={`rounded-xl border p-3 text-left transition ${stepKind === o.id ? selectedClass : "border-purple-100 bg-white hover:bg-purple-50/40"}`}>
-                      <div className={`w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center mb-2`}>
-                        <o.Icon className="w-5 h-5 text-white" />
+                    <button key={o.id} onClick={() => setStepKind(o.id)} className={`chooser-option relative flex w-full items-center gap-5 p-4 text-left sm:p-7 ${selected ? "is-selected" : ""}`}>
+                      {selected && <span className="chooser-check flex items-center justify-center"><Check className="w-8 h-8" /></span>}
+                      <div className={`chooser-option-icon ${iconClass} flex shrink-0 items-center justify-center`}>
+                        <o.Icon className="w-10 h-10 sm:w-11 sm:h-11 text-white" />
                       </div>
-                      <p className="text-sm font-semibold text-gray-800">{o.label}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xl sm:text-2xl font-extrabold text-slate-950">{o.label}</p>
+                        <p className="mt-2 max-w-md text-base sm:text-lg leading-relaxed text-slate-500">{o.description}</p>
+                      </div>
+                      <span className="chooser-arrow hidden sm:flex items-center justify-center">
+                        <ChevronRight className="w-8 h-8" />
+                      </span>
                     </button>
                   );
                 })}
+                </div>
               </div>
-              <div className="mt-5 flex justify-end"><button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="app-btn-primary h-11 px-8 rounded-full font-bold disabled:opacity-50">{t("mindmaps.next")}</button></div>
+              <button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="chooser-next relative mt-2 flex w-full items-center justify-center gap-4 disabled:opacity-55">
+                <Sparkles className="w-6 h-6" />
+                <span>{t("mindmaps.next")}</span>
+                <ChevronRight className="absolute right-8 w-8 h-8" />
+              </button>
             </div>
           ) : kind === "mindmap" ? (
             <>
