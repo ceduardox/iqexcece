@@ -19,6 +19,12 @@ export function serveStatic(app: Express) {
         return;
       }
 
+      if (normalized.endsWith("/OneSignalSDKWorker.js")) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        res.setHeader("Cache-Control", "no-cache");
+        return;
+      }
+
       if (normalized.includes("/assets/")) {
         res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
       }

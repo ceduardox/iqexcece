@@ -51,6 +51,18 @@ function logOneSignalState(label: string, OneSignal: any) {
   return state;
 }
 
+async function waitForOneSignalRegistration(OneSignal: any, timeoutMs = 18000) {
+  const startedAt = Date.now();
+  let state = logOneSignalState("waiting for subscription", OneSignal);
+
+  while (!state.subscriptionId && Date.now() - startedAt < timeoutMs) {
+    await new Promise((resolve) => window.setTimeout(resolve, 900));
+    state = logOneSignalState("subscription poll", OneSignal);
+  }
+
+  return state;
+}
+
 function getUnregisteredStatus(permission: string) {
   if (permission === "denied") {
     return "Las notificaciones estan bloqueadas. Activalas desde los permisos de la app o del navegador para recibir avisos.";
@@ -85,12 +97,18 @@ export function OneSignalPermissionPrompt() {
         const initialState = logOneSignalState("ready", OneSignal);
         if (initialState.notificationPermission === "granted" && !initialState.subscriptionId) {
           console.info("[onesignal-client] permission already granted, forcing optIn");
+          setStatus("Registrando este dispositivo en OneSignal...");
+          setVisible(true);
           await OneSignal.User.PushSubscription.optIn();
-          const nextState = logOneSignalState("after automatic optIn", OneSignal);
+          const nextState = await waitForOneSignalRegistration(OneSignal);
           if (!nextState.subscriptionId) {
             setStatus(getUnregisteredStatus(nextState.notificationPermission));
             setDebugInfo(JSON.stringify(nextState, null, 2));
             setVisible(true);
+          } else {
+            setStatus("Dispositivo registrado para notificaciones.");
+            setDebugInfo(JSON.stringify(nextState, null, 2));
+            window.setTimeout(() => setVisible(false), 1400);
           }
         } else if (initialState.notificationPermission === "denied" && isStandaloneMode() && !sessionStorage.getItem(SESSION_DISMISSED_KEY)) {
           setStatus(getUnregisteredStatus("denied"));
@@ -142,8 +160,8 @@ export function OneSignalPermissionPrompt() {
         await OneSignal.User.PushSubscription.optIn();
       }
 
-      await new Promise((resolve) => window.setTimeout(resolve, 1200));
-      return logOneSignalState("after manual permission", OneSignal);
+      setStatus("Registrando este dispositivo en OneSignal...");
+      return waitForOneSignalRegistration(OneSignal);
     };
 
     try {
