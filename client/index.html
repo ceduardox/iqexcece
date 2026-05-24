@@ -21,6 +21,20 @@
         await OneSignal.init({
           appId: "8f0ea034-551c-4bc8-b913-c500b4a80c2f",
           autoResubscribe: true,
+          promptOptions: {
+            slidedown: {
+              prompts: [{
+                type: "push",
+                autoPrompt: true,
+                text: {
+                  actionMessage: "Suscríbete a nuestras notificaciones para recibir novedades y avisos importantes.",
+                  acceptButton: "Suscribirme",
+                  cancelButton: "Más tarde",
+                  confirmMessage: "Gracias por suscribirte."
+                }
+              }]
+            }
+          },
           serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
           serviceWorkerParam: { scope: "/push/onesignal/" }
         });
