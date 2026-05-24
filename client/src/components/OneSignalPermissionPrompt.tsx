@@ -9,6 +9,7 @@ declare global {
 }
 
 const DISMISSED_KEY = "iqex-onesignal-permission-dismissed";
+const SESSION_DISMISSED_KEY = "iqex-onesignal-permission-dismissed-session";
 
 type OneSignalState = {
   notificationPermission: string;
@@ -23,6 +24,11 @@ type OneSignalState = {
 function getNativePermission() {
   if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
   return Notification.permission;
+}
+
+function isStandaloneMode() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true;
 }
 
 function readOneSignalState(OneSignal: any): OneSignalState {
@@ -43,6 +49,18 @@ function logOneSignalState(label: string, OneSignal: any) {
   const state = readOneSignalState(OneSignal);
   console.info(`[onesignal-client] ${label}`, state);
   return state;
+}
+
+function getUnregisteredStatus(permission: string) {
+  if (permission === "denied") {
+    return "Las notificaciones estan bloqueadas. Activalas desde los permisos de la app o del navegador para recibir avisos.";
+  }
+
+  if (permission === "default") {
+    return "Activa las notificaciones para recibir novedades, recordatorios y comunicados importantes.";
+  }
+
+  return "Permiso aceptado, pero OneSignal no devolvio subscriptionId.";
 }
 
 export function OneSignalPermissionPrompt() {
@@ -70,10 +88,14 @@ export function OneSignalPermissionPrompt() {
           await OneSignal.User.PushSubscription.optIn();
           const nextState = logOneSignalState("after automatic optIn", OneSignal);
           if (!nextState.subscriptionId) {
-            setStatus("Permiso aceptado, pero OneSignal todavia no registro este dispositivo.");
+            setStatus(getUnregisteredStatus(nextState.notificationPermission));
             setDebugInfo(JSON.stringify(nextState, null, 2));
             setVisible(true);
           }
+        } else if (initialState.notificationPermission === "denied" && isStandaloneMode() && !sessionStorage.getItem(SESSION_DISMISSED_KEY)) {
+          setStatus(getUnregisteredStatus("denied"));
+          setDebugInfo(JSON.stringify(initialState, null, 2));
+          setVisible(true);
         }
       } catch (error: any) {
         console.error("[onesignal-client] init diagnostics failed", error);
@@ -82,8 +104,11 @@ export function OneSignalPermissionPrompt() {
   }, []);
 
   useEffect(() => {
-    if (permission !== "default") return;
-    if (localStorage.getItem(DISMISSED_KEY) === "true") return;
+    if (permission === "granted" || permission === "unsupported") return;
+    if (sessionStorage.getItem(SESSION_DISMISSED_KEY) === "true") return;
+    if (permission === "denied" && !isStandaloneMode()) return;
+
+    localStorage.removeItem(DISMISSED_KEY);
     const timer = window.setTimeout(() => setVisible(true), 4500);
     return () => window.clearTimeout(timer);
   }, [permission]);
@@ -135,7 +160,7 @@ export function OneSignalPermissionPrompt() {
           setStatus("OneSignal necesita HTTPS para registrar este dispositivo. Abre la app desde el dominio seguro, no desde IP con http.");
           setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
         } else {
-          setStatus("Permiso aceptado, pero OneSignal no devolvio subscriptionId.");
+          setStatus(getUnregisteredStatus(nextPermission));
           setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
           setVisible(true);
         }
@@ -157,7 +182,7 @@ export function OneSignalPermissionPrompt() {
             setStatus("OneSignal necesita HTTPS para registrar este dispositivo. Abre la app desde el dominio seguro, no desde IP con http.");
             setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
           } else {
-            setStatus("Permiso aceptado, pero OneSignal no devolvio subscriptionId.");
+            setStatus(getUnregisteredStatus(nextPermission));
             setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
             setVisible(true);
           }
@@ -175,7 +200,8 @@ export function OneSignalPermissionPrompt() {
   };
 
   const dismiss = () => {
-    localStorage.setItem(DISMISSED_KEY, "true");
+    sessionStorage.setItem(SESSION_DISMISSED_KEY, "true");
+    localStorage.removeItem(DISMISSED_KEY);
     setVisible(false);
   };
 
@@ -222,7 +248,7 @@ export function OneSignalPermissionPrompt() {
           Ahora no
         </Button>
         <Button type="button" size="sm" onClick={requestPermission} disabled={busy} className="bg-cyan-600 hover:bg-cyan-500">
-          {busy ? "Abriendo..." : "Permitir"}
+          {busy ? "Abriendo..." : permission === "denied" ? "Activar" : "Permitir"}
         </Button>
       </div>
     </div>
