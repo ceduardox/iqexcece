@@ -26,6 +26,7 @@ async function refreshApp() {
       await registration.update();
       if (registration.waiting) {
         registration.waiting.postMessage("skipWaiting");
+        window.setTimeout(() => window.location.reload(), 500);
         return;
       }
     }

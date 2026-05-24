@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Apple, Download, X, RefreshCw, Smartphone } from "lucide-react";
+import { Apple, Download, X, Smartphone } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -57,8 +57,6 @@ export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [showAppleInstall, setShowAppleInstall] = useState(false);
-  const [showUpdate, setShowUpdate] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     let installTimer: number | undefined;
@@ -90,28 +88,7 @@ export function PWAInstallPrompt() {
     }
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/OneSignalSDKWorker.js").then((reg) => {
-        setRegistration(reg);
-
-        reg.addEventListener("updatefound", () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener("statechange", () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                setShowUpdate(true);
-              }
-            });
-          }
-        });
-      });
-
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
-        }
-      });
+      navigator.serviceWorker.register("/OneSignalSDKWorker.js");
     }
 
     return () => {
@@ -149,13 +126,6 @@ export function PWAInstallPrompt() {
   const handleDismissAppleInstall = () => {
     setShowAppleInstall(false);
     localStorage.setItem(APPLE_INSTALL_DISMISSED_AT_KEY, String(Date.now()));
-  };
-
-  const handleUpdate = () => {
-    if (registration?.waiting) {
-      registration.waiting.postMessage("skipWaiting");
-    }
-    setShowUpdate(false);
   };
 
   return (
@@ -283,43 +253,6 @@ export function PWAInstallPrompt() {
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Descargar app
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showUpdate && (
-          <motion.div
-            initial={{ opacity: 0, y: -100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -100 }}
-            className="fixed top-4 left-4 right-4 z-50"
-          >
-            <div
-              className="bg-white rounded-2xl p-4 shadow-2xl border border-cyan-100"
-              style={{ boxShadow: "0 8px 32px rgba(6, 182, 212, 0.25)" }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #06b6d4 0%, #8a3ffc 100%)" }}
-                >
-                  <RefreshCw className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-gray-800 text-sm">Nueva version disponible</h3>
-                  <p className="text-gray-500 text-xs">Actualiza para obtener las mejoras</p>
-                </div>
-                <Button
-                  onClick={handleUpdate}
-                  size="sm"
-                  className="text-white"
-                  style={{ background: "linear-gradient(135deg, #06b6d4 0%, #8a3ffc 100%)" }}
-                >
-                  Actualizar
                 </Button>
               </div>
             </div>
