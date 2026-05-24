@@ -943,8 +943,13 @@ Reglas:
 
     const appId = process.env.ONESIGNAL_APP_ID || "8f0ea034-551c-4bc8-b913-c500b4a80c2f";
     const apiKey = process.env.ONESIGNAL_REST_API_KEY;
+    const requestId = randomUUID();
     if (!apiKey) {
-      return res.status(500).json({ error: "OneSignal no configurado. Falta ONESIGNAL_REST_API_KEY en variables de entorno." });
+      console.error(`[onesignal:${requestId}] Missing ONESIGNAL_REST_API_KEY`);
+      return res.status(500).json({
+        error: "OneSignal no configurado. Falta ONESIGNAL_REST_API_KEY en variables de entorno.",
+        requestId,
+      });
     }
 
     const title = String(req.body?.title || "").trim();
@@ -976,9 +981,16 @@ Reglas:
         const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
         body.url = parsedUrl.toString();
       } catch {
-        return res.status(400).json({ error: "URL invalida." });
+        return res.status(400).json({ error: "URL invalida.", requestId });
       }
     }
+
+    console.info(`[onesignal:${requestId}] Sending push`, {
+      appId,
+      titleLength: title.length,
+      messageLength: message.length,
+      url: body.url || null,
+    });
 
     const response = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
@@ -994,14 +1006,29 @@ Reglas:
     try { data = JSON.parse(text); } catch {}
 
     if (!response.ok) {
+      console.error(`[onesignal:${requestId}] Rejected`, {
+        status: response.status,
+        statusText: response.statusText,
+        response: data && Object.keys(data).length > 0 ? data : text,
+      });
       return res.status(502).json({
         error: "OneSignal rechazo el envio.",
+        requestId,
+        status: response.status,
+        statusText: response.statusText,
         details: data?.errors || data?.message || text || "unknown",
+        response: data && Object.keys(data).length > 0 ? data : text,
       });
     }
 
+    console.info(`[onesignal:${requestId}] Accepted`, {
+      id: data?.id || null,
+      recipients: data?.recipients ?? null,
+    });
+
     res.json({
       success: true,
+      requestId,
       id: data?.id || null,
       recipients: data?.recipients ?? null,
       raw: data,

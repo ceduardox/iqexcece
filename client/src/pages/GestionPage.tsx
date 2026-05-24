@@ -8049,6 +8049,7 @@ function NotificationsPanel({ token }: { token: string }) {
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [debugInfo, setDebugInfo] = useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -8069,6 +8070,7 @@ function NotificationsPanel({ token }: { token: string }) {
     setSending(true);
     setError("");
     setStatus("");
+    setDebugInfo("");
 
     try {
       const res = await fetch("/api/admin/notifications/send", {
@@ -8079,13 +8081,22 @@ function NotificationsPanel({ token }: { token: string }) {
       const data = await res.json();
       if (!res.ok) {
         setError(data?.error || "No se pudo enviar la notificacion.");
+        const details = {
+          requestId: data?.requestId || null,
+          httpStatus: data?.status || res.status,
+          httpStatusText: data?.statusText || res.statusText,
+          details: data?.details || null,
+          response: data?.response || null,
+        };
+        setDebugInfo(JSON.stringify(details, null, 2));
         return;
       }
       const recipients = typeof data?.recipients === "number" ? ` Destinatarios: ${data.recipients}.` : "";
-      setStatus(`Notificacion enviada.${recipients}`);
+      setStatus(`Notificacion enviada.${recipients}${data?.requestId ? ` ID log: ${data.requestId}.` : ""}`);
       setMessage("");
     } catch (err: any) {
       setError(err?.message || "Error de conexion.");
+      setDebugInfo(JSON.stringify({ networkError: err?.message || String(err) }, null, 2));
     } finally {
       setSending(false);
     }
@@ -8145,7 +8156,16 @@ function NotificationsPanel({ token }: { token: string }) {
             />
             <p className="mt-1 text-right text-xs text-white/40">{message.length}/240</p>
           </div>
-          {error && <p className="rounded-md border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+          {error && (
+            <div className="rounded-md border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              <p>{error}</p>
+              {debugInfo && (
+                <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded bg-black/35 p-2 text-[11px] leading-relaxed text-red-100">
+                  {debugInfo}
+                </pre>
+              )}
+            </div>
+          )}
           {status && <p className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">{status}</p>}
           {!apiConfigured && (
             <p className="rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
