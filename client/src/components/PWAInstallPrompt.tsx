@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, X, RefreshCw, Smartphone } from "lucide-react";
+import { Apple, Download, X, RefreshCw, Smartphone } from "lucide-react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const INSTALL_DISMISSED_AT_KEY = "pwa-install-dismissed-at";
+const APPLE_INSTALL_DISMISSED_AT_KEY = "pwa-apple-install-dismissed-at";
 const INSTALL_SNOOZE_MS = 24 * 60 * 60 * 1000;
 
 function isStandaloneMode() {
@@ -20,7 +22,16 @@ function isAndroidDevice() {
   return /Android/i.test(window.navigator.userAgent || "");
 }
 
-function canShowInstallBanner() {
+function isAppleDevice() {
+  const ua = window.navigator.userAgent || "";
+  return /iPhone|iPad|iPod|Macintosh/i.test(ua);
+}
+
+function isInstallPage() {
+  return window.location.pathname === "/instalar-app";
+}
+
+function canShowAndroidInstallBanner() {
   if (isStandaloneMode()) return false;
   if (!isAndroidDevice()) return false;
 
@@ -30,9 +41,22 @@ function canShowInstallBanner() {
   return Date.now() - dismissedAt > INSTALL_SNOOZE_MS;
 }
 
+function canShowAppleInstallBanner() {
+  if (isStandaloneMode()) return false;
+  if (isInstallPage()) return false;
+  if (!isAppleDevice()) return false;
+
+  const dismissedAt = Number(localStorage.getItem(APPLE_INSTALL_DISMISSED_AT_KEY) || 0);
+  if (!dismissedAt) return true;
+
+  return Date.now() - dismissedAt > INSTALL_SNOOZE_MS;
+}
+
 export function PWAInstallPrompt() {
+  const [, setLocation] = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstall, setShowInstall] = useState(false);
+  const [showAppleInstall, setShowAppleInstall] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
@@ -43,9 +67,9 @@ export function PWAInstallPrompt() {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
 
-      if (canShowInstallBanner()) {
+      if (canShowAndroidInstallBanner()) {
         installTimer = window.setTimeout(() => {
-          if (canShowInstallBanner()) setShowInstall(true);
+          if (canShowAndroidInstallBanner()) setShowInstall(true);
         }, 3500);
       }
     };
@@ -58,6 +82,12 @@ export function PWAInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("appinstalled", handleAppInstalled);
+
+    if (canShowAppleInstallBanner()) {
+      installTimer = window.setTimeout(() => {
+        if (canShowAppleInstallBanner()) setShowAppleInstall(true);
+      }, 3500);
+    }
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").then((reg) => {
@@ -111,6 +141,16 @@ export function PWAInstallPrompt() {
     localStorage.setItem(INSTALL_DISMISSED_AT_KEY, String(Date.now()));
   };
 
+  const handleOpenAppleGuide = () => {
+    setShowAppleInstall(false);
+    setLocation("/instalar-app");
+  };
+
+  const handleDismissAppleInstall = () => {
+    setShowAppleInstall(false);
+    localStorage.setItem(APPLE_INSTALL_DISMISSED_AT_KEY, String(Date.now()));
+  };
+
   const handleUpdate = () => {
     if (registration?.waiting) {
       registration.waiting.postMessage("skipWaiting");
@@ -121,6 +161,70 @@ export function PWAInstallPrompt() {
   return (
     <>
       <AnimatePresence>
+        {showAppleInstall && (
+          <motion.div
+            initial={{ opacity: 0, y: 120, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 120, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            className="fixed inset-x-3 bottom-4 z-[65] mx-auto max-w-md sm:bottom-6"
+          >
+            <div
+              className="relative overflow-hidden rounded-2xl border border-violet-200/25 bg-slate-950 text-white shadow-2xl"
+              style={{ boxShadow: "0 18px 48px rgba(124, 58, 237, 0.30)" }}
+            >
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-400 via-cyan-300 to-fuchsia-400" />
+              <button
+                onClick={handleDismissAppleInstall}
+                className="absolute right-2 top-2 rounded-full p-2 text-white/55 hover:bg-white/10 hover:text-white"
+                aria-label="Cerrar banner de instalacion Apple"
+                data-testid="button-dismiss-apple-install"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="flex items-start gap-3 p-4 pr-12">
+                <div
+                  className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white"
+                  style={{ boxShadow: "0 10px 28px rgba(124, 58, 237, 0.24)" }}
+                >
+                  <img src="/iqxponencial-icon-192.png" alt="" className="h-10 w-10 rounded-xl object-contain" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-1.5 text-violet-200">
+                    <Apple className="h-3.5 w-3.5" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em]">iPhone y Mac</span>
+                  </div>
+                  <h3 className="text-base font-extrabold leading-tight">Instala IQeXponencial</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-white/66">
+                    En Apple se instala desde Safari. Te guiamos paso a paso.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 border-t border-white/10 bg-white/[0.03] p-3">
+                <Button
+                  onClick={handleDismissAppleInstall}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 flex-1 border-white/15 bg-transparent text-white/75 hover:bg-white/10 hover:text-white"
+                >
+                  Ahora no
+                </Button>
+                <Button
+                  onClick={handleOpenAppleGuide}
+                  size="sm"
+                  className="h-10 flex-1 bg-violet-500 font-bold text-white hover:bg-violet-400"
+                  data-testid="button-open-apple-install-guide"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Ver pasos
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {showInstall && (
           <motion.div
             initial={{ opacity: 0, y: 120, scale: 0.98 }}

@@ -57,6 +57,7 @@ const MetodoXPage = lazy(() => import("@/pages/MetodoXPage"));
 const ContactoPage = lazy(() => import("@/pages/ContactoPage"));
 const MindMapsPage = lazy(() => import("@/pages/MindMapsPage"));
 const ChatWidgetPage = lazy(() => import("@/pages/ChatWidgetPage"));
+const InstallAppPage = lazy(() => import("@/pages/InstallAppPage"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function warmCommonRoutes() {
@@ -123,6 +124,7 @@ function Router() {
       <Route path="/mapas-mentales" component={MindMapsPage}/>
       <Route path="/mapas-mentales/share/:token" component={MindMapsPage}/>
       <Route path="/widget/chat" component={ChatWidgetPage}/>
+      <Route path="/instalar-app" component={InstallAppPage}/>
       <Route component={NotFound} />
     </Switch>
   );
