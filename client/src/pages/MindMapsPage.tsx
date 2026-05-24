@@ -1586,6 +1586,21 @@ export default function MindMapsPage() {
           gap: 8px;
           background: linear-gradient(180deg, #fcfdff 0%, #f7faff 100%);
         }
+        .mindmaps-page .mindmap-action-bar {
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          overflow-x: auto;
+          overflow-y: visible;
+          padding: 2px 2px 8px;
+          scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
+        }
+        .mindmaps-page .mindmap-action-bar > button,
+        .mindmaps-page .mindmap-action-bar > label {
+          flex: 0 0 auto;
+        }
         .mindmaps-page .project-open-btn {
           border-radius: 0;
           box-shadow: none;
@@ -1798,6 +1813,17 @@ export default function MindMapsPage() {
             border-radius: 22px;
             font-size: 18px;
           }
+          .mindmaps-page .mindmap-action-bar {
+            margin: -2px -2px 0;
+            padding: 4px 2px 10px;
+          }
+          .mindmaps-page .mindmap-action-bar > button,
+          .mindmaps-page .mindmap-action-bar > label {
+            height: 38px;
+            padding-left: 10px;
+            padding-right: 10px;
+            font-size: 12px;
+          }
         }
       `}</style>
       <header className={`sticky top-0 z-40 px-3 py-4 ${showChooser ? "chooser-topbar" : "bg-white/90 backdrop-blur-lg border-b border-purple-100"}`}>
@@ -1986,7 +2012,7 @@ export default function MindMapsPage() {
             <>
               {!readonly && (
                 <div className="border-b border-purple-100 p-2 space-y-2">
-                  <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+                  <div className="mindmap-action-bar whitespace-nowrap">
                     <button
                       onClick={() => {
                         if (!boardRef.current) return;
