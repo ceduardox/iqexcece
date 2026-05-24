@@ -197,7 +197,7 @@ export function PWAInstallPrompt() {
                   </div>
                   <h3 className="text-base font-extrabold leading-tight">Instala IQeXponencial</h3>
                   <p className="mt-1 text-xs leading-relaxed text-white/66">
-                    En Apple se instala desde Safari. Te guiamos paso a paso.
+                    Sigue los pasos para agregarla a tu pantalla de inicio o al Dock.
                   </p>
                 </div>
               </div>

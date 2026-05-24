@@ -59,7 +59,7 @@ export default function InstallAppPage() {
                 Instala IQeXponencial como app
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/72 sm:text-lg">
-                En iPhone, iPad y Mac no aparece el boton automatico de descarga como en Android. Se instala desde Safari con el menu Compartir.
+                Abre IQeXponencial desde Safari y agregala a tu pantalla de inicio o al Dock siguiendo estos pasos.
               </p>
             </div>
 
