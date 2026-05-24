@@ -267,6 +267,22 @@ export default function MindMapsPage() {
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) || null, [nodes, selectedNodeId]);
 
+  function resetMindmapViewport() {
+    if (typeof window === "undefined") return;
+
+    const reset = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    reset();
+    requestAnimationFrame(() => {
+      reset();
+      requestAnimationFrame(reset);
+    });
+  }
+
   function clampOffset(nextX: number, nextY: number) {
     const rect = boardRef.current?.getBoundingClientRect();
     if (!rect) return { x: nextX, y: nextY };
@@ -313,11 +329,14 @@ export default function MindMapsPage() {
     setTitle(record.title || "Nuevo proyecto");
     setKind(parsed.kind);
     setSavedSnapshot(JSON.stringify(parsed));
+    setMobileSidebarOpen(false);
+    setMobileOptionsOpen(false);
     if (parsed.kind === "mindmap") {
       setNodes(parsed.nodes || []);
       setEdges(parsed.edges || []);
       setCols(colsDefault());
       setStrokes([]);
+      resetMindmapViewport();
     } else if (parsed.kind === "taskboard") {
       const normalized = normalizeTaskColumns(parsed.columns);
       setCols(normalized);
@@ -366,6 +385,12 @@ export default function MindMapsPage() {
     };
     run();
   }, [shareMatch, token]);
+
+  useEffect(() => {
+    if (!showChooser && kind === "mindmap") {
+      resetMindmapViewport();
+    }
+  }, [showChooser, kind]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
@@ -1437,6 +1462,36 @@ export default function MindMapsPage() {
     setBoardOffset({ x: 0, y: 0 });
   }
 
+  function startChosenProject() {
+    const nextName = stepName.trim();
+    if (!nextName) return;
+    if (!stepKind) {
+      toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" });
+      return;
+    }
+
+    if (typeof document !== "undefined") {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
+
+    setMobileSidebarOpen(false);
+    setMobileOptionsOpen(false);
+    setShowChooser(false);
+    setTitle(nextName);
+    setKind(stepKind);
+    if (stepKind === "mindmap") {
+      setNodes([]);
+      setEdges([]);
+      resetMindmapViewport();
+    }
+    if (stepKind === "taskboard") {
+      const initial = colsDefault();
+      setCols(initial);
+      setTaskColId(initial[0].id);
+    }
+    if (stepKind === "whiteboard") setStrokes([]);
+  }
+
   function handleBack() {
     if (!showChooser && !readonly) {
       newProject();
@@ -2051,7 +2106,7 @@ export default function MindMapsPage() {
                 })}
                 </div>
               </div>
-              <button onClick={() => { if (!stepName.trim()) return; if (!stepKind) { toast({ title: t("mindmaps.selectOptionTitle"), description: t("mindmaps.selectOptionDesc"), variant: "destructive" }); return; } setShowChooser(false); setTitle(stepName.trim()); setKind(stepKind); if (stepKind === "mindmap") { setNodes([]); setEdges([]); } if (stepKind === "taskboard") { const initial = colsDefault(); setCols(initial); setTaskColId(initial[0].id); } if (stepKind === "whiteboard") setStrokes([]); }} disabled={!stepName.trim()} className="chooser-next relative mt-2 flex w-full items-center justify-center gap-4 disabled:opacity-55">
+              <button onClick={startChosenProject} disabled={!stepName.trim()} className="chooser-next relative mt-2 flex w-full items-center justify-center gap-4 disabled:opacity-55">
                 <Sparkles className="w-6 h-6" />
                 <span>{t("mindmaps.next")}</span>
                 <ChevronRight className="absolute right-8 w-8 h-8" />
