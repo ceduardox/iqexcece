@@ -12,6 +12,9 @@ const DISMISSED_KEY = "iqex-onesignal-permission-dismissed";
 
 type OneSignalState = {
   notificationPermission: string;
+  secureContext: boolean;
+  serviceWorkerSupported: boolean;
+  origin: string;
   onesignalId: string | null;
   subscriptionId: string | null;
   optedIn: boolean | null;
@@ -25,6 +28,9 @@ function getNativePermission() {
 function readOneSignalState(OneSignal: any): OneSignalState {
   return {
     notificationPermission: getNativePermission(),
+    secureContext: window.isSecureContext,
+    serviceWorkerSupported: "serviceWorker" in navigator,
+    origin: window.location.origin,
     onesignalId: OneSignal?.User?.onesignalId || null,
     subscriptionId: OneSignal?.User?.PushSubscription?.id || null,
     optedIn: typeof OneSignal?.User?.PushSubscription?.optedIn === "boolean"
@@ -87,8 +93,22 @@ export function OneSignalPermissionPrompt() {
     setStatus("Abriendo permiso de notificaciones...");
     setDebugInfo("");
     const requestWithOneSignal = async (OneSignal: any) => {
+      if (!window.isSecureContext) {
+        const state = readOneSignalState(OneSignal);
+        setStatus("OneSignal necesita HTTPS para registrar este dispositivo. Abre la app desde el dominio seguro, no desde IP con http.");
+        setDebugInfo(JSON.stringify(state, null, 2));
+        return state;
+      }
+
+      if (!("serviceWorker" in navigator)) {
+        const state = readOneSignalState(OneSignal);
+        setStatus("Este navegador no tiene service worker disponible para Web Push.");
+        setDebugInfo(JSON.stringify(state, null, 2));
+        return state;
+      }
+
       if (OneSignal?.Notifications?.requestPermission) {
-        await OneSignal.Notifications.requestPermission();
+        await OneSignal.Notifications.requestPermission({ fallbackToSettings: true });
       } else if ("Notification" in window) {
         await Notification.requestPermission();
       }
@@ -111,6 +131,9 @@ export function OneSignalPermissionPrompt() {
           setStatus("Dispositivo registrado para notificaciones.");
           setDebugInfo(JSON.stringify(state, null, 2));
           window.setTimeout(() => setVisible(false), 1400);
+        } else if (!state?.secureContext) {
+          setStatus("OneSignal necesita HTTPS para registrar este dispositivo. Abre la app desde el dominio seguro, no desde IP con http.");
+          setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
         } else {
           setStatus("Permiso aceptado, pero OneSignal no devolvio subscriptionId.");
           setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
@@ -130,6 +153,9 @@ export function OneSignalPermissionPrompt() {
             setStatus("Dispositivo registrado para notificaciones.");
             setDebugInfo(JSON.stringify(state, null, 2));
             window.setTimeout(() => setVisible(false), 1400);
+          } else if (!state?.secureContext) {
+            setStatus("OneSignal necesita HTTPS para registrar este dispositivo. Abre la app desde el dominio seguro, no desde IP con http.");
+            setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
           } else {
             setStatus("Permiso aceptado, pero OneSignal no devolvio subscriptionId.");
             setDebugInfo(JSON.stringify(state || { notificationPermission: nextPermission }, null, 2));
