@@ -968,8 +968,8 @@ Reglas:
       return res.status(400).json({ error: "El mensaje no debe superar 240 caracteres." });
     }
 
-    const includedSegment = process.env.ONESIGNAL_INCLUDED_SEGMENT || "Subscribed Users";
-    const body: Record<string, unknown> = {
+    const primarySegment = process.env.ONESIGNAL_INCLUDED_SEGMENT || "Subscribed Users";
+    const createBody = (includedSegment: string): Record<string, unknown> => ({
       app_id: appId,
       target_channel: "push",
       included_segments: [includedSegment],
@@ -977,7 +977,9 @@ Reglas:
       headings: { es: title, en: title },
       contents: { es: message, en: message },
       name: `Admin IQeXponencial ${new Date().toISOString()}`,
-    };
+    });
+
+    let body = createBody(primarySegment);
 
     if (url) {
       try {
@@ -989,27 +991,50 @@ Reglas:
       }
     }
 
-    console.info(`[onesignal:${requestId}] Sending push`, {
-      appId,
-      titleLength: title.length,
-      messageLength: message.length,
-      includedSegment,
-      isAnyWeb: true,
-      url: body.url || null,
-    });
+    const sendToOneSignal = async (payload: Record<string, unknown>, includedSegment: string) => {
+      console.info(`[onesignal:${requestId}] Sending push`, {
+        appId,
+        titleLength: title.length,
+        messageLength: message.length,
+        includedSegment,
+        isAnyWeb: true,
+        url: payload.url || null,
+      });
 
-    const response = await fetch("https://api.onesignal.com/notifications?c=push", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Key ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    });
+      const response = await fetch("https://api.onesignal.com/notifications?c=push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Key ${apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const text = await response.text();
-    let data: any = {};
-    try { data = JSON.parse(text); } catch {}
+      const text = await response.text();
+      let data: any = {};
+      try { data = JSON.parse(text); } catch {}
+      return { response, text, data, includedSegment };
+    };
+
+    let result = await sendToOneSignal(body, primarySegment);
+
+    const shouldRetryWithAll = !result.data?.id &&
+      primarySegment !== "All" &&
+      Array.isArray(result.data?.errors) &&
+      result.data.errors.some((error: unknown) => String(error).includes("All included players are not subscribed"));
+
+    if (shouldRetryWithAll) {
+      body = createBody("All");
+      if (url) {
+        const parsedUrl = new URL(url, process.env.APP_BASE_URL || "https://iqexponencial.app");
+        body.url = parsedUrl.toString();
+        body.web_url = parsedUrl.toString();
+      }
+      console.info(`[onesignal:${requestId}] Retrying with All segment`);
+      result = await sendToOneSignal(body, "All");
+    }
+
+    const { response, text, data, includedSegment } = result;
 
     if (!response.ok) {
       console.error(`[onesignal:${requestId}] Rejected`, {
@@ -1044,6 +1069,7 @@ Reglas:
     console.info(`[onesignal:${requestId}] Accepted`, {
       id: data?.id || null,
       recipients: data?.recipients ?? null,
+      includedSegment,
       response: data,
     });
 
@@ -1052,6 +1078,7 @@ Reglas:
       requestId,
       id: data?.id || null,
       recipients: data?.recipients ?? null,
+      includedSegment,
       warnings: data?.warnings || null,
       errors: data?.errors || null,
       raw: data,
