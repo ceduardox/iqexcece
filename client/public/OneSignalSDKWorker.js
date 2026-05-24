@@ -1,3 +1,5 @@
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
 const CACHE_VERSION = 'v1.0.18';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
@@ -20,7 +22,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('iqexponencial-') && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -40,7 +42,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(event.request));
     return;
   }
-  
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {

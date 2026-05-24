@@ -90,7 +90,7 @@ export function PWAInstallPrompt() {
     }
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").then((reg) => {
+      navigator.serviceWorker.register("/OneSignalSDKWorker.js").then((reg) => {
         setRegistration(reg);
 
         reg.addEventListener("updatefound", () => {

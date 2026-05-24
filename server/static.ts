@@ -19,7 +19,7 @@ export function serveStatic(app: Express) {
         return;
       }
 
-      if (normalized.endsWith("/OneSignalSDKWorker.js")) {
+      if (normalized.endsWith("/OneSignalSDKWorker.js") || normalized.endsWith("/OneSignalSDKUpdaterWorker.js")) {
         res.setHeader("Content-Type", "application/javascript; charset=utf-8");
         res.setHeader("Cache-Control", "no-cache");
         return;
