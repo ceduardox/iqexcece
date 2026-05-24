@@ -8091,8 +8091,24 @@ function NotificationsPanel({ token }: { token: string }) {
         setDebugInfo(JSON.stringify(details, null, 2));
         return;
       }
-      const recipients = typeof data?.recipients === "number" ? ` Destinatarios: ${data.recipients}.` : "";
-      setStatus(`Notificacion enviada.${recipients}${data?.requestId ? ` ID log: ${data.requestId}.` : ""}`);
+      const recipients = typeof data?.recipients === "number" ? data.recipients : null;
+      const recipientsText = recipients === null ? "Destinatarios: OneSignal no lo informo." : `Destinatarios: ${recipients}.`;
+      const oneSignalId = data?.id ? ` ID OneSignal: ${data.id}.` : "";
+      const requestText = data?.requestId ? ` ID log: ${data.requestId}.` : "";
+      const warningText = recipients === 0
+        ? " No hay suscriptores activos en el segmento usado."
+        : recipients === null
+          ? " Abre los detalles para ver la respuesta completa de OneSignal."
+          : "";
+      setStatus(`Notificacion enviada. ${recipientsText}${oneSignalId}${requestText}${warningText}`);
+      setDebugInfo(JSON.stringify({
+        requestId: data?.requestId || null,
+        oneSignalId: data?.id || null,
+        recipients: data?.recipients ?? null,
+        warnings: data?.warnings || null,
+        errors: data?.errors || null,
+        raw: data?.raw || data,
+      }, null, 2));
       setMessage("");
     } catch (err: any) {
       setError(err?.message || "Error de conexion.");
@@ -8166,7 +8182,16 @@ function NotificationsPanel({ token }: { token: string }) {
               )}
             </div>
           )}
-          {status && <p className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">{status}</p>}
+          {status && (
+            <div className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+              <p>{status}</p>
+              {debugInfo && (
+                <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded bg-black/35 p-2 text-[11px] leading-relaxed text-emerald-100">
+                  {debugInfo}
+                </pre>
+              )}
+            </div>
+          )}
           {!apiConfigured && (
             <p className="rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
               Configura ONESIGNAL_REST_API_KEY en el entorno del servidor para habilitar el envio desde este panel.

@@ -1024,6 +1024,7 @@ Reglas:
     console.info(`[onesignal:${requestId}] Accepted`, {
       id: data?.id || null,
       recipients: data?.recipients ?? null,
+      response: data,
     });
 
     res.json({
@@ -1031,6 +1032,8 @@ Reglas:
       requestId,
       id: data?.id || null,
       recipients: data?.recipients ?? null,
+      warnings: data?.warnings || null,
+      errors: data?.errors || null,
       raw: data,
     });
   });
