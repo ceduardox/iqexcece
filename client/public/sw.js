@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.11';
+const CACHE_VERSION = 'v1.0.12';
 const CACHE_NAME = `iqexponencial-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -12,7 +12,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
   );
 });
 
