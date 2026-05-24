@@ -18,13 +18,6 @@
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
-        if ("serviceWorker" in navigator) {
-          const legacyRegistration = await navigator.serviceWorker.getRegistration("/push/onesignal/");
-          if (legacyRegistration) {
-            await legacyRegistration.unregister();
-          }
-        }
-
         await OneSignal.init({
           appId: "8f0ea034-551c-4bc8-b913-c500b4a80c2f",
           autoResubscribe: true,
