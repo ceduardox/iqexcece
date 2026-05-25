@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Bell, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +10,7 @@ declare global {
 
 const DISMISSED_KEY = "iqex-onesignal-permission-dismissed";
 const SESSION_DISMISSED_KEY = "iqex-onesignal-permission-dismissed-session";
+const REPAIR_COOLDOWN_MS = 10 * 60 * 1000;
 
 type OneSignalState = {
   notificationPermission: string;
@@ -31,6 +32,10 @@ function isStandaloneMode() {
     (window.navigator as unknown as { standalone?: boolean }).standalone === true;
 }
 
+function canShowNotificationPrompt() {
+  return isStandaloneMode();
+}
+
 function readOneSignalState(OneSignal: any): OneSignalState {
   return {
     notificationPermission: getNativePermission(),
@@ -45,6 +50,10 @@ function readOneSignalState(OneSignal: any): OneSignalState {
   };
 }
 
+function hasHealthyPushSubscription(state: OneSignalState) {
+  return Boolean(state.subscriptionId) && state.optedIn === true;
+}
+
 function logOneSignalState(label: string, OneSignal: any) {
   const state = readOneSignalState(OneSignal);
   console.info(`[onesignal-client] ${label}`, state);
@@ -55,7 +64,7 @@ async function waitForOneSignalRegistration(OneSignal: any, timeoutMs = 18000) {
   const startedAt = Date.now();
   let state = logOneSignalState("waiting for subscription", OneSignal);
 
-  while (!state.subscriptionId && Date.now() - startedAt < timeoutMs) {
+  while (!hasHealthyPushSubscription(state) && Date.now() - startedAt < timeoutMs) {
     await new Promise((resolve) => window.setTimeout(resolve, 900));
     state = logOneSignalState("subscription poll", OneSignal);
   }
@@ -81,6 +90,51 @@ export function OneSignalPermissionPrompt() {
   const [permission, setPermission] = useState<string>(() => getNativePermission());
   const [status, setStatus] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const repairingRef = useRef(false);
+  const lastRepairAttemptRef = useRef(0);
+
+  const repairGrantedSubscription = async (OneSignal: any, showFeedback = canShowNotificationPrompt(), force = false) => {
+    if (repairingRef.current) return readOneSignalState(OneSignal);
+
+    const currentState = logOneSignalState("repair check", OneSignal);
+    setPermission(currentState.notificationPermission);
+    if (currentState.notificationPermission !== "granted" || hasHealthyPushSubscription(currentState)) {
+      return currentState;
+    }
+
+    const now = Date.now();
+    if (!force && now - lastRepairAttemptRef.current < REPAIR_COOLDOWN_MS) {
+      return currentState;
+    }
+    lastRepairAttemptRef.current = now;
+    repairingRef.current = true;
+    if (showFeedback) {
+      setStatus("Registrando este dispositivo en OneSignal...");
+      setVisible(true);
+    }
+
+    try {
+      await OneSignal?.User?.PushSubscription?.optIn?.();
+      const nextState = await waitForOneSignalRegistration(OneSignal);
+      setPermission(nextState.notificationPermission);
+
+      if (hasHealthyPushSubscription(nextState)) {
+        if (showFeedback) {
+          setStatus("Dispositivo registrado para notificaciones.");
+          setDebugInfo(JSON.stringify(nextState, null, 2));
+          window.setTimeout(() => setVisible(false), 1400);
+        }
+      } else if (showFeedback) {
+        setStatus(getUnregisteredStatus(nextState.notificationPermission));
+        setDebugInfo(JSON.stringify(nextState, null, 2));
+        setVisible(true);
+      }
+
+      return nextState;
+    } finally {
+      repairingRef.current = false;
+    }
+  };
 
   useEffect(() => {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -95,22 +149,10 @@ export function OneSignalPermissionPrompt() {
         });
 
         const initialState = logOneSignalState("ready", OneSignal);
-        if (initialState.notificationPermission === "granted" && !initialState.subscriptionId) {
-          console.info("[onesignal-client] permission already granted, forcing optIn");
-          setStatus("Registrando este dispositivo en OneSignal...");
-          setVisible(true);
-          await OneSignal.User.PushSubscription.optIn();
-          const nextState = await waitForOneSignalRegistration(OneSignal);
-          if (!nextState.subscriptionId) {
-            setStatus(getUnregisteredStatus(nextState.notificationPermission));
-            setDebugInfo(JSON.stringify(nextState, null, 2));
-            setVisible(true);
-          } else {
-            setStatus("Dispositivo registrado para notificaciones.");
-            setDebugInfo(JSON.stringify(nextState, null, 2));
-            window.setTimeout(() => setVisible(false), 1400);
-          }
-        } else if (initialState.notificationPermission === "denied" && isStandaloneMode() && !sessionStorage.getItem(SESSION_DISMISSED_KEY)) {
+        if (initialState.notificationPermission === "granted" && !hasHealthyPushSubscription(initialState)) {
+          console.info("[onesignal-client] permission already granted, repairing optIn");
+          await repairGrantedSubscription(OneSignal, canShowNotificationPrompt(), true);
+        } else if (initialState.notificationPermission === "denied" && canShowNotificationPrompt() && !sessionStorage.getItem(SESSION_DISMISSED_KEY)) {
           setStatus(getUnregisteredStatus("denied"));
           setDebugInfo(JSON.stringify(initialState, null, 2));
           setVisible(true);
@@ -122,9 +164,30 @@ export function OneSignalPermissionPrompt() {
   }, []);
 
   useEffect(() => {
+    const repairIfNeeded = () => {
+      const loadedOneSignal = (window as any).OneSignal;
+      if (!loadedOneSignal) return;
+      if (getNativePermission() === "granted") {
+        void repairGrantedSubscription(loadedOneSignal, canShowNotificationPrompt());
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") repairIfNeeded();
+    };
+
+    window.addEventListener("focus", repairIfNeeded);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("focus", repairIfNeeded);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
     if (permission === "granted" || permission === "unsupported") return;
     if (sessionStorage.getItem(SESSION_DISMISSED_KEY) === "true") return;
-    if (permission === "denied" && !isStandaloneMode()) return;
+    if (!canShowNotificationPrompt()) return;
 
     localStorage.removeItem(DISMISSED_KEY);
     const timer = window.setTimeout(() => setVisible(true), 4500);
@@ -170,7 +233,7 @@ export function OneSignalPermissionPrompt() {
         const state = await requestWithOneSignal(loadedOneSignal);
         const nextPermission = getNativePermission();
         setPermission(nextPermission);
-        if (state?.subscriptionId) {
+        if (state && hasHealthyPushSubscription(state)) {
           setStatus("Dispositivo registrado para notificaciones.");
           setDebugInfo(JSON.stringify(state, null, 2));
           window.setTimeout(() => setVisible(false), 1400);
@@ -192,7 +255,7 @@ export function OneSignalPermissionPrompt() {
           const state = await requestWithOneSignal(OneSignal);
           const nextPermission = getNativePermission();
           setPermission(nextPermission);
-          if (state?.subscriptionId) {
+          if (state && hasHealthyPushSubscription(state)) {
             setStatus("Dispositivo registrado para notificaciones.");
             setDebugInfo(JSON.stringify(state, null, 2));
             window.setTimeout(() => setVisible(false), 1400);
