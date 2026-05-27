@@ -172,7 +172,7 @@ export function CognitiveResultSummary({ survey, accent = "purple" }: Props) {
             transition={{ duration: 1.45, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => {
               const text = encodeURIComponent("Quiero optimizar mi rendimiento con la Metodologia IQX.");
-              window.open(`https://wa.me/59173600060?text=${text}`, "_blank");
+              window.open(`https://wa.me/59161333628?text=${text}`, "_blank");
             }}
             className="shrink-0 rounded-full px-4 py-2 text-sm font-black text-white"
             style={{ background: "linear-gradient(90deg, #8a3ffc, #06b6d4)" }}
