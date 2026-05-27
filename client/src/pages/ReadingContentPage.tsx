@@ -90,6 +90,7 @@ export default function ReadingContentPage() {
   const [showSurvey, setShowSurvey] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [readingReportCode, setReadingReportCode] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [pendingFormData, setPendingFormData] = useState<FormDataType | null>(null);
   const [surveyResult, setSurveyResult] = useState<CognitiveSurveyResult | null>(null);
@@ -193,6 +194,7 @@ export default function ReadingContentPage() {
   const submitReadingResult = async (formDataUnified: FormDataType, survey: CognitiveSurveyResult) => {
     playButtonSound();
     setSubmitting(true);
+    setReadingReportCode(null);
     try {
       let correct = 0;
       answers.forEach((ans, i) => {
@@ -262,6 +264,8 @@ export default function ReadingContentPage() {
         } catch {}
         throw new Error(message);
       }
+      const savedQuiz = await quizResponse.json();
+      setReadingReportCode(savedQuiz?.reportCode || savedQuiz?.result?.reportCode || null);
 
       // Mirror diagnóstico data in training_results so /progreso can show it by sessionId
       await fetch("/api/training-results", {
@@ -342,29 +346,11 @@ export default function ReadingContentPage() {
     if (isSharing) return;
     setIsSharing(true);
     playButtonSound();
-    
-    const percentage = Math.round((correctAnswers / content.questions.length) * 100);
-    const blob = await captureAndShare();
-    
-    if (blob && navigator.share && navigator.canShare) {
-      const file = new File([blob], 'resultado-lectura.png', { type: 'image/png' });
-      if (navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: t("tests.myResult"),
-            text: `${t("tests.shareText", { percentage, speed: wordsPerMinute })} https://iqexponencial.app`
-          });
-        } catch (e) {
-          console.error("Share cancelled:", e);
-        }
-        setIsSharing(false);
-        return;
-      }
-    }
-    
-    const text = encodeURIComponent(t("tests.shareTextFull", { percentage, speed: wordsPerMinute }));
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+
+    const message = readingReportCode
+      ? `Hola, quiero recibir mi informe completo IQX de lectura.\nCodigo: ${readingReportCode}`
+      : "Hola, quiero recibir mi informe completo IQX de lectura.";
+    window.open(`https://wa.me/59161333628?text=${encodeURIComponent(message)}`, "_blank");
     setIsSharing(false);
   };
   
@@ -690,7 +676,7 @@ export default function ReadingContentPage() {
                 data-testid="button-whatsapp-share"
               >
                 <SiWhatsapp className="w-5 h-5" />
-                {isSharing ? t("tests.sharing") : t("tests.shareWhatsApp")}
+                {isSharing ? t("tests.sharing") : "Recibir informe por WhatsApp"}
               </motion.button>
               
               <motion.button

@@ -11,6 +11,7 @@ import { readingContents, razonamientoContents, cerebralContents, quizResults, u
 import { agentMessages, cerebralIntros, insertCerebralIntroSchema, asesorConfig, asesorChats, contactSubmissions, adminRoles, adminUsers } from "@shared/schema";
 import { db, pool } from "./db";
 import { getClientIp, loadSiteAccessSettings, saveSiteAccessSettings } from "./site-access";
+import type { QuizResult } from "@shared/schema";
 
 const ADMIN_USER = "CITEX";
 const ADMIN_PASS = "GESTORCITEXBO2014";
@@ -81,6 +82,102 @@ function parseStylesJson(raw: string | null | undefined): Record<string, unknown
   } catch {
     return {};
   }
+}
+
+const READING_REPORT_CODE_PREFIX = "IQX-R-";
+
+function buildReadingReportCode(resultId: string): string {
+  return `${READING_REPORT_CODE_PREFIX}${resultId.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()}`;
+}
+
+function parseReadingReportResultId(code: string): string | null {
+  const compact = code
+    .trim()
+    .replace(new RegExp(`^${READING_REPORT_CODE_PREFIX}`, "i"), "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
+
+  if (compact.length !== 32) return null;
+  return [
+    compact.slice(0, 8),
+    compact.slice(8, 12),
+    compact.slice(12, 16),
+    compact.slice(16, 20),
+    compact.slice(20),
+  ].join("-");
+}
+
+function parseJsonObject(raw: string | null | undefined): unknown {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function toPublicIsoDate(value: unknown): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value as any);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function buildCrmReadingReportPayload(result: QuizResult) {
+  return {
+    code: buildReadingReportCode(result.id),
+    resultId: result.id,
+    reportType: "reading_iqx",
+    reportVersion: 1,
+    createdAt: toPublicIsoDate(result.createdAt),
+    student: {
+      name: result.nombre,
+      email: result.email,
+      phone: result.telefono,
+      age: result.edad,
+      country: result.pais,
+      countryCode: result.codigoPais,
+      state: result.estado,
+      city: result.ciudad,
+      grade: result.grado,
+      institution: result.institucion,
+      studentType: result.tipoEstudiante,
+      semester: result.semestre,
+      isProfessional: result.esProfesional,
+      profession: result.profesion,
+      occupation: result.ocupacion,
+      workplace: result.lugarTrabajo,
+      comment: result.comentario,
+    },
+    reading: {
+      category: result.categoria,
+      title: result.readingTitle,
+      wordCount: result.readingWordCount,
+      themeNumber: result.readingTemaNumero,
+      language: result.readingLang,
+      content: result.readingContent,
+    },
+    scores: {
+      comprehension: result.comprension,
+      speedWpm: result.velocidadLectura,
+      maxSpeedWpm: result.velocidadMaxima,
+      correctAnswers: result.respuestasCorrectas,
+      totalAnswers: result.respuestasTotales,
+      readingTimeSeconds: result.tiempoLectura,
+      questionsTimeSeconds: result.tiempoCuestionario,
+      readerCategory: result.categoriaLector,
+    },
+    cognitiveProfile: {
+      answers: parseJsonObject(result.surveyAnswers),
+      score: result.surveyScore,
+      profile: result.surveyProfile,
+      mainNeed: result.surveyMainNeed,
+      interest: result.surveyInterest,
+    },
+    source: {
+      sessionId: result.sessionId,
+      isPwa: result.isPwa,
+    },
+  };
 }
 const ASESOR_RESPONSE_RULES = `
 Reglas obligatorias de respuesta:
@@ -1325,10 +1422,48 @@ Reglas:
         data.categoriaLector = cat;
       }
       const result = await storage.saveQuizResult(data);
-      res.json({ success: true, result });
+      const reportCode = result.testType === "lectura" || !result.testType
+        ? buildReadingReportCode(result.id)
+        : null;
+      res.json({
+        success: true,
+        result: reportCode ? { ...result, reportCode } : result,
+        reportCode,
+      });
     } catch (error) {
       console.error("Failed to save quiz result:", error);
       res.status(500).json({ error: "Failed to save result" });
+    }
+  });
+
+  app.get("/api/crm/reading-report/:code", async (req, res) => {
+    const crmApiKey = process.env.CRM_API_KEY || process.env.IQX_CRM_API_KEY;
+    if (!crmApiKey) {
+      return res.status(503).json({ error: "CRM_API_KEY is not configured" });
+    }
+
+    const auth = req.headers.authorization || "";
+    const providedKey = auth.replace(/^(Bearer|Key)\s+/i, "").trim();
+    if (!providedKey || providedKey !== crmApiKey) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const resultId = parseReadingReportResultId(req.params.code || "");
+    if (!resultId) {
+      return res.status(400).json({ error: "Invalid report code" });
+    }
+
+    try {
+      const results = await storage.getAllQuizResults();
+      const result = results.find((item) => item.id === resultId);
+      if (!result || (result.testType && result.testType !== "lectura")) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+
+      res.json(buildCrmReadingReportPayload(result));
+    } catch (error) {
+      console.error("Failed to load CRM reading report:", error);
+      res.status(500).json({ error: "Failed to load report" });
     }
   });
 
