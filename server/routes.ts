@@ -214,6 +214,22 @@ function buildReadingResultEmailHtml(result: QuizResult, reportCode: string): st
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tu resultado IQX de lectura</title>
+    <style>
+      @keyframes iqxButtonPulse {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 10px 22px rgba(34, 197, 94, 0.22);
+        }
+        50% {
+          transform: scale(1.045);
+          box-shadow: 0 16px 30px rgba(34, 197, 94, 0.34);
+        }
+      }
+      .iqx-email-cta {
+        animation: iqxButtonPulse 1.8s ease-in-out infinite;
+        transform-origin: center;
+      }
+    </style>
   </head>
   <body style="margin:0;background:#f4f8fb;font-family:Arial,Helvetica,sans-serif;color:#111827;">
     <div style="display:none;max-height:0;overflow:hidden;">Tu resultado IQX de lectura esta listo. Codigo: ${escapeEmailHtml(reportCode)}</div>
@@ -285,7 +301,7 @@ function buildReadingResultEmailHtml(result: QuizResult, reportCode: string): st
                 </div>
 
                 <div style="text-align:center;margin-top:24px;">
-                  <a href="${escapeEmailHtml(whatsappUrl)}" style="display:inline-block;background:#22c55e;color:#ffffff;text-decoration:none;font-size:17px;font-weight:900;padding:15px 24px;border-radius:999px;">Recibir informe completo por WhatsApp</a>
+                  <a class="iqx-email-cta" href="${escapeEmailHtml(whatsappUrl)}" style="display:inline-block;background:#22c55e;color:#ffffff;text-decoration:none;font-size:17px;font-weight:900;padding:15px 24px;border-radius:999px;box-shadow:0 10px 22px rgba(34, 197, 94, 0.22);">Recibir informe completo por WhatsApp</a>
                 </div>
               </td>
             </tr>
