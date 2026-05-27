@@ -179,6 +179,166 @@ function buildCrmReadingReportPayload(result: QuizResult) {
     },
   };
 }
+
+function escapeEmailHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatEmailTime(seconds: number | null | undefined): string {
+  if (!seconds) return "-";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+function buildReadingResultEmailHtml(result: QuizResult, reportCode: string): string {
+  const whatsappMessage = `Hola, quiero recibir mi informe completo IQX de lectura.\nCodigo: ${reportCode}`;
+  const whatsappUrl = `https://wa.me/59161333628?text=${encodeURIComponent(whatsappMessage)}`;
+  const category = result.categoriaLector || "Resultado IQX";
+  const categoryColor = category.includes("COMPETENTE")
+    ? "#16a34a"
+    : category.includes("REGULAR")
+      ? "#ca8a04"
+      : category.includes("SEVERA")
+        ? "#dc2626"
+        : "#ea580c";
+
+  return `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tu resultado IQX de lectura</title>
+  </head>
+  <body style="margin:0;background:#f4f8fb;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+    <div style="display:none;max-height:0;overflow:hidden;">Tu resultado IQX de lectura esta listo. Codigo: ${escapeEmailHtml(reportCode)}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f8fb;padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #dbeafe;box-shadow:0 16px 40px rgba(15,23,42,.12);">
+            <tr>
+              <td style="background:#071a3d;padding:28px 30px;color:#ffffff;">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.18em;color:#67e8f9;text-transform:uppercase;">IQeXponencial</div>
+                <h1 style="margin:10px 0 0;font-size:30px;line-height:1.12;font-weight:900;">Tu resultado IQX de lectura esta listo</h1>
+                <p style="margin:10px 0 0;font-size:16px;line-height:1.5;color:#dbeafe;">Hola ${escapeEmailHtml(result.nombre || "estudiante")}, estos son los datos principales de tu evaluacion.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:26px 30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="padding:14px;border-radius:18px;background:#ecfeff;border:1px solid #a5f3fc;text-align:center;">
+                      <div style="font-size:13px;color:#0f766e;font-weight:700;">Comprension</div>
+                      <div style="font-size:34px;font-weight:900;color:#0891b2;margin-top:4px;">${escapeEmailHtml(result.comprension ?? 0)}%</div>
+                    </td>
+                    <td width="12"></td>
+                    <td style="padding:14px;border-radius:18px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;">
+                      <div style="font-size:13px;color:#1d4ed8;font-weight:700;">Velocidad</div>
+                      <div style="font-size:34px;font-weight:900;color:#2563eb;margin-top:4px;">${escapeEmailHtml(result.velocidadLectura ?? 0)}</div>
+                      <div style="font-size:12px;color:#64748b;font-weight:700;">palabras/min</div>
+                    </td>
+                    <td width="12"></td>
+                    <td style="padding:14px;border-radius:18px;background:#f5f3ff;border:1px solid #ddd6fe;text-align:center;">
+                      <div style="font-size:13px;color:#6d28d9;font-weight:700;">Correctas</div>
+                      <div style="font-size:34px;font-weight:900;color:#7c3aed;margin-top:4px;">${escapeEmailHtml(result.respuestasCorrectas ?? 0)}/${escapeEmailHtml(result.respuestasTotales ?? 0)}</div>
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="margin-top:20px;padding:18px;border-radius:20px;background:#f8fafc;border:1px solid #e2e8f0;">
+                  <div style="font-size:13px;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Categoria lectora</div>
+                  <div style="margin-top:6px;font-size:24px;font-weight:900;color:${categoryColor};">${escapeEmailHtml(category)}</div>
+                  <p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:#475569;">Tu informe completo puede solicitarse por WhatsApp usando el codigo de reporte incluido abajo.</p>
+                </div>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:18px;">
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#64748b;">Texto leido</td>
+                    <td align="right" style="padding:12px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#111827;">${escapeEmailHtml(result.readingTitle || "-")}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#64748b;">Tiempo de lectura</td>
+                    <td align="right" style="padding:12px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#111827;">${escapeEmailHtml(formatEmailTime(result.tiempoLectura))}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#64748b;">Tiempo de preguntas</td>
+                    <td align="right" style="padding:12px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#111827;">${escapeEmailHtml(formatEmailTime(result.tiempoCuestionario))}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#64748b;">Perfil IQX</td>
+                    <td align="right" style="padding:12px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#111827;">${escapeEmailHtml(result.surveyProfile || "-")}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;color:#64748b;">Area clave</td>
+                    <td align="right" style="padding:12px 0;font-weight:700;color:#111827;">${escapeEmailHtml(result.surveyMainNeed || "-")}</td>
+                  </tr>
+                </table>
+
+                <div style="margin-top:22px;padding:18px;border-radius:18px;background:#0f172a;color:#ffffff;">
+                  <div style="font-size:13px;color:#67e8f9;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Codigo de reporte</div>
+                  <div style="margin-top:8px;font-size:20px;font-weight:900;letter-spacing:.04em;word-break:break-all;">${escapeEmailHtml(reportCode)}</div>
+                </div>
+
+                <div style="text-align:center;margin-top:24px;">
+                  <a href="${escapeEmailHtml(whatsappUrl)}" style="display:inline-block;background:#22c55e;color:#ffffff;text-decoration:none;font-size:17px;font-weight:900;padding:15px 24px;border-radius:999px;">Recibir informe completo por WhatsApp</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 30px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#64748b;font-size:13px;line-height:1.5;text-align:center;">
+                IQeXponencial - Metodo X. Si no solicitaste esta evaluacion, puedes ignorar este correo.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+async function sendReadingResultEmail(result: QuizResult, reportCode: string): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  const replyTo = process.env.RESEND_REPLY_TO;
+  const to = result.email?.trim();
+
+  if (!to) return;
+  if (!apiKey || !from) {
+    console.warn("Reading result email skipped: RESEND_API_KEY or RESEND_FROM_EMAIL is missing.");
+    return;
+  }
+
+  const payload: Record<string, unknown> = {
+    from,
+    to,
+    subject: "Tu resultado IQX de lectura",
+    html: buildReadingResultEmailHtml(result, reportCode),
+  };
+  if (replyTo) payload.reply_to = replyTo;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": `reading-result-${result.id}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseText = await response.text();
+  if (!response.ok) {
+    throw new Error(`Resend rejected reading result email (${response.status}): ${responseText}`);
+  }
+
+  console.log(`Reading result email sent to ${to}: ${responseText}`);
+}
 const ASESOR_RESPONSE_RULES = `
 Reglas obligatorias de respuesta:
 1) Usa el historial reciente (ultimos 10 mensajes) para evitar repetir informacion ya dada.
@@ -1425,6 +1585,11 @@ Reglas:
       const reportCode = result.testType === "lectura" || !result.testType
         ? buildReadingReportCode(result.id)
         : null;
+      if (reportCode) {
+        sendReadingResultEmail(result, reportCode).catch((emailError) => {
+          console.error("Failed to send reading result email:", emailError);
+        });
+      }
       res.json({
         success: true,
         result: reportCode ? { ...result, reportCode } : result,
