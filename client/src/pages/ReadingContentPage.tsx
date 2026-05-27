@@ -389,7 +389,7 @@ export default function ReadingContentPage() {
 
   const handleWhatsApp = () => {
     const msg = encodeURIComponent(t("tests.whatsAppInquiry"));
-    window.open(`https://wa.me/59173600060?text=${msg}`, "_blank");
+    window.open(`https://wa.me/59161333628?text=${msg}`, "_blank");
   };
 
   const handleNewTest = () => {
@@ -688,7 +688,7 @@ export default function ReadingContentPage() {
                 data-testid="button-share"
               >
                 <Share2 className="w-5 h-5" />
-                {t("tests.moreOptions")}
+                Compartir con:
               </motion.button>
               
               <motion.button
