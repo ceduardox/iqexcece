@@ -301,8 +301,8 @@ export default function CerebralResultPage() {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100"
           >
-            <div className="relative flex justify-center items-center mb-6">
-              <div className="absolute left-0 text-right pr-2 space-y-1 w-20">
+            <div className="grid grid-cols-[3.45rem_minmax(8.75rem,1fr)_3.45rem] sm:grid-cols-[4.25rem_minmax(10rem,1fr)_4.25rem] items-center gap-1.5 sm:gap-2 mb-6 overflow-visible">
+              <div className="text-right space-y-1 min-w-0">
                 {leftTraits.map((trait, idx) => (
                   (() => {
                     const isHighlighted = trait === highlightedLeftTrait;
@@ -312,7 +312,7 @@ export default function CerebralResultPage() {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + idx * 0.1 }}
-                    className={`text-xs ${isHighlighted ? 'font-bold text-sm' : 'text-gray-500'}`}
+                    className={`text-[10px] sm:text-[11px] leading-tight break-words ${isHighlighted ? 'font-bold text-[11px] sm:text-xs' : 'text-gray-500'}`}
                     style={isHighlighted ? { color: "#8a3ffc" } : {}}
                   >
                     {trait}
@@ -326,7 +326,7 @@ export default function CerebralResultPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
-                className="relative w-48 h-56"
+                className="relative mx-auto w-full max-w-[9.9rem] sm:max-w-[11.5rem] aspect-[390/428]"
               >
                 <motion.div
                   className="absolute inset-0 rounded-[40px] blur-2xl opacity-50"
@@ -351,123 +351,68 @@ export default function CerebralResultPage() {
                   transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                 />
 
-                <motion.svg
-                  viewBox="0 0 240 260"
-                  className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.22)]"
+                <motion.div
+                  className="relative w-full h-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.18)]"
                   animate={{ y: [0, -4, 0], rotateZ: [0, 0.8, 0] }}
                   transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <foreignObject x="0" y="0" width="240" height="260">
-                    <div
+                  <div
+                    className="absolute inset-0 overflow-hidden"
+                    style={{
+                      WebkitMaskImage: "url('/brain50.png')",
+                      maskImage: "url('/brain50.png')",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                      background: "rgba(15,23,42,0.08)",
+                    }}
+                  >
+                    <motion.div
+                      className="absolute left-0 bottom-0 w-1/2"
                       style={{
-                        position: "relative",
-                        width: "240px",
-                        height: "260px",
-                        WebkitMaskImage: "url('/brain50.svg')",
-                        maskImage: "url('/brain50.svg')",
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        background: "rgba(15,23,42,0.08)",
-                        overflow: "hidden",
+                        height: `${animatedLeftPercent}%`,
+                        background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
+                        boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
                       }}
-                    >
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${animatedLeftPercent}%`,
-                          background: "linear-gradient(180deg, #67E8F9 0%, #06B6D4 60%, #0E7490 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
-                        }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: "3%",
-                          width: "44%",
-                          bottom: `calc(${animatedLeftPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                      />
-
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "0",
-                          width: "50%",
-                          bottom: "0",
-                          height: `${animatedRightPercent}%`,
-                          background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
-                          boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
-                        }}
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          right: "3%",
-                          width: "44%",
-                          bottom: `calc(${animatedRightPercent}% - 2px)`,
-                          height: "2px",
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: "999px",
-                        }}
-                        animate={{ opacity: [0.35, 0.9, 0.35] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                    </div>
-                  </foreignObject>
-
-                  <line
-                    x1="120"
-                    y1="18"
-                    x2="120"
-                    y2="248"
-                    stroke="rgba(31,41,55,0.6)"
-                    strokeWidth="2.2"
-                    strokeDasharray="5,6"
+                      animate={{ y: [0, -2, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                      className="absolute right-0 bottom-0 w-1/2"
+                      style={{
+                        height: `${animatedRightPercent}%`,
+                        background: "linear-gradient(180deg, #C4B5FD 0%, #8A3FFC 60%, #6D28D9 100%)",
+                        boxShadow: "inset 0 6px 18px rgba(255,255,255,0.35)",
+                      }}
+                      animate={{ y: [0, -2, 0] }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <img
+                    src="/brain50.svg"
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-contain opacity-20 pointer-events-none"
                   />
-
-                  <text
-                    x="78"
-                    y="146"
-                    textAnchor="middle"
-                    className="text-3xl font-black"
-                    fill="#111111"
-                    style={{ filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.35))" }}
+                  <div className="absolute inset-y-[6%] left-1/2 -translate-x-1/2 border-l-2 border-dashed border-gray-600/55" />
+                  <div
+                    className="absolute top-[50%] left-[32%] -translate-x-1/2 -translate-y-1/2 text-[clamp(1.35rem,6.5vw,2rem)] font-black text-gray-950 leading-none"
+                    style={{ textShadow: "0 2px 3px rgba(255,255,255,0.75)" }}
                   >
                     {animatedLeftPercent}%
-                  </text>
-                  <text
-                    x="162"
-                    y="146"
-                    textAnchor="middle"
-                    className="text-3xl font-black"
-                    fill="#111111"
-                    style={{ filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.35))" }}
+                  </div>
+                  <div
+                    className="absolute top-[50%] left-[68%] -translate-x-1/2 -translate-y-1/2 text-[clamp(1.35rem,6.5vw,2rem)] font-black text-gray-950 leading-none"
+                    style={{ textShadow: "0 2px 3px rgba(255,255,255,0.75)" }}
                   >
                     {animatedRightPercent}%
-                  </text>
-                </motion.svg>
-                <svg viewBox="0 0 240 260" className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-                  <image href="/brain50.svg" x="0" y="0" width="240" height="260" opacity="0.22" />
-                </svg>
+                  </div>
+                </motion.div>
               </motion.div>
 
-              <div className="absolute right-0 text-left pl-2 space-y-1 w-20">
+              <div className="text-left space-y-1 min-w-0">
                 {rightTraits.map((trait, idx) => (
                   (() => {
                     const isHighlighted = trait === highlightedRightTrait;
@@ -477,7 +422,7 @@ export default function CerebralResultPage() {
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + idx * 0.1 }}
-                    className={`text-xs ${isHighlighted ? 'font-bold text-sm' : 'text-gray-500'}`}
+                    className={`text-[10px] sm:text-[11px] leading-tight break-words ${isHighlighted ? 'font-bold text-[11px] sm:text-xs' : 'text-gray-500'}`}
                     style={isHighlighted ? { color: "#8a3ffc" } : {}}
                   >
                     {trait}
