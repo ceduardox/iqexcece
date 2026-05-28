@@ -1251,6 +1251,14 @@ Reglas:
     }
   });
 
+  app.get("/api/admin/validate", async (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    if (!token || !validAdminTokens.has(token)) {
+      return res.status(401).json({ error: "No autorizado" });
+    }
+    res.json({ success: true });
+  });
+
   app.get("/api/admin/site-access", async (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     if (!validAdminTokens.has(token)) return res.status(401).json({ error: "No autorizado" });

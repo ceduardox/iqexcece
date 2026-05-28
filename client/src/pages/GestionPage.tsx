@@ -317,6 +317,7 @@ function withPaymentPeriodDates(sourcePayments: AdminPaymentRow[]) {
 
 export default function GestionPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [restoringSession, setRestoringSession] = useState(true);
   const [username, setUsername] = useState(() => localStorage.getItem("adminUser") || "");
   const [password, setPassword] = useState(() => localStorage.getItem("adminPass") || "");
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("adminUser"));
@@ -1698,40 +1699,85 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
   };
 
   useEffect(() => {
-    // Try to auto-login with saved credentials (tokens expire on server restart)
-    const savedUser = localStorage.getItem("adminUser");
-    const savedPass = localStorage.getItem("adminPass");
-    
-    if (savedUser && savedPass) {
-      // Auto-login to get fresh token
-      fetch("/api/admin/login", {
+    let cancelled = false;
+
+    const applyStoredRole = () => {
+      const savedRole = localStorage.getItem("adminRole");
+      if (!savedRole) {
+        setActiveRole(null);
+        return;
+      }
+      try {
+        setActiveRole(JSON.parse(savedRole));
+      } catch {
+        localStorage.removeItem("adminRole");
+        setActiveRole(null);
+      }
+    };
+
+    const activateSession = (nextToken: string) => {
+      if (cancelled) return;
+      setToken(nextToken);
+      localStorage.setItem("adminToken", nextToken);
+      applyStoredRole();
+      fetchAdminPaymentNotice(nextToken);
+      setIsLoggedIn(true);
+      setRestoringSession(false);
+    };
+
+    const loginWithSavedCredentials = async () => {
+      const savedUser = localStorage.getItem("adminUser");
+      const savedPass = localStorage.getItem("adminPass");
+      if (!savedUser || !savedPass) return false;
+
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: savedUser, password: savedPass }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.token) {
-            setToken(data.token);
-            localStorage.setItem("adminToken", data.token);
-            fetchAdminPaymentNotice(data.token);
-            const savedRole = localStorage.getItem("adminRole");
-            if (savedRole) {
-              try { setActiveRole(JSON.parse(savedRole)); } catch {}
-            }
-            setIsLoggedIn(true);
-          } else {
-            localStorage.removeItem("adminToken");
-            localStorage.removeItem("adminUser");
-            localStorage.removeItem("adminPass");
-            localStorage.removeItem("adminRole");
+      });
+      const data = await res.json();
+      if (!data.token) return false;
+
+      if (!data.isMainAdmin && data.role) {
+        localStorage.setItem("adminRole", JSON.stringify({ name: data.role.name, allowedTabs: data.role.allowedTabs }));
+      } else {
+        localStorage.removeItem("adminRole");
+      }
+      activateSession(data.token);
+      return true;
+    };
+
+    const restoreSession = async () => {
+      const savedToken = localStorage.getItem("adminToken");
+      if (savedToken) {
+        try {
+          const res = await fetch("/api/admin/validate", {
+            headers: { Authorization: `Bearer ${savedToken}` },
+          });
+          if (res.ok) {
+            activateSession(savedToken);
+            return;
           }
-        })
-        .catch(() => {
+        } catch {}
+      }
+
+      try {
+        const loggedIn = await loginWithSavedCredentials();
+        if (!loggedIn) {
           localStorage.removeItem("adminToken");
-        });
-    }
-  }, []);
+          if (!cancelled) setRestoringSession(false);
+        }
+      } catch {
+        localStorage.removeItem("adminToken");
+        if (!cancelled) setRestoringSession(false);
+      }
+    };
+
+    restoreSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchAdminPaymentNotice]);
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -2240,6 +2286,17 @@ Actualmente, en muy pocos países (por ejemplo, Holanda y Bélgica) se ha despen
     active
       ? "bg-cyan-500/15 text-white border-cyan-400/35 hover:bg-cyan-500/20"
       : "bg-slate-950/60 border-slate-700 text-slate-300 hover:bg-slate-900 hover:text-cyan-100";
+
+  if (restoringSession) {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_32rem),#020617] flex items-center justify-center p-4">
+        <div className="flex items-center gap-3 text-cyan-200">
+          <RefreshCw className="w-5 h-5 animate-spin" />
+          <span className="text-sm font-semibold">Verificando sesión...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
