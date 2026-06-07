@@ -170,7 +170,7 @@ export default function ContactoPage() {
   }, [styles, isMobile]);
 
   const contactItems = [
-    { id: "whatsapp", icon: SiWhatsapp, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank") },
+    { id: "whatsapp", icon: SiWhatsapp, labelKey: "contact.whatsapp", subKey: "contact.whatsappSub", gradient: "linear-gradient(135deg, #25D366, #128C7E)", iconColor: "#fff", action: () => window.open("https://wa.me/59173600060?text=%F0%9F%91%8B%F0%9F%8F%BB%20Hola%2C%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20de%20sus%20programas.", "_blank") },
     { id: "email", icon: Mail, labelKey: "contact.email", subKey: "contact.emailSub", gradient: "linear-gradient(135deg, #8a3ffc, #6d28d9)", iconColor: "#fff", action: () => { window.location.href = "mailto:soporte@inteligenciaexponencial.com"; } },
   ];
 

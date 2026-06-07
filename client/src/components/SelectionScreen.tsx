@@ -334,7 +334,7 @@ export function SelectionScreen({ onComplete }: SelectionScreenProps) {
   }, [setUserData, setLocation, playCard]);
 
   const handleWhatsApp = () => {
-    window.open("https://wa.me/59161333628?text=Bienvenido%20a%20IQExponencial%20en%20que%20podemos%20ayudarle", "_blank");
+    window.open("https://wa.me/59161333628?text=%F0%9F%91%8B%F0%9F%8F%BB%20Hola%2C%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20de%20sus%20programas.", "_blank");
   };
 
   const handleEmail = () => {
