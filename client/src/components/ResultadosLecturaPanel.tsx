@@ -324,29 +324,35 @@ function getProjection(result: QuizResult) {
   return base;
 }
 
-function ProgressRing({ value }: { value: number }) {
-  const radius = 64;
+function ProgressRing({ value, level }: { value: number; level: number }) {
+  const radius = 58;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.max(0, Math.min(100, value)) / 100) * circumference;
+  const palette = level >= 4
+    ? { track: "#e5f3df", start: "#c8d400", end: "#16a34a" }
+    : level === 3
+      ? { track: "#dff3ee", start: "#14b8a6", end: "#10b981" }
+      : { track: "#dbeafe", start: "#60a5fa", end: "#2563eb" };
+
   return (
-    <svg width="160" height="160" viewBox="0 0 160 160" className="shrink-0">
-      <circle cx="80" cy="80" r={radius} fill="none" stroke="#dbeafe" strokeWidth="10" />
+    <svg width="172" height="172" viewBox="0 0 172 172" className="mx-auto shrink-0">
+      <circle cx="86" cy="86" r={radius} fill="none" stroke={palette.track} strokeWidth="12" />
       <circle
-        cx="80"
-        cy="80"
+        cx="86"
+        cy="86"
         r={radius}
         fill="none"
         stroke="url(#iqxGradient)"
-        strokeWidth="10"
+        strokeWidth="12"
         strokeLinecap="round"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
-        transform="rotate(-90 80 80)"
+        transform="rotate(-90 86 86)"
       />
       <defs>
         <linearGradient id="iqxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#16c6b4" />
-          <stop offset="100%" stopColor="#2563eb" />
+          <stop offset="0%" stopColor={palette.start} />
+          <stop offset="100%" stopColor={palette.end} />
         </linearGradient>
       </defs>
     </svg>
@@ -541,18 +547,18 @@ function StudentIQXReport({ result }: { result: QuizResult }) {
             </div>
 
             <div className="rounded-[24px] bg-white border border-slate-200 p-6 shadow-sm flex flex-col items-center justify-center text-center">
-              <p className="text-2xl font-black mb-4">NIVEL IQX</p>
-              <div className="relative flex items-center justify-center">
-                <ProgressRing value={iqxLevel * 20} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-                  <div className="text-6xl leading-none font-black text-cyan-600">{iqxLevel}</div>
-                  <div className="text-lg leading-none font-bold text-slate-500 mt-1">DE 5</div>
+              <p className="text-[22px] font-black tracking-wide mb-5">NIVEL IQX</p>
+              <div className="relative mx-auto flex h-[172px] w-[172px] items-center justify-center">
+                <ProgressRing value={iqxLevel * 20} level={iqxLevel} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-[72px] leading-[0.9] font-black text-cyan-600">{iqxLevel}</div>
+                  <div className="mt-1 text-[18px] leading-none font-black text-slate-600">DE 5</div>
                 </div>
               </div>
-              <p className="text-emerald-600 text-2xl font-black mt-4">
+              <p className="text-emerald-600 text-2xl font-black mt-5">
                 {iqxLevel >= 4 ? "POTENCIAL ALTO" : iqxLevel === 3 ? "POTENCIAL MEDIO" : "EN DESARROLLO"}
               </p>
-              <p className="text-slate-600 text-lg mt-2">
+              <p className="text-slate-600 text-lg mt-2 max-w-[260px]">
                 {iqxLevel >= 4 ? "Buen desempeño con capacidad para alcanzar niveles superiores." : "Desempeño con oportunidad clara de mejora estructurada."}
               </p>
             </div>
