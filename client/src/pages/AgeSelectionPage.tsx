@@ -131,6 +131,85 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
   const WatermarkIcon = watermarkIcons[category.id] || Star;
   const badgeBg = badgeColors[category.id] || "bg-purple-500";
 
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
+        onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
+        className={`cursor-pointer ${getEditableClass(cardId)}`}
+        data-testid={`card-age-${category.id}`}
+      >
+        <motion.div
+          className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
+          style={{ 
+            background: cardStyle.imageUrl 
+              ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
+              : cardStyle.background || "white",
+            borderRadius: cardStyle.borderRadius || 16,
+            boxShadow: cardStyle.shadowBlur 
+              ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
+              : "0 1px 4px rgba(0,0,0,0.06)"
+          }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.1 }}
+        >
+          <div 
+            className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
+            style={{ 
+              width: iconSize + 8, 
+              height: iconSize + 8,
+              background: iconStyle.background || category.iconBg,
+              padding: 6
+            }}
+          >
+            <img 
+              src={iconStyle.imageUrl || category.iconUrl} 
+              alt="" 
+              className="drop-shadow-sm"
+              style={{ width: iconSize - 6, height: iconSize - 6, objectFit: "contain" }} 
+            />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h3 
+              className={`font-semibold leading-tight ${getEditableClass(titleId)}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
+              style={{
+                fontSize: titleStyle.fontSize || 14,
+                lineHeight: titleStyle.lineHeight,
+                color: titleStyle.textColor || "#1f2937"
+              }}
+            >
+              {titleStyle.buttonText || t(category.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({category.ageRange})</span>
+            </h3>
+            <p 
+              className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
+              style={{
+                fontSize: descStyle.fontSize || 12,
+                lineHeight: descStyle.lineHeight,
+                color: descStyle.textColor || "#9ca3af"
+              }}
+            >
+              {descStyle.buttonText || t(category.descKey)}
+            </p>
+          </div>
+
+          <motion.div
+            animate={{ x: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // DESKTOP PC VIEW (Wide cards, big top titles, pill badge, 3D icon with glow aura, & prominent "Comenzar" button)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -141,7 +220,7 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-[32px] px-4 py-6 md:p-7 flex flex-row md:flex-col items-center md:justify-between gap-3 md:gap-4 transition-all duration-300 bg-white hover:shadow-2xl md:hover:-translate-y-3 border border-purple-100/80 h-full md:min-h-[310px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)]"
+        className="relative overflow-hidden rounded-[32px] p-8 flex flex-col justify-between items-center bg-white hover:shadow-2xl hover:-translate-y-3 border border-purple-100/80 h-full min-h-[380px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)] transition-all duration-300"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
@@ -153,11 +232,10 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
         }}
         whileTap={{ scale: 0.98 }}
       >
-        {/* Top Section in PC: Big Title & Age Range Pill */}
-        <div className="flex-1 min-w-0 md:w-full md:text-center flex flex-col md:items-center">
+        <div className="w-full text-center flex flex-col items-center flex-1">
           {/* Big Title At Top */}
           <h3 
-            className={`font-black text-xl md:text-3xl text-[#1a0b36] mb-1 tracking-tight ${getEditableClass(titleId)}`}
+            className={`font-black text-2xl xl:text-3xl text-[#1a0b36] mb-2 tracking-tight ${getEditableClass(titleId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
             style={{
               fontSize: titleStyle.fontSize || undefined,
@@ -168,29 +246,29 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
             {titleStyle.buttonText || t(category.labelKey)}
           </h3>
 
-          {/* Age Range Badge (Capsule Pill enclosed in border radius) */}
-          <div className="mb-2 md:mb-3">
-            <span className={`inline-block px-3 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-extrabold text-white shadow-sm transition-transform group-hover:scale-105 ${badgeBg}`}>
+          {/* Age Range Badge Capsule Pill */}
+          <div className="mb-4">
+            <span className={`inline-block px-4 py-1 rounded-full text-sm font-extrabold text-white shadow-sm transition-transform group-hover:scale-105 ${badgeBg}`}>
               ({category.ageRange})
             </span>
           </div>
 
-          {/* 3D Illustration / Icon with Ambient Glow Aura (Extra Detail) */}
+          {/* 3D Illustration / Icon with Ambient Glow */}
           <div 
-            className={`relative flex-shrink-0 flex items-center justify-center my-2 md:my-3 md:mx-auto ${getEditableClass(iconId)}`}
+            className={`relative flex-shrink-0 flex items-center justify-center my-3 mx-auto ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
           >
             <div className="absolute inset-0 rounded-full blur-2xl opacity-30 bg-purple-400 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
             <img 
               src={iconStyle.imageUrl || category.iconUrl} 
               alt="" 
-              className="relative z-10 w-16 h-16 md:w-24 md:h-24 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
+              className="relative z-10 w-28 h-28 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
             />
           </div>
 
           {/* Description */}
           <p 
-            className={`leading-relaxed text-xs md:text-sm text-[#655b85] px-1 ${getEditableClass(descId)}`}
+            className={`leading-relaxed text-sm text-[#655b85] px-2 mb-4 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
               fontSize: descStyle.fontSize || undefined,
@@ -202,19 +280,17 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
           </p>
         </div>
 
-        {/* Extra Detail: Bottom Action Indicator on Hover */}
-        <div className="hidden md:flex items-center justify-center pt-2 gap-1.5 text-xs font-bold text-purple-600 opacity-60 group-hover:opacity-100 transition-all duration-300">
-          <WatermarkIcon className="w-4 h-4 stroke-[2]" />
-          <span className="tracking-wide uppercase text-[11px]">Comenzar →</span>
+        {/* Real Prominent Button for "Comenzar" */}
+        <div className="w-full pt-3 mt-auto">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-3 px-5 rounded-2xl font-extrabold text-sm text-white bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 shadow-lg group-hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-2 group-hover:from-purple-700 group-hover:to-indigo-700"
+          >
+            <span>Comenzar</span>
+            <ChevronRight className="w-4 h-4 stroke-[3]" />
+          </motion.button>
         </div>
-
-        <motion.div
-          animate={{ x: [0, 4, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="md:hidden"
-        >
-          <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
-        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -491,7 +567,7 @@ export default function AgeSelectionPage() {
             <SpacerEl id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
             <div 
-              className={`px-4 pb-8 space-y-2 md:space-y-0 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 items-stretch w-full ${getEditableClass("cards-section")}`}
+              className={`px-4 pb-8 space-y-2 md:space-y-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-8 items-stretch w-full max-w-[1500px] mx-auto ${getEditableClass("cards-section")}`}
               onClick={(e) => handleElementClick("cards-section", e)}
               style={{ ...getElementStyle("cards-section"), padding: isMobile ? "16px" : "24px 32px", borderRadius: resolveStyle(styles, "cards-section", isMobile).borderRadius || 0 }}
             >
