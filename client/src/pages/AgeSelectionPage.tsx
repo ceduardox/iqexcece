@@ -237,14 +237,14 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-[32px] px-4 py-7 flex flex-col justify-between items-center bg-white hover:shadow-xl hover:-translate-y-2 border border-purple-100/60 h-full min-h-[420px] group shadow-[0_10px_30px_rgba(0,0,0,0.03)] transition-all duration-300"
+        className="relative overflow-hidden rounded-[32px] px-4 py-7 flex flex-col justify-between items-center bg-white hover:shadow-[0_20px_40px_rgba(138,63,252,0.12)] hover:-translate-y-2.5 hover:border-purple-200 border border-purple-100/60 h-full min-h-[420px] group shadow-[0_12px_36px_rgba(138,63,252,0.05),0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-300"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : cardStyle.background || "#ffffff",
           borderRadius: cardStyle.borderRadius || 32,
           boxShadow: cardStyle.shadowBlur 
-            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.04)"}` 
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(138,63,252,0.08)"}` 
             : undefined
         }}
         whileTap={{ scale: 0.98 }}
@@ -577,6 +577,10 @@ export default function AgeSelectionPage() {
               >
                 <span className="whitespace-pre-line">{resolveStyle(styles, "main-title", isMobile).buttonText || t("age.selectStage")}</span>
               </h1>
+              
+              {/* Elegant Title Separator Line */}
+              <div className="hidden md:block w-20 h-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full mx-auto my-3.5" />
+
               <p 
                 className={`leading-relaxed md:text-lg ${getEditableClass("main-subtitle")}`}
                 onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
