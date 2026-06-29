@@ -90,6 +90,7 @@ function preloadImages(urls: string[], timeoutMs = 5000): Promise<void> {
     unique.forEach((url) => {
       const img = new Image();
       img.decoding = "async";
+      (img as any).fetchPriority = "high";
       img.onload = markDone;
       img.onerror = markDone;
       img.src = url;
@@ -102,7 +103,9 @@ function getAssetWarmSignature(urls: string[]) {
 }
 
 function getTestAssetUrls(styles: PageStyles) {
-  return extractImageUrlsFromStyles(styles);
+  const defaultIcons = Object.values(testCardStyles).map((s) => s.iconUrl);
+  const customUrls = extractImageUrlsFromStyles(styles);
+  return Array.from(new Set([...defaultIcons, ...customUrls]));
 }
 
 function getWarmAssetSignatureForStyles(styles: PageStyles) {

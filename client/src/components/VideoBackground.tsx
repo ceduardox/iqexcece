@@ -138,10 +138,10 @@ export function MediaIcon({ src, size, className = "" }: { src: string; size: nu
   
   if (isVideo) {
     return (
-      <video src={src} autoPlay loop muted playsInline preload="metadata" className={`drop-shadow-md ${className}`} style={style} />
+      <video src={src} autoPlay loop muted playsInline preload="auto" className={`drop-shadow-md ${className}`} style={style} />
     );
   }
-  return <img src={src} alt="" loading="lazy" decoding="async" className={`drop-shadow-md ${className}`} style={style} />;
+  return <img src={src} alt="" loading="eager" decoding="async" fetchPriority="high" className={`drop-shadow-md ${className}`} style={style} />;
 }
 
 interface VideoBackgroundProps {
