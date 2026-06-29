@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ChevronRight, Minus } from "lucide-react";
+import { ArrowLeft, ChevronRight, Minus, Star, BookOpen, Zap, BarChart2, Heart } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
@@ -112,72 +112,98 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
   const descStyle = resolveStyle(styles, descId, isMobile);
   const iconSize = iconStyle.iconSize || 40;
 
+  const badgeColors: Record<string, string> = {
+    preescolar: "bg-[#a855f7]",
+    ninos: "bg-[#38bdf8]",
+    adolescentes: "bg-[#c084fc]",
+    profesionales: "bg-[#60a5fa]",
+    adulto_mayor: "bg-[#d8b4fe]",
+  };
+
+  const watermarkIcons: Record<string, any> = {
+    preescolar: Star,
+    ninos: BookOpen,
+    adolescentes: Zap,
+    profesionales: BarChart2,
+    adulto_mayor: Heart,
+  };
+
+  const WatermarkIcon = watermarkIcons[category.id] || Star;
+  const badgeBg = badgeColors[category.id] || "bg-purple-500";
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
+      transition={{ delay: 0.05 + index * 0.06, duration: 0.3, ease: "easeOut" }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
       className={`cursor-pointer h-full ${getEditableClass(cardId)}`}
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-visible rounded-2xl md:rounded-3xl px-4 py-3.5 md:p-8 flex flex-row md:flex-col items-center md:justify-between gap-3 md:gap-6 transition-all duration-300 bg-white hover:shadow-md md:hover:shadow-2xl md:hover:-translate-y-3 border border-purple-100/70 h-full md:min-h-[280px] group"
+        className="relative overflow-hidden rounded-[28px] px-4 py-6 md:p-8 flex flex-row md:flex-col items-center md:justify-between gap-4 md:gap-5 transition-all duration-300 bg-white hover:shadow-2xl md:hover:-translate-y-3 border border-purple-100/70 h-full md:min-h-[420px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)]"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
-            : cardStyle.background || "white",
-          borderRadius: cardStyle.borderRadius || undefined,
+            : cardStyle.background || "linear-gradient(180deg, #ffffff 0%, #fcfbfe 70%, #f3e8ff 100%)",
+          borderRadius: cardStyle.borderRadius || 28,
           boxShadow: cardStyle.shadowBlur 
-            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
+            ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(124,58,237,0.08)"}` 
             : undefined
         }}
         whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.1 }}
       >
+        {/* 3D Illustration / Icon */}
         <div 
-          className={`flex-shrink-0 flex items-center justify-center rounded-xl md:rounded-2xl md:mx-auto ${getEditableClass(iconId)}`}
+          className={`flex-shrink-0 flex items-center justify-center md:mx-auto ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
-          style={{ 
-            width: isMobile ? iconSize + 8 : Math.max(iconSize + 32, 80), 
-            height: isMobile ? iconSize + 8 : Math.max(iconSize + 32, 80),
-            background: iconStyle.background || category.iconBg,
-            padding: isMobile ? 6 : 12
-          }}
         >
           <img 
             src={iconStyle.imageUrl || category.iconUrl} 
             alt="" 
-            className="drop-shadow-sm transition-transform duration-300 group-hover:scale-110"
-            style={{ width: isMobile ? iconSize - 6 : Math.max(iconSize + 12, 56), height: isMobile ? iconSize - 6 : Math.max(iconSize + 12, 56), objectFit: "contain" }} 
+            className="w-16 h-16 md:w-28 md:h-28 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
           />
         </div>
         
-        <div className="flex-1 min-w-0 md:w-full md:text-center flex flex-col md:justify-between">
-          <div>
-            <h3 
-              className={`font-semibold md:font-bold leading-tight md:text-xl mb-1.5 ${getEditableClass(titleId)}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
-              style={{
-                fontSize: titleStyle.fontSize || undefined,
-                lineHeight: titleStyle.lineHeight,
-                color: titleStyle.textColor || "#1f2937"
-              }}
-            >
-              {titleStyle.buttonText || t(category.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }} className="block md:inline mt-0.5 md:mt-0 text-xs md:text-sm">({category.ageRange})</span>
-            </h3>
-            <p 
-              className={`leading-tight md:leading-relaxed text-xs md:text-sm mt-1 ${getEditableClass(descId)}`}
-              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
-              style={{
-                fontSize: descStyle.fontSize || undefined,
-                lineHeight: descStyle.lineHeight,
-                color: descStyle.textColor || "#9ca3af"
-              }}
-            >
-              {descStyle.buttonText || t(category.descKey)}
-            </p>
+        {/* Card Content */}
+        <div className="flex-1 min-w-0 md:w-full md:text-center flex flex-col md:items-center">
+          {/* Title */}
+          <h3 
+            className={`font-black text-lg md:text-2xl text-[#1f1646] mb-1.5 md:mb-2 ${getEditableClass(titleId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
+            style={{
+              fontSize: titleStyle.fontSize || undefined,
+              lineHeight: titleStyle.lineHeight,
+              color: titleStyle.textColor || "#1f1646"
+            }}
+          >
+            {titleStyle.buttonText || t(category.labelKey)}
+          </h3>
+
+          {/* Age Range Badge (Capsule Pill enclosed in border radius) */}
+          <div className="mb-2 md:mb-4">
+            <span className={`inline-block px-3.5 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-extrabold text-white shadow-sm ${badgeBg}`}>
+              ({category.ageRange})
+            </span>
           </div>
+
+          {/* Description */}
+          <p 
+            className={`leading-relaxed text-xs md:text-sm text-[#655b85] px-1 md:px-2 ${getEditableClass(descId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
+            style={{
+              fontSize: descStyle.fontSize || undefined,
+              lineHeight: descStyle.lineHeight,
+              color: descStyle.textColor || "#655b85"
+            }}
+          >
+            {descStyle.buttonText || t(category.descKey)}
+          </p>
+        </div>
+
+        {/* Bottom Watermark Outline Icon */}
+        <div className="hidden md:flex items-center justify-center pt-2 pb-1 text-purple-300/60 transition-colors group-hover:text-purple-500/80">
+          <WatermarkIcon className="w-5 h-5 stroke-[1.75]" />
         </div>
 
         <motion.div
