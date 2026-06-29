@@ -294,11 +294,20 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
           </p>
         </div>
 
-        {/* Action Link at Bottom */}
-        <div className={`w-full pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-xs font-bold transition-all duration-300 ${theme.textColor}`}>
+        {/* Action Link at Bottom with Pulse Loop Animation */}
+        <motion.div 
+          animate={{ scale: [1, 1.04, 1] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className={`w-full pt-3.5 border-t border-slate-100 flex items-center justify-center gap-2 text-sm md:text-base font-extrabold transition-all duration-300 ${theme.textColor}`}
+        >
           <span className="pb-0.5 border-b-2 border-current">Comenzar</span>
-          <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-        </div>
+          <motion.div
+            animate={{ x: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5 stroke-[2.8]" />
+          </motion.div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
