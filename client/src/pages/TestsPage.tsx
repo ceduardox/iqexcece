@@ -168,27 +168,33 @@ function TestCard({
   const bgIsVideo = useIsVideo(hasBackgroundImage ? cardStyle?.imageUrl : undefined);
   const bgIsKnownVideo = hasBackgroundImage ? isKnownVideoAsset(cardStyle.imageUrl!) : false;
   
+  const neonGlowClass = testId === "lectura" 
+    ? "md:hover:shadow-[0_0_35px_rgba(6,182,212,0.45)] md:hover:border-cyan-400/80" 
+    : testId === "razonamiento" 
+    ? "md:hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] md:hover:border-purple-400/80" 
+    : "md:hover:shadow-[0_0_35px_rgba(236,72,153,0.45)] md:hover:border-pink-400/80";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: 0.1 + index * 0.12, duration: 0.4, type: "spring", stiffness: 100 }}
-      whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.2 } }}
+      whileHover={{ scale: 1.04, y: -8, transition: { duration: 0.25, ease: "easeOut" } }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
-      className={`cursor-pointer ${getEditableClass(cardId)}`}
+      className={`cursor-pointer h-full ${getEditableClass(cardId)}`}
       data-testid={`card-test-${testId}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-2xl p-4"
+        className={`relative overflow-hidden rounded-2xl md:rounded-3xl p-4 md:p-8 md:min-h-[360px] h-full flex flex-col justify-between transition-all duration-300 border border-transparent ${neonGlowClass}`}
         style={{ 
           background: (hasBackgroundImage && !bgIsKnownVideo && !bgIsVideo) 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : (cardStyle?.background || defaultStyle.bg),
-          borderRadius: cardStyle?.borderRadius || 20,
+          borderRadius: cardStyle?.borderRadius || undefined,
           boxShadow: cardStyle?.shadowBlur 
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.15)"}` 
-            : "0 4px 20px rgba(139, 92, 246, 0.15)",
-          border: textDark ? "1px solid rgba(139, 92, 246, 0.1)" : "none"
+            : undefined,
+          border: textDark ? "1px solid rgba(139, 92, 246, 0.15)" : "none"
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
@@ -197,7 +203,7 @@ function TestCard({
           <VideoBackground src={cardStyle.imageUrl!} imageSize={cardStyle?.imageSize} />
         )}
         <div 
-          className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${getEditableClass(`badge-${testId}`)}`}
+          className={`absolute top-3 left-3 md:top-4 md:left-4 px-3 py-1 rounded-full text-xs font-semibold ${getEditableClass(`badge-${testId}`)}`}
           style={{ 
             background: textDark ? "rgba(139, 92, 246, 0.1)" : "rgba(255,255,255,0.2)",
             color: textDark ? "#7c3aed" : "white"
@@ -206,9 +212,9 @@ function TestCard({
           Test
         </div>
         
-        <div className="flex gap-4 pt-6 md:flex-col md:items-center md:text-center">
+        <div className="flex gap-4 pt-6 md:pt-4 md:flex-col md:items-center md:text-center md:justify-between h-full">
           <div 
-            className={`relative flex-shrink-0 flex items-center justify-center self-center ${getEditableClass(iconId)}`}
+            className={`relative flex-shrink-0 flex items-center justify-center self-center md:my-4 ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
             style={{ width: iconSize, height: iconSize }}
           >
@@ -218,12 +224,12 @@ function TestCard({
             </div>
           </div>
           
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-w-0 flex flex-col md:justify-between md:w-full">
             <h3 
-              className={`text-lg font-bold mb-1 ${getEditableClass(titleId)}`}
+              className={`text-lg md:text-2xl font-bold mb-1.5 ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{ 
-                fontSize: titleStyle?.fontSize || 18,
+                fontSize: titleStyle?.fontSize || undefined,
                 lineHeight: titleStyle?.lineHeight,
                 color: titleStyle?.textColor || (textDark ? "#1f2937" : "white")
               }}
@@ -231,19 +237,19 @@ function TestCard({
               {titleStyle?.buttonText || title}
             </h3>
             <p 
-              className={`text-sm leading-snug mb-2 ${getEditableClass(descId)}`}
+              className={`text-sm md:text-base leading-snug md:leading-relaxed mb-4 ${getEditableClass(descId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
               style={{ 
-                fontSize: descStyle?.fontSize || 13,
+                fontSize: descStyle?.fontSize || undefined,
                 lineHeight: descStyle?.lineHeight,
                 color: descStyle?.textColor || (textDark ? "#6b7280" : "rgba(255,255,255,0.9)")
               }}
             >
               {descStyle?.buttonText || description}
             </p>
-            <div className="mt-auto flex justify-end md:justify-center">
+            <div className="mt-auto flex justify-end md:justify-center md:w-full">
               <motion.button
-                className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 ${getEditableClass(`btn-${testId}`)}`}
+                className={`px-5 py-2.5 md:py-3 md:px-6 rounded-xl md:rounded-2xl text-sm md:text-base font-bold flex items-center justify-center gap-2 md:w-full shadow-lg transition-transform ${getEditableClass(`btn-${testId}`)}`}
                 style={{
                   background: btnStyle?.background || (textDark ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "rgba(255,255,255,0.2)"),
                   color: btnStyle?.textColor || "white",
@@ -261,8 +267,8 @@ function TestCard({
                 }}
               >
                 {btnStyle?.buttonText || t("tests.start")}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                 </svg>
               </motion.button>
             </div>
@@ -690,7 +696,7 @@ export default function TestsPage() {
 
         <SpacerElement id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
-        <div className="px-4 pb-4 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 -mt-2 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-stretch">
           {genericTestCategories.map((category, index) => (
             <TestCard
               key={category.id}
