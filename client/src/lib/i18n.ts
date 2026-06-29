@@ -5,6 +5,28 @@ import es from "@/locales/es.json";
 import en from "@/locales/en.json";
 import pt from "@/locales/pt.json";
 
+function getInitialLanguage(): string {
+  if (typeof window === "undefined") return "es";
+  
+  try {
+    const saved = localStorage.getItem("i18nextLng");
+    if (saved && ["es", "en", "pt"].includes(saved.slice(0, 2).toLowerCase())) {
+      return saved.slice(0, 2).toLowerCase();
+    }
+  } catch {}
+
+  const browserLangs = navigator.languages || [navigator.language || "es"];
+  for (const lang of browserLangs) {
+    if (!lang) continue;
+    const code = lang.slice(0, 2).toLowerCase();
+    if (code === "es") return "es";
+    if (code === "pt") return "pt";
+    if (code === "en") return "en";
+  }
+
+  return "es";
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -14,12 +36,15 @@ i18n
       en: { translation: en },
       pt: { translation: pt },
     },
+    lng: getInitialLanguage(),
     fallbackLng: "es",
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
       caches: ["localStorage"],
       lookupLocalStorage: "i18nextLng",
+      cleanCode: true,
+      lowerCaseLng: true,
     },
   });
 
