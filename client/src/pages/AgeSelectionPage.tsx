@@ -118,69 +118,72 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
-      className={`cursor-pointer ${getEditableClass(cardId)}`}
+      className={`cursor-pointer h-full ${getEditableClass(cardId)}`}
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-visible rounded-2xl px-3 py-2.5 flex items-center gap-3 transition-all bg-white hover:shadow-md"
+        className="relative overflow-visible rounded-2xl md:rounded-3xl px-3 py-3 md:p-6 flex flex-row md:flex-col items-center md:justify-between gap-3 md:gap-4 transition-all duration-300 bg-white hover:shadow-md md:hover:shadow-xl md:hover:-translate-y-2.5 border border-purple-100/60 h-full group"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : cardStyle.background || "white",
-          borderRadius: cardStyle.borderRadius || 16,
+          borderRadius: cardStyle.borderRadius || undefined,
           boxShadow: cardStyle.shadowBlur 
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(0,0,0,0.08)"}` 
-            : "0 1px 4px rgba(0,0,0,0.06)"
+            : undefined
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
       >
         <div 
-          className={`flex-shrink-0 flex items-center justify-center rounded-xl ${getEditableClass(iconId)}`}
+          className={`flex-shrink-0 flex items-center justify-center rounded-xl md:rounded-2xl md:mx-auto ${getEditableClass(iconId)}`}
           onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
           style={{ 
-            width: iconSize + 8, 
-            height: iconSize + 8,
+            width: isMobile ? iconSize + 8 : Math.max(iconSize + 20, 68), 
+            height: isMobile ? iconSize + 8 : Math.max(iconSize + 20, 68),
             background: iconStyle.background || category.iconBg,
-            padding: 6
+            padding: isMobile ? 6 : 10
           }}
         >
           <img 
             src={iconStyle.imageUrl || category.iconUrl} 
             alt="" 
-            className="drop-shadow-sm"
-            style={{ width: iconSize - 6, height: iconSize - 6, objectFit: "contain" }} 
+            className="drop-shadow-sm transition-transform duration-300 group-hover:scale-110"
+            style={{ width: isMobile ? iconSize - 6 : Math.max(iconSize + 4, 48), height: isMobile ? iconSize - 6 : Math.max(iconSize + 4, 48), objectFit: "contain" }} 
           />
         </div>
         
-        <div className="flex-1 min-w-0">
-          <h3 
-            className={`font-semibold leading-tight ${getEditableClass(titleId)}`}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
-            style={{
-              fontSize: titleStyle.fontSize || 14,
-              lineHeight: titleStyle.lineHeight,
-              color: titleStyle.textColor || "#1f2937"
-            }}
-          >
-            {titleStyle.buttonText || t(category.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }}>({category.ageRange})</span>
-          </h3>
-          <p 
-            className={`leading-tight mt-0.5 ${getEditableClass(descId)}`}
-            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
-            style={{
-              fontSize: descStyle.fontSize || 12,
-              lineHeight: descStyle.lineHeight,
-              color: descStyle.textColor || "#9ca3af"
-            }}
-          >
-            {descStyle.buttonText || t(category.descKey)}
-          </p>
+        <div className="flex-1 min-w-0 md:w-full md:text-center flex flex-col md:justify-between">
+          <div>
+            <h3 
+              className={`font-semibold md:font-bold leading-tight md:text-lg mb-1 ${getEditableClass(titleId)}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
+              style={{
+                fontSize: titleStyle.fontSize || undefined,
+                lineHeight: titleStyle.lineHeight,
+                color: titleStyle.textColor || "#1f2937"
+              }}
+            >
+              {titleStyle.buttonText || t(category.labelKey)} <span style={{ color: "#7c3aed", fontWeight: 600 }} className="block md:inline mt-0.5 md:mt-0 text-xs md:text-sm">({category.ageRange})</span>
+            </h3>
+            <p 
+              className={`leading-tight md:leading-relaxed text-xs md:text-sm mt-0.5 ${getEditableClass(descId)}`}
+              onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
+              style={{
+                fontSize: descStyle.fontSize || undefined,
+                lineHeight: descStyle.lineHeight,
+                color: descStyle.textColor || "#9ca3af"
+              }}
+            >
+              {descStyle.buttonText || t(category.descKey)}
+            </p>
+          </div>
         </div>
 
         <motion.div
           animate={{ x: [0, 4, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="md:hidden"
         >
           <ChevronRight className="w-5 h-5 text-purple-400 flex-shrink-0" />
         </motion.div>
@@ -417,7 +420,7 @@ export default function AgeSelectionPage() {
         <SpacerEl id="spacer-top" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
         <div 
-          className={`w-full ${getEditableClass("hero-section")}`}
+          className={`w-full max-w-6xl mx-auto ${getEditableClass("hero-section")}`}
           onClick={(e) => handleElementClick("hero-section", e)}
           style={{
             paddingTop: "16px",
@@ -426,16 +429,16 @@ export default function AgeSelectionPage() {
           }}
         >
           <motion.div
-            className="px-5 pt-2 pb-4"
+            className="px-5 pt-2 pb-4 md:text-center md:py-8"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.25 }}
           >
             <h1 
-              className={`font-bold mb-1 ${getEditableClass("main-title")}`}
+              className={`font-bold mb-1 md:text-3xl ${getEditableClass("main-title")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-title", e); }}}
               style={{
-                fontSize: resolveStyle(styles, "main-title", isMobile).fontSize || 22,
+                fontSize: resolveStyle(styles, "main-title", isMobile).fontSize || undefined,
                 lineHeight: resolveStyle(styles, "main-title", isMobile).lineHeight,
                 color: resolveStyle(styles, "main-title", isMobile).textColor || "#5b21b6",
                 fontWeight: 700
@@ -444,10 +447,10 @@ export default function AgeSelectionPage() {
               <span className="whitespace-pre-line">{resolveStyle(styles, "main-title", isMobile).buttonText || t("age.selectStage")}</span>
             </h1>
             <p 
-              className={`leading-relaxed ${getEditableClass("main-subtitle")}`}
+              className={`leading-relaxed md:text-base ${getEditableClass("main-subtitle")}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); handleElementClick("main-subtitle", e); }}}
               style={{
-                fontSize: resolveStyle(styles, "main-subtitle", isMobile).fontSize || 13,
+                fontSize: resolveStyle(styles, "main-subtitle", isMobile).fontSize || undefined,
                 lineHeight: resolveStyle(styles, "main-subtitle", isMobile).lineHeight,
                 color: resolveStyle(styles, "main-subtitle", isMobile).textColor || "#9ca3af"
               }}
@@ -459,9 +462,9 @@ export default function AgeSelectionPage() {
           <SpacerEl id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
           <div 
-            className={`px-4 pb-4 space-y-2 ${getEditableClass("cards-section")}`}
+            className={`px-4 pb-8 space-y-2 md:space-y-0 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 items-stretch w-full ${getEditableClass("cards-section")}`}
             onClick={(e) => handleElementClick("cards-section", e)}
-            style={{ ...getElementStyle("cards-section"), padding: "16px", borderRadius: resolveStyle(styles, "cards-section", isMobile).borderRadius || 0 }}
+            style={{ ...getElementStyle("cards-section"), padding: isMobile ? "16px" : "24px 32px", borderRadius: resolveStyle(styles, "cards-section", isMobile).borderRadius || 0 }}
           >
             {ageCategories.map((category, index) => (
               <AgeCard
