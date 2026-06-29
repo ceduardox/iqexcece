@@ -123,27 +123,27 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
   const theme = categoryTheme[category.id] || categoryTheme.preescolar;
 
   const displayTitles: Record<string, string> = {
-    preescolar: "Preescolar",
-    ninos: "Niños",
-    adolescentes: "Adolescentes",
-    profesionales: "Adultos",
-    adulto_mayor: "Adulto mayor"
+    preescolar: t("age.preescolar"),
+    ninos: t("age.ninos"),
+    adolescentes: t("age.adolescentes"),
+    profesionales: t("age.adultos"),
+    adulto_mayor: t("age.adultoMayor")
   };
 
   const displayAges: Record<string, string> = {
-    preescolar: "3 - 5 años",
-    ninos: "6 - 11 años",
-    adolescentes: "12 - 17 años",
-    profesionales: "18 - 59 años",
-    adulto_mayor: "60+ años"
+    preescolar: t("age.ageRangePreescolar"),
+    ninos: t("age.ageRangeNinos"),
+    adolescentes: t("age.ageRangeAdolescentes"),
+    profesionales: t("age.ageRangeAdultos"),
+    adulto_mayor: t("age.ageRangeAdultoMayor")
   };
 
   const displayDescs: Record<string, string> = {
-    preescolar: "Juegos guiados para aprender jugando.",
-    ninos: "Lectura, lógica y atención para crecer aprendiendo.",
-    adolescentes: "Entrena tu mente, mejora velocidad y memoria.",
-    profesionales: "Ejercicios para concentración, productividad y claridad mental.",
-    adulto_mayor: "Memoria, agilidad y prevención cognitiva para una vida activa."
+    preescolar: t("age.preescolarDesc"),
+    ninos: t("age.ninosDesc"),
+    adolescentes: t("age.adolescentesDesc"),
+    profesionales: t("age.adultosDesc"),
+    adulto_mayor: t("age.adultoMayorDesc")
   };
 
   if (isMobile) {
