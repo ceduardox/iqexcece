@@ -141,55 +141,56 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-[28px] px-4 py-6 md:p-8 flex flex-row md:flex-col items-center md:justify-between gap-4 md:gap-5 transition-all duration-300 bg-white hover:shadow-2xl md:hover:-translate-y-3 border border-purple-100/70 h-full md:min-h-[420px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)]"
+        className="relative overflow-hidden rounded-[32px] px-4 py-6 md:p-7 flex flex-row md:flex-col items-center md:justify-between gap-3 md:gap-4 transition-all duration-300 bg-white hover:shadow-2xl md:hover:-translate-y-3 border border-purple-100/80 h-full md:min-h-[310px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)]"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : cardStyle.background || "linear-gradient(180deg, #ffffff 0%, #fcfbfe 70%, #f3e8ff 100%)",
-          borderRadius: cardStyle.borderRadius || 28,
+          borderRadius: cardStyle.borderRadius || 32,
           boxShadow: cardStyle.shadowBlur 
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(124,58,237,0.08)"}` 
             : undefined
         }}
         whileTap={{ scale: 0.98 }}
       >
-        {/* 3D Illustration / Icon */}
-        <div 
-          className={`flex-shrink-0 flex items-center justify-center md:mx-auto ${getEditableClass(iconId)}`}
-          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
-        >
-          <img 
-            src={iconStyle.imageUrl || category.iconUrl} 
-            alt="" 
-            className="w-16 h-16 md:w-28 md:h-28 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
-          />
-        </div>
-        
-        {/* Card Content */}
+        {/* Top Section in PC: Big Title & Age Range Pill */}
         <div className="flex-1 min-w-0 md:w-full md:text-center flex flex-col md:items-center">
-          {/* Title */}
+          {/* Big Title At Top */}
           <h3 
-            className={`font-black text-lg md:text-2xl text-[#1f1646] mb-1.5 md:mb-2 ${getEditableClass(titleId)}`}
+            className={`font-black text-xl md:text-3xl text-[#1a0b36] mb-1 tracking-tight ${getEditableClass(titleId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
             style={{
               fontSize: titleStyle.fontSize || undefined,
               lineHeight: titleStyle.lineHeight,
-              color: titleStyle.textColor || "#1f1646"
+              color: titleStyle.textColor || "#1a0b36"
             }}
           >
             {titleStyle.buttonText || t(category.labelKey)}
           </h3>
 
           {/* Age Range Badge (Capsule Pill enclosed in border radius) */}
-          <div className="mb-2 md:mb-4">
-            <span className={`inline-block px-3.5 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-extrabold text-white shadow-sm ${badgeBg}`}>
+          <div className="mb-2 md:mb-3">
+            <span className={`inline-block px-3 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-extrabold text-white shadow-sm transition-transform group-hover:scale-105 ${badgeBg}`}>
               ({category.ageRange})
             </span>
           </div>
 
+          {/* 3D Illustration / Icon with Ambient Glow Aura (Extra Detail) */}
+          <div 
+            className={`relative flex-shrink-0 flex items-center justify-center my-2 md:my-3 md:mx-auto ${getEditableClass(iconId)}`}
+            onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
+          >
+            <div className="absolute inset-0 rounded-full blur-2xl opacity-30 bg-purple-400 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
+            <img 
+              src={iconStyle.imageUrl || category.iconUrl} 
+              alt="" 
+              className="relative z-10 w-16 h-16 md:w-24 md:h-24 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
+            />
+          </div>
+
           {/* Description */}
           <p 
-            className={`leading-relaxed text-xs md:text-sm text-[#655b85] px-1 md:px-2 ${getEditableClass(descId)}`}
+            className={`leading-relaxed text-xs md:text-sm text-[#655b85] px-1 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
               fontSize: descStyle.fontSize || undefined,
@@ -201,9 +202,10 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
           </p>
         </div>
 
-        {/* Bottom Watermark Outline Icon */}
-        <div className="hidden md:flex items-center justify-center pt-2 pb-1 text-purple-300/60 transition-colors group-hover:text-purple-500/80">
-          <WatermarkIcon className="w-5 h-5 stroke-[1.75]" />
+        {/* Extra Detail: Bottom Action Indicator on Hover */}
+        <div className="hidden md:flex items-center justify-center pt-2 gap-1.5 text-xs font-bold text-purple-600 opacity-60 group-hover:opacity-100 transition-all duration-300">
+          <WatermarkIcon className="w-4 h-4 stroke-[2]" />
+          <span className="tracking-wide uppercase text-[11px]">Comenzar →</span>
         </div>
 
         <motion.div
