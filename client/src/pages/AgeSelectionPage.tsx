@@ -100,7 +100,7 @@ interface AgeCardProps {
 }
 
 function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onElementClick, getEditableClass }: AgeCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const cardId = `card-${category.id}`;
   const iconId = `icon-${category.id}`;
   const titleId = `title-${category.id}`;
