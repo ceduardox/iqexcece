@@ -110,6 +110,8 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
   const iconStyle = resolveStyle(styles, iconId, isMobile);
   const titleStyle = resolveStyle(styles, titleId, isMobile);
   const descStyle = resolveStyle(styles, descId, isMobile);
+  const btnId = `btn-${category.id}`;
+  const btnStyle = resolveStyle(styles, btnId, isMobile);
   const iconSize = iconStyle.iconSize || 40;
 
   const categoryTheme: Record<string, { circleBg: string; badgeBg: string; textColor: string }> = {
@@ -294,13 +296,20 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
           </p>
         </div>
 
-        {/* Action Link at Bottom with Pulse Loop Animation */}
+        {/* Action Link at Bottom with Pulse Loop Animation (Editable via Style Editor) */}
         <motion.div 
           animate={{ scale: [1, 1.04, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className={`w-full pt-3.5 border-t border-slate-100 flex items-center justify-center gap-2 text-sm md:text-base font-extrabold transition-all duration-300 ${theme.textColor}`}
+          className={`w-full pt-3.5 border-t border-slate-100 flex items-center justify-center gap-2 text-sm md:text-base font-extrabold transition-all duration-300 ${theme.textColor} ${getEditableClass(btnId)}`}
+          onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(btnId, e); }}}
+          style={{
+            fontSize: btnStyle.fontSize || undefined,
+            color: btnStyle.textColor || undefined
+          }}
         >
-          <span className="pb-0.5 border-b-2 border-current">Comenzar</span>
+          <span className="pb-0.5 border-b-2 border-current">
+            {btnStyle.buttonText || (i18n.language.startsWith('en') ? 'Start' : i18n.language.startsWith('pt') ? 'Iniciar' : 'Comenzar')}
+          </span>
           <motion.div
             animate={{ x: [0, 4, 0] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
