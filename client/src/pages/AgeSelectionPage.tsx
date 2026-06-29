@@ -209,34 +209,34 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
     );
   }
 
-  // DESKTOP PC VIEW (Wide cards, big top titles, pill badge, 3D icon with glow aura, & prominent "Comenzar" button)
+  // DESKTOP PC VIEW (Square cards 320px, titles on single line, 3D icon floating without box)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 + index * 0.06, duration: 0.3, ease: "easeOut" }}
       onClick={(e) => editorMode ? onElementClick(cardId, e) : onClick()}
-      className={`cursor-pointer h-full ${getEditableClass(cardId)}`}
+      className={`cursor-pointer ${getEditableClass(cardId)}`}
       data-testid={`card-age-${category.id}`}
     >
       <motion.div
-        className="relative overflow-hidden rounded-[40px] p-8 md:p-10 flex flex-col justify-between items-center bg-white hover:shadow-2xl hover:-translate-y-3.5 border-2 border-purple-100/80 h-full w-full max-w-[440px] mx-auto aspect-square group shadow-[0_15px_45px_rgba(124,58,237,0.08)] transition-all duration-300 min-h-[400px] md:min-h-[440px]"
+        className="relative overflow-hidden rounded-[32px] p-6 flex flex-col justify-between items-center bg-white hover:shadow-2xl hover:-translate-y-3 border border-purple-100/80 w-[320px] h-[340px] group shadow-[0_10px_30px_rgba(124,58,237,0.06)] transition-all duration-300"
         style={{ 
           background: cardStyle.imageUrl 
             ? `url(${cardStyle.imageUrl}) center/cover no-repeat` 
             : cardStyle.background || "linear-gradient(180deg, #ffffff 0%, #fcfbfe 70%, #f3e8ff 100%)",
-          borderRadius: cardStyle.borderRadius || 40,
+          borderRadius: cardStyle.borderRadius || 32,
           boxShadow: cardStyle.shadowBlur 
             ? `0 ${cardStyle.shadowBlur / 2}px ${cardStyle.shadowBlur}px ${cardStyle.shadowColor || "rgba(124,58,237,0.08)"}` 
             : undefined
         }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="w-full text-center flex flex-col items-center flex-1 min-h-0 justify-between">
+        <div className="w-full text-center flex flex-col items-center flex-1 justify-between min-h-0">
           {/* Top Header: Big Title & Age Range Pill */}
           <div className="w-full flex flex-col items-center">
             <h3 
-              className={`font-black text-2xl md:text-4xl text-[#1a0b36] mb-2 tracking-tight ${getEditableClass(titleId)}`}
+              className={`font-black text-2xl text-[#1a0b36] mb-1.5 tracking-tight whitespace-nowrap ${getEditableClass(titleId)}`}
               onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(titleId, e); }}}
               style={{
                 fontSize: titleStyle.fontSize || undefined,
@@ -247,27 +247,27 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
               {titleStyle.buttonText || t(category.labelKey)}
             </h3>
 
-            <span className={`inline-block px-5 py-1 md:px-6 md:py-1.5 rounded-full text-sm md:text-base font-extrabold text-white shadow-md transition-transform group-hover:scale-105 ${badgeBg}`}>
+            <span className={`inline-block px-4 py-0.5 rounded-full text-xs font-extrabold text-white shadow-sm transition-transform group-hover:scale-105 ${badgeBg}`}>
               ({category.ageRange})
             </span>
           </div>
 
-          {/* 3D Illustration / Icon with Ambient Glow (4x Bigger) */}
+          {/* 3D Illustration / Icon floating cleanly without white background box */}
           <div 
-            className={`relative flex-shrink-0 flex items-center justify-center my-3 mx-auto ${getEditableClass(iconId)}`}
+            className={`relative flex-shrink-0 flex items-center justify-center my-2 mx-auto ${getEditableClass(iconId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(iconId, e); }}}
           >
-            <div className="absolute inset-0 rounded-full blur-2xl opacity-40 bg-purple-400 group-hover:opacity-70 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 rounded-full blur-xl opacity-30 bg-purple-400 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
             <img 
               src={iconStyle.imageUrl || category.iconUrl} 
               alt="" 
-              className="relative z-10 w-28 h-28 md:w-36 md:h-36 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-lg"
+              className="relative z-10 w-24 h-24 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md bg-transparent"
             />
           </div>
 
           {/* Description */}
           <p 
-            className={`leading-relaxed text-sm md:text-base text-[#655b85] px-2 mb-2 ${getEditableClass(descId)}`}
+            className={`leading-snug text-xs text-[#655b85] px-2 mb-2 line-clamp-2 ${getEditableClass(descId)}`}
             onClick={(e) => { if (editorMode) { e.stopPropagation(); onElementClick(descId, e); }}}
             style={{
               fontSize: descStyle.fontSize || undefined,
@@ -279,15 +279,15 @@ function AgeCard({ category, index, onClick, editorMode, styles, isMobile, onEle
           </p>
         </div>
 
-        {/* Real Prominent Button for "Comenzar" (4x Scale) */}
-        <div className="w-full pt-4 mt-auto">
+        {/* Real Prominent Button for "Comenzar" */}
+        <div className="w-full pt-2 mt-auto">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full py-3.5 md:py-4 px-6 rounded-2xl font-extrabold text-base md:text-lg text-white bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 shadow-xl group-hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-2 group-hover:from-purple-700 group-hover:to-indigo-700"
+            className="w-full py-2.5 px-4 rounded-xl font-extrabold text-sm text-white bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 shadow-md group-hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-1.5 group-hover:from-purple-700 group-hover:to-indigo-700"
           >
             <span>Comenzar</span>
-            <ChevronRight className="w-5 h-5 stroke-[3]" />
+            <ChevronRight className="w-4 h-4 stroke-[3]" />
           </motion.button>
         </div>
       </motion.div>
@@ -566,7 +566,7 @@ export default function AgeSelectionPage() {
             <SpacerEl id="spacer-mid" styles={styles} isMobile={isMobile} editorMode={editorMode} getEditableClass={getEditableClass} handleElementClick={handleElementClick} />
 
             <div 
-              className={`px-4 pb-8 space-y-2 md:space-y-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-8 items-stretch w-full max-w-[1500px] mx-auto ${getEditableClass("cards-section")}`}
+              className={`px-4 pb-8 space-y-2 md:space-y-0 flex flex-wrap justify-center items-stretch gap-6 md:gap-8 w-full max-w-[1150px] mx-auto ${getEditableClass("cards-section")}`}
               onClick={(e) => handleElementClick("cards-section", e)}
               style={{ ...getElementStyle("cards-section"), padding: isMobile ? "16px" : "24px 32px", borderRadius: resolveStyle(styles, "cards-section", isMobile).borderRadius || 0 }}
             >
