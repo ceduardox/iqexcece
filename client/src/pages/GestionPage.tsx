@@ -8460,7 +8460,7 @@ function NotificationsPanel({ token }: { token: string }) {
 }
 
 function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: SessionsData | null; adminToken: string }) {
-  const [selectedDomain, setSelectedDomain] = useState<"iqexponencial.app" | "iqexponencial.com">("iqexponencial.app");
+  const [selectedDomain, setSelectedDomain] = useState<"iqexponencial.app" | "iqexponencial.com" | "iqmaximo.com" | "iqmax.online">("iqexponencial.app");
   const [billingMode, setBillingMode] = useState<"mensual" | "anual">("mensual");
   const [serverView, setServerView] = useState<"panel" | "pagos">("panel");
   const [liveTick, setLiveTick] = useState(0);
@@ -8679,7 +8679,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     pro: 120,
     elite: 300,
   };
-  const domainFactor = selectedDomain === "iqexponencial.com" ? 0.7 : 1;
+  const domainFactor = selectedDomain === "iqexponencial.com" ? 0.7 : selectedDomain === "iqmaximo.com" ? 0.75 : selectedDomain === "iqmax.online" ? 0.65 : 1;
   const trafficDemand = activeUsers * 1.8 + totalSessions * 0.06 + 16;
   const normalized = (trafficDemand / planPowerById[activePlanId]) * 100 * domainFactor;
   const cpu = Math.max(8, Math.min(95, Math.round(normalized + 8)));
@@ -9102,7 +9102,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             <span className="text-white/50">Actualiza cada 2.2s</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {(["iqexponencial.app", "iqexponencial.com"] as const).map((domain) => (
+            {(["iqexponencial.app", "iqexponencial.com", "iqmaximo.com", "iqmax.online"] as const).map((domain) => (
               <Button
                 key={domain}
                 size="sm"
@@ -9118,6 +9118,10 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
             <span className="text-xs text-white/60 ml-1">
               {selectedDomain === "iqexponencial.com"
                 ? "Dominio web optimizado: 20% a 40% menos carga."
+                : selectedDomain === "iqmaximo.com"
+                ? "Dominio alternativo con carga media."
+                : selectedDomain === "iqmax.online"
+                ? "Dominio ligero con trafico optimizado."
                 : "Dominio app con trafico completo y carga primaria."}
             </span>
           </div>
