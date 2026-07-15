@@ -240,12 +240,42 @@ const DEFAULT_SERVER_PAYMENT_ROWS: AdminPaymentRow[] = [
   {
     orderId: "inv-2026-06",
     dueAt: "2026-06-10T12:00:00.000Z",
-    paidAt: "2026-05-22T12:00:00.000Z",
-    updatedAt: "2026-05-22T12:00:00.000Z",
+    paidAt: "2026-06-28T12:00:00.000Z",
+    updatedAt: "2026-06-28T12:00:00.000Z",
     planId: "starter",
     billingMode: "mensual",
     amountUsd: 60,
     paymentStatus: "finished",
+  },
+  {
+    orderId: "inv-2026-07",
+    dueAt: "2026-07-10T12:00:00.000Z",
+    paidAt: "2026-06-28T12:00:00.000Z",
+    updatedAt: "2026-06-28T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "finished",
+  },
+  {
+    orderId: "inv-2026-08",
+    dueAt: "2026-08-10T12:00:00.000Z",
+    paidAt: "2026-06-28T12:00:00.000Z",
+    updatedAt: "2026-06-28T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "finished",
+  },
+  {
+    orderId: "inv-2026-09",
+    dueAt: "2026-09-10T12:00:00.000Z",
+    paidAt: null,
+    updatedAt: "2026-06-28T12:00:00.000Z",
+    planId: "starter",
+    billingMode: "mensual",
+    amountUsd: 60,
+    paymentStatus: "pending",
   },
 ];
 
@@ -8637,18 +8667,19 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     return seeded.sort((a: any, b: any) => new Date(a.periodAt || 0).getTime() - new Date(b.periodAt || 0).getTime());
   }, [payments]);
 
+  const nowTime = new Date().getTime();
   const paidStatuses = new Set(["finished", "confirmed", "paid"]);
   const latestPaid = [...rawPayments]
     .filter((p: any) => paidStatuses.has(String(p.paymentStatus || "").toLowerCase()))
     .sort((a: any, b: any) => new Date(b.periodAt || 0).getTime() - new Date(a.periodAt || 0).getTime())[0];
-  const pendingPayments = rawPayments
+  const allPendingPayments = rawPayments
     .filter((row: any) => normalizePaymentStatus(row.paymentStatus) === "pending")
     .sort((a: any, b: any) => new Date(a.periodAt || 0).getTime() - new Date(b.periodAt || 0).getTime());
+  const pendingPayments = allPendingPayments
+    .filter((row: any) => new Date(row.periodAt || 0).getTime() <= nowTime);
   const pendingDebt = pendingPayments.reduce((sum: number, row: any) => sum + Number(row.amountUsd || 0), 0);
   const oldestPending = pendingPayments[0];
-  const latestPending = pendingPayments[pendingPayments.length - 1];
-
-  const nowTime = new Date().getTime();
+  const latestPending = allPendingPayments[allPendingPayments.length - 1];
   const isCoverageExpired = latestPaid?.periodAt ? new Date(latestPaid.periodAt).getTime() < nowTime : false;
   const daysOverdue = isCoverageExpired && latestPaid?.periodAt
     ? Math.max(1, Math.floor((nowTime - new Date(latestPaid.periodAt).getTime()) / (1000 * 60 * 60 * 24)))
