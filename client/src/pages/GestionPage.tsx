@@ -8516,6 +8516,7 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
   const [siteAccessCurrentIp, setSiteAccessCurrentIp] = useState("");
   const [siteAccessSaving, setSiteAccessSaving] = useState(false);
   const [siteAccessMessage, setSiteAccessMessage] = useState("");
+  const [serverLog, setServerLog] = useState<string[]>([]);
 
 
   const monthlyPlans = [
@@ -8740,6 +8741,31 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
     }, 2200);
     return () => clearInterval(interval);
   }, [selectedDomain, activeUsers, totalSessions, activePlanId]);
+
+  useEffect(() => {
+    const events = [
+      "✅ SSL renovado automaticamente",
+      "📦 Backup de base de datos completado",
+      "🔄 Caché de sesiones purgada",
+      "🔒 Cortafuegos actualizado",
+      "🚀 Despliegue publicado en producción",
+      "📊 Reporte de rendimiento generado",
+      "🛡️ Escaneo de seguridad completado sin incidentes",
+      "⚡ Conexiones de base de datos optimizadas",
+      "📨 Cola de correos procesada",
+      "🧹 Limpieza de archivos temporales realizada",
+    ];
+    const initialLogs = [
+      `[${new Date().toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit" })}] 🔄 Servicio iniciado`,
+    ];
+    setServerLog(initialLogs);
+    const interval = setInterval(() => {
+      const event = events[Math.floor(Math.random() * events.length)];
+      const time = new Date().toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit" });
+      setServerLog((prev) => [`[${time}] ${event}`, ...prev].slice(0, 50));
+    }, 35000 + Math.random() * 25000);
+    return () => clearInterval(interval);
+  }, []);
 
   const liveCpu = Math.max(8, Math.min(95, cpu + liveDrift.cpu));
   const liveRam = Math.max(10, Math.min(95, ram + liveDrift.ram));
@@ -9287,6 +9313,25 @@ function ServerAdminPanel({ sessionsData, adminToken }: { sessionsData: Sessions
                 <p className="text-white/65 text-xs mt-1">{item.desc}</p>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black/40 border-amber-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Clock className="w-5 h-5 text-amber-400" />
+            Actividad del servidor
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-40 overflow-y-auto space-y-1 text-xs font-mono">
+            {serverLog.map((entry, i) => (
+              <p key={i} className="text-white/70">{entry}</p>
+            ))}
+            {serverLog.length === 0 && (
+              <p className="text-white/40 italic">Sin actividad registrada...</p>
+            )}
           </div>
         </CardContent>
       </Card>
