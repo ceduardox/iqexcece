@@ -493,11 +493,12 @@ export default function GestionPage() {
     }
 
     const timeline = seeded.sort((a, b) => new Date(a.periodAt || 0).getTime() - new Date(b.periodAt || 0).getTime());
+    const now = new Date();
     const latestPaid = [...timeline]
       .filter((row) => normalizePaymentStatusValue(row.paymentStatus) === "paid")
       .sort((a, b) => new Date(b.periodAt || 0).getTime() - new Date(a.periodAt || 0).getTime())[0];
     const pendingPayments = timeline
-      .filter((row) => normalizePaymentStatusValue(row.paymentStatus) === "pending")
+      .filter((row) => normalizePaymentStatusValue(row.paymentStatus) === "pending" && row.periodAt && new Date(row.periodAt).getTime() <= now.getTime())
       .sort((a, b) => new Date(a.periodAt || 0).getTime() - new Date(b.periodAt || 0).getTime());
 
     if (pendingPayments.length === 0) return null;
@@ -508,6 +509,17 @@ export default function GestionPage() {
     const advancePeriodAt = latestPending?.periodAt && advanceAmount > 0
       ? addMonthsKeepingDayFromDate(latestPending.periodAt, 1).toISOString()
       : null;
+
+    const paidPayments = [...timeline].filter((row) =>
+      normalizePaymentStatusValue(row.paymentStatus) === "paid" && row.paidAt
+    );
+    const paidByDateKey = latestPaid?.paidAt
+      ? new Date(latestPaid.paidAt).toISOString().split("T")[0]
+      : null;
+    const sameBatch = paidByDateKey
+      ? paidPayments.filter((p) => p.paidAt && new Date(p.paidAt).toISOString().split("T")[0] === paidByDateKey)
+      : [];
+    const lastPaidTotalAmount = sameBatch.reduce((sum, p) => sum + Number(p.amountUsd || 0), 0);
 
     return {
       pendingCount: pendingPayments.length,
@@ -523,7 +535,7 @@ export default function GestionPage() {
       lastPaidAt: latestPaid?.paidAt
         ? new Date(latestPaid.paidAt).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })
         : "-",
-      lastPaidAmount: Number(latestPaid?.amountUsd || 0),
+      lastPaidAmount: lastPaidTotalAmount || Number(latestPaid?.amountUsd || 0),
     };
   };
 
