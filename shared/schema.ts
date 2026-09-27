@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, integer, serial, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, integer, serial, unique, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -523,3 +523,11 @@ export const adminUsers = pgTable("admin_users", {
 });
 
 export type AdminUser = typeof adminUsers.$inferSelect;
+
+// Durable server billing records. Provider payment IDs cannot be credited twice.
+export const serverCryptoOrders = pgTable("server_crypto_orders", {
+  orderId: text("order_id").primaryKey(),
+  data: jsonb("data").notNull(),
+}, table => [
+  uniqueIndex("server_crypto_payment_id").on(sql`(${table.data}->>'paymentId')`).where(sql`${table.data}->>'paymentId' IS NOT NULL`),
+]);
