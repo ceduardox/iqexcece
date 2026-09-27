@@ -33,7 +33,7 @@ export async function applyProviderPayment(payload: any) {
     if (!prev) throw new Error("Orden de pago desconocida");
     if (!payload.payment_id || String(payload.price_currency).toLowerCase() !== "usd" ||
         Math.round(Number(payload.price_amount) * 100) !== Math.round(prev.amountUsd * 100) ||
-        (prev.invoiceId && String(payload.invoice_id) !== String(prev.invoiceId)) ||
+        (prev.invoiceId && payload.invoice_id != null && String(payload.invoice_id) !== String(prev.invoiceId)) ||
         (prev.paymentId && String(payload.payment_id) !== String(prev.paymentId))) throw new Error("El pago no coincide con la orden");
     // Late/repeated notifications cannot remove or duplicate an already applied credit.
     if (!isSettled(prev.paymentStatus)) {
